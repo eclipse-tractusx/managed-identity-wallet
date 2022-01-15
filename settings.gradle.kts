@@ -1,0 +1,1 @@
+rootProject.name = "net.catenax.core.custodian"
