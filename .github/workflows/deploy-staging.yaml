@@ -55,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          tags: ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
+          tags: ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${{ env.CX_CUSTODIAN_VERSION }}.${{ env.SHORT_SHA }}
           push: true
 
   deploy:
