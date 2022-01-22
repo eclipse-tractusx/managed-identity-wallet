@@ -26,12 +26,7 @@ fun Application.configureSerialization() {
         json(Json {
             prettyPrint = true
             isLenient = true
+            encodeDefaults = true
         })
-    }
-
-    routing {
-        get("/json/kotlinx-serialization") {
-                call.respond(mapOf("serialization" to "successful"))
-            }
     }
 }
