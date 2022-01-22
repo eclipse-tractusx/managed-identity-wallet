@@ -7,9 +7,10 @@ on:
     branches: [ main ]
 
 env:
-  CX_CUSTODIAN_VERSION: "0.0.2.${GITHUB_SHA}"
+  CX_CUSTODIAN_VERSION: "0.0.2"
   NAMESPACE: "bpdm"
   SECRET: "custodian-staging-secret"
+  SHORT_SHA: "default"
 
 jobs:
   build:
@@ -19,8 +20,14 @@ jobs:
       # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Version
-        run: echo ${CX_CUSTODIAN_VERSION}
+      - name: Set outputs
+        id: vars
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Show version
+        run: echo ${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
 
       - name: Docker Login
         uses: docker/login-action@v1
@@ -48,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          tags: ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${{ env.CX_CUSTODIAN_VERSION }}
+          tags: ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
           push: true
 
   deploy:
@@ -84,7 +91,7 @@ jobs:
           manifests: |
             ${{ github.workspace }}/deployment/aks-custodian-dev.yaml
           images: |
-            ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${{ env.CX_CUSTODIAN_VERSION }}
+            ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
           imagepullsecrets: |
             ${{ env.SECRET }}
           namespace: ${{ env.NAMESPACE }}
