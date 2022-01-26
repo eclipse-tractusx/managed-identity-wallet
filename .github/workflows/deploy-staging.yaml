@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  CX_CUSTODIAN_VERSION: "0.0.2"
+  CX_CUSTODIAN_VERSION: "0.0.3"
   NAMESPACE: "bpdm"
   SECRET: "custodian-staging-secret"
   SHORT_SHA: "default"
