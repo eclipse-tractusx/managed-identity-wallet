@@ -31,18 +31,53 @@ import kotlinx.serialization.SerializationException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
+import io.ktor.auth.*
+
 import net.catenax.core.custodian.entities.*
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.*
 
 class ApplicationTest {
 
-   fun setupEnvironment(environment: ApplicationEnvironment) {
+    val issuer = "http://0.0.0.0:8080" // System.getenv("CX_AUTH_ISSUER_URL") ?: "http://localhost:8081/auth/realms/catenax"
+
+    fun setupEnvironment(environment: ApplicationEnvironment) {
         (environment.config as MapApplicationConfig).apply {
             put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:custodian;DB_CLOSE_DELAY=-1;")
             put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
+            put("auth.issuerUrl", issuer)
+            put("auth.realm", System.getenv("CX_AUTH_REALM") ?: "catenax")
+            put("auth.role", System.getenv("CX_AUTH_ROLE") ?: "access")
         }
-   }
+    }
+
+   fun makeToken(): String = "token"
+
+   fun Application.configureTestSecurity() {
+
+        // dummy authentication for tests
+        install(Authentication) {
+
+            provider("auth-ui") {
+                pipeline.intercept(AuthenticationPipeline.RequestAuthentication) { context ->
+                    context.principal(UserIdPrincipal("tester"))
+                }
+            }
+
+            provider("auth-ui-session") {
+                pipeline.intercept(AuthenticationPipeline.RequestAuthentication) { context ->
+                    context.principal(UserIdPrincipal("tester"))
+                }
+            }
+
+            provider("auth-jwt") {
+                pipeline.intercept(AuthenticationPipeline.RequestAuthentication) { context ->
+                    context.principal(UserIdPrincipal("tester"))
+                }
+            }
+
+        }
+    }
 
     @Test
     fun testRoot() {
@@ -50,6 +85,7 @@ class ApplicationTest {
             setupEnvironment(environment)
             configurePersistence()
             configureOpenAPI()
+            configureTestSecurity()
             configureRouting()
             configureSerialization()
         }) {
@@ -62,52 +98,70 @@ class ApplicationTest {
             }
         }
     }
+
     @Test
     fun testCompanyCrud() {
+        val token = makeToken()
+
         withTestApplication({
             setupEnvironment(environment)
             configurePersistence()
             configureOpenAPI()
+            configureTestSecurity()
             configureRouting()
             configureSerialization()
         }) {
-            handleRequest(HttpMethod.Get, "/company") {
+            handleRequest(HttpMethod.Get, "/api/company") {
+                addHeader(HttpHeaders.Authorization, "Bearer $token")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 val companies: List<CompanyDto> = Json.decodeFromString(ListSerializer(CompanyDto.serializer()), response.content!!)
                 assertEquals(0, companies.size)
             }
-            handleRequest(HttpMethod.Post, "/company") {
-                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody("""{"bpn":"bpn1", "name": "name1", "wallet": { "did": "did1", "vcs": [] }}""")
+            // create it with wallet
+            handleRequest(HttpMethod.Post, "/api/company") {
+                addHeader(HttpHeaders.Authorization, "Bearer $token")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody("""{"bpn":"bpn1", "name": "name1", "wallet": { "did": "did1", "vcs": [] }}""")
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
-            handleRequest(HttpMethod.Get, "/company") {
+            // create it without wallet, on the fly
+            handleRequest(HttpMethod.Post, "/api/company") {
+                addHeader(HttpHeaders.Authorization, "Bearer $token")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody("""{"bpn":"bpn2", "name": "name2"}""")
             }.apply {
-                assertEquals(HttpStatusCode.OK, response.status())
-                val companies: List<CompanyDto> = Json.decodeFromString(ListSerializer(CompanyDto.serializer()), response.content!!)
-                assertEquals(1, companies.size)
+                assertEquals(HttpStatusCode.Created, response.status())
             }
-
-            // programmatically add a company
-            transaction {
-                val c = Company.new {
-                    bpn = "bpn2"
-                    name = "name2"
-                }
-                WalletDao.createWallet(c, WalletDto("did2", emptyList<String>()))
-            }
-
-            handleRequest(HttpMethod.Get, "/company") {
+            handleRequest(HttpMethod.Get, "/api/company") {
+                addHeader(HttpHeaders.Authorization, "Bearer $token")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 val companies: List<CompanyDto> = Json.decodeFromString(ListSerializer(CompanyDto.serializer()), response.content!!)
                 assertEquals(2, companies.size)
+            }
+
+            // programmatically add a company
+            transaction {
+                val c = Company.new {
+                    bpn = "bpn3"
+                    name = "name3"
+                }
+                WalletDao.createWallet(c, WalletDto("did3", emptyList<String>()))
+            }
+
+            handleRequest(HttpMethod.Get, "/api/company") {
+                addHeader(HttpHeaders.Authorization, "Bearer $token")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                val companies: List<CompanyDto> = Json.decodeFromString(ListSerializer(CompanyDto.serializer()), response.content!!)
+                assertEquals(3, companies.size)
             }
         }
     }
@@ -116,12 +170,13 @@ class ApplicationTest {
         withTestApplication({
             setupEnvironment(environment)
             configurePersistence()
-            configureSerialization()
+            configureTestSecurity()
             configureOpenAPI()
             configureRouting()
+            configureSerialization()
         }) {
             var exception = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("{wrong:json}")
@@ -131,7 +186,7 @@ class ApplicationTest {
             }
             assertTrue(exception.message!!.contains("wrong"))
             exception = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"wrong":"json"}""")
@@ -141,7 +196,7 @@ class ApplicationTest {
             }
             assertTrue(exception.message!!.contains("wrong"))
             exception = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":null}""")
@@ -151,7 +206,7 @@ class ApplicationTest {
             }
             assertTrue(exception.message!!.contains("null"))
             exception = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":"bpn1", "name": null}""")
@@ -161,17 +216,7 @@ class ApplicationTest {
             }
             assertTrue(exception.message!!.contains("null"))
             exception = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
-                        addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                        addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody("""{"bpn":"bpn1", "name": ""}""")
-                }.apply {
-                    assertEquals(HttpStatusCode.Created, response.status())
-                }
-            }
-            assertTrue(exception.message!!.contains("wallet"))
-            exception = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":"bpn1", "name": "", "wallet": {}}""")
@@ -182,7 +227,7 @@ class ApplicationTest {
             assertTrue(exception.message!!.contains("did"))
             assertTrue(exception.message!!.contains("vcs"))
             var iae = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":"", "name": "name1", "wallet": { "did": "did1", "vcs": [] }}""")
@@ -192,7 +237,7 @@ class ApplicationTest {
             }
             assertEquals("Field 'bpn' is required not to be blank, but it was blank", iae.message)
             iae = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":"bpn1", "name": "", "wallet": { "did": "did1", "vcs": [] }}""")
@@ -202,7 +247,7 @@ class ApplicationTest {
             }
             assertEquals("Field 'name' is required not to be blank, but it was blank", iae.message)
             iae = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":"bpn1", "name": "", "wallet": { "did": "", "vcs": [] }}""")
@@ -215,17 +260,17 @@ class ApplicationTest {
             // programmatically add a company
             transaction {
                 val c = Company.new {
-                    bpn = "bpn3"
-                    name = "name3"
+                    bpn = "bpn4"
+                    name = "name4"
                 }
-                WalletDao.createWallet(c, WalletDto("did3", emptyList<String>()))
+                WalletDao.createWallet(c, WalletDto("did4", emptyList<String>()))
             }
 
             iae = assertFailsWith<BadRequestException> {
-                handleRequest(HttpMethod.Post, "/company") {
+                handleRequest(HttpMethod.Post, "/api/company") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody("""{"bpn":"bpn3", "name": "name3", "wallet": { "did": "did3", "vcs": [] }}""")
+                        setBody("""{"bpn":"bpn4", "name": "name4", "wallet": { "did": "did4", "vcs": [] }}""")
                 }.apply {
                     assertEquals(HttpStatusCode.Created, response.status())
                 }

@@ -42,6 +42,8 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
+    configureSecurity()
+
     configureRouting()
 
     configurePersistence()

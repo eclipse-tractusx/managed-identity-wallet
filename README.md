@@ -67,12 +67,27 @@ docker run -p 8080:8080 catena-x/custodian:0.0.1
 Please see the file `.env.example` for the environment examples that are used
 below. Here a few hints on how to set it up:
 
-1. `CX_RG`: please enter your resource group name
-2. `CX_AKS`: please enter your kubernetes service name
-3. `CX_ACR_SERVER`: get the login server of your registry e.g. via `az acr list -o table`
-4. `CX_ACR_USER`: get the username of your registry e.g.
+1. `CX_DB_JDBC_URL`: enter the database url, default is `jdbc:h2:mem:custodiandev;DB_CLOSE_DELAY=-1;`
+2. `CX_DB_JDBC_DRIVER`: enter the driver, default is `org.h2.Driver`
+3. `CX_AUTH_JWKS_URL`: enter the keycloak certs url, e.g. `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs`
+4. `CX_AUTH_ISSUER_URL`: enter the token issue, e.g. `http://localhost:8081/auth/realms/catenax`
+5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
+6. `CX_AUTH_ROLE`: specify the expected role within the token, e.g. `access`
+7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `custodian`
+
+To follow all steps in this readme you also need following variables:
+
+1. `CX_SUBSCRIPTION_ID`: enter your Azure subscription id
+2. `CX_CLIENT_ID`: enter your Azure client id
+3. `CX_RG`: enter your resource group name
+4. `CX_IP_NAME`: enter the static ip resource name
+5. `CX_IP`: enter the actual IP of the static ip reresource
+6. `CX_LB_SERVICE` enter the load balance service name in kubernetes
+7. `CX_AKS`: please enter your kubernetes service name
+8. `CX_ACR_SERVER`: get the login server of your registry e.g. via `az acr list -o table`
+9. `CX_ACR_USER`: get the username of your registry e.g.
    via `az acr credential show --name $CX_ACR_NAME --query "username" -o table `
-5. `CX_ACR_PASSWORD`: get the password of the registry
+10. `CX_ACR_PASSWORD`: get the password of the registry
    via `az acr credential show --name $CX_ACR_NAME --query "passwords[0].value" -o table`
 
 ## Local development environment
@@ -87,6 +102,24 @@ docker run --name cx_postgres -e POSTGRES_PASSWORD=cx_password -p 5432:5432 -d p
 ```
 
 Please see the section below setting up the database.
+
+Additionally the authentication and authorization is done via
+[keycloak](https://www.keycloak.org). A keycloak instance can be started via
+
+```
+docker run -d --name catenax_keycloak -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=catena -p 8081:8080 jboss/keycloak
+```
+
+To make it work a new realm needs to be configured at http://localhost:8081
+and there via the "Add realm" button, it can be for example named `catenax`.
+Also add an additional client, e.g. named `Custodian` with *valid redirect url*
+set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user,
+e.g. named `custodian-admin`, need to be created as well (including setting
+a password, e.g. `catena-x`). The user also needs to have a specific client role
+assigned, e.g. `access`, which is validated on access time.
+
+The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
+You can also import the configuration from `examples/
 
 ## Testing GitHub actions locally
 
