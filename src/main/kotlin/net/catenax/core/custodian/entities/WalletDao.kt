@@ -7,6 +7,11 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.javatime.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
+import java.security.KeyPairGenerator
+import java.security.spec.ECGenParameterSpec
+import java.security.KeyPair
+import java.util.Base64
+
 import net.catenax.core.custodian.models.*
 
 object VerifiableCredentials : IntIdTable("verifiablecredentials") {
@@ -35,6 +40,8 @@ object Wallets : IntIdTable("wallets") {
     val modifiedAt = datetime("modified_at").defaultExpression(CurrentDateTime())
     val did = varchar("did", 36)
     val name = varchar("name", 127)
+    val privateKey = varchar("privateKey", 4096)
+    val publicKey = varchar("publicKey", 4096)
 
     val companyId = reference("company_id", Companies)
 }
@@ -47,6 +54,9 @@ class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
     var modifiedAt by Wallets.modifiedAt
 
     var name by Wallets.name
+
+    var privateKey by Wallets.privateKey
+    var publicKey by Wallets.publicKey
 
     var company by Company referencedOn Wallets.companyId
 }
@@ -70,17 +80,26 @@ object WalletDao {
         .firstOrNull()
         ?: throw NotFoundException("Wallet for company $company not found")
 
-    fun createWallet(c: Company, wallet: WalletDto) = transaction {
+    fun createWallet(c: Company, wallet: WalletCreateDto) = transaction {
+        // TODO potentially use the name
         // TODO add VCs
+        
+        val kpg = KeyPairGenerator.getInstance("EC")
+        val params = ECGenParameterSpec("secp256r1")
+        kpg.initialize(params);
+        val kp = kpg.generateKeyPair()
+
         Wallet.new {
             did = wallet.did
-            name = "walletname"
+            name = "CompanyWallet"
             company = c
+            privateKey = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded())
+            publicKey = Base64.getEncoder().encodeToString(kp.getPublic().getEncoded())
         }
     }
 
     fun toObject(entity: Wallet) = entity.run {
-        WalletDto(did, emptyList<String>())
+        WalletDto(did, createdAt, publicKey, emptyList<String>())
     }
 
 }

@@ -20,14 +20,28 @@ import io.ktor.auth.authentication
 import io.ktor.auth.OAuthAccessTokenResponse
 import io.ktor.sessions.*
 
+import io.ktor.client.engine.apache.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import io.ktor.http.*
+import io.ktor.client.*
+
 import com.auth0.jwt.*
 
 import java.io.File
+import java.io.IOException
+import java.time.LocalDateTime
 
 import kotlin.reflect.typeOf
 import kotlinx.html.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.*
 
+import io.bkbn.kompendium.auth.configuration.JwtAuthConfiguration
+import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.metadata.ExceptionInfo
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
@@ -37,7 +51,6 @@ import io.bkbn.kompendium.core.metadata.method.PostInfo
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.Notarized.notarizedDelete
-
 import io.bkbn.kompendium.core.routes.redoc
 
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -46,7 +59,27 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.entities.*
 
+suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String): String {
+
+    var stringBody: String = ""
+    HttpClient(Apache).use { client ->
+        val httpResponse: HttpResponse = client.get("${datapoolUrl}/api/catena/businesspartners/${bpn}") {
+            headers {
+                append(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }
+        }
+        stringBody = httpResponse.readText()
+    }
+
+    return stringBody
+}
+
+@Serializable
+data class BusinessPartnerInfo(val bpn: String)
+
 fun Application.configureRouting() {
+
+    val datapoolUrl = environment.config.property("datapool.url").getString()
 
     routing {
 
@@ -56,10 +89,9 @@ fun Application.configureRouting() {
             call.respondHtml {
                 head {
                     title { +"Catena-X Core // Custodian" }
-                    style { +"body { font-family: Arial; }" }
+                    style { "body { font-family: Arial; }" }
                 }
                 body {
-                    val runtime = Runtime.getRuntime()
                     h1 { +"Catena-X Core // Custodian" }
                     p { a("/docs") { +"See API docs" }}
                     p { a("/ui/") { +"Admin UI" }}
@@ -77,9 +109,10 @@ fun Application.configureRouting() {
                     val principal = call.authentication.principal<OAuthAccessTokenResponse>()
                     if (principal != null) {
                         val response = principal as OAuthAccessTokenResponse.OAuth2
-                        val token = JWT.decode(response.accessToken)
-                        val name = token.getClaim("preferred_username").asString()
-                        call.sessions.set(UserSession(principal?.accessToken.toString()))
+                        // TODO put claims into the session
+                        // val token = JWT.decode(response.accessToken)
+                        // val name = token.getClaim("preferred_username").asString()
+                        call.sessions.set(UserSession(response.accessToken.toString()))
                         call.respondRedirect("/ui/")
                     } else {
                         call.respondRedirect("/login")
@@ -97,7 +130,7 @@ fun Application.configureRouting() {
                     default("index.html")
                 }
 
-                route("/wallets") {
+                route("/companies") {
                     handle {
 
                         val userSession = call.sessions.get<UserSession>()
@@ -109,19 +142,62 @@ fun Application.configureRouting() {
                     }
                 }
 
+                route("/companies/{did}/full") {
+                    handle {
+                        val did = call.parameters["did"]
+                        if (did != null) {
+                            try {
+                                val stringBody = retrieveBusinessPartnerInfo("${datapoolUrl}", did)
+                                val d = Json { ignoreUnknownKeys = true }.decodeFromString<BusinessPartnerInfo>(BusinessPartnerInfo.serializer(), stringBody)
+                                call.respondText(stringBody, ContentType.Application.Json, HttpStatusCode.OK)
+                            } catch (e: RedirectResponseException) {
+                                log.warn("RedirectResponseException: " + e.message)
+                                throw BadRequestException(e.message!!)
+                            } catch (e: ClientRequestException) {
+                                log.warn("ClientRequestException: " + e.message)
+                                throw BadRequestException(e.message!!)
+                            } catch (e: ServerResponseException) {
+                                log.warn("ServerResponseException: " + e.message)
+                                throw BadRequestException(e.message!!)
+                            } catch (e: SerializationException) {
+                                log.warn("SerializationException: " + e.message)
+                                throw BadRequestException(e.message!!)
+                            } catch (e: IOException) {
+                                log.warn("IOException: ${datapoolUrl} " + e.message)
+                                throw BadRequestException(e.message!!)
+                            }
+                        } else {
+                            throw BadRequestException("No DID given!")
+                        }
+                    }
+                }
+
             }
         }
 
-        route("/api/company") {
-            authenticate("auth-jwt") {
+        // this is just a workaround for the serialization issue
+        @Serializable(with = CompanyCreateListSerializer::class) 
+        class CompanyCreateDtoList : ArrayList<CompanyCreateDto> {
+            constructor(l: List<CompanyCreateDto>) : super(l)
+        }
 
-                notarizedGet(GetInfo<Unit, List<CompanyDto>>(
+        route("/api/company") {
+
+            val authConfig = object : JwtAuthConfiguration {
+                override val name: String = "auth-jwt"
+            }
+
+            // based on: authenticate("auth-jwt")
+            notarizedAuthenticate(authConfig) {
+
+                notarizedGet(GetInfo<Unit, List<CompanyCreateDto>>(
                     summary = "List of companies",
                     description = "Retrieve list of registered companies with wallets",
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
                         description = "List of companies is available",
-                        examples = mapOf("demo" to mutableListOf(CompanyDto("did1_bpn", "did1_name", WalletDto("did1", emptyList<String>()))))
+                        // somehow the serialization did not work out with directly specifying `listOf(CompanyCreateDto(...`
+                        examples = mapOf("demo" to CompanyCreateDtoList(listOf(CompanyCreateDto("did1_bpn", "did1_name", WalletCreateDto("did1", emptyList<String>())))))
                     ),
                     tags = setOf("Company")
                 )) {
@@ -152,7 +228,7 @@ fun Application.configureRouting() {
                         responseInfo = ResponseInfo(
                             status = HttpStatusCode.OK,
                             description = "Company with the given bpn exists",
-                            examples = mapOf("did1_bpn" to CompanyDto("did1_bpn", "did1_name", WalletDto("did1", emptyList<String>())))
+                            examples = mapOf("did1_bpn" to CompanyDto("did1_bpn", "did1_name", WalletDto("did1", LocalDateTime.now(), "samplePublicKey", emptyList<String>())))
                         ),
                         canThrow = setOf(badRequestException, notFoundException),
                         tags = setOf("Company")
@@ -172,12 +248,12 @@ fun Application.configureRouting() {
                     examples = mapOf("demo" to ExceptionResponse("Illegal argument"))
                 )
 
-                notarizedPost(PostInfo<Unit, CompanyDto, SuccessResponse>(
+                notarizedPost(PostInfo<Unit, CompanyCreateDto, SuccessResponse>(
                     summary = "Register company with wallet",
                     description = "Register a company with a hosted wallet",
                     requestInfo = RequestInfo(
                         description = "Company and wallet to register",
-                        examples = mapOf("demo" to CompanyDto("did1_bpn", "did1_name", WalletDto("did1", emptyList<String>())))
+                        examples = mapOf("demo" to CompanyCreateDto("did1_bpn", "did1_name", WalletCreateDto("did1", emptyList<String>())))
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.Created,
@@ -189,14 +265,19 @@ fun Application.configureRouting() {
                 )) {
 
                     try {
-                        val company = call.receive<CompanyDto>()
+                        val company = call.receive<CompanyCreateDto>()
 
                         transaction {
                             val c = Company.new {
                                 bpn = company.bpn
                                 name = company.name
                             }
-                            val w = WalletDao.createWallet(c, company.wallet)
+                            var w = company.wallet
+                            if (WalletCreateDto.INVALID == company.wallet) {
+                                w = WalletCreateDto("did:bpn:BPNL" + (Math.random().toRawBits()).toString(16) + "ZZ", emptyList<String>())
+                            }
+                            WalletDao.createWallet(c, w)
+                            // TODO should we respond with the created company?
                         }
 
                         call.respond(HttpStatusCode.Created, SuccessResponse("Company and wallet successfully registered!"))

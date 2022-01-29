@@ -39,15 +39,14 @@ import net.catenax.core.custodian.models.*
 
 class ApplicationTest {
 
-    val issuer = "http://0.0.0.0:8080" // System.getenv("CX_AUTH_ISSUER_URL") ?: "http://localhost:8081/auth/realms/catenax"
-
     fun setupEnvironment(environment: ApplicationEnvironment) {
         (environment.config as MapApplicationConfig).apply {
             put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:custodian;DB_CLOSE_DELAY=-1;")
             put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
-            put("auth.issuerUrl", issuer)
+            put("auth.issuerUrl", System.getenv("CX_AUTH_ISSUER_URL") ?: "http://localhost:8081/auth/realms/catenax")
             put("auth.realm", System.getenv("CX_AUTH_REALM") ?: "catenax")
             put("auth.role", System.getenv("CX_AUTH_ROLE") ?: "access")
+            put("datapool.url", System.getenv("CX_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
         }
     }
 
@@ -95,6 +94,12 @@ class ApplicationTest {
             }
             handleRequest(HttpMethod.Post, "/").apply {
                 assertEquals(HttpStatusCode.NotFound, response.status())
+            }
+            handleRequest(HttpMethod.Get, "/docs").apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+            handleRequest(HttpMethod.Get, "/openapi.json").apply {
+                assertEquals(HttpStatusCode.OK, response.status())
             }
         }
     }
@@ -152,7 +157,7 @@ class ApplicationTest {
                     bpn = "bpn3"
                     name = "name3"
                 }
-                WalletDao.createWallet(c, WalletDto("did3", emptyList<String>()))
+                WalletDao.createWallet(c, WalletCreateDto("did3", emptyList<String>()))
             }
 
             handleRequest(HttpMethod.Get, "/api/company") {
@@ -263,7 +268,7 @@ class ApplicationTest {
                     bpn = "bpn4"
                     name = "name4"
                 }
-                WalletDao.createWallet(c, WalletDto("did4", emptyList<String>()))
+                WalletDao.createWallet(c, WalletCreateDto("did4", emptyList<String>()))
             }
 
             iae = assertFailsWith<BadRequestException> {

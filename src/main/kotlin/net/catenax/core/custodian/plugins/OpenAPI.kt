@@ -34,8 +34,8 @@ fun Application.configureOpenAPI() {
           ),
           servers = mutableListOf(
           Server(
-              url = URI("https://int.catena-x.net"),
-              description = "Catena-X Integration Environment"
+              url = URI("http://custodian-dev.germanywestcentral.cloudapp.azure.com:8080"),
+              description = "Catena-X Dev Environment"
           )
           )
       )

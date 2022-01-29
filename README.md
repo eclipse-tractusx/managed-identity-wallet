@@ -53,13 +53,14 @@ First step is to create the distribution of the application (in this case using 
 Next step is to build and tag the Docker image:
 
 ```
-docker build -t catena-x/custodian:0.0.1 .
+docker build -t catena-x/custodian:0.0.3 .
 ```
 
-Finally, start the image:
+Finally, start the image (please make sure that there are no quotes around the
+values in the env file):
 
 ```
-docker run -p 8080:8080 catena-x/custodian:0.0.1
+docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:0.0.3
 ```
 
 ## Environment variable setup
@@ -74,6 +75,7 @@ below. Here a few hints on how to set it up:
 5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
 6. `CX_AUTH_ROLE`: specify the expected role within the token, e.g. `access`
 7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `custodian`
+8. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
 
 To follow all steps in this readme you also need following variables:
 

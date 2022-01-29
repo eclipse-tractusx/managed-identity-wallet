@@ -29,12 +29,13 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-apache:$ktor_version")
+    implementation("io.ktor:ktor-client-serialization:$ktor_version")
+
     implementation("io.ktor:ktor-serialization:$ktor_version")
     implementation("io.ktor:ktor-webjars:$ktor_version")
     implementation("io.ktor:ktor-websockets:$ktor_version")
     implementation("io.ktor:ktor-auth:$ktor_version")
     implementation("io.ktor:ktor-auth-jwt:$ktor_version")
-    implementation("io.ktor:ktor-client-apache:$ktor_version")
 
     // for 2.0.0-beta
     // implementation("io.ktor:ktor-server-websockets:$ktor_version")
@@ -45,6 +46,9 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     implementation("io.bkbn:kompendium-core:$kompendium_version")
+    implementation("io.bkbn:kompendium-auth:$kompendium_version")
+    // for now: using kotlinx.serialization
+    // implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7")
     // for now: using redocs instead of swagger ui
     // implementation("io.bkbn:kompendium-swagger-ui:$kompendium_version")
 
