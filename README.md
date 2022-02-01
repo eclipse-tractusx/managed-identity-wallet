@@ -53,14 +53,14 @@ First step is to create the distribution of the application (in this case using 
 Next step is to build and tag the Docker image:
 
 ```
-docker build -t catena-x/custodian:0.0.3 .
+docker build -t catena-x/custodian:0.0.4 .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:0.0.3
+docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:0.0.4
 ```
 
 ## Environment variable setup

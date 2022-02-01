@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  CX_CUSTODIAN_VERSION: "0.0.3"
+  CX_CUSTODIAN_VERSION: "0.0.4"
   NAMESPACE: "bpdm"
   SECRET: "custodian-staging-secret"
   SHORT_SHA: "default"
@@ -50,6 +50,12 @@ jobs:
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
         with:
           arguments: installDist
+
+      - name: setup nodejs
+        uses: actions/setup-node@master
+
+      - name: build admin ui
+        run: cd ui-src && npm install && npm run build && cp -r dist/* ../static
 
       - name: Build and push staging images
         uses: docker/build-push-action@v2

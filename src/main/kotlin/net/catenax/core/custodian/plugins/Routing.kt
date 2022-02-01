@@ -125,7 +125,7 @@ fun Application.configureRouting() {
 
             authenticate("auth-ui-session") {
                 static("/") {
-                    staticRootFolder = File("./static")
+                    staticRootFolder = File("/app/static")
                     files(".")
                     default("index.html")
                 }
@@ -152,13 +152,13 @@ fun Application.configureRouting() {
                                 call.respondText(stringBody, ContentType.Application.Json, HttpStatusCode.OK)
                             } catch (e: RedirectResponseException) {
                                 log.warn("RedirectResponseException: " + e.message)
-                                throw BadRequestException(e.message!!)
+                                throw BadRequestException("Could not retrieve business partner details!")
                             } catch (e: ClientRequestException) {
                                 log.warn("ClientRequestException: " + e.message)
-                                throw BadRequestException(e.message!!)
+                                throw BadRequestException("Could not retrieve business partner details!")
                             } catch (e: ServerResponseException) {
                                 log.warn("ServerResponseException: " + e.message)
-                                throw BadRequestException(e.message!!)
+                                throw BadRequestException("Could not retrieve business partner details!")
                             } catch (e: SerializationException) {
                                 log.warn("SerializationException: " + e.message)
                                 throw BadRequestException(e.message!!)
