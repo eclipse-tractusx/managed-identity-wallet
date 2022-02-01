@@ -6,7 +6,7 @@
     <div class="list">
       <ul>
         <li v-for="company in companies" :key="company.bpn" @click="loadDetails(company.bpn)">
-          <img src="@/assets/wallet.svg" style="margin-right: 15px; width:75px; float: left;"/><div style="float:left;">{{ company.bpn }}<br>{{ company.name }}</div>
+          <img src="@/assets/wallet.svg" style="margin-right: 15px; width:75px; float: left;"/><div style="float:left;">{{ company.bpn }}<br>{{ company.name }}<br>{{ company.createdAt.replace('T', ' ').substring(0, 19) }}</div>
         </li>
       </ul>
       <div class="json">
