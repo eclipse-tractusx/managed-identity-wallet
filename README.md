@@ -53,14 +53,14 @@ First step is to create the distribution of the application (in this case using 
 Next step is to build and tag the Docker image:
 
 ```
-docker build -t catena-x/custodian:0.0.4 .
+docker build -t catena-x/custodian:0.0.5 .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:0.0.4
+docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:0.0.5
 ```
 
 ## Environment variable setup
@@ -202,7 +202,7 @@ az role assignment create \
     --assignee $CX_CLIENT_ID \
     --role "Network Contributor" \
     --scope /subscriptions/$CX_SUBSCRIPTION_ID/resourceGroups/$CX_RG
-````
+```
 
 And then create the service with
 
@@ -242,6 +242,32 @@ within the `Persistence.kt` database setup:
 
 ```
 SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
+```
+
+## Dashboard
+
+Within `ui-src` a simple Vue based dashboard application is available
+which currently only shows the existing companies as well as is able
+to retrieve the full BPN information from the CX data pool API on a
+click on the BPN.
+
+It can be developed with
+
+```
+cd ui-src
+yarn serve
+```
+
+In each release the files in `/static` are updated but within the deployment
+pipeline the application is built and copied over to the `/static` directory.
+
+The steps to build the static files are like following:
+
+```
+cd ui-src
+yarn build
+rm -rf ../static/*
+cp -r dist/* ../static
 ```
 
 ## Tools

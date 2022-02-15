@@ -82,7 +82,7 @@ object WalletDao {
 
     fun createWallet(c: Company, wallet: WalletCreateDto) = transaction {
         // TODO potentially use the name
-        // TODO add VCs
+        // TODO add VCs: request cx data pool information
         
         val kpg = KeyPairGenerator.getInstance("EC")
         val params = ECGenParameterSpec("secp256r1")
