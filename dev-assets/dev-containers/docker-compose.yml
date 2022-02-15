@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  cx_postgres:
+    image: postgres
+    container_name: cx_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cx_password
+      PGDATA: /data/postgres-data
+    volumes:
+      - postgres-data:/data/postgres-data
+    ports:
+      - "5432:5432"
+
+  catenax_keycloak:
+    image: jboss/keycloak
+    container_name: catenax_keycloak
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: catena
+      KEYCLOAK_IMPORT: /tmp/catenax-realm.json
+    volumes:
+      - ./keycloak/catenax-realm.json:/tmp/catenax-realm.json
+    ports:
+      - "8081:8080"
+
+volumes:
+  postgres-data:
