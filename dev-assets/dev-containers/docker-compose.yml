@@ -2,7 +2,7 @@ version: '3'
 
 services:
   cx_postgres:
-    image: postgres
+    image: postgres:14.2
     container_name: cx_postgres
     environment:
       POSTGRES_USER: postgres
@@ -13,9 +13,9 @@ services:
     ports:
       - "5432:5432"
 
-  catenax_keycloak:
-    image: jboss/keycloak
-    container_name: catenax_keycloak
+  cx_keycloak:
+    image: jboss/keycloak:16.1.1
+    container_name: cx_keycloak
     environment:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: catena
