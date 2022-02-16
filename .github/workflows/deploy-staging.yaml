@@ -11,6 +11,7 @@ env:
   NAMESPACE: "bpdm"
   SECRET: "custodian-staging-secret"
   SHORT_SHA: "default"
+  LOAD_BALANCER_IP: "20.113.25.108"
 
 jobs:
   build:
@@ -70,6 +71,13 @@ jobs:
     if: ${{ false }}  # disable for now
 
     steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Helm
+        uses: Azure/setup-helm@v1
+        with:
+          version: v3.3.1
+
       - name: Set the target Azure Kubernetes Service (AKS) cluster. 
         uses: azure/aks-set-context@v1
         with:
@@ -90,14 +98,20 @@ jobs:
           secret-name: ${{ env.SECRET }}
           namespace: ${{ env.NAMESPACE }}
           arguments: --force true
-      
-      - name: Deploy app to dev
-        uses: azure/k8s-deploy@v1
-        with:
-          manifests: |
-            ${{ github.workspace }}/deployment/aks-custodian-dev.yaml
-          images: |
-            ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
-          imagepullsecrets: |
-            ${{ env.SECRET }}
-          namespace: ${{ env.NAMESPACE }}
+
+      - name: Run Helm Deploy app to dev
+        run: |
+          helm upgrade \
+            --install \
+            --atomic \
+            --wait \
+            --namespace ${{ env.NAMESPACE }} \
+            --generate-name \
+            ./helm/custodian \
+            --set image.registry=${{ secrets.CX_ACR_SERVER }} \
+            --set image.name=catena-x/custodian \
+            --set image.tag=${{env.CX_CUSTODIAN_VERSION}}.${{env.SHORT_SHA}\
+            --set imageCredentials.registry=${{ secrets.CX_ACR_SERVER }}\
+            --set imageCredentials.username=${{ secrets.CX_ACR_USER }}\
+            --set imageCredentials.password=${{ secrets.CX_ACR_PASSWORD }}\
+            --set loadBalancerIP=${{env.LOAD_BALANCER_IP}}
