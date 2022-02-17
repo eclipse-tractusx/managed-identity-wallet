@@ -35,7 +35,10 @@ In the following the `gradle` commands are using the gradle wrapper `gradlew`.
 
 ## Running locally with gradle
 
+Copy the file `.env.example` and rename it to `.env`
+
 ```
+set -a; source .env; set +a
 ./gradlew run
 ```
 
@@ -96,32 +99,21 @@ To follow all steps in this readme you also need following variables:
 
 To resemble the staging and production system as much as possible also on the
 local machine, an external Postgresql database should be used instead of
-the default included h2 in-memory database. This can be done using the default
-Docker image for Postgresql:
+the default included h2 in-memory database. Additionally the authentication and authorization could be done via
+[keycloak](https://www.keycloak.org).
 
-```
-docker run --name cx_postgres -e POSTGRES_PASSWORD=cx_password -p 5432:5432 -d postgres
-```
+ * navigate to `./dev-assets/dev-containers`
+ * run `docker-compose up -d` to start a Postgresql database and Keycloak instance in Docker conatiners
+ * To setup the Postgresql database in the application please see the section below setting up the database
+ * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
+ * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
+ * The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `Custodian` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user, e.g. named `custodian-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
 
-Please see the section below setting up the database.
-
-Additionally the authentication and authorization is done via
-[keycloak](https://www.keycloak.org). A keycloak instance can be started via
-
-```
-docker run -d --name catenax_keycloak -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=catena -p 8081:8080 jboss/keycloak
-```
-
-To make it work a new realm needs to be configured at http://localhost:8081
-and there via the "Add realm" button, it can be for example named `catenax`.
-Also add an additional client, e.g. named `Custodian` with *valid redirect url*
-set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user,
-e.g. named `custodian-admin`, need to be created as well (including setting
-a password, e.g. `catena-x`). The user also needs to have a specific client role
-assigned, e.g. `access`, which is validated on access time.
-
-The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
-You can also import the configuration from `examples/
+To run and develop using IntelliJ IDE:
+* open the IntelliJ IDE and import the project
+* create file `dev.env` and copy the values from `.env.example`
+* install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile
+* Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
 
 ## Testing GitHub actions locally
 
