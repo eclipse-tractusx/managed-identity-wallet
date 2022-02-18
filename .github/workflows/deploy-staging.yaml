@@ -107,7 +107,7 @@ jobs:
             --atomic \
             --wait \
             --namespace ${{ env.NAMESPACE }} \
-            ./helm/custodian \
+            cx-custodian ./helm/custodian \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
             --set image.name=catena-x/custodian \
             --set image.tag=${{env.CX_CUSTODIAN_VERSION}}.${{env.SHORT_SHA}}\
