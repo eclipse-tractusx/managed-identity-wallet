@@ -38,7 +38,7 @@ In the following the `gradle` commands are using the gradle wrapper `gradlew`.
 Copy the file `.env.example` and rename it to `.env`
 
 ```
-srouce .env
+set -a; source .env; set +a
 ./gradlew run
 ```
 
@@ -109,8 +109,8 @@ the default included h2 in-memory database. Additionally the authentication and 
  * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
  * The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `Custodian` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user, e.g. named `custodian-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
 
-To run and develop using Intellij IDE:
-* open the Intellij IDE and import the project
+To run and develop using IntelliJ IDE:
+* open the IntelliJ IDE and import the project
 * create file `dev.env` and copy the values from `.env.example`
 * install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile
 * Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration

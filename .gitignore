@@ -4,7 +4,6 @@ build
 .idea/*
 !.idea/runConfigurations
 !.idea/runConfigurations/*
-!.idea/vcs.xml
 !.idea/dictionaries
 !.idea/dictionaries/*
 !.idea/copyright
@@ -38,3 +37,4 @@ bin/
 hs_err_pid*.log
 
 .env
+dev.env
