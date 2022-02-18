@@ -68,7 +68,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-20.04
-    if: ${{ false }}  # disable for now
 
     steps:
       - uses: actions/checkout@v2
