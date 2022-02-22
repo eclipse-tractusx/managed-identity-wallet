@@ -30,6 +30,8 @@ import java.time.LocalDateTime
 import java.util.Date
 
 import net.catenax.core.custodian.models.*
+import java.net.URI
+import kotlin.reflect.full.memberProperties
 
 object DateAsLongSerializer : KSerializer<Date> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
@@ -53,6 +55,62 @@ object CompanyCreateListSerializer : JsonTransformingSerializer<List<CompanyCrea
     // If response is not an array, then it is a single object that should be wrapped into the array
     override fun transformDeserialize(element: JsonElement): JsonElement =
         if (element !is JsonArray) JsonArray(listOf(element)) else element
+}
+
+object URISerializer : KSerializer<URI> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("URI", PrimitiveKind.STRING)
+    override fun deserialize(input: Decoder): URI = URI.create(input.decodeString())
+    override fun serialize(output: Encoder, obj: URI) = output.encodeString(obj.toString())
+}
+
+// https://github.com/Kotlin/kotlinx.serialization/issues/746#issuecomment-779549456
+object AnySerializer : KSerializer<Any> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Any")
+    override fun serialize(encoder: Encoder, value: Any) {
+        val jsonEncoder = encoder as JsonEncoder
+        val jsonElement = serializeAny(value)
+        jsonEncoder.encodeJsonElement(jsonElement)
+    }
+
+    private fun serializeAny(value: Any?): JsonElement = when (value) {
+        null -> JsonNull
+        is Map<*, *> -> {
+            val mapContents = value.entries.associate { mapEntry ->
+                mapEntry.key.toString() to serializeAny(mapEntry.value)
+            }
+            JsonObject(mapContents)
+        }
+        is List<*> -> {
+            val arrayContents = value.map { listEntry -> serializeAny(listEntry) }
+            JsonArray(arrayContents)
+        }
+        is Number -> JsonPrimitive(value)
+        is Boolean -> JsonPrimitive(value)
+        is String -> JsonPrimitive(value)
+        else -> {
+            val contents = value::class.memberProperties.associate { property ->
+                property.name to serializeAny(property.getter.call(value))
+            }
+            JsonObject(contents)
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): Any {
+        val jsonDecoder = decoder as JsonDecoder
+        val element = jsonDecoder.decodeJsonElement()
+
+        return deserializeJsonElement(element)
+    }
+
+    private fun deserializeJsonElement(element: JsonElement): Any = when (element) {
+        is JsonObject -> {
+            element.mapValues { deserializeJsonElement(it.value) }
+        }
+        is JsonArray -> {
+            element.map { deserializeJsonElement(it) }
+        }
+        is JsonPrimitive -> element.toString()
+    }
 }
 
 fun Application.configureSerialization() {

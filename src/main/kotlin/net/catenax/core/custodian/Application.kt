@@ -13,11 +13,13 @@ import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.server.engine.*
+import io.ktor.client.features.json.*
 
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.ExceptionResponse
 import net.catenax.core.custodian.models.NotFoundException
 import net.catenax.core.custodian.models.BadRequestException
+import net.catenax.core.custodian.routes.ssiRoutes
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -45,6 +47,7 @@ fun Application.module(testing: Boolean = false) {
     configureSecurity()
 
     configureRouting()
+    ssiRoutes()
 
     configurePersistence()
 }
