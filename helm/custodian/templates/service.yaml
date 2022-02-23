@@ -6,6 +6,6 @@ spec:
   type: LoadBalancer
   loadBalancerIP: {{ .Values.loadBalancerIP }}
   ports:
-  - port: 8080
+  - port: 8081
   selector:
     app: catenax-custodian
