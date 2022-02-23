@@ -101,7 +101,7 @@ jobs:
           arguments: --force true
 
       - name: Show image tag
-        run: echo ${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
+        run: echo ${env.CX_CUSTODIAN_VERSION}.${env.SHORT_SHA}
       
       - name: Run Helm Deploy app to dev
         run: |
@@ -113,7 +113,7 @@ jobs:
             cx-custodian ./helm/custodian \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
             --set image.name=catena-x/custodian \
-            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA} \
+            --set image.tag=${env.CX_CUSTODIAN_VERSION}.${env.SHORT_SHA} \
             --set imageCredentials.registry=${{ secrets.CX_ACR_SERVER }} \
             --set imageCredentials.username=${{ secrets.CX_ACR_USER }} \
             --set imageCredentials.password=${{ secrets.CX_ACR_PASSWORD }} \
