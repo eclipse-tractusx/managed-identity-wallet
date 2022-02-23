@@ -3,6 +3,7 @@ package net.catenax.core.custodian.routes
 import com.danubetech.verifiablecredentials.jsonld.VerifiableCredentialContexts
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
+import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.GetInfo
@@ -15,6 +16,7 @@ import io.ktor.routing.*
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.LdProofDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
+import net.catenax.core.custodian.models.ssi.VerifiableCredentialParameters
 
 fun Route.vcRoutes() {
 
@@ -22,9 +24,14 @@ fun Route.vcRoutes() {
 
         route("") {
             notarizedGet(
-                GetInfo<Unit, List<VerifiableCredentialDto>>(
+                GetInfo<VerifiableCredentialParameters, List<VerifiableCredentialDto>>(
                     summary = "Get Verifiable credentials",
                     description = "get verifiable credentials",
+                    parameterExamples = setOf(
+                        ParameterExample("id", "did", "http://example.edu/credentials/3732"),
+                        ParameterExample("type", "type", "['University-Degree-Credential']"),
+                        ParameterExample("issuer", "issuer", "did:example:0123")
+                    ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
                         description = "The created Verifiable Credential",
@@ -70,7 +77,7 @@ fun Route.vcRoutes() {
             notarizedPost(
                 PostInfo<Unit, VerifiableCredentialDto, SuccessResponse>(
                     summary = "Store Verifiable credential ",
-                    description = "store a verifiable credential using the issuer did as identifier of wallet",
+                    description = "store a verifiable credential using the subject DID as identifier of wallet",
                     requestInfo = RequestInfo(
                         description = "the verifiable credential",
                         examples = signedVerifiableCredentialDtoExample
@@ -90,10 +97,9 @@ fun Route.vcRoutes() {
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-                var id = verifiableCredentialDto.id
                 call.respond(
                     HttpStatusCode.Created,
-                    SuccessResponse("Credential with id $id has been successfully Stored")
+                    SuccessResponse("Credential has been successfully Stored")
                 )
             }
         }

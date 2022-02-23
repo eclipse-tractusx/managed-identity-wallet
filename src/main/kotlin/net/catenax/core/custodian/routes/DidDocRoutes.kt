@@ -4,6 +4,7 @@ import io.bkbn.kompendium.core.Notarized.notarizedDelete
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.Notarized.notarizedPut
+import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.DeleteInfo
@@ -15,10 +16,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import net.catenax.core.custodian.models.ssi.DidDocumentDto
-import net.catenax.core.custodian.models.ssi.DidServiceDto
-import net.catenax.core.custodian.models.ssi.DidVerificationMethodDto
-import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
+import net.catenax.core.custodian.models.ssi.*
 
 fun Route.didDocRoutes() {
 
@@ -26,19 +24,21 @@ fun Route.didDocRoutes() {
 
         route("/{did}") {
             notarizedGet(
-                GetInfo<Unit, DidDocumentDto>(
-                    summary = "Resolve DID Document",
-                    description = "resolve the did document for given did",
+                GetInfo<DidDocumentParameters, DidDocumentDto>(
+                    summary = "Resolve DIDDocument",
+                    description = "resolve the DIDDocument for given DID",
+                    parameterExamples = setOf(
+                        ParameterExample("did", "did", "did:exp:123")
+                    ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
-                        description = "The resolved Did Document",
+                        description = "The resolved DIDDocument",
                         examples = didDocumentDtoExample
                     ),
                     canThrow = setOf(invalidInputException),
-                    tags = setOf("DidDocuments")
+                    tags = setOf("DIDDocument")
                 )
             ) {
-                val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
                 call.respond(
                     HttpStatusCode.Created,
                     didDocumentDtoExample["demo"] as DidDocumentDto
@@ -47,21 +47,25 @@ fun Route.didDocRoutes() {
         }
 
         route("/{did}/services") {
+
             notarizedPost(
-                PostInfo<Unit, DidServiceDto, DidDocumentDto>(
+                PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
                     summary = "Add New Service Endpoint",
-                    description = "add a new service endpoint to the DID Document",
+                    description = "add a new service endpoint to the DIDDocument",
+                    parameterExamples = setOf(
+                        ParameterExample("did", "did", "did:exp:123")
+                    ),
                     requestInfo = RequestInfo(
                         description = "The Service endpoint",
                         examples = didServiceDtoExample
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
-                        description = "The resolved Did Document after the adding the new Service",
+                        description = "The resolved DIDDocument after the adding the new Service",
                         examples = didDocumentDtoExample
                     ),
                     canThrow = setOf(notFoundException, invalidInputException),
-                    tags = setOf("DidDocuments")
+                    tags = setOf("DIDDocument")
                 )
             ) {
                 val serviceDto = call.receive<DidServiceDto>()
@@ -70,24 +74,25 @@ fun Route.didDocRoutes() {
                     didDocumentDtoExample["demo"] as DidDocumentDto
                 )
             }
-        }
 
-        route("/{did}/services") {
             notarizedPut(
-                PutInfo<Unit, DidServiceDto, DidDocumentDto>(
+                PutInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
                     summary = "Update an existing Service Endpoint",
-                    description = "update the service endpoint in the DID Document based on its id",
+                    description = "update the service endpoint in the DIDDocument based on its id",
+                    parameterExamples = setOf(
+                        ParameterExample("did", "did", "did:exp:123")
+                    ),
                     requestInfo = RequestInfo(
                         description = "The Service endpoint",
                         examples = didServiceDtoExample
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
-                        description = "The resolved Did Document after the updating the Service",
+                        description = "The resolved DIDDocument after the updating the Service",
                         examples = didDocumentDtoExample
                     ),
                     canThrow = setOf(notFoundException, invalidInputException),
-                    tags = setOf("DidDocuments")
+                    tags = setOf("DIDDocument")
                 )
             ) {
                 val serviceDto = call.receive<DidServiceDto>()
@@ -96,52 +101,30 @@ fun Route.didDocRoutes() {
                     didDocumentDtoExample["demo"] as DidDocumentDto
                 )
             }
-        }
 
-        route("/{did}/services/{id}") {
-            notarizedDelete(
-                DeleteInfo<Unit, DidDocumentDto>(
-                    summary = "Remove the Service endpoint",
-                    description = "remove service endpoint in DID Document based on its id",
-                    responseInfo = ResponseInfo(
-                        status = HttpStatusCode.OK,
-                        description = "The resolved Did Document after removing the service",
-                        examples = mapOf(
-                            "demo" to DidDocumentDto(
-                                id = "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                type = listOf("University-Degree-Credential, VerifiableCredential"),
-                                context = listOf("https://www.w3.org/ns/did/v1"),
-                                verificationMethods = listOf(
-                                    DidVerificationMethodDto(
-                                        id = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
-                                        type = "Ed25519VerificationKey2018",
-                                        controller = "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                        publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    canThrow = setOf(notFoundException, invalidInputException),
-                    tags = setOf("DidDocuments")
-                )
-            ) {
-                call.respond(
-                    HttpStatusCode.OK,
-                    DidDocumentDto(
-                        id = "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                        type = listOf("University-Degree-Credential, VerifiableCredential"),
-                        context = listOf("https://www.w3.org/ns/did/v1"),
-                        verificationMethods = listOf(
-                            DidVerificationMethodDto(
-                                id = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
-                                type = "Ed25519VerificationKey2018",
-                                controller = "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                            )
-                        )
+            route("/{id}") {
+                notarizedDelete(
+                    DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
+                        summary = "Remove the Service endpoint",
+                        description = "remove service endpoint in DIDDocument based on its id",
+                        parameterExamples = setOf(
+                            ParameterExample("did", "did", "did:exp:123"),
+                            ParameterExample("id", "id", "did:example:123#edv")
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.OK,
+                            description = "The resolved DIDDocument after removing the service",
+                            examples = didDocumentDtoWithoutServiceExample
+                        ),
+                        canThrow = setOf(notFoundException, invalidInputException),
+                        tags = setOf("DIDDocument")
                     )
-                )
+                ) {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        didDocumentDtoWithoutServiceExample["demo"] as DidDocumentDto
+                    )
+                }
             }
         }
     }
@@ -150,8 +133,8 @@ fun Route.didDocRoutes() {
 val didDocumentDtoExample = mapOf(
     "demo" to DidDocumentDto(
         id = "did:example:76e12ec712ebc6f1c221ebfeb1f",
-        type = listOf("University-Degree-Credential, VerifiableCredential"),
         context = listOf("https://www.w3.org/ns/did/v1"),
+        controller = listOf("123", "1231"),
         verificationMethods = listOf(
             DidVerificationMethodDto(
                 id = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
@@ -165,6 +148,22 @@ val didDocumentDtoExample = mapOf(
                 id = "did:example:123#edv",
                 type = "ServiceEndpointProxyService",
                 serviceEndpoint = "https://myservice.com/myendpoint"
+            )
+        )
+    )
+)
+
+val didDocumentDtoWithoutServiceExample = mapOf(
+    "demo" to DidDocumentDto(
+        id = "did:example:76e12ec712ebc6f1c221ebfeb1f",
+        context = listOf("https://www.w3.org/ns/did/v1"),
+        controller = "test",
+        verificationMethods = listOf(
+            DidVerificationMethodDto(
+                id = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
+                type = "Ed25519VerificationKey2018",
+                controller = "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
             )
         )
     )

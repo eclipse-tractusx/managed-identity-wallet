@@ -11,9 +11,6 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.server.engine.*
-import io.ktor.client.features.json.*
 
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.ExceptionResponse
