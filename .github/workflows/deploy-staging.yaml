@@ -105,9 +105,10 @@ jobs:
         run: |
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Show version
         run: echo ${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
-      
+
       - name: Run Helm Deploy app to dev
         run: |
           helm upgrade \
