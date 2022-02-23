@@ -100,8 +100,13 @@ jobs:
           namespace: ${{ env.NAMESPACE }}
           arguments: --force true
 
-      - name: Show image tag
-        run: echo ${env.CX_CUSTODIAN_VERSION}.${env.SHORT_SHA}
+      - name: Set outputs
+        id: vars
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Show version
+        run: echo ${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
       
       - name: Run Helm Deploy app to dev
         run: |
@@ -113,7 +118,7 @@ jobs:
             cx-custodian ./helm/custodian \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
             --set image.name=catena-x/custodian \
-            --set image.tag=${env.CX_CUSTODIAN_VERSION}.${env.SHORT_SHA} \
+            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA} \
             --set imageCredentials.registry=${{ secrets.CX_ACR_SERVER }} \
             --set imageCredentials.username=${{ secrets.CX_ACR_USER }} \
             --set imageCredentials.password=${{ secrets.CX_ACR_PASSWORD }} \
