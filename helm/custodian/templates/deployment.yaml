@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catenax-custodian
+  name: catenax-custodian-x
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: catenax-custodian
+      app: catenax-custodian-x
   template:
     metadata:
       labels:
-        app: catenax-custodian
+        app: catenax-custodian-x
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       imagePullSecrets:
         - name: akz-registry-key
       containers:
-      - name: catenax-custodian
+      - name: catenax-custodian-x
         image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         env:
         - name: ALLOW_EMPTY_PASSWORD

@@ -8,10 +8,9 @@ on:
 
 env:
   CX_CUSTODIAN_VERSION: "0.0.4"
-  NAMESPACE: "custodian"
+  NAMESPACE: "ingress-custodian"
   SECRET: "custodian-staging-secret"
   SHORT_SHA: "default"
-  LOAD_BALANCER_IP: "20.113.25.108"
   CLUSTER_RESOURCE_GROUP: "cxtsi-dev013-rg"
   CLUSTER_NAME: "cxtsi-dev013-aks-services"
 
@@ -123,4 +122,3 @@ jobs:
             --set imageCredentials.registry=${{ secrets.CX_ACR_SERVER }} \
             --set imageCredentials.username=${{ secrets.CX_ACR_USER }} \
             --set imageCredentials.password=${{ secrets.CX_ACR_PASSWORD }} \
-            --set loadBalancerIP=${{env.LOAD_BALANCER_IP}}
