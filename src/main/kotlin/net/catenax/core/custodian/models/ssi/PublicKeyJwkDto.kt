@@ -17,15 +17,8 @@ data class PublicKeyJwkDto(
     val keyOps: List<String>? = null,
     val alg: String? = null,
     val kid: String? = null,
-    val x5u: String? = null,
-    val x5t: String? = null,
-    val x5c: List<String>? = null,
-    val x5t256: String? = null,
     val crv: String? = null,
     val x: String? = null,
     val y: String? = null,
-    val d: String? = null,
-    val n: String? = null,
-    val e: String? = null,
     val additionalAttributes: Map<String, Any>? = null
 ) {}

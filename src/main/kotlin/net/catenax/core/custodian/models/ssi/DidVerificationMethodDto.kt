@@ -2,7 +2,6 @@
 
 package net.catenax.core.custodian.models.ssi
 
-import com.danubetech.keyformats.JWK_to_PublicKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import net.catenax.core.custodian.plugins.AnySerializer

@@ -30,7 +30,8 @@ fun Route.vcRoutes() {
                     parameterExamples = setOf(
                         ParameterExample("id", "did", "http://example.edu/credentials/3732"),
                         ParameterExample("type", "type", "['University-Degree-Credential']"),
-                        ParameterExample("issuer", "issuer", "did:example:0123")
+                        ParameterExample("issuer", "issuer", "did:example:0123"),
+                        ParameterExample("holder", "holder", "did:example:4567")
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,

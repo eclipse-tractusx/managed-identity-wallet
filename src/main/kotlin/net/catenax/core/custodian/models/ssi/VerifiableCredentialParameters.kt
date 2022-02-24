@@ -15,5 +15,8 @@ data class VerifiableCredentialParameters(
     val type: List<String>,
     @Param(type = ParamType.QUERY)
     @Field(description = "The DID of Issuer as String (URI compatible)", name = "issuer")
-    val issuer: String
+    val issuer: String,
+    @Param(type = ParamType.QUERY)
+    @Field(description = "The DID of holder as String (URI compatible)", name = "holder")
+    val holder: String
 )

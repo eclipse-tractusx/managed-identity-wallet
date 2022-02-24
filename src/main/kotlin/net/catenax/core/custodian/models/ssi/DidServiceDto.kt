@@ -9,6 +9,6 @@ data class DidServiceDto(
     val id: String,
     @Field(description = "The Type of the Service Endpoint as String", name = "type")
     val type: String,
-    @Field(description = "The Type of the Service Endpoint as String (URI compatible)", name = "serviceEndpoint")
+    @Field(description = "The URL of the Service Endpoint as String (URI compatible)", name = "serviceEndpoint")
     val serviceEndpoint: String
 ) {}
