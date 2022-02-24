@@ -13,16 +13,15 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.LdProofDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialParameters
+import net.catenax.core.custodian.models.ssi.VerifiableCredentialRequestDto
 
 fun Route.vcRoutes() {
 
     route("/credentials") {
 
-        route("") {
             notarizedGet(
                 GetInfo<VerifiableCredentialParameters, List<VerifiableCredentialDto>>(
                     summary = "Get Verifiable credentials",
@@ -30,8 +29,10 @@ fun Route.vcRoutes() {
                     parameterExamples = setOf(
                         ParameterExample("id", "did", "http://example.edu/credentials/3732"),
                         ParameterExample("type", "type", "['University-Degree-Credential']"),
-                        ParameterExample("issuer", "issuer", "did:example:0123"),
-                        ParameterExample("holder", "holder", "did:example:4567")
+                        ParameterExample("issuerIdentifier", "issuerIdentifierDid", "did:example:0123"),
+                        ParameterExample("holderIdentifier", "holderIdentifierDid", "did:example:4567"),
+                        ParameterExample("issuerIdentifier", "issuerIdentifierBPN", "BPN0123"),
+                        ParameterExample("holderIdentifier", "holderIdentifierBPN", "BPN4567")
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
@@ -46,11 +47,9 @@ fun Route.vcRoutes() {
                     listOf( signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto )
                 )
             }
-        }
 
-        route("/issue") {
             notarizedPost(
-                PostInfo<Unit, VerifiableCredentialDto, VerifiableCredentialDto>(
+                PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
                     summary = "Issue Verifiable credential ",
                     description = "issue a verifiable credential",
                     requestInfo = RequestInfo(
@@ -62,7 +61,7 @@ fun Route.vcRoutes() {
                         description = "The created Verifiable Credential",
                         examples = signedVerifiableCredentialDtoExample
                     ),
-                    canThrow = setOf(invalidInputException, notFoundException),
+                    canThrow = setOf(invalidInputException, invalidInputSyntaxException),
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
@@ -72,42 +71,10 @@ fun Route.vcRoutes() {
                     signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto
                 )
             }
-        }
 
-        route("/store") {
+        route("/issuer") {
             notarizedPost(
-                PostInfo<Unit, VerifiableCredentialDto, SuccessResponse>(
-                    summary = "Store Verifiable credential ",
-                    description = "store a verifiable credential using the subject DID as identifier of wallet",
-                    requestInfo = RequestInfo(
-                        description = "the verifiable credential",
-                        examples = signedVerifiableCredentialDtoExample
-                    ),
-                    responseInfo = ResponseInfo(
-                        status = HttpStatusCode.Created,
-                        description = "Success message",
-                        examples = mapOf(
-                            "demo" to SuccessResponse(
-                                "Credential with id http://example.edu/credentials/3732" +
-                                        "has been successfully Stored"
-                            )
-                        )
-                    ),
-                    canThrow = setOf(invalidInputException, notFoundException),
-                    tags = setOf("VerifiableCredentials")
-                )
-            ) {
-                val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-                call.respond(
-                    HttpStatusCode.Created,
-                    SuccessResponse("Credential has been successfully Stored")
-                )
-            }
-        }
-
-        route("/cx-issue") {
-            notarizedPost(
-                PostInfo<Unit, VerifiableCredentialDto, VerifiableCredentialDto>(
+                PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
                     summary = "Issue catena-x related credentials",
                     description = "issue a verifiable credential by catena-x wallets",
                     requestInfo = RequestInfo(
@@ -119,7 +86,7 @@ fun Route.vcRoutes() {
                         description = "The created Verifiable Credential",
                         examples = signedVerifiableCredentialDtoExample
                     ),
-                    canThrow = setOf(invalidInputException, notFoundException),
+                    canThrow = setOf(invalidInputException, invalidInputSyntaxException),
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
@@ -134,14 +101,14 @@ fun Route.vcRoutes() {
 }
 
 val unsignedVerifiableCredentialDtoExample = mapOf(
-    "demo" to VerifiableCredentialDto(
+    "demo" to VerifiableCredentialRequestDto(
         context = listOf(
             VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
             VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
         ),
         id = "http://example.edu/credentials/3732",
         type = listOf("University-Degree-Credential, VerifiableCredential"),
-        issuer = "did:example:76e12ec712ebc6f1c221ebfeb1f",
+        issuerIdentifier = "did:example:76e12ec712ebc6f1c221ebfeb1f",
         issuanceDate = "2019-06-16T18:56:59Z",
         expirationDate = "2019-06-17T18:56:59Z",
         credentialSubject = mapOf("college" to "Test-University")

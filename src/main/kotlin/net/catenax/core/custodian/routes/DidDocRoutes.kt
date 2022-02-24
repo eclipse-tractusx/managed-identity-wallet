@@ -22,13 +22,14 @@ fun Route.didDocRoutes() {
 
     route("/didDocuments") {
 
-        route("/{did}") {
+        route("/{identifier}") {
             notarizedGet(
                 GetInfo<DidDocumentParameters, DidDocumentDto>(
                     summary = "Resolve DIDDocument",
-                    description = "resolve the DIDDocument for given DID",
+                    description = "resolve the DIDDocument for given DID or BPN",
                     parameterExamples = setOf(
-                        ParameterExample("did", "did", "did:exp:123")
+                        ParameterExample("identifier", "did", "did:exp:123"),
+                        ParameterExample("identifier", "bpn", "BPN123"),
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
@@ -46,14 +47,14 @@ fun Route.didDocRoutes() {
             }
         }
 
-        route("/{did}/services") {
-
+        route("/{identifier}/services") {
             notarizedPost(
-                PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
+                PostInfo<DidDocumentServiceParameters, DidServiceDto, DidDocumentDto>(
                     summary = "Add New Service Endpoint",
                     description = "add a new service endpoint to the DIDDocument",
                     parameterExamples = setOf(
-                        ParameterExample("did", "did", "did:exp:123")
+                        ParameterExample("identifier", "did", "did:exp:123"),
+                        ParameterExample("identifier", "bpn", "BPN123")
                     ),
                     requestInfo = RequestInfo(
                         description = "The Service endpoint",
@@ -75,40 +76,43 @@ fun Route.didDocRoutes() {
                 )
             }
 
-            notarizedPut(
-                PutInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
-                    summary = "Update an existing Service Endpoint",
-                    description = "update the service endpoint in the DIDDocument based on its id",
-                    parameterExamples = setOf(
-                        ParameterExample("did", "did", "did:exp:123")
-                    ),
-                    requestInfo = RequestInfo(
-                        description = "The Service endpoint",
-                        examples = didServiceDtoExample
-                    ),
-                    responseInfo = ResponseInfo(
-                        status = HttpStatusCode.OK,
-                        description = "The resolved DIDDocument after the updating the Service",
-                        examples = didDocumentDtoExample
-                    ),
-                    canThrow = setOf(notFoundException, invalidInputException),
-                    tags = setOf("DIDDocument")
-                )
-            ) {
-                val serviceDto = call.receive<DidServiceDto>()
-                call.respond(
-                    HttpStatusCode.Created,
-                    didDocumentDtoExample["demo"] as DidDocumentDto
-                )
-            }
-
             route("/{id}") {
+                notarizedPut(
+                    PutInfo<DidDocumentParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
+                        summary = "Update an existing Service Endpoint",
+                        description = "update the service endpoint in the DIDDocument based on its id",
+                        parameterExamples = setOf(
+                            ParameterExample("identifier", "did", "did:exp:123"),
+                            ParameterExample("identifier", "bpn", "BPN123"),
+                            ParameterExample("id", "id", "did:example:123#edv")
+                        ),
+                        requestInfo = RequestInfo(
+                            description = "The Service endpoint",
+                            examples = didServiceUpdateRequestDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.OK,
+                            description = "The resolved DIDDocument after the updating the Service",
+                            examples = didDocumentDtoExample
+                        ),
+                        canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
+                        tags = setOf("DIDDocument")
+                    )
+                ) {
+                    val serviceDto = call.receive<DidServiceDto>()
+                    call.respond(
+                        HttpStatusCode.Created,
+                        didDocumentDtoExample["demo"] as DidDocumentDto
+                    )
+                }
+
                 notarizedDelete(
                     DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
                         summary = "Remove the Service endpoint",
                         description = "remove service endpoint in DIDDocument based on its id",
                         parameterExamples = setOf(
-                            ParameterExample("did", "did", "did:exp:123"),
+                            ParameterExample("identifier", "did", "did:exp:123"),
+                            ParameterExample("identifier", "bpn", "BPN123"),
                             ParameterExample("id", "id", "did:example:123#edv")
                         ),
                         responseInfo = ResponseInfo(
@@ -116,7 +120,7 @@ fun Route.didDocRoutes() {
                             description = "The resolved DIDDocument after removing the service",
                             examples = didDocumentDtoWithoutServiceExample
                         ),
-                        canThrow = setOf(notFoundException, invalidInputException),
+                        canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
                         tags = setOf("DIDDocument")
                     )
                 ) {
@@ -176,3 +180,11 @@ val didServiceDtoExample = mapOf(
         serviceEndpoint = "https://myservice.com/myendpoint"
     )
 )
+
+val didServiceUpdateRequestDtoExample = mapOf(
+    "demo" to DidServiceUpdateRequestDto(
+        type = "ServiceEndpointProxyService",
+        serviceEndpoint = "https://myservice.com/myendpoint"
+    )
+)
+

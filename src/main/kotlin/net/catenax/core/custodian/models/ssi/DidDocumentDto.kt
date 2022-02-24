@@ -1,6 +1,7 @@
 package net.catenax.core.custodian.models.ssi
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.bkbn.kompendium.annotations.Field
 import io.bkbn.kompendium.annotations.Param
 import io.bkbn.kompendium.annotations.ParamType
 import kotlinx.serialization.SerialName
@@ -22,4 +23,11 @@ data class DidDocumentDto(
     val capabilityInvocationVerificationMethods: List<DidVerificationMethodDto>? = null,
     val capabilityDelegationVerificationMethods: List<DidVerificationMethodDto>? = null,
     val services: List<DidServiceDto>? = null
-) {}
+)
+
+@Serializable
+data class DidDocumentParameters(
+    @Param(type = ParamType.PATH)
+    @Field(description = "The DID or BPN of Entity", name = "identifier")
+    val identifier: String
+)
