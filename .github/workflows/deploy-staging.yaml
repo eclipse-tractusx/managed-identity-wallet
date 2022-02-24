@@ -7,7 +7,7 @@ on:
     branches: [ helm-deployment ]
 
 env:
-  CX_CUSTODIAN_VERSION: "0.0.4"
+  CX_CUSTODIAN_VERSION: "0.0.5"
   NAMESPACE: "ingress-custodian"
   SECRET: "custodian-staging-secret"
   SHORT_SHA: "default"
@@ -104,9 +104,6 @@ jobs:
         run: |
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Show version
-        run: echo ${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
 
       - name: Run Helm Deploy app to dev
         run: |

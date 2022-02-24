@@ -124,6 +124,45 @@ see the section above.
 ```
 act --secret-file .env
 ```
+## Helm Setup and Auto Deployment
+The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `main` branch, please check if the version of the helm-chart and Application in `Chart.yaml` need to be updated.
+* To check the current deployment and version run `helm list -n ingress-custodian`. Example output:
+```
+NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	APP VERSION
+cx-custodian 	ingress-custodian	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-custodian-0.1.0	0.0.5      
+```
+
+The deployment requires also a secret file `catenax-custodian-secrets` that include the following data:
+1. `allow-empty-password`
+1. `cx-db-jdbc-url`
+1. `cx-db-jdbc-driver`
+1. `cx-auth-jwks-url`
+1. `cx-auth-issuer-url`
+1. `cx-auth-realm`
+1. `cx-auth-role`
+1. `cx-auth-client-id`
+1. `cx-auth-client-secret`
+1. `cx-auth-redirect-url`
+1. `cx-datapool-url`
+
+To add a secret file to the namespace in the cluster:
+* login to AKS
+* run the following command after replaceing the placeholders
+```
+  kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets \
+  --from-literal=allow-empty-password='<placeholder>' \
+  --from-literal=cx-db-jdbc-url='<placeholder>' \
+  --from-literal=cx-db-jdbc-driver='<placeholder>' \
+  --from-literal=cx-auth-jwks-url='<placeholder>' \
+  --from-literal=cx-auth-issuer-url='<placeholder> \
+  --from-literal=cx-auth-realm='<placeholder>' \
+  --from-literal=cx-auth-role='<placeholder>' \
+  --from-literal=cx-auth-client-id='<placeholder>' \
+  --from-literal=cx-auth-client-secret='<placeholder>' \
+  --from-literal=cx-auth-redirect-url='<placeholder>' \
+  --from-literal=cx-datapool-url='<placeholder>'
+```
+* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
 
 ## Manually deploy the to Azure Kubernetes Service (AKS)
 
