@@ -59,13 +59,14 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.entities.*
 
-suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String): String {
+suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token: String): String {
 
     var stringBody: String = ""
     HttpClient(Apache).use { client ->
-        val httpResponse: HttpResponse = client.get("${datapoolUrl}/api/catena/businesspartners/${bpn}") {
+        val httpResponse: HttpResponse = client.get("${datapoolUrl}/api/catena/businesspartner/${bpn}") {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                append(HttpHeaders.Authorization, "Bearer " + token)
             }
         }
         stringBody = httpResponse.readText()
@@ -144,10 +145,16 @@ fun Application.configureRouting() {
 
                 route("/companies/{did}/full") {
                     handle {
+                        val userSession = call.sessions.get<UserSession>()
+                        var token = ""
+                        if (userSession != null) {
+                            token = userSession.token
+                        }
+
                         val did = call.parameters["did"]
                         if (did != null) {
                             try {
-                                val stringBody = retrieveBusinessPartnerInfo("${datapoolUrl}", did)
+                                val stringBody = retrieveBusinessPartnerInfo("${datapoolUrl}", did, token)
                                 val d = Json { ignoreUnknownKeys = true }.decodeFromString<BusinessPartnerInfo>(BusinessPartnerInfo.serializer(), stringBody)
                                 call.respondText(stringBody, ContentType.Application.Json, HttpStatusCode.OK)
                             } catch (e: RedirectResponseException) {
