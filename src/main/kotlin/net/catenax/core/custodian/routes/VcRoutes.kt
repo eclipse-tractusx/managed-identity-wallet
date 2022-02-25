@@ -36,7 +36,7 @@ fun Route.vcRoutes() {
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
-                        description = "The created Verifiable Credential",
+                        description = "The created Verifiable Credential"
                     ),
                     tags = setOf("VerifiableCredentials")
                 )
@@ -44,7 +44,7 @@ fun Route.vcRoutes() {
                 val id = call.request.queryParameters["id"]
                 call.respond(
                     HttpStatusCode.OK,
-                    listOf( signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto )
+                    listOf(signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto )
                 )
             }
 

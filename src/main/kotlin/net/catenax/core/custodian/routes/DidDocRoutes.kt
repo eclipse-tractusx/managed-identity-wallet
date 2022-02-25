@@ -45,57 +45,26 @@ fun Route.didDocRoutes() {
                     didDocumentDtoExample["demo"] as DidDocumentDto
                 )
             }
-        }
 
-        route("/{identifier}/services") {
-            notarizedPost(
-                PostInfo<DidDocumentServiceParameters, DidServiceDto, DidDocumentDto>(
-                    summary = "Add New Service Endpoint",
-                    description = "add a new service endpoint to the DIDDocument",
-                    parameterExamples = setOf(
-                        ParameterExample("identifier", "did", "did:exp:123"),
-                        ParameterExample("identifier", "bpn", "BPN123")
-                    ),
-                    requestInfo = RequestInfo(
-                        description = "The Service endpoint",
-                        examples = didServiceDtoExample
-                    ),
-                    responseInfo = ResponseInfo(
-                        status = HttpStatusCode.OK,
-                        description = "The resolved DIDDocument after the adding the new Service",
-                        examples = didDocumentDtoExample
-                    ),
-                    canThrow = setOf(notFoundException, invalidInputException),
-                    tags = setOf("DIDDocument")
-                )
-            ) {
-                val serviceDto = call.receive<DidServiceDto>()
-                call.respond(
-                    HttpStatusCode.Created,
-                    didDocumentDtoExample["demo"] as DidDocumentDto
-                )
-            }
-
-            route("/{id}") {
-                notarizedPut(
-                    PutInfo<DidDocumentParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
-                        summary = "Update an existing Service Endpoint",
-                        description = "update the service endpoint in the DIDDocument based on its id",
+            route("/services") {
+                notarizedPost(
+                    PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
+                        summary = "Add New Service Endpoint",
+                        description = "add a new service endpoint to the DIDDocument",
                         parameterExamples = setOf(
                             ParameterExample("identifier", "did", "did:exp:123"),
-                            ParameterExample("identifier", "bpn", "BPN123"),
-                            ParameterExample("id", "id", "did:example:123#edv")
+                            ParameterExample("identifier", "bpn", "BPN123")
                         ),
                         requestInfo = RequestInfo(
                             description = "The Service endpoint",
-                            examples = didServiceUpdateRequestDtoExample
+                            examples = didServiceDtoExample
                         ),
                         responseInfo = ResponseInfo(
                             status = HttpStatusCode.OK,
-                            description = "The resolved DIDDocument after the updating the Service",
+                            description = "The resolved DIDDocument after the adding the new Service",
                             examples = didDocumentDtoExample
                         ),
-                        canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
+                        canThrow = setOf(notFoundException, invalidInputException),
                         tags = setOf("DIDDocument")
                     )
                 ) {
@@ -106,28 +75,59 @@ fun Route.didDocRoutes() {
                     )
                 }
 
-                notarizedDelete(
-                    DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
-                        summary = "Remove the Service endpoint",
-                        description = "remove service endpoint in DIDDocument based on its id",
-                        parameterExamples = setOf(
-                            ParameterExample("identifier", "did", "did:exp:123"),
-                            ParameterExample("identifier", "bpn", "BPN123"),
-                            ParameterExample("id", "id", "did:example:123#edv")
-                        ),
-                        responseInfo = ResponseInfo(
-                            status = HttpStatusCode.OK,
-                            description = "The resolved DIDDocument after removing the service",
-                            examples = didDocumentDtoWithoutServiceExample
-                        ),
-                        canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
-                        tags = setOf("DIDDocument")
-                    )
-                ) {
-                    call.respond(
-                        HttpStatusCode.OK,
-                        didDocumentDtoWithoutServiceExample["demo"] as DidDocumentDto
-                    )
+                route("/{id}") {
+                    notarizedPut(
+                        PutInfo<DidDocumentServiceParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
+                            summary = "Update an existing Service Endpoint",
+                            description = "update the service endpoint in the DIDDocument based on its id",
+                            parameterExamples = setOf(
+                                ParameterExample("identifier", "did", "did:exp:123"),
+                                ParameterExample("identifier", "bpn", "BPN123"),
+                                ParameterExample("id", "id", "did:example:123#edv")
+                            ),
+                            requestInfo = RequestInfo(
+                                description = "The Service endpoint",
+                                examples = didServiceUpdateRequestDtoExample
+                            ),
+                            responseInfo = ResponseInfo(
+                                status = HttpStatusCode.OK,
+                                description = "The resolved DIDDocument after the updating the Service",
+                                examples = didDocumentDtoExample
+                            ),
+                            canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
+                            tags = setOf("DIDDocument")
+                        )
+                    ) {
+                        val serviceDto = call.receive<DidServiceDto>()
+                        call.respond(
+                            HttpStatusCode.Created,
+                            didDocumentDtoExample["demo"] as DidDocumentDto
+                        )
+                    }
+
+                    notarizedDelete(
+                        DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
+                            summary = "Remove the Service endpoint",
+                            description = "remove service endpoint in DIDDocument based on its id",
+                            parameterExamples = setOf(
+                                ParameterExample("identifier", "did", "did:exp:123"),
+                                ParameterExample("identifier", "bpn", "BPN123"),
+                                ParameterExample("id", "id", "did:example:123#edv")
+                            ),
+                            responseInfo = ResponseInfo(
+                                status = HttpStatusCode.OK,
+                                description = "The resolved DIDDocument after removing the service",
+                                examples = didDocumentDtoWithoutServiceExample
+                            ),
+                            canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
+                            tags = setOf("DIDDocument")
+                        )
+                    ) {
+                        call.respond(
+                            HttpStatusCode.OK,
+                            didDocumentDtoWithoutServiceExample["demo"] as DidDocumentDto
+                        )
+                    }
                 }
             }
         }
