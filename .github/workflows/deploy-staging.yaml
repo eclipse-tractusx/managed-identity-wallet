@@ -2,9 +2,9 @@ name: Build and push the latest build to staging
 
 on:
   push:
-    branches: [ helm-deployment ]
+    branches: [ develop ]
   workflow_dispatch:
-    branches: [ helm-deployment ]
+    branches: [ develop ]
 
 env:
   CX_CUSTODIAN_VERSION: "0.0.5"

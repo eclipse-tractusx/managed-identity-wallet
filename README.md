@@ -147,7 +147,8 @@ The deployment requires also a secret file `catenax-custodian-secrets` that incl
 
 To add a secret file to the namespace in the cluster:
 * login to AKS
-* run the following command after replaceing the placeholders
+* either import them using a file `kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets --from-file <path to file>`
+* or run the following command after replaceing the placeholders
 ```
   kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets \
   --from-literal=allow-empty-password='<placeholder>' \
