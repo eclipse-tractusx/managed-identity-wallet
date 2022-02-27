@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "net.catenax.core"
-version = "0.0.5"
+version = "0.0.6"
 application {
     mainClass.set("net.catenax.core.custodian.ApplicationKt")
 }
@@ -19,6 +19,8 @@ application {
 repositories {
     mavenCentral()
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap") }
+    maven { url = uri("https://repo.danubetech.com/repository/maven-public/") }
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -57,8 +59,12 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
 
+    implementation("decentralized-identity:did-common-java:1.0.0")
+    implementation("com.danubetech:verifiable-credentials-java:1.0.0")
+
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation(kotlin("test"))
 
     runtimeOnly("com.h2database:h2:2.1.210")
     runtimeOnly("org.postgresql:postgresql:42.2.24")
