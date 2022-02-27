@@ -2,15 +2,17 @@ name: Build and push the latest build to staging
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop ]
   workflow_dispatch:
-    branches: [ main ]
+    branches: [ develop ]
 
 env:
-  CX_CUSTODIAN_VERSION: "0.0.4"
-  NAMESPACE: "bpdm"
+  CX_CUSTODIAN_VERSION: "0.0.5"
+  NAMESPACE: "ingress-custodian"
   SECRET: "custodian-staging-secret"
   SHORT_SHA: "default"
+  CLUSTER_RESOURCE_GROUP: "cxtsi-dev013-rg"
+  CLUSTER_NAME: "cxtsi-dev013-aks-services"
 
 jobs:
   build:
@@ -67,13 +69,19 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-20.04
-    if: ${{ false }}  # disable for now
 
     steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Helm
+        uses: Azure/setup-helm@v1
+        with:
+          version: v3.3.1
+
       - name: Set the target Azure Kubernetes Service (AKS) cluster. 
         uses: azure/aks-set-context@v1
         with:
-          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+          creds: '${{ secrets.AZURE_SP_DEV013_TSI }}'
           cluster-name: ${{ env.CLUSTER_NAME }}
           resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
       
@@ -90,14 +98,24 @@ jobs:
           secret-name: ${{ env.SECRET }}
           namespace: ${{ env.NAMESPACE }}
           arguments: --force true
-      
-      - name: Deploy app to dev
-        uses: azure/k8s-deploy@v1
-        with:
-          manifests: |
-            ${{ github.workspace }}/deployment/aks-custodian-dev.yaml
-          images: |
-            ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
-          imagepullsecrets: |
-            ${{ env.SECRET }}
-          namespace: ${{ env.NAMESPACE }}
+
+      - name: Set outputs
+        id: vars
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Run Helm Deploy app to dev
+        run: |
+          helm upgrade \
+            --install \
+            --atomic \
+            --wait \
+            --namespace ${{ env.NAMESPACE }} \
+            cx-custodian ./helm/custodian \
+            -f ./helm/custodian/values-staging.yaml \
+            --set image.registry=${{ secrets.CX_ACR_SERVER }} \
+            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA} \
+            --set imageCredentials.registry=${{ secrets.CX_ACR_SERVER }} \
+            --set imageCredentials.username=${{ secrets.CX_ACR_USER }} \
+            --set imageCredentials.password=${{ secrets.CX_ACR_PASSWORD }} \
