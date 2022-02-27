@@ -9,7 +9,7 @@ on:
 env:
   CX_CUSTODIAN_VERSION: "0.0.5"
   NAMESPACE: "ingress-custodian"
-  SECRET: "custodian-staging-secret"
+  SECRET: "acr-credentials"
   SHORT_SHA: "default"
   CLUSTER_RESOURCE_GROUP: "cxtsi-dev013-rg"
   CLUSTER_NAME: "cxtsi-dev013-aks-services"
@@ -115,7 +115,4 @@ jobs:
             cx-custodian ./helm/custodian \
             -f ./helm/custodian/values-staging.yaml \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
-            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA} \
-            --set imageCredentials.registry=${{ secrets.CX_ACR_SERVER }} \
-            --set imageCredentials.username=${{ secrets.CX_ACR_USER }} \
-            --set imageCredentials.password=${{ secrets.CX_ACR_PASSWORD }} \
+            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA}

@@ -15,7 +15,7 @@ spec:
       nodeSelector:
         "kubernetes.io/os": linux
       imagePullSecrets:
-        - name: akz-registry-key
+        - name: acr-credentials
       containers:
       - name: catenax-custodian
         image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}

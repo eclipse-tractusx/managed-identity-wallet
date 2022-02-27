@@ -1,6 +1,6 @@
 image:
   name: "catena-x/custodian"
-allowEmptyPassword: "yes"
+allowEmptyPassword: "\"yes\""
 db:
   jdbcDriver: "org.postgresql.Driver"
 auth:
