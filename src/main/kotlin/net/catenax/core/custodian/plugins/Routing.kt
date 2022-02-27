@@ -206,7 +206,7 @@ fun Application.configureRouting() {
                         // somehow the serialization did not work out with directly specifying `listOf(CompanyCreateDto(...`
                         examples = mapOf("demo" to CompanyCreateDtoList(listOf(CompanyCreateDto("did1_bpn", "did1_name", WalletCreateDto("did1", emptyList<String>())))))
                     ),
-                    tags = setOf("Company")
+                    tags = setOf("Company (TO BE REVISED)")
                 )) {
                     call.respond(CompanyDao.getAll())
                 }
@@ -238,7 +238,7 @@ fun Application.configureRouting() {
                             examples = mapOf("did1_bpn" to CompanyDto("did1_bpn", "did1_name", WalletDto("did1", LocalDateTime.now(), "samplePublicKey", emptyList<String>())))
                         ),
                         canThrow = setOf(badRequestException, notFoundException),
-                        tags = setOf("Company")
+                        tags = setOf("Company (TO BE REVISED)")
                     )) {
                         val bpn = call.parameters["bpn"] ?: throw BadRequestException("Missing or malformed bpn")
                         val company = CompanyDao.getCompany(bpn)
@@ -268,7 +268,7 @@ fun Application.configureRouting() {
                         examples = mapOf("demo" to SuccessResponse("Company and wallet successfully registered!"))
                     ),
                     canThrow = setOf(illegalArgumentException),
-                    tags = setOf("Company")
+                    tags = setOf("Company (TO BE REVISED)")
                 )) {
 
                     try {
@@ -302,15 +302,15 @@ fun Application.configureRouting() {
 
                 route("/{bpn}") {
                     notarizedDelete(DeleteInfo<Unit, SuccessResponse>(
-                        summary = "Remove compand and hosted wallet",
-                        description = "Remove compand and hosted wallet",
+                        summary = "Remove company and hosted wallet",
+                        description = "Remove company and hosted wallet",
                         responseInfo = ResponseInfo(
                             status = HttpStatusCode.Accepted,
                             description = "Company and wallet successfully removed!",
                             examples = mapOf("demo" to SuccessResponse("Company and wallet successfully removed!"))
                         ),
                         canThrow = setOf(notFoundException),
-                        tags = setOf("Company")
+                        tags = setOf("Company (TO BE REVISED)")
                     )) {
                         val bpn = call.parameters["bpn"] ?: return@notarizedDelete call.respond(HttpStatusCode.BadRequest)
                         transaction {

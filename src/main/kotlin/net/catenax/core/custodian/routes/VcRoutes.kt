@@ -13,10 +13,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import net.catenax.core.custodian.models.ssi.LdProofDto
-import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
-import net.catenax.core.custodian.models.ssi.VerifiableCredentialParameters
-import net.catenax.core.custodian.models.ssi.VerifiableCredentialRequestDto
+import net.catenax.core.custodian.models.ssi.*
 
 fun Route.vcRoutes() {
 
@@ -24,8 +21,8 @@ fun Route.vcRoutes() {
 
             notarizedGet(
                 GetInfo<VerifiableCredentialParameters, List<VerifiableCredentialDto>>(
-                    summary = "Get Verifiable credentials",
-                    description = "get verifiable credentials",
+                    summary = "Query Verifiable Credentials",
+                    description = "Search verifiable credentials with filter criteria",
                     parameterExamples = setOf(
                         ParameterExample("id", "did", "http://example.edu/credentials/3732"),
                         ParameterExample("type", "type", "['University-Degree-Credential']"),
@@ -36,7 +33,7 @@ fun Route.vcRoutes() {
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
-                        description = "The created Verifiable Credential"
+                        description = "The list of verifiable credentials matching the query, empty if no match found"
                     ),
                     tags = setOf("VerifiableCredentials")
                 )
@@ -50,18 +47,18 @@ fun Route.vcRoutes() {
 
             notarizedPost(
                 PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
-                    summary = "Issue Verifiable credential ",
-                    description = "issue a verifiable credential",
+                    summary = "Issue Verifiable Credential ",
+                    description = "Issue a verifiable credential with a given issuer DID",
                     requestInfo = RequestInfo(
-                        description = "the verifiable credential",
-                        examples = unsignedVerifiableCredentialDtoExample
+                        description = "The verifiable credential input data",
+                        examples = verifiableCredentialRequestDtoExample
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.Created,
                         description = "The created Verifiable Credential",
                         examples = signedVerifiableCredentialDtoExample
                     ),
-                    canThrow = setOf(invalidInputException, invalidInputSyntaxException),
+                    canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
@@ -74,19 +71,19 @@ fun Route.vcRoutes() {
 
         route("/issuer") {
             notarizedPost(
-                PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
-                    summary = "Issue catena-x related credentials",
-                    description = "issue a verifiable credential by catena-x wallets",
+                PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
+                    summary = "Issue a Verifiable Credential with Catena-X platform issuer",
+                    description = "Issue a verifiable credential by Catena-X wallet",
                     requestInfo = RequestInfo(
-                        description = "the verifiable credential",
-                        examples = unsignedVerifiableCredentialDtoExample
+                        description = "The verifiable credential input",
+                        examples = verifiableCredentialRequestWithoutIssuerDtoExample
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.Created,
                         description = "The created Verifiable Credential",
                         examples = signedVerifiableCredentialDtoExample
                     ),
-                    canThrow = setOf(invalidInputException, invalidInputSyntaxException),
+                    canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
@@ -100,7 +97,7 @@ fun Route.vcRoutes() {
     }
 }
 
-val unsignedVerifiableCredentialDtoExample = mapOf(
+val verifiableCredentialRequestDtoExample = mapOf(
     "demo" to VerifiableCredentialRequestDto(
         context = listOf(
             VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
@@ -111,7 +108,23 @@ val unsignedVerifiableCredentialDtoExample = mapOf(
         issuerIdentifier = "did:example:76e12ec712ebc6f1c221ebfeb1f",
         issuanceDate = "2019-06-16T18:56:59Z",
         expirationDate = "2019-06-17T18:56:59Z",
-        credentialSubject = mapOf("college" to "Test-University")
+        credentialSubject = mapOf("college" to "Test-University"),
+        holderIdentifier = "did:example:492edf208"
+    )
+)
+
+val verifiableCredentialRequestWithoutIssuerDtoExample = mapOf(
+    "demo" to VerifiableCredentialRequestWithoutIssuerDto(
+        context = listOf(
+            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
+            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+        ),
+        id = "http://example.edu/credentials/3732",
+        type = listOf("University-Degree-Credential, VerifiableCredential"),
+        issuanceDate = "2019-06-16T18:56:59Z",
+        expirationDate = "2019-06-17T18:56:59Z",
+        credentialSubject = mapOf("college" to "Test-University"),
+        holderIdentifier = "did:example:492edf208"
     )
 )
 

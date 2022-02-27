@@ -25,18 +25,18 @@ fun Route.didDocRoutes() {
         route("/{identifier}") {
             notarizedGet(
                 GetInfo<DidDocumentParameters, DidDocumentDto>(
-                    summary = "Resolve DIDDocument",
-                    description = "resolve the DIDDocument for given DID or BPN",
+                    summary = "Resolve DID Document",
+                    description = "Resolve the DID document for a given DID or BPN",
                     parameterExamples = setOf(
                         ParameterExample("identifier", "did", "did:exp:123"),
                         ParameterExample("identifier", "bpn", "BPN123"),
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.OK,
-                        description = "The resolved DIDDocument",
+                        description = "The resolved DID Document",
                         examples = didDocumentDtoExample
                     ),
-                    canThrow = setOf(invalidInputException),
+                    canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                     tags = setOf("DIDDocument")
                 )
             ) {
@@ -50,7 +50,7 @@ fun Route.didDocRoutes() {
                 notarizedPost(
                     PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
                         summary = "Add New Service Endpoint",
-                        description = "add a new service endpoint to the DIDDocument",
+                        description = "Add a new service endpoint to the DID Document",
                         parameterExamples = setOf(
                             ParameterExample("identifier", "did", "did:exp:123"),
                             ParameterExample("identifier", "bpn", "BPN123")
@@ -61,10 +61,10 @@ fun Route.didDocRoutes() {
                         ),
                         responseInfo = ResponseInfo(
                             status = HttpStatusCode.OK,
-                            description = "The resolved DIDDocument after the adding the new Service",
+                            description = "The resolved DID Document after adding the new Service",
                             examples = didDocumentDtoExample
                         ),
-                        canThrow = setOf(notFoundException, invalidInputException),
+                        canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                         tags = setOf("DIDDocument")
                     )
                 ) {
@@ -79,22 +79,22 @@ fun Route.didDocRoutes() {
                     notarizedPut(
                         PutInfo<DidDocumentServiceParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
                             summary = "Update an existing Service Endpoint",
-                            description = "update the service endpoint in the DIDDocument based on its id",
+                            description = "Update the service endpoint in the DID Document based on its id",
                             parameterExamples = setOf(
                                 ParameterExample("identifier", "did", "did:exp:123"),
                                 ParameterExample("identifier", "bpn", "BPN123"),
                                 ParameterExample("id", "id", "did:example:123#edv")
                             ),
                             requestInfo = RequestInfo(
-                                description = "The Service endpoint",
+                                description = "The updated service endpoint data",
                                 examples = didServiceUpdateRequestDtoExample
                             ),
                             responseInfo = ResponseInfo(
                                 status = HttpStatusCode.OK,
-                                description = "The resolved DIDDocument after the updating the Service",
+                                description = "The resolved DID Document after the updating the Service",
                                 examples = didDocumentDtoExample
                             ),
-                            canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
+                            canThrow = setOf(notFoundException, semanticallyInvalidInputException, syntacticallyInvalidInputException),
                             tags = setOf("DIDDocument")
                         )
                     ) {
@@ -107,8 +107,8 @@ fun Route.didDocRoutes() {
 
                     notarizedDelete(
                         DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
-                            summary = "Remove the Service endpoint",
-                            description = "remove service endpoint in DIDDocument based on its id",
+                            summary = "Remove Service Endpoint",
+                            description = "Remove service endpoint in DID Document based on its id",
                             parameterExamples = setOf(
                                 ParameterExample("identifier", "did", "did:exp:123"),
                                 ParameterExample("identifier", "bpn", "BPN123"),
@@ -116,10 +116,10 @@ fun Route.didDocRoutes() {
                             ),
                             responseInfo = ResponseInfo(
                                 status = HttpStatusCode.OK,
-                                description = "The resolved DIDDocument after removing the service",
+                                description = "The resolved DID Document after removing the service",
                                 examples = didDocumentDtoWithoutServiceExample
                             ),
-                            canThrow = setOf(notFoundException, invalidInputException, invalidInputSyntaxException),
+                            canThrow = setOf(notFoundException, semanticallyInvalidInputException, syntacticallyInvalidInputException),
                             tags = setOf("DIDDocument")
                         )
                     ) {

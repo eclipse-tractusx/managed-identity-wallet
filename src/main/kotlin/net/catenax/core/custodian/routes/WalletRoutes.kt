@@ -16,43 +16,81 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.serialization.Serializable
 import net.catenax.core.custodian.models.SuccessResponse
-import net.catenax.core.custodian.models.ssi.IssuedVerifiableCredentialRequestDto
-import net.catenax.core.custodian.models.ssi.LdProofDto
-import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
+import net.catenax.core.custodian.models.ssi.*
 
 fun Route.walletRoutes() {
-    route("/wallets/{identifier}/credentials") {
-        notarizedPost(
-            PostInfo<StoreVerifiableCredentialParameter, IssuedVerifiableCredentialRequestDto, SuccessResponse>(
-                summary = "Store Verifiable credential ",
-                description = "store a verifiable credential using the subject DID as identifier of wallet",
-                parameterExamples = setOf(
-                    ParameterExample("identifier", "did", "did:exp:123"),
-                    ParameterExample("identifier", "bpn", "BPN123"),
-                ),
-                requestInfo = RequestInfo(
-                    description = "the verifiable credential",
-                    examples = issuedVerifiableCredentialRequestDtoExample
-                ),
-                responseInfo = ResponseInfo(
-                    status = HttpStatusCode.Created,
-                    description = "Success message",
-                    examples = mapOf(
-                        "demo" to SuccessResponse(
-                            "Credential with id http://example.edu/credentials/3732" +
-                                    "has been successfully Stored"
+    route("/wallets/{identifier}") {
+
+        route("/credentials") {
+            notarizedPost(
+                PostInfo<StoreVerifiableCredentialParameter, IssuedVerifiableCredentialRequestDto, SuccessResponse>(
+                    summary = "Store Verifiable Credential ",
+                    description = "Store a verifiable credential in the wallet of the given identifier",
+                    parameterExamples = setOf(
+                        ParameterExample("identifier", "did", "did:exp:123"),
+                        ParameterExample("identifier", "bpn", "BPN123"),
+                    ),
+                    requestInfo = RequestInfo(
+                        description = "The verifiable credential to be stored",
+                        examples = issuedVerifiableCredentialRequestDtoExample
+                    ),
+                    responseInfo = ResponseInfo(
+                        status = HttpStatusCode.Created,
+                        description = "Success message",
+                        examples = mapOf(
+                            "demo" to SuccessResponse(
+                                "Credential with id http://example.edu/credentials/3732" +
+                                        "has been successfully stored"
+                            )
                         )
-                    )
-                ),
-                canThrow = setOf(invalidInputException, notFoundException),
-                tags = setOf("Wallets")
-            )
-        ) {
-            val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-            call.respond(
-                HttpStatusCode.Created,
-                SuccessResponse("Credential has been successfully Stored")
-            )
+                    ),
+                    canThrow = setOf(semanticallyInvalidInputException, notFoundException),
+                    tags = setOf("Wallets")
+                )
+            ) {
+                val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
+                call.respond(
+                    HttpStatusCode.Created,
+                    SuccessResponse("Credential has been successfully Stored")
+                )
+            }
+        }
+
+        route("/signatures") {
+            notarizedPost(
+                PostInfo<SignMessageParameter, SignMessageDto, SignMessageResponseDto>(
+                    summary = "Sign Message",
+                    description = "Sign a message using the wallet of the given identifier",
+                    requestInfo = RequestInfo(
+                        description = "the message to sign and the wallet did",
+                        examples = mapOf("demo" to SignMessageDto(
+                            message = "message_string")
+                        )
+                    ),
+                    responseInfo = ResponseInfo(
+                        status = HttpStatusCode.Created,
+                        description = "The signed message response",
+                        examples = mapOf(
+                            "demo" to SignMessageResponseDto(
+                                "did:example", "message_string",
+                                "signed_message_hex", "public_key_base58"
+                            )
+                        )
+                    ),
+                    canThrow = setOf(notFoundException),
+                    tags = setOf("Wallets")
+                )
+            ) {
+                val signMessageParameter = call.receive<SignMessageParameter>()
+                val signMessageDto = call.receive<SignMessageDto>()
+                val response = SignMessageResponseDto(
+                    identifier = signMessageParameter.identifier,
+                    message = signMessageDto.message,
+                    signedMessageInHex = "0x123....",
+                    publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
+                )
+                call.respond(HttpStatusCode.Created, response)
+            }
         }
     }
 }
@@ -60,7 +98,15 @@ fun Route.walletRoutes() {
 @Serializable
 data class StoreVerifiableCredentialParameter(
     @Param(type = ParamType.PATH)
-    @Field(description = "The DID or BPN of Entity", name = "identifier")
+    @Field(description = "The DID or BPN of the credential holder. The DID must match to the id of the credential subject if present.",
+        name = "identifier")
+    val identifier: String
+)
+
+@Serializable
+data class SignMessageParameter(
+    @Param(type = ParamType.PATH)
+    @Field(description = "The DID or BPN of the signer.", name = "identifier")
     val identifier: String
 )
 

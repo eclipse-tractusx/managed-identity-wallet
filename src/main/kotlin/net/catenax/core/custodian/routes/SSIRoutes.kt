@@ -24,16 +24,16 @@ val notFoundException = ExceptionInfo<ExceptionResponse>(
     examples = mapOf("demo" to ExceptionResponse("reason"))
 )
 
-val invalidInputException = ExceptionInfo<ExceptionResponse>(
+val semanticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),
-    description = "Unprocessable Entity",
+    description = "The input can not be processed due to semantic mismatches",
     status = HttpStatusCode.UnprocessableEntity,
     examples = mapOf("demo" to ExceptionResponse("reason"))
 )
 
-val invalidInputSyntaxException = ExceptionInfo<ExceptionResponse>(
+val syntacticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),
-    description = "Bad Request",
+    description = "The input does not comply to the syntax requirements",
     status = HttpStatusCode.BadRequest,
     examples = mapOf("demo" to ExceptionResponse("reason"))
 )
@@ -52,42 +52,6 @@ fun Application.ssiRoutes() {
                 vcRoutes()
                 vpRoutes()
                 walletRoutes()
-                route("/sign") {
-                    notarizedPost(
-                        PostInfo<Unit, SignMessageDto, SignMessageResponseDto>(
-                            summary = "Sign A Message",
-                            description = "Sign a Message using the wallet",
-                            requestInfo = RequestInfo(
-                                description = "the message to sign and the wallet did",
-                                examples = mapOf("demo" to SignMessageDto(
-                                    identifier = "did:example:0123",
-                                    message = "message_string")
-                                )
-                            ),
-                            responseInfo = ResponseInfo(
-                                status = HttpStatusCode.Created,
-                                description = "The signed message response",
-                                examples = mapOf(
-                                    "demo" to SignMessageResponseDto(
-                                        "did:example", "message_string",
-                                        "signed_message_hex", "public_key_base58"
-                                    )
-                                )
-                            ),
-                            canThrow = setOf(invalidInputException, notFoundException, invalidInputSyntaxException),
-                            tags = setOf("Sign")
-                        )
-                    ) {
-                        val signMessageDto = call.receive<SignMessageDto>()
-                        val response = SignMessageResponseDto(
-                            identifier = signMessageDto.identifier,
-                            message = signMessageDto.message,
-                            signedMessageInHex = "0x123....",
-                            publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                        )
-                        call.respond(HttpStatusCode.Created, response)
-                    }
-                }
             }
         }
     }

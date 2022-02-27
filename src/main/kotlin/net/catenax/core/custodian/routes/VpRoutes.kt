@@ -21,17 +21,17 @@ fun Route.vpRoutes() {
         notarizedPost(
             PostInfo<Unit, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
                 summary = "Create Verifiable Presentation ",
-                description = "create a verifiable Presentation",
+                description = "Create a verifiable presentation from a list of verifiable credentials, signed by the holder",
                 requestInfo = RequestInfo(
-                    description = "the verifiable Presentation dto",
+                    description = "The verifiable presentation input data",
                     examples = verifiablePresentationRequestDtoExample
                 ),
                 responseInfo = ResponseInfo(
                     status = HttpStatusCode.Created,
-                    description = "The created Verifiable Presentation",
+                    description = "The created verifiable presentation",
                     examples = verifiablePresentationResponseDtoExample
                 ),
-                canThrow = setOf(invalidInputException),
+                canThrow = setOf(semanticallyInvalidInputException),
                 tags = setOf("VerifiablePresentations")
             )
         ) {

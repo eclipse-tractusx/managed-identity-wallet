@@ -6,8 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SignMessageDto(
-    @Field(description = "The DID or BPN of the signer", name = "identifier")
-    val identifier: String,
     @Field(description = "The message to sign", name = "message")
     val message: String)
 

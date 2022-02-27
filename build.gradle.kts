@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "net.catenax.core"
-version = "0.0.5"
+version = "0.0.6"
 application {
     mainClass.set("net.catenax.core.custodian.ApplicationKt")
 }
