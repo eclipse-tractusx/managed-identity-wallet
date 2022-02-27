@@ -21,18 +21,18 @@ spec:
         image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         env:
         - name: ALLOW_EMPTY_PASSWORD
-          value: {{ .Values.allow-empty-password | default "no" }}
+          value: {{ .Values.allowEmptyPassword | default "no" }}
         - name: CX_DB_JDBC_URL
           valueFrom:
             secretKeyRef:
               name: catenax-custodian-secrets
               key: cx-db-jdbc-url
         - name: CX_DB_JDBC_DRIVER
-          value: {{ .Values.db.jdbc-driver }}
+          value: {{ .Values.db.jdbcDriver }}
         - name: CX_AUTH_JWKS_URL
-          value: {{ .Values.auth.jwks-url }}
+          value: {{ .Values.auth.jwksUrl }}
         - name: CX_AUTH_ISSUER_URL
-          value: {{ .Values.auth.issuer-url }}
+          value: {{ .Values.auth.issuerUrl }}
         - name: CX_AUTH_REALM
           value: {{ .Values.auth.realm }}
         - name: CX_AUTH_ROLE
@@ -48,9 +48,9 @@ spec:
               name: catenax-custodian-secrets
               key: cx-auth-client-secret
         - name: CX_AUTH_REDIRECT_URL
-          value: {{ .Values.auth.redirect-url }}
+          value: {{ .Values.auth.redirectUrl }}
         - name: CX_DATAPOOL_URL
-          value: {{ .Values.datapool-url }}
+          value: {{ .Values.datapoolUrl }}
         resources:
           requests:
             cpu: 100m
