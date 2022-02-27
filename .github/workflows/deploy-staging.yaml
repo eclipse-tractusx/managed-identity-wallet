@@ -113,8 +113,8 @@ jobs:
             --wait \
             --namespace ${{ env.NAMESPACE }} \
             cx-custodian ./helm/custodian \
+            -f ./helm/custodian/values-staging.yaml \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
-            --set image.name=catena-x/custodian \
             --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA} \
             --set imageCredentials.registry=${{ secrets.CX_ACR_SERVER }} \
             --set imageCredentials.username=${{ secrets.CX_ACR_USER }} \

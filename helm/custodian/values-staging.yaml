@@ -1,0 +1,12 @@
+image:
+  name: "catena-x/custodian"
+allow-empty-password: "yes"
+db:
+  jdbc-driver: "org.postgresql.Driver"
+auth:
+  jwks-url: "https://catenaxdev003akssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central/protocol/openid-connect/certs"
+  issuer-url: "https://catenaxdev003akssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central"
+  redirect-url: "https://custodian-dev.germanywestcentral.cloudapp.azure.com/callback"
+  realm: "CX-Central"
+  role: "access"
+datapool-url: "http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080"

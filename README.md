@@ -133,17 +133,9 @@ cx-custodian 	ingress-custodian	1       	2022-02-24 08:51:39.864930557 +0000 UTC
 ```
 
 The deployment requires also a secret file `catenax-custodian-secrets` that include the following data:
-1. `allow-empty-password`
-1. `cx-db-jdbc-url`
-1. `cx-db-jdbc-driver`
-1. `cx-auth-jwks-url`
-1. `cx-auth-issuer-url`
-1. `cx-auth-realm`
-1. `cx-auth-role`
+1. `cx-db-jdbc-url` (includes password/credentials for DB access)
 1. `cx-auth-client-id`
 1. `cx-auth-client-secret`
-1. `cx-auth-redirect-url`
-1. `cx-datapool-url`
 
 To add a secret file to the namespace in the cluster:
 * login to AKS

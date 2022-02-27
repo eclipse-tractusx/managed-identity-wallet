@@ -21,40 +21,22 @@ spec:
         image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         env:
         - name: ALLOW_EMPTY_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: allow-empty-password
+          value: {{ .Values.allow-empty-password | default "no" }}
         - name: CX_DB_JDBC_URL
           valueFrom:
             secretKeyRef:
               name: catenax-custodian-secrets
               key: cx-db-jdbc-url
         - name: CX_DB_JDBC_DRIVER
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: cx-db-jdbc-driver
+          value: {{ .Values.db.jdbc-driver }}
         - name: CX_AUTH_JWKS_URL
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: cx-auth-jwks-url
+          value: {{ .Values.auth.jwks-url }}
         - name: CX_AUTH_ISSUER_URL
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: cx-auth-issuer-url
+          value: {{ .Values.auth.issuer-url }}
         - name: CX_AUTH_REALM
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: cx-auth-realm
+          value: {{ .Values.auth.realm }}
         - name: CX_AUTH_ROLE
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: cx-auth-role
+          value: {{ .Values.auth.role }}
         - name: CX_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
@@ -66,15 +48,9 @@ spec:
               name: catenax-custodian-secrets
               key: cx-auth-client-secret
         - name: CX_AUTH_REDIRECT_URL
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: cx-auth-redirect-url
+          value: {{ .Values.auth.redirect-url }}
         - name: CX_DATAPOOL_URL
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-secrets
-              key: cx-datapool-url
+          value: {{ .Values.datapool-url }}
         resources:
           requests:
             cpu: 100m
