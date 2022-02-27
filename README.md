@@ -124,6 +124,38 @@ see the section above.
 ```
 act --secret-file .env
 ```
+## Helm Setup and Auto Deployment
+The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `main` branch, please check if the version of the helm-chart and Application in `Chart.yaml` need to be updated.
+* To check the current deployment and version run `helm list -n ingress-custodian`. Example output:
+```
+NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	APP VERSION
+cx-custodian 	ingress-custodian	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-custodian-0.1.0	0.0.5      
+```
+
+The deployment requires also a secret file `catenax-custodian-secrets` that include the following data:
+1. `cx-db-jdbc-url` (includes password/credentials for DB access)
+1. `cx-auth-client-id`
+1. `cx-auth-client-secret`
+
+To add a secret file to the namespace in the cluster:
+* login to AKS
+* either import them using a file `kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets --from-file <path to file>`
+* or run the following command after replaceing the placeholders
+```
+  kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets \
+  --from-literal=allow-empty-password='<placeholder>' \
+  --from-literal=cx-db-jdbc-url='<placeholder>' \
+  --from-literal=cx-db-jdbc-driver='<placeholder>' \
+  --from-literal=cx-auth-jwks-url='<placeholder>' \
+  --from-literal=cx-auth-issuer-url='<placeholder> \
+  --from-literal=cx-auth-realm='<placeholder>' \
+  --from-literal=cx-auth-role='<placeholder>' \
+  --from-literal=cx-auth-client-id='<placeholder>' \
+  --from-literal=cx-auth-client-secret='<placeholder>' \
+  --from-literal=cx-auth-redirect-url='<placeholder>' \
+  --from-literal=cx-datapool-url='<placeholder>'
+```
+* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
 
 ## Manually deploy the to Azure Kubernetes Service (AKS)
 
@@ -235,6 +267,56 @@ within the `Persistence.kt` database setup:
 ```
 SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
 ```
+
+### Prepare automated deployment
+
+Based on the [documentation](https://docs.microsoft.com/en-us/azure/aks/kubernetes-action), first create a service principial
+
+```
+az ad sp create-for-rbac --name "core-custodian" --role contributor --scopes /subscriptions/$CX_SUBSCRIPTION_ID/resourceGroups/$CX_RG --sdk-auth
+```
+
+And put the resulting JSON output for example in a GitHub secret.
+
+### Prepare SSL
+
+Based on the [documentation](https://docs.microsoft.com/en-us/azure/aks/ingress-static-ip?tabs=azure-cli)
+run following commands to create the nginx ingress container:
+
+```
+az acr import --name $CX_ACR_SERVER --source $SOURCE_REGISTRY/$CONTROLLER_IMAGE:$CONTROLLER_TAG --image $CONTROLLER_IMAGE:$CONTROLLER_TAG
+az acr import --name $CX_ACR_SERVER --source $SOURCE_REGISTRY/$PATCH_IMAGE:$PATCH_TAG --image $PATCH_IMAGE:$PATCH_TAG
+az acr import --name $CX_ACR_SERVER --source $SOURCE_REGISTRY/$DEFAULTBACKEND_IMAGE:$DEFAULTBACKEND_TAG --image $DEFAULTBACKEND_IMAGE:$DEFAULTBACKEND_TAG
+az acr import --name $CX_ACR_SERVER --source $CERT_MANAGER_REGISTRY/$CERT_MANAGER_IMAGE_CONTROLLER:$CERT_MANAGER_TAG --image $CERT_MANAGER_IMAGE_CONTROLLER:$CERT_MANAGER_TAG
+az acr import --name $CX_ACR_SERVER --source $CERT_MANAGER_REGISTRY/$CERT_MANAGER_IMAGE_WEBHOOK:$CERT_MANAGER_TAG --image $CERT_MANAGER_IMAGE_WEBHOOK:$CERT_MANAGER_TAG
+az acr import --name $CX_ACR_SERVER --source $CERT_MANAGER_REGISTRY/$CERT_MANAGER_IMAGE_CAINJECTOR:$CERT_MANAGER_TAG --image $CERT_MANAGER_IMAGE_CAINJECTOR:$CERT_MANAGER_TAG
+```
+
+```
+helm install nginx-ingress ingress-nginx/ingress-nginx \
+    --version 4.0.13 \
+    --namespace "$CX_NAMESPACE" --create-namespace \
+    --set controller.replicaCount=2 \
+    --set controller.nodeSelector."kubernetes\.io/os"=linux \
+    --set controller.image.registry=$CX_ACR_SERVER \
+    --set controller.image.image=$CONTROLLER_IMAGE \
+    --set controller.image.tag=$CONTROLLER_TAG \
+    --set controller.image.digest="" \
+    --set controller.admissionWebhooks.patch.nodeSelector."kubernetes\.io/os"=linux \
+    --set controller.admissionWebhooks.patch.image.registry=$CX_ACR_SERVER \
+    --set controller.admissionWebhooks.patch.image.image=$PATCH_IMAGE \
+    --set controller.admissionWebhooks.patch.image.tag=$PATCH_TAG \
+    --set controller.admissionWebhooks.patch.image.digest="" \
+    --set defaultBackend.nodeSelector."kubernetes\.io/os"=linux \
+    --set defaultBackend.image.registry=$CX_ACR_SERVER \
+    --set defaultBackend.image.image=$DEFAULTBACKEND_IMAGE \
+    --set defaultBackend.image.tag=$DEFAULTBACKEND_TAG \
+    --set defaultBackend.image.digest="" \
+    --set controller.service.loadBalancerIP=$CX_IP
+```
+(Currently we leave out `--set controller.service.annotations."service\.beta\.kubernetes\.io/azure-dns-label-name"=$CX_IP_NAME`)
+
+We assume that a cert manager already exists and that we can directly continue
 
 ## Dashboard
 

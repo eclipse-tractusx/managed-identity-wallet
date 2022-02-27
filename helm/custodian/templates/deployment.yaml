@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catenax-custodian
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catenax-custodian
+  template:
+    metadata:
+      labels:
+        app: catenax-custodian
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      imagePullSecrets:
+        - name: acr-credentials
+      containers:
+      - name: catenax-custodian
+        image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: {{ .Values.allowEmptyPassword | default "no" }}
+        - name: CX_DB_JDBC_URL
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-secrets
+              key: cx-db-jdbc-url
+        - name: CX_DB_JDBC_DRIVER
+          value: {{ .Values.db.jdbcDriver }}
+        - name: CX_AUTH_JWKS_URL
+          value: {{ .Values.auth.jwksUrl }}
+        - name: CX_AUTH_ISSUER_URL
+          value: {{ .Values.auth.issuerUrl }}
+        - name: CX_AUTH_REALM
+          value: {{ .Values.auth.realm }}
+        - name: CX_AUTH_ROLE
+          value: {{ .Values.auth.role }}
+        - name: CX_AUTH_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-secrets
+              key: cx-auth-client-id
+        - name: CX_AUTH_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-secrets
+              key: cx-auth-client-secret
+        - name: CX_AUTH_REDIRECT_URL
+          value: {{ .Values.auth.redirectUrl }}
+        - name: CX_DATAPOOL_URL
+          value: {{ .Values.datapoolUrl }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 8080
+          name: custodian
