@@ -22,6 +22,16 @@ jobs:
       # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - uses: madhead/read-java-properties@latest
+        id: version
+        with:
+          file: gradle.properties
+          property: version
+          default: 0.0.1
+
+      - name: Set App Version
+        run: echo "CX_CUSTODIAN_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
+
       - name: Set outputs
         id: vars
         run: |
@@ -45,11 +55,15 @@ jobs:
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
+        env:
+          version: ${CX_CUSTODIAN_VERSION}
         with:
           arguments: build
 
       - name: Create dist
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
+        env:
+          version: ${CX_CUSTODIAN_VERSION}
         with:
           arguments: installDist
 
@@ -72,6 +86,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - uses: madhead/read-java-properties@latest
+        id: version
+        with:
+          file: gradle.properties
+          property: version
+          default: 0.0.1
+
+      - name: Set App Version
+        run: echo "CX_CUSTODIAN_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
 
       - name: Install Helm
         uses: Azure/setup-helm@v1
@@ -108,6 +132,7 @@ jobs:
       - name: Run Helm Deploy app to dev
         run: |
           helm upgrade \
+            --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION}
             --install \
             --atomic \
             --wait \

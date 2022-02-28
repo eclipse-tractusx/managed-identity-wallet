@@ -13,12 +13,13 @@ import io.bkbn.kompendium.oas.server.Server
 import java.net.URI
 
 fun Application.configureOpenAPI() {
+    val version = environment.config.propertyOrNull("version")?: "0.0.0"
     install(Kompendium) {
       spec = OpenApiSpec(
           openapi = "3.0.3",
           info = Info(
           title = "Catena-X Core Custodian API",
-          version = "0.0.1",
+          version = version as String,
           description = "Catena-X Core Custodian API",
           // TODO need to be adjusted
           termsOfService = URI("https://www.catena-x.net/"),
