@@ -10,3 +10,5 @@ auth:
   realm: "CX-Central"
   role: "access"
 datapoolUrl: "http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080"
+app:
+  version: "0.0.6"

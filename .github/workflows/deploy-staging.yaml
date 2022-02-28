@@ -55,15 +55,11 @@ jobs:
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
-        env:
-          version: ${CX_CUSTODIAN_VERSION}
         with:
           arguments: build
 
       - name: Create dist
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
-        env:
-          version: ${CX_CUSTODIAN_VERSION}
         with:
           arguments: installDist
 
@@ -144,3 +140,4 @@ jobs:
             -f ./helm/custodian/values-staging.yaml \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
             --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
+            --set app.version=${CX_CUSTODIAN_VERSION}

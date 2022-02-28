@@ -13,7 +13,7 @@ import io.bkbn.kompendium.oas.server.Server
 import java.net.URI
 
 fun Application.configureOpenAPI() {
-    val version = environment.config.propertyOrNull("version")?: "0.0.0"
+    val version = environment.config.propertyOrNull("appVersion")?: "0.0.0"
     install(Kompendium) {
       spec = OpenApiSpec(
           openapi = "3.0.3",
