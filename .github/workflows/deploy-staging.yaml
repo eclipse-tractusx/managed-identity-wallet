@@ -129,15 +129,12 @@ jobs:
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      - name: Run Helm Deploy app to dev
-      
-      - name: package Helm App version and Chart
+      - name: Package Helm App version and Chart
         run: helm package --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION} ${{ env.NAMESPACE }}
-      
+
       - name: Run Helm Deploy app to dev
         run: |
           helm upgrade \
-            --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION}
             --install \
             --atomic \
             --wait \
