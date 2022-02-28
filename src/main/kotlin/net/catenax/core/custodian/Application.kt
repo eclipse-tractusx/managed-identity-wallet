@@ -21,6 +21,7 @@ import net.catenax.core.custodian.routes.ssiRoutes
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 fun Application.module(testing: Boolean = false) {
+
     configureSockets()
     configureSerialization()
 
@@ -47,4 +48,6 @@ fun Application.module(testing: Boolean = false) {
     ssiRoutes()
 
     configurePersistence()
+    val version = environment.config.property("app.version").getString()
+    println("Application Version: $version")
 }
