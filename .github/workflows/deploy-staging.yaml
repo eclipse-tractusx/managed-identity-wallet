@@ -130,7 +130,10 @@ jobs:
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Run Helm Deploy app to dev
-        run: |
+      
+      - name: Run Helm Deploy app to dev
+      - run: helm package --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION} ${{ env.NAMESPACE }}
+      - run: |
           helm upgrade \
             --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION}
             --install \
