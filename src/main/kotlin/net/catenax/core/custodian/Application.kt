@@ -48,6 +48,4 @@ fun Application.module(testing: Boolean = false) {
     ssiRoutes()
 
     configurePersistence()
-    val version = environment.config.property("app.version").getString()
-    println("Application Version: $version")
 }
