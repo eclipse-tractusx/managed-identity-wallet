@@ -2,9 +2,9 @@ name: Build and push the latest build to staging
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ app-version ]
   workflow_dispatch:
-    branches: [ develop ]
+    branches: [ app-version ]
 
 env:
   CX_CUSTODIAN_VERSION: "0.0.6"
