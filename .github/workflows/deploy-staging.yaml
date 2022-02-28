@@ -131,9 +131,11 @@ jobs:
 
       - name: Run Helm Deploy app to dev
       
+      - name: package Helm App version and Chart
+        run: helm package --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION} ${{ env.NAMESPACE }}
+      
       - name: Run Helm Deploy app to dev
-      - run: helm package --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION} ${{ env.NAMESPACE }}
-      - run: |
+        run: |
           helm upgrade \
             --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION}
             --install \
