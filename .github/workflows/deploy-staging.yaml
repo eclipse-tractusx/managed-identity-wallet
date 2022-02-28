@@ -139,5 +139,5 @@ jobs:
             cx-custodian catenax-custodian-${CX_CUSTODIAN_VERSION}.tgz \
             -f ./helm/custodian/values-staging.yaml \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
-            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
+            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA} \
             --set app.version=${CX_CUSTODIAN_VERSION}
