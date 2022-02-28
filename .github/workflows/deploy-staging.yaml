@@ -131,7 +131,7 @@ jobs:
 
       - name: Package Helm App version and Chart
         run: |
-          helm package --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION} ./helm/custodian --namespace ${{ env.NAMESPACE }}
+          helm package --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION} ./helm/custodian
 
       - name: Run Helm Deploy app to dev
         run: |
@@ -140,7 +140,7 @@ jobs:
             --atomic \
             --wait \
             --namespace ${{ env.NAMESPACE }} \
-            cx-custodian ./helm/custodian \
+            cx-custodian catenax-custodian-${CX_CUSTODIAN_VERSION}.tgz \
             -f ./helm/custodian/values-staging.yaml \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
             --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
