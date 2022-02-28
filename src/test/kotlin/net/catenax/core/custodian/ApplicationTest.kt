@@ -41,6 +41,7 @@ class ApplicationTest {
 
     fun setupEnvironment(environment: ApplicationEnvironment) {
         (environment.config as MapApplicationConfig).apply {
+            put("app.version", System.getenv("CX_VERSION") ?: "0.0.5")
             put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:custodian;DB_CLOSE_DELAY=-1;")
             put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
             put("auth.issuerUrl", System.getenv("CX_AUTH_ISSUER_URL") ?: "http://localhost:8081/auth/realms/catenax")
