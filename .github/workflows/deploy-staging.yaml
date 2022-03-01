@@ -2,9 +2,9 @@ name: Build and push the latest build to staging
 
 on:
   push:
-    branches: [ app-version ]
+    branches: [ develop ]
   workflow_dispatch:
-    branches: [ app-version ]
+    branches: [ develop ]
 
 env:
   NAMESPACE: "ingress-custodian"
