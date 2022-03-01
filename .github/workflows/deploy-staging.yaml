@@ -125,7 +125,7 @@ jobs:
 
       - name: Package Helm App version and Chart
         run: |
-          helm package --app-version=${APP_VERSION} ./helm/custodian
+          helm package --app-version=${APP_VERSION} catenax-custodian-${APP_VERSION} ./helm/custodian
 
       - name: Run Helm Deploy app to dev
         run: |
