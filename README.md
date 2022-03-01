@@ -79,6 +79,7 @@ below. Here a few hints on how to set it up:
 6. `CX_AUTH_ROLE`: specify the expected role within the token, e.g. `access`
 7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `custodian`
 8. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
+8. `CX_VERSION`: specify the application version, e.g. `0.0.6` note that github actions replace the value before the helm deployment
 
 To follow all steps in this readme you also need following variables:
 
@@ -125,7 +126,7 @@ see the section above.
 act --secret-file .env
 ```
 ## Helm Setup and Auto Deployment
-The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `main` branch, please check if the version of the helm-chart and Application in `Chart.yaml` need to be updated.
+The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated.
 * To check the current deployment and version run `helm list -n ingress-custodian`. Example output:
 ```
 NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	APP VERSION
@@ -143,17 +144,9 @@ To add a secret file to the namespace in the cluster:
 * or run the following command after replaceing the placeholders
 ```
   kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets \
-  --from-literal=allow-empty-password='<placeholder>' \
   --from-literal=cx-db-jdbc-url='<placeholder>' \
-  --from-literal=cx-db-jdbc-driver='<placeholder>' \
-  --from-literal=cx-auth-jwks-url='<placeholder>' \
-  --from-literal=cx-auth-issuer-url='<placeholder> \
-  --from-literal=cx-auth-realm='<placeholder>' \
-  --from-literal=cx-auth-role='<placeholder>' \
   --from-literal=cx-auth-client-id='<placeholder>' \
-  --from-literal=cx-auth-client-secret='<placeholder>' \
-  --from-literal=cx-auth-redirect-url='<placeholder>' \
-  --from-literal=cx-datapool-url='<placeholder>'
+  --from-literal=cx-auth-client-secret='<placeholder>'
 ```
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
 
