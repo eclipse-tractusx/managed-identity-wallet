@@ -7,10 +7,8 @@ on:
     branches: [ app-version ]
 
 env:
-  CX_CUSTODIAN_VERSION: "0.0.6"
   NAMESPACE: "ingress-custodian"
   SECRET: "acr-credentials"
-  SHORT_SHA: "default"
   CLUSTER_RESOURCE_GROUP: "cxtsi-dev013-rg"
   CLUSTER_NAME: "cxtsi-dev013-aks-services"
 
@@ -30,7 +28,7 @@ jobs:
           default: 0.0.1
 
       - name: Set App Version
-        run: echo "CX_CUSTODIAN_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
+        run: echo "APP_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
 
       - name: Set outputs
         id: vars
@@ -39,7 +37,7 @@ jobs:
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Show version
-        run: echo ${CX_CUSTODIAN_VERSION}.${SHORT_SHA}
+        run: echo ${APP_VERSION}.${SHORT_SHA}
 
       - name: Docker Login
         uses: docker/login-action@v1
@@ -73,7 +71,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          tags: ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${{ env.CX_CUSTODIAN_VERSION }}.${{ env.SHORT_SHA }}
+          tags: ${{ secrets.CX_ACR_SERVER }}/catena-x/custodian:${{ env.APP_VERSION }}.${{ env.SHORT_SHA }}
           push: true
 
   deploy:
@@ -91,7 +89,7 @@ jobs:
           default: 0.0.1
 
       - name: Set App Version
-        run: echo "CX_CUSTODIAN_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
+        run: echo "APP_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
 
       - name: Install Helm
         uses: Azure/setup-helm@v1
@@ -127,7 +125,7 @@ jobs:
 
       - name: Package Helm App version and Chart
         run: |
-          helm package --app-version=${CX_CUSTODIAN_VERSION} --version=${CX_CUSTODIAN_VERSION} ./helm/custodian
+          helm package --app-version=${APP_VERSION} ./helm/custodian
 
       - name: Run Helm Deploy app to dev
         run: |
@@ -136,8 +134,8 @@ jobs:
             --atomic \
             --wait \
             --namespace ${{ env.NAMESPACE }} \
-            cx-custodian catenax-custodian-${CX_CUSTODIAN_VERSION}.tgz \
+            cx-custodian catenax-custodian-${APP_VERSION}.tgz \
             -f ./helm/custodian/values-staging.yaml \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
-            --set image.tag=${CX_CUSTODIAN_VERSION}.${SHORT_SHA} \
-            --set app.version=${CX_CUSTODIAN_VERSION}
+            --set image.tag=${APP_VERSION}.${SHORT_SHA} \
+            --set app.version=${APP_VERSION}

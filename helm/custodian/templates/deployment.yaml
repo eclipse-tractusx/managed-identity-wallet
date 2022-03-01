@@ -20,7 +20,7 @@ spec:
       - name: catenax-custodian
         image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         env:
-        - name: CX_VERSION
+        - name: APP_VERSION
           value: {{ .Values.app.version }}
         - name: ALLOW_EMPTY_PASSWORD
           value: {{ .Values.allowEmptyPassword | default "no" }}
