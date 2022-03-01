@@ -63,7 +63,7 @@ suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token:
 
     var stringBody: String = ""
     HttpClient(Apache).use { client ->
-        val httpResponse: HttpResponse = client.get("${datapoolUrl}/api/catena/businesspartner/${bpn}") {
+        val httpResponse: HttpResponse = client.get("${datapoolUrl}/api/catena/business-partner/${bpn}") {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 append(HttpHeaders.Authorization, "Bearer " + token)
