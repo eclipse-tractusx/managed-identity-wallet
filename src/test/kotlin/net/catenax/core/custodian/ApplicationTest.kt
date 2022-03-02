@@ -36,6 +36,8 @@ import io.ktor.auth.*
 import net.catenax.core.custodian.entities.*
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.*
+import net.catenax.core.custodian.persistances.entities.Company
+import net.catenax.core.custodian.persistances.entities.WalletDao
 
 class ApplicationTest {
 

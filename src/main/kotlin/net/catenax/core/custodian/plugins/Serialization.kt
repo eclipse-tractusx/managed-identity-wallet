@@ -51,11 +51,6 @@ object StringListSerializer : JsonTransformingSerializer<List<String>>(ListSeria
         if (element !is JsonArray) JsonArray(listOf(element)) else element
 }
 
-object CompanyCreateListSerializer : JsonTransformingSerializer<List<CompanyCreateDto>>(ListSerializer(CompanyCreateDto.serializer())) {
-    // If response is not an array, then it is a single object that should be wrapped into the array
-    override fun transformDeserialize(element: JsonElement): JsonElement =
-        if (element !is JsonArray) JsonArray(listOf(element)) else element
-}
 
 object URISerializer : KSerializer<URI> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("URI", PrimitiveKind.STRING)

@@ -2,27 +2,14 @@ package net.catenax.core.custodian.routes
 
 import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.auth.configuration.JwtAuthConfiguration
-import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.ExceptionInfo
-import io.bkbn.kompendium.core.metadata.RequestInfo
-import io.bkbn.kompendium.core.metadata.ResponseInfo
-import io.bkbn.kompendium.core.metadata.method.PostInfo
 import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
 import io.ktor.routing.*
 import net.catenax.core.custodian.models.ExceptionResponse
-import net.catenax.core.custodian.models.ssi.SignMessageDto
-import net.catenax.core.custodian.models.ssi.SignMessageResponseDto
+import net.catenax.core.custodian.persistances.repositories.WalletRepository
+import net.catenax.core.custodian.services.WalletService
 import kotlin.reflect.typeOf
-
-val notFoundException = ExceptionInfo<ExceptionResponse>(
-    responseType = typeOf<ExceptionResponse>(),
-    description = "Not Found",
-    status = HttpStatusCode.NotFound,
-    examples = mapOf("demo" to ExceptionResponse("reason"))
-)
 
 val semanticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),
@@ -38,7 +25,10 @@ val syntacticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     examples = mapOf("demo" to ExceptionResponse("reason"))
 )
 
-fun Application.ssiRoutes() {
+fun Application.appRoutes() {
+    val walletRepository = WalletRepository()
+    val walletService = WalletService(walletRepository)
+
     routing {
         route("/api") {
 
@@ -48,10 +38,10 @@ fun Application.ssiRoutes() {
 
             // based on: authenticate("auth-jwt")
             notarizedAuthenticate(authConfig) {
+                walletRoutes(walletService)
                 didDocRoutes()
                 vcRoutes()
                 vpRoutes()
-                walletRoutes()
             }
         }
     }

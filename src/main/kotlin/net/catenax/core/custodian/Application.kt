@@ -16,7 +16,8 @@ import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.ExceptionResponse
 import net.catenax.core.custodian.models.NotFoundException
 import net.catenax.core.custodian.models.BadRequestException
-import net.catenax.core.custodian.routes.ssiRoutes
+import net.catenax.core.custodian.persistances.repositories.WalletRepository
+import net.catenax.core.custodian.routes.appRoutes
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -44,7 +45,7 @@ fun Application.module(testing: Boolean = false) {
     configureSecurity()
 
     configureRouting()
-    ssiRoutes()
+    appRoutes()
 
     configurePersistence()
 }

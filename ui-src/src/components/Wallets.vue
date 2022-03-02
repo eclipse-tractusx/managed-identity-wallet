@@ -1,12 +1,12 @@
 <template>
-  <div class="companies">
+  <div class="wallets">
     <div class="drawer">
        <div class="selected">Administration</div>
     </div>
     <div class="list">
       <ul>
-        <li v-for="company in companies" :key="company.bpn" @click="loadDetails(company.bpn)">
-          <img src="@/assets/wallet.svg" style="margin-right: 15px; width:75px; float: left;"/><div style="float:left;">{{ company.bpn }}<br>{{ company.name }}<br>{{ company.createdAt.replace('T', ' ').substring(0, 19) }}</div>
+        <li v-for="wallet in wallets" :key="wallet.bpn" @click="loadDetails(wallet.bpn)">
+          <img src="@/assets/wallet.svg" style="margin-right: 15px; width:75px; float: left;"/><div style="float:left;">{{ wallet.bpn }}<br>{{ wallet.name }}<br>{{ wallet.createdAt.replace('T', ' ').substring(0, 19) }}</div>
         </li>
       </ul>
       <div class="json">
@@ -19,7 +19,7 @@
 <script lang="ts">
 import Vue from 'vue';
 
-declare interface Company {
+declare interface Wallet {
   bpn: string,
   name: string,
   createdAt: string,
@@ -42,33 +42,33 @@ declare interface CompaniesResult {
 export default Vue.extend({
   data() {
     return {
-      companies: [] as Company[],
+      wallets: [] as Wallet[],
       details: ''
     };
   },
   mounted() {
-    var c = this.companies;
-    fetch('/ui/companies')
+    var c = this.wallets;
+    fetch('/ui/wallets')
       .then(response => response.json() as Promise<CompaniesResult[]>)
       .then(data => {
         console.log(data)
-        // replacing current list of companies
+        // replacing current list of wallets
         c.length = 0
         for (let d of data) {
-          const company : Company = {
+          const wallet : Wallet = {
             bpn: d.bpn,
             name: d.name,
             createdAt: d.wallet != null ? d.wallet.createdAt : '',
             publicKey : d.wallet != null ? d.wallet.publicKey : ''
           } 
-          c.push(company)
+          c.push(wallet)
         }
       })
       .catch(error => { console.log(error) });
   },
   methods: {
     loadDetails(bpn: string) {
-      fetch('/ui/companies/' + bpn + '/full')
+      fetch('/ui/wallets/' + bpn + '/full')
       .then(response => response.json())
       .then(data => {
         console.log(data)
@@ -100,12 +100,12 @@ li {
 a {
   color: #42b983;
 }
-.companies .drawer {
+.wallets .drawer {
   float: left;
   width: 200px;
   padding: 10px;
 }
-.companies .list {
+.wallets .list {
   background-color: rgb(245, 245, 245);
   float: left;
   width: calc(100% - 260px);

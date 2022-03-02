@@ -4,10 +4,15 @@ import com.danubetech.verifiablecredentials.jsonld.VerifiableCredentialContexts
 import io.bkbn.kompendium.annotations.Field
 import io.bkbn.kompendium.annotations.Param
 import io.bkbn.kompendium.annotations.ParamType
+import io.bkbn.kompendium.core.Notarized.notarizedDelete
+import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
+import io.bkbn.kompendium.core.metadata.ExceptionInfo
 import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
+import io.bkbn.kompendium.core.metadata.method.DeleteInfo
+import io.bkbn.kompendium.core.metadata.method.GetInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
 import io.ktor.application.*
 import io.ktor.http.*
@@ -15,81 +20,180 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.serialization.Serializable
-import net.catenax.core.custodian.models.SuccessResponse
+import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.*
+import net.catenax.core.custodian.persistances.repositories.WalletRepository
+import net.catenax.core.custodian.services.WalletService
+import org.jetbrains.exposed.exceptions.ExposedSQLException
+import java.time.LocalDateTime
+import kotlin.reflect.typeOf
 
-fun Route.walletRoutes() {
-    route("/wallets/{identifier}") {
+fun Route.walletRoutes(walletService: WalletService) {
 
-        route("/credentials") {
-            notarizedPost(
-                PostInfo<StoreVerifiableCredentialParameter, IssuedVerifiableCredentialRequestDto, SuccessResponse>(
-                    summary = "Store Verifiable Credential ",
-                    description = "Store a verifiable credential in the wallet of the given identifier",
-                    parameterExamples = setOf(
-                        ParameterExample("identifier", "did", "did:exp:123"),
-                        ParameterExample("identifier", "bpn", "BPN123"),
-                    ),
-                    requestInfo = RequestInfo(
-                        description = "The verifiable credential to be stored",
-                        examples = issuedVerifiableCredentialRequestDtoExample
-                    ),
-                    responseInfo = ResponseInfo(
-                        status = HttpStatusCode.Created,
-                        description = "Success message",
-                        examples = mapOf(
-                            "demo" to SuccessResponse(
-                                "Credential with id http://example.edu/credentials/3732" +
-                                        "has been successfully stored"
-                            )
-                        )
-                    ),
-                    canThrow = setOf(semanticallyInvalidInputException, notFoundException),
-                    tags = setOf("Wallets")
-                )
-            ) {
-                val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-                call.respond(
-                    HttpStatusCode.Created,
-                    SuccessResponse("Credential has been successfully Stored")
-                )
+    route("/wallets") {
+        notarizedGet(
+            GetInfo<Unit, List<WalletDto>>(
+                summary = "List of wallets",
+                description = "Retrieve list of registered wallets without credentials",
+                responseInfo = ResponseInfo(
+                    status = HttpStatusCode.OK,
+                    description = "List of wallets if available without credentials",
+                ),
+                tags = setOf("Wallets")
+            )
+        ) {
+            call.respond(walletService.getAll())
+        }
+
+        notarizedPost(
+            PostInfo<Unit, WalletCreateDto, WalletDto>(
+                summary = "Create wallet",
+                description = "Create a wallet and store it",
+                requestInfo = RequestInfo(
+                    description = "wallet to create",
+                    examples = walletCreateDtoExample
+                ),
+                responseInfo = ResponseInfo(
+                    status = HttpStatusCode.Created,
+                    description = "Wallet was successfully created",
+                    examples = walletDtoExample
+                ),
+                canThrow = setOf(illegalArgumentException),
+                tags = setOf("Wallets")
+            )
+        ) {
+            try {
+                val walletToCreate = call.receive<WalletCreateDto>()
+                val createdWallet = walletService.createWallet(walletToCreate)
+                call.respond(HttpStatusCode.Created, createdWallet)
+            } catch (e: IllegalArgumentException) {
+                throw BadRequestException(e.message!!)
+            } catch (e: ExposedSQLException) {
+                val isUniqueConstraintError = e.sqlState == "23505"
+                if (isUniqueConstraintError) {
+                    throw BadRequestException("Company with already exists!")
+                } else {
+                    throw BadRequestException(e.message!!)
+                }
             }
         }
 
-        route("/signatures") {
-            notarizedPost(
-                PostInfo<SignMessageParameter, SignMessageDto, SignMessageResponseDto>(
-                    summary = "Sign Message",
-                    description = "Sign a message using the wallet of the given identifier",
-                    requestInfo = RequestInfo(
-                        description = "the message to sign and the wallet did",
-                        examples = mapOf("demo" to SignMessageDto(
-                            message = "message_string")
-                        )
+
+        route("/{identifier}") {
+
+            notarizedGet(
+                GetInfo<WalletDtoParameter, WalletDto>(
+                    summary = "Retrieve wallet by identifier",
+                    description = "Retrieve single wallet by identifier, with or without credentials",
+                    parameterExamples = setOf(
+                        ParameterExample("identifier", "did", "did:example:0123"),
+                        ParameterExample("identifier", "bpn", "bpn123"),
+                        ParameterExample("withCredentials", "withCredentials", "false")
                     ),
                     responseInfo = ResponseInfo(
-                        status = HttpStatusCode.Created,
-                        description = "The signed message response",
-                        examples = mapOf(
-                            "demo" to SignMessageResponseDto(
-                                "did:example", "message_string",
-                                "signed_message_hex", "public_key_base58"
-                            )
-                        )
+                        status = HttpStatusCode.OK,
+                        description = "The wallet",
+                        examples = walletDtoExample
+                    ),
+                    canThrow = setOf(badRequestException, notFoundException),
+                    tags = setOf("Wallets")
+                )
+            ) {
+                val identifier = call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                val walletDto: WalletDto = walletService.getWallet(identifier)
+                call.respond(walletDto)
+            }
+
+            notarizedDelete(
+                DeleteInfo<Unit, SuccessResponse>(
+                    summary = "Remove wallet",
+                    description = "Remove hosted wallet",
+                    responseInfo = ResponseInfo(
+                        status = HttpStatusCode.Accepted,
+                        description = "Wallet successfully removed!",
+                        examples = mapOf("demo" to SuccessResponse("Wallet successfully removed!"))
                     ),
                     canThrow = setOf(notFoundException),
                     tags = setOf("Wallets")
                 )
             ) {
-                val signMessageParameter = call.receive<SignMessageParameter>()
-                val signMessageDto = call.receive<SignMessageDto>()
-                val response = SignMessageResponseDto(
-                    identifier = signMessageParameter.identifier,
-                    message = signMessageDto.message,
-                    signedMessageInHex = "0x123....",
-                    publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                )
-                call.respond(HttpStatusCode.Created, response)
+                val identifier = call.parameters["identifier"] ?: return@notarizedDelete call.respond(HttpStatusCode.BadRequest)
+                if (walletService.deleteWallet(identifier)) {
+                    call.respond(HttpStatusCode.Accepted, SuccessResponse("Wallet successfully removed!"))
+                }
+                call.respond(HttpStatusCode.BadRequest,  ExceptionResponse("Delete wallet $identifier has failed!"))
+            }
+
+            route("/credentials") {
+                notarizedPost(
+                    PostInfo<StoreVerifiableCredentialParameter, IssuedVerifiableCredentialRequestDto, SuccessResponse>(
+                        summary = "Store Verifiable Credential ",
+                        description = "Store a verifiable credential in the wallet of the given identifier",
+                        parameterExamples = setOf(
+                            ParameterExample("identifier", "did", "did:exp:123"),
+                            ParameterExample("identifier", "bpn", "BPN123"),
+                        ),
+                        requestInfo = RequestInfo(
+                            description = "The verifiable credential to be stored",
+                            examples = issuedVerifiableCredentialRequestDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Created,
+                            description = "Success message",
+                            examples = mapOf(
+                                "demo" to SuccessResponse(
+                                    "Credential with id http://example.edu/credentials/3732" +
+                                            "has been successfully stored"
+                                )
+                            )
+                        ),
+                        canThrow = setOf(semanticallyInvalidInputException, notFoundException),
+                        tags = setOf("Wallets")
+                    )
+                ) {
+                    val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
+                    call.respond(
+                        HttpStatusCode.Created,
+                        SuccessResponse("Credential has been successfully Stored")
+                    )
+                }
+            }
+
+            route("/signatures") {
+                notarizedPost(
+                    PostInfo<SignMessageParameter, SignMessageDto, SignMessageResponseDto>(
+                        summary = "Sign Message",
+                        description = "Sign a message using the wallet of the given identifier",
+                        requestInfo = RequestInfo(
+                            description = "the message to sign and the wallet did",
+                            examples = mapOf("demo" to SignMessageDto(
+                                message = "message_string")
+                            )
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Created,
+                            description = "The signed message response",
+                            examples = mapOf(
+                                "demo" to SignMessageResponseDto(
+                                    "did:example", "message_string",
+                                    "signed_message_hex", "public_key_base58"
+                                )
+                            )
+                        ),
+                        canThrow = setOf(notFoundException),
+                        tags = setOf("Wallets")
+                    )
+                ) {
+                    val signMessageParameter = call.receive<SignMessageParameter>()
+                    val signMessageDto = call.receive<SignMessageDto>()
+                    val response = SignMessageResponseDto(
+                        identifier = signMessageParameter.identifier,
+                        message = signMessageDto.message,
+                        signedMessageInHex = "0x123....",
+                        publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
+                    )
+                    call.respond(HttpStatusCode.Created, response)
+                }
             }
         }
     }
@@ -108,6 +212,16 @@ data class SignMessageParameter(
     @Param(type = ParamType.PATH)
     @Field(description = "The DID or BPN of the signer.", name = "identifier")
     val identifier: String
+)
+
+@Serializable
+data class WalletDtoParameter(
+    @Param(type = ParamType.PATH)
+    @Field(description = "The DID or BPN of the Wallet", name = "identifier")
+    val identifier: String,
+    @Param(type = ParamType.QUERY)
+    @Field(description = "return stored credentials", name = "withCredentials")
+    val withCredentials: Boolean
 )
 
 val issuedVerifiableCredentialRequestDtoExample =  mapOf(
@@ -130,4 +244,46 @@ val issuedVerifiableCredentialRequestDtoExample =  mapOf(
             jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
         )
     )
+)
+
+val walletDtoExample = mapOf(
+    "demo" to WalletDto(
+        "name",
+        "bpn",
+        "did",
+        LocalDateTime.now(),
+        "samplePublicKey",
+        emptyList<VerifiableCredentialDto>()
+    )
+)
+
+val walletCreateDtoExample = mapOf(
+    "demo" to WalletCreateDto(
+        "name",
+        "bpn"
+    )
+)
+
+// for documentation
+val badRequestException = ExceptionInfo<ExceptionResponse>(
+    responseType = typeOf<ExceptionResponse>(),
+    description = "Missing or malformed identifier",
+    status = HttpStatusCode.BadRequest,
+    examples = mapOf("demo" to ExceptionResponse("Missing or malformed identifier"))
+)
+
+// for documentation
+val illegalArgumentException = ExceptionInfo<ExceptionResponse>(
+    responseType = typeOf<ExceptionResponse>(),
+    description = "Illegal argument",
+    status = HttpStatusCode.BadRequest,
+    examples = mapOf("demo" to ExceptionResponse("Illegal argument"))
+)
+
+// for documentation
+val notFoundException = ExceptionInfo<ExceptionResponse>(
+    responseType = typeOf<ExceptionResponse>(),
+    description = "No company with given identifier",
+    status = HttpStatusCode.NotFound,
+    examples = mapOf("demo" to ExceptionResponse("No wallet with given identifier"))
 )
