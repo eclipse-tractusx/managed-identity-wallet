@@ -5,8 +5,8 @@ import io.ktor.application.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-import net.catenax.core.custodian.persistances.entities.VerifiableCredentials
-import net.catenax.core.custodian.persistances.entities.Wallets
+import net.catenax.core.custodian.persistence.entities.VerifiableCredentials
+import net.catenax.core.custodian.persistence.entities.Wallets
 
 fun Application.configurePersistence() {
     val jdbcUrl = environment.config.property("db.jdbcUrl").getString()

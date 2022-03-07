@@ -1,7 +1,6 @@
 package net.catenax.core.custodian
 
 import io.ktor.http.*
-import java.time.Duration
 
 // for 2.0.0-beta
 // import io.ktor.server.response.*
@@ -24,9 +23,7 @@ import io.ktor.server.testing.*
 import io.ktor.config.*
 
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.SerializationException
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -36,8 +33,8 @@ import io.ktor.auth.*
 import net.catenax.core.custodian.entities.*
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.*
-import net.catenax.core.custodian.persistances.entities.Company
-import net.catenax.core.custodian.persistances.entities.WalletDao
+import net.catenax.core.custodian.persistence.entities.Company
+import net.catenax.core.custodian.persistence.entities.WalletDao
 
 class ApplicationTest {
 

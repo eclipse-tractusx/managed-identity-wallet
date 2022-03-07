@@ -37,7 +37,7 @@ import io.bkbn.kompendium.core.routes.redoc
 
 
 import net.catenax.core.custodian.models.*
-import net.catenax.core.custodian.persistances.repositories.WalletRepository
+import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import net.catenax.core.custodian.services.WalletService
 
 suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token: String): String {

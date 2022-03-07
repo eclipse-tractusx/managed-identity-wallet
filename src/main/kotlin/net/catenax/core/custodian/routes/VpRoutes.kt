@@ -10,6 +10,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import net.catenax.core.custodian.models.semanticallyInvalidInputException
 import net.catenax.core.custodian.models.ssi.LdProofDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.models.ssi.VerifiablePresentationDto

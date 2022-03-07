@@ -1,26 +1,15 @@
-package net.catenax.core.custodian.persistances.entities
+package net.catenax.core.custodian.persistence.entities
 
 import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.javatime.*
-import org.jetbrains.exposed.sql.transactions.transaction
-
-import java.security.KeyPairGenerator
-import java.security.spec.ECGenParameterSpec
-import java.security.KeyPair
-import java.util.Base64
-
-import net.catenax.core.custodian.models.*
-import org.bitcoinj.core.Base58
-import java.time.LocalDateTime
 
 object Wallets : IntIdTable("wallets") {
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime())
     val modifiedAt = datetime("modified_at").defaultExpression(CurrentDateTime())
 
-    val name = varchar("name", 127).uniqueIndex("name")
+    val name = varchar("name", 127)
     var bpn = varchar("bpn", 36).uniqueIndex("bpn")
     val did = varchar("did", 4096).uniqueIndex("did")
 

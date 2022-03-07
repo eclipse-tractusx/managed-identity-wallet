@@ -1,10 +1,10 @@
-package net.catenax.core.custodian.persistances.repositories
+package net.catenax.core.custodian.persistence.repositories
 
 import net.catenax.core.custodian.models.NotFoundException
 import net.catenax.core.custodian.models.WalletCreateDto
 import net.catenax.core.custodian.models.WalletDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
-import net.catenax.core.custodian.persistances.entities.*
+import net.catenax.core.custodian.persistence.entities.*
 import org.bitcoinj.core.Base58
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -21,7 +21,7 @@ class WalletRepository {
     fun getWallet(identifier: String): Wallet = transaction {
         Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }
             .firstOrNull()
-            ?: throw NotFoundException("Wallet with did $identifier not found")
+            ?: throw NotFoundException("Wallet with identifier $identifier not found")
     }
 
     fun addWallet(wallet: WalletCreateDto): Wallet = transaction {
@@ -33,8 +33,8 @@ class WalletRepository {
 
         Wallet.new {
             bpn = wallet.bpn
-            did = wallet.did?: "did:example:" + Base58.encode(kp.public.encoded).toString()
             name = wallet.name
+            did = "did:example:" + Base58.encode(kp.public.encoded).toString()
             createdAt = LocalDateTime.now()
             privateKey = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded())
             publicKey = Base58.encode(kp.public.encoded).toString()

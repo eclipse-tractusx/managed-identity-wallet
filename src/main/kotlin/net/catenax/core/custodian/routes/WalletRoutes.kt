@@ -7,7 +7,6 @@ import io.bkbn.kompendium.annotations.ParamType
 import io.bkbn.kompendium.core.Notarized.notarizedDelete
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
-import io.bkbn.kompendium.core.metadata.ExceptionInfo
 import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
@@ -22,11 +21,9 @@ import io.ktor.routing.*
 import kotlinx.serialization.Serializable
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.*
-import net.catenax.core.custodian.persistances.repositories.WalletRepository
 import net.catenax.core.custodian.services.WalletService
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import java.time.LocalDateTime
-import kotlin.reflect.typeOf
 
 fun Route.walletRoutes(walletService: WalletService) {
 
@@ -34,10 +31,10 @@ fun Route.walletRoutes(walletService: WalletService) {
         notarizedGet(
             GetInfo<Unit, List<WalletDto>>(
                 summary = "List of wallets",
-                description = "Retrieve list of registered wallets without credentials",
+                description = "Retrieve list of registered wallets without their stored credentials",
                 responseInfo = ResponseInfo(
                     status = HttpStatusCode.OK,
-                    description = "List of wallets if available without credentials",
+                    description = "List of wallets if available without their stored credentials",
                 ),
                 tags = setOf("Wallets")
             )
@@ -58,7 +55,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     description = "Wallet was successfully created",
                     examples = walletDtoExample
                 ),
-                canThrow = setOf(illegalArgumentException),
+                canThrow = setOf(syntacticallyInvalidInputException, semanticallyInvalidInputException),
                 tags = setOf("Wallets")
             )
         ) {
@@ -71,9 +68,9 @@ fun Route.walletRoutes(walletService: WalletService) {
             } catch (e: ExposedSQLException) {
                 val isUniqueConstraintError = e.sqlState == "23505"
                 if (isUniqueConstraintError) {
-                    throw BadRequestException("Company with already exists!")
+                    throw UnprocessableEntityException("Wallet with given BPN already exists!")
                 } else {
-                    throw BadRequestException(e.message!!)
+                    throw UnprocessableEntityException(e.message!!)
                 }
             }
         }
@@ -84,7 +81,7 @@ fun Route.walletRoutes(walletService: WalletService) {
             notarizedGet(
                 GetInfo<WalletDtoParameter, WalletDto>(
                     summary = "Retrieve wallet by identifier",
-                    description = "Retrieve single wallet by identifier, with or without credentials",
+                    description = "Retrieve single wallet by identifier, with or without its credentials",
                     parameterExamples = setOf(
                         ParameterExample("identifier", "did", "did:example:0123"),
                         ParameterExample("identifier", "bpn", "bpn123"),
@@ -95,7 +92,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                         description = "The wallet",
                         examples = walletDtoExample
                     ),
-                    canThrow = setOf(badRequestException, notFoundException),
+                    canThrow = setOf(syntacticallyInvalidInputException, notFoundException),
                     tags = setOf("Wallets")
                 )
             ) {
@@ -113,7 +110,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                         description = "Wallet successfully removed!",
                         examples = mapOf("demo" to SuccessResponse("Wallet successfully removed!"))
                     ),
-                    canThrow = setOf(notFoundException),
+                    canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                     tags = setOf("Wallets")
                 )
             ) {
@@ -199,6 +196,7 @@ fun Route.walletRoutes(walletService: WalletService) {
     }
 }
 
+// for documentation
 @Serializable
 data class StoreVerifiableCredentialParameter(
     @Param(type = ParamType.PATH)
@@ -220,7 +218,7 @@ data class WalletDtoParameter(
     @Field(description = "The DID or BPN of the Wallet", name = "identifier")
     val identifier: String,
     @Param(type = ParamType.QUERY)
-    @Field(description = "return stored credentials", name = "withCredentials")
+    @Field(description = "Flag whether all stored credentials of the wallet should be included in the response", name = "withCredentials")
     val withCredentials: Boolean
 )
 
@@ -262,28 +260,4 @@ val walletCreateDtoExample = mapOf(
         "name",
         "bpn"
     )
-)
-
-// for documentation
-val badRequestException = ExceptionInfo<ExceptionResponse>(
-    responseType = typeOf<ExceptionResponse>(),
-    description = "Missing or malformed identifier",
-    status = HttpStatusCode.BadRequest,
-    examples = mapOf("demo" to ExceptionResponse("Missing or malformed identifier"))
-)
-
-// for documentation
-val illegalArgumentException = ExceptionInfo<ExceptionResponse>(
-    responseType = typeOf<ExceptionResponse>(),
-    description = "Illegal argument",
-    status = HttpStatusCode.BadRequest,
-    examples = mapOf("demo" to ExceptionResponse("Illegal argument"))
-)
-
-// for documentation
-val notFoundException = ExceptionInfo<ExceptionResponse>(
-    responseType = typeOf<ExceptionResponse>(),
-    description = "No company with given identifier",
-    status = HttpStatusCode.NotFound,
-    examples = mapOf("demo" to ExceptionResponse("No wallet with given identifier"))
 )

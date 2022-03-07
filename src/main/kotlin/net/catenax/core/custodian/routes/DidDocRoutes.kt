@@ -16,7 +16,10 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import net.catenax.core.custodian.models.notFoundException
+import net.catenax.core.custodian.models.semanticallyInvalidInputException
 import net.catenax.core.custodian.models.ssi.*
+import net.catenax.core.custodian.models.syntacticallyInvalidInputException
 
 fun Route.didDocRoutes() {
 
@@ -94,7 +97,9 @@ fun Route.didDocRoutes() {
                                 description = "The resolved DID Document after the updating the Service",
                                 examples = didDocumentDtoExample
                             ),
-                            canThrow = setOf(notFoundException, semanticallyInvalidInputException, syntacticallyInvalidInputException),
+                            canThrow = setOf(notFoundException,
+                                semanticallyInvalidInputException,
+                                syntacticallyInvalidInputException),
                             tags = setOf("DIDDocument")
                         )
                     ) {
