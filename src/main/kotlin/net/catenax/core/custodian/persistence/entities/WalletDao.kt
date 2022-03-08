@@ -23,8 +23,8 @@ class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
     var modifiedAt by Wallets.modifiedAt
 
     var name by Wallets.name
-    var did by Wallets.did
     var bpn by Wallets.bpn
+    var did by Wallets.did
 
     var privateKey by Wallets.privateKey
     var publicKey by Wallets.publicKey

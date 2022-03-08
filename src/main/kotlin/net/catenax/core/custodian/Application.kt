@@ -14,6 +14,7 @@ import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.ExceptionResponse
 import net.catenax.core.custodian.models.NotFoundException
 import net.catenax.core.custodian.models.BadRequestException
+import net.catenax.core.custodian.models.ConflictException
 import net.catenax.core.custodian.routes.appRoutes
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -36,6 +37,9 @@ fun Application.module(testing: Boolean = false) {
         }
         exception<NotFoundException> { cause ->
             call.respond(HttpStatusCode.NotFound, ExceptionResponse(cause.message!!))
+        }
+        exception<ConflictException> { cause ->
+            call.respond(HttpStatusCode.Conflict, ExceptionResponse(cause.message!!))
         }
     }
 

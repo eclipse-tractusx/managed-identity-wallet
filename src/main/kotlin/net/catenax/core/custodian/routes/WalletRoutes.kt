@@ -31,10 +31,10 @@ fun Route.walletRoutes(walletService: WalletService) {
         notarizedGet(
             GetInfo<Unit, List<WalletDto>>(
                 summary = "List of wallets",
-                description = "Retrieve list of registered wallets without their stored credentials",
+                description = "Retrieve list of registered wallets",
                 responseInfo = ResponseInfo(
                     status = HttpStatusCode.OK,
-                    description = "List of wallets if available without their stored credentials",
+                    description = "List of wallets",
                 ),
                 tags = setOf("Wallets")
             )
@@ -55,7 +55,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     description = "Wallet was successfully created",
                     examples = walletDtoExample
                 ),
-                canThrow = setOf(syntacticallyInvalidInputException, semanticallyInvalidInputException),
+                canThrow = setOf(syntacticallyInvalidInputException, conflictException),
                 tags = setOf("Wallets")
             )
         ) {
@@ -68,9 +68,9 @@ fun Route.walletRoutes(walletService: WalletService) {
             } catch (e: ExposedSQLException) {
                 val isUniqueConstraintError = e.sqlState == "23505"
                 if (isUniqueConstraintError) {
-                    throw UnprocessableEntityException("Wallet with given BPN already exists!")
+                    throw ConflictException("Wallet with given BPN already exists!")
                 } else {
-                    throw UnprocessableEntityException(e.message!!)
+                    throw ConflictException(e.message!!)
                 }
             }
         }

@@ -18,20 +18,20 @@ class WalletRepository {
     fun getAll(): List<Wallet> = transaction { Wallet.all().toList() }
 
     @Throws(NotFoundException::class)
-    fun getWallet(identifier: String): Wallet = transaction {
-        Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }
+    fun getWallet(identifier: String): Wallet {
+        return Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }
             .firstOrNull()
             ?: throw NotFoundException("Wallet with identifier $identifier not found")
     }
 
-    fun addWallet(wallet: WalletCreateDto): Wallet = transaction {
+    fun addWallet(wallet: WalletCreateDto): Wallet {
         // TODO add VCs: request cx data pool information
         val kpg = KeyPairGenerator.getInstance("EC")
         val params = ECGenParameterSpec("secp256r1")
         kpg.initialize(params);
         val kp = kpg.generateKeyPair()
 
-        Wallet.new {
+        val createdWallet = Wallet.new {
             bpn = wallet.bpn
             name = wallet.name
             did = "did:example:" + Base58.encode(kp.public.encoded).toString()
@@ -39,12 +39,12 @@ class WalletRepository {
             privateKey = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded())
             publicKey = Base58.encode(kp.public.encoded).toString()
         }
+        return createdWallet
     }
 
-    fun deleteWallet(identifier: String): Boolean = transaction {
-        val wallet = getWallet(identifier)
-        wallet.delete()
-        true
+    fun deleteWallet(identifier: String): Boolean {
+        getWallet(identifier).delete()
+        return true
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
