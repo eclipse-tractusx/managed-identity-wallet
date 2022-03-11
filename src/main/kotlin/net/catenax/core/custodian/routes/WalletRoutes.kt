@@ -64,13 +64,13 @@ fun Route.walletRoutes(walletService: WalletService) {
                 val createdWallet = walletService.createWallet(walletToCreate)
                 call.respond(HttpStatusCode.Created, createdWallet)
             } catch (e: IllegalArgumentException) {
-                throw BadRequestException(e.message!!)
+                throw BadRequestException(e.message)
             } catch (e: ExposedSQLException) {
                 val isUniqueConstraintError = e.sqlState == "23505"
                 if (isUniqueConstraintError) {
                     throw ConflictException("Wallet with given BPN already exists!")
                 } else {
-                    throw ConflictException(e.message!!)
+                    throw UnprocessableEntityException(e.message)
                 }
             }
         }
@@ -96,7 +96,8 @@ fun Route.walletRoutes(walletService: WalletService) {
                     tags = setOf("Wallets")
                 )
             ) {
-                val identifier = call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                val identifier =
+                    call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
                 val walletDto: WalletDto = walletService.getWallet(identifier)
                 call.respond(walletDto)
             }
@@ -114,11 +115,15 @@ fun Route.walletRoutes(walletService: WalletService) {
                     tags = setOf("Wallets")
                 )
             ) {
-                val identifier = call.parameters["identifier"] ?: return@notarizedDelete call.respond(HttpStatusCode.BadRequest)
+                val identifier =
+                    call.parameters["identifier"] ?: return@notarizedDelete call.respond(HttpStatusCode.BadRequest)
                 if (walletService.deleteWallet(identifier)) {
-                    call.respond(HttpStatusCode.Accepted, SuccessResponse("Wallet successfully removed!"))
+                    return@notarizedDelete call.respond(
+                        HttpStatusCode.Accepted,
+                        SuccessResponse("Wallet successfully removed!")
+                    )
                 }
-                call.respond(HttpStatusCode.BadRequest,  ExceptionResponse("Delete wallet $identifier has failed!"))
+                call.respond(HttpStatusCode.BadRequest, ExceptionResponse("Delete wallet $identifier has failed!"))
             }
 
             route("/credentials") {
@@ -163,8 +168,10 @@ fun Route.walletRoutes(walletService: WalletService) {
                         description = "Sign a message using the wallet of the given identifier",
                         requestInfo = RequestInfo(
                             description = "the message to sign and the wallet did",
-                            examples = mapOf("demo" to SignMessageDto(
-                                message = "message_string")
+                            examples = mapOf(
+                                "demo" to SignMessageDto(
+                                    message = "message_string"
+                                )
                             )
                         ),
                         responseInfo = ResponseInfo(
@@ -200,8 +207,10 @@ fun Route.walletRoutes(walletService: WalletService) {
 @Serializable
 data class StoreVerifiableCredentialParameter(
     @Param(type = ParamType.PATH)
-    @Field(description = "The DID or BPN of the credential holder. The DID must match to the id of the credential subject if present.",
-        name = "identifier")
+    @Field(
+        description = "The DID or BPN of the credential holder. The DID must match to the id of the credential subject if present.",
+        name = "identifier"
+    )
     val identifier: String
 )
 
@@ -218,11 +227,14 @@ data class WalletDtoParameter(
     @Field(description = "The DID or BPN of the Wallet", name = "identifier")
     val identifier: String,
     @Param(type = ParamType.QUERY)
-    @Field(description = "Flag whether all stored credentials of the wallet should be included in the response", name = "withCredentials")
+    @Field(
+        description = "Flag whether all stored credentials of the wallet should be included in the response",
+        name = "withCredentials"
+    )
     val withCredentials: Boolean
 )
 
-val issuedVerifiableCredentialRequestDtoExample =  mapOf(
+val issuedVerifiableCredentialRequestDtoExample = mapOf(
     "demo" to IssuedVerifiableCredentialRequestDto(
         context = listOf(
             VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),

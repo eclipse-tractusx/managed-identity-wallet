@@ -154,10 +154,10 @@ fun Application.configureRouting() {
                                 throw BadRequestException("Could not retrieve business partner details!")
                             } catch (e: SerializationException) {
                                 log.warn("SerializationException: " + e.message)
-                                throw BadRequestException(e.message!!)
+                                throw BadRequestException(e.message)
                             } catch (e: IOException) {
                                 log.warn("IOException: ${datapoolUrl} " + e.message)
-                                throw BadRequestException(e.message!!)
+                                throw BadRequestException(e.message)
                             }
                         } else {
                             throw BadRequestException("No DID given!")

@@ -1,7 +1,6 @@
 package net.catenax.core.custodian.services
 
-import net.catenax.core.custodian.models.WalletCreateDto
-import net.catenax.core.custodian.models.WalletDto
+import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory

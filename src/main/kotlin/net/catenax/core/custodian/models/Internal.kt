@@ -11,11 +11,13 @@ data class ExceptionResponse(val message: String, val error: Boolean = true)
 @Serializable
 data class SuccessResponse(val message: String)
 
-class BadRequestException(message: String) : Exception(message)
+class BadRequestException(message: String? = "empty message") : Exception(message)
 
-class ConflictException(message: String) : Exception(message)
+class UnprocessableEntityException(message: String? = "empty message") : Exception(message)
 
-class NotFoundException(message: String) : Exception(message)
+class ConflictException(message: String? =  "empty message") : Exception(message)
+
+class NotFoundException(message: String? =  "empty message") : Exception(message)
 
 val semanticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),
