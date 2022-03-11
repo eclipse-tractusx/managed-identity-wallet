@@ -1,12 +1,12 @@
 {
 	"info": {
-		"_postman_id": "4c62b51c-3d30-4d5a-8c80-36dee60cd421",
+		"_postman_id": "644dc106-810e-41e6-ab42-c1d22fb7bd29",
 		"name": "Custodian Sample",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Get Access Token  Keycloak (local)",
+			"name": "Get Access Token  Keycloak",
 			"event": [
 				{
 					"listen": "test",
@@ -64,16 +64,11 @@
 					]
 				},
 				"url": {
-					"raw": "http://localhost:8081/auth/realms/catenax/protocol/openid-connect/token",
-					"protocol": "http",
+					"raw": "{{keycloak_realm_url}}/protocol/openid-connect/token",
 					"host": [
-						"localhost"
+						"{{keycloak_realm_url}}"
 					],
-					"port": "8081",
 					"path": [
-						"auth",
-						"realms",
-						"catenax",
 						"protocol",
 						"openid-connect",
 						"token"
@@ -83,7 +78,7 @@
 			"response": []
 		},
 		{
-			"name": "Create wallet  in Custodian (local)",
+			"name": "Create wallet  in Custodian",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -99,7 +94,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"did3_name\",\n    \"bpn\": \"did3_bpn\"\n}",
+					"raw": "{\n    \"name\": \"did1_name\",\n    \"bpn\": \"did1_bpn\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -107,12 +102,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/wallets",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets"
@@ -122,7 +115,7 @@
 			"response": []
 		},
 		{
-			"name": "Get wallets from Custodian  (local)",
+			"name": "Get wallets from Custodian ",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -137,12 +130,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets"
@@ -152,7 +143,7 @@
 			"response": []
 		},
 		{
-			"name": "Get wallet by identifier(local)",
+			"name": "Get wallet by identifier",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -167,23 +158,21 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/did2_bpn",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets",
-						"did2_bpn"
+						"did1_bpn"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Delete wallet with identifier from Custodian (local)",
+			"name": "Delete wallet with identifier from Custodian",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -198,12 +187,10 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/did1_bpn",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets",
