@@ -3,6 +3,7 @@ val kotlin_version: String by project
 val logback_version: String by project
 val kompendium_version: String by project
 val exposed_version: String by project
+val version: String by project
 
 plugins {
     application
@@ -11,7 +12,6 @@ plugins {
 }
 
 group = "net.catenax.core"
-version = "0.0.6"
 application {
     mainClass.set("net.catenax.core.custodian.ApplicationKt")
 }
