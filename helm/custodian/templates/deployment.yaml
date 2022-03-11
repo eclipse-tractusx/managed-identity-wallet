@@ -53,6 +53,8 @@ spec:
           value: {{ .Values.auth.redirectUrl }}
         - name: CX_DATAPOOL_URL
           value: {{ .Values.datapoolUrl }}
+        - name: LOG_LEVEL_EXPOSED
+          value: {{ .Values.logging.exposed | default "INFO" }}
         resources:
           requests:
             cpu: 100m

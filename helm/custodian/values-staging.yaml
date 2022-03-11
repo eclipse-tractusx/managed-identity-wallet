@@ -10,3 +10,5 @@ auth:
   realm: "CX-Central"
   role: "access"
 datapoolUrl: "https://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com"
+logging:
+  exposed: "INFO"

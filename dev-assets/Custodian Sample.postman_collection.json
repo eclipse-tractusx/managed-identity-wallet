@@ -1,0 +1,204 @@
+{
+	"info": {
+		"_postman_id": "644dc106-810e-41e6-ab42-c1d22fb7bd29",
+		"name": "Custodian Sample",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Access Token  Keycloak",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"access_token\", jsonData.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "{{username}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "{{client_id}}",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{client_secret}}",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "openid",
+							"type": "text"
+						},
+						{
+							"key": "audience",
+							"value": "Client005-CustodianTest",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{keycloak_realm_url}}/protocol/openid-connect/token",
+					"host": [
+						"{{keycloak_realm_url}}"
+					],
+					"path": [
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create wallet  in Custodian",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"did1_name\",\n    \"bpn\": \"did1_bpn\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/wallets",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"wallets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get wallets from Custodian ",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{custodian_url}}/api/wallets",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"wallets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get wallet by identifier",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"did1_bpn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete wallet with identifier from Custodian",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"did1_bpn"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

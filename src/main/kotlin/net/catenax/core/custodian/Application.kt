@@ -4,8 +4,6 @@ package net.catenax.core.custodian
 // import io.ktor.server.engine.*
 // import io.ktor.server.application.*
 
-import io.ktor.server.netty.*
-
 // for 1.6.7
 import io.ktor.application.*
 import io.ktor.features.*
@@ -16,7 +14,8 @@ import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.ExceptionResponse
 import net.catenax.core.custodian.models.NotFoundException
 import net.catenax.core.custodian.models.BadRequestException
-import net.catenax.core.custodian.routes.ssiRoutes
+import net.catenax.core.custodian.models.ConflictException
+import net.catenax.core.custodian.routes.appRoutes
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -40,12 +39,15 @@ fun Application.module(testing: Boolean = false) {
         exception<NotFoundException> { cause ->
             call.respond(HttpStatusCode.NotFound, ExceptionResponse(cause.message!!))
         }
+        exception<ConflictException> { cause ->
+            call.respond(HttpStatusCode.Conflict, ExceptionResponse(cause.message!!))
+        }
     }
 
     configureSecurity()
 
     configureRouting()
-    ssiRoutes()
+    appRoutes()
 
     configurePersistence()
 }
