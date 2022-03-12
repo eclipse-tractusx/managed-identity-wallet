@@ -21,6 +21,7 @@ fun Application.appRoutes() {
             // based on: authenticate("auth-jwt")
             notarizedAuthenticate(authConfig) {
                 walletRoutes(walletService)
+                businessPartnerDataRoutes()
                 didDocRoutes()
                 vcRoutes()
                 vpRoutes()

@@ -79,7 +79,7 @@ below. Here a few hints on how to set it up:
 6. `CX_AUTH_ROLE`: specify the expected role within the token, e.g. `access`
 7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `custodian`
 8. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
-8. `CX_VERSION`: specify the application version, e.g. `0.0.6` note that github actions replace the value before the helm deployment
+8. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
 
 To follow all steps in this readme you also need following variables:
 

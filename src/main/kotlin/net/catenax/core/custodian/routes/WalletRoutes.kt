@@ -75,7 +75,6 @@ fun Route.walletRoutes(walletService: WalletService) {
             }
         }
 
-
         route("/{identifier}") {
 
             notarizedGet(
@@ -156,7 +155,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
                     call.respond(
                         HttpStatusCode.Created,
-                        SuccessResponse("Credential has been successfully Stored")
+                        SuccessResponse("Credential has been successfully stored")
                     )
                 }
             }

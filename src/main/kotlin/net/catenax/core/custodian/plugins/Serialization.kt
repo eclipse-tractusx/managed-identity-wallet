@@ -51,7 +51,6 @@ object StringListSerializer : JsonTransformingSerializer<List<String>>(ListSeria
         if (element !is JsonArray) JsonArray(listOf(element)) else element
 }
 
-
 object URISerializer : KSerializer<URI> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("URI", PrimitiveKind.STRING)
     override fun deserialize(input: Decoder): URI = URI.create(input.decodeString())
@@ -114,11 +113,14 @@ fun Application.configureSerialization() {
             prettyPrint = true
             isLenient = true
             encodeDefaults = true
-            
+
             // useArrayPolymorphism  = true
             classDiscriminator = "class"
             serializersModule = KompendiumSerializersModule.module
             explicitNulls = false
+
+            // currently needed for business partner data update
+            ignoreUnknownKeys = true
         })
     }
 }
