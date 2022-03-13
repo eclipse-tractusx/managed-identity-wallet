@@ -44,7 +44,7 @@ fun Route.didDocRoutes() {
                 )
             ) {
                 call.respond(
-                    HttpStatusCode.Created,
+                    HttpStatusCode.OK,
                     didDocumentDtoExample["demo"] as DidDocumentDto
                 )
             }

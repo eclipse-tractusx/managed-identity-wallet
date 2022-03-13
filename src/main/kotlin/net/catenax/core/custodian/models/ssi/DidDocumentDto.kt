@@ -1,6 +1,5 @@
 package net.catenax.core.custodian.models.ssi
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.bkbn.kompendium.annotations.Field
 import io.bkbn.kompendium.annotations.Param
 import io.bkbn.kompendium.annotations.ParamType
@@ -11,7 +10,6 @@ import net.catenax.core.custodian.plugins.AnySerializer
 @Serializable
 data class DidDocumentDto(
     val id: String,
-    @JsonProperty("@context")
     @SerialName("@context")
     val context: List<String>,
     val alsoKnownAs: String? = null,

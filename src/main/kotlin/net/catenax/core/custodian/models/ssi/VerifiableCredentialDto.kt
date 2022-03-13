@@ -5,9 +5,7 @@ package net.catenax.core.custodian.models.ssi
 import com.apicatalog.jsonld.loader.DocumentLoaderOptions
 import com.danubetech.verifiablecredentials.CredentialSubject
 import com.danubetech.verifiablecredentials.VerifiableCredential
-import com.danubetech.verifiablecredentials.credentialstatus.CredentialStatus
 import com.danubetech.verifiablecredentials.validation.Validation
-import com.fasterxml.jackson.annotation.JsonProperty
 import foundation.identity.jsonld.ConfigurableDocumentLoader
 import foundation.identity.jsonld.JsonLDUtils
 import info.weboftrust.ldsignatures.LdProof
@@ -26,7 +24,6 @@ import java.net.URI
 data class VerifiableCredentialDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @JsonProperty("@context")
     @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
@@ -117,7 +114,6 @@ data class VerifiableCredentialParameters(
 data class IssuedVerifiableCredentialRequestDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @JsonProperty("@context")
     @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
@@ -139,7 +135,6 @@ data class IssuedVerifiableCredentialRequestDto(
 data class VerifiableCredentialRequestDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @JsonProperty("@context")
     @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
@@ -162,7 +157,6 @@ data class VerifiableCredentialRequestDto(
 data class VerifiableCredentialRequestWithoutIssuerDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @JsonProperty("@context")
     @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
