@@ -4,12 +4,14 @@ import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.auth.configuration.JwtAuthConfiguration
 import io.ktor.application.*
 import io.ktor.routing.*
+import net.catenax.core.custodian.persistence.repositories.CredentialRepository
 import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import net.catenax.core.custodian.services.WalletService
 
 fun Application.appRoutes() {
     val walletRepository = WalletRepository()
-    val walletService = WalletService(walletRepository)
+    val credRepository = CredentialRepository()
+    val walletService = WalletService(walletRepository, credRepository)
 
     routing {
         route("/api") {
@@ -22,9 +24,9 @@ fun Application.appRoutes() {
             notarizedAuthenticate(authConfig) {
                 walletRoutes(walletService)
                 businessPartnerDataRoutes()
-                didDocRoutes()
-                vcRoutes()
-                vpRoutes()
+                didDocRoutes(walletService)
+                vcRoutes(walletService)
+                vpRoutes(walletService)
             }
         }
     }

@@ -16,12 +16,14 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import net.catenax.core.custodian.models.BadRequestException
 import net.catenax.core.custodian.models.notFoundException
 import net.catenax.core.custodian.models.semanticallyInvalidInputException
 import net.catenax.core.custodian.models.ssi.*
 import net.catenax.core.custodian.models.syntacticallyInvalidInputException
+import net.catenax.core.custodian.services.WalletService
 
-fun Route.didDocRoutes() {
+fun Route.didDocRoutes(walletService: WalletService) {
 
     route("/didDocuments") {
 
@@ -43,10 +45,10 @@ fun Route.didDocRoutes() {
                     tags = setOf("DIDDocument")
                 )
             ) {
-                call.respond(
-                    HttpStatusCode.OK,
-                    didDocumentDtoExample["demo"] as DidDocumentDto
-                )
+                val identifier = call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                val didDoc = walletService.resolveDocument(identifier)
+
+                call.respond(HttpStatusCode.OK, didDoc)
             }
 
             route("/services") {

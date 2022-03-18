@@ -152,7 +152,9 @@ fun Route.walletRoutes(walletService: WalletService) {
                         tags = setOf("Wallets")
                     )
                 ) {
-                    val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
+                    val identifier = call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                    val verifiableCredential = call.receive<IssuedVerifiableCredentialRequestDto>()
+                    walletService.storeCredential(identifier, verifiableCredential)
                     call.respond(
                         HttpStatusCode.Created,
                         SuccessResponse("Credential has been successfully stored")
@@ -261,7 +263,6 @@ val walletDtoExample = mapOf(
         "bpn",
         "did",
         LocalDateTime.now(),
-        "samplePublicKey",
         emptyList<VerifiableCredentialDto>()
     )
 )

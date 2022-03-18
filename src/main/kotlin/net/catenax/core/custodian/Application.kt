@@ -9,12 +9,11 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
+import net.catenax.core.custodian.models.*
+import net.catenax.core.custodian.models.BadRequestException
+import net.catenax.core.custodian.models.NotFoundException
 
 import net.catenax.core.custodian.plugins.*
-import net.catenax.core.custodian.models.ExceptionResponse
-import net.catenax.core.custodian.models.NotFoundException
-import net.catenax.core.custodian.models.BadRequestException
-import net.catenax.core.custodian.models.ConflictException
 import net.catenax.core.custodian.routes.appRoutes
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -35,6 +34,9 @@ fun Application.module(testing: Boolean = false) {
     install(StatusPages) {
         exception<BadRequestException> { cause ->
             call.respond(HttpStatusCode.BadRequest, ExceptionResponse(cause.message!!))
+        }
+        exception<NotImplementedException> { cause ->
+            call.respond(HttpStatusCode.NotImplemented, ExceptionResponse(cause.message!!))
         }
         exception<NotFoundException> { cause ->
             call.respond(HttpStatusCode.NotFound, ExceptionResponse(cause.message!!))

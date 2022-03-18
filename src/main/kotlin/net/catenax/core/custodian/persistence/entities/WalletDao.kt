@@ -13,8 +13,9 @@ object Wallets : IntIdTable("wallets") {
     var bpn = varchar("bpn", 36).uniqueIndex("bpn")
     val did = varchar("did", 4096).uniqueIndex("did")
 
-    val privateKey = varchar("privateKey", 4096).uniqueIndex("privateKey")
-    val publicKey = varchar("publicKey", 4096).uniqueIndex("publicKey")
+    val walletId = varchar("wallet_id", 4096)
+    val walletKey = varchar("wallet_key", 4096)
+    val walletToken = varchar("wallet_token", 4096)
 }
 
 class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
@@ -26,6 +27,7 @@ class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
     var bpn by Wallets.bpn
     var did by Wallets.did
 
-    var privateKey by Wallets.privateKey
-    var publicKey by Wallets.publicKey
+    var walletId by Wallets.walletId
+    var walletKey by Wallets.walletKey
+    var walletToken by Wallets.walletToken
 }

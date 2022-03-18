@@ -6,6 +6,7 @@ import com.apicatalog.jsonld.loader.DocumentLoaderOptions
 import com.danubetech.verifiablecredentials.CredentialSubject
 import com.danubetech.verifiablecredentials.VerifiableCredential
 import com.danubetech.verifiablecredentials.validation.Validation
+import com.fasterxml.jackson.annotation.JsonProperty
 import foundation.identity.jsonld.ConfigurableDocumentLoader
 import foundation.identity.jsonld.JsonLDUtils
 import info.weboftrust.ldsignatures.LdProof
@@ -15,16 +16,17 @@ import io.bkbn.kompendium.annotations.ParamType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
-import kotlinx.serialization.json.*
 import net.catenax.core.custodian.plugins.AnySerializer
 
 import java.net.URI
+import java.util.ArrayList
+import java.util.LinkedHashMap
 
 @Serializable
 data class VerifiableCredentialDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @SerialName("@context")
+    @JsonProperty("@context") @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
     @Field(description = "List of Types", name = "type")
@@ -114,7 +116,7 @@ data class VerifiableCredentialParameters(
 data class IssuedVerifiableCredentialRequestDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @SerialName("@context")
+    @JsonProperty("@context") @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
     @Field(description = "List of Types", name = "type")
@@ -135,7 +137,7 @@ data class IssuedVerifiableCredentialRequestDto(
 data class VerifiableCredentialRequestDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @SerialName("@context")
+    @JsonProperty("@context") @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
     @Field(description = "List of Credential Types", name = "type")
@@ -157,7 +159,7 @@ data class VerifiableCredentialRequestDto(
 data class VerifiableCredentialRequestWithoutIssuerDto(
     @Field(description = "The ID of credential as String (URI compatible)", name = "id")
     val id: String? = null,
-    @SerialName("@context")
+    @JsonProperty("@context") @SerialName("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
     @Field(description = "List of Credential Types", name = "type")

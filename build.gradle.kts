@@ -39,6 +39,17 @@ dependencies {
     implementation("io.ktor:ktor-auth:$ktor_version")
     implementation("io.ktor:ktor-auth-jwt:$ktor_version")
 
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-kotlin
+    implementation("io.ktor:ktor-client-gson:$ktor_version")
+    implementation("io.ktor:ktor-client-jackson:$ktor_version")
+    // https://mvnrepository.com/artifact/org.postgresql/postgresql
+    implementation("org.postgresql:postgresql:42.3.3")
+    implementation ("com.beust:klaxon:5.5")
+
+    // implementation("com.google.code.gson:gson:2.8.5")
+    //implementation ("io.ktor:ktor-client-logging-native:$ktor_version")
+    //implementation("io.ktor:ktor-client-io.ktor:ktor-client-serialization:$ktor_version")
+    //implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
     // for 2.0.0-beta
     // implementation("io.ktor:ktor-server-websockets:$ktor_version")
     // implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
@@ -46,6 +57,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
 
     implementation("io.bkbn:kompendium-core:$kompendium_version")
     implementation("io.bkbn:kompendium-auth:$kompendium_version")
@@ -67,6 +79,6 @@ dependencies {
     testImplementation(kotlin("test"))
 
     runtimeOnly("com.h2database:h2:2.1.210")
-    runtimeOnly("org.postgresql:postgresql:42.2.24")
+    //runtimeOnly("org.postgresql:postgresql:42.2.24")
 
 }

@@ -1,17 +1,13 @@
 package net.catenax.core.custodian.persistence.repositories
 
 import net.catenax.core.custodian.models.NotFoundException
-import net.catenax.core.custodian.models.WalletCreateDto
+import net.catenax.core.custodian.models.WalletData
 import net.catenax.core.custodian.models.WalletDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.persistence.entities.*
-import org.bitcoinj.core.Base58
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.security.KeyPairGenerator
-import java.security.spec.ECGenParameterSpec
 import java.time.LocalDateTime
-import java.util.*
 
 class WalletRepository {
 
@@ -24,20 +20,16 @@ class WalletRepository {
             ?: throw NotFoundException("Wallet with identifier $identifier not found")
     }
 
-    fun addWallet(wallet: WalletCreateDto): Wallet {
+    fun addWallet(wallet: WalletData): Wallet {
         // TODO add VCs: request cx data pool information
-        val kpg = KeyPairGenerator.getInstance("EC")
-        val params = ECGenParameterSpec("secp256r1")
-        kpg.initialize(params);
-        val kp = kpg.generateKeyPair()
-
         val createdWallet = Wallet.new {
             bpn = wallet.bpn
             name = wallet.name
-            did = "did:example:" + Base58.encode(kp.public.encoded).toString()
+            did = wallet.did
+            walletId = wallet.walletId
+            walletKey = wallet.walletKey
+            walletToken = wallet.walletToken
             createdAt = LocalDateTime.now()
-            privateKey = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded())
-            publicKey = Base58.encode(kp.public.encoded).toString()
         }
         return createdWallet
     }
@@ -48,6 +40,10 @@ class WalletRepository {
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
-        WalletDto(name, bpn, did, createdAt, publicKey, emptyList<VerifiableCredentialDto>())
+        WalletDto(name, bpn, did, createdAt, emptyList<VerifiableCredentialDto>())
+    }
+
+    fun toWalletCompleteDataObject(entity: Wallet): WalletData = entity.run {
+        WalletData( name, bpn, did, walletId, walletKey, walletToken)
     }
 }

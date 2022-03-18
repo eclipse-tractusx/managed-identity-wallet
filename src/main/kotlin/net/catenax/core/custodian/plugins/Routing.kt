@@ -37,6 +37,7 @@ import io.bkbn.kompendium.core.routes.redoc
 
 
 import net.catenax.core.custodian.models.*
+import net.catenax.core.custodian.persistence.repositories.CredentialRepository
 import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import net.catenax.core.custodian.services.WalletService
 
@@ -61,7 +62,8 @@ data class BusinessPartnerInfo(val bpn: String)
 
 fun Application.configureRouting() {
     val walletRepository = WalletRepository()
-    val walletService = WalletService(walletRepository)
+    val credentialRepository = CredentialRepository()
+    val walletService = WalletService(walletRepository, credentialRepository)
 
     val datapoolUrl = environment.config.property("datapool.url").getString()
 

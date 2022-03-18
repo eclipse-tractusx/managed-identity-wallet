@@ -16,8 +16,9 @@ import io.ktor.routing.*
 import net.catenax.core.custodian.models.semanticallyInvalidInputException
 import net.catenax.core.custodian.models.ssi.*
 import net.catenax.core.custodian.models.syntacticallyInvalidInputException
+import net.catenax.core.custodian.services.WalletService
 
-fun Route.vcRoutes() {
+fun Route.vcRoutes(walletService: WalletService) {
 
     route("/credentials") {
 
@@ -40,11 +41,12 @@ fun Route.vcRoutes() {
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
-                val id = call.request.queryParameters["id"]
-                call.respond(
-                    HttpStatusCode.OK,
-                    listOf(signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto )
-                )
+                val id = call.request.queryParameters["id"] ?: null
+                val type = call.request.queryParameters["type"] ?: null
+                val issuerIdentifier = call.request.queryParameters["issuerIdentifier"] ?: null
+                val holderIdentifier = call.request.queryParameters["holderIdentifier"] ?: null
+                val credentials = walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
+                call.respond( HttpStatusCode.OK, credentials)
             }
 
             notarizedPost(
@@ -53,7 +55,7 @@ fun Route.vcRoutes() {
                     description = "Issue a verifiable credential with a given issuer DID",
                     requestInfo = RequestInfo(
                         description = "The verifiable credential input data",
-                        examples = verifiableCredentialRequestDtoExample
+                        // examples = verifiableCredentialRequestDtoExample
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.Created,
@@ -64,10 +66,12 @@ fun Route.vcRoutes() {
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
-                val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
+                val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
+                val signedCred = walletService.issueCredential(verifiableCredentialDto)
+                println("SINGED Cred: $signedCred")
                 call.respond(
                     HttpStatusCode.Created,
-                    signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto
+                    signedCred
                 )
             }
 
@@ -90,6 +94,7 @@ fun Route.vcRoutes() {
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
+
                 call.respond(
                     HttpStatusCode.Created,
                     signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto
@@ -99,6 +104,7 @@ fun Route.vcRoutes() {
     }
 }
 
+/**
 val verifiableCredentialRequestDtoExample = mapOf(
     "demo" to VerifiableCredentialRequestDto(
         context = listOf(
@@ -113,7 +119,7 @@ val verifiableCredentialRequestDtoExample = mapOf(
         credentialSubject = mapOf("college" to "Test-University"),
         holderIdentifier = "did:example:492edf208"
     )
-)
+)*/
 
 val verifiableCredentialRequestWithoutIssuerDtoExample = mapOf(
     "demo" to VerifiableCredentialRequestWithoutIssuerDto(

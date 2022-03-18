@@ -20,6 +20,7 @@ import io.ktor.application.*
 import io.ktor.server.testing.*
 import io.ktor.config.*
 import io.ktor.auth.*
+import kotlinx.coroutines.runBlocking
 
 import kotlin.test.*
 
@@ -31,9 +32,7 @@ import kotlinx.serialization.builtins.*
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.routes.*
-import net.catenax.core.custodian.models.ssi.*
 import net.catenax.core.custodian.services.*
-import net.catenax.core.custodian.persistence.*
 import net.catenax.core.custodian.persistence.repositories.*
 
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -53,7 +52,8 @@ class ApplicationTest {
     }
 
     val walletRepository = WalletRepository()
-    val walletService = WalletService(walletRepository)
+    val credentialRepository = CredentialRepository()
+    val walletService = WalletService(walletRepository, credentialRepository)
 
     fun makeToken(): String = "token"
 
@@ -151,7 +151,9 @@ class ApplicationTest {
 
             // programmatically add a wallet
             transaction {
-                walletService.createWallet(WalletCreateDto("did3", "name3"))
+                runBlocking {
+                    walletService.createWallet(WalletCreateDto("did3", "name3"))
+                }
             }
 
             handleRequest(HttpMethod.Get, "/api/wallets") {
@@ -261,7 +263,9 @@ class ApplicationTest {
 
             // programmatically add a wallet
             transaction {
-                walletService.createWallet(WalletCreateDto("bpn4", "name4"))
+                runBlocking {
+                    walletService.createWallet(WalletCreateDto("bpn4", "name4"))
+                }
             }
 
             var ce = assertFailsWith<ConflictException> {
