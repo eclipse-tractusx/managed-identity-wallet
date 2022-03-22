@@ -6,9 +6,14 @@ import net.catenax.core.custodian.models.ssi.IssuedVerifiableCredentialRequestDt
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.persistence.entities.*
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class CredentialRepository {
+
+    fun deleteCredentialsOfWallet(walletId: Int) {
+        VerifiableCredentials.deleteWhere { VerifiableCredentials.walletId eq walletId }
+    }
 
     fun getCredentials(issuerIdentifier: String?,
                        holderIdentifier: String?,
@@ -16,10 +21,10 @@ class CredentialRepository {
                        credentialId: String?): List<ResultRow> = transaction {
         val query = VerifiableCredentials.selectAll()
         issuerIdentifier?.let {
-            query.andWhere { VerifiableCredentials.issuerIdentifier eq it }
+            query.andWhere { VerifiableCredentials.issuerDid eq it }
         }
         holderIdentifier?.let {
-            query.andWhere { VerifiableCredentials.holderIdentifier eq it }
+            query.andWhere { VerifiableCredentials.holderDid eq it }
         }
         type?.let {
             query.andWhere { VerifiableCredentials.type eq it }
@@ -37,8 +42,8 @@ class CredentialRepository {
         return VerifiableCredential.new {
             credentialId = issuedCredential.id
             content = credentialAsJson
-            issuerIdentifier = issuedCredential.issuer
-            holderIdentifier = issuedCredential.credentialSubject["id"] as String
+            issuerDid = issuedCredential.issuer
+            holderDid = issuedCredential.credentialSubject["id"] as String
             type = typesAsString
             wallet = holderWallet
         }

@@ -38,11 +38,8 @@ fun Route.vpRoutes(walletService: WalletService) {
             )
         ) {
             val verifiableCredentialDto = call.receive<VerifiablePresentationRequestDto>()
-            walletService.issuePresentation(verifiableCredentialDto)
-            call.respond(
-                HttpStatusCode.Created,
-                verifiablePresentationResponseDtoExample["demo"] as VerifiablePresentationDto
-            )
+            val signedVerifiablePresentation = walletService.issuePresentation(verifiableCredentialDto)
+            call.respond(HttpStatusCode.Created, signedVerifiablePresentation)
         }
     }
 }

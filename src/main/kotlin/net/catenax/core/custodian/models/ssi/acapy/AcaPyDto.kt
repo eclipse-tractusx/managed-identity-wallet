@@ -11,6 +11,37 @@ import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.models.ssi.VerifiablePresentationDto
 import net.catenax.core.custodian.plugins.AnySerializer
 
+enum class EndPointType { Endpoint, Profile, LinkedDomains }
+
+enum class KeyType { ED25519 { override fun toString() = "ed25519" } }
+
+enum class DidMethod { SOV { override fun toString() = "sov" }}
+
+enum class WalletType {
+    INDY { override fun toString() = "indy" },
+    ASKAR { override fun toString() = "askar"}
+}
+
+enum class KeyManagementMode {
+    MANAGED { override fun toString() = "managed" },
+    UNMANAGED { override fun toString() = "unmanaged" }
+}
+
+enum class WalletDispatchType {
+    BASE { override fun toString() = "base" },
+    DEFAULT { override fun toString() = "default" }
+}
+enum class VerificationKeyType {
+    PUBLIC_KEY_BASE58 { override fun toString() = "publicKeyBase58" }
+}
+
+@Serializable
+data class AcaPyConfig(
+    val apiAdminUrl: String,
+    val ledgerUrl: String,
+    val networkIdentifier: String
+)
+
 @Serializable
 data class WalletList(val results: List<WalletRecord>)
 
@@ -22,7 +53,7 @@ data class WalletRecord(
     @SerialName("updated_at") @JsonProperty("updated_at") val updatedAt: String,
     val settings: WalletSettings,
     val state: String? = null
-){}
+)
 
 @Serializable
 data class WalletSettings(
@@ -33,7 +64,7 @@ data class WalletSettings(
     @SerialName("wallet.id") @JsonProperty("wallet.id") val walletId: String,
     @SerialName("default_label") @JsonProperty("default_label") val defaultLabel: String,
     @SerialName("image_url") @JsonProperty("image_url") val imageUrl: String? = ""
-) {}
+)
 
 @Serializable
 data class CreateSubWallet(
@@ -45,7 +76,7 @@ data class CreateSubWallet(
     @SerialName("wallet_key") @JsonProperty("wallet_key") val walletKey : String,
     @SerialName("wallet_name") @JsonProperty("wallet_name") val walletName: String,
     @SerialName("wallet_type") @JsonProperty("wallet_type") val walletType: String
-) {}
+)
 
 @Serializable
 data class CreatedSubWalletResult(
@@ -55,13 +86,13 @@ data class CreatedSubWalletResult(
     @SerialName("updated_at") @JsonProperty("updated_at") val updatedAt: String,
     val settings: WalletSettings,
     val token: String
-) {}
+)
 
 @Serializable
 data class DidCreate(
     val method: String,
     val options: DidCreateOptions
-) {}
+)
 
 @Serializable
 data class DidCreateOptions(@SerialName("key_type") @JsonProperty("key_type") val keyType: String)
@@ -157,3 +188,11 @@ data class ResolutionMetaData(
     @JsonProperty("retrieved_time") @SerialName("retrieved_time") val retrievedTime: String,
     val duration: Int
 )
+
+@Serializable
+data class DidEndpointWithType(
+    @JsonProperty("did") @SerialName("did") val didIdentifier: String,
+    val endpoint: String,
+    @JsonProperty("endpoint_type") @SerialName("endpoint_type") val endpointType: String
+)
+

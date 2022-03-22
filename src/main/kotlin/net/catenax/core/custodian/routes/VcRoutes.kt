@@ -68,11 +68,7 @@ fun Route.vcRoutes(walletService: WalletService) {
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
                 val signedCred = walletService.issueCredential(verifiableCredentialDto)
-                println("SINGED Cred: $signedCred")
-                call.respond(
-                    HttpStatusCode.Created,
-                    signedCred
-                )
+                call.respond(HttpStatusCode.Created, signedCred)
             }
 
         route("/issuer") {

@@ -12,7 +12,10 @@ data class DidServiceDto(
     @Field(description = "The Type of the Service Endpoint as String", name = "type")
     val type: String,
     @Field(description = "The URL of the Service Endpoint as String (URI compatible)", name = "serviceEndpoint")
-    val serviceEndpoint: String
+    val serviceEndpoint: String,
+    val recipientKeys: List<String>? = null,
+    val routingKeys: List<String>? = null,
+    val priority: Int? = null
 )
 
 @Serializable

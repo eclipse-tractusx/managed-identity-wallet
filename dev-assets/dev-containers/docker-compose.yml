@@ -25,5 +25,38 @@ services:
     ports:
       - "8081:8080"
 
+  cx_acapy:
+    image: acapy:latest
+    ports:
+      - "${ACAPY_ADMIN_PORT}:${ACAPY_ADMIN_PORT}"
+      - "${ACAPY_ENDPOINT_PORT}:${ACAPY_ENDPOINT_PORT}"
+    environment:
+      WAIT_HOSTS: "db:5432"
+      WAIT_HOSTS_TIMEOUT: "300"
+      WAIT_SLEEP_INTERVAL: "5"
+      WAIT_HOST_CONNECT_TIMEOUT: "3"
+    entrypoint: /bin/bash
+    command: [
+       "-c",
+       "aca-py start \
+        -e ${ACAPY_ENDPOINT_URL} \
+        --auto-provision \
+        --inbound-transport http '0.0.0.0' ${ACAPY_ENDPOINT_PORT} \
+        --outbound-transport http \
+        --admin '0.0.0.0' ${ACAPY_ADMIN_PORT} \
+        --wallet-type indy \
+        --wallet-name catenaX \
+        --wallet-key issuerkey \
+        --seed ${AGENT_WALLET_SEED} \
+        --genesis-url ${LEDGER_URL}/genesis \
+        --label ${LABEL} \
+        --admin-insecure-mode \
+        --auto-ping-connection \
+        --jwt-secret secret \
+        --multitenant \
+        --multitenant-admin \
+        --log-level DEBUG",
+    ]
+
 volumes:
   postgres-data:

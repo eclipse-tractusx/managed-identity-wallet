@@ -39,12 +39,7 @@ dependencies {
     implementation("io.ktor:ktor-auth:$ktor_version")
     implementation("io.ktor:ktor-auth-jwt:$ktor_version")
 
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-kotlin
-    implementation("io.ktor:ktor-client-gson:$ktor_version")
     implementation("io.ktor:ktor-client-jackson:$ktor_version")
-    // https://mvnrepository.com/artifact/org.postgresql/postgresql
-    implementation("org.postgresql:postgresql:42.3.3")
-    implementation ("com.beust:klaxon:5.5")
 
     // implementation("com.google.code.gson:gson:2.8.5")
     //implementation ("io.ktor:ktor-client-logging-native:$ktor_version")
@@ -79,6 +74,6 @@ dependencies {
     testImplementation(kotlin("test"))
 
     runtimeOnly("com.h2database:h2:2.1.210")
-    //runtimeOnly("org.postgresql:postgresql:42.2.24")
+    runtimeOnly("org.postgresql:postgresql:42.2.24")
 
 }

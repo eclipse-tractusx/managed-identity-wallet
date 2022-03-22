@@ -3,7 +3,8 @@ package net.catenax.core.custodian.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class WalletData(
+data class WalletExtendedData(
+    val id: Int? = null,
     val name: String,
     val bpn: String,
     val did: String,

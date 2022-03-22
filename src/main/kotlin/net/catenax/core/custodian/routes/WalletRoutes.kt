@@ -97,8 +97,12 @@ fun Route.walletRoutes(walletService: WalletService) {
             ) {
                 val identifier =
                     call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
-                val walletDto: WalletDto = walletService.getWallet(identifier)
-                call.respond(walletDto)
+                var withCredentials = false
+                if (call.request.queryParameters["withCredentials"] != null) {
+                    withCredentials = call.request.queryParameters["withCredentials"].toBoolean()
+                }
+                val walletDto: WalletDto = walletService.getWallet(identifier, withCredentials)
+                return@notarizedGet call.respond(HttpStatusCode.OK, walletDto)
             }
 
             notarizedDelete(
@@ -155,10 +159,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     val identifier = call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
                     val verifiableCredential = call.receive<IssuedVerifiableCredentialRequestDto>()
                     walletService.storeCredential(identifier, verifiableCredential)
-                    call.respond(
-                        HttpStatusCode.Created,
-                        SuccessResponse("Credential has been successfully stored")
-                    )
+                    call.respond(HttpStatusCode.Created, SuccessResponse("Credential has been successfully stored"))
                 }
             }
 
@@ -263,7 +264,7 @@ val walletDtoExample = mapOf(
         "bpn",
         "did",
         LocalDateTime.now(),
-        emptyList<VerifiableCredentialDto>()
+        emptyList<VerifiableCredentialDto>().toMutableList()
     )
 )
 

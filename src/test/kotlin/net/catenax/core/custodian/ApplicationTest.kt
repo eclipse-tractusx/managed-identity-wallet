@@ -25,8 +25,6 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.*
 
 import kotlinx.serialization.json.*
-import kotlinx.serialization.*
-import kotlinx.serialization.modules.*
 import kotlinx.serialization.builtins.*
 
 import net.catenax.core.custodian.plugins.*
@@ -48,12 +46,16 @@ class ApplicationTest {
             put("auth.realm", System.getenv("CX_AUTH_REALM") ?: "catenax")
             put("auth.role", System.getenv("CX_AUTH_ROLE") ?: "access")
             put("datapool.url", System.getenv("CX_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
+            put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
+            put("acapy.ledgerUrl", System.getenv("ACAPY_LEDGER_URL") ?: "https://indy-test.bosch-digital.de/register")
+            put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: ":indy:test")
         }
     }
 
     val walletRepository = WalletRepository()
     val credentialRepository = CredentialRepository()
-    val walletService = WalletService(walletRepository, credentialRepository)
+    val acaPyMockedService = AcaPyMockedService()
+    val walletService = WalletAcaPyServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
 
     fun makeToken(): String = "token"
 
@@ -170,7 +172,9 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.Accepted, response.status())
             }
             transaction {
-                walletService.deleteWallet("did3")
+                runBlocking {
+                    walletService.deleteWallet("did3")
+                }
             }
 
             // verify deletion
@@ -281,8 +285,10 @@ class ApplicationTest {
 
             // clean up created wallets
             transaction {
-                walletService.deleteWallet("bpn4")
-                assertEquals(0, walletService.getAll().size)
+                runBlocking {
+                    walletService.deleteWallet("bpn4")
+                    assertEquals(0, walletService.getAll().size)
+                }
             }
         }
     }

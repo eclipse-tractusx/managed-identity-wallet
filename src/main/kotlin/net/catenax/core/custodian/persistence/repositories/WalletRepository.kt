@@ -1,7 +1,7 @@
 package net.catenax.core.custodian.persistence.repositories
 
 import net.catenax.core.custodian.models.NotFoundException
-import net.catenax.core.custodian.models.WalletData
+import net.catenax.core.custodian.models.WalletExtendedData
 import net.catenax.core.custodian.models.WalletDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.persistence.entities.*
@@ -20,9 +20,9 @@ class WalletRepository {
             ?: throw NotFoundException("Wallet with identifier $identifier not found")
     }
 
-    fun addWallet(wallet: WalletData): Wallet {
+    fun addWallet(wallet: WalletExtendedData): Wallet {
         // TODO add VCs: request cx data pool information
-        val createdWallet = Wallet.new {
+        return Wallet.new {
             bpn = wallet.bpn
             name = wallet.name
             did = wallet.did
@@ -31,7 +31,6 @@ class WalletRepository {
             walletToken = wallet.walletToken
             createdAt = LocalDateTime.now()
         }
-        return createdWallet
     }
 
     fun deleteWallet(identifier: String): Boolean {
@@ -40,10 +39,10 @@ class WalletRepository {
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
-        WalletDto(name, bpn, did, createdAt, emptyList<VerifiableCredentialDto>())
+        WalletDto(name, bpn, did, createdAt, emptyList<VerifiableCredentialDto>().toMutableList())
     }
 
-    fun toWalletCompleteDataObject(entity: Wallet): WalletData = entity.run {
-        WalletData( name, bpn, did, walletId, walletKey, walletToken)
+    fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {
+        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey, walletToken)
     }
 }

@@ -35,6 +35,12 @@ fun Application.module(testing: Boolean = false) {
         exception<BadRequestException> { cause ->
             call.respond(HttpStatusCode.BadRequest, ExceptionResponse(cause.message!!))
         }
+        exception<UnprocessableEntityException> { cause ->
+            call.respond(HttpStatusCode.UnprocessableEntity, ExceptionResponse(cause.message!!))
+        }
+        exception<ForbiddenException> { cause ->
+            call.respond(HttpStatusCode.Forbidden, ExceptionResponse(cause.message!!))
+        }
         exception<NotImplementedException> { cause ->
             call.respond(HttpStatusCode.NotImplemented, ExceptionResponse(cause.message!!))
         }

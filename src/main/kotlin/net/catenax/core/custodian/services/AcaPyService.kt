@@ -1,50 +1,123 @@
 package net.catenax.core.custodian.services
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.logging.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.acapy.*
 
-interface AcaPyService {
+class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: HttpClient): IAcaPyService {
 
-    suspend fun getWallets(): WalletList
+    override fun getNetworkIdentifier(): String {
+        return acaPyConfig.networkIdentifier
+    }
 
-    suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult
-
-    suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult
-
-    suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse
-
-    suspend fun registerDidOnLedger(didRegistration: DidRegistration): DidRegistrationResult
-
-    suspend fun <T> signCredentialJsonLd(signRequest: SignRequest<T>, token: String): String
-
-    suspend fun <T> signPresentationJsonLd(signRequest: SignRequest<T>, token: String): SignPresentationResponse
-
-    suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse
-
-    suspend fun resolveDidDoc(did: String, token: String): ResolutionResult
-
-    companion object {
-        fun create(): AcaPyService {
-            return AcaPyServiceImpl(
-                client = HttpClient() {
-                    // expectSuccess = false
-                    install(Logging) {
-                        logger = Logger.DEFAULT
-                        level = LogLevel.BODY
-                    }
-                    install(JsonFeature) {
-                        serializer = JacksonSerializer() {
-                           enable(SerializationFeature.INDENT_OUTPUT)
-                           serializationConfig.defaultPrettyPrinter
-                           setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                        }
-                    }
-                }
-            )
+    override suspend fun getWallets(): WalletList {
+        return try {
+            client.get {
+                headers.append(HttpHeaders.Accept, "application/json")
+                url("${acaPyConfig.apiAdminUrl}/multitenancy/wallets")
+            }
+        } catch (e: Exception) {
+            throw BadRequestException(e.message)
         }
     }
+
+    override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
+        println(acaPyConfig.apiAdminUrl)
+        val httpResponse: HttpResponse = client.post {
+            url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet")
+            contentType(ContentType.Application.Json)
+            body = subWallet
+        }
+        return Json.decodeFromString(httpResponse.readText())
+    }
+
+    override suspend fun assignDidToPublic(didIdentifier: String, token: String): Boolean {
+        client.post<Any> {
+            url("${acaPyConfig.apiAdminUrl}/wallet/did/public?did=$didIdentifier")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            accept(ContentType.Application.Json)
+        }
+        return true
+    }
+
+    override suspend fun deleteSubWallet(walletData: WalletExtendedData): Boolean {
+        client.post<Any> {
+            url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet/${walletData.walletId}/remove")
+            contentType(ContentType.Application.Json)
+            body = WalletKey(walletData.walletKey)
+        }
+        return true
+    }
+
+    override suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse {
+        return client.post {
+            url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet/$id/token")
+            contentType(ContentType.Application.Json)
+            body = WalletKey(key)
+        }
+    }
+
+    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult {
+        return client.post {
+            url("${acaPyConfig.apiAdminUrl}/wallet/did/create")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = didCreateDto
+        }
+    }
+
+    override suspend fun registerDidOnLedger(didRegistration: DidRegistration): DidRegistrationResult {
+        return client.post {
+            url(acaPyConfig.ledgerUrl)
+            contentType(ContentType.Application.Json)
+            body = didRegistration
+        }
+    }
+
+    override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String {
+        val httpResponse: HttpResponse = client.post {
+            url("${acaPyConfig.apiAdminUrl}/jsonld/sign")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = signRequest
+        }
+        return httpResponse.readText()
+    }
+
+    override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse {
+        return client.post {
+            url("${acaPyConfig.apiAdminUrl}/jsonld/verify")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = verifyRequest
+        }
+    }
+
+    override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
+        return client.get {
+            url("${acaPyConfig.apiAdminUrl}/resolver/resolve/$did")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            accept(ContentType.Application.Json)
+        }
+    }
+
+    override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String): Boolean {
+        client.post<Any> {
+            url("${acaPyConfig.apiAdminUrl}/wallet/set-did-endpoint")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = serviceEndPoint
+        }
+        return true
+    }
+
 }
