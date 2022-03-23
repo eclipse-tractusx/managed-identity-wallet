@@ -27,7 +27,7 @@ fun Route.vcRoutes(walletService: WalletService) {
                     summary = "Query Verifiable Credentials",
                     description = "Search verifiable credentials with filter criteria",
                     parameterExamples = setOf(
-                        ParameterExample("id", "did", "http://example.edu/credentials/3732"),
+                        ParameterExample("id", "id", "http://example.edu/credentials/3732"),
                         ParameterExample("type", "type", "['University-Degree-Credential']"),
                         ParameterExample("issuerIdentifier", "issuerIdentifierDid", "did:example:0123"),
                         ParameterExample("holderIdentifier", "holderIdentifierDid", "did:example:4567"),

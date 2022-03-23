@@ -312,12 +312,7 @@ class AcaPyWalletServiceImpl(
         } else {
             null
         }
-        val listOfCredentials =
-            credentialRepository.getCredentials(issuerDid, holderDid, type, credentialId)
-        if (listOfCredentials.isNotEmpty()) {
-            return listOfCredentials.map { credentialRepository.fromRow(it) }
-        }
-        return emptyList()
+        return credentialRepository.getCredentials(issuerDid, holderDid, type, credentialId)
     }
 
     private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {

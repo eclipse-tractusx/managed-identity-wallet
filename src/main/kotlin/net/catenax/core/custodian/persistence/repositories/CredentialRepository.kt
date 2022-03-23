@@ -19,7 +19,7 @@ class CredentialRepository {
         holderIdentifier: String?,
         type: String?,
         credentialId: String?
-    ): List<ResultRow> = transaction {
+    ): List<VerifiableCredentialDto> = transaction {
         val query = VerifiableCredentials.selectAll()
         issuerIdentifier?.let {
             query.andWhere { VerifiableCredentials.issuerDid eq it }
@@ -33,7 +33,9 @@ class CredentialRepository {
         credentialId?.let {
             query.andWhere { VerifiableCredentials.credentialId eq it }
         }
-        query.toList()
+        query.toList().map {
+            Json.decodeFromString(it[VerifiableCredentials.content])
+        }
     }
 
     fun storeCredential(
@@ -50,9 +52,5 @@ class CredentialRepository {
             type = typesAsString
             wallet = holderWallet
         }
-    }
-
-    fun fromRow(resultRow: ResultRow): VerifiableCredentialDto {
-        return Json.decodeFromString(resultRow[VerifiableCredentials.content])
     }
 }

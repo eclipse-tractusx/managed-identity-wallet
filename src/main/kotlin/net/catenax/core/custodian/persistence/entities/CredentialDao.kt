@@ -6,6 +6,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 object VerifiableCredentials : IntIdTable("verifiable_credentials") {
+    // uniqueIndex("content") not working in h2 database
     val content = text("content").uniqueIndex("content")
     val credentialId = varchar("credential_id", 4096).uniqueIndex("credentialId").nullable()
     val issuerDid = varchar("issuer_did", 4096)
