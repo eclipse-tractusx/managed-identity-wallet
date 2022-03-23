@@ -41,10 +41,6 @@ dependencies {
 
     implementation("io.ktor:ktor-client-jackson:$ktor_version")
 
-    // implementation("com.google.code.gson:gson:2.8.5")
-    //implementation ("io.ktor:ktor-client-logging-native:$ktor_version")
-    //implementation("io.ktor:ktor-client-io.ktor:ktor-client-serialization:$ktor_version")
-    //implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
     // for 2.0.0-beta
     // implementation("io.ktor:ktor-server-websockets:$ktor_version")
     // implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
@@ -67,7 +63,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
 
     implementation("decentralized-identity:did-common-java:1.0.0")
-    implementation("com.danubetech:verifiable-credentials-java:1.0.0")
 
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")

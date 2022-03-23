@@ -1,6 +1,5 @@
 package net.catenax.core.custodian.routes
 
-import com.danubetech.verifiablecredentials.jsonld.VerifiableCredentialContexts
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
@@ -15,6 +14,7 @@ import net.catenax.core.custodian.models.ssi.LdProofDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.models.ssi.VerifiablePresentationDto
 import net.catenax.core.custodian.models.ssi.VerifiablePresentationRequestDto
+import net.catenax.core.custodian.models.ssi.JsonLdContexts
 import net.catenax.core.custodian.services.WalletService
 
 fun Route.vpRoutes(walletService: WalletService) {
@@ -49,8 +49,8 @@ val verifiablePresentationRequestDtoExample = mapOf(
         verifiableCredentials = listOf(
             VerifiableCredentialDto(
                 context = listOf(
-                    VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
-                    VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
                 ),
                 id = "http://example.edu/credentials/333",
                 type = listOf("University-Degree-Credential, VerifiableCredential"),
@@ -72,14 +72,14 @@ val verifiablePresentationRequestDtoExample = mapOf(
 
 val verifiablePresentationResponseDtoExample = mapOf(
     "demo" to VerifiablePresentationDto(
-        context = listOf("https://www.w3.org/2018/credentials/v1"),
+        context = listOf(JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1),
         type =  listOf("VerifiablePresentation"),
         holder = "did:example:76e12ec712ebc6f1c221ebfeb1f",
         verifiableCredential = listOf(
             VerifiableCredentialDto(
                 context = listOf(
-                    VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
-                    VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
                 ),
                 id = "http://example.edu/credentials/3732",
                 type = listOf("University-Degree-Credential, VerifiableCredential"),

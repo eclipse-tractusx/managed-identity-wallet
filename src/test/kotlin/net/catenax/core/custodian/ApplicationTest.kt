@@ -166,7 +166,7 @@ class ApplicationTest {
 
             // delete both from the store
             handleRequest(HttpMethod.Delete, "/api/wallets/bpn1").apply {
-                assertEquals(HttpStatusCode.Accepted, response.status())
+                assertEquals(HttpStatusCode.OK, response.status())
             }
             transaction {
                 runBlocking {

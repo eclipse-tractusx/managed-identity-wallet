@@ -1,6 +1,5 @@
 package net.catenax.core.custodian.routes
 
-import com.danubetech.verifiablecredentials.jsonld.VerifiableCredentialContexts
 import io.bkbn.kompendium.annotations.Field
 import io.bkbn.kompendium.annotations.Param
 import io.bkbn.kompendium.annotations.ParamType
@@ -21,6 +20,7 @@ import io.ktor.routing.*
 import kotlinx.serialization.Serializable
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.*
+import net.catenax.core.custodian.models.ssi.JsonLdContexts
 import net.catenax.core.custodian.services.WalletService
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import java.time.LocalDateTime
@@ -251,8 +251,8 @@ data class WalletDtoParameter(
 val issuedVerifiableCredentialRequestDtoExample = mapOf(
     "demo" to IssuedVerifiableCredentialRequestDto(
         context = listOf(
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
         ),
         id = "http://example.edu/credentials/3732",
         type = listOf("University-Degree-Credential, VerifiableCredential"),
