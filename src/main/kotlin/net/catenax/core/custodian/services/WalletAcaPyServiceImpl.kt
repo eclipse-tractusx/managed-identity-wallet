@@ -65,7 +65,7 @@ class WalletAcaPyServiceImpl(
             walletName = walletCreateDto.bpn + "-" + JsonLDUtils.dateToString(Date()),
             walletType = WalletType.ASKAR.toString()
         )
-        // Create sub Wallet on ledger
+        // Create Sub Wallet on ledger
         val createdSubWalletDto = acaPyService.createSubWallet(subWalletToCreate)
         // Create local DID on ledger
         val createdDid = acaPyService.createLocalDidForWallet(
@@ -81,7 +81,7 @@ class WalletAcaPyServiceImpl(
                 verkey = createdDid.result.verkey
             )
         )
-        // set as Public
+        // set DID as Public
         acaPyService.assignDidToPublic(
             getIdentifierOfDid(createdDid.result.did),
             createdSubWalletDto.token
@@ -102,7 +102,7 @@ class WalletAcaPyServiceImpl(
 
     override suspend fun deleteWallet(identifier: String): Boolean {
         log.debug("Delete Wallet with identifier $identifier")
-        val walletData = getWalletPrivateInformation(identifier)
+        val walletData = getWalletExtendedInformation(identifier)
         transaction {
             credentialRepository.deleteCredentialsOfWallet(walletId = walletData.id!!)
             walletRepository.deleteWallet(identifier)
@@ -141,8 +141,8 @@ class WalletAcaPyServiceImpl(
 
     override suspend fun issueCredential(vcRequest: VerifiableCredentialRequestDto): VerifiableCredentialDto {
         log.debug("Issue Credential $vcRequest")
-        val issuerWalletData = getWalletPrivateInformation(vcRequest.issuerIdentifier)
-        val holderWalletData = getWalletPrivateInformation(vcRequest.holderIdentifier)
+        val issuerWalletData = getWalletExtendedInformation(vcRequest.issuerIdentifier)
+        val holderWalletData = getWalletExtendedInformation(vcRequest.holderIdentifier)
 
         val issuerDid = issuerWalletData.did
         val holderDid = holderWalletData.did
@@ -183,7 +183,7 @@ class WalletAcaPyServiceImpl(
 
     override suspend fun resolveDocument(identifier: String): DidDocumentDto {
         log.debug("Resolve DID Document $identifier")
-        val walletData = getWalletPrivateInformation(identifier)
+        val walletData = getWalletExtendedInformation(identifier)
         val modifiedDid = walletData.did.replace(networkIdentifier, ":sov:")
         val didDocResult = acaPyService.resolveDidDoc(modifiedDid, walletData.walletToken)
         val json = Json.encodeToString(ResolutionResult.serializer(), didDocResult)
@@ -208,7 +208,7 @@ class WalletAcaPyServiceImpl(
 
     override suspend fun issuePresentation(vpRequest: VerifiablePresentationRequestDto): VerifiablePresentationDto {
         log.debug("Issue Presentation $vpRequest")
-        val holderWalletData = getWalletPrivateInformation(vpRequest.holderIdentifier)
+        val holderWalletData = getWalletExtendedInformation(vpRequest.holderIdentifier)
         val holderDid = holderWalletData.did
         val token = holderWalletData.walletToken
         val verKey = getVerificationKey(holderDid, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
@@ -239,7 +239,7 @@ class WalletAcaPyServiceImpl(
 
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto {
         log.debug("Add Service Key $identifier")
-        val walletData = getWalletPrivateInformation(identifier)
+        val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
             didDoc.services.map {
@@ -263,7 +263,7 @@ class WalletAcaPyServiceImpl(
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
     ): DidDocumentDto {
         log.debug("Add Service Key $identifier")
-        val walletData = getWalletPrivateInformation(identifier)
+        val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
             var found = false
@@ -315,7 +315,7 @@ class WalletAcaPyServiceImpl(
         return emptyList()
     }
 
-    private fun getWalletPrivateInformation(identifier: String): WalletExtendedData {
+    private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {
         return transaction {
             val extractedWallet = walletRepository.getWallet(identifier)
             walletRepository.toWalletCompleteDataObject(extractedWallet)
