@@ -199,11 +199,11 @@ class WalletAcaPyServiceImpl(
                 VerificationKeyType.PUBLIC_KEY_BASE58.toString() -> didDocumentDto.verificationMethods[0].publicKeyBase58
                     ?: throw BadRequestException("Verification Key with publicKeyBase58 does not exits")
                 else -> {
-                    throw BadRequestException("Not supported type")
+                    throw BadRequestException("Not supported public key type")
                 }
             }
         }
-        throw BadRequestException("Get Verification key exception")
+        throw BadRequestException("Error: no verification methods")
     }
 
     override suspend fun issuePresentation(vpRequest: VerifiablePresentationRequestDto): VerifiablePresentationDto {
@@ -234,10 +234,7 @@ class WalletAcaPyServiceImpl(
         if (signedVpResult.signedDoc != null) {
             return signedVpResult.signedDoc
         }
-        if (signedVpResult.error != null) {
-            throw BadRequestException(signedVpResult.error)
-        }
-        throw BadRequestException("Issuer presentation failed!")
+        throw BadRequestException(signedVpResult.error)
     }
 
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto {
@@ -284,9 +281,9 @@ class WalletAcaPyServiceImpl(
             if (found) {
                 return resolveDocument(walletData.did)
             }
-            throw BadRequestException("Not Found")
+            throw BadRequestException("Target Service Endpoint not Found")
         }
-        throw BadRequestException("Get Verification key exception")
+        throw BadRequestException("Update Service failed: DID Document has no services")
     }
 
     override suspend fun deleteService(identifier: String, id: String): DidDocumentDto {
