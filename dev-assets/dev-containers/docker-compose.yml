@@ -44,18 +44,18 @@ services:
         --inbound-transport http '0.0.0.0' ${ACAPY_ENDPOINT_PORT} \
         --outbound-transport http \
         --admin '0.0.0.0' ${ACAPY_ADMIN_PORT} \
-        --wallet-type indy \
-        --wallet-name catenaX \
-        --wallet-key issuerkey \
+        --wallet-type ${WALLET_TYPE} \
+        --wallet-name ${WALLET_NAME} \
+        --wallet-key ${WALLET_KEY} \
         --seed ${AGENT_WALLET_SEED} \
         --genesis-url ${LEDGER_URL}/genesis \
         --label ${LABEL} \
         --admin-insecure-mode \
         --auto-ping-connection \
-        --jwt-secret secret \
+        --jwt-secret ${JWT_SECRET} \
         --multitenant \
         --multitenant-admin \
-        --log-level DEBUG",
+        --log-level ${LOG_LEVEL}",
     ]
 
 volumes:

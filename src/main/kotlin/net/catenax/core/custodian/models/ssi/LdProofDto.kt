@@ -2,7 +2,6 @@ package net.catenax.core.custodian.models.ssi
 
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class LdProofDto(
     val type: String,
@@ -15,19 +14,4 @@ data class LdProofDto(
     val domain: String? = null,
     val challenge: String? = null,
     val nonce: String? = null
-) {
-
-    constructor(created: String, type: String, proofPurpose: String, verificationMethod: String, jws: String)
-            : this(
-        type,
-        created,
-        proofPurpose,
-        verificationMethod,
-        jws,
-        proofValue = null,
-        creator = null,
-        domain = null,
-        challenge = null,
-        nonce = null
-    )
-}
+)

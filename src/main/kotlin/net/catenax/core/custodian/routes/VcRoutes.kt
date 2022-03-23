@@ -45,8 +45,10 @@ fun Route.vcRoutes(walletService: WalletService) {
                 val type = call.request.queryParameters["type"] ?: null
                 val issuerIdentifier = call.request.queryParameters["issuerIdentifier"] ?: null
                 val holderIdentifier = call.request.queryParameters["holderIdentifier"] ?: null
-                val credentials = walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
-                call.respond( HttpStatusCode.OK, credentials)
+                call.respond(
+                    HttpStatusCode.OK,
+                    walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
+                )
             }
 
             notarizedPost(
@@ -55,7 +57,7 @@ fun Route.vcRoutes(walletService: WalletService) {
                     description = "Issue a verifiable credential with a given issuer DID",
                     requestInfo = RequestInfo(
                         description = "The verifiable credential input data",
-                        // examples = verifiableCredentialRequestDtoExample
+                        examples = verifiableCredentialRequestDtoExample
                     ),
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.Created,
@@ -67,8 +69,7 @@ fun Route.vcRoutes(walletService: WalletService) {
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
-                val signedCred = walletService.issueCredential(verifiableCredentialDto)
-                call.respond(HttpStatusCode.Created, signedCred)
+                call.respond(HttpStatusCode.Created, walletService.issueCredential(verifiableCredentialDto))
             }
 
         route("/issuer") {
@@ -100,7 +101,6 @@ fun Route.vcRoutes(walletService: WalletService) {
     }
 }
 
-/**
 val verifiableCredentialRequestDtoExample = mapOf(
     "demo" to VerifiableCredentialRequestDto(
         context = listOf(
@@ -115,7 +115,7 @@ val verifiableCredentialRequestDtoExample = mapOf(
         credentialSubject = mapOf("college" to "Test-University"),
         holderIdentifier = "did:example:492edf208"
     )
-)*/
+)
 
 val verifiableCredentialRequestWithoutIssuerDtoExample = mapOf(
     "demo" to VerifiableCredentialRequestWithoutIssuerDto(

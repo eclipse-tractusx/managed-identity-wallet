@@ -46,7 +46,7 @@ suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token:
 
     var stringBody: String = ""
     HttpClient(Apache).use { client ->
-        val httpResponse: HttpResponse = client.get("${datapoolUrl}/api/catena/business-partner/${bpn}") {
+        val httpResponse: HttpResponse = client.get("$datapoolUrl/$bpn") {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 append(HttpHeaders.Authorization, "Bearer " + token)
@@ -164,7 +164,7 @@ fun Application.configureRouting() {
                                 log.warn("SerializationException: " + e.message)
                                 throw BadRequestException(e.message)
                             } catch (e: IOException) {
-                                log.warn("IOException: ${datapoolUrl} " + e.message)
+                                log.warn("IOException: $datapoolUrl " + e.message)
                                 throw BadRequestException(e.message)
                             }
                         } else {

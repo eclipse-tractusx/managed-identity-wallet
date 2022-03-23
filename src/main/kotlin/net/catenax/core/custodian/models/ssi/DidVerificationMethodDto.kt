@@ -1,10 +1,6 @@
-@file:UseSerializers(AnySerializer::class)
-
 package net.catenax.core.custodian.models.ssi
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.UseSerializers
-import net.catenax.core.custodian.plugins.AnySerializer
 
 @Serializable
 data class DidVerificationMethodDto(
@@ -17,4 +13,4 @@ data class DidVerificationMethodDto(
     val publicKeyPem: String? = null,
     val publicKeyMultibase: String? = null,
     val publicKeyJwk: PublicKeyJwkDto? = null
-) {}
+)

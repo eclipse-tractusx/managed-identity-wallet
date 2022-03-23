@@ -2,7 +2,6 @@
 
 package net.catenax.core.custodian.models.ssi
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -12,7 +11,6 @@ import net.catenax.core.custodian.plugins.AnySerializer
 data class PublicKeyJwkDto(
     val kty: String,
     val use: String? = null,
-    @JsonProperty("key_ops")
     @SerialName("key_ops")
     val keyOps: List<String>? = null,
     val alg: String? = null,
@@ -21,4 +19,4 @@ data class PublicKeyJwkDto(
     val x: String? = null,
     val y: String? = null,
     val additionalAttributes: Map<String, Any>? = null
-) {}
+)

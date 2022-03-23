@@ -110,7 +110,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     summary = "Remove wallet",
                     description = "Remove hosted wallet",
                     responseInfo = ResponseInfo(
-                        status = HttpStatusCode.Accepted,
+                        status = HttpStatusCode.OK,
                         description = "Wallet successfully removed!",
                         examples = mapOf("demo" to SuccessResponse("Wallet successfully removed!"))
                     ),
@@ -122,7 +122,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     call.parameters["identifier"] ?: return@notarizedDelete call.respond(HttpStatusCode.BadRequest)
                 if (walletService.deleteWallet(identifier)) {
                     return@notarizedDelete call.respond(
-                        HttpStatusCode.Accepted,
+                        HttpStatusCode.OK,
                         SuccessResponse("Wallet successfully removed!")
                     )
                 }
@@ -156,10 +156,22 @@ fun Route.walletRoutes(walletService: WalletService) {
                         tags = setOf("Wallets")
                     )
                 ) {
-                    val identifier = call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
-                    val verifiableCredential = call.receive<IssuedVerifiableCredentialRequestDto>()
-                    walletService.storeCredential(identifier, verifiableCredential)
-                    call.respond(HttpStatusCode.Created, SuccessResponse("Credential has been successfully stored"))
+                    try {
+                        val identifier = call.parameters["identifier"]
+                            ?: throw BadRequestException("Missing or malformed identifier")
+                        val verifiableCredential = call.receive<IssuedVerifiableCredentialRequestDto>()
+                        walletService.storeCredential(identifier, verifiableCredential)
+                        call.respond(HttpStatusCode.Created, SuccessResponse("Credential has been successfully stored"))
+                    } catch (e: ExposedSQLException) {
+                        val isUniqueConstraintError = e.sqlState == "23505"
+                        if (isUniqueConstraintError) {
+                            throw ConflictException("Credential already exists!")
+                        } else {
+                            throw UnprocessableEntityException(e.message)
+                        }
+                    } catch (e: Exception) {
+                        throw e
+                    }
                 }
             }
 

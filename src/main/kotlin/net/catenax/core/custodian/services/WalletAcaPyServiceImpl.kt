@@ -289,8 +289,8 @@ class WalletAcaPyServiceImpl(
         throw BadRequestException("Get Verification key exception")
     }
 
-    override suspend fun deleteService(identifier: String, id: String): Boolean {
-        throw NotImplementedException("Delete Service is not supported!")
+    override suspend fun deleteService(identifier: String, id: String): DidDocumentDto {
+        throw NotImplementedException("Delete Service Endpoint is not supported!")
     }
 
     override fun getCredentials(

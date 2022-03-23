@@ -1,12 +1,12 @@
 package net.catenax.core.custodian
 
 import net.catenax.core.custodian.models.*
+import net.catenax.core.custodian.models.ssi.DidDocumentDto
 import net.catenax.core.custodian.models.ssi.acapy.*
-import net.catenax.core.custodian.routes.didDocumentDtoExample
 
 import net.catenax.core.custodian.services.IAcaPyService
 
-class AcaPyMockedService(): IAcaPyService {
+class AcaPyMockedService: IAcaPyService {
 
     override fun getNetworkIdentifier(): String = ""
 
@@ -31,9 +31,9 @@ class AcaPyMockedService(): IAcaPyService {
         )
     }
 
-    override suspend fun assignDidToPublic(didIdentifier: String, token: String): Boolean = true
+    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {}
 
-    override suspend fun deleteSubWallet(walletData: WalletExtendedData): Boolean = true
+    override suspend fun deleteSubWallet(walletData: WalletExtendedData) {}
 
     override suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse =
         CreateWalletTokenResponse(token = "")
@@ -59,7 +59,7 @@ class AcaPyMockedService(): IAcaPyService {
 
     override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult =
         ResolutionResult(
-            didDoc = didDocumentDtoExample["demo"]!!,
+            didDoc = DidDocumentDto(id = "id", context = emptyList()),
             metadata = ResolutionMetaData(
                 resolverType = "",
                 resolver = "",
@@ -68,5 +68,5 @@ class AcaPyMockedService(): IAcaPyService {
             )
         )
 
-    override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String): Boolean = true
+    override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
 }

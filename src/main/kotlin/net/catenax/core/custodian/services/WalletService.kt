@@ -47,7 +47,7 @@ interface WalletService {
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
     ): DidDocumentDto
 
-    suspend fun deleteService(identifier: String, id: String): Boolean
+    suspend fun deleteService(identifier: String, id: String): DidDocumentDto
 
     companion object {
         fun createWithAcaPyService(

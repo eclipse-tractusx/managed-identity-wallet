@@ -6,7 +6,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 object VerifiableCredentials : IntIdTable("verifiable_credentials") {
-    val content = text("content")
+    val content = text("content").uniqueIndex("content")
     val credentialId = varchar("credential_id", 4096).nullable()
     val issuerDid = varchar("issuer_did", 4096)
     val holderDid = varchar("holder_did", 4096)

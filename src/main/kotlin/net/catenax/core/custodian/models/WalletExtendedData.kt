@@ -10,4 +10,5 @@ data class WalletExtendedData(
     val did: String,
     var walletId: String,
     var walletKey: String,
-    var walletToken: String)
+    var walletToken: String
+)

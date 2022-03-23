@@ -13,9 +13,6 @@ import io.ktor.http.*
 // import io.ktor.server.application.*
 
 // for 1.6.7
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
 import io.ktor.application.*
 import io.ktor.server.testing.*
 import io.ktor.config.*
@@ -37,7 +34,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class ApplicationTest {
 
-    fun setupEnvironment(environment: ApplicationEnvironment) {
+    private fun setupEnvironment(environment: ApplicationEnvironment) {
         (environment.config as MapApplicationConfig).apply {
             put("app.version", System.getenv("APP_VERSION") ?: "0.0.7")
             put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:custodian;DB_CLOSE_DELAY=-1;")
@@ -52,14 +49,14 @@ class ApplicationTest {
         }
     }
 
-    val walletRepository = WalletRepository()
-    val credentialRepository = CredentialRepository()
-    val acaPyMockedService = AcaPyMockedService()
-    val walletService = WalletAcaPyServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
+    private val walletRepository = WalletRepository()
+    private val credentialRepository = CredentialRepository()
+    private val acaPyMockedService = AcaPyMockedService()
+    private val walletService = WalletAcaPyServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
 
-    fun makeToken(): String = "token"
+    private fun makeToken(): String = "token"
 
-    fun Application.configureTestSecurity() {
+    private fun Application.configureTestSecurity() {
 
         // dummy authentication for tests
         install(Authentication) {
@@ -272,7 +269,7 @@ class ApplicationTest {
                 }
             }
 
-            var ce = assertFailsWith<ConflictException> {
+            val ce = assertFailsWith<ConflictException> {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())

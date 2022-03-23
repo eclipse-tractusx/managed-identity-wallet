@@ -12,9 +12,9 @@ interface IAcaPyService {
 
     suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult
 
-    suspend fun assignDidToPublic(didIdentifier: String, token: String): Boolean
+    suspend fun assignDidToPublic(didIdentifier: String, token: String)
 
-    suspend fun deleteSubWallet(walletData: WalletExtendedData): Boolean
+    suspend fun deleteSubWallet(walletData: WalletExtendedData)
 
     suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse
 
@@ -28,7 +28,7 @@ interface IAcaPyService {
 
     suspend fun resolveDidDoc(did: String, token: String): ResolutionResult
 
-    suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String): Boolean
+    suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String)
 
     companion object {
         fun create(acaPyConfig: AcaPyConfig, client: HttpClient): IAcaPyService {

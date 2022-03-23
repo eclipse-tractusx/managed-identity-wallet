@@ -27,7 +27,6 @@ class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: Htt
     }
 
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
-        println(acaPyConfig.apiAdminUrl)
         val httpResponse: HttpResponse = client.post {
             url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet")
             contentType(ContentType.Application.Json)
@@ -36,22 +35,20 @@ class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: Htt
         return Json.decodeFromString(httpResponse.readText())
     }
 
-    override suspend fun assignDidToPublic(didIdentifier: String, token: String): Boolean {
+    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {
         client.post<Any> {
             url("${acaPyConfig.apiAdminUrl}/wallet/did/public?did=$didIdentifier")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
             accept(ContentType.Application.Json)
         }
-        return true
     }
 
-    override suspend fun deleteSubWallet(walletData: WalletExtendedData): Boolean {
+    override suspend fun deleteSubWallet(walletData: WalletExtendedData) {
         client.post<Any> {
             url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet/${walletData.walletId}/remove")
             contentType(ContentType.Application.Json)
             body = WalletKey(walletData.walletKey)
         }
-        return true
     }
 
     override suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse {
@@ -109,7 +106,7 @@ class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: Htt
         }
     }
 
-    override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String): Boolean {
+    override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {
         client.post<Any> {
             url("${acaPyConfig.apiAdminUrl}/wallet/set-did-endpoint")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
@@ -117,7 +114,6 @@ class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: Htt
             contentType(ContentType.Application.Json)
             body = serviceEndPoint
         }
-        return true
     }
 
 }
