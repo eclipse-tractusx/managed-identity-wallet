@@ -14,8 +14,7 @@ import net.catenax.core.custodian.plugins.AnySerializer
 @Serializable
 data class DidDocumentDto(
     val id: String,
-    @SerialName("@context")
-    @JsonProperty("@context")
+    @SerialName("@context") @JsonProperty("@context")
     val context: List<String>,
     val alsoKnownAs: String? = null,
     @Serializable(AnySerializer::class) val controller: Any? = null,

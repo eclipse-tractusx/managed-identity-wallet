@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
-class WalletAcaPyServiceImpl(
+class AcaPyWalletServiceImpl(
     private val acaPyService: IAcaPyService,
     private val walletRepository: WalletRepository,
     private val credentialRepository: CredentialRepository
@@ -56,6 +56,9 @@ class WalletAcaPyServiceImpl(
 
     override suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto {
         log.debug("Add a new Wallet with bpn ${walletCreateDto.bpn}")
+        // Check if wallet already exists
+        transaction { walletRepository.checkWalletAlreadyExits(walletCreateDto.bpn) }
+        // Create Sub Wallet in Aca-Py
         val subWalletToCreate = CreateSubWallet(
             keyManagementMode = KeyManagementMode.MANAGED.toString(),
             label = walletCreateDto.name,
@@ -65,9 +68,8 @@ class WalletAcaPyServiceImpl(
             walletName = walletCreateDto.bpn + "-" + JsonLDUtils.dateToString(Date()),
             walletType = WalletType.ASKAR.toString()
         )
-        // Create Sub Wallet on ledger
         val createdSubWalletDto = acaPyService.createSubWallet(subWalletToCreate)
-        // Create local DID on ledger
+        // Create local DID in Aca-Py
         val createdDid = acaPyService.createLocalDidForWallet(
             DidCreate(method = DidMethod.SOV.toString(), options = DidCreateOptions(KeyType.ED25519.toString())),
             createdSubWalletDto.token
@@ -89,7 +91,7 @@ class WalletAcaPyServiceImpl(
         val walletToCreate = WalletExtendedData(
             name = walletCreateDto.name,
             bpn = walletCreateDto.bpn,
-            did = "did${networkIdentifier}${createdDid.result.did}",
+            did = "did:indy:${networkIdentifier}:${createdDid.result.did}",
             walletId = createdSubWalletDto.walletId,
             walletKey = subWalletToCreate.walletKey,
             walletToken = createdSubWalletDto.token
@@ -151,7 +153,7 @@ class WalletAcaPyServiceImpl(
         if (credentialSubject["id"] != null || credentialSubject["id"] != holderDid) {
             credentialSubject["id"] = holderDid
         }
-        val verKey = getVerificationKey(issuerDid, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
+        val verificationMethod = getVerificationMethod(issuerDid, 0)
         val convertedDatetime: Date = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())
         val issuanceDate = vcRequest.issuanceDate ?: JsonLDUtils.dateToString(convertedDatetime)
         val signRequest: SignRequest<VerifiableCredentialDto> = SignRequest(
@@ -168,10 +170,10 @@ class WalletAcaPyServiceImpl(
                 options = SignOptions(
                     proofPurpose = "assertionMethod",
                     type = "Ed25519Signature2018",
-                    verificationMethod = "$issuerDid#key-1"
+                    verificationMethod = replaceSovWithNetworkIdentifier(verificationMethod.id)
                 )
             ),
-            verkey = verKey
+            verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
         )
         val signedVcResultAsJsonString = acaPyService.signJsonLd(signRequest, issuerWalletData.walletToken)
         val signedVcResult: SignCredentialResponse = Json.decodeFromString(signedVcResultAsJsonString)
@@ -184,26 +186,30 @@ class WalletAcaPyServiceImpl(
     override suspend fun resolveDocument(identifier: String): DidDocumentDto {
         log.debug("Resolve DID Document $identifier")
         val walletData = getWalletExtendedInformation(identifier)
-        val modifiedDid = walletData.did.replace(networkIdentifier, ":sov:")
+        val modifiedDid = replaceNetworkIdentifierWithSov(walletData.did)
         val didDocResult = acaPyService.resolveDidDoc(modifiedDid, walletData.walletToken)
-        val json = Json.encodeToString(ResolutionResult.serializer(), didDocResult)
-        val res: ResolutionResult = Json.decodeFromString(json.replace(":sov:", networkIdentifier))
+        val resolutionResultAsJson = Json.encodeToString(ResolutionResult.serializer(), didDocResult)
+        val res: ResolutionResult = Json.decodeFromString(replaceSovWithNetworkIdentifier(resolutionResultAsJson))
         return res.didDoc
     }
 
-    private suspend fun getVerificationKey(identifier: String, type: String): String {
-        log.debug("Get Verification Key $identifier")
+    private suspend fun getVerificationMethod(identifier: String, atIndex: Int): DidVerificationMethodDto {
+        log.debug("Get Verification Method for $identifier")
         val didDocumentDto = resolveDocument(identifier)
-        if (!didDocumentDto.verificationMethods.isNullOrEmpty()) {
-            return when (type) {
-                VerificationKeyType.PUBLIC_KEY_BASE58.toString() -> didDocumentDto.verificationMethods[0].publicKeyBase58
-                    ?: throw BadRequestException("Verification Key with publicKeyBase58 does not exits")
-                else -> {
-                    throw BadRequestException("Not supported public key type")
-                }
+        if (didDocumentDto.verificationMethods.isNullOrEmpty() || didDocumentDto.verificationMethods.size <= atIndex) {
+            throw BadRequestException("Error: no verification methods")
+        }
+        return didDocumentDto.verificationMethods[atIndex]
+    }
+
+    private fun getVerificationKey(verificationMethod: DidVerificationMethodDto, type: String): String {
+        return when (type) {
+            VerificationKeyType.PUBLIC_KEY_BASE58.toString() -> verificationMethod.publicKeyBase58
+                ?: throw BadRequestException("Verification Key with publicKeyBase58 does not exist")
+            else -> {
+                throw BadRequestException("Not supported public key type")
             }
         }
-        throw BadRequestException("Error: no verification methods")
     }
 
     override suspend fun issuePresentation(vpRequest: VerifiablePresentationRequestDto): VerifiablePresentationDto {
@@ -211,7 +217,7 @@ class WalletAcaPyServiceImpl(
         val holderWalletData = getWalletExtendedInformation(vpRequest.holderIdentifier)
         val holderDid = holderWalletData.did
         val token = holderWalletData.walletToken
-        val verKey = getVerificationKey(holderDid, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
+        val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
             doc = SignDoc(
                 credential = VerifiablePresentationDto(
@@ -224,10 +230,10 @@ class WalletAcaPyServiceImpl(
                 options = SignOptions(
                     proofPurpose = "assertionMethod",
                     type = "Ed25519Signature2018",
-                    verificationMethod = "$holderDid#key-1"
+                    verificationMethod = replaceSovWithNetworkIdentifier(verificationMethod.id)
                 )
             ),
-            verkey = verKey
+            verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
         )
         val signedVpAsJsonString = acaPyService.signJsonLd(signRequest, token)
         val signedVpResult: SignPresentationResponse = Json.decodeFromString(signedVpAsJsonString)
@@ -281,7 +287,7 @@ class WalletAcaPyServiceImpl(
             if (found) {
                 return resolveDocument(walletData.did)
             }
-            throw BadRequestException("Target Service Endpoint not Found")
+            throw NotFoundException("Target Service Endpoint not Found")
         }
         throw BadRequestException("Update Service failed: DID Document has no services")
     }
@@ -296,7 +302,6 @@ class WalletAcaPyServiceImpl(
         type: String?,
         credentialId: String?
     ): List<VerifiableCredentialDto> {
-        log.debug("Get Credentials")
         val issuerDid = if (!issuerIdentifier.isNullOrEmpty()) {
             getWallet(issuerIdentifier).did
         } else {
@@ -340,4 +345,10 @@ class WalletAcaPyServiceImpl(
         "profile" -> EndPointType.Profile.name
         else -> throw NotImplementedException("Service type $type is not supported")
     }
+
+    private fun replaceSovWithNetworkIdentifier(input: String): String =
+        input.replace(":sov:", ":indy:$networkIdentifier:")
+
+    private fun replaceNetworkIdentifierWithSov(input: String): String =
+        input.replace(":indy:$networkIdentifier:", ":sov:")
 }

@@ -82,7 +82,7 @@ below. Here a few hints on how to set it up:
 9. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
 10. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
 11. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.bosch-digital.de/register`
-12. `ACAPY_NETWORK_IDENTIFIER`: specify the indy ledger identifier, e.g. `:indy:test:`
+12. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
 
 To follow all steps in this readme you also need following variables:
 
@@ -107,11 +107,13 @@ the default included h2 in-memory database. Additionally the authentication and 
 [keycloak](https://www.keycloak.org). The Aca-Py Service will also run in a docker container
 
  * build the Aca-Py Image (if not available)
-    * git clone https://github.com/hyperledger/aries-cloudagent-python.git
-    * cd aries-cloudagent-python
-    * docker build -t acapy -f ./docker/Dockerfile.run .
+    * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
+    * navigate to the repository `cd aries-cloudagent-python`
+    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from 21. März 2022
+    * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
+    * run `docker build -t acapy -f ./docker/Dockerfile.run .`
  * navigate to `./dev-assets/dev-containers`
- * run `docker-compose --env-file .env.docker up -d` to start a Postgresql database and Keycloak instance in Docker conatiners
+ * run `docker-compose .env.docker up -d` to start a Postgresql database and Keycloak instance and the AcaPy Service in Docker conatiners
  * To setup the Postgresql database in the application please see the section below setting up the database
  * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
  * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`

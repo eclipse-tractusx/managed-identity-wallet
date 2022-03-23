@@ -28,8 +28,8 @@ services:
   cx_acapy:
     image: acapy:latest
     ports:
-      - "${ACAPY_ADMIN_PORT}:${ACAPY_ADMIN_PORT}"
-      - "${ACAPY_ENDPOINT_PORT}:${ACAPY_ENDPOINT_PORT}"
+      - "11000:11000"
+      - "8000:8000"
     environment:
       WAIT_HOSTS: "db:5432"
       WAIT_HOSTS_TIMEOUT: "300"
@@ -39,23 +39,23 @@ services:
     command: [
        "-c",
        "aca-py start \
-        -e ${ACAPY_ENDPOINT_URL} \
+        -e http://localhost:8000/ \
         --auto-provision \
-        --inbound-transport http '0.0.0.0' ${ACAPY_ENDPOINT_PORT} \
+        --inbound-transport http '0.0.0.0' 8000 \
         --outbound-transport http \
-        --admin '0.0.0.0' ${ACAPY_ADMIN_PORT} \
-        --wallet-type ${WALLET_TYPE} \
-        --wallet-name ${WALLET_NAME} \
-        --wallet-key ${WALLET_KEY} \
-        --seed ${AGENT_WALLET_SEED} \
-        --genesis-url ${LEDGER_URL}/genesis \
-        --label ${LABEL} \
+        --admin '0.0.0.0' 11000 \
+        --wallet-name catenaX \
+        --wallet-type indy \
+        --wallet-key issuerKeySecret19 \
+        --seed 00000000000000000000000111111119 \
+        --genesis-url https://indy-test.bosch-digital.de/genesis \
+        --label CatenaXIssuer \
         --admin-insecure-mode \
         --auto-ping-connection \
-        --jwt-secret ${JWT_SECRET} \
+        --jwt-secret jwtSecret19 \
         --multitenant \
         --multitenant-admin \
-        --log-level ${LOG_LEVEL}",
+        --log-level DEBUG",
     ]
 
 volumes:

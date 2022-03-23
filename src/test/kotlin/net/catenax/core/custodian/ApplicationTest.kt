@@ -52,7 +52,7 @@ class ApplicationTest {
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
     private val acaPyMockedService = AcaPyMockedService()
-    private val walletService = WalletAcaPyServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
+    private val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
 
     private fun makeToken(): String = "token"
 

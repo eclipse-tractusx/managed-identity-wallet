@@ -105,7 +105,7 @@ interface WalletService {
                     }
                 }
             )
-            return WalletAcaPyServiceImpl(acaPyService, walletRepository, credentialRepository)
+            return AcaPyWalletServiceImpl(acaPyService, walletRepository, credentialRepository)
         }
     }
 }

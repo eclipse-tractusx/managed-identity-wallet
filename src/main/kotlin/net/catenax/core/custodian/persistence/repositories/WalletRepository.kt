@@ -1,5 +1,6 @@
 package net.catenax.core.custodian.persistence.repositories
 
+import net.catenax.core.custodian.models.ConflictException
 import net.catenax.core.custodian.models.NotFoundException
 import net.catenax.core.custodian.models.WalletExtendedData
 import net.catenax.core.custodian.models.WalletDto
@@ -18,6 +19,13 @@ class WalletRepository {
         return Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }
             .firstOrNull()
             ?: throw NotFoundException("Wallet with identifier $identifier not found")
+    }
+
+    @Throws(ConflictException::class)
+    fun checkWalletAlreadyExits(identifier: String) {
+         if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
+             throw ConflictException("Wallet with identifier $identifier already Exists")
+         }
     }
 
     fun addWallet(wallet: WalletExtendedData): Wallet {
