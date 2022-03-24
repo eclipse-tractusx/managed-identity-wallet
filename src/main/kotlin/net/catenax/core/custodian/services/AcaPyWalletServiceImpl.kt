@@ -341,7 +341,7 @@ class AcaPyWalletServiceImpl(
 
     private fun createRandomString(): String {
         return (1..25)
-            .map { SecureRandom().nextInt(0, charPool.size) }
+            .map { SecureRandom().nextInt(charPool.size) }
             .map(charPool::get)
             .joinToString("")
     }

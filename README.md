@@ -113,7 +113,7 @@ the default included h2 in-memory database. Additionally the authentication and 
     * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
     * run `docker build -t acapy -f ./docker/Dockerfile.run .`
  * navigate to `./dev-assets/dev-containers`
- * run `docker-compose .env.docker up -d` to start a Postgresql database and Keycloak instance and the AcaPy Service in Docker conatiners
+ * run `docker-compose up -d` to start a Postgresql database and Keycloak instance and the AcaPy Service in Docker conatiners
  * To setup the Postgresql database in the application please see the section below setting up the database
  * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
  * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
