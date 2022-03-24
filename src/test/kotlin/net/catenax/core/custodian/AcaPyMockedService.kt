@@ -5,29 +5,33 @@ import net.catenax.core.custodian.models.ssi.DidDocumentDto
 import net.catenax.core.custodian.models.ssi.acapy.*
 
 import net.catenax.core.custodian.services.IAcaPyService
+import java.security.SecureRandom
 
-class AcaPyMockedService: IAcaPyService {
+class AcaPyMockedService(): IAcaPyService {
 
-    override fun getNetworkIdentifier(): String = ""
+    private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+    var currentDid: String = "EXAMPLE";
+
+    override fun getNetworkIdentifier(): String = "local:test"
 
     override suspend fun getWallets(): WalletList = WalletList(results = emptyList())
 
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
         return CreatedSubWalletResult(
-            createdAt = "",
-            walletId = "",
-            keyManagementMode = "",
-            updatedAt = "",
+            createdAt = "createdAt",
+            walletId = "walletId",
+            keyManagementMode = "managed",
+            updatedAt = "updatedAt",
             WalletSettings(
-                walletType = "",
-                walletName = "",
+                walletType = "walletType",
+                walletName = "walletName",
                 walletWebhookUrls = emptyList(),
-                walletDispatchType = "",
-                walletId = "",
-                defaultLabel = "",
-                imageUrl = ""
+                walletDispatchType = "walletDispatchType",
+                walletId = "walletId",
+                defaultLabel = "defaultLabel",
+                imageUrl = "imageUrl"
             ),
-            token = ""
+            token = "token"
         )
     }
 
@@ -36,21 +40,23 @@ class AcaPyMockedService: IAcaPyService {
     override suspend fun deleteSubWallet(walletData: WalletExtendedData) {}
 
     override suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse =
-        CreateWalletTokenResponse(token = "")
+        CreateWalletTokenResponse(token = "token")
 
-    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult =
-        DidResult(
+    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult {
+        currentDid = createRandomString()
+        return DidResult(
             result = DidResultDetails(
-                did = "",
+                did = currentDid,
                 keyType = "",
                 method = "",
                 posture = "",
-                verkey = ""
+                verkey = "abc"
             )
         )
+    }
 
     override suspend fun registerDidOnLedger(didRegistration: DidRegistration): DidRegistrationResult =
-        DidRegistrationResult(seed = "", did = "", verkey = "")
+        DidRegistrationResult(seed = null, did = didRegistration.did, verkey = didRegistration.verkey)
 
     override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String = ""
 
@@ -59,7 +65,7 @@ class AcaPyMockedService: IAcaPyService {
 
     override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult =
         ResolutionResult(
-            didDoc = DidDocumentDto(id = "id", context = emptyList()),
+            didDoc = DidDocumentDto(id = did, context = emptyList()),
             metadata = ResolutionMetaData(
                 resolverType = "",
                 resolver = "",
@@ -69,4 +75,11 @@ class AcaPyMockedService: IAcaPyService {
         )
 
     override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
+
+    private fun createRandomString(): String {
+        return (1..25)
+            .map { SecureRandom().nextInt(charPool.size) }
+            .map(charPool::get)
+            .joinToString("")
+    }
 }

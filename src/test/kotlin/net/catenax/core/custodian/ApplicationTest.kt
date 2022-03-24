@@ -34,7 +34,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class ApplicationTest {
 
-    private fun setupEnvironment(environment: ApplicationEnvironment) {
+     private fun setupEnvironment(environment: ApplicationEnvironment) {
         (environment.config as MapApplicationConfig).apply {
             put("app.version", System.getenv("APP_VERSION") ?: "0.0.7")
             put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:custodian;DB_CLOSE_DELAY=-1;")
@@ -56,7 +56,7 @@ class ApplicationTest {
 
     private fun makeToken(): String = "token"
 
-    private fun Application.configureTestSecurity() {
+    fun Application.configureTestSecurity() {
 
         // dummy authentication for tests
         install(Authentication) {
@@ -89,8 +89,8 @@ class ApplicationTest {
             configurePersistence()
             configureOpenAPI()
             configureTestSecurity()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
@@ -118,8 +118,8 @@ class ApplicationTest {
             configurePersistence()
             configureOpenAPI()
             configureTestSecurity()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
@@ -197,8 +197,8 @@ class ApplicationTest {
             configurePersistence()
             configureTestSecurity()
             configureOpenAPI()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             var exception = assertFailsWith<BadRequestException> {
@@ -269,7 +269,7 @@ class ApplicationTest {
                 }
             }
 
-            val ce = assertFailsWith<ConflictException> {
+            var ce = assertFailsWith<ConflictException> {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -299,8 +299,8 @@ class ApplicationTest {
             configurePersistence()
             configureOpenAPI()
             configureTestSecurity()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Post, "/api/businessPartnerData") {

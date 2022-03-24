@@ -61,15 +61,7 @@ suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token:
 @Serializable
 data class BusinessPartnerInfo(val bpn: String)
 
-fun Application.configureRouting() {
-    val walletRepository = WalletRepository()
-    val credentialRepository = CredentialRepository()
-    val acaPyConfig = AcaPyConfig(
-        apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
-        ledgerUrl = environment.config.property("acapy.ledgerUrl").getString(),
-        networkIdentifier = environment.config.property("acapy.networkIdentifier").getString()
-    )
-    val walletService = WalletService.createWithAcaPyService(acaPyConfig, walletRepository, credentialRepository)
+fun Application.configureRouting(walletService: WalletService) {
 
     val datapoolUrl = environment.config.property("datapool.url").getString()
 
