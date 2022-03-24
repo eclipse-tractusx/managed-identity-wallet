@@ -30,8 +30,10 @@ services:
     ports:
       - "11000:11000"
       - "8000:8000"
+    depends_on:
+      - cx_postgres
     environment:
-      WAIT_HOSTS: "db:5432"
+      WAIT_HOSTS: "cx_postgres:5432"
       WAIT_HOSTS_TIMEOUT: "300"
       WAIT_SLEEP_INTERVAL: "5"
       WAIT_HOST_CONNECT_TIMEOUT: "3"
@@ -47,6 +49,9 @@ services:
         --wallet-name catenaX \
         --wallet-type indy \
         --wallet-key issuerKeySecret19 \
+        --wallet-storage-type postgres_storage
+        --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
+        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
         --seed 00000000000000000000000111111119 \
         --genesis-url https://indy-test.bosch-digital.de/genesis \
         --label CatenaXIssuer \
