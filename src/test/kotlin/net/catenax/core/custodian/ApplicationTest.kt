@@ -278,7 +278,7 @@ class ApplicationTest {
                     assertEquals(HttpStatusCode.Created, response.status())
                 }
             }
-            assertEquals("Wallet with given BPN already exists!", ce.message)
+            assertEquals("Wallet with identifier bpn4 already exists!", ce.message)
 
             // clean up created wallets
             transaction {

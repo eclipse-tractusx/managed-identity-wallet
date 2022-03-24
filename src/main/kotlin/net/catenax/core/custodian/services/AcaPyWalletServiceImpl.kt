@@ -23,6 +23,7 @@ class AcaPyWalletServiceImpl(
 
     private val networkIdentifier = acaPyService.getNetworkIdentifier()
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+    private val arrayOfSupportedIds = listOf("did-communication", "linked_domains", "profile")
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
@@ -41,8 +42,9 @@ class AcaPyWalletServiceImpl(
                     null
                 )
                 WalletDto(walletDto.name, walletDto.bpn, walletDto.did, walletDto.createdAt, credentials)
+            } else {
+                walletDto
             }
-            walletDto
         }
     }
 
@@ -57,7 +59,7 @@ class AcaPyWalletServiceImpl(
     override suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto {
         log.debug("Add a new Wallet with bpn ${walletCreateDto.bpn}")
         // Check if wallet already exists
-        transaction { walletRepository.checkWalletAlreadyExits(walletCreateDto.bpn) }
+        transaction { walletRepository.checkWalletAlreadyExists(walletCreateDto.bpn) }
         // Create Sub Wallet in Aca-Py
         val subWalletToCreate = CreateSubWallet(
             keyManagementMode = KeyManagementMode.MANAGED.toString(),
@@ -218,11 +220,12 @@ class AcaPyWalletServiceImpl(
         val holderDid = holderWalletData.did
         val token = holderWalletData.walletToken
         val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
+        checkHolderOfCredentials(holderDid, vpRequest.verifiableCredentials)
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
             doc = SignDoc(
                 credential = VerifiablePresentationDto(
                     id = UUID.randomUUID().toString(),
-                    context = listOf("https://www.w3.org/2018/credentials/v1"),
+                    context = listOf(JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1),
                     type = listOf("VerifiablePresentation"),
                     holder = holderDid,
                     verifiableCredential = vpRequest.verifiableCredentials,
@@ -243,23 +246,34 @@ class AcaPyWalletServiceImpl(
         throw BadRequestException(signedVpResult.error)
     }
 
+    private fun checkHolderOfCredentials(holderDid: String, vcs: List<VerifiableCredentialDto>) {
+        vcs.map {
+            if (it.credentialSubject["id"] == null || it.credentialSubject["id"] != holderDid) {
+                throw ForbiddenException("Only holders are allowed to use the verifiable credentials")
+            }
+        }
+    }
+
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto {
-        log.debug("Add Service Key $identifier")
+        log.debug("Add Service Endpoint for $identifier")
+        checkSupportedId(serviceDto.id)
         val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
             didDoc.services.map {
-                if (it.type == serviceDto.type) {
+                if (it.id.split("#")[1] == serviceDto.id) {
                     throw ConflictException("Service end point already exists")
                 }
             }
         }
-        val didEndpointWithType = DidEndpointWithType(
-            didIdentifier = getIdentifierOfDid(walletData.did),
-            endpoint = serviceDto.serviceEndpoint,
-            endpointType = mapServiceTypeToEnum(serviceDto.type)
+        acaPyService.updateService(
+            DidEndpointWithType(
+                didIdentifier = getIdentifierOfDid(walletData.did),
+                endpoint = serviceDto.serviceEndpoint,
+                endpointType = mapServiceTypeToEnum(serviceDto.type)
+            ),
+            walletData.walletToken
         )
-        acaPyService.updateService(didEndpointWithType, walletData.walletToken)
         return resolveDocument(walletData.did)
     }
 
@@ -268,19 +282,22 @@ class AcaPyWalletServiceImpl(
         id: String,
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
     ): DidDocumentDto {
-        log.debug("Add Service Key $identifier")
+        log.debug("Update Service Endpoint for $identifier")
+        checkSupportedId(id)
         val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
             var found = false
             didDoc.services.map {
-                if (it.type == serviceUpdateRequestDto.type) {
-                    val didEndpointWithType = DidEndpointWithType(
-                        didIdentifier = getIdentifierOfDid(walletData.did),
-                        endpoint = serviceUpdateRequestDto.serviceEndpoint,
-                        endpointType = mapServiceTypeToEnum(serviceUpdateRequestDto.type)
+                if (it.id.split("#")[1] == id) {
+                    acaPyService.updateService(
+                        DidEndpointWithType(
+                            didIdentifier = getIdentifierOfDid(walletData.did),
+                            endpoint = serviceUpdateRequestDto.serviceEndpoint,
+                            endpointType = mapServiceTypeToEnum(serviceUpdateRequestDto.type)
+                        ),
+                        walletData.walletToken
                     )
-                    acaPyService.updateService(didEndpointWithType, walletData.walletToken)
                     found = true
                 }
             }
@@ -324,7 +341,7 @@ class AcaPyWalletServiceImpl(
 
     private fun createRandomString(): String {
         return (1..25)
-            .map { SecureRandom.getInstanceStrong().nextInt(0, charPool.size) }
+            .map { SecureRandom().nextInt(0, charPool.size) }
             .map(charPool::get)
             .joinToString("")
     }
@@ -339,6 +356,12 @@ class AcaPyWalletServiceImpl(
         "linked_domains" -> EndPointType.LinkedDomains.name
         "profile" -> EndPointType.Profile.name
         else -> throw NotImplementedException("Service type $type is not supported")
+    }
+
+    private fun checkSupportedId(id: String) {
+        if (!arrayOfSupportedIds.contains(id)) {
+            throw NotImplementedException("The Id $id of the service is not supported")
+        }
     }
 
     private fun replaceSovWithNetworkIdentifier(input: String): String =

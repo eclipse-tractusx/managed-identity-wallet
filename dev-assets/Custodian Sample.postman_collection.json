@@ -99,7 +99,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"did123_bpn123_name\",\n    \"bpn\": \"bpn123\"\n}",
+					"raw": "{\n    \"name\": \"did777bpn777_name\",\n    \"bpn\": \"bpn777\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -167,7 +167,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/did:indy:test:NJ4WkdAGznzYjBoBZg29vH",
+					"raw": "http://localhost:8080/api/wallets/bpn777",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -176,7 +176,7 @@
 					"path": [
 						"api",
 						"wallets",
-						"did:indy:test:NJ4WkdAGznzYjBoBZg29vH"
+						"bpn777"
 					]
 				}
 			},
@@ -198,7 +198,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/did:indy:test:NJ4WkdAGznzYjBoBZg29vH",
+					"raw": "http://localhost:8080/api/wallets/bpn777",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -207,46 +207,7 @@
 					"path": [
 						"api",
 						"wallets",
-						"did:indy:test:NJ4WkdAGznzYjBoBZg29vH"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Issue Credential",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{access_token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\"\n    },\n    \"holderIdentifier\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/api/credentials",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"credentials"
+						"bpn777"
 					]
 				}
 			},
@@ -280,7 +241,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/did:indy:test:7CuLwGRrqbfJfkuDKEcW2C",
+					"raw": "http://localhost:8080/api/didDocuments/bpn888",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -289,7 +250,46 @@
 					"path": [
 						"api",
 						"didDocuments",
-						"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C"
+						"bpn888"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Credential",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn777\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\"\n    },\n    \"holderIdentifier\": \"bpn888\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/credentials",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"credentials"
 					]
 				}
 			},
@@ -312,7 +312,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"holderIdentifier\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/3732\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C\",\n            \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n            \"expirationDate\": \"2019-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"Sally\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master\",\n                    \"degreeType\": \"Undergraduate\",\n                    \"name\": \"Master of Science and Arts\"\n                },\n                \"college\": \"Stuttgart\",\n                \"id\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-03-22T16:34:31Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..Jve_Em6KigLUtCsMwpM5uEbRQZcNGR8OZaq3Ps0_h0Kq-EwD5iMDPbPEJB8K2RuCwzeIP8eUqeRmdZt8bI1qDA\"\n            }\n        }\n    ]\n}",
+					"raw": "{\n    \"holderIdentifier\": \"bpn777\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/3732\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5\",\n            \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n            \"expirationDate\": \"2019-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"Sally\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master\",\n                    \"degreeType\": \"Undergraduate\",\n                    \"name\": \"Master of Science and Arts\"\n                },\n                \"college\": \"Stuttgart\",\n                \"id\": \"did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-03-24T09:34:02Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..LvCQ4TWhFHOkwMzvrx-TxHovoaCLPlK2taHxQUtUOp0Uc_jYbjL3XgVR2u6jVMvGIdPt4gs-VZb49f7GuiXFDA\"\n            }\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -351,7 +351,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\",\n        \"id\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-03-22T16:34:31Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..Jve_Em6KigLUtCsMwpM5uEbRQZcNGR8OZaq3Ps0_h0Kq-EwD5iMDPbPEJB8K2RuCwzeIP8eUqeRmdZt8bI1qDA\"\n    }\n}",
+					"raw": "{\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\",\n        \"id\": \"did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-03-24T09:34:02Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..LvCQ4TWhFHOkwMzvrx-TxHovoaCLPlK2taHxQUtUOp0Uc_jYbjL3XgVR2u6jVMvGIdPt4gs-VZb49f7GuiXFDA\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -359,7 +359,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/did:indy:test:7CuLwGRrqbfJfkuDKEcW2C/credentials",
+					"raw": "http://localhost:8080/api/wallets/bpn888/credentials",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -368,7 +368,7 @@
 					"path": [
 						"api",
 						"wallets",
-						"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C",
+						"bpn888",
 						"credentials"
 					]
 				}
@@ -391,7 +391,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/credentials",
+					"raw": "http://localhost:8080/api/credentials?id=http://example.edu/credentials/3732&issuerIdentifier=bpn777&holderIdentifier=bpn888&type=University-Degree-Credential",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -400,6 +400,24 @@
 					"path": [
 						"api",
 						"credentials"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "http://example.edu/credentials/3732"
+						},
+						{
+							"key": "issuerIdentifier",
+							"value": "bpn777"
+						},
+						{
+							"key": "holderIdentifier",
+							"value": "bpn888"
+						},
+						{
+							"key": "type",
+							"value": "University-Degree-Credential"
+						}
 					]
 				}
 			},
@@ -422,7 +440,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"id\": \"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C#linked_domains\",\n  \"type\": \"linked_domains\",\n  \"serviceEndpoint\": \"https://myhost:123\"\n}",
+					"raw": "{\n  \"id\": \"linked_domains\",\n  \"type\": \"linked_domains\",\n  \"serviceEndpoint\": \"https://myhost:123\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -430,7 +448,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/did:indy:test:7CuLwGRrqbfJfkuDKEcW2C/services",
+					"raw": "http://localhost:8080/api/didDocuments/did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD/services",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -439,7 +457,7 @@
 					"path": [
 						"api",
 						"didDocuments",
-						"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C",
+						"did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD",
 						"services"
 					]
 				}
@@ -463,7 +481,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"type\": \"linked_domains\",\n  \"serviceEndpoint\": \"https://myhost:1111\"\n}",
+					"raw": "{\n  \"type\": \"linked_domains\",\n  \"serviceEndpoint\": \"https://myhost:777\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -471,7 +489,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/did:indy:test:7CuLwGRrqbfJfkuDKEcW2C/services/did:sov:7CuLwGRrqbfJfkuDKEcW2C#linked_domains",
+					"raw": "http://localhost:8080/api/didDocuments/did:indy:local:test:43Arq24V9uQFPKHuDb7TC5/services/linked_domains",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -480,11 +498,10 @@
 					"path": [
 						"api",
 						"didDocuments",
-						"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C",
+						"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5",
 						"services",
-						"did:sov:7CuLwGRrqbfJfkuDKEcW2C"
-					],
-					"hash": "linked_domains"
+						"linked_domains"
+					]
 				}
 			},
 			"response": []
@@ -514,7 +531,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/did:indy:test:7CuLwGRrqbfJfkuDKEcW2C/services/id",
+					"raw": "http://localhost:8080/api/didDocuments/did:indy:test:TfhXmtfTbSLeHrhhQsAP5n/services/linked_domains",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -523,9 +540,9 @@
 					"path": [
 						"api",
 						"didDocuments",
-						"did:indy:test:7CuLwGRrqbfJfkuDKEcW2C",
+						"did:indy:test:TfhXmtfTbSLeHrhhQsAP5n",
 						"services",
-						"id"
+						"linked_domains"
 					]
 				}
 			},

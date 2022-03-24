@@ -22,9 +22,9 @@ class WalletRepository {
     }
 
     @Throws(ConflictException::class)
-    fun checkWalletAlreadyExits(identifier: String) {
+    fun checkWalletAlreadyExists(identifier: String) {
          if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
-             throw ConflictException("Wallet with identifier $identifier already Exists")
+             throw ConflictException("Wallet with identifier $identifier already exists!")
          }
     }
 
