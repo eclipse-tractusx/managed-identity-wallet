@@ -1,12 +1,12 @@
 {
 	"info": {
-		"_postman_id": "4c62b51c-3d30-4d5a-8c80-36dee60cd421",
+		"_postman_id": "10a4186d-8e7e-4caa-8325-b83fa24357ef",
 		"name": "Custodian Sample",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Get Access Token  Keycloak (local)",
+			"name": "Get Access Token  Keycloak",
 			"event": [
 				{
 					"listen": "test",
@@ -64,16 +64,11 @@
 					]
 				},
 				"url": {
-					"raw": "http://localhost:8081/auth/realms/catenax/protocol/openid-connect/token",
-					"protocol": "http",
+					"raw": "{{keycloak_realm_url}}/protocol/openid-connect/token",
 					"host": [
-						"localhost"
+						"{{keycloak_realm_url}}"
 					],
-					"port": "8081",
 					"path": [
-						"auth",
-						"realms",
-						"catenax",
 						"protocol",
 						"openid-connect",
 						"token"
@@ -83,7 +78,7 @@
 			"response": []
 		},
 		{
-			"name": "Create wallet  in Custodian (local)",
+			"name": "Create wallet  in Custodian",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -99,7 +94,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"did777bpn777_name\",\n    \"bpn\": \"bpn777\"\n}",
+					"raw": "{\n    \"name\": \"did1_name\",\n    \"bpn\": \"did1_bpn\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -107,12 +102,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/wallets",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets"
@@ -122,7 +115,7 @@
 			"response": []
 		},
 		{
-			"name": "Get wallets from Custodian  (local)",
+			"name": "Get wallets from Custodian ",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -137,12 +130,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets"
@@ -152,7 +143,7 @@
 			"response": []
 		},
 		{
-			"name": "Get wallet by identifier(local)",
+			"name": "Get wallet by identifier",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -167,23 +158,21 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/bpn777",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets",
-						"bpn777"
+						"did1_bpn"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Delete wallet with identifier from Custodian (local)",
+			"name": "Delete wallet with identifier from Custodian",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -198,16 +187,14 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/bpn777",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets",
-						"bpn777"
+						"did1_bpn"
 					]
 				}
 			},
@@ -241,12 +228,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/bpn888",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/didDocuments/bpn888",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"didDocuments",
@@ -273,7 +258,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn777\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\"\n    },\n    \"holderIdentifier\": \"bpn888\"\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn1\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\"\n    },\n    \"holderIdentifier\": \"bpn2\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -281,12 +266,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/credentials",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/credentials",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"credentials"
@@ -320,12 +303,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/presentations",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/presentations",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"presentations"
@@ -351,7 +332,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\",\n        \"id\": \"did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-03-24T09:34:02Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..LvCQ4TWhFHOkwMzvrx-TxHovoaCLPlK2taHxQUtUOp0Uc_jYbjL3XgVR2u6jVMvGIdPt4gs-VZb49f7GuiXFDA\"\n    }\n}",
+					"raw": "{\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:indy:local:test:WQUpGv13THnGhwYRefvLYP\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\",\n        \"id\": \"did:indy:local:test:8Df7FFvkZBz1T263ZjZSAc\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-03-24T10:20:48Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:indy:local:test:WQUpGv13THnGhwYRefvLYP#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..UE187_VSdg6M_5UciuU-q_LuPxxWOQTWG7gAEkCQPPec8zaLny2VCEKhkI0dmJOqPS3eLlsUf1547eqkyXt3BQ\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -359,16 +340,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/wallets/bpn888/credentials",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/wallets/bpn22/credentials",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"wallets",
-						"bpn888",
+						"bpn22",
 						"credentials"
 					]
 				}
@@ -376,7 +355,7 @@
 			"response": []
 		},
 		{
-			"name": "Get Cred",
+			"name": "Get Credentials",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -391,12 +370,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/credentials?id=http://example.edu/credentials/3732&issuerIdentifier=bpn777&holderIdentifier=bpn888&type=University-Degree-Credential",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/credentials?id=http://example.edu/credentials/3732&issuerIdentifier=bpn777&holderIdentifier=bpn888&type=University-Degree-Credential",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"credentials"
@@ -448,12 +425,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD/services",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/didDocuments/did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD/services",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"didDocuments",
@@ -481,7 +456,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"type\": \"linked_domains\",\n  \"serviceEndpoint\": \"https://myhost:777\"\n}",
+					"raw": "{\n  \"type\": \"linked_domains\",\n  \"serviceEndpoint\": \"https://myhost:7715\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -489,16 +464,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/did:indy:local:test:43Arq24V9uQFPKHuDb7TC5/services/linked_domains",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/didDocuments/bpn1/services/linked_domains",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"didDocuments",
-						"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5",
+						"bpn1",
 						"services",
 						"linked_domains"
 					]
@@ -507,7 +480,7 @@
 			"response": []
 		},
 		{
-			"name": "Update Service Copy",
+			"name": "Delete Service",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -531,12 +504,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/didDocuments/did:indy:test:TfhXmtfTbSLeHrhhQsAP5n/services/linked_domains",
-					"protocol": "http",
+					"raw": "{{custodian_url}}/api/didDocuments/did:indy:test:TfhXmtfTbSLeHrhhQsAP5n/services/linked_domains",
 					"host": [
-						"localhost"
+						"{{custodian_url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"didDocuments",
