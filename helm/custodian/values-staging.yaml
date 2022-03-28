@@ -15,8 +15,6 @@ logging:
 acapy:
   imageName: "acapy"
   tag: "0.0.1"
-  walletName: "catenaX"
-  walletType: "indy"
   ledgerUrl: "https://indy-test.bosch-digital.de"
   label: "CatenaXIssuer"
   logLevel: "DEBUG"
