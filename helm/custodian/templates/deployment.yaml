@@ -73,9 +73,9 @@ spec:
         image: {{ .Values.image.registry }}/{{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
         env:
         - name: ${WALLET_NAME}
-          value: {{ .Values.acapy.walletName | default "catenaX" }}
+          value: {{ .Values.acapy.walletName }}
         - name: ${WALLET_TYPE}
-          value: {{ .Values.acapy.walletType | default "indy" }}
+          value: {{ .Values.acapy.walletType }}
         - name: WALLET_KEY
           valueFrom:
             secretKeyRef:
