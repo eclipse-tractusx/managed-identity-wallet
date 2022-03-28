@@ -320,6 +320,26 @@ helm install nginx-ingress ingress-nginx/ingress-nginx \
 
 We assume that a cert manager already exists and that we can directly continue
 
+## Aca-Py Build and Upload Image
+* Build the Aca-Py Image localy
+    * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
+    * navigate to the repository `cd aries-cloudagent-python`
+    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from 21. März 2022
+    * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
+    * run `docker build -t acapy:0.0.1 -f ./docker/Dockerfile.run .`
+* navigate back to the core-custoian repository
+* login to AKS:
+    ```
+    set -a; source .env; set +a
+    docker login $CX_ACR_SERVER
+    az aks get-credentials --resource-group $CX_RG --name $CX_AKS_CLUSTER --admin
+    ```
+* push the image to the ACR:
+    ```
+    docker tag acapy:0.0.1 $CX_ACR_SERVER/catena-x/acapy:0.0.1 
+    docker push $CX_ACR_SERVER/catena-x/acapy:0.0.1 
+    ```
+
 ## Dashboard
 
 Within `ui-src` a simple Vue based dashboard application is available
