@@ -69,7 +69,6 @@ spec:
         ports:
         - containerPort: 8080
           name: custodian
-
       - name: catenax-acapy
         image: {{ .Values.image.registry }}/{{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
         env:
