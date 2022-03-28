@@ -98,11 +98,11 @@ spec:
         - name: LOG_LEVEL
           value: {{ .Values.acapy.logLevel }}
         - name: ACAPY_ENDPOINT_PORT
-          value: {{ .Values.acapy.endpointPort }}
+          value: {{ .Values.acapy.endpointPort | quote }}
         - name: ACAPY_ENDPOINT_URL
           value: {{ .Values.acapy.endpointUrl }}
         - name: ACAPY_ADMIN_PORT
-          value: {{ .Values.acapy.adminPort }}
+          value: {{ .Values.acapy.adminPort | quote }}
         - name: DB_HOST
           valueFrom:
             secretKeyRef:
