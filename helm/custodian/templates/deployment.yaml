@@ -100,10 +100,7 @@ spec:
         - name: ACAPY_ADMIN_PORT
           value: {{ .Values.acapy.adminPort | quote }}
         - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-acapy-secrets
-              key: acapy-db-host
+          value: {{ .Values.acapy.databaseHost }}
         - name: DB_ACCOUNT
           valueFrom:
             secretKeyRef:
@@ -133,24 +130,24 @@ spec:
             memory: 256Mi
         command: ["/bin/bash"]
         args: ["-c", "aca-py start \
-          -e ${ACAPY_ENDPOINT_URL} \
+          -e $(ACAPY_ENDPOINT_URL) \
           --auto-provision \
-          --inbound-transport http '0.0.0.0' ${ACAPY_ENDPOINT_PORT} \
+          --inbound-transport http '0.0.0.0' $(ACAPY_ENDPOINT_PORT) \
           --outbound-transport http \
-          --admin '0.0.0.0' ${ACAPY_ADMIN_PORT} \
+          --admin '0.0.0.0' $(ACAPY_ADMIN_PORT) \
           --wallet-name AcapyCatenaX \
           --wallet-type indy \
-          --wallet-key ${WALLET_KEY} \
+          --wallet-key $(WALLET_KEY) \
           --wallet-storage-type postgres_storage
-          --wallet-storage-config '{\"url\":\"${DB_HOST}:5432\",\"max_connections\":5}'
-          --wallet-storage-creds '{\"account\":\"${DB_ACCOUNT}\",\"password\":\"${DB_PASSWORD}\",\"admin_account\":\"${DB_ADMIN_USER}\",\"admin_password\":\"${DB_ADMIN_PASSWORD}\"}'
-          --seed ${AGENT_WALLET_SEED} \
-          --genesis-url ${LEDGER_URL}/genesis \
-          --label ${LABEL} \
+          --wallet-storage-config '{\"url\":\"$(DB_HOST):5432\",\"max_connections\":5}'
+          --wallet-storage-creds '{\"account\":\"$(DB_ACCOUNT)\",\"password\":\"$(DB_PASSWORD)\",\"admin_account\":\"$(DB_ADMIN_USER)\",\"admin_password\":\"$(DB_ADMIN_PASSWORD)\"}'
+          --seed $(AGENT_WALLET_SEED) \
+          --genesis-url $(LEDGER_URL)/genesis \
+          --label $(LABEL) \
           --admin-insecure-mode \
           --auto-ping-connection \
-          --jwt-secret ${JWT_SECRET} \
+          --jwt-secret $(JWT_SECRET) \
           --multitenant \
           --multitenant-admin \
-          --log-level ${LOG_LEVEL}"
+          --log-level $(LOG_LEVEL)"
         ]

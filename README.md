@@ -135,7 +135,8 @@ see the section above.
 act --secret-file .env
 ```
 ## Helm Setup and Auto Deployment
-The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated.
+The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated, the Aca-Py image is uploaded as described [section](##Aca-Py_Build_and_ Upload_Image) and the secret files and `values-staging.yaml` sill accurate.
+
 * To check the current deployment and version run `helm list -n ingress-custodian`. Example output:
 ```
 NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	APP VERSION
@@ -157,7 +158,30 @@ To add a secret file to the namespace in the cluster:
   --from-literal=cx-auth-client-id='<placeholder>' \
   --from-literal=cx-auth-client-secret='<placeholder>'
 ```
+
+Aca-py will be deployed and connected to a postgres database pod in the same namespace (the postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) (without adding a Service) )
+
+The deployment of AcaPy instance requires also a secret file `catenax-custodian-acapy-secrets` that include the following data:
+1. `acapy-wallet-key` the key of the base wallet
+1. `acapy-agent-wallet-seed` the seed of the base wallet
+1. `acapy-jwt-secret` the jwt secret for the tokens
+1. `acapy-db-account` postgres account
+1. `acapy-db-password` postgres password
+1. `acapy-db-admin` postgres admin
+1. `acapy-db-admin-password` postgres admin password
+```
+kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secrets \
+  --from-literal=acapy-wallet-key='<placeholder>' \
+  --from-literal=acapy-agent-wallet-seed='<placeholder>' \
+  --from-literal=acapy-jwt-secret='<placeholder>' \
+  --from-literal=acapy-db-account='<placeholder>' \
+  --from-literal=acapy-db-password='<placeholder>' \
+  --from-literal=acapy-db-admin='<placeholder>' \
+  --from-literal=acapy-db-admin-password='<placeholder>'
+```
+
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
+* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-acapy-secrets -o yaml`
 
 ## Manually deploy the to Azure Kubernetes Service (AKS)
 

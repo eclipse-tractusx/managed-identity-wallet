@@ -24,3 +24,4 @@ acapy:
   adminUrl: "http://localhost:11000"
   registerLedgerUrl: "https://indy-test.bosch-digital.de/register"
   networkIdentifier: "local:test"
+  databaseHost: "172.40.1.188"
