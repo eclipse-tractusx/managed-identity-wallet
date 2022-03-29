@@ -39,4 +39,4 @@ hs_err_pid*.log
 .env
 dev.env
 
-dev-assets/postgres
+dev-assets/secrets/*
