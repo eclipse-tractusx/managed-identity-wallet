@@ -14,7 +14,7 @@ logging:
   exposed: "INFO"
 acapy:
   imageName: "acapy"
-  tag: "0.0.1"
+  tag: "0.7.3-b2968d52"
   ledgerUrl: "https://indy-test.bosch-digital.de"
   label: "CatenaXIssuer"
   logLevel: "DEBUG"
@@ -24,4 +24,4 @@ acapy:
   adminUrl: "http://localhost:11000"
   registerLedgerUrl: "https://indy-test.bosch-digital.de/register"
   networkIdentifier: "local:test"
-  databaseHost: "172.40.1.188"
+  databaseHost: "172.40.1.188" # the IP of the postgres pod (kubectl describe pods <name-of-pod> -n ingress-custodian)

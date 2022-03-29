@@ -159,7 +159,7 @@ To add a secret file to the namespace in the cluster:
   --from-literal=cx-auth-client-secret='<placeholder>'
 ```
 
-Aca-py will be deployed and connected to a postgres database pod in the same namespace (the postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) The used files can be found under `dev-assets/acapy-postgres` without adding a Service
+Aca-py will be deployed and connected to a postgres database pod in the same namespace. The postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) The used files can be found under `dev-assets/acapy-postgres` without adding a Service. The IP of the acapy-postgres pod should be updated in the `values-staging.yaml` whenever the postgres pod is changed
 
 The deployment of AcaPy instance requires also a secret file `catenax-custodian-acapy-secrets` that include the following data:
 1. `acapy-wallet-key` the key of the base wallet
@@ -348,9 +348,9 @@ We assume that a cert manager already exists and that we can directly continue
 * Build the Aca-Py Image localy
     * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
     * navigate to the repository `cd aries-cloudagent-python`
-    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from 21. März 2022
+    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from March 21, 2022
     * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
-    * run `docker build -t acapy:0.0.1 -f ./docker/Dockerfile.run .`
+    * run `docker build -t acapy:0.7.3-b2968d52 -f ./docker/Dockerfile.run .`
 * navigate back to the core-custoian repository
 * login to AKS:
     ```
@@ -360,8 +360,8 @@ We assume that a cert manager already exists and that we can directly continue
     ```
 * push the image to the ACR:
     ```
-    docker tag acapy:0.0.1 $CX_ACR_SERVER/catena-x/acapy:0.0.1 
-    docker push $CX_ACR_SERVER/catena-x/acapy:0.0.1 
+    docker tag acapy:0.7.3-b2968d52 $CX_ACR_SERVER/catena-x/acapy:0.7.3-b2968d52
+    docker push $CX_ACR_SERVER/catena-x/acapy:0.7.3-b2968d52
     ```
 
 ## Dashboard
