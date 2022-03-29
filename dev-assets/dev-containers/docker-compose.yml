@@ -25,5 +25,43 @@ services:
     ports:
       - "8081:8080"
 
+  cx_acapy:
+    image: acapy:latest
+    ports:
+      - "11000:11000"
+      - "8000:8000"
+    depends_on:
+      - cx_postgres
+    environment:
+      WAIT_HOSTS: "cx_postgres:5432"
+      WAIT_HOSTS_TIMEOUT: "300"
+      WAIT_SLEEP_INTERVAL: "5"
+      WAIT_HOST_CONNECT_TIMEOUT: "3"
+    entrypoint: /bin/bash
+    command: [
+       "-c",
+       "aca-py start \
+        -e http://localhost:8000/ \
+        --auto-provision \
+        --inbound-transport http '0.0.0.0' 8000 \
+        --outbound-transport http \
+        --admin '0.0.0.0' 11000 \
+        --wallet-name catenaX \
+        --wallet-type indy \
+        --wallet-key issuerKeySecret19 \
+        --wallet-storage-type postgres_storage
+        --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
+        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
+        --seed 00000000000000000000000111111119 \
+        --genesis-url https://indy-test.bosch-digital.de/genesis \
+        --label CatenaXIssuer \
+        --admin-insecure-mode \
+        --auto-ping-connection \
+        --jwt-secret jwtSecret19 \
+        --multitenant \
+        --multitenant-admin \
+        --log-level DEBUG",
+    ]
+
 volumes:
   postgres-data:

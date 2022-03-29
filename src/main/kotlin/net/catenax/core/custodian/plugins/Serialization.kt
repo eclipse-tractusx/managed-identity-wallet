@@ -25,13 +25,19 @@ import kotlinx.serialization.modules.*
 import kotlinx.serialization.builtins.*
 
 import io.bkbn.kompendium.oas.serialization.KompendiumSerializersModule
+import io.ktor.client.features.json.*
+import kotlinx.serialization.json.JsonNull.isString
 
 import java.time.LocalDateTime
 import java.util.Date
 
 import net.catenax.core.custodian.models.*
 import java.net.URI
+import kotlin.reflect.KType
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.typeOf
 
 object DateAsLongSerializer : KSerializer<Date> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
@@ -80,7 +86,7 @@ object AnySerializer : KSerializer<Any> {
         }
         is Number -> JsonPrimitive(value)
         is Boolean -> JsonPrimitive(value)
-        is String -> JsonPrimitive(value)
+        is String ->  JsonPrimitive(value)
         else -> {
             val contents = value::class.memberProperties.associate { property ->
                 property.name to serializeAny(property.getter.call(value))
@@ -103,7 +109,21 @@ object AnySerializer : KSerializer<Any> {
         is JsonArray -> {
             element.map { deserializeJsonElement(it) }
         }
-        is JsonPrimitive -> element.toString()
+        is JsonPrimitive  -> {
+            if (element.isString) {
+               element.content
+           } else {
+               try {
+                    element.boolean
+                } catch (e: Throwable) {
+                    try {
+                        element.long
+                    } catch (e: Throwable) {
+                        element.double
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -111,7 +131,7 @@ fun Application.configureSerialization() {
     install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
-            isLenient = true
+            isLenient = false
             encodeDefaults = true
 
             // useArrayPolymorphism  = true

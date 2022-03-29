@@ -11,8 +11,7 @@ import net.catenax.core.custodian.plugins.AnySerializer
 
 @Serializable
 data class VerifiablePresentationDto(
-    @JsonProperty("@context")
-    @SerialName("@context")
+    @SerialName("@context") @JsonProperty("@context")
     @Field(description = "List of Contexts", name = "@context")
     val context: List<String>,
     @Field(description = "The ID of Credential as String (URI compatible)", name = "id")

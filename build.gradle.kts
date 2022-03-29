@@ -39,6 +39,8 @@ dependencies {
     implementation("io.ktor:ktor-auth:$ktor_version")
     implementation("io.ktor:ktor-auth-jwt:$ktor_version")
 
+    implementation("io.ktor:ktor-client-jackson:$ktor_version")
+
     // for 2.0.0-beta
     // implementation("io.ktor:ktor-server-websockets:$ktor_version")
     // implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
@@ -46,6 +48,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
 
     implementation("io.bkbn:kompendium-core:$kompendium_version")
     implementation("io.bkbn:kompendium-auth:$kompendium_version")
@@ -60,7 +63,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
 
     implementation("decentralized-identity:did-common-java:1.0.0")
-    implementation("com.danubetech:verifiable-credentials-java:1.0.0")
 
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")

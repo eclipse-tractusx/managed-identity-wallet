@@ -13,11 +13,15 @@ data class SuccessResponse(val message: String)
 
 class BadRequestException(message: String? = "empty message") : Exception(message)
 
+class NotImplementedException(message: String? = "empty message") : Exception(message)
+
 class UnprocessableEntityException(message: String? = "empty message") : Exception(message)
 
 class ConflictException(message: String? =  "empty message") : Exception(message)
 
 class NotFoundException(message: String? =  "empty message") : Exception(message)
+
+class ForbiddenException(message: String? = "empty message") : Exception(message)
 
 val semanticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),

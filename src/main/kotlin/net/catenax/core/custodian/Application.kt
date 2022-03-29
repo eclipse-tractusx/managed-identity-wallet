@@ -9,13 +9,16 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
+import net.catenax.core.custodian.models.*
+import net.catenax.core.custodian.models.BadRequestException
+import net.catenax.core.custodian.models.NotFoundException
+import net.catenax.core.custodian.models.ssi.acapy.AcaPyConfig
+import net.catenax.core.custodian.persistence.repositories.CredentialRepository
+import net.catenax.core.custodian.persistence.repositories.WalletRepository
 
 import net.catenax.core.custodian.plugins.*
-import net.catenax.core.custodian.models.ExceptionResponse
-import net.catenax.core.custodian.models.NotFoundException
-import net.catenax.core.custodian.models.BadRequestException
-import net.catenax.core.custodian.models.ConflictException
 import net.catenax.core.custodian.routes.appRoutes
+import net.catenax.core.custodian.services.WalletService
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -36,6 +39,15 @@ fun Application.module(testing: Boolean = false) {
         exception<BadRequestException> { cause ->
             call.respond(HttpStatusCode.BadRequest, ExceptionResponse(cause.message!!))
         }
+        exception<UnprocessableEntityException> { cause ->
+            call.respond(HttpStatusCode.UnprocessableEntity, ExceptionResponse(cause.message!!))
+        }
+        exception<ForbiddenException> { cause ->
+            call.respond(HttpStatusCode.Forbidden, ExceptionResponse(cause.message!!))
+        }
+        exception<NotImplementedException> { cause ->
+            call.respond(HttpStatusCode.NotImplemented, ExceptionResponse(cause.message!!))
+        }
         exception<NotFoundException> { cause ->
             call.respond(HttpStatusCode.NotFound, ExceptionResponse(cause.message!!))
         }
@@ -46,8 +58,16 @@ fun Application.module(testing: Boolean = false) {
 
     configureSecurity()
 
-    configureRouting()
-    appRoutes()
+    val walletRepository = WalletRepository()
+    val credRepository = CredentialRepository()
+    val acaPyConfig = AcaPyConfig(
+        apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
+        ledgerUrl = environment.config.property("acapy.ledgerUrl").getString(),
+        networkIdentifier = environment.config.property("acapy.networkIdentifier").getString()
+    )
+    val walletService = WalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository)
+    configureRouting(walletService)
+    appRoutes(walletService)
 
     configurePersistence()
 }

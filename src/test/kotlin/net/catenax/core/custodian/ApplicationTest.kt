@@ -13,34 +13,28 @@ import io.ktor.http.*
 // import io.ktor.server.application.*
 
 // for 1.6.7
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
 import io.ktor.application.*
 import io.ktor.server.testing.*
 import io.ktor.config.*
 import io.ktor.auth.*
+import kotlinx.coroutines.runBlocking
 
 import kotlin.test.*
 
 import kotlinx.serialization.json.*
-import kotlinx.serialization.*
-import kotlinx.serialization.modules.*
 import kotlinx.serialization.builtins.*
 
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.routes.*
-import net.catenax.core.custodian.models.ssi.*
 import net.catenax.core.custodian.services.*
-import net.catenax.core.custodian.persistence.*
 import net.catenax.core.custodian.persistence.repositories.*
 
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ApplicationTest {
 
-    fun setupEnvironment(environment: ApplicationEnvironment) {
+     private fun setupEnvironment(environment: ApplicationEnvironment) {
         (environment.config as MapApplicationConfig).apply {
             put("app.version", System.getenv("APP_VERSION") ?: "0.0.7")
             put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:custodian;DB_CLOSE_DELAY=-1;")
@@ -49,13 +43,18 @@ class ApplicationTest {
             put("auth.realm", System.getenv("CX_AUTH_REALM") ?: "catenax")
             put("auth.role", System.getenv("CX_AUTH_ROLE") ?: "access")
             put("datapool.url", System.getenv("CX_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
+            put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
+            put("acapy.ledgerUrl", System.getenv("ACAPY_LEDGER_URL") ?: "https://indy-test.bosch-digital.de/register")
+            put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: ":indy:test")
         }
     }
 
-    val walletRepository = WalletRepository()
-    val walletService = WalletService(walletRepository)
+    private val walletRepository = WalletRepository()
+    private val credentialRepository = CredentialRepository()
+    private val acaPyMockedService = AcaPyMockedService()
+    private val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
 
-    fun makeToken(): String = "token"
+    private fun makeToken(): String = "token"
 
     fun Application.configureTestSecurity() {
 
@@ -90,8 +89,8 @@ class ApplicationTest {
             configurePersistence()
             configureOpenAPI()
             configureTestSecurity()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
@@ -119,8 +118,8 @@ class ApplicationTest {
             configurePersistence()
             configureOpenAPI()
             configureTestSecurity()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
@@ -151,7 +150,9 @@ class ApplicationTest {
 
             // programmatically add a wallet
             transaction {
-                walletService.createWallet(WalletCreateDto("did3", "name3"))
+                runBlocking {
+                    walletService.createWallet(WalletCreateDto("did3", "name3"))
+                }
             }
 
             handleRequest(HttpMethod.Get, "/api/wallets") {
@@ -165,10 +166,12 @@ class ApplicationTest {
 
             // delete both from the store
             handleRequest(HttpMethod.Delete, "/api/wallets/bpn1").apply {
-                assertEquals(HttpStatusCode.Accepted, response.status())
+                assertEquals(HttpStatusCode.OK, response.status())
             }
             transaction {
-                walletService.deleteWallet("did3")
+                runBlocking {
+                    walletService.deleteWallet("did3")
+                }
             }
 
             // verify deletion
@@ -194,8 +197,8 @@ class ApplicationTest {
             configurePersistence()
             configureTestSecurity()
             configureOpenAPI()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             var exception = assertFailsWith<BadRequestException> {
@@ -261,7 +264,9 @@ class ApplicationTest {
 
             // programmatically add a wallet
             transaction {
-                walletService.createWallet(WalletCreateDto("bpn4", "name4"))
+                runBlocking {
+                    walletService.createWallet(WalletCreateDto("bpn4", "name4"))
+                }
             }
 
             var ce = assertFailsWith<ConflictException> {
@@ -273,12 +278,14 @@ class ApplicationTest {
                     assertEquals(HttpStatusCode.Created, response.status())
                 }
             }
-            assertEquals("Wallet with given BPN already exists!", ce.message)
+            assertEquals("Wallet with identifier bpn4 already exists!", ce.message)
 
             // clean up created wallets
             transaction {
-                walletService.deleteWallet("bpn4")
-                assertEquals(0, walletService.getAll().size)
+                runBlocking {
+                    walletService.deleteWallet("bpn4")
+                    assertEquals(0, walletService.getAll().size)
+                }
             }
         }
     }
@@ -292,8 +299,8 @@ class ApplicationTest {
             configurePersistence()
             configureOpenAPI()
             configureTestSecurity()
-            configureRouting()
-            appRoutes()
+            configureRouting(walletService)
+            appRoutes(walletService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Post, "/api/businessPartnerData") {

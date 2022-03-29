@@ -1,6 +1,5 @@
 package net.catenax.core.custodian.routes
 
-import com.danubetech.verifiablecredentials.jsonld.VerifiableCredentialContexts
 import io.bkbn.kompendium.annotations.Field
 import io.bkbn.kompendium.annotations.Param
 import io.bkbn.kompendium.annotations.ParamType
@@ -21,6 +20,7 @@ import io.ktor.routing.*
 import kotlinx.serialization.Serializable
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.*
+import net.catenax.core.custodian.models.ssi.JsonLdContexts
 import net.catenax.core.custodian.services.WalletService
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import java.time.LocalDateTime
@@ -97,8 +97,12 @@ fun Route.walletRoutes(walletService: WalletService) {
             ) {
                 val identifier =
                     call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
-                val walletDto: WalletDto = walletService.getWallet(identifier)
-                call.respond(walletDto)
+                var withCredentials = false
+                if (call.request.queryParameters["withCredentials"] != null) {
+                    withCredentials = call.request.queryParameters["withCredentials"].toBoolean()
+                }
+                val walletDto: WalletDto = walletService.getWallet(identifier, withCredentials)
+                return@notarizedGet call.respond(HttpStatusCode.OK, walletDto)
             }
 
             notarizedDelete(
@@ -106,7 +110,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     summary = "Remove wallet",
                     description = "Remove hosted wallet",
                     responseInfo = ResponseInfo(
-                        status = HttpStatusCode.Accepted,
+                        status = HttpStatusCode.OK,
                         description = "Wallet successfully removed!",
                         examples = mapOf("demo" to SuccessResponse("Wallet successfully removed!"))
                     ),
@@ -118,7 +122,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                     call.parameters["identifier"] ?: return@notarizedDelete call.respond(HttpStatusCode.BadRequest)
                 if (walletService.deleteWallet(identifier)) {
                     return@notarizedDelete call.respond(
-                        HttpStatusCode.Accepted,
+                        HttpStatusCode.OK,
                         SuccessResponse("Wallet successfully removed!")
                     )
                 }
@@ -152,11 +156,22 @@ fun Route.walletRoutes(walletService: WalletService) {
                         tags = setOf("Wallets")
                     )
                 ) {
-                    val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-                    call.respond(
-                        HttpStatusCode.Created,
-                        SuccessResponse("Credential has been successfully stored")
-                    )
+                    try {
+                        val identifier = call.parameters["identifier"]
+                            ?: throw BadRequestException("Missing or malformed identifier")
+                        val verifiableCredential = call.receive<IssuedVerifiableCredentialRequestDto>()
+                        walletService.storeCredential(identifier, verifiableCredential)
+                        call.respond(HttpStatusCode.Created, SuccessResponse("Credential has been successfully stored"))
+                    } catch (e: ExposedSQLException) {
+                        val isUniqueConstraintError = e.sqlState == "23505"
+                        if (isUniqueConstraintError) {
+                            throw ConflictException("Credential already exists!")
+                        } else {
+                            throw UnprocessableEntityException(e.message)
+                        }
+                    } catch (e: Exception) {
+                        throw e
+                    }
                 }
             }
 
@@ -236,8 +251,8 @@ data class WalletDtoParameter(
 val issuedVerifiableCredentialRequestDtoExample = mapOf(
     "demo" to IssuedVerifiableCredentialRequestDto(
         context = listOf(
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
         ),
         id = "http://example.edu/credentials/3732",
         type = listOf("University-Degree-Credential, VerifiableCredential"),
@@ -261,8 +276,7 @@ val walletDtoExample = mapOf(
         "bpn",
         "did",
         LocalDateTime.now(),
-        "samplePublicKey",
-        emptyList<VerifiableCredentialDto>()
+        emptyList<VerifiableCredentialDto>().toMutableList()
     )
 )
 

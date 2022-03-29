@@ -79,7 +79,10 @@ below. Here a few hints on how to set it up:
 6. `CX_AUTH_ROLE`: specify the expected role within the token, e.g. `access`
 7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `custodian`
 8. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
-8. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
+9. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
+10. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
+11. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.bosch-digital.de/register`
+12. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
 
 To follow all steps in this readme you also need following variables:
 
@@ -101,10 +104,16 @@ To follow all steps in this readme you also need following variables:
 To resemble the staging and production system as much as possible also on the
 local machine, an external Postgresql database should be used instead of
 the default included h2 in-memory database. Additionally the authentication and authorization could be done via
-[keycloak](https://www.keycloak.org).
+[keycloak](https://www.keycloak.org). The Aca-Py Service will also run in a docker container
 
+ * build the Aca-Py Image (if not available)
+    * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
+    * navigate to the repository `cd aries-cloudagent-python`
+    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from 21. März 2022
+    * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
+    * run `docker build -t acapy -f ./docker/Dockerfile.run .`
  * navigate to `./dev-assets/dev-containers`
- * run `docker-compose up -d` to start a Postgresql database and Keycloak instance in Docker conatiners
+ * run `docker-compose up -d` to start a Postgresql database and Keycloak instance and the AcaPy Service in Docker conatiners
  * To setup the Postgresql database in the application please see the section below setting up the database
  * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
  * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
@@ -126,7 +135,8 @@ see the section above.
 act --secret-file .env
 ```
 ## Helm Setup and Auto Deployment
-The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated.
+The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated, the Aca-Py image is uploaded as described [section](##Aca-Py_Build_and_ Upload_Image) and the secret files and `values-staging.yaml` sill accurate.
+
 * To check the current deployment and version run `helm list -n ingress-custodian`. Example output:
 ```
 NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	APP VERSION
@@ -148,7 +158,30 @@ To add a secret file to the namespace in the cluster:
   --from-literal=cx-auth-client-id='<placeholder>' \
   --from-literal=cx-auth-client-secret='<placeholder>'
 ```
+
+Aca-py will be deployed and connected to a postgres database pod in the same namespace. The postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) The used files can be found under `dev-assets/acapy-postgres` without adding a Service. The IP of the acapy-postgres pod should be updated in the `values-staging.yaml` whenever the postgres pod is changed
+
+The deployment of AcaPy instance requires also a secret file `catenax-custodian-acapy-secrets` that include the following data:
+1. `acapy-wallet-key` the key of the base wallet
+1. `acapy-agent-wallet-seed` the seed of the base wallet
+1. `acapy-jwt-secret` the jwt secret for the tokens
+1. `acapy-db-account` postgres account
+1. `acapy-db-password` postgres password
+1. `acapy-db-admin` postgres admin
+1. `acapy-db-admin-password` postgres admin password
+```
+kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secrets \
+  --from-literal=acapy-wallet-key='<placeholder>' \
+  --from-literal=acapy-agent-wallet-seed='<placeholder>' \
+  --from-literal=acapy-jwt-secret='<placeholder>' \
+  --from-literal=acapy-db-account='<placeholder>' \
+  --from-literal=acapy-db-password='<placeholder>' \
+  --from-literal=acapy-db-admin='<placeholder>' \
+  --from-literal=acapy-db-admin-password='<placeholder>'
+```
+
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
+* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-acapy-secrets -o yaml`
 
 ## Manually deploy the to Azure Kubernetes Service (AKS)
 
@@ -310,6 +343,26 @@ helm install nginx-ingress ingress-nginx/ingress-nginx \
 (Currently we leave out `--set controller.service.annotations."service\.beta\.kubernetes\.io/azure-dns-label-name"=$CX_IP_NAME`)
 
 We assume that a cert manager already exists and that we can directly continue
+
+## Aca-Py Build and Upload Image
+* Build the Aca-Py Image localy
+    * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
+    * navigate to the repository `cd aries-cloudagent-python`
+    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from March 21, 2022
+    * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
+    * run `docker build -t acapy:0.7.3-b2968d52 -f ./docker/Dockerfile.run .`
+* navigate back to the core-custoian repository
+* login to AKS:
+    ```
+    set -a; source .env; set +a
+    docker login $CX_ACR_SERVER
+    az aks get-credentials --resource-group $CX_RG --name $CX_AKS_CLUSTER --admin
+    ```
+* push the image to the ACR:
+    ```
+    docker tag acapy:0.7.3-b2968d52 $CX_ACR_SERVER/catena-x/acapy:0.7.3-b2968d52
+    docker push $CX_ACR_SERVER/catena-x/acapy:0.7.3-b2968d52
+    ```
 
 ## Dashboard
 

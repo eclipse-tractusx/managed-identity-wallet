@@ -53,8 +53,12 @@ spec:
           value: {{ .Values.auth.redirectUrl }}
         - name: CX_DATAPOOL_URL
           value: {{ .Values.datapoolUrl }}
-        - name: LOG_LEVEL_EXPOSED
-          value: {{ .Values.logging.exposed | default "INFO" }}
+        - name: ACAPY_API_ADMIN_URL
+          value: {{ .Values.acapy.adminUrl }}
+        - name: ACAPY_LEDGER_URL
+          value: {{ .Values.acapy.registerLedgerUrl }}
+        - name: ACAPY_NETWORK_IDENTIFIER
+          value: {{ .Values.acapy.networkIdentifier }}
         resources:
           requests:
             cpu: 100m
@@ -65,3 +69,85 @@ spec:
         ports:
         - containerPort: 8080
           name: custodian
+      - name: catenax-acapy
+        image: {{ .Values.image.registry }}/catena-x/{{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
+        env:
+        - name: WALLET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-wallet-key
+        - name: AGENT_WALLET_SEED
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-agent-wallet-seed
+        - name: LEDGER_URL
+          value: {{ .Values.acapy.ledgerUrl }}
+        - name: LABEL
+          value: {{ .Values.acapy.label }}
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-jwt-secret
+        - name: LOG_LEVEL
+          value: {{ .Values.acapy.logLevel }}
+        - name: ACAPY_ENDPOINT_PORT
+          value: {{ .Values.acapy.endpointPort | quote }}
+        - name: ACAPY_ENDPOINT_URL
+          value: {{ .Values.acapy.endpointUrl }}
+        - name: ACAPY_ADMIN_PORT
+          value: {{ .Values.acapy.adminPort | quote }}
+        - name: DB_HOST
+          value: {{ .Values.acapy.databaseHost }}
+        - name: DB_ACCOUNT
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-account
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-password
+        - name: DB_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-admin
+        - name: DB_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-admin-password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        command: ["/bin/bash"]
+        args: ["-c", "aca-py start \
+          -e $(ACAPY_ENDPOINT_URL) \
+          --auto-provision \
+          --inbound-transport http '0.0.0.0' $(ACAPY_ENDPOINT_PORT) \
+          --outbound-transport http \
+          --admin '0.0.0.0' $(ACAPY_ADMIN_PORT) \
+          --wallet-name AcapyCatenaX \
+          --wallet-type indy \
+          --wallet-key $(WALLET_KEY) \
+          --wallet-storage-type postgres_storage
+          --wallet-storage-config '{\"url\":\"$(DB_HOST):5432\",\"max_connections\":5}'
+          --wallet-storage-creds '{\"account\":\"$(DB_ACCOUNT)\",\"password\":\"$(DB_PASSWORD)\",\"admin_account\":\"$(DB_ADMIN_USER)\",\"admin_password\":\"$(DB_ADMIN_PASSWORD)\"}'
+          --seed $(AGENT_WALLET_SEED) \
+          --genesis-url $(LEDGER_URL)/genesis \
+          --label $(LABEL) \
+          --admin-insecure-mode \
+          --auto-ping-connection \
+          --jwt-secret $(JWT_SECRET) \
+          --multitenant \
+          --multitenant-admin \
+          --log-level $(LOG_LEVEL)"
+        ]

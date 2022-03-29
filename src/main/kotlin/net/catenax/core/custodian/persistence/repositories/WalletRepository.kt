@@ -1,17 +1,14 @@
 package net.catenax.core.custodian.persistence.repositories
 
+import net.catenax.core.custodian.models.ConflictException
 import net.catenax.core.custodian.models.NotFoundException
-import net.catenax.core.custodian.models.WalletCreateDto
+import net.catenax.core.custodian.models.WalletExtendedData
 import net.catenax.core.custodian.models.WalletDto
 import net.catenax.core.custodian.models.ssi.VerifiableCredentialDto
 import net.catenax.core.custodian.persistence.entities.*
-import org.bitcoinj.core.Base58
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.security.KeyPairGenerator
-import java.security.spec.ECGenParameterSpec
 import java.time.LocalDateTime
-import java.util.*
 
 class WalletRepository {
 
@@ -24,22 +21,24 @@ class WalletRepository {
             ?: throw NotFoundException("Wallet with identifier $identifier not found")
     }
 
-    fun addWallet(wallet: WalletCreateDto): Wallet {
-        // TODO add VCs: request cx data pool information
-        val kpg = KeyPairGenerator.getInstance("EC")
-        val params = ECGenParameterSpec("secp256r1")
-        kpg.initialize(params);
-        val kp = kpg.generateKeyPair()
+    @Throws(ConflictException::class)
+    fun checkWalletAlreadyExists(identifier: String) {
+         if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
+             throw ConflictException("Wallet with identifier $identifier already exists!")
+         }
+    }
 
-        val createdWallet = Wallet.new {
+    fun addWallet(wallet: WalletExtendedData): Wallet {
+        // TODO add VCs: request cx data pool information
+        return Wallet.new {
             bpn = wallet.bpn
             name = wallet.name
-            did = "did:example:" + Base58.encode(kp.public.encoded).toString()
+            did = wallet.did
+            walletId = wallet.walletId
+            walletKey = wallet.walletKey
+            walletToken = wallet.walletToken
             createdAt = LocalDateTime.now()
-            privateKey = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded())
-            publicKey = Base58.encode(kp.public.encoded).toString()
         }
-        return createdWallet
     }
 
     fun deleteWallet(identifier: String): Boolean {
@@ -48,6 +47,10 @@ class WalletRepository {
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
-        WalletDto(name, bpn, did, createdAt, publicKey, emptyList<VerifiableCredentialDto>())
+        WalletDto(name, bpn, did, createdAt, emptyList<VerifiableCredentialDto>().toMutableList())
+    }
+
+    fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {
+        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey, walletToken)
     }
 }

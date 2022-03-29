@@ -1,6 +1,5 @@
 package net.catenax.core.custodian.routes
 
-import com.danubetech.verifiablecredentials.jsonld.VerifiableCredentialContexts
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.ParameterExample
@@ -15,9 +14,11 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import net.catenax.core.custodian.models.semanticallyInvalidInputException
 import net.catenax.core.custodian.models.ssi.*
+import net.catenax.core.custodian.models.ssi.JsonLdContexts
 import net.catenax.core.custodian.models.syntacticallyInvalidInputException
+import net.catenax.core.custodian.services.WalletService
 
-fun Route.vcRoutes() {
+fun Route.vcRoutes(walletService: WalletService) {
 
     route("/credentials") {
 
@@ -26,7 +27,7 @@ fun Route.vcRoutes() {
                     summary = "Query Verifiable Credentials",
                     description = "Search verifiable credentials with filter criteria",
                     parameterExamples = setOf(
-                        ParameterExample("id", "did", "http://example.edu/credentials/3732"),
+                        ParameterExample("id", "id", "http://example.edu/credentials/3732"),
                         ParameterExample("type", "type", "['University-Degree-Credential']"),
                         ParameterExample("issuerIdentifier", "issuerIdentifierDid", "did:example:0123"),
                         ParameterExample("holderIdentifier", "holderIdentifierDid", "did:example:4567"),
@@ -40,10 +41,13 @@ fun Route.vcRoutes() {
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
-                val id = call.request.queryParameters["id"]
+                val id = call.request.queryParameters["id"] ?: null
+                val type = call.request.queryParameters["type"] ?: null
+                val issuerIdentifier = call.request.queryParameters["issuerIdentifier"] ?: null
+                val holderIdentifier = call.request.queryParameters["holderIdentifier"] ?: null
                 call.respond(
                     HttpStatusCode.OK,
-                    listOf(signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto )
+                    walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
                 )
             }
 
@@ -64,11 +68,8 @@ fun Route.vcRoutes() {
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
-                val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-                call.respond(
-                    HttpStatusCode.Created,
-                    signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto
-                )
+                val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
+                call.respond(HttpStatusCode.Created, walletService.issueCredential(verifiableCredentialDto))
             }
 
         route("/issuer") {
@@ -90,6 +91,7 @@ fun Route.vcRoutes() {
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
+
                 call.respond(
                     HttpStatusCode.Created,
                     signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto
@@ -102,8 +104,8 @@ fun Route.vcRoutes() {
 val verifiableCredentialRequestDtoExample = mapOf(
     "demo" to VerifiableCredentialRequestDto(
         context = listOf(
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
         ),
         id = "http://example.edu/credentials/3732",
         type = listOf("University-Degree-Credential, VerifiableCredential"),
@@ -118,8 +120,8 @@ val verifiableCredentialRequestDtoExample = mapOf(
 val verifiableCredentialRequestWithoutIssuerDtoExample = mapOf(
     "demo" to VerifiableCredentialRequestWithoutIssuerDto(
         context = listOf(
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
         ),
         id = "http://example.edu/credentials/3732",
         type = listOf("University-Degree-Credential, VerifiableCredential"),
@@ -133,8 +135,8 @@ val verifiableCredentialRequestWithoutIssuerDtoExample = mapOf(
 val signedVerifiableCredentialDtoExample =  mapOf(
     "demo" to VerifiableCredentialDto(
         context = listOf(
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1.toString(),
-            VerifiableCredentialContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1.toString()
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
         ),
         id = "http://example.edu/credentials/3732",
         type = listOf("University-Degree-Credential, VerifiableCredential"),

@@ -12,8 +12,7 @@ data class WalletDto(
     val bpn: String,
     val did: String,
     @Serializable(with = LocalDateTimeAsStringSerializer::class) val createdAt: LocalDateTime,
-    val publicKey: String,
-    @Serializable(with = StringListSerializer::class) val vcs: List<VerifiableCredentialDto>
+    val vcs: List<VerifiableCredentialDto>
 ) {
 
     init {

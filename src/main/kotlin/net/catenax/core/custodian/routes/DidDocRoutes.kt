@@ -16,12 +16,14 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import net.catenax.core.custodian.models.BadRequestException
 import net.catenax.core.custodian.models.notFoundException
 import net.catenax.core.custodian.models.semanticallyInvalidInputException
 import net.catenax.core.custodian.models.ssi.*
 import net.catenax.core.custodian.models.syntacticallyInvalidInputException
+import net.catenax.core.custodian.services.WalletService
 
-fun Route.didDocRoutes() {
+fun Route.didDocRoutes(walletService: WalletService) {
 
     route("/didDocuments") {
 
@@ -43,10 +45,9 @@ fun Route.didDocRoutes() {
                     tags = setOf("DIDDocument")
                 )
             ) {
-                call.respond(
-                    HttpStatusCode.OK,
-                    didDocumentDtoExample["demo"] as DidDocumentDto
-                )
+                val identifier =
+                    call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                call.respond(HttpStatusCode.OK, walletService.resolveDocument(identifier))
             }
 
             route("/services") {
@@ -72,9 +73,11 @@ fun Route.didDocRoutes() {
                     )
                 ) {
                     val serviceDto = call.receive<DidServiceDto>()
-                    call.respond(
+                    val identifier =
+                        call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                    return@notarizedPost call.respond(
                         HttpStatusCode.Created,
-                        didDocumentDtoExample["demo"] as DidDocumentDto
+                        walletService.addService(identifier, serviceDto)
                     )
                 }
 
@@ -97,16 +100,22 @@ fun Route.didDocRoutes() {
                                 description = "The resolved DID Document after the updating the Service",
                                 examples = didDocumentDtoExample
                             ),
-                            canThrow = setOf(notFoundException,
+                            canThrow = setOf(
+                                notFoundException,
                                 semanticallyInvalidInputException,
-                                syntacticallyInvalidInputException),
+                                syntacticallyInvalidInputException
+                            ),
                             tags = setOf("DIDDocument")
                         )
                     ) {
-                        val serviceDto = call.receive<DidServiceDto>()
-                        call.respond(
-                            HttpStatusCode.Created,
-                            didDocumentDtoExample["demo"] as DidDocumentDto
+                        val identifier = call.parameters["identifier"]
+                            ?: throw BadRequestException("Missing or malformed identifier")
+                        val serviceId =
+                            call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
+                        val serviceDto = call.receive<DidServiceUpdateRequestDto>()
+                        return@notarizedPut call.respond(
+                            HttpStatusCode.OK,
+                            walletService.updateService(identifier, serviceId, serviceDto)
                         )
                     }
 
@@ -124,14 +133,19 @@ fun Route.didDocRoutes() {
                                 description = "The resolved DID Document after removing the service",
                                 examples = didDocumentDtoWithoutServiceExample
                             ),
-                            canThrow = setOf(notFoundException, semanticallyInvalidInputException, syntacticallyInvalidInputException),
+                            canThrow = setOf(
+                                notFoundException,
+                                semanticallyInvalidInputException,
+                                syntacticallyInvalidInputException
+                            ),
                             tags = setOf("DIDDocument")
                         )
                     ) {
-                        call.respond(
-                            HttpStatusCode.OK,
-                            didDocumentDtoWithoutServiceExample["demo"] as DidDocumentDto
-                        )
+                        val identifier = call.parameters["identifier"]
+                            ?: throw BadRequestException("Missing or malformed identifier")
+                        val serviceId =
+                            call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
+                        call.respond(HttpStatusCode.OK, walletService.deleteService(identifier, serviceId))
                     }
                 }
             }
@@ -139,7 +153,7 @@ fun Route.didDocRoutes() {
     }
 }
 
-val didDocumentDtoExample = mapOf(
+val didDocumentDtoExample: Map<String, DidDocumentDto> = mapOf(
     "demo" to DidDocumentDto(
         id = "did:example:76e12ec712ebc6f1c221ebfeb1f",
         context = listOf("https://www.w3.org/ns/did/v1"),
@@ -192,4 +206,3 @@ val didServiceUpdateRequestDtoExample = mapOf(
         serviceEndpoint = "https://myservice.com/myendpoint"
     )
 )
-

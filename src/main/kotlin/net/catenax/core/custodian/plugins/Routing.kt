@@ -37,6 +37,8 @@ import io.bkbn.kompendium.core.routes.redoc
 
 
 import net.catenax.core.custodian.models.*
+import net.catenax.core.custodian.models.ssi.acapy.AcaPyConfig
+import net.catenax.core.custodian.persistence.repositories.CredentialRepository
 import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import net.catenax.core.custodian.services.WalletService
 
@@ -44,7 +46,7 @@ suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token:
 
     var stringBody: String = ""
     HttpClient(Apache).use { client ->
-        val httpResponse: HttpResponse = client.get("${datapoolUrl}/api/catena/business-partner/${bpn}") {
+        val httpResponse: HttpResponse = client.get("$datapoolUrl/$bpn") {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 append(HttpHeaders.Authorization, "Bearer " + token)
@@ -59,9 +61,7 @@ suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token:
 @Serializable
 data class BusinessPartnerInfo(val bpn: String)
 
-fun Application.configureRouting() {
-    val walletRepository = WalletRepository()
-    val walletService = WalletService(walletRepository)
+fun Application.configureRouting(walletService: WalletService) {
 
     val datapoolUrl = environment.config.property("datapool.url").getString()
 
@@ -156,7 +156,7 @@ fun Application.configureRouting() {
                                 log.warn("SerializationException: " + e.message)
                                 throw BadRequestException(e.message)
                             } catch (e: IOException) {
-                                log.warn("IOException: ${datapoolUrl} " + e.message)
+                                log.warn("IOException: $datapoolUrl " + e.message)
                                 throw BadRequestException(e.message)
                             }
                         } else {
