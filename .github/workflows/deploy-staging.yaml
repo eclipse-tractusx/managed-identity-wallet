@@ -2,9 +2,9 @@ name: Build and push the latest build to staging
 
 on:
   push:
-    branches: [ impl-with-acapy ]
+    branches: [ develop ]
   workflow_dispatch:
-    branches: [ impl-with-acapy ]
+    branches: [ develop ]
 
 env:
   NAMESPACE: "ingress-custodian"

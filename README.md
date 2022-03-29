@@ -159,7 +159,7 @@ To add a secret file to the namespace in the cluster:
   --from-literal=cx-auth-client-secret='<placeholder>'
 ```
 
-Aca-py will be deployed and connected to a postgres database pod in the same namespace (the postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) (without adding a Service) )
+Aca-py will be deployed and connected to a postgres database pod in the same namespace (the postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) The used files can be found under `dev-assets/acapy-postgres` without adding a Service
 
 The deployment of AcaPy instance requires also a secret file `catenax-custodian-acapy-secrets` that include the following data:
 1. `acapy-wallet-key` the key of the base wallet
