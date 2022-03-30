@@ -174,45 +174,6 @@ fun Route.walletRoutes(walletService: WalletService) {
                     }
                 }
             }
-
-            route("/signatures") {
-                notarizedPost(
-                    PostInfo<SignMessageParameter, SignMessageDto, SignMessageResponseDto>(
-                        summary = "Sign Message",
-                        description = "Sign a message using the wallet of the given identifier",
-                        requestInfo = RequestInfo(
-                            description = "the message to sign and the wallet did",
-                            examples = mapOf(
-                                "demo" to SignMessageDto(
-                                    message = "message_string"
-                                )
-                            )
-                        ),
-                        responseInfo = ResponseInfo(
-                            status = HttpStatusCode.Created,
-                            description = "The signed message response",
-                            examples = mapOf(
-                                "demo" to SignMessageResponseDto(
-                                    "did:example", "message_string",
-                                    "signed_message_hex", "public_key_base58"
-                                )
-                            )
-                        ),
-                        canThrow = setOf(notFoundException),
-                        tags = setOf("Wallets")
-                    )
-                ) {
-                    val signMessageParameter = call.receive<SignMessageParameter>()
-                    val signMessageDto = call.receive<SignMessageDto>()
-                    val response = SignMessageResponseDto(
-                        identifier = signMessageParameter.identifier,
-                        message = signMessageDto.message,
-                        signedMessageInHex = "0x123....",
-                        publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                    )
-                    call.respond(HttpStatusCode.Created, response)
-                }
-            }
         }
     }
 }
@@ -225,13 +186,6 @@ data class StoreVerifiableCredentialParameter(
         description = "The DID or BPN of the credential holder. The DID must match to the id of the credential subject if present.",
         name = "identifier"
     )
-    val identifier: String
-)
-
-@Serializable
-data class SignMessageParameter(
-    @Param(type = ParamType.PATH)
-    @Field(description = "The DID or BPN of the signer.", name = "identifier")
     val identifier: String
 )
 

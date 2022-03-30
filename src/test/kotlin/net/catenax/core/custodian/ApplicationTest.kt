@@ -230,7 +230,7 @@ class ApplicationTest {
             assertTrue(exception.message!!.contains("required"))
             exception = assertFailsWith<BadRequestException> {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
-                       addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                        addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":null}""")
                 }.apply {
