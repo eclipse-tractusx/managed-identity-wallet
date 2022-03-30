@@ -83,6 +83,7 @@ below. Here a few hints on how to set it up:
 10. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
 11. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.bosch-digital.de/register`
 12. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
+13. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
 
 To follow all steps in this readme you also need following variables:
 
@@ -124,6 +125,8 @@ To run and develop using IntelliJ IDE:
 * create file `dev.env` and copy the values from `.env.example`
 * install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile
 * Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
+* Create the CatenaX wallet using the value stored in `CX_BPN` as bpn
+* Register the created DID of Wallet and its VerKey on the ledger.
 
 ## Testing GitHub actions locally
 
