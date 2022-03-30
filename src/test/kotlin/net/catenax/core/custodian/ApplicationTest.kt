@@ -44,8 +44,8 @@ class ApplicationTest {
             put("auth.role", System.getenv("CX_AUTH_ROLE") ?: "access")
             put("datapool.url", System.getenv("CX_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
             put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
-            put("acapy.ledgerUrl", System.getenv("ACAPY_LEDGER_URL") ?: "https://indy-test.bosch-digital.de/register")
             put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: ":indy:test")
+            put("wallet.catenaXBpn", System.getenv("CX_BPN") ?: "bpn1")
         }
     }
 
@@ -127,8 +127,8 @@ class ApplicationTest {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                val companies: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
-                assertEquals(0, companies.size)
+                val wallets: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
+                assertEquals(0, wallets.size)
             }
             // create wallet
             handleRequest(HttpMethod.Post, "/api/wallets") {
@@ -144,8 +144,8 @@ class ApplicationTest {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                val companies: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
-                assertEquals(1, companies.size)
+                val wallets: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
+                assertEquals(1, wallets.size)
             }
 
             // programmatically add a wallet
@@ -160,8 +160,8 @@ class ApplicationTest {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                val companies: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
-                assertEquals(2, companies.size)
+                val wallets: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
+                assertEquals(2, wallets.size)
             }
 
             // delete both from the store
@@ -180,8 +180,8 @@ class ApplicationTest {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                val companies: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
-                assertEquals(0, companies.size)
+                val wallets: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
+                assertEquals(0, wallets.size)
             }
 
             transaction {
@@ -201,6 +201,13 @@ class ApplicationTest {
             appRoutes(walletService)
             configureSerialization()
         }) {
+            // create catena X wallet
+            transaction {
+                runBlocking {
+                    walletService.createWallet(WalletCreateDto("bpn1", "name1"))
+                }
+            }
+
             var exception = assertFailsWith<BadRequestException> {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -223,7 +230,7 @@ class ApplicationTest {
             assertTrue(exception.message!!.contains("required"))
             exception = assertFailsWith<BadRequestException> {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
-                        addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                       addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody("""{"bpn":null}""")
                 }.apply {
@@ -233,9 +240,9 @@ class ApplicationTest {
             assertTrue(exception.message!!.contains("null"))
             exception = assertFailsWith<BadRequestException> {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
-                        addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                        addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody("""{"bpn":"bpn1", "name": null}""")
+                       addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                       addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody("""{"bpn":"bpn2", "name": null}""")
                 }.apply {
                     assertEquals(HttpStatusCode.Created, response.status())
                 }
@@ -245,7 +252,7 @@ class ApplicationTest {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody("""{"bpn":"", "name": "name1"}""")
+                        setBody("""{"bpn":"", "name": "name2"}""")
                 }.apply {
                     assertEquals(HttpStatusCode.Created, response.status())
                 }
@@ -255,7 +262,7 @@ class ApplicationTest {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
                         addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody("""{"bpn":"bpn1", "name": ""}""")
+                        setBody("""{"bpn":"bpn2", "name": ""}""")
                 }.apply {
                     assertEquals(HttpStatusCode.Created, response.status())
                 }
@@ -284,6 +291,7 @@ class ApplicationTest {
             transaction {
                 runBlocking {
                     walletService.deleteWallet("bpn4")
+                    walletService.deleteWallet("bpn1") // Catena-X wallet
                     assertEquals(0, walletService.getAll().size)
                 }
             }

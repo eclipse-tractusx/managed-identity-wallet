@@ -9,17 +9,17 @@ import kotlinx.serialization.json.Json
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.acapy.*
 
-class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: HttpClient): IAcaPyService {
+class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val client: HttpClient): IAcaPyService {
 
-    override fun getNetworkIdentifier(): String {
-        return acaPyConfig.networkIdentifier
+    override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
+        return acaPyConfig
     }
 
     override suspend fun getWallets(): WalletList {
         return try {
             client.get {
-                headers.append(HttpHeaders.Accept, "application/json")
                 url("${acaPyConfig.apiAdminUrl}/multitenancy/wallets")
+                accept(ContentType.Application.Json)
             }
         } catch (e: Exception) {
             throw BadRequestException(e.message)
@@ -29,6 +29,7 @@ class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: Htt
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
         val httpResponse: HttpResponse = client.post {
             url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet")
+            accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = subWallet
         }
@@ -59,7 +60,7 @@ class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: Htt
         }
     }
 
-    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult {
+    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): LocalDidResult {
         return client.post {
             url("${acaPyConfig.apiAdminUrl}/wallet/did/create")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
@@ -69,11 +70,31 @@ class AcaPyService(private val acaPyConfig: AcaPyConfig, private val client: Htt
         }
     }
 
-    override suspend fun registerDidOnLedger(didRegistration: DidRegistration): DidRegistrationResult {
+    override suspend fun getPublicDidOfWallet(tokenOfWallet: String): DidResult {
+        return try {
+            client.get {
+                url("${acaPyConfig.apiAdminUrl}/wallet/did/public")
+                headers.append(HttpHeaders.Authorization, "Bearer $tokenOfWallet")
+                accept(ContentType.Application.Json)
+            }
+        } catch (e: Exception) {
+            throw BadRequestException(e.message)
+        }
+    }
+
+    override suspend fun registerDidOnLedger(
+        didRegistration: DidRegistration,
+        endorserWalletToken: String
+    ): DidRegistrationResult {
         return client.post {
-            url(acaPyConfig.ledgerUrl)
-            contentType(ContentType.Application.Json)
-            body = didRegistration
+            // Role is ignored because endorser cannot register nym with role other than NONE
+            url("${acaPyConfig.apiAdminUrl}/ledger/" +
+                    "register-nym?" +
+                    "did=${didRegistration.did}&" +
+                    "verkey=${didRegistration.verkey}&" +
+                    "alias=${didRegistration.alias}")
+            headers.append(HttpHeaders.Authorization, "Bearer $endorserWalletToken")
+            accept(ContentType.Application.Json)
         }
     }
 

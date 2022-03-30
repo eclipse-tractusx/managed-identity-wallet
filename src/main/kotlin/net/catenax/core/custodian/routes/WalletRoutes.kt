@@ -53,7 +53,7 @@ fun Route.walletRoutes(walletService: WalletService) {
                 responseInfo = ResponseInfo(
                     status = HttpStatusCode.Created,
                     description = "Wallet was successfully created",
-                    examples = walletDtoExample
+                    examples = walletDtoWithVerKeyExample
                 ),
                 canThrow = setOf(syntacticallyInvalidInputException, conflictException),
                 tags = setOf("Wallets")
@@ -270,11 +270,23 @@ val issuedVerifiableCredentialRequestDtoExample = mapOf(
     )
 )
 
+val walletDtoWithVerKeyExample = mapOf(
+    "demo" to WalletDto(
+        "name",
+        "bpn",
+        "did",
+        "verkey",
+        LocalDateTime.now(),
+        emptyList<VerifiableCredentialDto>().toMutableList()
+    )
+)
+
 val walletDtoExample = mapOf(
     "demo" to WalletDto(
         "name",
         "bpn",
         "did",
+        null,
         LocalDateTime.now(),
         emptyList<VerifiableCredentialDto>().toMutableList()
     )

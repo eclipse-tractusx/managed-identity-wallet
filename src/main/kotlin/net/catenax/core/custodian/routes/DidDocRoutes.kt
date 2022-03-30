@@ -115,7 +115,11 @@ fun Route.didDocRoutes(walletService: WalletService) {
                         val serviceDto = call.receive<DidServiceUpdateRequestDto>()
                         return@notarizedPut call.respond(
                             HttpStatusCode.OK,
-                            walletService.updateService(identifier, serviceId, serviceDto)
+                            walletService.updateService(
+                                identifier = identifier,
+                                id = serviceId,
+                                serviceUpdateRequestDto = serviceDto
+                            )
                         )
                     }
 

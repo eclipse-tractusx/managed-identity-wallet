@@ -59,8 +59,8 @@ object StringListSerializer : JsonTransformingSerializer<List<String>>(ListSeria
 
 object URISerializer : KSerializer<URI> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("URI", PrimitiveKind.STRING)
-    override fun deserialize(input: Decoder): URI = URI.create(input.decodeString())
-    override fun serialize(output: Encoder, obj: URI) = output.encodeString(obj.toString())
+    override fun deserialize(decoder: Decoder): URI = URI.create(decoder.decodeString())
+    override fun serialize(encoder: Encoder, value: URI) = encoder.encodeString(value.toString())
 }
 
 // https://github.com/Kotlin/kotlinx.serialization/issues/746#issuecomment-779549456

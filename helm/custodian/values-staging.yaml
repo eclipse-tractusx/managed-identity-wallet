@@ -12,6 +12,8 @@ auth:
 datapoolUrl: "https://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com"
 logging:
   exposed: "INFO"
+wallet:
+  catenaXBpn: "Bpn111"
 acapy:
   imageName: "acapy"
   tag: "0.7.3-b2968d52"
@@ -22,6 +24,5 @@ acapy:
   endpointUrl: "https://custodian-dev.germanywestcentral.cloudapp.azure.com:8000/"
   adminPort: "11000"
   adminUrl: "http://localhost:11000"
-  registerLedgerUrl: "https://indy-test.bosch-digital.de/register"
   networkIdentifier: "local:test"
   databaseHost: "172.40.1.188" # the IP of the postgres pod (kubectl describe pods <name-of-pod> -n ingress-custodian)

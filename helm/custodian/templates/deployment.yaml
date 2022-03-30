@@ -55,10 +55,10 @@ spec:
           value: {{ .Values.datapoolUrl }}
         - name: ACAPY_API_ADMIN_URL
           value: {{ .Values.acapy.adminUrl }}
-        - name: ACAPY_LEDGER_URL
-          value: {{ .Values.acapy.registerLedgerUrl }}
         - name: ACAPY_NETWORK_IDENTIFIER
           value: {{ .Values.acapy.networkIdentifier }}
+        - name: CX_BPN
+          value: {{ .Values.wallet.catenaXBpn }}
         resources:
           requests:
             cpu: 100m

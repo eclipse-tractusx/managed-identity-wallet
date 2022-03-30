@@ -36,7 +36,11 @@ enum class VerificationKeyType {
 }
 
 @Serializable
-data class AcaPyConfig(val apiAdminUrl: String, val ledgerUrl: String, val networkIdentifier: String)
+data class WalletAndAcaPyConfig(
+    val apiAdminUrl: String,
+    val networkIdentifier: String,
+    val catenaXBpn: String
+)
 
 @Serializable
 data class WalletList(val results: List<WalletRecord>)
@@ -91,7 +95,10 @@ data class DidCreate(val method: String, val options: DidCreateOptions)
 data class DidCreateOptions(@SerialName("key_type") @JsonProperty("key_type") val keyType: String)
 
 @Serializable
-data class DidResult(val result: DidResultDetails)
+data class LocalDidResult(val result: DidResultDetails)
+
+@Serializable
+data class DidResult(val result: DidResultDetails? = null)
 
 @Serializable
 data class DidResultDetails(
@@ -118,9 +125,7 @@ data class DidRegistration(
 
 @Serializable
 data class DidRegistrationResult(
-    val seed: String? = null,
-    val did: String,
-    val verkey: String
+    val success: Boolean
 )
 
 @Serializable
