@@ -63,7 +63,8 @@ fun Application.module(testing: Boolean = false) {
     val acaPyConfig = WalletAndAcaPyConfig(
         apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
         networkIdentifier = environment.config.property("acapy.networkIdentifier").getString(),
-        catenaXBpn = environment.config.property("wallet.catenaXBpn").getString(),
+        adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
+        catenaXBpn = environment.config.property("wallet.catenaXBpn").getString()
     )
     val walletService = WalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository)
     configureRouting(walletService)

@@ -16,7 +16,8 @@ class AcaPyMockedService: IAcaPyService {
         return WalletAndAcaPyConfig(
             apiAdminUrl = "",
             networkIdentifier = "local:test",
-            catenaXBpn = "bpn1"
+            catenaXBpn = "bpn1",
+            adminApiKey = "Hj23iQUsstG!dde"
         )
     }
 

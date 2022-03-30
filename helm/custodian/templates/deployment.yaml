@@ -57,6 +57,11 @@ spec:
           value: {{ .Values.acapy.adminUrl }}
         - name: ACAPY_NETWORK_IDENTIFIER
           value: {{ .Values.acapy.networkIdentifier }}
+        - name: ACAPY_ADMIN_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-admin-api-key
         - name: CX_BPN
           value: {{ .Values.wallet.catenaXBpn }}
         resources:
@@ -91,6 +96,11 @@ spec:
             secretKeyRef:
               name: catenax-custodian-acapy-secrets
               key: acapy-jwt-secret
+        - name: ACAPY_ADMIN_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-admin-api-key
         - name: LOG_LEVEL
           value: {{ .Values.acapy.logLevel }}
         - name: ACAPY_ENDPOINT_PORT
@@ -144,7 +154,7 @@ spec:
           --seed $(AGENT_WALLET_SEED) \
           --genesis-url $(LEDGER_URL)/genesis \
           --label $(LABEL) \
-          --admin-insecure-mode \
+          --admin-api-key $(ACAPY_ADMIN_API_KEY) \
           --auto-ping-connection \
           --jwt-secret $(JWT_SECRET) \
           --multitenant \

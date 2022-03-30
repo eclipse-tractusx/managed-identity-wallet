@@ -12,13 +12,19 @@ import net.catenax.core.custodian.models.ssi.acapy.*
 class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val client: HttpClient): IAcaPyService {
 
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
-        return acaPyConfig
+        return WalletAndAcaPyConfig(
+            apiAdminUrl = acaPyConfig.apiAdminUrl,
+            networkIdentifier = acaPyConfig.networkIdentifier,
+            catenaXBpn = acaPyConfig.catenaXBpn,
+            adminApiKey = "" // don't expose the api key outside the AcaPyService
+        )
     }
 
     override suspend fun getWallets(): WalletList {
         return try {
             client.get {
                 url("${acaPyConfig.apiAdminUrl}/multitenancy/wallets")
+                headers.append("X-API-Key", acaPyConfig.adminApiKey)
                 accept(ContentType.Application.Json)
             }
         } catch (e: Exception) {
@@ -29,6 +35,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
         val httpResponse: HttpResponse = client.post {
             url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = subWallet
@@ -39,6 +46,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
     override suspend fun assignDidToPublic(didIdentifier: String, token: String) {
         client.post<Any> {
             url("${acaPyConfig.apiAdminUrl}/wallet/did/public?did=$didIdentifier")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             headers.append(HttpHeaders.Authorization, "Bearer $token")
             accept(ContentType.Application.Json)
         }
@@ -47,6 +55,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
     override suspend fun deleteSubWallet(walletData: WalletExtendedData) {
         client.post<Any> {
             url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet/${walletData.walletId}/remove")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             contentType(ContentType.Application.Json)
             body = WalletKey(walletData.walletKey)
         }
@@ -55,6 +64,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
     override suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse {
         return client.post {
             url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet/$id/token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             contentType(ContentType.Application.Json)
             body = WalletKey(key)
         }
@@ -64,6 +74,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
         return client.post {
             url("${acaPyConfig.apiAdminUrl}/wallet/did/create")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = didCreateDto
@@ -75,6 +86,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
             client.get {
                 url("${acaPyConfig.apiAdminUrl}/wallet/did/public")
                 headers.append(HttpHeaders.Authorization, "Bearer $tokenOfWallet")
+                headers.append("X-API-Key", acaPyConfig.adminApiKey)
                 accept(ContentType.Application.Json)
             }
         } catch (e: Exception) {
@@ -94,6 +106,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
                     "verkey=${didRegistration.verkey}&" +
                     "alias=${didRegistration.alias}")
             headers.append(HttpHeaders.Authorization, "Bearer $endorserWalletToken")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
         }
     }
@@ -102,6 +115,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
         val httpResponse: HttpResponse = client.post {
             url("${acaPyConfig.apiAdminUrl}/jsonld/sign")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = signRequest
@@ -113,6 +127,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
         return client.post {
             url("${acaPyConfig.apiAdminUrl}/jsonld/verify")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = verifyRequest
@@ -123,6 +138,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
         return client.get {
             url("${acaPyConfig.apiAdminUrl}/resolver/resolve/$did")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
         }
     }
@@ -131,6 +147,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
         client.post<Any> {
             url("${acaPyConfig.apiAdminUrl}/wallet/set-did-endpoint")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = serviceEndPoint

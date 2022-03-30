@@ -80,7 +80,7 @@ class AcaPyWalletServiceImpl(
 
         // For Catena-X Wallet 
         //  1. The DID will be registered externally with endorser role.
-        //  2 .The Assign to public will be triggerd in other functions
+        //  2 .The Assign to public will be triggered in other functions e.g. resolve and issue VC/VP
         if (!isCatenaXWallet(walletCreateDto.bpn)) {
             registerAndAddToPublic(walletCreateDto, createdDid, createdSubWalletDto.token)
         }
