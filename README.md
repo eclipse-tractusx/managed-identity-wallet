@@ -197,7 +197,7 @@ kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secre
 ## Usage and Setup After First Deployment
 * Create the Catena-X wallet by sending a create wallet request using the configured value in `CX_BPN`
 * Register the DID and VerKey of Catena-X on the ledger manually
-* Get the token of the wallet from Datenbank using psql
+* Get the token of the wallet from database e.g. using psql
 * Assign the DID of Catena-X to public manually by sending a Post request `/wallet/did/public?did=<did-identifier-place-holder>` directly in the Aca-Py Pod using the token of wallet and the admin api key of Aca-Py in the header
 ```
     Authorization: "Bearer <WalletToken-placeholder>" 
