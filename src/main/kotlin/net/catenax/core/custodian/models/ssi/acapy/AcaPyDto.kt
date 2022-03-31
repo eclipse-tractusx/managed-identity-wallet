@@ -96,10 +96,7 @@ data class DidCreate(val method: String, val options: DidCreateOptions)
 data class DidCreateOptions(@SerialName("key_type") @JsonProperty("key_type") val keyType: String)
 
 @Serializable
-data class LocalDidResult(val result: DidResultDetails)
-
-@Serializable
-data class DidResult(val result: DidResultDetails? = null)
+data class DidResult(val result: DidResultDetails)
 
 @Serializable
 data class DidResultDetails(

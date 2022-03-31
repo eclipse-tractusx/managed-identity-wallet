@@ -128,7 +128,11 @@ To run and develop using IntelliJ IDE:
 * Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
 * Create the CatenaX wallet using the value stored in `CX_BPN` as bpn
 * Register the DID of Catena-X Wallet and its VerKey on the ledger
-* Resolve the DID of Catena-X Wallet to trigger the assign to public functionality in AcaPy
+* Assign the DID to public manually by sending a Post request `http://localhost:11000/wallet/did/public?did=<did-identifier-place-holder>` using the wallet token and the admin api key in the header
+```
+    Authorization: "Bearer <WalletToken-placeholder>" 
+    X-API-Key: "<AdminApiKey-Placeholder>"
+```
 
 ## Testing GitHub actions locally
 
@@ -189,6 +193,16 @@ kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secre
 
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-acapy-secrets -o yaml`
+
+## Usage and Setup After First Deployment
+* Create the Catena-X wallet by sending a create wallet request using the configured value in `CX_BPN`
+* Register the DID and VerKey of Catena-X on the ledger manually
+* Get the token of the wallet from Datenbank using psql
+* Assign the DID of Catena-X to public manually by sending a Post request `/wallet/did/public?did=<did-identifier-place-holder>` directly in the Aca-Py Pod using the token of wallet and the admin api key of Aca-Py in the header
+```
+    Authorization: "Bearer <WalletToken-placeholder>" 
+    X-API-Key: "<AdminApiKey-Placeholder>"
+```
 
 ## Manually deploy the to Azure Kubernetes Service (AKS)
 

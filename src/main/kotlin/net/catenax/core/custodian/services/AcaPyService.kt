@@ -70,7 +70,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
         }
     }
 
-    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): LocalDidResult {
+    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult {
         return client.post {
             url("${acaPyConfig.apiAdminUrl}/wallet/did/create")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
@@ -78,19 +78,6 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = didCreateDto
-        }
-    }
-
-    override suspend fun getPublicDidOfWallet(tokenOfWallet: String): DidResult {
-        return try {
-            client.get {
-                url("${acaPyConfig.apiAdminUrl}/wallet/did/public")
-                headers.append(HttpHeaders.Authorization, "Bearer $tokenOfWallet")
-                headers.append("X-API-Key", acaPyConfig.adminApiKey)
-                accept(ContentType.Application.Json)
-            }
-        } catch (e: Exception) {
-            throw BadRequestException(e.message)
         }
     }
 

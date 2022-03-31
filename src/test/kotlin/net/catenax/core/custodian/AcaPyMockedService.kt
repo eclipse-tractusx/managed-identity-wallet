@@ -49,9 +49,9 @@ class AcaPyMockedService: IAcaPyService {
     override suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse =
         CreateWalletTokenResponse(token = "token")
 
-    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): LocalDidResult {
+    override suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult {
         currentDid = createRandomString()
-        return LocalDidResult(
+        return DidResult(
             result = DidResultDetails(
                 did = currentDid,
                 keyType = "",
@@ -61,8 +61,6 @@ class AcaPyMockedService: IAcaPyService {
             )
         )
     }
-
-    override suspend fun getPublicDidOfWallet(tokenOfWallet: String): DidResult = DidResult(result = null)
 
     override suspend fun registerDidOnLedger(
         didRegistration: DidRegistration,

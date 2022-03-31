@@ -18,9 +18,7 @@ interface IAcaPyService {
 
     suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse
 
-    suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): LocalDidResult
-
-    suspend fun getPublicDidOfWallet(tokenOfWallet: String): DidResult
+    suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult
 
     suspend fun registerDidOnLedger(didRegistration: DidRegistration, endorserWalletToken: String): DidRegistrationResult
 
