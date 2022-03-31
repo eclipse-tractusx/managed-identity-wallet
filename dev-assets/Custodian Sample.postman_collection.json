@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "10a4186d-8e7e-4caa-8325-b83fa24357ef",
+		"_postman_id": "3d3faa0b-38b2-45cd-aba3-cc67ff52727d",
 		"name": "Custodian Sample",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -94,7 +94,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"did1_name\",\n    \"bpn\": \"did1_bpn\"\n}",
+					"raw": "{\n    \"name\": \"acapy_111_name\",\n    \"bpn\": \"bpn111\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -228,14 +228,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn888",
+					"raw": "{{custodian_url}}/api/didDocuments/bpn111",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"didDocuments",
-						"bpn888"
+						"bpn111"
 					]
 				}
 			},
@@ -258,7 +258,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn1\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\"\n    },\n    \"holderIdentifier\": \"bpn2\"\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3735\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn777111\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Test\"\n        },\n        \"college\": \"Test\"\n    },\n    \"holderIdentifier\": \"bpn777\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -273,6 +273,44 @@
 					"path": [
 						"api",
 						"credentials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Credential By CatenaX",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Test\"\n        },\n        \"college\": \"Test\"\n    },\n    \"holderIdentifier\": \"bpn777\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/credentials/issuer",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"credentials",
+						"issuer"
 					]
 				}
 			},
@@ -425,14 +463,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD/services",
+					"raw": "{{custodian_url}}/api/didDocuments/bpn888/services",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"didDocuments",
-						"did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD",
+						"bpn888",
 						"services"
 					]
 				}

@@ -47,7 +47,7 @@ class WalletRepository {
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
-        WalletDto(name, bpn, did, createdAt, emptyList<VerifiableCredentialDto>().toMutableList())
+        WalletDto(name, bpn, did, null,createdAt, emptyList<VerifiableCredentialDto>().toMutableList())
     }
 
     fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {

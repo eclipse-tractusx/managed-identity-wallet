@@ -10,7 +10,7 @@ import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.*
-import net.catenax.core.custodian.models.ssi.acapy.AcaPyConfig
+import net.catenax.core.custodian.models.ssi.acapy.WalletAndAcaPyConfig
 import net.catenax.core.custodian.persistence.repositories.CredentialRepository
 import net.catenax.core.custodian.persistence.repositories.WalletRepository
 
@@ -27,6 +27,8 @@ interface WalletService {
     fun storeCredential(identifier: String, issuedCredential: IssuedVerifiableCredentialRequestDto): Boolean
 
     suspend fun issueCredential(vcRequest: VerifiableCredentialRequestDto): VerifiableCredentialDto
+
+    suspend fun issueCatenaXCredential(vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto): VerifiableCredentialDto
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 
@@ -51,12 +53,12 @@ interface WalletService {
 
     companion object {
         fun createWithAcaPyService(
-            acaPyConfig: AcaPyConfig,
+            walletAndAcaPyConfig: WalletAndAcaPyConfig,
             walletRepository: WalletRepository,
             credentialRepository: CredentialRepository,
         ): WalletService {
             val acaPyService = IAcaPyService.create(
-                acaPyConfig = acaPyConfig,
+                walletAndAcaPyConfig = walletAndAcaPyConfig,
                 client = HttpClient() {
                     expectSuccess = true
                     install(ResponseObserver) {

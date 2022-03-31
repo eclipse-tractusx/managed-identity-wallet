@@ -69,7 +69,7 @@ fun Application.configureSecurity() {
                     val jwk = jwkProvider.get(kid)
                     val algorithm = Algorithm.RSA256(jwk.getPublicKey() as RSAPublicKey, null)
                     val verifier = JWT.require(algorithm).withIssuer(issuerUrl).build()
-                    val jwt = verifier.verify(it.token)
+                    verifier.verify(it.token)
                     it
                 } catch (ex:Exception) {
                     log.warn("Authentication information validation error: " + ex.message)

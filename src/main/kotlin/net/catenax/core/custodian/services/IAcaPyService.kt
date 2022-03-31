@@ -6,7 +6,7 @@ import net.catenax.core.custodian.models.ssi.acapy.*
 
 interface IAcaPyService {
 
-    fun getNetworkIdentifier(): String
+    fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig
 
     suspend fun getWallets(): WalletList
 
@@ -20,7 +20,7 @@ interface IAcaPyService {
 
     suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult
 
-    suspend fun registerDidOnLedger(didRegistration: DidRegistration): DidRegistrationResult
+    suspend fun registerDidOnLedger(didRegistration: DidRegistration, endorserWalletToken: String): DidRegistrationResult
 
     suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String
 
@@ -31,8 +31,8 @@ interface IAcaPyService {
     suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String)
 
     companion object {
-        fun create(acaPyConfig: AcaPyConfig, client: HttpClient): IAcaPyService {
-            return AcaPyService(acaPyConfig, client)
+        fun create(walletAndAcaPyConfig: WalletAndAcaPyConfig, client: HttpClient): IAcaPyService {
+            return AcaPyService(walletAndAcaPyConfig, client)
         }
     }
 }

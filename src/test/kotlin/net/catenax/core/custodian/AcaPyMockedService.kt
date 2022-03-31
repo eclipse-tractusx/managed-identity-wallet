@@ -7,12 +7,19 @@ import net.catenax.core.custodian.models.ssi.acapy.*
 import net.catenax.core.custodian.services.IAcaPyService
 import java.security.SecureRandom
 
-class AcaPyMockedService(): IAcaPyService {
+class AcaPyMockedService: IAcaPyService {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    var currentDid: String = "EXAMPLE";
+    private var currentDid: String = "EXAMPLE"
 
-    override fun getNetworkIdentifier(): String = "local:test"
+    override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
+        return WalletAndAcaPyConfig(
+            apiAdminUrl = "",
+            networkIdentifier = "local:test",
+            catenaXBpn = "bpn1",
+            adminApiKey = "Hj23iQUsstG!dde"
+        )
+    }
 
     override suspend fun getWallets(): WalletList = WalletList(results = emptyList())
 
@@ -55,8 +62,10 @@ class AcaPyMockedService(): IAcaPyService {
         )
     }
 
-    override suspend fun registerDidOnLedger(didRegistration: DidRegistration): DidRegistrationResult =
-        DidRegistrationResult(seed = null, did = didRegistration.did, verkey = didRegistration.verkey)
+    override suspend fun registerDidOnLedger(
+        didRegistration: DidRegistration,
+        endorserWalletToken: String
+    ): DidRegistrationResult = DidRegistrationResult(success = true)
 
     override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String = ""
 

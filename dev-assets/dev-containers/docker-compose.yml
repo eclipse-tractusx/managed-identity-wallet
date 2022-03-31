@@ -55,7 +55,7 @@ services:
         --seed 00000000000000000000000111111119 \
         --genesis-url https://indy-test.bosch-digital.de/genesis \
         --label CatenaXIssuer \
-        --admin-insecure-mode \
+        --admin-api-key Hj23iQUsstG!dde \
         --auto-ping-connection \
         --jwt-secret jwtSecret19 \
         --multitenant \

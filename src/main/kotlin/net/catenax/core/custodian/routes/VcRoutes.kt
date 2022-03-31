@@ -41,10 +41,10 @@ fun Route.vcRoutes(walletService: WalletService) {
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
-                val id = call.request.queryParameters["id"] ?: null
-                val type = call.request.queryParameters["type"] ?: null
-                val issuerIdentifier = call.request.queryParameters["issuerIdentifier"] ?: null
-                val holderIdentifier = call.request.queryParameters["holderIdentifier"] ?: null
+                val id = call.request.queryParameters["id"]
+                val type = call.request.queryParameters["type"]
+                val issuerIdentifier = call.request.queryParameters["issuerIdentifier"]
+                val holderIdentifier = call.request.queryParameters["holderIdentifier"]
                 call.respond(
                     HttpStatusCode.OK,
                     walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
@@ -90,12 +90,9 @@ fun Route.vcRoutes(walletService: WalletService) {
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
-                val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-
-                call.respond(
-                    HttpStatusCode.Created,
-                    signedVerifiableCredentialDtoExample["demo"] as VerifiableCredentialDto
-                )
+                val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
+                val verifiableCredentialDto =  walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
+                call.respond(HttpStatusCode.Created, verifiableCredentialDto)
             }
         }
     }

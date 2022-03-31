@@ -37,9 +37,6 @@ import io.bkbn.kompendium.core.routes.redoc
 
 
 import net.catenax.core.custodian.models.*
-import net.catenax.core.custodian.models.ssi.acapy.AcaPyConfig
-import net.catenax.core.custodian.persistence.repositories.CredentialRepository
-import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import net.catenax.core.custodian.services.WalletService
 
 suspend fun retrieveBusinessPartnerInfo(datapoolUrl: String, bpn: String, token: String): String {
@@ -138,7 +135,7 @@ fun Application.configureRouting(walletService: WalletService) {
                         if (did != null) {
                             try {
                                 val stringBody = retrieveBusinessPartnerInfo("${datapoolUrl}", did, token)
-                                val d = Json { ignoreUnknownKeys = true }.decodeFromString<BusinessPartnerInfo>(
+                                Json { ignoreUnknownKeys = true }.decodeFromString<BusinessPartnerInfo>(
                                     BusinessPartnerInfo.serializer(),
                                     stringBody
                                 )

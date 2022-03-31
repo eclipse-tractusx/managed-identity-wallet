@@ -83,6 +83,8 @@ below. Here a few hints on how to set it up:
 10. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
 11. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.bosch-digital.de/register`
 12. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
+13. `ACAPY_ADMIN_API_KEY`: specify the admin api key of Aca-Py enpoints, e.g. `Hj23iQUsstG!dde`
+14. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
 
 To follow all steps in this readme you also need following variables:
 
@@ -124,6 +126,13 @@ To run and develop using IntelliJ IDE:
 * create file `dev.env` and copy the values from `.env.example`
 * install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile
 * Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
+* Create the CatenaX wallet using the value stored in `CX_BPN` as bpn
+* Register the DID of Catena-X Wallet and its VerKey on the ledger
+* Assign the DID to public manually by sending a Post request `http://localhost:11000/wallet/did/public?did=<did-identifier-place-holder>` using the wallet token and the admin api key in the header
+```
+    Authorization: "Bearer <WalletToken-placeholder>" 
+    X-API-Key: "<AdminApiKey-Placeholder>"
+```
 
 ## Testing GitHub actions locally
 
@@ -169,6 +178,7 @@ The deployment of AcaPy instance requires also a secret file `catenax-custodian-
 1. `acapy-db-password` postgres password
 1. `acapy-db-admin` postgres admin
 1. `acapy-db-admin-password` postgres admin password
+1. `acapy-admin-api-key` the admin api key used by the custodian and acapy instance
 ```
 kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secrets \
   --from-literal=acapy-wallet-key='<placeholder>' \
@@ -177,11 +187,22 @@ kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secre
   --from-literal=acapy-db-account='<placeholder>' \
   --from-literal=acapy-db-password='<placeholder>' \
   --from-literal=acapy-db-admin='<placeholder>' \
-  --from-literal=acapy-db-admin-password='<placeholder>'
+  --from-literal=acapy-db-admin-password='<placeholder>' \
+  --from-literal=acapy-admin-api-key='<placeholder>'
 ```
 
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-acapy-secrets -o yaml`
+
+## Usage and Setup After First Deployment
+* Create the Catena-X wallet by sending a create wallet request using the configured value in `CX_BPN`
+* Register the DID and VerKey of Catena-X on the ledger manually
+* Get the token of the wallet from database e.g. using psql
+* Assign the DID of Catena-X to public manually by sending a Post request `/wallet/did/public?did=<did-identifier-place-holder>` directly in the Aca-Py Pod using the token of wallet and the admin api key of Aca-Py in the header
+```
+    Authorization: "Bearer <WalletToken-placeholder>" 
+    X-API-Key: "<AdminApiKey-Placeholder>"
+```
 
 ## Manually deploy the to Azure Kubernetes Service (AKS)
 

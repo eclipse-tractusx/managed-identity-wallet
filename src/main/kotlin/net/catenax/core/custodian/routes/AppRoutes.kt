@@ -4,9 +4,6 @@ import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.auth.configuration.JwtAuthConfiguration
 import io.ktor.application.*
 import io.ktor.routing.*
-import net.catenax.core.custodian.models.ssi.acapy.AcaPyConfig
-import net.catenax.core.custodian.persistence.repositories.CredentialRepository
-import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import net.catenax.core.custodian.services.WalletService
 
 fun Application.appRoutes(walletService: WalletService) {
