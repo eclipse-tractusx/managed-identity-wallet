@@ -80,9 +80,9 @@ class AcaPyWalletServiceImpl(
 
         // For Catena-X Wallet 
         //   1. The DID will be registered externally with endorser role.
-        //   2 .The Assign to public will be triggered manually
+        //   2. The Assign to public will be triggered manually
         if (!isCatenaXWallet(walletCreateDto.bpn)) {
-            registerAndAddToPublic(walletCreateDto, createdDid, createdSubWalletDto.token)
+            registerSubWalletUsingCatenaXWallet(walletCreateDto, createdDid)
         }
         val walletToCreate = WalletExtendedData(
             name = walletCreateDto.name,
@@ -106,11 +106,7 @@ class AcaPyWalletServiceImpl(
         )
     }
 
-    private suspend fun registerAndAddToPublic(
-        walletCreateDto: WalletCreateDto,
-        createdDid: DidResult,
-        token: String
-    ) {
+    private suspend fun registerSubWalletUsingCatenaXWallet(walletCreateDto: WalletCreateDto, createdDid: DidResult) {
         val catenaXWallet = getWalletExtendedInformation(catenaXMainBpn)
         // Register DID on ledger
         acaPyService.registerDidOnLedger(
@@ -121,11 +117,6 @@ class AcaPyWalletServiceImpl(
                 role = "NONE"
             ),
             catenaXWallet.walletToken
-        )
-        // Set DID as Public in Aca-Py
-        acaPyService.assignDidToPublic(
-            getIdentifierOfDid(createdDid.result.did),
-            token
         )
     }
 
@@ -299,6 +290,9 @@ class AcaPyWalletServiceImpl(
         log.debug("Add Service Endpoint for $identifier")
         checkSupportedId(serviceDto.id)
         val walletData = getWalletExtendedInformation(identifier)
+        if (!isCatenaXWallet(walletData.bpn)) {
+            throw NotImplementedException("Add Service Endpoint is not supported for the given wallet $identifier")
+        }
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
             didDoc.services.map {
@@ -326,6 +320,9 @@ class AcaPyWalletServiceImpl(
         log.debug("Update Service Endpoint for $identifier")
         checkSupportedId(id)
         val walletData = getWalletExtendedInformation(identifier)
+        if (!isCatenaXWallet(walletData.bpn)) {
+            throw NotImplementedException("Update Service Endpoint is not supported for the wallet $identifier")
+        }
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
             var found = false
