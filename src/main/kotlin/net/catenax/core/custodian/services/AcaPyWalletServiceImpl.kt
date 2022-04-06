@@ -471,9 +471,9 @@ class AcaPyWalletServiceImpl(
                 credentialSubject = mapOf(
                     "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
                     "bpn" to bpn,
-                    "memberOf" to "Catena-x",
+                    "memberOf" to "Catena-X",
                     "status" to "Active",
-                    "date" to currentDateAsString
+                    "startTime" to currentDateAsString
                 ),
                 holderIdentifier = bpn
             )
