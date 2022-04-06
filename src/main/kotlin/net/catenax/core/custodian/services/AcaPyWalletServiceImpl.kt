@@ -1,6 +1,9 @@
 package net.catenax.core.custodian.services
 
 import foundation.identity.jsonld.JsonLDUtils
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import net.catenax.core.custodian.models.*
@@ -96,6 +99,10 @@ class AcaPyWalletServiceImpl(
             val createdWalletData = walletRepository.addWallet(walletToCreate)
             walletRepository.toObject(createdWalletData)
         }
+        // run Async
+        issueAndStoreBpnCredentialsAsync(storedWallet.bpn)
+        // run Async
+        issueAndStoreMembershipCredentialsAsync(storedWallet.bpn)
         return WalletDto(
             storedWallet.name,
             storedWallet.bpn,
@@ -409,4 +416,87 @@ class AcaPyWalletServiceImpl(
         input.replace(":indy:$networkIdentifier:", ":sov:")
 
     private fun isCatenaXWallet(bpn: String): Boolean = bpn == catenaXMainBpn
+
+    private suspend fun issueAndStoreBpnCredentialsAsync(bpn: String): Deferred<Boolean>  = GlobalScope.async {
+        try {
+            val vcr = VerifiableCredentialRequestWithoutIssuerDto(
+                id = UUID.randomUUID().toString(),
+                context= listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_BPN_CREDENTIALS
+                ),
+                type = listOf(JsonLdTypes.BPN_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
+                issuanceDate = JsonLDUtils.dateToString(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())),
+                credentialSubject = mapOf(
+                    "type" to listOf(JsonLdTypes.BPN_TYPE),
+                    "bpn" to bpn
+                ),
+                holderIdentifier = bpn
+            )
+            val issuedVC: VerifiableCredentialDto= issueCatenaXCredential(vcr)
+            if (issuedVC.proof != null){
+                storeCredential(bpn, IssuedVerifiableCredentialRequestDto(
+                    id = issuedVC.id,
+                    type = issuedVC.type,
+                    context = issuedVC.context,
+                    issuer = issuedVC.issuer,
+                    issuanceDate = issuedVC.issuanceDate,
+                    expirationDate = issuedVC.expirationDate,
+                    credentialSubject = issuedVC.credentialSubject,
+                    proof = issuedVC.proof
+                ))
+                return@async true
+            }
+            log.error("Error: Proof of Bpn Credential is empty")
+            false
+        } catch (e: Exception) {
+            log.error("Error: IssueAndStoreBpnCredentialsAsync failed with message ${e.message}")
+            false
+        }
+    }
+
+    private suspend fun issueAndStoreMembershipCredentialsAsync(bpn: String): Deferred<Boolean>  = GlobalScope.async {
+        try {
+            val currentDateAsString = JsonLDUtils.dateToString(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()))
+            val vcr = VerifiableCredentialRequestWithoutIssuerDto(
+                id = UUID.randomUUID().toString(),
+                context= listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_MEMBERSHIP_CREDENTIALS
+                ),
+                type = listOf(JsonLdTypes.MEMBERSHIP_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
+                issuanceDate = currentDateAsString,
+                credentialSubject = mapOf(
+                    "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
+                    "bpn" to bpn,
+                    "memberOf" to "Catena-x",
+                    "status" to "Active",
+                    "date" to currentDateAsString
+                ),
+                holderIdentifier = bpn
+            )
+            val issuedVC: VerifiableCredentialDto = issueCatenaXCredential(vcr)
+            if (issuedVC.proof != null) {
+                storeCredential(
+                    bpn,
+                    IssuedVerifiableCredentialRequestDto(
+                        id = issuedVC.id,
+                        type = issuedVC.type,
+                        context = issuedVC.context,
+                        issuer = issuedVC.issuer,
+                        issuanceDate = issuedVC.issuanceDate,
+                        expirationDate = issuedVC.expirationDate,
+                        credentialSubject = issuedVC.credentialSubject,
+                        proof = issuedVC.proof
+                    )
+                )
+                return@async true
+            }
+            log.error("Error: Proof of Membership Credential is empty")
+            false
+        } catch (e: Exception) {
+            log.error("Error: IssueAndStoreMembershipCredentialsAsync failed with message ${e.message}")
+            false
+        }
+    }
 }
