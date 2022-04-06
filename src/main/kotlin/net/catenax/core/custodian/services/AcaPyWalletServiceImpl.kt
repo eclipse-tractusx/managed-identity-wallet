@@ -102,7 +102,9 @@ class AcaPyWalletServiceImpl(
         // run Async
         issueAndStoreBpnCredentialsAsync(storedWallet.bpn)
         // run Async
-        issueAndStoreMembershipCredentialsAsync(storedWallet.bpn)
+        if (!isCatenaXWallet(walletCreateDto.bpn)) {
+            issueAndStoreMembershipCredentialsAsync(storedWallet.bpn)
+        }
         return WalletDto(
             storedWallet.name,
             storedWallet.bpn,
