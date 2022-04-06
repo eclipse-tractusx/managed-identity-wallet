@@ -14,8 +14,7 @@ import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.security.SecureRandom
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.Instant
 import java.util.*
 
 class AcaPyWalletServiceImpl(
@@ -78,7 +77,7 @@ class AcaPyWalletServiceImpl(
             walletWebhookUrls = emptyList(),
             walletDispatchType = WalletDispatchType.BASE.toString(),
             walletKey = createRandomString(),
-            walletName = walletCreateDto.bpn + "-" + JsonLDUtils.dateToString(Date()),
+            walletName = walletCreateDto.bpn + "-" + JsonLDUtils.dateToString(Date.from(Instant.now())),
             walletType = WalletType.ASKAR.toString()
         )
         val createdSubWalletDto = acaPyService.createSubWallet(subWalletToCreate)
@@ -204,7 +203,7 @@ class AcaPyWalletServiceImpl(
             credentialSubject["id"] = holderDid
         }
         val verificationMethod = getVerificationMethod(issuerDid, 0)
-        val convertedDatetime: Date = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())
+        val convertedDatetime: Date = Date.from(Instant.now())
         val issuanceDate = vcRequest.issuanceDate ?: JsonLDUtils.dateToString(convertedDatetime)
         val signRequest: SignRequest<VerifiableCredentialDto> = SignRequest(
             SignDoc(
@@ -452,8 +451,7 @@ class AcaPyWalletServiceImpl(
 
 
     private fun prepareMembershipCredential(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
-        val currentDateAsString =
-            JsonLDUtils.dateToString(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()))
+        val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = UUID.randomUUID().toString(),
             context = listOf(
@@ -480,11 +478,7 @@ class AcaPyWalletServiceImpl(
                 JsonLdContexts.JSONLD_CONTEXT_BPN_CREDENTIALS
             ),
             type = listOf(JsonLdTypes.BPN_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
-            issuanceDate = JsonLDUtils.dateToString(
-                Date.from(
-                    LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
-                )
-            ),
+            issuanceDate = JsonLDUtils.dateToString(Date.from(Instant.now())),
             credentialSubject = mapOf(
                 "type" to listOf(JsonLdTypes.BPN_TYPE),
                 "bpn" to bpn
