@@ -45,7 +45,14 @@ class AcaPyWalletServiceImpl(
                     null,
                     null
                 )
-                WalletDto(walletDto.name, walletDto.bpn, walletDto.did, walletDto.verKey, walletDto.createdAt, credentials)
+                WalletDto(
+                    walletDto.name,
+                    walletDto.bpn,
+                    walletDto.did,
+                    walletDto.verKey,
+                    walletDto.createdAt,
+                    credentials
+                )
             } else {
                 walletDto
             }
@@ -100,10 +107,10 @@ class AcaPyWalletServiceImpl(
             walletRepository.toObject(createdWalletData)
         }
         // run Async
-        issueAndStoreBpnCredentialsAsync(storedWallet.bpn)
+        issueAndStoreCatenaXCredentialsAsync(storedWallet.bpn, JsonLdTypes.BPN_TYPE)
         // run Async
         if (!isCatenaXWallet(walletCreateDto.bpn)) {
-            issueAndStoreMembershipCredentialsAsync(storedWallet.bpn)
+            issueAndStoreCatenaXCredentialsAsync(storedWallet.bpn, JsonLdTypes.MEMBERSHIP_TYPE)
         }
         return WalletDto(
             storedWallet.name,
@@ -419,86 +426,88 @@ class AcaPyWalletServiceImpl(
 
     private fun isCatenaXWallet(bpn: String): Boolean = bpn == catenaXMainBpn
 
-    private suspend fun issueAndStoreBpnCredentialsAsync(bpn: String): Deferred<Boolean>  = GlobalScope.async {
+    private suspend fun issueAndStoreCatenaXCredentialsAsync(
+        bpn: String,
+        type: String
+    ): Deferred<Boolean> = GlobalScope.async {
         try {
-            val vcr = VerifiableCredentialRequestWithoutIssuerDto(
-                id = UUID.randomUUID().toString(),
-                context= listOf(
-                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
-                    JsonLdContexts.JSONLD_CONTEXT_BPN_CREDENTIALS
-                ),
-                type = listOf(JsonLdTypes.BPN_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
-                issuanceDate = JsonLDUtils.dateToString(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())),
-                credentialSubject = mapOf(
-                    "type" to listOf(JsonLdTypes.BPN_TYPE),
-                    "bpn" to bpn
-                ),
-                holderIdentifier = bpn
-            )
-            val issuedVC: VerifiableCredentialDto= issueCatenaXCredential(vcr)
-            if (issuedVC.proof != null){
-                storeCredential(bpn, IssuedVerifiableCredentialRequestDto(
-                    id = issuedVC.id,
-                    type = issuedVC.type,
-                    context = issuedVC.context,
-                    issuer = issuedVC.issuer,
-                    issuanceDate = issuedVC.issuanceDate,
-                    expirationDate = issuedVC.expirationDate,
-                    credentialSubject = issuedVC.credentialSubject,
-                    proof = issuedVC.proof
-                ))
+            val vcToIssue = when (type) {
+                JsonLdTypes.MEMBERSHIP_TYPE -> prepareMembershipCredential(bpn)
+                JsonLdTypes.BPN_TYPE -> prepareBpnCredentials(bpn)
+                else -> throw NotImplementedException("Credential of type $type is not implemented!")
+            }
+            val verifiableCredential: VerifiableCredentialDto = issueCatenaXCredential(vcToIssue)
+            val issuedVC = toIssuedVerifiableCredentialRequestDto(verifiableCredential)
+            if (issuedVC != null) {
+                storeCredential(bpn, issuedVC)
                 return@async true
             }
-            log.error("Error: Proof of Bpn Credential is empty")
+            log.error("Error: Proof of Credential of type $type is empty")
             false
         } catch (e: Exception) {
-            log.error("Error: IssueAndStoreBpnCredentialsAsync failed with message ${e.message}")
+            log.error("Error: Issue Catena-X Credentials of type $type failed with message ${e.message}")
             false
         }
     }
 
-    private suspend fun issueAndStoreMembershipCredentialsAsync(bpn: String): Deferred<Boolean>  = GlobalScope.async {
-        try {
-            val currentDateAsString = JsonLDUtils.dateToString(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()))
-            val vcr = VerifiableCredentialRequestWithoutIssuerDto(
-                id = UUID.randomUUID().toString(),
-                context= listOf(
-                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
-                    JsonLdContexts.JSONLD_CONTEXT_MEMBERSHIP_CREDENTIALS
-                ),
-                type = listOf(JsonLdTypes.MEMBERSHIP_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
-                issuanceDate = currentDateAsString,
-                credentialSubject = mapOf(
-                    "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-                    "bpn" to bpn,
-                    "memberOf" to "Catena-X",
-                    "status" to "Active",
-                    "startTime" to currentDateAsString
-                ),
-                holderIdentifier = bpn
-            )
-            val issuedVC: VerifiableCredentialDto = issueCatenaXCredential(vcr)
-            if (issuedVC.proof != null) {
-                storeCredential(
-                    bpn,
-                    IssuedVerifiableCredentialRequestDto(
-                        id = issuedVC.id,
-                        type = issuedVC.type,
-                        context = issuedVC.context,
-                        issuer = issuedVC.issuer,
-                        issuanceDate = issuedVC.issuanceDate,
-                        expirationDate = issuedVC.expirationDate,
-                        credentialSubject = issuedVC.credentialSubject,
-                        proof = issuedVC.proof
-                    )
+
+    private fun prepareMembershipCredential(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
+        val currentDateAsString =
+            JsonLDUtils.dateToString(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()))
+        return VerifiableCredentialRequestWithoutIssuerDto(
+            id = UUID.randomUUID().toString(),
+            context = listOf(
+                JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                JsonLdContexts.JSONLD_CONTEXT_MEMBERSHIP_CREDENTIALS
+            ),
+            type = listOf(JsonLdTypes.MEMBERSHIP_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
+            issuanceDate = currentDateAsString,
+            credentialSubject = mapOf(
+                "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
+                "memberOf" to "Catena-X",
+                "status" to "Active",
+                "startTime" to currentDateAsString
+            ),
+            holderIdentifier = bpn
+        )
+    }
+
+    private fun prepareBpnCredentials(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
+        return VerifiableCredentialRequestWithoutIssuerDto(
+            id = UUID.randomUUID().toString(),
+            context = listOf(
+                JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                JsonLdContexts.JSONLD_CONTEXT_BPN_CREDENTIALS
+            ),
+            type = listOf(JsonLdTypes.BPN_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
+            issuanceDate = JsonLDUtils.dateToString(
+                Date.from(
+                    LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
                 )
-                return@async true
-            }
-            log.error("Error: Proof of Membership Credential is empty")
-            false
-        } catch (e: Exception) {
-            log.error("Error: IssueAndStoreMembershipCredentialsAsync failed with message ${e.message}")
-            false
+            ),
+            credentialSubject = mapOf(
+                "type" to listOf(JsonLdTypes.BPN_TYPE),
+                "bpn" to bpn
+            ),
+            holderIdentifier = bpn
+        )
+    }
+
+    private fun toIssuedVerifiableCredentialRequestDto(
+        vcDto: VerifiableCredentialDto
+    ): IssuedVerifiableCredentialRequestDto? {
+        if (vcDto.proof != null) {
+            return IssuedVerifiableCredentialRequestDto(
+                id =  vcDto.id,
+                type = vcDto.type,
+                context = vcDto.context,
+                issuer = vcDto.issuer,
+                issuanceDate = vcDto.issuanceDate,
+                expirationDate = vcDto.expirationDate,
+                credentialSubject = vcDto.credentialSubject,
+                proof = vcDto.proof
+            )
         }
+        return null
     }
 }
