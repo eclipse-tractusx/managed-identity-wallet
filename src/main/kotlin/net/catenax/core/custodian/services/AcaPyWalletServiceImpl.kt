@@ -11,8 +11,7 @@ import net.catenax.core.custodian.persistence.repositories.WalletRepository
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.security.SecureRandom
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.Instant
 import java.util.*
 
 class AcaPyWalletServiceImpl(
@@ -42,7 +41,14 @@ class AcaPyWalletServiceImpl(
                     null,
                     null
                 )
-                WalletDto(walletDto.name, walletDto.bpn, walletDto.did, walletDto.verKey, walletDto.createdAt, credentials)
+                WalletDto(
+                    walletDto.name,
+                    walletDto.bpn,
+                    walletDto.did,
+                    walletDto.verKey,
+                    walletDto.createdAt,
+                    credentials
+                )
             } else {
                 walletDto
             }
@@ -68,7 +74,7 @@ class AcaPyWalletServiceImpl(
             walletWebhookUrls = emptyList(),
             walletDispatchType = WalletDispatchType.BASE.toString(),
             walletKey = createRandomString(),
-            walletName = walletCreateDto.bpn + "-" + JsonLDUtils.dateToString(Date()),
+            walletName = walletCreateDto.bpn + "-" + JsonLDUtils.dateToString(Date.from(Instant.now())),
             walletType = WalletType.ASKAR.toString()
         )
         val createdSubWalletDto = acaPyService.createSubWallet(subWalletToCreate)
@@ -188,7 +194,7 @@ class AcaPyWalletServiceImpl(
             credentialSubject["id"] = holderDid
         }
         val verificationMethod = getVerificationMethod(issuerDid, 0)
-        val convertedDatetime: Date = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())
+        val convertedDatetime: Date = Date.from(Instant.now())
         val issuanceDate = vcRequest.issuanceDate ?: JsonLDUtils.dateToString(convertedDatetime)
         val signRequest: SignRequest<VerifiableCredentialDto> = SignRequest(
             SignDoc(
@@ -252,7 +258,6 @@ class AcaPyWalletServiceImpl(
         val holderDid = holderWalletData.did
         val token = holderWalletData.walletToken
         val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
-        checkHolderOfCredentials(holderDid, vpRequest.verifiableCredentials)
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
             doc = SignDoc(
                 credential = VerifiablePresentationDto(
@@ -276,14 +281,6 @@ class AcaPyWalletServiceImpl(
             return signedVpResult.signedDoc
         }
         throw BadRequestException(signedVpResult.error)
-    }
-
-    private fun checkHolderOfCredentials(holderDid: String, vcs: List<VerifiableCredentialDto>) {
-        vcs.map {
-            if (it.credentialSubject["id"] == null || it.credentialSubject["id"] != holderDid) {
-                throw ForbiddenException("Only holders are allowed to use the verifiable credentials")
-            }
-        }
     }
 
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto {
@@ -370,6 +367,8 @@ class AcaPyWalletServiceImpl(
         return credentialRepository.getCredentials(issuerDid, holderDid, type, credentialId)
     }
 
+    override fun isCatenaXWallet(bpn: String): Boolean = bpn == catenaXMainBpn
+
     private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {
         return transaction {
             val extractedWallet = walletRepository.getWallet(identifier)
@@ -407,6 +406,4 @@ class AcaPyWalletServiceImpl(
 
     private fun replaceNetworkIdentifierWithSov(input: String): String =
         input.replace(":indy:$networkIdentifier:", ":sov:")
-
-    private fun isCatenaXWallet(bpn: String): Boolean = bpn == catenaXMainBpn
 }

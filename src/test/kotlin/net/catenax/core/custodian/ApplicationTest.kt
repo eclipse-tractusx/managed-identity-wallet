@@ -54,7 +54,7 @@ class ApplicationTest {
     private val credentialRepository = CredentialRepository()
     private val acaPyMockedService = AcaPyMockedService()
     private val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
-
+    private val bpdService = BusinessPartnerDataServiceImpl(walletService)
     private fun makeToken(): String = "token"
 
     fun Application.configureTestSecurity() {
@@ -91,7 +91,7 @@ class ApplicationTest {
             configureOpenAPI()
             configureTestSecurity()
             configureRouting(walletService)
-            appRoutes(walletService)
+            appRoutes(walletService, bpdService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
@@ -120,7 +120,7 @@ class ApplicationTest {
             configureOpenAPI()
             configureTestSecurity()
             configureRouting(walletService)
-            appRoutes(walletService)
+            appRoutes(walletService, bpdService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
@@ -199,7 +199,7 @@ class ApplicationTest {
             configureTestSecurity()
             configureOpenAPI()
             configureRouting(walletService)
-            appRoutes(walletService)
+            appRoutes(walletService, bpdService)
             configureSerialization()
         }) {
             // create catena X wallet
@@ -309,7 +309,7 @@ class ApplicationTest {
             configureOpenAPI()
             configureTestSecurity()
             configureRouting(walletService)
-            appRoutes(walletService)
+            appRoutes(walletService, bpdService)
             configureSerialization()
         }) {
             handleRequest(HttpMethod.Post, "/api/businessPartnerData") {

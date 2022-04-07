@@ -21,11 +21,12 @@ import kotlinx.serialization.Serializable
 import net.catenax.core.custodian.models.*
 import net.catenax.core.custodian.models.ssi.*
 import net.catenax.core.custodian.models.ssi.JsonLdContexts
+import net.catenax.core.custodian.services.BusinessPartnerDataService
 import net.catenax.core.custodian.services.WalletService
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import java.time.LocalDateTime
 
-fun Route.walletRoutes(walletService: WalletService) {
+fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService: BusinessPartnerDataService) {
 
     route("/wallets") {
         notarizedGet(
@@ -62,6 +63,16 @@ fun Route.walletRoutes(walletService: WalletService) {
             try {
                 val walletToCreate = call.receive<WalletCreateDto>()
                 val createdWallet = walletService.createWallet(walletToCreate)
+                if (!walletService.isCatenaXWallet(createdWallet.bpn)) {
+                    // Issue and store credentials async
+                    businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
+                        createdWallet.bpn,
+                        JsonLdTypes.BPN_TYPE
+                    )
+                    businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
+                        createdWallet.bpn,
+                        JsonLdTypes.MEMBERSHIP_TYPE)
+                }
                 call.respond(HttpStatusCode.Created, createdWallet)
             } catch (e: IllegalArgumentException) {
                 throw BadRequestException(e.message)

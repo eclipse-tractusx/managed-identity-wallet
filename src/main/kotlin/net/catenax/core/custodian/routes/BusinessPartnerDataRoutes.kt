@@ -12,8 +12,9 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 import net.catenax.core.custodian.models.*
+import net.catenax.core.custodian.services.BusinessPartnerDataService
 
-fun Route.businessPartnerDataRoutes() {
+fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerDataService) {
 
     route("/businessPartnerData") {
         notarizedPost(
