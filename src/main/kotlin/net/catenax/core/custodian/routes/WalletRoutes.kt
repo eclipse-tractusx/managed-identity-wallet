@@ -63,12 +63,12 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
             try {
                 val walletToCreate = call.receive<WalletCreateDto>()
                 val createdWallet = walletService.createWallet(walletToCreate)
-                // Issue and store credentials async
-                businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
-                    createdWallet.bpn,
-                    JsonLdTypes.BPN_TYPE
-                )
                 if (!walletService.isCatenaXWallet(createdWallet.bpn)) {
+                    // Issue and store credentials async
+                    businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
+                        createdWallet.bpn,
+                        JsonLdTypes.BPN_TYPE
+                    )
                     businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
                         createdWallet.bpn,
                         JsonLdTypes.MEMBERSHIP_TYPE)
