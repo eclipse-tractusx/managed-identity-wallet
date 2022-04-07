@@ -18,6 +18,8 @@ import net.catenax.core.custodian.persistence.repositories.WalletRepository
 
 import net.catenax.core.custodian.plugins.*
 import net.catenax.core.custodian.routes.appRoutes
+import net.catenax.core.custodian.services.BusinessPartnerDataService
+import net.catenax.core.custodian.services.BusinessPartnerDataServiceImpl
 import net.catenax.core.custodian.services.WalletService
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -67,8 +69,9 @@ fun Application.module(testing: Boolean = false) {
         catenaXBpn = environment.config.property("wallet.catenaXBpn").getString()
     )
     val walletService = WalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository)
+    val businessPartnerDataService = BusinessPartnerDataService.createBusinessPartnerDataService(walletService)
     configureRouting(walletService)
-    appRoutes(walletService)
+    appRoutes(walletService, businessPartnerDataService)
 
     configurePersistence()
 }

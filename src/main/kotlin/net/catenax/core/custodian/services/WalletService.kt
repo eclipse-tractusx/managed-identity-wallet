@@ -51,6 +51,8 @@ interface WalletService {
 
     suspend fun deleteService(identifier: String, id: String): DidDocumentDto
 
+    fun isCatenaXWallet(bpn: String): Boolean
+
     companion object {
         fun createWithAcaPyService(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,

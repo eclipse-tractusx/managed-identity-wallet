@@ -4,9 +4,10 @@ import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.auth.configuration.JwtAuthConfiguration
 import io.ktor.application.*
 import io.ktor.routing.*
+import net.catenax.core.custodian.services.BusinessPartnerDataService
 import net.catenax.core.custodian.services.WalletService
 
-fun Application.appRoutes(walletService: WalletService) {
+fun Application.appRoutes(walletService: WalletService, businessPartnerDataService: BusinessPartnerDataService) {
 
     routing {
         route("/api") {
@@ -17,8 +18,8 @@ fun Application.appRoutes(walletService: WalletService) {
 
             // based on: authenticate("auth-jwt")
             notarizedAuthenticate(authConfig) {
-                walletRoutes(walletService)
-                businessPartnerDataRoutes()
+                walletRoutes(walletService, businessPartnerDataService)
+                businessPartnerDataRoutes(businessPartnerDataService)
                 didDocRoutes(walletService)
                 vcRoutes(walletService)
                 vpRoutes(walletService)

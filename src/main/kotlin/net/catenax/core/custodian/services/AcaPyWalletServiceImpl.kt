@@ -1,9 +1,6 @@
 package net.catenax.core.custodian.services
 
 import foundation.identity.jsonld.JsonLDUtils
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import net.catenax.core.custodian.models.*
@@ -104,12 +101,6 @@ class AcaPyWalletServiceImpl(
         val storedWallet = transaction {
             val createdWalletData = walletRepository.addWallet(walletToCreate)
             walletRepository.toObject(createdWalletData)
-        }
-        // run Async
-        issueAndStoreCatenaXCredentialsAsync(storedWallet.bpn, JsonLdTypes.BPN_TYPE)
-        // run Async
-        if (!isCatenaXWallet(walletCreateDto.bpn)) {
-            issueAndStoreCatenaXCredentialsAsync(storedWallet.bpn, JsonLdTypes.MEMBERSHIP_TYPE)
         }
         return WalletDto(
             storedWallet.name,
@@ -267,7 +258,6 @@ class AcaPyWalletServiceImpl(
         val holderDid = holderWalletData.did
         val token = holderWalletData.walletToken
         val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
-        checkHolderOfCredentials(holderDid, vpRequest.verifiableCredentials)
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
             doc = SignDoc(
                 credential = VerifiablePresentationDto(
@@ -291,14 +281,6 @@ class AcaPyWalletServiceImpl(
             return signedVpResult.signedDoc
         }
         throw BadRequestException(signedVpResult.error)
-    }
-
-    private fun checkHolderOfCredentials(holderDid: String, vcs: List<VerifiableCredentialDto>) {
-        vcs.map {
-            if (it.credentialSubject["id"] == null || it.credentialSubject["id"] != holderDid) {
-                throw ForbiddenException("Only holders are allowed to use the verifiable credentials")
-            }
-        }
     }
 
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto {
@@ -385,6 +367,8 @@ class AcaPyWalletServiceImpl(
         return credentialRepository.getCredentials(issuerDid, holderDid, type, credentialId)
     }
 
+    override fun isCatenaXWallet(bpn: String): Boolean = bpn == catenaXMainBpn
+
     private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {
         return transaction {
             val extractedWallet = walletRepository.getWallet(identifier)
@@ -422,86 +406,4 @@ class AcaPyWalletServiceImpl(
 
     private fun replaceNetworkIdentifierWithSov(input: String): String =
         input.replace(":indy:$networkIdentifier:", ":sov:")
-
-    private fun isCatenaXWallet(bpn: String): Boolean = bpn == catenaXMainBpn
-
-    private suspend fun issueAndStoreCatenaXCredentialsAsync(
-        bpn: String,
-        type: String
-    ): Deferred<Boolean> = GlobalScope.async {
-        try {
-            val vcToIssue = when (type) {
-                JsonLdTypes.MEMBERSHIP_TYPE -> prepareMembershipCredential(bpn)
-                JsonLdTypes.BPN_TYPE -> prepareBpnCredentials(bpn)
-                else -> throw NotImplementedException("Credential of type $type is not implemented!")
-            }
-            val verifiableCredential: VerifiableCredentialDto = issueCatenaXCredential(vcToIssue)
-            val issuedVC = toIssuedVerifiableCredentialRequestDto(verifiableCredential)
-            if (issuedVC != null) {
-                storeCredential(bpn, issuedVC)
-                return@async true
-            }
-            log.error("Error: Proof of Credential of type $type is empty")
-            false
-        } catch (e: Exception) {
-            log.error("Error: Issue Catena-X Credentials of type $type failed with message ${e.message}")
-            false
-        }
-    }
-
-
-    private fun prepareMembershipCredential(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
-        val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
-        return VerifiableCredentialRequestWithoutIssuerDto(
-            id = UUID.randomUUID().toString(),
-            context = listOf(
-                JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
-                JsonLdContexts.JSONLD_CONTEXT_MEMBERSHIP_CREDENTIALS
-            ),
-            type = listOf(JsonLdTypes.MEMBERSHIP_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
-            issuanceDate = currentDateAsString,
-            credentialSubject = mapOf(
-                "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-                "memberOf" to "Catena-X",
-                "status" to "Active",
-                "startTime" to currentDateAsString
-            ),
-            holderIdentifier = bpn
-        )
-    }
-
-    private fun prepareBpnCredentials(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
-        return VerifiableCredentialRequestWithoutIssuerDto(
-            id = UUID.randomUUID().toString(),
-            context = listOf(
-                JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
-                JsonLdContexts.JSONLD_CONTEXT_BPN_CREDENTIALS
-            ),
-            type = listOf(JsonLdTypes.BPN_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
-            issuanceDate = JsonLDUtils.dateToString(Date.from(Instant.now())),
-            credentialSubject = mapOf(
-                "type" to listOf(JsonLdTypes.BPN_TYPE),
-                "bpn" to bpn
-            ),
-            holderIdentifier = bpn
-        )
-    }
-
-    private fun toIssuedVerifiableCredentialRequestDto(
-        vcDto: VerifiableCredentialDto
-    ): IssuedVerifiableCredentialRequestDto? {
-        if (vcDto.proof != null) {
-            return IssuedVerifiableCredentialRequestDto(
-                id =  vcDto.id,
-                type = vcDto.type,
-                context = vcDto.context,
-                issuer = vcDto.issuer,
-                issuanceDate = vcDto.issuanceDate,
-                expirationDate = vcDto.expirationDate,
-                credentialSubject = vcDto.credentialSubject,
-                proof = vcDto.proof
-            )
-        }
-        return null
-    }
 }
