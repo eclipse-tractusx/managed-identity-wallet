@@ -54,7 +54,7 @@ class ApplicationTest {
     private val credentialRepository = CredentialRepository()
     private val acaPyMockedService = AcaPyMockedService()
     private val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
-    private val bpdService = BusinessPartnerDataServiceImpl(walletService)
+    private val bpdService = BusinessPartnerDataMockedService()
     private fun makeToken(): String = "token"
 
     fun Application.configureTestSecurity() {

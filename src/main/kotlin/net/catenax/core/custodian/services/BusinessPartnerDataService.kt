@@ -1,10 +1,17 @@
 package net.catenax.core.custodian.services
 
 import kotlinx.coroutines.Deferred
+import net.catenax.core.custodian.models.BusinessPartnerDataUpdateRequestDto
 
 interface BusinessPartnerDataService {
 
-    suspend fun issueAndStoreCatenaXCredentialsAsync(bpn: String, type: String): Deferred<Boolean>
+    suspend fun issueAndUpdateCatenaXCredentials(businessPartnerData: BusinessPartnerDataUpdateRequestDto)
+
+    suspend fun<T> issueAndStoreCatenaXCredentialsAsync(
+        bpn: String,
+        type: String,
+        data: T? = null
+    ): Deferred<Boolean>
 
     companion object {
         fun createBusinessPartnerDataService(walletService: WalletService): BusinessPartnerDataService {
