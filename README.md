@@ -111,9 +111,9 @@ the default included h2 in-memory database. Additionally the authentication and 
  * build the Aca-Py Image (if not available)
     * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
     * navigate to the repository `cd aries-cloudagent-python`
-    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from 21. März 2022
-    * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
-    * run `docker build -t acapy -f ./docker/Dockerfile.run .`
+    * currently tested with commit `50772992cf354edbb2216de2659e2c44d4836576` from April 07, 2022
+    * run `git checkout 50772992cf354edbb2216de2659e2c44d4836576`
+    * run `docker build -t acapy:0.7.3-5077299 -f ./docker/Dockerfile.run .`
  * navigate to `./dev-assets/dev-containers`
  * run `docker-compose up -d` to start a Postgresql database and Keycloak instance and the AcaPy Service in Docker conatiners
  * To setup the Postgresql database in the application please see the section below setting up the database
@@ -127,7 +127,7 @@ To run and develop using IntelliJ IDE:
 * install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile
 * Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
 * Create the CatenaX wallet using the value stored in `CX_BPN` as bpn
-* Register the DID of Catena-X Wallet and its VerKey on the ledger
+* Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](https://indy-test.bosch-digital.de/) as Endorser
 * Assign the DID to public manually by sending a Post request `http://localhost:11000/wallet/did/public?did=<did-identifier-place-holder>` using the wallet token and the admin api key in the header
 ```
     Authorization: "Bearer <WalletToken-placeholder>" 
@@ -369,9 +369,9 @@ We assume that a cert manager already exists and that we can directly continue
 * Build the Aca-Py Image localy
     * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
     * navigate to the repository `cd aries-cloudagent-python`
-    * currently tested with commit `b2968d5236c246f630ad07bd3e827248e2fd609a` from March 21, 2022
-    * run `git checkout b2968d5236c246f630ad07bd3e827248e2fd609a`
-    * run `docker build -t acapy:0.7.3-b2968d52 -f ./docker/Dockerfile.run .`
+    * currently tested with commit `50772992cf354edbb2216de2659e2c44d4836576` from April 07, 2022
+    * run `git checkout 50772992cf354edbb2216de2659e2c44d4836576`
+    * run `docker build -t acapy:0.7.3-5077299 -f ./docker/Dockerfile.run .`
 * navigate back to the core-custoian repository
 * login to AKS:
     ```
@@ -381,8 +381,8 @@ We assume that a cert manager already exists and that we can directly continue
     ```
 * push the image to the ACR:
     ```
-    docker tag acapy:0.7.3-b2968d52 $CX_ACR_SERVER/catena-x/acapy:0.7.3-b2968d52
-    docker push $CX_ACR_SERVER/catena-x/acapy:0.7.3-b2968d52
+    docker tag acapy:0.7.3-5077299 $CX_ACR_SERVER/catena-x/acapy:0.7.3-5077299
+    docker push $CX_ACR_SERVER/catena-x/acapy:0.7.3-5077299
     ```
 
 ## Dashboard

@@ -16,7 +16,7 @@ wallet:
   catenaXBpn: "BPNL000000000000"
 acapy:
   imageName: "acapy"
-  tag: "0.7.3-b2968d52"
+  tag: "0.7.3-5077299"
   ledgerUrl: "https://idu.cloudcompass.ca"
   label: "CatenaXIssuer"
   logLevel: "DEBUG"

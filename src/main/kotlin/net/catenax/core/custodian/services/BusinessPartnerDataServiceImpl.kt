@@ -22,7 +22,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
     // TODO: notify if issue credentials failed
     override suspend fun issueAndUpdateCatenaXCredentials(businessPartnerData: BusinessPartnerDataUpdateRequestDto) {
         val bpn = businessPartnerData.bpn
-        if (!businessPartnerData.names.isNullOrEmpty()) {
+        if (businessPartnerData.names.isNotEmpty()) {
             businessPartnerData.names.forEach {
                 if (isNewCredential(bpn, it.uuid, JsonLdTypes.NAME_TYPE)) {
                     issueAndStoreCatenaXCredentialsAsync(
@@ -33,7 +33,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 }
             }
         }
-        if (!businessPartnerData.bankAccounts.isNullOrEmpty()) {
+        if (businessPartnerData.bankAccounts.isNotEmpty()) {
             businessPartnerData.bankAccounts.forEach {
                 if (isNewCredential(bpn, it.uuid, JsonLdTypes.BANK_ACCOUNT_TYPE)) {
                     issueAndStoreCatenaXCredentialsAsync(
@@ -44,7 +44,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 }
             }
         }
-        if (!businessPartnerData.addresses.isNullOrEmpty()) {
+        if (businessPartnerData.addresses.isNotEmpty()) {
             businessPartnerData.addresses.forEach {
                 if (isNewCredential(bpn, it.uuid, JsonLdTypes.ADDRESS_TYPE)) {
                     issueAndStoreCatenaXCredentialsAsync(
@@ -56,7 +56,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
             }
         }
         if (businessPartnerData.legalForm != null) {
-            if (isNewLegalForm(bpn, JsonLdTypes.LEGAL_FORM_TYPE, businessPartnerData.legalForm)) {
+            if (isNewLegalForm(bpn, businessPartnerData.legalForm)) {
                 issueAndStoreCatenaXCredentialsAsync(
                     bpn = bpn,
                     type = JsonLdTypes.LEGAL_FORM_TYPE,
@@ -70,8 +70,12 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
         return walletService.getCredentials(null, bpn, type, uuid).isEmpty()
     }
 
-    private fun isNewLegalForm(bpn: String, type: String, legalForm: LegalFormDto): Boolean {
-        val credentials = walletService.getCredentials(null, bpn, type, null)
+    private fun isNewLegalForm(bpn: String, legalForm: LegalFormDto): Boolean {
+        val credentials = walletService.getCredentials(
+            null,
+            bpn,
+            JsonLdTypes.LEGAL_FORM_TYPE,
+            null)
         if (credentials.isEmpty()) {
             return true
         } else {
@@ -102,7 +106,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 //  of NameDto, BankAccountDto, AddressDto and LegalFormDto
                 JsonLdTypes.MEMBERSHIP_TYPE -> prepareMembershipCredential(bpn)
                 JsonLdTypes.BPN_TYPE -> prepareBpnCredentials(bpn)
-                JsonLdTypes.NAME_TYPE -> prepareNamesCredential(bpn, data as NameDto)
+                JsonLdTypes.NAME_TYPE -> prepareNamesCredential(bpn, data as ExtendedMultiPurposeDto)
                 JsonLdTypes.BANK_ACCOUNT_TYPE -> prepareBankAccountCredential(bpn, data as BankAccountDto)
                 JsonLdTypes.ADDRESS_TYPE -> prepareAddressCredential(bpn, data as AddressDto)
                 JsonLdTypes.LEGAL_FORM_TYPE -> prepareLegalFormCredential(bpn, data as LegalFormDto)
@@ -122,7 +126,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
         }
     }
 
-    private fun prepareNamesCredential(bpn: String, name: NameDto): VerifiableCredentialRequestWithoutIssuerDto {
+    private fun prepareNamesCredential(bpn: String, name: ExtendedMultiPurposeDto): VerifiableCredentialRequestWithoutIssuerDto {
         val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = name.uuid,
@@ -137,15 +141,14 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 "uuid" to name.uuid,
                 "value" to name.value,
                 "shortName" to (name.shortName ?: ""),
-                "nameType" to ExtendedNameDto(
-                    technicalKey = (name.type.technicalKey ?: ""),
+                "nameType" to TypeKeyNameUrlDto(
+                    technicalKey = (name.type.technicalKey),
                     name = name.type.name,
-                    url = (name.type.url ?: "")
+                    url = name.type.url
                 ),
-                "language" to ExtendedNameDto(
-                    technicalKey = (name.language.technicalKey ?: ""),
-                    name = name.language.name,
-                    url = (name.language.url ?: "")
+                "language" to TypeKeyNameDto(
+                    technicalKey = name.language.technicalKey,
+                    name = name.language.name
                 )
             ),
             holderIdentifier = bpn
@@ -170,7 +173,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 "technicalKey" to legalForm.technicalKey,
                 "name" to legalForm.name,
                 "url" to (legalForm.url ?: ""),
-                "mainAbbreviation" to legalForm.mainAbbreviation,
+                "mainAbbreviation" to (legalForm.mainAbbreviation ?: ""),
                 "language" to legalForm.language,
                 "categories" to legalForm.categories
             ),
@@ -195,10 +198,9 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 "type" to listOf(JsonLdTypes.BANK_ACCOUNT_TYPE),
                 "uuid" to bankAccount.uuid,
                 "trustScores" to bankAccount.trustScores,
-                "currency" to ExtendedNameDto(
-                    technicalKey = (bankAccount.currency.technicalKey ?: ""),
+                "currency" to TypeKeyNameDto(
+                    technicalKey = bankAccount.currency.technicalKey,
                     name = bankAccount.currency.name,
-                    url = (bankAccount.currency.url ?: "")
                 ),
                 "internationalBankAccountIdentifier" to bankAccount.internationalBankAccountIdentifier,
                 "internationalBankIdentifier" to bankAccount.internationalBankIdentifier,
@@ -215,7 +217,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
     ): VerifiableCredentialRequestWithoutIssuerDto {
         val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
 
-        val credSubject = mutableMapOf<String, Any>();
+        val credSubject = mutableMapOf<String, Any>()
         credSubject["type"] = listOf(JsonLdTypes.ADDRESS_TYPE, JsonLdTypes.CREDENTIAL_TYPE)
         credSubject["uuid"] = address.uuid
         credSubject["version"] = address.version
@@ -234,16 +236,16 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 "shortName" to (it.shortName ?: ""),
                 "fipsCode" to (it.fipsCode ?: ""),
                 "administrativeAreasType" to mapOf(
-                    "technicalKey" to (it.type.technicalKey ?: ""),
+                    "technicalKey" to it.type.technicalKey,
                     "name" to it.type.name,
                     "url" to (it.type.url ?: "")
                 ),
                 "language" to mapOf(
-                    "technicalKey" to (it.language.technicalKey ?: ""),
+                    "technicalKey" to it.language.technicalKey,
                     "name" to it.name
                 )
             )
-            administrativeAreas.add(administrativeArea);
+            administrativeAreas.add(administrativeArea)
         }
         credSubject["administrativeAreas"] = administrativeAreas
         val postCodes = mutableListOf<Any>()
@@ -252,7 +254,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 "uuid" to it.uuid,
                 "value" to it.value,
                 "postCodesType" to mapOf(
-                    "technicalKey" to (it.type.technicalKey ?: ""),
+                    "technicalKey" to it.type.technicalKey,
                     "name" to it.type.name,
                     "url" to (it.type.url ?: "")
                 )
@@ -267,12 +269,12 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 "value" to it.value,
                 "shortName" to (it.shortName ?: ""),
                 "localitiesType" to mapOf(
-                    "technicalKey" to (it.type.technicalKey ?: ""),
+                    "technicalKey" to it.type.technicalKey,
                     "name" to it.type.name,
                     "url" to (it.type.url ?: "")
                 ),
                 "language" to mapOf(
-                    "technicalKey" to (it.language.technicalKey ?: ""),
+                    "technicalKey" to it.language.technicalKey,
                     "name" to (it.language.name)
                 )
             )
@@ -290,12 +292,12 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 "number" to (it.number ?: ""),
                 "direction" to (it.direction ?: ""),
                 "thoroughfaresType" to mapOf(
-                    "technicalKey" to (it.type.technicalKey ?: ""),
+                    "technicalKey" to it.type.technicalKey,
                     "name" to it.type.name,
                     "url" to (it.type.url ?: "")
                 ),
                 "language" to mapOf(
-                    "technicalKey" to (it.language.technicalKey ?: ""),
+                    "technicalKey" to it.language.technicalKey,
                     "name" to it.language.name
                 )
             )
