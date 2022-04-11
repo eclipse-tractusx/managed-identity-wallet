@@ -64,14 +64,18 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                 val walletToCreate = call.receive<WalletCreateDto>()
                 val createdWallet = walletService.createWallet(walletToCreate)
                 if (!walletService.isCatenaXWallet(createdWallet.bpn)) {
+                    // TODO: notify if issue credentials failed
                     // Issue and store credentials async
                     businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
                         createdWallet.bpn,
-                        JsonLdTypes.BPN_TYPE
+                        JsonLdTypes.BPN_TYPE,
+                        null
                     )
                     businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
                         createdWallet.bpn,
-                        JsonLdTypes.MEMBERSHIP_TYPE)
+                        JsonLdTypes.MEMBERSHIP_TYPE,
+                        null
+                    )
                 }
                 call.respond(HttpStatusCode.Created, createdWallet)
             } catch (e: IllegalArgumentException) {
