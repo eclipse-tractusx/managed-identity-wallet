@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import {defineComponent} from 'vue'
 
 declare interface Wallet {
   bpn: string,
@@ -39,12 +39,12 @@ declare interface CompaniesResult {
   wallet: WalletResult
 }
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       wallets: [] as Wallet[],
-      details: ''
-    };
+      details: '' as string,
+    }
   },
   mounted() {
     var c = this.wallets;
