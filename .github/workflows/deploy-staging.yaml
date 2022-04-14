@@ -65,7 +65,7 @@ jobs:
         uses: actions/setup-node@master
 
       - name: build admin ui
-        run: cd ui-src && npm install && npm run build && cp -r dist/* ../static
+        run: cd ui-src && yarn && yarn build && cp -r dist/* ../static
 
       - name: Build and push staging images
         uses: docker/build-push-action@v2
