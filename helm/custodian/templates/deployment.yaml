@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -161,3 +162,39 @@ spec:
           --multitenant-admin \
           --log-level $(LOG_LEVEL)"
         ]
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: custodian-ingress
+  # namespace: 
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # potentially to be removed
+    cert-manager.io/issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+
+    # If you encounter a redirect loop or are getting a 307 response code
+    # then you need to force the nginx ingress to connect to the backend using HTTPS.
+    #
+    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  rules:
+    - host: {{ .Values.certificate.host }}
+      http:
+        paths:
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: catenax-custodian
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - {{ .Values.certificate.host }}
+      secretName: tls-secret
