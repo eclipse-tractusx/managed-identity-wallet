@@ -69,6 +69,6 @@ dependencies {
     testImplementation(kotlin("test"))
 
     runtimeOnly("com.h2database:h2:2.1.210")
-    runtimeOnly("org.postgresql:postgresql:42.2.24")
+    runtimeOnly("org.postgresql:postgresql:42.2.25")
 
 }
