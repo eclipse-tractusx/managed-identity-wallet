@@ -138,4 +138,5 @@ jobs:
             -f ./helm/custodian/values-staging.yaml \
             --set image.registry=${{ secrets.CX_ACR_SERVER }} \
             --set image.tag=${APP_VERSION}.${SHORT_SHA} \
-            --set app.version=${APP_VERSION}
+            --set app.version=${APP_VERSION} \
+            --set certificate.host="custodian-dev.germanywestcentral.cloudapp.azure.com"
