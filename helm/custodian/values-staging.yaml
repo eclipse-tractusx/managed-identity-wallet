@@ -1,0 +1,28 @@
+image:
+  name: "catena-x/custodian"
+allowEmptyPassword: "\"yes\""
+db:
+  jdbcDriver: "org.postgresql.Driver"
+auth:
+  jwksUrl: "https://catenaxdev003akssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central/protocol/openid-connect/certs"
+  issuerUrl: "https://catenaxdev003akssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central"
+  redirectUrl: "https://custodian-dev.germanywestcentral.cloudapp.azure.com/callback"
+  realm: "CX-Central"
+  role: "access"
+datapoolUrl: "https://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com"
+logging:
+  exposed: "INFO"
+wallet:
+  catenaXBpn: "BPNL000000000000"
+acapy:
+  imageName: "acapy"
+  tag: "0.7.3-5077299"
+  ledgerUrl: "https://idu.cloudcompass.ca"
+  label: "CatenaXIssuer"
+  logLevel: "DEBUG"
+  endpointPort: "8000"
+  endpointUrl: "https://custodian-dev.germanywestcentral.cloudapp.azure.com:8000/"
+  adminPort: "11000"
+  adminUrl: "http://localhost:11000"
+  networkIdentifier: "idunion:test"
+  databaseHost: "172.40.1.188" # the IP of the postgres pod (kubectl describe pods <name-of-pod> -n ingress-custodian)

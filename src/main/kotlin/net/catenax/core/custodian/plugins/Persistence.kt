@@ -5,7 +5,8 @@ import io.ktor.application.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-import net.catenax.core.custodian.entities.*
+import net.catenax.core.custodian.persistence.entities.VerifiableCredentials
+import net.catenax.core.custodian.persistence.entities.Wallets
 
 fun Application.configurePersistence() {
     val jdbcUrl = environment.config.property("db.jdbcUrl").getString()
@@ -13,7 +14,7 @@ fun Application.configurePersistence() {
     Database.connect(jdbcUrl, driver = jdbcDriver)
     transaction {
         // Create missing tables
-        SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
+        SchemaUtils.createMissingTablesAndColumns(Wallets, VerifiableCredentials)
         commit()
     } 
 }
