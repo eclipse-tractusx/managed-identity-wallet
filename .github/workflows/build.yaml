@@ -84,11 +84,9 @@ jobs:
         run: cd ui-src && npm install -g yarn && yarn && yarn build && cp -r dist/* ../static
 
       - name: Build and push Docker image
-        if: ${{ !env.ACT }}
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/Dockerfile-provisioning-service
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest${{ env.TAG_SUFFIX }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}.${{ env.SHORT_SHA }}
           labels: ${{ steps.meta.outputs.labels }}
