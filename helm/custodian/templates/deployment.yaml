@@ -76,7 +76,7 @@ spec:
         - containerPort: 8080
           name: custodian
       - name: catenax-acapy
-        image: {{ .Values.image.registry }}/catena-x/{{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
         env:
         - name: WALLET_KEY
           valueFrom:

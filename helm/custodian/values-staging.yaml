@@ -1,5 +1,5 @@
 image:
-  name: "catena-x/custodian"
+  name: "catenax-ng/product-core-managed-identity-wallets_service"
 allowEmptyPassword: "\"yes\""
 db:
   jdbcDriver: "org.postgresql.Driver"
@@ -15,7 +15,7 @@ logging:
 wallet:
   catenaXBpn: "BPNL000000000000"
 acapy:
-  imageName: "acapy"
+  imageName: "catenax-ng/product-core-managed-identity-wallets_acapy"
   tag: "0.7.3-5077299"
   ledgerUrl: "https://idu.cloudcompass.ca"
   label: "CatenaXIssuer"
