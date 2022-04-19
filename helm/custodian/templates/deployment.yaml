@@ -111,7 +111,7 @@ spec:
         - name: ACAPY_ADMIN_PORT
           value: {{ .Values.acapy.adminPort | quote }}
         - name: DB_HOST
-          value: {{ .Values.acapy.databaseHost }}
+          value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc
         - name: DB_ACCOUNT
           valueFrom:
             secretKeyRef:

@@ -20,6 +20,7 @@ appVersion: 0.3.2
 
 dependencies:
   - name: postgresql
-    version: '^8'
-    repository: '@stable'
+    version: 11.1.20
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
     alias: postgresql
