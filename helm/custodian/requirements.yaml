@@ -1,4 +1,0 @@
-dependencies:
-  - name: postgresql
-    version: '11'
-    repository: '@stable'
