@@ -113,19 +113,25 @@ spec:
         - name: DB_HOST
           value: {{ .Values.acapy.databaseHost }}
         - name: DB_ACCOUNT
-          value: {{ .Values.postgresql.auth.username }}
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-account
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: product-managed-identity-wallets-postgresql
-              key: postgres-password
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-password
         - name: DB_ADMIN_USER
-          value: {{ .Values.postgresql.auth.username }}
+          valueFrom:
+            secretKeyRef:
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-admin
         - name: DB_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: product-managed-identity-wallets-postgresql
-              key: postgres-password
+              name: catenax-custodian-acapy-secrets
+              key: acapy-db-admin-password
         resources:
           requests:
             cpu: 100m

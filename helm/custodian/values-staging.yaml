@@ -31,3 +31,4 @@ postgresql:
   auth:
     username: postgres
     password: ""
+    existingSecret: "postgres-acapy-secret-config"
