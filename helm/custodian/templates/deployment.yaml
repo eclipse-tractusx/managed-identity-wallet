@@ -120,8 +120,8 @@ spec:
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
-              key: acapy-db-password
+              name: product-managed-identity-wallets-postgresql
+              key: postgres-password
         - name: DB_ADMIN_USER
           valueFrom:
             secretKeyRef:
@@ -130,8 +130,8 @@ spec:
         - name: DB_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
-              key: acapy-db-admin-password
+              name: product-managed-identity-wallets-postgresql
+              key: postgres-password
         resources:
           requests:
             cpu: 100m
