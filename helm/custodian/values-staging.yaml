@@ -25,7 +25,7 @@ acapy:
   adminPort: "11000"
   adminUrl: "http://localhost:11000"
   networkIdentifier: "idunion:test"
-  databaseHost: "10.244.2.207" # the IP of the postgres DB
+  databaseHost: "10.244.2.211" # the IP of the postgres DB
 postgresql:
   enabled: true
   auth:
