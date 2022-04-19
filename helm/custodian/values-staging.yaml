@@ -26,3 +26,5 @@ acapy:
   adminUrl: "http://localhost:11000"
   networkIdentifier: "idunion:test"
   databaseHost: "172.40.1.188" # the IP of the postgres pod (kubectl describe pods <name-of-pod> -n ingress-custodian)
+postgresql:
+  postgresUser: postgres
