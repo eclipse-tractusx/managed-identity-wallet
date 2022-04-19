@@ -118,14 +118,14 @@ spec:
           valueFrom:
             secretKeyRef:
               name: product-managed-identity-wallets-postgresql
-              key: password
+              key: postgres-password
         - name: DB_ADMIN_USER
           value: {{ .Values.postgresql.auth.username }}
         - name: DB_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
               name: product-managed-identity-wallets-postgresql
-              key: password
+              key: postgres-password
         resources:
           requests:
             cpu: 100m
