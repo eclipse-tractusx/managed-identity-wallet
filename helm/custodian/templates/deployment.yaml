@@ -113,20 +113,14 @@ spec:
         - name: DB_HOST
           value: {{ .Values.acapy.databaseHost }}
         - name: DB_ACCOUNT
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-acapy-secrets
-              key: acapy-db-account
+          value: {{ .Values.acapy.databaseUser }}
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: product-managed-identity-wallets-postgresql
               key: postgres-password
         - name: DB_ADMIN_USER
-          valueFrom:
-            secretKeyRef:
-              name: catenax-custodian-acapy-secrets
-              key: acapy-db-admin
+          value: {{ .Values.acapy.databaseUser }}
         - name: DB_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
