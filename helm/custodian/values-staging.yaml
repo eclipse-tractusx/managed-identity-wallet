@@ -29,5 +29,5 @@ acapy:
 postgresql:
   enabled: true
   auth:
-    username: postgresAdmin
+    username: postgres
     password: ""
