@@ -113,14 +113,14 @@ spec:
         - name: DB_HOST
           value: {{ .Values.acapy.databaseHost }}
         - name: DB_ACCOUNT
-          value: {{ .Values.acapy.databaseUser }}
+          value: {{ .Values.postgresql.auth.username }}
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: product-managed-identity-wallets-postgresql
               key: postgres-password
         - name: DB_ADMIN_USER
-          value: {{ .Values.acapy.databaseUser }}
+          value: {{ .Values.postgresql.auth.username }}
         - name: DB_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
