@@ -416,6 +416,19 @@ cp -r dist/* ../static
 To access databases [DBeaver](https://dbeaver.io/) is really useful as it has a
 graphical interface but also excellent SQL support.
 
+## Dokumentation and Used Technologies
+
+* Documentation: [Catena-X Confluence](https://confluence.catena-x.net/pages/viewpage.action?pageId=16797461)
+
+* Used Technologies:
+
+    * [ACA-Py](https://github.com/hyperledger/aries-cloudagent-python) (Aries Cloud Agent Python) 
+with [Multitenancy](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md) feature and [JSON-LD Credential](https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
+
+    * [Hyperledger Indy](https://hyperledger-indy.readthedocs.io/en/latest/)
+
+    * [Ktor Framework](https://ktor.io/)
+
 ## Future
 
 Potentially following libraries and frameworks could be added in future
