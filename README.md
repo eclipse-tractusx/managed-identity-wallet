@@ -1,17 +1,82 @@
-# Catena-X Core Custodian
+# Catena-X Core Managed Identity Wallets <a id= "introduction"></a>
 
 This repository is part of the overarching Catena-X project, and more specifically
 developed within the Catena-X Core Agile Release Train.
 
-The Custodian implements the Self-Sovereign-Identity (SSI) readiness by providing
-a wallet hosting platform including a DID resolver, service endpoints and the
-company wallets itself.
+The Managed Identity Wallets service implements the Self-Sovereign-Identity (SSI)
+readiness by providing a wallet hosting platform including a DID resolver,
+service endpoints and the company wallets itself.
 
 Technically this project is developed using the [ktor](https://ktor.io) Microservices
 framework and thus the Kotlin language. It is using [gradle](https://gradle.org/) as
 build system.
 
-## Building with gradle
+# Table of contents
+
+1. [Introduction](#introduction)
+2. [Used Technologies](#usedtechnologies)
+3. [Local Deployment Toolstack](#deploymentwithIntellij)
+4. [Steps for initial lokal Deployment and Wallet Creation](#initialDeploymentandWalletCreation)
+5. [Building with gradle](#buildingWithGradle)
+6. [Running locally with gradle (MacOS)](#runningLocallyWithGradle)
+   1. [Under IntelliJ](#underIntelliJ)
+7. [Building and running the Docker image](#buildingAndRunningTheDockerImage)
+8. [Environment variable setup](#environmentVariableSetup)
+9. [Local development environment](#localDevelopmentEnvironment)
+    1. [Aca-Py Docker Image](#acapyDockerImage)
+    2. [Start up Docker Containers for Postgres, Keycloak and AcaPy](#startupDockerContainers)
+    3. [IntelliJ Development Setup](#intellijDevelopmentSetup)
+    4. [Initial Wallet Setup](#initialWalletSetup)
+10. [Testing GitHub actions locally](#testingGitHubActionsLocally)
+11. [Setting up progresql database](#settingUpPostgresSqlDatabase)
+12. [Dashboard](#dashboard)
+13. [Future](#future)
+14. [Further Notes](#furtherNotes)
+15. [Helm Setup and Auto Deployment](#helmSetupAndAutoDeployment)
+
+## Used technologies in this Project <a id= "usedtechnologies"></a>
+
+- ACA-Py (Aries Cloud Agent Python) https://github.com/hyperledger/aries-cloudagent-python
+    * specifially the multi-tenant feature https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md)
+    * and the JSON-LD credential https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
+- Hyperledger Indy https://hyperledger-indy.readthedocs.io/en/latest/
+- Ktor Framework https://ktor.io/
+
+## Local Deployment Toolstack <a id= "deploymentwithIntellij"></a>
+
+- Intellij - https://www.jetbrains.com/de-de/idea/download/
+- Postman - https://www.postman.com/downloads/
+- Docker - https://www.docker.com/products/docker-desktop/
+- DBeaver - https://dbeaver.io/
+- Gradle - https://gradle.org/install/
+  
+## Steps for initial lokal Deployment and Wallet Creation <a id= "initialDeploymentandWalletCreation"></a>
+
+1. Clone the Github Repository - https://github.com/catenax-ng/product-core-managed-identity-wallets.git
+2. Clone the [Aca-Py Docker Image](#acapyDockerImage)
+3. Copy .env.example and rename to dev.env see section [IntelliJ Development Setup](#intellijDevelopmentSetup)
+4. Start Docker-Compose Up for deployment of Keycloack, Acapy and Postgres, see section [Startup Docker Containers](#startupDockerContainers)
+5. Setup Postgres Connection in DBeaver with Credentials -postgres, -cx_password on port 5432, see section [Setting up progresql database](#settingUpPostgresSqlDatabase)
+    1. Add the postgres settings to dev.env and comment out the h2-settings also in section
+    2. Create custodiandev Database
+6. Add the Custodiandev Database connection to DBeaver
+7. Run `application.kt` in IntelliJ or in your IDE or run it on the command line (`set -a; source dev.env; set +a` and `./gradlew run`)
+8. Start Postman and add the Environment and the collection from ./dev-assets/
+    1. In the body of *Create wallet in Custodian*, change the `bpn` value to your `CX_BPN`
+       1. ![Change the BPN name](docs/images/ChangeBpnName.png "Adjusting the BPN Name")
+    2. Execute the request and note down your `did` and `verKey` from the response
+       1. ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
+9. Register public DID
+    1. Register your DID from your Wallet at https://indy-test.bosch-digital.de/ with "Register from DID"
+       1. ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
+    2. Post your created wallets with your DID to `http://localhost:11000/wallet/did/public?did=` + (your DID without the prefix e.g. `AS3fJQvDio8ERWzdSG1Zzi`)
+       1. ![AcaPy DID registration](docs/images/AcaPyDIDPublicAssignment.png "AcaPy DID Public Assignment")
+    3. Add as authorization a Bearer Token (from the `custodiandev` database take the content of `wallet_token` from the `wallets` table)
+       1. ![WalletTokenExtraction](docs/images/WalletTokenExtraction.png "Wallet_Token extraction")
+    4. Add as `X-API-Key` header your `ACAPY_ADMIN_API_KEY` env variable value
+11. Now you have created your own Wallet and published your DID to the Ledger, you can retrieve the list of wallets in Postman via the *Get wallets from Custodian*
+
+## Building with gradle <a id= "buildingWithGradle"></a>
 
 To install gradle just follow [the official guide](https://gradle.org/install/), e.g. on MacOS homebrew can be used:
 
@@ -33,16 +98,19 @@ Or, as we also use gradle in the CI/CD pipeline, the gradle wrapper can be used
 
 In the following the `gradle` commands are using the gradle wrapper `gradlew`.
 
-## Running locally with gradle
+## Running locally with gradle (MacOS) <a id= "runningLocallyWithGradle"></a>
 
-Copy the file `.env.example` and rename it to `.env`
+Copy the file `.env.example` and rename it to `dev.env`
 
 ```
-set -a; source .env; set +a
+set -a; source dev.env; set +a
 ./gradlew run
 ```
+### Under Intellij <a id= "underIntelliJ"></a>
 
-## Building and running the Docker image
+Download the Intellij envFile Plugin, copy the file `.env.example` and rename it to `dev.env`
+
+## Building and running the Docker image <a id= "buildingAndRunningTheDockerImage"></a>
 
 Based on the [official documentation](https://ktor.io/docs/docker.html#getting-the-application-ready)
 below the steps to build and run this service via Docker.
@@ -66,7 +134,7 @@ values in the env file):
 docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:0.0.5
 ```
 
-## Environment variable setup
+## Environment variable setup <a id= "environmentVariableSetup"></a>
 
 Please see the file `.env.example` for the environment examples that are used
 below. Here a few hints on how to set it up:
@@ -86,47 +154,42 @@ below. Here a few hints on how to set it up:
 13. `ACAPY_ADMIN_API_KEY`: specify the admin api key of Aca-Py enpoints, e.g. `Hj23iQUsstG!dde`
 14. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
 
-To follow all steps in this readme you also need following variables:
-
-1. `CX_SUBSCRIPTION_ID`: enter your Azure subscription id
-2. `CX_CLIENT_ID`: enter your Azure client id
-3. `CX_RG`: enter your resource group name
-4. `CX_IP_NAME`: enter the static ip resource name
-5. `CX_IP`: enter the actual IP of the static ip reresource
-6. `CX_LB_SERVICE` enter the load balance service name in kubernetes
-7. `CX_AKS`: please enter your kubernetes service name
-8. `CX_ACR_SERVER`: get the login server of your registry e.g. via `az acr list -o table`
-9. `CX_ACR_USER`: get the username of your registry e.g.
-   via `az acr credential show --name $CX_ACR_NAME --query "username" -o table `
-10. `CX_ACR_PASSWORD`: get the password of the registry
-   via `az acr credential show --name $CX_ACR_NAME --query "passwords[0].value" -o table`
-
-## Local development environment
+## Local development environment <a id= "localDevelopmentEnvironment"></a>
 
 To resemble the staging and production system as much as possible also on the
 local machine, an external Postgresql database should be used instead of
 the default included h2 in-memory database. Additionally the authentication and authorization could be done via
 [keycloak](https://www.keycloak.org). The Aca-Py Service will also run in a docker container
 
- * build the Aca-Py Image (if not available)
+### Aca-Py Docker Image <a id= "acapyDockerImage"></a>
+
+* build the Aca-Py Image (if not available)
     * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
     * navigate to the repository `cd aries-cloudagent-python`
     * currently tested with commit `50772992cf354edbb2216de2659e2c44d4836576` from April 07, 2022
     * run `git checkout 50772992cf354edbb2216de2659e2c44d4836576`
     * run `docker build -t acapy:0.7.3-5077299 -f ./docker/Dockerfile.run .`
- * navigate to `./dev-assets/dev-containers`
- * run `docker-compose up -d` to start a Postgresql database and Keycloak instance and the AcaPy Service in Docker conatiners
- * To setup the Postgresql database in the application please see the section below setting up the database
- * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
- * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
- * The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `Custodian` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user, e.g. named `custodian-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
+
+### Start up Docker Containers for Postgres, Keycloak and AcaPy <a id= "startupDockerContainers"></a>
+
+* navigate to `./dev-assets/dev-containers`
+* run `docker-compose up -d` (or `docker compose up -d`, depdending on the installation) to start a Postgresql database and Keycloak instance and the AcaPy Service as Docker containers
+* To setup the Postgresql database in the application please see the section below - [Setting up progresql database](#settingUpPostgresSqlDatabase), for the database
+* The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
+* Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
+* The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `Custodian` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user, e.g. named `custodian-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
+
+### IntelliJ Development Setup <a id= "intellijDevelopmentSetup"></a>
 
 To run and develop using IntelliJ IDE:
 * open the IntelliJ IDE and import the project
 * create file `dev.env` and copy the values from `.env.example`
 * install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile
 * Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
-* Create the CatenaX wallet using the value stored in `CX_BPN` as bpn
+
+### Initial Wallet Setup <a id= "initialWalletSetup"></a>
+
+* Create the Catena-X wallet using the value stored in `CX_BPN` as BPN
 * Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](https://indy-test.bosch-digital.de/) as Endorser
 * Assign the DID to public manually by sending a Post request `http://localhost:11000/wallet/did/public?did=<did-identifier-place-holder>` using the wallet token and the admin api key in the header
 ```
@@ -134,7 +197,7 @@ To run and develop using IntelliJ IDE:
     X-API-Key: "<AdminApiKey-Placeholder>"
 ```
 
-## Testing GitHub actions locally
+## Testing GitHub actions locally <a id= "testingGitHubActionsLocally"></a>
 
 Using [act](https://github.com/nektos/act) it is possible to test GitHub actions
 locally. To run it needs a secrets file, which could be derived on `.env.example`,
@@ -143,7 +206,72 @@ see the section above.
 ```
 act --secret-file .env
 ```
-## Helm Setup and Auto Deployment
+## Setting up progresql database <a id="settingUpPostgresSqlDatabase"></a>
+
+Based on the [documentation](https://docs.microsoft.com/en-us/azure/postgresql/howto-create-users)
+provided by Mirosoft following SQL needs to be executed to setup initiall the database:
+
+```
+CREATE DATABASE custodiandev;
+CREATE ROLE custodiandevuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD '^cXnF61qM1kf';
+GRANT CONNECT ON DATABASE custodiandev TO custodiandevuser;
+```
+
+Then following environment settings in your local environment file (potentially
+named `dev.env`) can be used:
+
+```
+CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/custodiandev?user=custodiandevuser&password=^cXnF61qM1kf"
+CX_DB_JDBC_DRIVER="org.postgresql.Driver"
+```
+
+Currently the ORM Exposed is creating the tables if they don't exist yet, done
+within the `Persistence.kt` database setup:
+
+```
+SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
+```
+
+## Dashboard <a id="dashboard"></a>
+
+Within `ui-src` a simple Vue based dashboard application is available
+which currently only shows the existing companies as well as is able
+to retrieve the full BPN information from the CX data pool API on a
+click on the BPN.
+
+It can be developed with
+
+```
+cd ui-src
+yarn serve
+```
+
+In each release the files in `/static` are updated but within the deployment
+pipeline the application is built and copied over to the `/static` directory.
+
+The steps to build the static files are like following:
+
+```
+cd ui-src
+yarn build
+rm -rf ../static/*
+cp -r dist/* ../static
+```
+
+## Future <a id="future"></a>
+
+Potentially following libraries and frameworks could be added in future
+
+* [HikariCP](https://github.com/brettwooldridge/HikariCP) for connection pooling
+* [Koin](https://github.com/InsertKoinIO/koin) for dependency injection
+
+------
+
+# Further notes <a id= "furtherNotes"></a>
+
+Deployment to be adjusted to the ArgoCD deployment, below notes are just for reference
+
+## Helm Setup and Auto Deployment <a id= "helmSetupAndAutoDeployment"></a>
 The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated, the Aca-Py image is uploaded as described [section](##Aca-Py_Build_and_ Upload_Image) and the secret files and `values-staging.yaml` sill accurate.
 
 * To check the current deployment and version run `helm list -n ingress-custodian`. Example output:
@@ -194,244 +322,4 @@ kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secre
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-acapy-secrets -o yaml`
 
-## Usage and Setup After First Deployment
-* Create the Catena-X wallet by sending a create wallet request using the configured value in `CX_BPN`
-* Register the DID and VerKey of Catena-X on the ledger manually
-* Get the token of the wallet from database e.g. using psql
-* Assign the DID of Catena-X to public manually by sending a Post request `/wallet/did/public?did=<did-identifier-place-holder>` directly in the Aca-Py Pod using the token of wallet and the admin api key of Aca-Py in the header
-```
-    Authorization: "Bearer <WalletToken-placeholder>" 
-    X-API-Key: "<AdminApiKey-Placeholder>"
-```
 
-## Manually deploy the to Azure Kubernetes Service (AKS)
-
-First install the Azure command line like in
-[the official guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli),
-e.g. on MacOS homebrew can be used:
-
-```
-brew update && brew install azure-cli
-```
-
-Make sure you have also kubectl installed
-
-```
-az aks install-cli
-```
-
-### Login to AKS
-
-Initial the usage can be prepared via following commands:
-
-```
-set -a; source .env; set +a
-docker login $CX_ACR_SERVER
-az aks get-credentials --resource-group $CX_RG --name $CX_AKS_CLUSTER --admin
-```
-
-### Push the image to the ACR
-
-Make sure that the latest image is pushed to the registry:
-
-```
-docker tag catena-x/custodian:0.0.1 $CX_ACR_SERVER/catena-x/custodian:0.0.1 
-docker push $CX_ACR_SERVER/catena-x/custodian:0.0.1 
-```
-
-### Verify kubernetes is functional
-
-Verify that nodes are available
-
-```
-kubectl get nodes
-```
-
-### Setup up static IP / DNS name
-
-To use a static IP and dns name for the service, follow the step of the
-official [documentation](https://docs.microsoft.com/en-us/azure/aks/static-ip)
-
-```
-az network public-ip create \
-    --resource-group $CX_RG \
-    --name $CX_IP \
-    --sku Standard \
-    --allocation-method static
-```
-
-You can view the generated IP with
-
-```
-az network public-ip show --resource-group $CX_RG --name $CX_IP --query ipAddress --output tsv
-```
-
-Make sure that the roles are assigned correctly
-
-```
-az role assignment create \
-    --assignee $CX_CLIENT_ID \
-    --role "Network Contributor" \
-    --scope /subscriptions/$CX_SUBSCRIPTION_ID/resourceGroups/$CX_RG
-```
-
-And then create the service with
-
-```
-kubectl apply -f deployment/aks-custodian-lb-dev.yaml
-```
-
-Which makes it accessible at `<location>.cloudapp.azure.com`.
-
-To troubleshoot look into the service via
-
-```
-kubectl describe service $CX_LB_SERVICE
-```
-
-## Setting up progresql database
-
-Based on the [documentation](https://docs.microsoft.com/en-us/azure/postgresql/howto-create-users)
-provided by Mirosoft following SQL needs to be executed to setup initiall the database:
-
-```
-CREATE DATABASE custodiandev;
-CREATE ROLE custodiandevuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD '^cXnF61qM1kf';
-GRANT CONNECT ON DATABASE custodiandev TO custodiandevuser;
-```
-
-Then following environment settings in your local environment file (potentially
-named `.env`) can be used:
-
-```
-CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/custodiandev?user=custodiandevuser&password=^cXnF61qM1kf"
-CX_DB_JDBC_DRIVER="org.postgresql.Driver"
-```
-
-Currently the ORM Exposed is creating the tables if they don't exist yet, done
-within the `Persistence.kt` database setup:
-
-```
-SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
-```
-
-### Prepare automated deployment
-
-Based on the [documentation](https://docs.microsoft.com/en-us/azure/aks/kubernetes-action), first create a service principial
-
-```
-az ad sp create-for-rbac --name "core-custodian" --role contributor --scopes /subscriptions/$CX_SUBSCRIPTION_ID/resourceGroups/$CX_RG --sdk-auth
-```
-
-And put the resulting JSON output for example in a GitHub secret.
-
-### Prepare SSL
-
-Based on the [documentation](https://docs.microsoft.com/en-us/azure/aks/ingress-static-ip?tabs=azure-cli)
-run following commands to create the nginx ingress container:
-
-```
-az acr import --name $CX_ACR_SERVER --source $SOURCE_REGISTRY/$CONTROLLER_IMAGE:$CONTROLLER_TAG --image $CONTROLLER_IMAGE:$CONTROLLER_TAG
-az acr import --name $CX_ACR_SERVER --source $SOURCE_REGISTRY/$PATCH_IMAGE:$PATCH_TAG --image $PATCH_IMAGE:$PATCH_TAG
-az acr import --name $CX_ACR_SERVER --source $SOURCE_REGISTRY/$DEFAULTBACKEND_IMAGE:$DEFAULTBACKEND_TAG --image $DEFAULTBACKEND_IMAGE:$DEFAULTBACKEND_TAG
-az acr import --name $CX_ACR_SERVER --source $CERT_MANAGER_REGISTRY/$CERT_MANAGER_IMAGE_CONTROLLER:$CERT_MANAGER_TAG --image $CERT_MANAGER_IMAGE_CONTROLLER:$CERT_MANAGER_TAG
-az acr import --name $CX_ACR_SERVER --source $CERT_MANAGER_REGISTRY/$CERT_MANAGER_IMAGE_WEBHOOK:$CERT_MANAGER_TAG --image $CERT_MANAGER_IMAGE_WEBHOOK:$CERT_MANAGER_TAG
-az acr import --name $CX_ACR_SERVER --source $CERT_MANAGER_REGISTRY/$CERT_MANAGER_IMAGE_CAINJECTOR:$CERT_MANAGER_TAG --image $CERT_MANAGER_IMAGE_CAINJECTOR:$CERT_MANAGER_TAG
-```
-
-```
-helm install nginx-ingress ingress-nginx/ingress-nginx \
-    --version 4.0.13 \
-    --namespace "$CX_NAMESPACE" --create-namespace \
-    --set controller.replicaCount=2 \
-    --set controller.nodeSelector."kubernetes\.io/os"=linux \
-    --set controller.image.registry=$CX_ACR_SERVER \
-    --set controller.image.image=$CONTROLLER_IMAGE \
-    --set controller.image.tag=$CONTROLLER_TAG \
-    --set controller.image.digest="" \
-    --set controller.admissionWebhooks.patch.nodeSelector."kubernetes\.io/os"=linux \
-    --set controller.admissionWebhooks.patch.image.registry=$CX_ACR_SERVER \
-    --set controller.admissionWebhooks.patch.image.image=$PATCH_IMAGE \
-    --set controller.admissionWebhooks.patch.image.tag=$PATCH_TAG \
-    --set controller.admissionWebhooks.patch.image.digest="" \
-    --set defaultBackend.nodeSelector."kubernetes\.io/os"=linux \
-    --set defaultBackend.image.registry=$CX_ACR_SERVER \
-    --set defaultBackend.image.image=$DEFAULTBACKEND_IMAGE \
-    --set defaultBackend.image.tag=$DEFAULTBACKEND_TAG \
-    --set defaultBackend.image.digest="" \
-    --set controller.service.loadBalancerIP=$CX_IP
-```
-(Currently we leave out `--set controller.service.annotations."service\.beta\.kubernetes\.io/azure-dns-label-name"=$CX_IP_NAME`)
-
-We assume that a cert manager already exists and that we can directly continue
-
-## Aca-Py Build and Upload Image
-* Build the Aca-Py Image localy
-    * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
-    * navigate to the repository `cd aries-cloudagent-python`
-    * currently tested with commit `50772992cf354edbb2216de2659e2c44d4836576` from April 07, 2022
-    * run `git checkout 50772992cf354edbb2216de2659e2c44d4836576`
-    * run `docker build -t acapy:0.7.3-5077299 -f ./docker/Dockerfile.run .`
-* navigate back to the core-custoian repository
-* login to AKS:
-    ```
-    set -a; source .env; set +a
-    docker login $CX_ACR_SERVER
-    az aks get-credentials --resource-group $CX_RG --name $CX_AKS_CLUSTER --admin
-    ```
-* push the image to the ACR:
-    ```
-    docker tag acapy:0.7.3-5077299 $CX_ACR_SERVER/catena-x/acapy:0.7.3-5077299
-    docker push $CX_ACR_SERVER/catena-x/acapy:0.7.3-5077299
-    ```
-
-## Dashboard
-
-Within `ui-src` a simple Vue based dashboard application is available
-which currently only shows the existing companies as well as is able
-to retrieve the full BPN information from the CX data pool API on a
-click on the BPN.
-
-It can be developed with
-
-```
-cd ui-src
-yarn serve
-```
-
-In each release the files in `/static` are updated but within the deployment
-pipeline the application is built and copied over to the `/static` directory.
-
-The steps to build the static files are like following:
-
-```
-cd ui-src
-yarn build
-rm -rf ../static/*
-cp -r dist/* ../static
-```
-
-## Tools
-
-To access databases [DBeaver](https://dbeaver.io/) is really useful as it has a
-graphical interface but also excellent SQL support.
-
-## Dokumentation and Used Technologies
-
-* Documentation: [Catena-X Confluence](https://confluence.catena-x.net/pages/viewpage.action?pageId=16797461)
-
-* Used Technologies:
-
-    * [ACA-Py](https://github.com/hyperledger/aries-cloudagent-python) (Aries Cloud Agent Python) 
-with [Multitenancy](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md) feature and [JSON-LD Credential](https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
-
-    * [Hyperledger Indy](https://hyperledger-indy.readthedocs.io/en/latest/)
-
-    * [Ktor Framework](https://ktor.io/)
-
-## Future
-
-Potentially following libraries and frameworks could be added in future
-
-* [HikariCP](https://github.com/brettwooldridge/HikariCP) for connection pooling
-* [Koin](https://github.com/InsertKoinIO/koin) for dependency injection
