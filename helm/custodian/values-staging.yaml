@@ -25,4 +25,10 @@ acapy:
   adminPort: "11000"
   adminUrl: "http://localhost:11000"
   networkIdentifier: "idunion:test"
-  databaseHost: "172.40.1.188" # the IP of the postgres pod (kubectl describe pods <name-of-pod> -n ingress-custodian)
+  databaseHost: "10.244.2.211" # the IP of the postgres DB
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    password: ""
+    existingSecret: "postgres-acapy-secret-config"
