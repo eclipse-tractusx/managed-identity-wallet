@@ -2,24 +2,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catenax-custodian
+  name: catenax-managed-identity-wallets
+  namespace: {{ .Values.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: catenax-custodian
+      app: catenax-managed-identity-wallets
   template:
     metadata:
       labels:
-        app: catenax-custodian
+        app: catenax-managed-identity-wallets
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       imagePullSecrets:
         - name: acr-credentials
       containers:
-      - name: catenax-custodian
+      - name: catenax-managed-identity-wallets
+        {{- if .Values.image.registry }}
         image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        {{- else }}
+        image: {{ .Values.image.name }}:{{ .Values.image.tag }}
+        {{- end }}
         env:
         - name: APP_VERSION
           value: {{ .Values.app.version }}
@@ -28,7 +33,7 @@ spec:
         - name: CX_DB_JDBC_URL
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-secrets
+              name: catenax-managed-identity-wallets-secrets
               key: cx-db-jdbc-url
         - name: CX_DB_JDBC_DRIVER
           value: {{ .Values.db.jdbcDriver }}
@@ -43,12 +48,12 @@ spec:
         - name: CX_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-secrets
+              name: catenax-managed-identity-wallets-secrets
               key: cx-auth-client-id
         - name: CX_AUTH_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-secrets
+              name: catenax-managed-identity-wallets-secrets
               key: cx-auth-client-secret
         - name: CX_AUTH_REDIRECT_URL
           value: {{ .Values.auth.redirectUrl }}
@@ -61,7 +66,7 @@ spec:
         - name: ACAPY_ADMIN_API_KEY
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-admin-api-key
         - name: CX_BPN
           value: {{ .Values.wallet.catenaXBpn }}
@@ -74,19 +79,22 @@ spec:
             memory: 256Mi
         ports:
         - containerPort: 8080
-          name: custodian
       - name: catenax-acapy
+        {{- if .Values.image.registry }}
         image: {{ .Values.image.registry }}/{{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
+        {{- else }}
+        image: {{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
+        {{- end }}
         env:
         - name: WALLET_KEY
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-wallet-key
         - name: AGENT_WALLET_SEED
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-agent-wallet-seed
         - name: LEDGER_URL
           value: {{ .Values.acapy.ledgerUrl }}
@@ -95,12 +103,12 @@ spec:
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-jwt-secret
         - name: ACAPY_ADMIN_API_KEY
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-admin-api-key
         - name: LOG_LEVEL
           value: {{ .Values.acapy.logLevel }}
@@ -115,22 +123,22 @@ spec:
         - name: DB_ACCOUNT
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-db-account
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-db-password
         - name: DB_ADMIN_USER
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-db-admin
         - name: DB_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: catenax-custodian-acapy-secrets
+              name: catenax-managed-identity-wallets-acapy-secrets
               key: acapy-db-admin-password
         resources:
           requests:
@@ -167,8 +175,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: custodian-ingress
-  # namespace: 
+  name: catenax-managed-identity-wallets-ingress
+  namespace: {{ .Values.Namespace }}
   annotations:
     kubernetes.io/ingress.class: nginx
     # potentially to be removed
@@ -191,7 +199,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: catenax-custodian
+                name: catenax-managed-identity-wallets
                 port:
                   number: 8080
   tls:

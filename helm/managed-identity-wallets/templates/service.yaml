@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: catenax-custodian
+  name: catenax-managed-identity-wallets
 spec:
   type: ClusterIP
   ports:
   - port: 8080
   selector:
-    app: catenax-custodian
+    app: catenax-managed-identity-wallets

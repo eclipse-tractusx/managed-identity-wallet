@@ -159,18 +159,26 @@ below. Here a few hints on how to set it up:
 To resemble the staging and production system as much as possible also on the
 local machine, an external Postgresql database should be used instead of
 the default included h2 in-memory database. Additionally the authentication and authorization could be done via
-[keycloak](https://www.keycloak.org). The Aca-Py Service will also run in a docker container
+[keycloak](https://www.keycloak.org).
 
-### Aca-Py Docker Image <a id= "acapyDockerImage"></a>
+There are two ways to set up the local environment:
+1. *Run from source*: using keycloak and postgres as stand-alone docker containers and running the managed identity wallets service via gradle, or 
+2. *Run in Kubernetes*: packaging all of the services and run them on a local kubernetes cluster
 
-* build the Aca-Py Image (if not available)
-    * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
-    * navigate to the repository `cd aries-cloudagent-python`
-    * currently tested with commit `50772992cf354edbb2216de2659e2c44d4836576` from April 07, 2022
-    * run `git checkout 50772992cf354edbb2216de2659e2c44d4836576`
-    * run `docker build -t acapy:0.7.3-5077299 -f ./docker/Dockerfile.run .`
+![Devevelopment Environment Setup Options](docs/images/DevEnvSetupOptions.png "Devevelopment Environment Setup Options")
 
-### Start up Docker Containers for Postgres, Keycloak and AcaPy <a id= "startupDockerContainers"></a>
+### Preperation of Aca-Py Docker Image <a id= "acapyDockerImage"></a>
+
+Building the Aca-Py image is necessary for both setup options:
+* clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
+* navigate to the repository `cd aries-cloudagent-python`
+* currently tested with commit `0.7.4-rc1` from April, 28, 2022
+* run `git checkout 0.7.4-rc1`
+* run `docker build -t acapy:0.7.4-rc1 -f ./docker/Dockerfile.run .`
+
+### Option 1: Run from source <a id= "startupDockerContainers"></a>
+
+Starting up Docker Containers for Postgres, Keycloak and AcaPy via following steps:
 
 * navigate to `./dev-assets/dev-containers`
 * run `docker-compose up -d` (or `docker compose up -d`, depdending on the installation) to start a Postgresql database and Keycloak instance and the AcaPy Service as Docker containers
@@ -178,6 +186,17 @@ the default included h2 in-memory database. Additionally the authentication and 
 * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
 * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
 * The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `Custodian` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user, e.g. named `custodian-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
+
+Finally run the managed identity wallets service via
+
+```
+./gradlew run
+```
+
+or respectively in your IDE.
+### Option 2: Run in Kubernetes
+
+(tbd)
 
 ### IntelliJ Development Setup <a id= "intellijDevelopmentSetup"></a>
 
@@ -274,23 +293,23 @@ Deployment to be adjusted to the ArgoCD deployment, below notes are just for ref
 ## Helm Setup and Auto Deployment <a id= "helmSetupAndAutoDeployment"></a>
 The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated, the Aca-Py image is uploaded as described [section](##Aca-Py_Build_and_ Upload_Image) and the secret files and `values-staging.yaml` sill accurate.
 
-* To check the current deployment and version run `helm list -n ingress-custodian`. Example output:
+* To check the current deployment and version run `helm list -n <namespace-placeholder>`. Example output:
 ```
 NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	APP VERSION
 cx-custodian 	ingress-custodian	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-custodian-0.1.0	0.0.5      
 ```
 
-The deployment requires also a secret file `catenax-custodian-secrets` that include the following data:
+The deployment requires also a secret file `catenax-managed-identity-wallets-secrets` that include the following data:
 1. `cx-db-jdbc-url` (includes password/credentials for DB access)
 1. `cx-auth-client-id`
 1. `cx-auth-client-secret`
 
 To add a secret file to the namespace in the cluster:
 * login to AKS
-* either import them using a file `kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets --from-file <path to file>`
+* either import them using a file `kubectl -n <namespace-placeholder> create secret generic catenax-managed-identity-wallets-secrets --from-file <path to file>`
 * or run the following command after replaceing the placeholders
 ```
-  kubectl -n <namespace-placeholder> create secret generic catenax-custodian-secrets \
+  kubectl -n <namespace-placeholder> create secret generic catenax-managed-identity-wallets-secrets \
   --from-literal=cx-db-jdbc-url='<placeholder>' \
   --from-literal=cx-auth-client-id='<placeholder>' \
   --from-literal=cx-auth-client-secret='<placeholder>'
@@ -298,7 +317,7 @@ To add a secret file to the namespace in the cluster:
 
 Aca-py will be deployed and connected to a postgres database pod in the same namespace. The postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) The used files can be found under `dev-assets/acapy-postgres` without adding a Service. The IP of the acapy-postgres pod should be updated in the `values-staging.yaml` whenever the postgres pod is changed
 
-The deployment of AcaPy instance requires also a secret file `catenax-custodian-acapy-secrets` that include the following data:
+The deployment of AcaPy instance requires also a secret file `catenax-managed-identity-wallets-acapy-secrets` that include the following data:
 1. `acapy-wallet-key` the key of the base wallet
 1. `acapy-agent-wallet-seed` the seed of the base wallet
 1. `acapy-jwt-secret` the jwt secret for the tokens
@@ -308,7 +327,7 @@ The deployment of AcaPy instance requires also a secret file `catenax-custodian-
 1. `acapy-db-admin-password` postgres admin password
 1. `acapy-admin-api-key` the admin api key used by the custodian and acapy instance
 ```
-kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secrets \
+kubectl -n <namespace-placeholder> create secret generic catenax-managed-identity-wallets-acapy-secrets \
   --from-literal=acapy-wallet-key='<placeholder>' \
   --from-literal=acapy-agent-wallet-seed='<placeholder>' \
   --from-literal=acapy-jwt-secret='<placeholder>' \
@@ -319,7 +338,7 @@ kubectl -n ingress-custodian create secret generic catenax-custodian-acapy-secre
   --from-literal=acapy-admin-api-key='<placeholder>'
 ```
 
-* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-secrets -o yaml`
-* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-custodian-acapy-secrets -o yaml`
+* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-secrets -o yaml`
+* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-acapy-secrets -o yaml`
 
 

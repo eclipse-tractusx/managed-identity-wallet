@@ -26,7 +26,7 @@ services:
       - "8081:8080"
 
   cx_acapy:
-    image: acapy:0.7.3-5077299
+    image: acapy:0.7.4-rc1
     container_name: cx_acapy
     ports:
       - "11000:11000"

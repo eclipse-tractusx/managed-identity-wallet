@@ -1,6 +1,6 @@
 apiVersion: v2
-name: catenax-custodian
-description: catenax custodian app
+name: catenax-managed-identity-wallets
+description: Catena-X Managed Identity Wallets Services
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -19,6 +19,11 @@ version: 0.3.3
 appVersion: 0.3.2
 
 dependencies:
+  - name: postgresql
+    version: 11.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: acapy-postgresql.enabled
+    alias: acapy-postgresql
   - name: postgresql
     version: 11.x.x
     repository: https://charts.bitnami.com/bitnami

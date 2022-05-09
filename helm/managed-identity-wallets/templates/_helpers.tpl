@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "custodian.name" -}}
+{{- define "managed-identity-wallets.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "custodian.fullname" -}}
+{{- define "managed-identity-wallets.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "custodian.chart" -}}
+{{- define "managed-identity-wallets.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "custodian.labels" -}}
-helm.sh/chart: {{ include "custodian.chart" . }}
-{{ include "custodian.selectorLabels" . }}
+{{- define "managed-identity-wallets.labels" -}}
+helm.sh/chart: {{ include "managed-identity-wallets.chart" . }}
+{{ include "managed-identity-wallets.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "custodian.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "custodian.name" . }}
+{{- define "managed-identity-wallets.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "managed-identity-wallets.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "custodian.serviceAccountName" -}}
+{{- define "managed-identity-wallets.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "custodian.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "managed-identity-wallets.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
