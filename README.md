@@ -124,14 +124,14 @@ First step is to create the distribution of the application (in this case using 
 Next step is to build and tag the Docker image:
 
 ```
-docker build -t catena-x/custodian:0.0.5 .
+docker build -t catena-x/custodian:<placeholder> .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:0.0.5
+docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:<placeholder>
 ```
 
 ## Environment variable setup <a id= "environmentVariableSetup"></a>
@@ -165,7 +165,7 @@ There are two ways to set up the local environment:
 1. *Run from source*: using keycloak and postgres as stand-alone docker containers and running the managed identity wallets service via gradle, or 
 2. *Run in Kubernetes*: packaging all of the services and run them on a local kubernetes cluster
 
-![Devevelopment Environment Setup Options](docs/images/DevEnvSetupOptions.png "Devevelopment Environment Setup Options")
+![Development Environment Setup Options](docs/images/DevEnvSetupOptions.png "Development Environment Setup Options")
 
 ### Preperation of Aca-Py Docker Image <a id= "acapyDockerImage"></a>
 
@@ -175,6 +175,16 @@ Building the Aca-Py image is necessary for both setup options:
 * currently tested with commit `0.7.4-rc1` from April, 28, 2022
 * run `git checkout 0.7.4-rc1`
 * run `docker build -t acapy:0.7.4-rc1 -f ./docker/Dockerfile.run .`
+
+### Preparation of Managed Identity Wallet Docker Image
+
+Building the service image is necessary for both setup options, it is recommended
+to use as version tag the version specified in `gradle.properties`:
+
+```
+./gradlew installDist
+docker build -t catena-x/custodian:<placeholder> .
+```
 
 ### Option 1: Run from source <a id= "startupDockerContainers"></a>
 
@@ -196,7 +206,66 @@ Finally run the managed identity wallets service via
 or respectively in your IDE.
 ### Option 2: Run in Kubernetes
 
-(tbd)
+*Work in progress*
+
+1. Create a namespace
+
+Using as example `managed-identity-wallets`:
+
+```
+kubectl create namespace managed-identity-wallets
+```
+
+2. Create relevant secrets
+
+Altogether four secrets are needed
+* catenax-managed-identity-wallets-secrets
+* catenax-managed-identity-wallets-acapy-secrets
+* postgres-acapy-secret-config
+* postgres-managed-identity-wallets-secret-config
+
+Create these with following commands, after replacing the placeholders:
+
+```
+kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-secrets \
+  --from-literal=cx-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/custodiandev?user=custodiandevuser&password=<placeholder>' \
+  --from-literal=cx-auth-client-id='Custodian' \
+  --from-literal=cx-auth-client-secret='<placeholder>'
+
+kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-acapy-secrets \
+  --from-literal=acapy-wallet-key='<placeholder>' \
+  --from-literal=acapy-agent-wallet-seed='<placeholder>' \
+  --from-literal=acapy-jwt-secret='<placeholder>' \
+  --from-literal=acapy-db-account='postgres' \
+  --from-literal=acapy-db-password='<placeholder>' \
+  --from-literal=acapy-db-admin='postgres' \
+  --from-literal=acapy-db-admin-password='<placeholder>' \
+  --from-literal=acapy-admin-api-key='<placeholder>'
+
+kubectl -n managed-identity-wallets create secret generic postgres-acapy-secret-config \
+--from-literal=password='<placeholder>' \
+--from-literal=postgres-password='<placeholder>' \
+--from-literal=user='postgres'
+
+kubectl -n managed-identity-wallets create secret generic postgres-managed-identity-wallets-secret-config \
+--from-literal=password='<placeholder>' \
+--from-literal=postgres-password='<placeholder>' \
+--from-literal=user='postgres'
+```
+
+3. Install a new deployment via helm
+
+Run following command to use the base values as well as the predefined values for local deployment:
+
+```
+helm install managed-identity-wallets ./helm/managed-identity-wallets/ -n managed-identity-wallets -f ./helm/managed-identity-wallets/values.yaml -f ./helm/managed-identity-wallets/values-local.yaml
+```
+
+4. Expose via loadbalancer
+
+```
+kubectl -n managed-identity-wallets apply -f dev-assets/kube-local-lb.yaml
+```
 
 ### IntelliJ Development Setup <a id= "intellijDevelopmentSetup"></a>
 
