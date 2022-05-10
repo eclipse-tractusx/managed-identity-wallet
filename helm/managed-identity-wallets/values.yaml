@@ -20,7 +20,7 @@ acapy:
   secret:
     name: "catenax-managed-identity-wallets-acapy-secrets"
     path: "managed-identity-wallets/dev/catenax-managed-identity-wallets-acapy-secrets"
-acapy-postgresql:
+acapyPostgresql:
   enabled: true
   auth:
     existingSecret: "postgres-acapy-secret-config"
@@ -31,9 +31,12 @@ postgresql:
   enabled: false
   auth:
     existingSecret: "postgres-managed-identity-wallets-secret-config"
+  secret:
+    name: "postgres-managed-identity-wallets-secret-config"
+    path: "managed-identity-wallets/dev/postgres-managed-identity-wallets-secret-config"
 app:
-  version: "0.10.0"
-managed-identity-wallets:
+  version: "0.3.2"
+managedIdentityWallets:
   secret:
     name: "catenax-managed-identity-wallets-secrets"
     path: "managed-identity-wallets/dev/catenax-managed-identity-wallets-secrets"

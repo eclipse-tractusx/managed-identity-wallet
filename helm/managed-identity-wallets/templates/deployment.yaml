@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: catenax-managed-identity-wallets
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}  
 spec:
   replicas: 1
   selector:

@@ -22,7 +22,7 @@ dependencies:
   - name: postgresql
     version: 11.x.x
     repository: https://charts.bitnami.com/bitnami
-    condition: acapy-postgresql.enabled
+    condition: acapyPostgresql.enabled
     alias: acapy-postgresql
   - name: postgresql
     version: 11.x.x
