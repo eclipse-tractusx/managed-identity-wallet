@@ -5,6 +5,9 @@ auth:
   realm: "CX-Central"
   role: "access"
 datapoolUrl: "https://catenax-bpdm-int.demo.catena-x.net"
+image:
+  registry: "ghcr.io"
+  tag: "latest"
 acapy:
   logLevel: "INFO"
   endpointPort: "8000"

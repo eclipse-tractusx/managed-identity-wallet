@@ -6,6 +6,7 @@ auth:
   role: "access"
 datapoolUrl: "https://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com"
 image:
+  registry: "ghcr.io"
   tag: "latest-develop"
 acapy:
   logLevel: "DEBUG"
