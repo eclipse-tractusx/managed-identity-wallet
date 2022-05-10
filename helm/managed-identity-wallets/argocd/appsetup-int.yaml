@@ -4,17 +4,19 @@ metadata:
   name: managed-identity-wallets
 spec:
   destination:
-    namespace: managed-identity-wallets
+    namespace: product-managed-identity-wallets
     server: 'https://kubernetes.default.svc'
   source:
-    path: helm/managed-identity-wallets
     repoURL: 'https://github.com/catenax-ng/product-core-managed-identity-wallets.git'
-    targetRevision: HEAD
+    path: helm/managed-identity-wallets
+    targetRevision: main
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-int.yaml
     plugin:
       name: argocd-vault-plugin-helm
       env:
         - name: AVP_SECRET
           value: vault-secret
-        - name: helm_args
-          value: '-f ./managed-identity-wallets/values.yaml -f ./managed-identity-wallets/values-dev.yaml'
-  project: project-portal
+  project: project-managed-identity-wallets
