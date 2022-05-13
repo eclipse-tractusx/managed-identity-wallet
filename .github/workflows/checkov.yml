@@ -36,9 +36,10 @@ jobs:
           framework: all # optional: run only on a specific infrastructure {cloudformation,terraform,kubernetes,all}
           output_format: sarif # optional: the output format, one of: cli, json, junitxml, github_failed_only, or sarif. Default: sarif
           download_external_modules: true # optional: download external terraform modules from public git repositories and terraform registry
-          log_level: DEBUG # optional: set log level. Default WARNING
           # config_file: path/this_file
           # baseline: cloudformation/.checkov.baseline # optional: Path to a generated baseline file. Will only report results not in the baseline.
+          log_level: WARNING # optional: set log level. Default WARNING
+          skip_check: CKV_DOCKER_2,CKV_K8S_8,CKV_SECRET_6,CKV_K8S_21,CKV_K8S_37,CKV_K8S_28,CKV_K8S_9,CKV_K8S_43,CKV_K8S_15,CKV_K8S_35,CKV_K8S_38,CKV_K8S_22,CKV_K8S_40,CKV_K8S_31 # optional: add low severity checkov rule IDs
 
       - name: Upload Checkov scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1

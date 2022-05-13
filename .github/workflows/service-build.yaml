@@ -83,7 +83,7 @@ jobs:
         with:
           appname: 'project-managed-identity-wallets'
           createprofile: false
-          filepath: 'build/libs/net.catenax.core.custodian-*.jar' # add filepath for upload
+          filepath: 'build/install/net.catenax.core.custodian/lib/*' # add filepath for upload
           vid: '${{ secrets.VERACODE_API_ID }}' # store and reference veracode API ID in github secrets
           vkey: '${{ secrets.VERACODE_API_KEY }}' #store and reference veracode API KEY in github secrets
 #          createsandbox: 'true'
