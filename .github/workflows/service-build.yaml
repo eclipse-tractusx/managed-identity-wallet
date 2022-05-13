@@ -77,6 +77,22 @@ jobs:
         with:
           arguments: installDist
 
+      - name: Veracode Upload And Scan
+        uses: veracode/veracode-uploadandscan-action@0.2.1
+        continue-on-error: true
+        with:
+          appname: 'project-managed-identity-wallets'
+          createprofile: false
+          filepath: 'build/install/net.catenax.core.custodian/lib/*' # add filepath for upload
+          vid: '${{ secrets.VERACODE_API_ID }}' # store and reference veracode API ID in github secrets
+          vkey: '${{ secrets.VERACODE_API_KEY }}' #store and reference veracode API KEY in github secrets
+#          createsandbox: 'true'
+#          sandboxname: 'SANDBOXNAME'
+#          scantimeout: 0
+#          exclude: '*.js'
+#          include: '*.war'
+#          criticality: 'VeryHigh'
+
       - name: setup nodejs
         uses: actions/setup-node@master
 

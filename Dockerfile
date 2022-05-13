@@ -1,6 +1,8 @@
-FROM openjdk:17-jdk
+FROM openjdk:17-slim
 EXPOSE 8080:8080
-RUN mkdir /app
+# run as non-root user
+RUN groupadd -g 1001 -r user && useradd -u 1001 -r -s /bin/false -g user user
+USER user
 COPY ./build/install/net.catenax.core.custodian/ /app/
 COPY ./static /app/static
 WORKDIR /app/bin

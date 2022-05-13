@@ -1,0 +1,29 @@
+image:
+  name: "catenax-ng/product-core-managed-identity-wallets_service"
+  tag: "0.3.2"
+allowEmptyPassword: "\"yes\""
+db:
+  jdbcDriver: "org.postgresql.Driver"
+namespace: "managed-identity-wallets"
+logging:
+  exposed: "INFO"
+wallet:
+  catenaXBpn: "BPNL000000000000"
+acapy:
+  imageName: "catenax-ng/product-core-managed-identity-wallets_acapy"
+  tag: "0.7.4-rc1"
+  ledgerUrl: "https://idu.cloudcompass.ca"
+  label: "CatenaXIssuer"
+  logLevel: "INFO"
+  networkIdentifier: "idunion:test"
+  databaseHost: "managed-identity-wallets-acapy-postgresql"
+acapyPostgresql:
+  enabled: true
+  auth:
+    existingSecret: "postgres-acapy-secret-config"
+postgresql:
+  enabled: false
+  auth:
+    existingSecret: "postgres-managed-identity-wallets-secret-config"
+app:
+  version: "0.3.2"

@@ -1,0 +1,33 @@
+auth:
+  jwksUrl: "https://catenaxintakssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central/protocol/openid-connect/certs"
+  issuerUrl: "https://catenaxintakssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central"
+  redirectUrl: "https://managed-identity-wallets.int.demo.catena-x.net/callback"
+  realm: "CX-Central"
+  role: "access"
+datapoolUrl: "https://catenax-bpdm-int.demo.catena-x.net"
+image:
+  registry: "ghcr.io"
+  tag: "latest"
+acapy:
+  logLevel: "INFO"
+  endpointPort: "8000"
+  endpointUrl: "https://managed-identity-wallets.int.demo.catena-x.net:8000/"
+  adminPort: "11000"
+  adminUrl: "http://localhost:11000"
+  secret:
+    name: "catenax-managed-identity-wallets-acapy-secrets"
+    path: "managed-identity-wallets/data/int/catenax-managed-identity-wallets-acapy-secrets"
+certificate:
+  host: "managed-identity-wallets.int.demo.catena-x.net"
+acapyPostgresql:
+  secret:
+    name: "postgres-acapy-secret-config"
+    path: "managed-identity-wallets/data/int/postgres-acapy-secret-config"
+postgresql:
+  secret:
+    name: "postgres-managed-identity-wallets-secret-config"
+    path: "managed-identity-wallets/data/int/postgres-managed-identity-wallets-secret-config"
+managedIdentityWallets:
+  secret:
+    name: "catenax-managed-identity-wallets-secrets"
+    path: "managed-identity-wallets/data/int/catenax-managed-identity-wallets-secrets"
