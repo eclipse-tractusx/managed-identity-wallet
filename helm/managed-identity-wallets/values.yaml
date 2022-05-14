@@ -27,3 +27,4 @@ postgresql:
     existingSecret: "postgres-managed-identity-wallets-secret-config"
 app:
   version: "0.3.2"
+isLocal: false

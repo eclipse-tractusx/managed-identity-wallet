@@ -86,11 +86,11 @@ jobs:
           filepath: 'build/install/net.catenax.core.custodian/lib/*' # add filepath for upload
           vid: '${{ secrets.VERACODE_API_ID }}' # store and reference veracode API ID in github secrets
           vkey: '${{ secrets.VERACODE_API_KEY }}' #store and reference veracode API KEY in github secrets
+          include: 'build/install/net.catenax.core.custodian/lib/net.catenax.core.custodian-*jar'
 #          createsandbox: 'true'
 #          sandboxname: 'SANDBOXNAME'
 #          scantimeout: 0
 #          exclude: '*.js'
-#          include: '*.war'
 #          criticality: 'VeryHigh'
 
       - name: setup nodejs
