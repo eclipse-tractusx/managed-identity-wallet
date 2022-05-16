@@ -1,7 +1,7 @@
 auth:
   jwksUrl: "https://catenaxdev003akssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central/protocol/openid-connect/certs"
   issuerUrl: "https://catenaxdev003akssrv.germanywestcentral.cloudapp.azure.com/iamcentralidp/auth/realms/CX-Central"
-  redirectUrl: "https://custodian-dev.germanywestcentral.cloudapp.azure.com/callback"
+  redirectUrl: "https://managed-identity-wallets.dev.demo.catena-x.net/callback"
   realm: "CX-Central"
   role: "access"
 datapoolUrl: "https://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com"

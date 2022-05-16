@@ -58,11 +58,11 @@ build system.
 4. Start Docker-Compose Up for deployment of Keycloack, Acapy and Postgres, see section [Startup Docker Containers](#startupDockerContainers)
 5. Setup Postgres Connection in DBeaver with Credentials -postgres, -cx_password on port 5432, see section [Setting up progresql database](#settingUpPostgresSqlDatabase)
     1. Add the postgres settings to dev.env and comment out the h2-settings also in section
-    2. Create custodiandev Database
-6. Add the Custodiandev Database connection to DBeaver
+    2. Create miwdev Database
+6. Add the miwdev Database connection to DBeaver
 7. Run `application.kt` in IntelliJ or in your IDE or run it on the command line (`set -a; source dev.env; set +a` and `./gradlew run`)
 8. Start Postman and add the Environment and the collection from ./dev-assets/
-    1. In the body of *Create wallet in Custodian*, change the `bpn` value to your `CX_BPN`
+    1. In the body of *Create wallet in Managed Identity Wallets*, change the `bpn` value to your `CX_BPN`
        1. ![Change the BPN name](docs/images/ChangeBpnName.png "Adjusting the BPN Name")
     2. Execute the request and note down your `did` and `verKey` from the response
        1. ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
@@ -71,10 +71,10 @@ build system.
        1. ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
     2. Post your created wallets with your DID to `http://localhost:11000/wallet/did/public?did=` + (your DID without the prefix e.g. `AS3fJQvDio8ERWzdSG1Zzi`)
        1. ![AcaPy DID registration](docs/images/AcaPyDIDPublicAssignment.png "AcaPy DID Public Assignment")
-    3. Add as authorization a Bearer Token (from the `custodiandev` database take the content of `wallet_token` from the `wallets` table)
+    3. Add as authorization a Bearer Token (from the `miwdev` database take the content of `wallet_token` from the `wallets` table)
        1. ![WalletTokenExtraction](docs/images/WalletTokenExtraction.png "Wallet_Token extraction")
     4. Add as `X-API-Key` header your `ACAPY_ADMIN_API_KEY` env variable value
-11. Now you have created your own Wallet and published your DID to the Ledger, you can retrieve the list of wallets in Postman via the *Get wallets from Custodian*
+11. Now you have created your own Wallet and published your DID to the Ledger, you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
 
 ## Building with gradle <a id= "buildingWithGradle"></a>
 
@@ -124,14 +124,14 @@ First step is to create the distribution of the application (in this case using 
 Next step is to build and tag the Docker image:
 
 ```
-docker build -t catena-x/custodian:<placeholder> .
+docker build -t catena-x/managed-identity-wallets:<placeholder> .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:<placeholder>
+docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets:<placeholder>
 ```
 
 ## Environment variable setup <a id= "environmentVariableSetup"></a>
@@ -139,13 +139,13 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/custodian:<placeholder>
 Please see the file `.env.example` for the environment examples that are used
 below. Here a few hints on how to set it up:
 
-1. `CX_DB_JDBC_URL`: enter the database url, default is `jdbc:h2:mem:custodiandev;DB_CLOSE_DELAY=-1;`
+1. `CX_DB_JDBC_URL`: enter the database url, default is `jdbc:h2:mem:miwdev;DB_CLOSE_DELAY=-1;`
 2. `CX_DB_JDBC_DRIVER`: enter the driver, default is `org.h2.Driver`
 3. `CX_AUTH_JWKS_URL`: enter the keycloak certs url, e.g. `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs`
 4. `CX_AUTH_ISSUER_URL`: enter the token issue, e.g. `http://localhost:8081/auth/realms/catenax`
 5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
 6. `CX_AUTH_ROLE`: specify the expected role within the token, e.g. `access`
-7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `custodian`
+7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `managed-identity-wallets`
 8. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
 9. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
 10. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
@@ -183,7 +183,7 @@ to use as version tag the version specified in `gradle.properties`:
 
 ```
 ./gradlew installDist
-docker build -t catena-x/custodian:<placeholder> .
+docker build -t catena-x/managed-identity-wallets:<placeholder> .
 ```
 
 ### Option 1: Run from source <a id= "startupDockerContainers"></a>
@@ -195,7 +195,7 @@ Starting up Docker Containers for Postgres, Keycloak and AcaPy via following ste
 * To setup the Postgresql database in the application please see the section below - [Setting up progresql database](#settingUpPostgresSqlDatabase), for the database
 * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
 * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
-* The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `Custodian` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `custodian-api` and a user, e.g. named `custodian-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
+* The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `ManagedIdentityWallets` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `managed-identity-wallets-api` and a user, e.g. named `managed-identity-wallets-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
 
 Finally run the managed identity wallets service via
 
@@ -228,8 +228,8 @@ Create these with following commands, after replacing the placeholders:
 
 ```
 kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-secrets \
-  --from-literal=cx-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/custodiandev?user=custodiandevuser&password=<placeholder>' \
-  --from-literal=cx-auth-client-id='Custodian' \
+  --from-literal=cx-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/miwdev?user=miwdevuser&password=<placeholder>' \
+  --from-literal=cx-auth-client-id='ManagedIdentityWallets' \
   --from-literal=cx-auth-client-secret='<placeholder>'
 
 kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-acapy-secrets \
@@ -300,16 +300,16 @@ Based on the [documentation](https://docs.microsoft.com/en-us/azure/postgresql/h
 provided by Mirosoft following SQL needs to be executed to setup initiall the database:
 
 ```
-CREATE DATABASE custodiandev;
-CREATE ROLE custodiandevuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD '^cXnF61qM1kf';
-GRANT CONNECT ON DATABASE custodiandev TO custodiandevuser;
+CREATE DATABASE miwdev;
+CREATE ROLE miwdevuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD '^cXnF61qM1kf';
+GRANT CONNECT ON DATABASE miwdev TO miwdevuser;
 ```
 
 Then following environment settings in your local environment file (potentially
 named `dev.env`) can be used:
 
 ```
-CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/custodiandev?user=custodiandevuser&password=^cXnF61qM1kf"
+CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password=^cXnF61qM1kf"
 CX_DB_JDBC_DRIVER="org.postgresql.Driver"
 ```
 
@@ -360,12 +360,12 @@ Potentially following libraries and frameworks could be added in future
 Deployment to be adjusted to the ArgoCD deployment, below notes are just for reference
 
 ## Helm Setup and Auto Deployment <a id= "helmSetupAndAutoDeployment"></a>
-The Helm setup is configured under `helm/custodian` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated, the Aca-Py image is uploaded as described [section](##Aca-Py_Build_and_ Upload_Image) and the secret files and `values-staging.yaml` sill accurate.
+The Helm setup is configured under `helm/managed-identity-wallets` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated, the Aca-Py image is uploaded as described [section](##Aca-Py_Build_and_ Upload_Image) and the secret files and `values-staging.yaml` sill accurate.
 
 * To check the current deployment and version run `helm list -n <namespace-placeholder>`. Example output:
 ```
-NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	APP VERSION
-cx-custodian 	ingress-custodian	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-custodian-0.1.0	0.0.5      
+NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	                APP VERSION
+cx-miw       	ingress-miw     	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-managed-identity-wallets-0.1.0	0.0.5      
 ```
 
 The deployment requires also a secret file `catenax-managed-identity-wallets-secrets` that include the following data:
@@ -394,7 +394,7 @@ The deployment of AcaPy instance requires also a secret file `catenax-managed-id
 1. `acapy-db-password` postgres password
 1. `acapy-db-admin` postgres admin
 1. `acapy-db-admin-password` postgres admin password
-1. `acapy-admin-api-key` the admin api key used by the custodian and acapy instance
+1. `acapy-admin-api-key` the admin api key used by the managed identity wallets and acapy instance
 ```
 kubectl -n <namespace-placeholder> create secret generic catenax-managed-identity-wallets-acapy-secrets \
   --from-literal=acapy-wallet-key='<placeholder>' \

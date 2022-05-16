@@ -1,1 +1,1 @@
-rootProject.name = "net.catenax.core.custodian"
+rootProject.name = "net.catenax.core.managedidentitywallets"

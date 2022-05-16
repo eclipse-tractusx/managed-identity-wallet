@@ -1,9 +1,9 @@
-package net.catenax.core.custodian
+package net.catenax.core.managedidentitywallets
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
-import net.catenax.core.custodian.models.*
-import net.catenax.core.custodian.services.BusinessPartnerDataService
+import net.catenax.core.managedidentitywallets.models.*
+import net.catenax.core.managedidentitywallets.services.BusinessPartnerDataService
 
 class BusinessPartnerDataMockedService: BusinessPartnerDataService {
 

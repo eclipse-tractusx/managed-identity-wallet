@@ -13,7 +13,7 @@ plugins {
 
 group = "net.catenax.core"
 application {
-    mainClass.set("net.catenax.core.custodian.ApplicationKt")
+    mainClass.set("net.catenax.core.managedidentitywallets.ApplicationKt")
 }
 
 repositories {

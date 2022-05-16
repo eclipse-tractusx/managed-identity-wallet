@@ -1,10 +1,10 @@
-package net.catenax.core.custodian
+package net.catenax.core.managedidentitywallets
 
-import net.catenax.core.custodian.models.*
-import net.catenax.core.custodian.models.ssi.DidDocumentDto
-import net.catenax.core.custodian.models.ssi.acapy.*
+import net.catenax.core.managedidentitywallets.models.*
+import net.catenax.core.managedidentitywallets.models.ssi.DidDocumentDto
+import net.catenax.core.managedidentitywallets.models.ssi.acapy.*
 
-import net.catenax.core.custodian.services.IAcaPyService
+import net.catenax.core.managedidentitywallets.services.IAcaPyService
 import java.security.SecureRandom
 
 class AcaPyMockedService: IAcaPyService {

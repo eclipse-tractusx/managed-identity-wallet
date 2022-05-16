@@ -17,5 +17,5 @@ acapy:
 certificate:
   host: "managed-identity-wallets.local.demo.catena-x.net"
 image:
-  name: "catena-x/custodian"
+  name: "catena-x/managed-identity-wallets"
 isLocal: true

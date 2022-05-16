@@ -1,4 +1,4 @@
-package net.catenax.core.custodian
+package net.catenax.core.managedidentitywallets
 
 import io.ktor.http.*
 
@@ -24,11 +24,11 @@ import kotlin.test.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.builtins.*
 
-import net.catenax.core.custodian.plugins.*
-import net.catenax.core.custodian.models.*
-import net.catenax.core.custodian.routes.*
-import net.catenax.core.custodian.services.*
-import net.catenax.core.custodian.persistence.repositories.*
+import net.catenax.core.managedidentitywallets.plugins.*
+import net.catenax.core.managedidentitywallets.models.*
+import net.catenax.core.managedidentitywallets.routes.*
+import net.catenax.core.managedidentitywallets.services.*
+import net.catenax.core.managedidentitywallets.persistence.repositories.*
 
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -37,7 +37,7 @@ class ApplicationTest {
      private fun setupEnvironment(environment: ApplicationEnvironment) {
         (environment.config as MapApplicationConfig).apply {
             put("app.version", System.getenv("APP_VERSION") ?: "0.0.7")
-            put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:custodian;DB_CLOSE_DELAY=-1;")
+            put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:miw;DB_CLOSE_DELAY=-1;")
             put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
             put("auth.issuerUrl", System.getenv("CX_AUTH_ISSUER_URL") ?: "http://localhost:8081/auth/realms/catenax")
             put("auth.realm", System.getenv("CX_AUTH_REALM") ?: "catenax")
