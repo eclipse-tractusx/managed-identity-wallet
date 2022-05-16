@@ -25,6 +25,7 @@ spec:
         {{- else }}
         image: {{ .Values.image.name }}:{{ .Values.image.tag }}
         {{- end }}
+        imagePullPolicy: Always
         env:
         - name: APP_VERSION
           value: {{ .Values.app.version }}
