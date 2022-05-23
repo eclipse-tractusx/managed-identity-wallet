@@ -28,7 +28,7 @@ postgresql:
   secret:
     name: "postgres-managed-identity-wallets-secret-config"
     path: "managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config"
-acapyPostgresql:
+acapypostgresql:
   secret:
     name: "postgres-acapy-secret-config"
     path: "managed-identity-wallets/data//dev/postgres-acapy-secret-config"

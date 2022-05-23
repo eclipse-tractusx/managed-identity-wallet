@@ -19,7 +19,7 @@ acapy:
     path: "managed-identity-wallets/data/int/catenax-managed-identity-wallets-acapy-secrets"
 certificate:
   host: "managed-identity-wallets.int.demo.catena-x.net"
-acapyPostgresql:
+acapypostgresql:
   secret:
     name: "postgres-acapy-secret-config"
     path: "managed-identity-wallets/data/int/postgres-acapy-secret-config"
