@@ -1,0 +1,68 @@
+name: Weekly Veracode Scan
+
+on:
+  schedule:
+    # Once a week
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+  # Trigger manually
+
+jobs:
+  scan-code:
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: madhead/read-java-properties@latest
+        id: version
+        with:
+          file: gradle.properties
+          property: version
+          default: 0.0.1
+
+      - name: Set App Version
+        run: echo "APP_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
+
+      - name: Set outputs
+        id: vars
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Show version
+        run: echo ${APP_VERSION}.${SHORT_SHA}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+            java-version: 17
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
+        with:
+          arguments: build
+
+      - name: Create dist
+        uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
+        with:
+          arguments: installDist
+
+      - name: Veracode Upload And Scan
+        uses: veracode/veracode-uploadandscan-action@0.2.1
+        continue-on-error: true
+        with:
+          appname: 'project-managed-identity-wallets'
+          createprofile: false
+          filepath: 'build/install/net.catenax.core.managedidentitywallets/lib/*' # add filepath for upload
+          vid: '${{ secrets.VERACODE_API_ID }}' # store and reference veracode API ID in github secrets
+          vkey: '${{ secrets.VERACODE_API_KEY }}' #store and reference veracode API KEY in github secrets
+          include: 'build/install/net.catenax.core.managedidentitywallets/lib/net.catenax.core.managedidentitywallets-*jar'
+#          createsandbox: 'true'
+#          sandboxname: 'SANDBOXNAME'
+#          scantimeout: 0
+#          exclude: '*.js'
+#          criticality: 'VeryHigh'

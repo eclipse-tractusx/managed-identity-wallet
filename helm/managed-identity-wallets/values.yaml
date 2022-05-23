@@ -16,7 +16,7 @@ acapy:
   label: "CatenaXIssuer"
   logLevel: "INFO"
   networkIdentifier: "idunion:test"
-  databaseHost: "managed-identity-wallets-acapy-postgresql"
+  databaseHost: "product-managed-identity-wallets-acapy-postgresql"
 acapyPostgresql:
   enabled: true
   auth:
