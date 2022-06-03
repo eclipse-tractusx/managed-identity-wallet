@@ -65,12 +65,13 @@ class AcaPyWalletServiceImpl(
 
     override suspend fun registerBaseWallet(verKey: String): Boolean {
         val catenaXWallet = getWalletExtendedInformation(catenaXMainBpn)
+        val shortDid = catenaXWallet.did.substring(("did:indy:"+networkIdentifier).length)
 
         // Register DID on ledger
         val didRegistrationResult = acaPyService.registerDidOnLedger(
             DidRegistration(
                 alias = catenaXWallet.name,
-                did = catenaXWallet.did,
+                did = shortDid,
                 verkey = verKey,
                 role = "ENDORSER"
             ),

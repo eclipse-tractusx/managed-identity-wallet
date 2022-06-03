@@ -65,7 +65,12 @@ class AcaPyMockedService: IAcaPyService {
     override suspend fun registerDidOnLedger(
         didRegistration: DidRegistration,
         endorserWalletToken: String
-    ): DidRegistrationResult = DidRegistrationResult(success = true)
+    ): DidRegistrationResult {
+        if (didRegistration.did.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
+            throw Exception("Cannot process did containing network identifier!")
+        }
+        return DidRegistrationResult(success = true)
+    }
 
     override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String = ""
 
