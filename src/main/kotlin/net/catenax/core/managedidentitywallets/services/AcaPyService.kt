@@ -15,7 +15,7 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
         return WalletAndAcaPyConfig(
             apiAdminUrl = acaPyConfig.apiAdminUrl,
             networkIdentifier = acaPyConfig.networkIdentifier,
-            catenaXBpn = acaPyConfig.catenaXBpn,
+            baseWalletBpn = acaPyConfig.baseWalletBpn,
             adminApiKey = "" // don't expose the api key outside the AcaPyService
         )
     }

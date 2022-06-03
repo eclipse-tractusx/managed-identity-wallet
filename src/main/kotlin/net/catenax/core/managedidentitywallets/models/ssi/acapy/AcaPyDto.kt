@@ -39,7 +39,7 @@ enum class VerificationKeyType {
 data class WalletAndAcaPyConfig(
     val apiAdminUrl: String,
     val networkIdentifier: String,
-    val catenaXBpn: String,
+    val baseWalletBpn: String,
     val adminApiKey: String
 )
 

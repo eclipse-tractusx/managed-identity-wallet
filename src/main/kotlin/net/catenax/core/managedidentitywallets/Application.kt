@@ -66,7 +66,7 @@ fun Application.module(testing: Boolean = false) {
         apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
         networkIdentifier = environment.config.property("acapy.networkIdentifier").getString(),
         adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
-        catenaXBpn = environment.config.property("wallet.catenaXBpn").getString()
+        baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
     )
     val walletService = WalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository)
     val businessPartnerDataService = BusinessPartnerDataService.createBusinessPartnerDataService(walletService)

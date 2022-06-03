@@ -46,7 +46,7 @@ class ApplicationTest {
             put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
             put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: ":indy:test")
             put("acapy.adminApiKey", System.getenv("ACAPY_ADMIN_API_KEY") ?: "Hj23iQUsstG!dde")
-            put("wallet.catenaXBpn", System.getenv("CX_BPN") ?: "bpn1")
+            put("wallet.baseWalletBpn", System.getenv("CX_BPN") ?: "bpn1")
         }
     }
 

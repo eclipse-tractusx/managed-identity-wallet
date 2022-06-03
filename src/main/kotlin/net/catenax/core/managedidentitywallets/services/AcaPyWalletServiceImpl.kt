@@ -21,7 +21,7 @@ class AcaPyWalletServiceImpl(
 ) : WalletService {
 
     private val networkIdentifier = acaPyService.getWalletAndAcaPyConfig().networkIdentifier
-    private val catenaXMainBpn = acaPyService.getWalletAndAcaPyConfig().catenaXBpn
+    private val baseWalletBpn = acaPyService.getWalletAndAcaPyConfig().baseWalletBpn
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     private val arrayOfSupportedIds = listOf("did-communication", "linked_domains", "profile")
 
@@ -64,21 +64,17 @@ class AcaPyWalletServiceImpl(
     }
 
     override suspend fun registerBaseWallet(verKey: String): Boolean {
-        val catenaXWallet = getWalletExtendedInformation(catenaXMainBpn)
+        log.debug("Register base wallet with bpn ${baseWalletBpn} and key ${verKey}")
+        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
         val shortDid = catenaXWallet.did.substring(("did:indy:"+networkIdentifier+":").length)
 
-        // Register DID on ledger
-        val didRegistrationResult = acaPyService.registerDidOnLedger(
-            DidRegistration(
-                alias = catenaXWallet.name,
-                did = shortDid,
-                verkey = verKey,
-                role = "ENDORSER"
-            ),
+        // Register DID with public DID on ledger
+        acaPyService.assignDidToPublic(
+            shortDid,
             catenaXWallet.walletToken
         )
 
-        return didRegistrationResult.success
+        return true
     }
 
     override suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto {
@@ -131,7 +127,7 @@ class AcaPyWalletServiceImpl(
     }
 
     private suspend fun registerSubWalletUsingCatenaXWallet(walletCreateDto: WalletCreateDto, createdDid: DidResult) {
-        val catenaXWallet = getWalletExtendedInformation(catenaXMainBpn)
+        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
         // Register DID on ledger
         acaPyService.registerDidOnLedger(
             DidRegistration(
@@ -191,7 +187,7 @@ class AcaPyWalletServiceImpl(
             id = vcCatenaXRequest.id,
             context = vcCatenaXRequest.context,
             type = vcCatenaXRequest.type,
-            issuerIdentifier = catenaXMainBpn,
+            issuerIdentifier = baseWalletBpn,
             issuanceDate = vcCatenaXRequest.issuanceDate,
             expirationDate = vcCatenaXRequest.expirationDate,
             credentialSubject = vcCatenaXRequest.credentialSubject,
@@ -385,7 +381,7 @@ class AcaPyWalletServiceImpl(
         return credentialRepository.getCredentials(issuerDid, holderDid, type, credentialId)
     }
 
-    override fun isCatenaXWallet(bpn: String): Boolean = bpn == catenaXMainBpn
+    override fun isCatenaXWallet(bpn: String): Boolean = bpn == baseWalletBpn
 
     private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {
         return transaction {

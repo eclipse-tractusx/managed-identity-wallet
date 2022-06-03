@@ -16,7 +16,7 @@ class AcaPyMockedService: IAcaPyService {
         return WalletAndAcaPyConfig(
             apiAdminUrl = "",
             networkIdentifier = "local:test",
-            catenaXBpn = "bpn1",
+            baseWalletBpn = "bpn1",
             adminApiKey = "Hj23iQUsstG!dde"
         )
     }
@@ -42,7 +42,14 @@ class AcaPyMockedService: IAcaPyService {
         )
     }
 
-    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {}
+    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {
+        if (didIdentifier.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
+            throw Exception("Cannot process did containing network identifier!")
+        }
+        if (didIdentifier.indexOf(":") === 0) {
+            throw Exception("Cannot process did starting with a colon!")
+        }
+    }
 
     override suspend fun deleteSubWallet(walletData: WalletExtendedData) {}
 
