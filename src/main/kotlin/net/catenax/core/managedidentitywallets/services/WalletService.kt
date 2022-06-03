@@ -32,6 +32,8 @@ interface WalletService {
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 
+    suspend fun registerBaseWallet(verKey: String): Boolean
+
     suspend fun issuePresentation(vpRequest: VerifiablePresentationRequestDto): VerifiablePresentationDto
 
     fun getCredentials(

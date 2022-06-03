@@ -147,7 +147,7 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
             route("/credentials") {
                 notarizedPost(
                     PostInfo<StoreVerifiableCredentialParameter, IssuedVerifiableCredentialRequestDto, SuccessResponse>(
-                        summary = "Store Verifiable Credential ",
+                        summary = "Store Verifiable Credential",
                         description = "Store a verifiable credential in the wallet of the given identifier",
                         parameterExamples = setOf(
                             ParameterExample("identifier", "did", "did:exp:123"),
@@ -189,6 +189,52 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                     }
                 }
             }
+
+            route("/public") {
+                notarizedPost(
+                    PostInfo<StoreVerifiableCredentialParameter, VerKeyDto, SuccessResponse>(
+                        summary = "Register on Public Chain",
+                        description = "Register wallet DID on the public chain, endpoint only available for the base wallet",
+                        parameterExamples = setOf(
+                            ParameterExample("identifier", "did", "did:exp:123"),
+                            ParameterExample("identifier", "bpn", "BPN123"),
+                        ),
+                        requestInfo = RequestInfo(
+                            description = "VerKey",
+                            examples = verKeyExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Created,
+                            description = "Success message",
+                            examples = mapOf(
+                                "demo" to SuccessResponse(
+                                    "Wallet has been successfully registered on chain"
+                                )
+                            )
+                        ),
+                        canThrow = setOf(semanticallyInvalidInputException, notFoundException),
+                        tags = setOf("Wallets")
+                    )
+                ) {
+                    try {
+                        val identifier = call.parameters["identifier"]
+                            ?: throw BadRequestException("Missing or malformed identifier")
+                        val walletDto: WalletDto = walletService.getWallet(identifier)
+                        if (walletService.isCatenaXWallet(walletDto.bpn) == false) {
+                            throw NotFoundException("Registering endpoint is not available for any other wallet but the base wallet")
+                        }
+                        var verKeyDto = call.receive<VerKeyDto>()
+                        if (walletService.registerBaseWallet(verKeyDto.verKey)) {
+                            call.respond(HttpStatusCode.Created, SuccessResponse("Wallet has been successfully registered on chain"))
+                        } else {
+                            throw Exception("Could not register base wallet on public chain, manual intervention needed!")
+                        }
+                    } catch (e: Exception) {
+                        throw e
+                    }
+                }
+            }
+
         }
     }
 }
@@ -215,6 +261,14 @@ data class WalletDtoParameter(
         name = "withCredentials"
     )
     val withCredentials: Boolean
+)
+
+@Serializable
+data class VerKeyDto(
+    val verKey: String
+)
+val verKeyExample = mapOf(
+    "demo" to VerKeyDto("VERIFICATION_KEY_AFTER_CREATION")
 )
 
 val issuedVerifiableCredentialRequestDtoExample = mapOf(

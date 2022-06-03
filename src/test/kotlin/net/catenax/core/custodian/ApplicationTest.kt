@@ -300,6 +300,76 @@ class ApplicationTest {
     }
 
     @Test
+    fun testRegisterBaseWallet() {
+        val token = makeToken()
+
+        withTestApplication({
+            setupEnvironment(environment)
+            configurePersistence()
+            configureOpenAPI()
+            configureTestSecurity()
+            configureRouting(walletService)
+            appRoutes(walletService, bpdService)
+            configureSerialization()
+        }) {
+
+            var verKey = ""
+
+            // programmatically add a wallet
+            transaction {
+                runBlocking {
+                    val createdWallet = walletService.createWallet(WalletCreateDto("bpn1", "base"))
+                    verKey = createdWallet.verKey!!
+                    walletService.createWallet(WalletCreateDto("non_base_bpn", "non_base"))
+                }
+            }
+
+            var exception = assertFailsWith<NotFoundException> {
+                handleRequest(HttpMethod.Post, "/api/wallets/non_existing_bpn/public") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $token")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody("{\"verKey\":\"" + verKey + "\"}")
+                }.apply {
+                    assertEquals(HttpStatusCode.NotFound, response.status())
+                }
+            }
+            assertTrue(exception.message!!.contains("non_existing_bpn not found"))
+
+            exception = assertFailsWith<NotFoundException> {
+               handleRequest(HttpMethod.Post, "/api/wallets/non_base_bpn/public") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $token")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody("{\"verKey\":\"" + verKey + "\"}")
+                }.apply {
+                    assertEquals(HttpStatusCode.NotFound, response.status())
+                }
+            }
+            assertTrue(exception.message!!.contains("wallet but the base wallet"))
+
+            handleRequest(HttpMethod.Post, "/api/wallets/bpn1/public") {
+                addHeader(HttpHeaders.Authorization, "Bearer $token")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody("{\"verKey\":\"" + verKey + "\"}")
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // clean up created wallets
+            transaction {
+                runBlocking {
+                    walletService.deleteWallet("bpn1") // Catena-X wallet
+                    walletService.deleteWallet("non_base_bpn")
+                    assertEquals(0, walletService.getAll().size)
+                }
+            }
+
+        }
+    }
+
+    @Test
     fun testDataUpdate() {
         val token = makeToken()
 

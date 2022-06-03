@@ -63,6 +63,23 @@ class AcaPyWalletServiceImpl(
         }
     }
 
+    override suspend fun registerBaseWallet(verKey: String): Boolean {
+        val catenaXWallet = getWalletExtendedInformation(catenaXMainBpn)
+
+        // Register DID on ledger
+        val didRegistrationResult = acaPyService.registerDidOnLedger(
+            DidRegistration(
+                alias = catenaXWallet.name,
+                did = catenaXWallet.did,
+                verkey = verKey,
+                role = "ENDORSER"
+            ),
+            catenaXWallet.walletToken
+        )
+
+        return didRegistrationResult.success
+    }
+
     override suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto {
         log.debug("Add a new Wallet with bpn ${walletCreateDto.bpn}")
         // Check if wallet already exists
