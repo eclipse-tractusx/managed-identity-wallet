@@ -1,44 +1,51 @@
 package net.catenax.core.managedidentitywallets.routes
 
+import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
+
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+
 import net.catenax.core.managedidentitywallets.models.semanticallyInvalidInputException
 import net.catenax.core.managedidentitywallets.models.ssi.LdProofDto
 import net.catenax.core.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import net.catenax.core.managedidentitywallets.models.ssi.VerifiablePresentationDto
 import net.catenax.core.managedidentitywallets.models.ssi.VerifiablePresentationRequestDto
 import net.catenax.core.managedidentitywallets.models.ssi.JsonLdContexts
+import net.catenax.core.managedidentitywallets.plugins.AuthConstants
 import net.catenax.core.managedidentitywallets.services.WalletService
 
 fun Route.vpRoutes(walletService: WalletService) {
 
     route("/presentations") {
-        notarizedPost(
-            PostInfo<Unit, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
-                summary = "Create Verifiable Presentation ",
-                description = "Create a verifiable presentation from a list of verifiable credentials, signed by the holder",
-                requestInfo = RequestInfo(
-                    description = "The verifiable presentation input data",
-                    examples = verifiablePresentationRequestDtoExample
-                ),
-                responseInfo = ResponseInfo(
-                    status = HttpStatusCode.Created,
-                    description = "The created verifiable presentation",
-                    examples = verifiablePresentationResponseDtoExample
-                ),
-                canThrow = setOf(semanticallyInvalidInputException),
-                tags = setOf("VerifiablePresentations")
-            )
-        ) {
-            val verifiableCredentialDto = call.receive<VerifiablePresentationRequestDto>()
-            call.respond(HttpStatusCode.Created, walletService.issuePresentation(verifiableCredentialDto))
+        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+            notarizedPost(
+                PostInfo<Unit, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
+                    summary = "Create Verifiable Presentation ",
+                    description = "Create a verifiable presentation from a list of verifiable credentials, signed by the holder",
+                    requestInfo = RequestInfo(
+                        description = "The verifiable presentation input data",
+                        examples = verifiablePresentationRequestDtoExample
+                    ),
+                    responseInfo = ResponseInfo(
+                        status = HttpStatusCode.Created,
+                        description = "The created verifiable presentation",
+                        examples = verifiablePresentationResponseDtoExample
+                    ),
+                    canThrow = setOf(semanticallyInvalidInputException),
+                    tags = setOf("VerifiablePresentations"),
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                )
+            ) {
+                val verifiableCredentialDto = call.receive<VerifiablePresentationRequestDto>()
+                call.respond(HttpStatusCode.Created, walletService.issuePresentation(verifiableCredentialDto))
+            }
         }
     }
 }

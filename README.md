@@ -144,15 +144,16 @@ below. Here a few hints on how to set it up:
 3. `CX_AUTH_JWKS_URL`: enter the keycloak certs url, e.g. `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs`
 4. `CX_AUTH_ISSUER_URL`: enter the token issue, e.g. `http://localhost:8081/auth/realms/catenax`
 5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
-6. `CX_AUTH_ROLE`: specify the expected role within the token, e.g. `access`
-7. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `managed-identity-wallets`
-8. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
-9. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
-10. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
-11. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.bosch-digital.de/register`
-12. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
-13. `ACAPY_ADMIN_API_KEY`: specify the admin api key of Aca-Py enpoints, e.g. `Hj23iQUsstG!dde`
-14. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
+6. `CX_AUTH_ROLE_MAPPINGS`: specify the expected role mappings within the token, e.g. `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets`
+7. `CX_AUTH_RESOURCE_ID`: specify the resource id e.g. `ManagedIdentityWallets`
+8. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `managed-identity-wallets`
+9. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
+10. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
+11. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
+12. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.bosch-digital.de/register`
+13. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
+14. `ACAPY_ADMIN_API_KEY`: specify the admin api key of Aca-Py enpoints, e.g. `Hj23iQUsstG!dde`
+15. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
 
 ## Local development environment <a id= "localDevelopmentEnvironment"></a>
 

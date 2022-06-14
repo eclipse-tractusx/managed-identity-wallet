@@ -46,7 +46,7 @@ class AcaPyMockedService: IAcaPyService {
         if (didIdentifier.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
             throw Exception("Cannot process did containing network identifier!")
         }
-        if (didIdentifier.indexOf(":") === 0) {
+        if (didIdentifier.indexOf(":") == 0) {
             throw Exception("Cannot process did starting with a colon!")
         }
     }
@@ -76,7 +76,7 @@ class AcaPyMockedService: IAcaPyService {
         if (didRegistration.did.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
             throw Exception("Cannot process did containing network identifier!")
         }
-        if (didRegistration.did.indexOf(":") === 0) {
+        if (didRegistration.did.indexOf(":") == 0) {
             throw Exception("Cannot process did starting with a colon!")
         }
         return DidRegistrationResult(success = true)

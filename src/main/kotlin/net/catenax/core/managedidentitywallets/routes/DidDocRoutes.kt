@@ -1,5 +1,6 @@
 package net.catenax.core.managedidentitywallets.routes
 
+import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.Notarized.notarizedDelete
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
@@ -11,16 +12,19 @@ import io.bkbn.kompendium.core.metadata.method.DeleteInfo
 import io.bkbn.kompendium.core.metadata.method.GetInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
 import io.bkbn.kompendium.core.metadata.method.PutInfo
+
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+
 import net.catenax.core.managedidentitywallets.models.BadRequestException
 import net.catenax.core.managedidentitywallets.models.notFoundException
 import net.catenax.core.managedidentitywallets.models.semanticallyInvalidInputException
 import net.catenax.core.managedidentitywallets.models.ssi.*
 import net.catenax.core.managedidentitywallets.models.syntacticallyInvalidInputException
+import net.catenax.core.managedidentitywallets.plugins.AuthConstants
 import net.catenax.core.managedidentitywallets.services.WalletService
 
 fun Route.didDocRoutes(walletService: WalletService) {
@@ -28,6 +32,8 @@ fun Route.didDocRoutes(walletService: WalletService) {
     route("/didDocuments") {
 
         route("/{identifier}") {
+
+            // unprotected, as it is public information
             notarizedGet(
                 GetInfo<DidDocumentParameters, DidDocumentDto>(
                     summary = "Resolve DID Document",
@@ -42,7 +48,8 @@ fun Route.didDocRoutes(walletService: WalletService) {
                         examples = didDocumentDtoExample
                     ),
                     canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
-                    tags = setOf("DIDDocument")
+                    tags = setOf("DIDDocument"),
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
                 )
             ) {
                 val identifier =
@@ -51,105 +58,112 @@ fun Route.didDocRoutes(walletService: WalletService) {
             }
 
             route("/services") {
-                notarizedPost(
-                    PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
-                        summary = "Add New Service Endpoint",
-                        description = "Add a new service endpoint to the DID Document",
-                        parameterExamples = setOf(
-                            ParameterExample("identifier", "did", "did:exp:123"),
-                            ParameterExample("identifier", "bpn", "BPN123")
-                        ),
-                        requestInfo = RequestInfo(
-                            description = "The Service endpoint",
-                            examples = didServiceDtoExample
-                        ),
-                        responseInfo = ResponseInfo(
-                            status = HttpStatusCode.OK,
-                            description = "The resolved DID Document after adding the new Service",
-                            examples = didDocumentDtoExample
-                        ),
-                        canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
-                        tags = setOf("DIDDocument")
-                    )
-                ) {
-                    val serviceDto = call.receive<DidServiceDto>()
-                    val identifier =
-                        call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
-                    return@notarizedPost call.respond(
-                        HttpStatusCode.Created,
-                        walletService.addService(identifier, serviceDto)
-                    )
+                notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+                    notarizedPost(
+                        PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
+                            summary = "Add New Service Endpoint",
+                            description = "Add a new service endpoint to the DID Document",
+                            parameterExamples = setOf(
+                                ParameterExample("identifier", "did", "did:exp:123"),
+                                ParameterExample("identifier", "bpn", "BPN123")
+                            ),
+                            requestInfo = RequestInfo(
+                                description = "The Service endpoint",
+                                examples = didServiceDtoExample
+                            ),
+                            responseInfo = ResponseInfo(
+                                status = HttpStatusCode.OK,
+                                description = "The resolved DID Document after adding the new Service",
+                                examples = didDocumentDtoExample
+                            ),
+                            canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
+                            tags = setOf("DIDDocument"),
+                            securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                        )
+                    ) {
+                        val serviceDto = call.receive<DidServiceDto>()
+                        val identifier =
+                            call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                        return@notarizedPost call.respond(
+                            HttpStatusCode.Created,
+                            walletService.addService(identifier, serviceDto)
+                        )
+                    }
                 }
 
                 route("/{id}") {
-                    notarizedPut(
-                        PutInfo<DidDocumentServiceParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
-                            summary = "Update an existing Service Endpoint",
-                            description = "Update the service endpoint in the DID Document based on its id",
-                            parameterExamples = setOf(
-                                ParameterExample("identifier", "did", "did:exp:123"),
-                                ParameterExample("identifier", "bpn", "BPN123"),
-                                ParameterExample("id", "id", "did:example:123#edv")
-                            ),
-                            requestInfo = RequestInfo(
-                                description = "The updated service endpoint data",
-                                examples = didServiceUpdateRequestDtoExample
-                            ),
-                            responseInfo = ResponseInfo(
-                                status = HttpStatusCode.OK,
-                                description = "The resolved DID Document after the updating the Service",
-                                examples = didDocumentDtoExample
-                            ),
-                            canThrow = setOf(
-                                notFoundException,
-                                semanticallyInvalidInputException,
-                                syntacticallyInvalidInputException
-                            ),
-                            tags = setOf("DIDDocument")
-                        )
-                    ) {
-                        val identifier = call.parameters["identifier"]
-                            ?: throw BadRequestException("Missing or malformed identifier")
-                        val serviceId =
-                            call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
-                        val serviceDto = call.receive<DidServiceUpdateRequestDto>()
-                        return@notarizedPut call.respond(
-                            HttpStatusCode.OK,
-                            walletService.updateService(
-                                identifier = identifier,
-                                id = serviceId,
-                                serviceUpdateRequestDto = serviceDto
+                    notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+                        notarizedPut(
+                            PutInfo<DidDocumentServiceParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
+                                summary = "Update an existing Service Endpoint",
+                                description = "Update the service endpoint in the DID Document based on its id",
+                                parameterExamples = setOf(
+                                    ParameterExample("identifier", "did", "did:exp:123"),
+                                    ParameterExample("identifier", "bpn", "BPN123"),
+                                    ParameterExample("id", "id", "did:example:123#edv")
+                                ),
+                                requestInfo = RequestInfo(
+                                    description = "The updated service endpoint data",
+                                    examples = didServiceUpdateRequestDtoExample
+                                ),
+                                responseInfo = ResponseInfo(
+                                    status = HttpStatusCode.OK,
+                                    description = "The resolved DID Document after the updating the Service",
+                                    examples = didDocumentDtoExample
+                                ),
+                                canThrow = setOf(
+                                    notFoundException,
+                                    semanticallyInvalidInputException,
+                                    syntacticallyInvalidInputException
+                                ),
+                                tags = setOf("DIDDocument"),
+                                securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
                             )
-                        )
-                    }
+                        ) {
+                            val identifier = call.parameters["identifier"]
+                                ?: throw BadRequestException("Missing or malformed identifier")
+                            val serviceId =
+                                call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
+                            val serviceDto = call.receive<DidServiceUpdateRequestDto>()
+                            return@notarizedPut call.respond(
+                                HttpStatusCode.OK,
+                                walletService.updateService(
+                                    identifier = identifier,
+                                    id = serviceId,
+                                    serviceUpdateRequestDto = serviceDto
+                                )
+                            )
+                        }
 
-                    notarizedDelete(
-                        DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
-                            summary = "Remove Service Endpoint",
-                            description = "Remove service endpoint in DID Document based on its id",
-                            parameterExamples = setOf(
-                                ParameterExample("identifier", "did", "did:exp:123"),
-                                ParameterExample("identifier", "bpn", "BPN123"),
-                                ParameterExample("id", "id", "did:example:123#edv")
-                            ),
-                            responseInfo = ResponseInfo(
-                                status = HttpStatusCode.OK,
-                                description = "The resolved DID Document after removing the service",
-                                examples = didDocumentDtoWithoutServiceExample
-                            ),
-                            canThrow = setOf(
-                                notFoundException,
-                                semanticallyInvalidInputException,
-                                syntacticallyInvalidInputException
-                            ),
-                            tags = setOf("DIDDocument")
-                        )
-                    ) {
-                        val identifier = call.parameters["identifier"]
-                            ?: throw BadRequestException("Missing or malformed identifier")
-                        val serviceId =
-                            call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
-                        call.respond(HttpStatusCode.OK, walletService.deleteService(identifier, serviceId))
+                        notarizedDelete(
+                            DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
+                                summary = "Remove Service Endpoint",
+                                description = "Remove service endpoint in DID Document based on its id",
+                                parameterExamples = setOf(
+                                    ParameterExample("identifier", "did", "did:exp:123"),
+                                    ParameterExample("identifier", "bpn", "BPN123"),
+                                    ParameterExample("id", "id", "did:example:123#edv")
+                                ),
+                                responseInfo = ResponseInfo(
+                                    status = HttpStatusCode.OK,
+                                    description = "The resolved DID Document after removing the service",
+                                    examples = didDocumentDtoWithoutServiceExample
+                                ),
+                                canThrow = setOf(
+                                    notFoundException,
+                                    semanticallyInvalidInputException,
+                                    syntacticallyInvalidInputException
+                                ),
+                                tags = setOf("DIDDocument"),
+                                securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                            )
+                        ) {
+                            val identifier = call.parameters["identifier"]
+                                ?: throw BadRequestException("Missing or malformed identifier")
+                            val serviceId =
+                                call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
+                            call.respond(HttpStatusCode.OK, walletService.deleteService(identifier, serviceId))
+                        }
                     }
                 }
             }

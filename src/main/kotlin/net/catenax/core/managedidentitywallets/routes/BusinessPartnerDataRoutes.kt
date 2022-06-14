@@ -1,5 +1,6 @@
 package net.catenax.core.managedidentitywallets.routes
 
+import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
@@ -12,31 +13,37 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 import net.catenax.core.managedidentitywallets.models.*
+import net.catenax.core.managedidentitywallets.plugins.AuthConstants
 import net.catenax.core.managedidentitywallets.services.BusinessPartnerDataService
 
 fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerDataService) {
 
     route("/businessPartnerData") {
-        notarizedPost(
-            PostInfo<Unit, BusinessPartnerDataUpdateRequestDto, String>(
-                summary = "Update business partner data in the corresponding wallet",
-                description = "Create or update data associated with a given bpn in the corresponding wallet by creating or updating verifiable credentials",
-                requestInfo = RequestInfo(
-                    description = "The input data to use for the update",
-                    examples = dataUpdateRequestDtoExample
-                ),
-                responseInfo = ResponseInfo(
-                    status = HttpStatusCode.Accepted,
-                    description = "Empty response body"
-                ),
-                canThrow = setOf(semanticallyInvalidInputException),
-                tags = setOf("BusinessPartnerData")
-            )
-        ) {
-            val dataUpdateRequestDto = call.receive<BusinessPartnerDataUpdateRequestDto>()
-            businessPartnerDataService.issueAndUpdateCatenaXCredentials(dataUpdateRequestDto)
-            call.respond(HttpStatusCode.Accepted)
+
+        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+            notarizedPost(
+                PostInfo<Unit, BusinessPartnerDataUpdateRequestDto, String>(
+                    summary = "Update business partner data in the corresponding wallet",
+                    description = "Create or update data associated with a given bpn in the corresponding wallet by creating or updating verifiable credentials",
+                    requestInfo = RequestInfo(
+                        description = "The input data to use for the update",
+                        examples = dataUpdateRequestDtoExample
+                    ),
+                    responseInfo = ResponseInfo(
+                        status = HttpStatusCode.Accepted,
+                        description = "Empty response body"
+                    ),
+                    canThrow = setOf(semanticallyInvalidInputException),
+                    tags = setOf("BusinessPartnerData"),
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                )
+            ) {
+                val dataUpdateRequestDto = call.receive<BusinessPartnerDataUpdateRequestDto>()
+                businessPartnerDataService.issueAndUpdateCatenaXCredentials(dataUpdateRequestDto)
+                call.respond(HttpStatusCode.Accepted)
+            }
         }
+
     }
 }
 

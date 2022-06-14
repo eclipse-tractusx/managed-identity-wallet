@@ -1,5 +1,6 @@
 package net.catenax.core.managedidentitywallets.routes
 
+import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.ParameterExample
@@ -7,21 +8,25 @@ import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.GetInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
+
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+
 import net.catenax.core.managedidentitywallets.models.semanticallyInvalidInputException
 import net.catenax.core.managedidentitywallets.models.ssi.*
 import net.catenax.core.managedidentitywallets.models.ssi.JsonLdContexts
 import net.catenax.core.managedidentitywallets.models.syntacticallyInvalidInputException
+import net.catenax.core.managedidentitywallets.plugins.AuthConstants
 import net.catenax.core.managedidentitywallets.services.WalletService
 
 fun Route.vcRoutes(walletService: WalletService) {
 
     route("/credentials") {
 
+        notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW) {
             notarizedGet(
                 GetInfo<VerifiableCredentialParameters, List<VerifiableCredentialDto>>(
                     summary = "Query Verifiable Credentials",
@@ -38,7 +43,8 @@ fun Route.vcRoutes(walletService: WalletService) {
                         status = HttpStatusCode.OK,
                         description = "The list of verifiable credentials matching the query, empty if no match found"
                     ),
-                    tags = setOf("VerifiableCredentials")
+                    tags = setOf("VerifiableCredentials"),
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
                 )
             ) {
                 val id = call.request.queryParameters["id"]
@@ -50,7 +56,9 @@ fun Route.vcRoutes(walletService: WalletService) {
                     walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
                 )
             }
+        }
 
+        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
             notarizedPost(
                 PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
                     summary = "Issue Verifiable Credential ",
@@ -65,34 +73,39 @@ fun Route.vcRoutes(walletService: WalletService) {
                         examples = signedVerifiableCredentialDtoExample
                     ),
                     canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
-                    tags = setOf("VerifiableCredentials")
+                    tags = setOf("VerifiableCredentials"),
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
                 call.respond(HttpStatusCode.Created, walletService.issueCredential(verifiableCredentialDto))
             }
+        }
 
         route("/issuer") {
-            notarizedPost(
-                PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
-                    summary = "Issue a Verifiable Credential with Catena-X platform issuer",
-                    description = "Issue a verifiable credential by Catena-X wallet",
-                    requestInfo = RequestInfo(
-                        description = "The verifiable credential input",
-                        examples = verifiableCredentialRequestWithoutIssuerDtoExample
-                    ),
-                    responseInfo = ResponseInfo(
-                        status = HttpStatusCode.Created,
-                        description = "The created Verifiable Credential",
-                        examples = signedVerifiableCredentialDtoExample
-                    ),
-                    canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
-                    tags = setOf("VerifiableCredentials")
-                )
-            ) {
-                val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
-                val verifiableCredentialDto =  walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
-                call.respond(HttpStatusCode.Created, verifiableCredentialDto)
+            notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+                notarizedPost(
+                    PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
+                        summary = "Issue a Verifiable Credential with Catena-X platform issuer",
+                        description = "Issue a verifiable credential by Catena-X wallet",
+                        requestInfo = RequestInfo(
+                            description = "The verifiable credential input",
+                            examples = verifiableCredentialRequestWithoutIssuerDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Created,
+                            description = "The created Verifiable Credential",
+                            examples = signedVerifiableCredentialDtoExample
+                        ),
+                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
+                        tags = setOf("VerifiableCredentials"),
+                        securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                    )
+                ) {
+                    val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
+                    val verifiableCredentialDto =  walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
+                    call.respond(HttpStatusCode.Created, verifiableCredentialDto)
+                }
             }
         }
     }

@@ -29,7 +29,7 @@ class WalletRepository {
     }
 
     fun addWallet(wallet: WalletExtendedData): Wallet {
-        // TODO add VCs: request cx data pool information
+        // no VCs are added in this step, they will come in through the business partner data service
         return Wallet.new {
             bpn = wallet.bpn
             name = wallet.name
