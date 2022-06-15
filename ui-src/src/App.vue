@@ -2,7 +2,7 @@
   <div id="app">
     <div id="nav">
       <img src="@/assets/logo.svg" style="height: 50px; float: left; margin-right: 20px; "/>
-      <router-link to="/">Custodian Dashboard</router-link>
+      <router-link to="/">Managed Identity Wallets Dashboard</router-link>
       <!-- router-link to="/about">About</router-link-->
       <div class="clearfix"></div>
     </div>

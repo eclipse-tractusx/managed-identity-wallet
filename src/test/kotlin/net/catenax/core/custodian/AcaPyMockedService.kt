@@ -1,10 +1,10 @@
-package net.catenax.core.custodian
+package net.catenax.core.managedidentitywallets
 
-import net.catenax.core.custodian.models.*
-import net.catenax.core.custodian.models.ssi.DidDocumentDto
-import net.catenax.core.custodian.models.ssi.acapy.*
+import net.catenax.core.managedidentitywallets.models.*
+import net.catenax.core.managedidentitywallets.models.ssi.DidDocumentDto
+import net.catenax.core.managedidentitywallets.models.ssi.acapy.*
 
-import net.catenax.core.custodian.services.IAcaPyService
+import net.catenax.core.managedidentitywallets.services.IAcaPyService
 import java.security.SecureRandom
 
 class AcaPyMockedService: IAcaPyService {
@@ -16,7 +16,7 @@ class AcaPyMockedService: IAcaPyService {
         return WalletAndAcaPyConfig(
             apiAdminUrl = "",
             networkIdentifier = "local:test",
-            catenaXBpn = "bpn1",
+            baseWalletBpn = "bpn1",
             adminApiKey = "Hj23iQUsstG!dde"
         )
     }
@@ -42,7 +42,14 @@ class AcaPyMockedService: IAcaPyService {
         )
     }
 
-    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {}
+    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {
+        if (didIdentifier.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
+            throw Exception("Cannot process did containing network identifier!")
+        }
+        if (didIdentifier.indexOf(":") == 0) {
+            throw Exception("Cannot process did starting with a colon!")
+        }
+    }
 
     override suspend fun deleteSubWallet(walletData: WalletExtendedData) {}
 
@@ -65,7 +72,15 @@ class AcaPyMockedService: IAcaPyService {
     override suspend fun registerDidOnLedger(
         didRegistration: DidRegistration,
         endorserWalletToken: String
-    ): DidRegistrationResult = DidRegistrationResult(success = true)
+    ): DidRegistrationResult {
+        if (didRegistration.did.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
+            throw Exception("Cannot process did containing network identifier!")
+        }
+        if (didRegistration.did.indexOf(":") == 0) {
+            throw Exception("Cannot process did starting with a colon!")
+        }
+        return DidRegistrationResult(success = true)
+    }
 
     override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String = ""
 

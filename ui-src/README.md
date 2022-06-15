@@ -1,4 +1,4 @@
-# custodian-admin
+# managed-identity-wallets-admin
 
 ## Project setup
 ```

@@ -13,7 +13,7 @@ plugins {
 
 group = "net.catenax.core"
 application {
-    mainClass.set("net.catenax.core.custodian.ApplicationKt")
+    mainClass.set("net.catenax.core.managedidentitywallets.ApplicationKt")
 }
 
 repositories {
@@ -25,7 +25,6 @@ repositories {
 
 dependencies {
     implementation("io.ktor:ktor-server-core:$ktor_version")
-    implementation("io.ktor:ktor-html-builder:$ktor_version")
 
     // for 1.6.7
     implementation("io.ktor:ktor-client-core:$ktor_version")
