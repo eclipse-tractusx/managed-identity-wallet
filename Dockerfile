@@ -1,4 +1,4 @@
-FROM openjdk:17-slim
+FROM amazoncorretto:17-alpine
 EXPOSE 8080:8080
 # run as non-root user
 RUN groupadd -g 1001 -r user && useradd -u 1001 -r -s /bin/false -g user user
