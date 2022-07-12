@@ -1,7 +1,7 @@
 FROM amazoncorretto:17-alpine
 EXPOSE 8080:8080
 # run as non-root user
-RUN groupadd -g 1001 -r user && useradd -u 1001 -r -s /bin/false -g user user
+RUN addgroup -g 1001 -S user && adduser -u 1001 -S -s /bin/false -G user user
 USER user
 COPY ./build/install/net.catenax.core.managedidentitywallets/ /app/
 COPY ./static /app/static

@@ -69,11 +69,8 @@ build system.
 9. Register public DID
     1. Register your DID from your Wallet at https://indy-test.bosch-digital.de/ with "Register from DID"
        1. ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
-    2. Post your created wallets with your DID to `http://localhost:11000/wallet/did/public?did=` + (your DID without the prefix e.g. `AS3fJQvDio8ERWzdSG1Zzi`)
-       1. ![AcaPy DID registration](docs/images/AcaPyDIDPublicAssignment.png "AcaPy DID Public Assignment")
-    3. Add as authorization a Bearer Token (from the `miwdev` database take the content of `wallet_token` from the `wallets` table)
-       1. ![WalletTokenExtraction](docs/images/WalletTokenExtraction.png "Wallet_Token extraction")
-    4. Add as `X-API-Key` header your `ACAPY_ADMIN_API_KEY` env variable value
+    2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
+       `{ "verKey": "verification key from creation" }`
 11. Now you have created your own Wallet and published your DID to the Ledger, you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
 
 ## Building with gradle <a id= "buildingWithGradle"></a>
@@ -144,7 +141,7 @@ below. Here a few hints on how to set it up:
 3. `CX_AUTH_JWKS_URL`: enter the keycloak certs url, e.g. `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs`
 4. `CX_AUTH_ISSUER_URL`: enter the token issue, e.g. `http://localhost:8081/auth/realms/catenax`
 5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
-6. `CX_AUTH_ROLE_MAPPINGS`: specify the expected role mappings within the token, e.g. `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets`
+6. `CX_AUTH_ROLE_MAPPINGS`: specify the expected role mappings within the token, e.g. `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallets:update_wallet`
 7. `CX_AUTH_RESOURCE_ID`: specify the resource id e.g. `ManagedIdentityWallets`
 8. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `managed-identity-wallets`
 9. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
@@ -280,11 +277,8 @@ To run and develop using IntelliJ IDE:
 
 * Create the Catena-X wallet using the value stored in `CX_BPN` as BPN
 * Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](https://indy-test.bosch-digital.de/) as Endorser
-* Assign the DID to public manually by sending a Post request `http://localhost:11000/wallet/did/public?did=<did-identifier-place-holder>` using the wallet token and the admin api key in the header
-```
-    Authorization: "Bearer <WalletToken-placeholder>" 
-    X-API-Key: "<AdminApiKey-Placeholder>"
-```
+* Assign the DID to public manually by sending a POST request `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key 
+  `{ "verKey": "verification key from creation" }`
 
 ## Testing GitHub actions locally <a id= "testingGitHubActionsLocally"></a>
 
