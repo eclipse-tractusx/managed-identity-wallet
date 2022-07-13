@@ -10,6 +10,7 @@ import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
 import net.catenax.core.managedidentitywallets.models.*
 import net.catenax.core.managedidentitywallets.models.ssi.*
+import net.catenax.core.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import net.catenax.core.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import net.catenax.core.managedidentitywallets.persistence.repositories.CredentialRepository
 import net.catenax.core.managedidentitywallets.persistence.repositories.WalletRepository
@@ -54,6 +55,9 @@ interface WalletService {
     suspend fun deleteService(identifier: String, id: String): DidDocumentDto
 
     fun isCatenaXWallet(bpn: String): Boolean
+
+    suspend fun verifyVerifiablePresentation(vpDto: VerifiablePresentationDto,
+                                             withDateValidation: Boolean = false): VerifyResponse
 
     companion object {
         fun createWithAcaPyService(

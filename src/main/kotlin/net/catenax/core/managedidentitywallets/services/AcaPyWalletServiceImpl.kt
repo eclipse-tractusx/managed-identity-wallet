@@ -64,9 +64,9 @@ class AcaPyWalletServiceImpl(
     }
 
     override suspend fun registerBaseWallet(verKey: String): Boolean {
-        log.debug("Register base wallet with bpn ${baseWalletBpn} and key ${verKey}")
+        log.debug("Register base wallet with bpn $baseWalletBpn and key $verKey")
         val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
-        val shortDid = catenaXWallet.did.substring(("did:indy:"+networkIdentifier+":").length)
+        val shortDid = catenaXWallet.did.substring(("did:indy:$networkIdentifier:").length)
 
         // Register DID with public DID on ledger
         acaPyService.assignDidToPublic(
@@ -239,9 +239,18 @@ class AcaPyWalletServiceImpl(
 
     override suspend fun resolveDocument(identifier: String): DidDocumentDto {
         log.debug("Resolve DID Document $identifier")
-        val walletData = getWalletExtendedInformation(identifier)
-        val modifiedDid = replaceNetworkIdentifierWithSov(walletData.did)
-        val didDocResult = acaPyService.resolveDidDoc(modifiedDid, walletData.walletToken)
+        val token: String
+        val modifiedDid: String
+        if (isDID(identifier)) {
+            val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
+            token = catenaXWallet.walletToken
+            modifiedDid = replaceNetworkIdentifierWithSov(identifier)
+        } else {
+            val walletData = getWalletExtendedInformation(identifier)
+            token = walletData.walletToken
+            modifiedDid = replaceNetworkIdentifierWithSov(walletData.did)
+        }
+        val didDocResult = acaPyService.resolveDidDoc(modifiedDid, token)
         val resolutionResultAsJson = Json.encodeToString(ResolutionResult.serializer(), didDocResult)
         val res: ResolutionResult = Json.decodeFromString(replaceSovWithNetworkIdentifier(resolutionResultAsJson))
         return res.didDoc
@@ -383,6 +392,100 @@ class AcaPyWalletServiceImpl(
 
     override fun isCatenaXWallet(bpn: String): Boolean = bpn == baseWalletBpn
 
+    override suspend fun verifyVerifiablePresentation(vpDto: VerifiablePresentationDto,
+                                                      withDateValidation: Boolean): VerifyResponse {
+        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
+        validateVerifiablePresentation(vpDto, catenaXWallet.walletToken)
+
+        val listOfVerifiableCredentials = vpDto.verifiableCredential
+        if (!listOfVerifiableCredentials.isNullOrEmpty()) {
+            listOfVerifiableCredentials.forEach {
+                validateVerifiableCredential(it, withDateValidation, catenaXWallet.walletToken)
+            }
+        }
+        return VerifyResponse(error = null, valid = true, vp = vpDto)
+    }
+
+    private suspend fun validateVerifiableCredential(
+        vc: VerifiableCredentialDto,
+        withDateValidation: Boolean,
+        walletToken: String
+    ) {
+        if (withDateValidation) {
+            val currentDatetime: Date = Date.from(Instant.now())
+            if (currentDatetime.before(JsonLDUtils.stringToDate(vc.issuanceDate))) {
+                throw UnprocessableEntityException("VC with id ${vc.id} is not valid due its issuanceDate")
+            }
+            if (!vc.expirationDate.isNullOrEmpty()
+                && currentDatetime.after(JsonLDUtils.stringToDate(vc.expirationDate))
+            ) {
+                throw UnprocessableEntityException("VC with id ${vc.id} is not valid due its expirationDate")
+            }
+        }
+        if (vc.proof == null) {
+            throw UnprocessableEntityException("Cannot verify VC due to missing proof")
+        }
+        val verifyReq = VerifyRequest(
+            signedDoc = vc,
+            verkey = getVerKeyOfVerificationMethodId(vc.issuer, vc.proof.verificationMethod)
+        )
+        var isValid = true
+        var message = ""
+        try {
+            val response = acaPyService.verifyJsonLd(verifyReq, walletToken)
+            if (!response.valid) {
+                isValid = false
+                message = if (response.error.isNullOrBlank()) message else " Error message ${response.error}"
+            }
+        } catch (e: Exception) {
+            throw UnprocessableEntityException("AcaPy VC ${vc.id} validation failed: ${e.message}")
+        }
+        if (!isValid) {
+            throw UnprocessableEntityException("VC with id ${vc.id} is not valid.$message")
+        }
+    }
+
+    private suspend fun validateVerifiablePresentation(
+        vpDto: VerifiablePresentationDto,
+        walletToken: String
+    ) {
+        if (vpDto.holder.isNullOrEmpty()) {
+            throw UnprocessableEntityException("Cannot verify VP due to missing holder DID")
+        }
+        if (vpDto.proof == null) {
+            throw UnprocessableEntityException("Cannot verify VP due to missing proof")
+        }
+        val verifyVPReq = VerifyRequest(
+            signedDoc = vpDto,
+            verkey = getVerKeyOfVerificationMethodId(vpDto.holder, vpDto.proof.verificationMethod)
+        )
+        var isValid = true
+        var message = ""
+        try {
+            val response = acaPyService.verifyJsonLd(verifyVPReq, walletToken)
+            if (!response.valid) {
+                isValid = false
+                message = if (response.error.isNullOrBlank()) message else " Error message ${response.error}"
+            }
+        } catch (e: Exception) {
+            throw UnprocessableEntityException("AcaPy VP validation failed ${e.message}")
+        }
+        if (!isValid) {
+            throw UnprocessableEntityException("VP is not valid.$message")
+        }
+    }
+
+    private suspend fun getVerKeyOfVerificationMethodId(did: String, verificationMethodId: String): String {
+        val didDocumentDto = resolveDocument(did)
+        if (didDocumentDto.verificationMethods.isNullOrEmpty()) {
+            throw BadRequestException("Error: no verification methods")
+        }
+        val verificationMethod = didDocumentDto.verificationMethods.find {
+                method -> method.id == verificationMethodId
+        } ?: throw BadRequestException("Error: no verification methods equal to $verificationMethodId")
+        return getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
+    }
+
     private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {
         return transaction {
             val extractedWallet = walletRepository.getWallet(identifier)
@@ -420,4 +523,6 @@ class AcaPyWalletServiceImpl(
 
     private fun replaceNetworkIdentifierWithSov(input: String): String =
         input.replace(":indy:$networkIdentifier:", ":sov:")
+
+    private fun isDID(identifier: String) : Boolean = identifier.startsWith("did:")
 }
