@@ -2,6 +2,7 @@ package net.catenax.core.managedidentitywallets
 
 import net.catenax.core.managedidentitywallets.models.*
 import net.catenax.core.managedidentitywallets.models.ssi.DidDocumentDto
+import net.catenax.core.managedidentitywallets.models.ssi.DidVerificationMethodDto
 import net.catenax.core.managedidentitywallets.models.ssi.acapy.*
 
 import net.catenax.core.managedidentitywallets.services.IAcaPyService
@@ -87,8 +88,76 @@ class AcaPyMockedService: IAcaPyService {
     override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse =
         VerifyResponse(error = null, valid = true)
 
-    override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult =
-        ResolutionResult(
+    override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
+        if (did == "did:sov:AA5EEDcn8yTfMobaTcabj9"){
+            return ResolutionResult(
+                didDoc = DidDocumentDto(
+                    id = did,
+                    context = emptyList(),
+                    verificationMethods = listOf(
+                        DidVerificationMethodDto(
+                            id = "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
+                            type = "Ed25519VerificationKey2018",
+                            controller = "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
+                            publicKeyBase58= "5zTG9qLF8DEzR7fmCa9jy6L5Efi5QvpWEvMXszh9jStA"
+                        )
+                    )
+                ),
+                metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
+            )
+        }
+        if (did == "did:sov:LCNSw1JxSTDw7EpR1UMG7D") {
+            return ResolutionResult(
+                didDoc = DidDocumentDto(
+                    id = did,
+                    context = emptyList(),
+                    verificationMethods = listOf(
+                        DidVerificationMethodDto(
+                            id = "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
+                            type = "Ed25519VerificationKey2018",
+                            controller = "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
+                            publicKeyBase58= "BTppBmURHHqg6PKf7ryv8VS7hrKg8nEhwmjuD9ciGssz"
+                        )
+                    )
+                ),
+                metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
+            )
+        }
+        if (did == "did:sov:M6Mis1fZKuhEw71GNY3TAb") {
+            return ResolutionResult(
+                didDoc = DidDocumentDto(
+                    id = did,
+                    context = emptyList(),
+                    verificationMethods = listOf(
+                        DidVerificationMethodDto(
+                            id = "did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb#key-1",
+                            type = "Ed25519VerificationKey2018",
+                            controller = "did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb",
+                            publicKeyBase58= "BxAExpSNdKQ4KA7ocjH7qgphkbdKva8kKy1pDn5ksWxV"
+                        )
+                    )
+                ),
+                metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
+            )
+        }
+        if (did == "did:sov:YHXZLLSLnKxz5D2HQaKXcP"){
+            return ResolutionResult(
+                didDoc = DidDocumentDto(
+                    id = did,
+                    context = emptyList(),
+                    verificationMethods = listOf(
+                        DidVerificationMethodDto(
+                            id = "did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP#key-1",
+                            type = "Ed25519VerificationKey2018",
+                            controller = "did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP",
+                            publicKeyBase58= "J3ymiVmkB6yEWZ9qsp62kHzGmGm2phdvapRA6bkoJmBW"
+                        )
+                    )
+                ),
+                metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
+            )
+        }
+        return ResolutionResult(
             didDoc = DidDocumentDto(id = did, context = emptyList()),
             metadata = ResolutionMetaData(
                 resolverType = "",
@@ -97,6 +166,7 @@ class AcaPyMockedService: IAcaPyService {
                 duration = 0
             )
         )
+    }
 
     override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
 

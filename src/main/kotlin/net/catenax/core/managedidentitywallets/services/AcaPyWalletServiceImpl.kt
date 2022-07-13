@@ -425,7 +425,7 @@ class AcaPyWalletServiceImpl(
             }
         }
         if (vc.proof == null) {
-            throw UnprocessableEntityException("Cannot verify verifiable credential due to missing proof")
+            throw UnprocessableEntityException("Cannot verify verifiable credential ${vc.id} due to missing proof")
         }
         val verifyReq = VerifyRequest(
             signedDoc = vc,
