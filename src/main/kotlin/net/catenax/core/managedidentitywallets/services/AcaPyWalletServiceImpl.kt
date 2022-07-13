@@ -414,16 +414,18 @@ class AcaPyWalletServiceImpl(
         if (withDateValidation) {
             val currentDatetime: Date = Date.from(Instant.now())
             if (currentDatetime.before(JsonLDUtils.stringToDate(vc.issuanceDate))) {
-                throw UnprocessableEntityException("VC with id ${vc.id} is not valid due its issuanceDate")
+                throw UnprocessableEntityException("Verifiable credential with id ${vc.id}" +
+                        " is not valid due its issuanceDate")
             }
             if (!vc.expirationDate.isNullOrEmpty()
                 && currentDatetime.after(JsonLDUtils.stringToDate(vc.expirationDate))
             ) {
-                throw UnprocessableEntityException("VC with id ${vc.id} is not valid due its expirationDate")
+                throw UnprocessableEntityException("Verifiable credential with id ${vc.id}" +
+                        " is not valid due its expirationDate")
             }
         }
         if (vc.proof == null) {
-            throw UnprocessableEntityException("Cannot verify VC due to missing proof")
+            throw UnprocessableEntityException("Cannot verify verifiable credential due to missing proof")
         }
         val verifyReq = VerifyRequest(
             signedDoc = vc,
@@ -438,10 +440,11 @@ class AcaPyWalletServiceImpl(
                 message = if (response.error.isNullOrBlank()) message else " Error message ${response.error}"
             }
         } catch (e: Exception) {
-            throw UnprocessableEntityException("AcaPy VC ${vc.id} validation failed: ${e.message}")
+            throw UnprocessableEntityException("External validation of the verifiable credential ${vc.id}" +
+                    " failed: ${e.message}")
         }
         if (!isValid) {
-            throw UnprocessableEntityException("VC with id ${vc.id} is not valid.$message")
+            throw UnprocessableEntityException("Verifiable credential with id ${vc.id} is not valid.$message")
         }
     }
 
@@ -450,10 +453,10 @@ class AcaPyWalletServiceImpl(
         walletToken: String
     ) {
         if (vpDto.holder.isNullOrEmpty()) {
-            throw UnprocessableEntityException("Cannot verify VP due to missing holder DID")
+            throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing holder DID")
         }
         if (vpDto.proof == null) {
-            throw UnprocessableEntityException("Cannot verify VP due to missing proof")
+            throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing proof")
         }
         val verifyVPReq = VerifyRequest(
             signedDoc = vpDto,
@@ -468,10 +471,11 @@ class AcaPyWalletServiceImpl(
                 message = if (response.error.isNullOrBlank()) message else " Error message ${response.error}"
             }
         } catch (e: Exception) {
-            throw UnprocessableEntityException("AcaPy VP validation failed ${e.message}")
+            throw UnprocessableEntityException("External validation of" +
+                    "the verifiable presentation failed: ${e.message}")
         }
         if (!isValid) {
-            throw UnprocessableEntityException("VP is not valid.$message")
+            throw UnprocessableEntityException("Verifiable presentation is not valid.$message")
         }
     }
 

@@ -52,7 +52,7 @@ fun Route.vpRoutes(walletService: WalletService) {
         }
 
         route("/validation") {
-            notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+            notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW) {
                 notarizedPost(
                     PostInfo<WithDateValidation, VerifiablePresentationDto, VerifyResponse>(
                         summary = "Validate Verifiable Presentation",
@@ -75,7 +75,7 @@ fun Route.vpRoutes(walletService: WalletService) {
                         ),
                         canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                         tags = setOf("VerifiablePresentations"),
-                        securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                        securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
                     )
                 ) {
                     var withDateValidation = false
