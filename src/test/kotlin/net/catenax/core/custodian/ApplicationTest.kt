@@ -964,7 +964,6 @@ class ApplicationTest {
                     setBody(vpWithOutdatedVC)
                 }.apply { }
             }
-            println(dateException.message)
             assertTrue(dateException.message!!.contains(
                 "Verifiable credential http://example.edu/credentials/3735 expired 2021-06-17T18:56:59Z"))
 
