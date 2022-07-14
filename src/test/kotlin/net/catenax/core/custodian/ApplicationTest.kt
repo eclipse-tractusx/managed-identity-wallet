@@ -356,7 +356,7 @@ class ApplicationTest {
 
             // programmatically add base wallet
             runBlocking {
-                walletService.createWallet(WalletCreateDto("$DEFAULT_BPN", "name1"))
+                walletService.createWallet(WalletCreateDto(DEFAULT_BPN, "name1"))
             }
 
             // delete should not work with wrong token
@@ -900,7 +900,7 @@ class ApplicationTest {
         }) {
             // programmatically add base wallet and an additional one
             runBlocking {
-                walletService.createWallet(WalletCreateDto("bpn1", "base"))
+                walletService.createWallet(WalletCreateDto(DEFAULT_BPN, "base"))
             }
 
             var validVP = """
@@ -1309,7 +1309,7 @@ class ApplicationTest {
 
             // clean up created wallets
             runBlocking {
-                walletService.deleteWallet("bpn1") // base wallet
+                walletService.deleteWallet(DEFAULT_BPN) // base wallet
                 assertEquals(0, walletService.getAll().size)
             }
 
