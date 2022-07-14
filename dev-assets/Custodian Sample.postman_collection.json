@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3d3faa0b-38b2-45cd-aba3-cc67ff52727d",
+		"_postman_id": "6966c120-e2de-46df-8bc8-6c7ab9203ee9",
 		"name": "Custodian Sample",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -26,23 +26,13 @@
 					"mode": "urlencoded",
 					"urlencoded": [
 						{
-							"key": "username",
-							"value": "{{username}}",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "{{password}}",
-							"type": "text"
-						},
-						{
 							"key": "client_id",
 							"value": "{{client_id}}",
 							"type": "text"
 						},
 						{
 							"key": "grant_type",
-							"value": "password",
+							"value": "client_credentials",
 							"type": "text"
 						},
 						{
@@ -54,12 +44,6 @@
 							"key": "scope",
 							"value": "openid",
 							"type": "text"
-						},
-						{
-							"key": "audience",
-							"value": "Client005-CustodianTest",
-							"type": "text",
-							"disabled": true
 						}
 					]
 				},
@@ -158,14 +142,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
+					"raw": "{{custodian_url}}/api/wallets/did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"did1_bpn"
+						"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D"
 					]
 				}
 			},
@@ -187,14 +171,14 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/did1_bpn",
+					"raw": "{{custodian_url}}/api/wallets/bpn222",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"did1_bpn"
+						"bpn222"
 					]
 				}
 			},
@@ -228,14 +212,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn111",
+					"raw": "{{custodian_url}}/api/didDocuments/did:indy:local:test:Q4uK6exCsFUQQHf5wchtT4",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"didDocuments",
-						"bpn111"
+						"did:indy:local:test:Q4uK6exCsFUQQHf5wchtT4"
 					]
 				}
 			},
@@ -258,7 +242,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3735\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn777111\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Test\"\n        },\n        \"college\": \"Test\"\n    },\n    \"holderIdentifier\": \"bpn777\"\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3735\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2027-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\"\n    },\n    \"holderIdentifier\": \"bpn333\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -295,82 +279,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Test\"\n        },\n        \"college\": \"Test\"\n    },\n    \"holderIdentifier\": \"bpn777\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{custodian_url}}/api/credentials/issuer",
-					"host": [
-						"{{custodian_url}}"
-					],
-					"path": [
-						"api",
-						"credentials",
-						"issuer"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Issue Presentations",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{access_token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"holderIdentifier\": \"bpn777\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/3732\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5\",\n            \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n            \"expirationDate\": \"2019-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"Sally\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master\",\n                    \"degreeType\": \"Undergraduate\",\n                    \"name\": \"Master of Science and Arts\"\n                },\n                \"college\": \"Stuttgart\",\n                \"id\": \"did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-03-24T09:34:02Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:43Arq24V9uQFPKHuDb7TC5#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..LvCQ4TWhFHOkwMzvrx-TxHovoaCLPlK2taHxQUtUOp0Uc_jYbjL3XgVR2u6jVMvGIdPt4gs-VZb49f7GuiXFDA\"\n            }\n        }\n    ]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{custodian_url}}/api/presentations",
-					"host": [
-						"{{custodian_url}}"
-					],
-					"path": [
-						"api",
-						"presentations"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Store issued Credential",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{access_token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"id\": \"http://example.edu/credentials/3732\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:indy:local:test:WQUpGv13THnGhwYRefvLYP\",\n    \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n    \"expirationDate\": \"2019-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Science and Arts\"\n        },\n        \"college\": \"Stuttgart\",\n        \"id\": \"did:indy:local:test:8Df7FFvkZBz1T263ZjZSAc\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-03-24T10:20:48Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:indy:local:test:WQUpGv13THnGhwYRefvLYP#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..UE187_VSdg6M_5UciuU-q_LuPxxWOQTWG7gAEkCQPPec8zaLny2VCEKhkI0dmJOqPS3eLlsUf1547eqkyXt3BQ\"\n    }\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2021-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Test\"\n        },\n        \"college\": \"Test\"\n    },\n    \"holderIdentifier\": \"bpn777\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -393,6 +302,128 @@
 			"response": []
 		},
 		{
+			"name": "Issue Presentations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"holderIdentifier\": \"bpn333\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/3735\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D\",\n            \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n            \"expirationDate\": \"2026-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master\",\n                    \"degreeType\": \"Undergraduate\",\n                    \"name\": \"Master of Test\"\n                },\n                \"college\": \"Test\",\n                \"id\": \"did:indy:local:test:AA5EEDcn8yTfMobaTcabj9\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-07-12T12:13:16Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg\"\n            }\n        },\n        {\n            \"id\": \"http://example.edu/credentials/3735\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D\",\n            \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n            \"expirationDate\": \"2021-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master1\",\n                    \"degreeType\": \"Undergraduate2\",\n                    \"name\": \"Master of Test122\"\n                },\n                \"college\": \"Test2\",\n                \"id\": \"did:indy:local:test:AA5EEDcn8yTfMobaTcabj9\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-07-12T14:10:05Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..GS0XFEczDb9cZhARxS9_gj2X8sZPVo51_r3pWa0wfiX_ailCnYsv1y6x0kFGDTXkV9wqWjAylOkumYqbV4xHCw\"\n            }\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/presentations",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"presentations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Presentations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\"\n    ],\n    \"id\": \"73e9e2f1-c0f9-4453-9619-d26244c83f15\",\n    \"type\": [\n        \"VerifiablePresentation\"\n    ],\n    \"holder\": \"did:indy:local:test:AA5EEDcn8yTfMobaTcabj9\",\n    \"verifiableCredential\": [\n        {\n            \"id\": \"http://example.edu/credentials/3735\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D\",\n            \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n            \"expirationDate\": \"2026-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master\",\n                    \"degreeType\": \"Undergraduate\",\n                    \"name\": \"Master of Test\"\n                },\n                \"college\": \"Test\",\n                \"id\": \"did:indy:local:test:AA5EEDcn8yTfMobaTcabj9\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-07-12T12:13:16Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg\"\n            }\n        },\n        {\n            \"id\": \"http://example.edu/credentials/3735\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D\",\n            \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n            \"expirationDate\": \"2027-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master1\",\n                    \"degreeType\": \"Undergraduate2\",\n                    \"name\": \"Master of Test1\"\n                },\n                \"college\": \"Test2\",\n                \"id\": \"did:indy:local:test:AA5EEDcn8yTfMobaTcabj9\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-07-12T12:16:45Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..6oIPVm3ealRVzpgiFKItyIzVWlNUT150fbh9OcBElj9FvaICAd-wc1yzrwka3ns1SmrPFsWIIe0wC1rJQLISBA\"\n            }\n        }\n    ],\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-07-12T12:28:44Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/presentations/validation?withDateValidation=false",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"presentations",
+						"validation"
+					],
+					"query": [
+						{
+							"key": "withDateValidation",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store issued Credential",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"http://example.edu/credentials/3735\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2027-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\",\n        \"id\": \"did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-07-13T08:10:16Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..QVvU0ztVcxZWyH9ze2pLGlfjDByPBusWReGxOb4io7X4VxMSVptheAiGk11MHHL88X978oDh4B5MaAHcInlPCg\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/didDocuments/bpn111",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"didDocuments",
+						"bpn111"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get Credentials",
 			"request": {
 				"auth": {
@@ -408,7 +439,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials?id=http://example.edu/credentials/3732&issuerIdentifier=bpn777&holderIdentifier=bpn888&type=University-Degree-Credential",
+					"raw": "{{custodian_url}}/api/credentials?issuerIdentifier=bpn111&holderIdentifier=bpn333",
 					"host": [
 						"{{custodian_url}}"
 					],
@@ -419,19 +450,21 @@
 					"query": [
 						{
 							"key": "id",
-							"value": "http://example.edu/credentials/3732"
+							"value": "http://example.edu/credentials/3732",
+							"disabled": true
 						},
 						{
 							"key": "issuerIdentifier",
-							"value": "bpn777"
+							"value": "bpn111"
 						},
 						{
 							"key": "holderIdentifier",
-							"value": "bpn888"
+							"value": "bpn333"
 						},
 						{
 							"key": "type",
-							"value": "University-Degree-Credential"
+							"value": "University-Degree-Credential",
+							"disabled": true
 						}
 					]
 				}
@@ -552,6 +585,49 @@
 						"did:indy:test:TfhXmtfTbSLeHrhhQsAP5n",
 						"services",
 						"linked_domains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post created catena-x wallet",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3YWxsZXRfaWQiOiI4Nzc2NTNjMy00OGVhLTQ3ZWItODc3ZS00NjY0MmIzZDU4NzEiLCJpYXQiOjE2NTc2OTk1NjJ9.gD6w6aQBuQlbFqqAyyE1bR3G9TEh2Ijq2lAyXwpoJtE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11000/wallet/did/public?did=M6Mis1fZKuhEw71GNY3TAb",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11000",
+					"path": [
+						"wallet",
+						"did",
+						"public"
+					],
+					"query": [
+						{
+							"key": "did",
+							"value": "M6Mis1fZKuhEw71GNY3TAb"
+						}
 					]
 				}
 			},

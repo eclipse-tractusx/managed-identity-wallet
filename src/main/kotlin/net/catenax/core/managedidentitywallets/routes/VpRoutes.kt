@@ -1,7 +1,11 @@
 package net.catenax.core.managedidentitywallets.routes
 
+import io.bkbn.kompendium.annotations.Field
+import io.bkbn.kompendium.annotations.Param
+import io.bkbn.kompendium.annotations.ParamType
 import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.Notarized.notarizedPost
+import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
@@ -11,13 +15,12 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlinx.serialization.Serializable
 
 import net.catenax.core.managedidentitywallets.models.semanticallyInvalidInputException
-import net.catenax.core.managedidentitywallets.models.ssi.LdProofDto
-import net.catenax.core.managedidentitywallets.models.ssi.VerifiableCredentialDto
-import net.catenax.core.managedidentitywallets.models.ssi.VerifiablePresentationDto
-import net.catenax.core.managedidentitywallets.models.ssi.VerifiablePresentationRequestDto
-import net.catenax.core.managedidentitywallets.models.ssi.JsonLdContexts
+import net.catenax.core.managedidentitywallets.models.ssi.*
+import net.catenax.core.managedidentitywallets.models.ssi.acapy.VerifyResponse
+import net.catenax.core.managedidentitywallets.models.syntacticallyInvalidInputException
 import net.catenax.core.managedidentitywallets.plugins.AuthConstants
 import net.catenax.core.managedidentitywallets.services.WalletService
 
@@ -45,6 +48,47 @@ fun Route.vpRoutes(walletService: WalletService) {
             ) {
                 val verifiableCredentialDto = call.receive<VerifiablePresentationRequestDto>()
                 call.respond(HttpStatusCode.Created, walletService.issuePresentation(verifiableCredentialDto))
+            }
+        }
+
+        route("/validation") {
+            notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW) {
+                notarizedPost(
+                    PostInfo<WithDateValidation, VerifiablePresentationDto, VerifyResponse>(
+                        summary = "Validate Verifiable Presentation",
+                        description = "Validate Verifiable Presentation with all included credentials",
+                        parameterExamples = setOf(
+                            ParameterExample("withDateValidation", "withDateValidation", "false")
+                        ),
+                        requestInfo = RequestInfo(
+                            description = "The verifiable presentation to validate",
+                            examples = verifiablePresentationResponseDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.OK,
+                            description = "The verification value",
+                            examples = mapOf("demo" to VerifyResponse(
+                                error = null,
+                                valid = true,
+                                vp = verifiablePresentationResponseDtoExample["demo"]!!
+                            ))
+                        ),
+                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
+                        tags = setOf("VerifiablePresentations"),
+                        securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
+                    )
+                ) {
+                    var withDateValidation = false
+                    val verifiablePresentation = call.receive<VerifiablePresentationDto>()
+                    if (call.request.queryParameters["withDateValidation"] != null) {
+                        withDateValidation = call.request.queryParameters["withDateValidation"].toBoolean()
+                    }
+                    val verifyResponse =  walletService.verifyVerifiablePresentation(
+                        vpDto = verifiablePresentation,
+                        withDateValidation = withDateValidation
+                    )
+                    call.respond(HttpStatusCode.OK, verifyResponse)
+                }
             }
         }
     }
@@ -111,4 +155,14 @@ val verifiablePresentationResponseDtoExample = mapOf(
             jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
         )
     )
+)
+
+@Serializable
+data class WithDateValidation(
+    @Param(type = ParamType.QUERY)
+    @Field(
+        description = "Flag whether issuance and expiration date of all credentials should be validated",
+        name = "withDateValidation"
+    )
+    val withDateValidation: Boolean? = false
 )
