@@ -414,14 +414,13 @@ class AcaPyWalletServiceImpl(
         if (withDateValidation) {
             val currentDatetime: Date = Date.from(Instant.now())
             if (currentDatetime.before(JsonLDUtils.stringToDate(vc.issuanceDate))) {
-                throw UnprocessableEntityException("Verifiable credential with id ${vc.id}" +
-                        " is not valid due its issuanceDate")
+                throw UnprocessableEntityException("Invalid issuance date ${vc.issuanceDate} " +
+                        "in verifiable credential ${vc.id}")
             }
             if (!vc.expirationDate.isNullOrEmpty()
                 && currentDatetime.after(JsonLDUtils.stringToDate(vc.expirationDate))
             ) {
-                throw UnprocessableEntityException("Verifiable credential with id ${vc.id}" +
-                        " is not valid due its expirationDate")
+                throw UnprocessableEntityException("Verifiable credential ${vc.id} expired ${vc.expirationDate}")
             }
         }
         if (vc.proof == null) {
@@ -452,15 +451,17 @@ class AcaPyWalletServiceImpl(
         vpDto: VerifiablePresentationDto,
         walletToken: String
     ) {
-        if (vpDto.holder.isNullOrEmpty()) {
-            throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing holder DID")
-        }
         if (vpDto.proof == null) {
             throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing proof")
         }
+        var didOfVpSigner = if (vpDto.holder.isNullOrEmpty()) {
+            vpDto.proof.verificationMethod.split("#").first()
+        } else {
+            vpDto.holder
+        }
         val verifyVPReq = VerifyRequest(
             signedDoc = vpDto,
-            verkey = getVerKeyOfVerificationMethodId(vpDto.holder, vpDto.proof.verificationMethod)
+            verkey = getVerKeyOfVerificationMethodId(didOfVpSigner, vpDto.proof.verificationMethod)
         )
         var isValid = true
         var message = ""
@@ -471,7 +472,7 @@ class AcaPyWalletServiceImpl(
                 message = if (response.error.isNullOrBlank()) message else " Error message ${response.error}"
             }
         } catch (e: Exception) {
-            throw UnprocessableEntityException("External validation of" +
+            throw UnprocessableEntityException("External validation of " +
                     "the verifiable presentation failed: ${e.message}")
         }
         if (!isValid) {
@@ -482,11 +483,12 @@ class AcaPyWalletServiceImpl(
     private suspend fun getVerKeyOfVerificationMethodId(did: String, verificationMethodId: String): String {
         val didDocumentDto = resolveDocument(did)
         if (didDocumentDto.verificationMethods.isNullOrEmpty()) {
-            throw BadRequestException("Error: no verification methods")
+            throw UnprocessableEntityException("The DID Doc has no verification methods")
         }
         val verificationMethod = didDocumentDto.verificationMethods.find {
                 method -> method.id == verificationMethodId
-        } ?: throw BadRequestException("Error: no verification methods equal to $verificationMethodId")
+        } ?: throw UnprocessableEntityException("Verification method with given Id " +
+                "$verificationMethodId does not exist")
         return getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
     }
 

@@ -483,7 +483,7 @@ class ApplicationTest {
             configureSerialization()
         }) {
 
-            var verKey = ""
+            var verKey: String
 
             // programmatically add base wallet and an additional one
             runBlocking {
@@ -497,7 +497,7 @@ class ApplicationTest {
                     addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody("{\"verKey\":\"" + verKey + "\"}")
+                    setBody("{\"verKey\":\"$verKey\"}")
                 }.apply {
                     assertEquals(HttpStatusCode.NotFound, response.status())
                 }
@@ -520,7 +520,7 @@ class ApplicationTest {
                 addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody("{\"verKey\":\"" + verKey + "\"}")
+                setBody("{\"verKey\":\"$verKey\"}")
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
@@ -845,7 +845,6 @@ class ApplicationTest {
                 assertTrue { output.valid }
             }
 
-            // missing proof
             var vpWithoutProof = """
                 {
                     "@context": [
@@ -965,8 +964,9 @@ class ApplicationTest {
                     setBody(vpWithOutdatedVC)
                 }.apply { }
             }
-            assertTrue(dateException.message!!.contains("Verifiable credential with id" +
-                    " http://example.edu/credentials/3735 is not valid due its expirationDate"))
+            println(dateException.message)
+            assertTrue(dateException.message!!.contains(
+                "Verifiable credential http://example.edu/credentials/3735 expired 2021-06-17T18:56:59Z"))
 
             var vpWithFutureVC = """
                 {
@@ -1030,8 +1030,9 @@ class ApplicationTest {
                     setBody(vpWithFutureVC)
                 }.apply { }
             }
-            assertTrue(issuanceDateException.message!!.contains("Verifiable credential with id" +
-                    " http://example.edu/credentials/3735 is not valid due its issuanceDate"))
+            assertTrue(issuanceDateException.message!!.contains(
+                "Invalid issuance date 2025-06-16T18:56:59Z " +
+                        "in verifiable credential http://example.edu/credentials/3735"))
 
             var vpWithVcWithoutProof = """
                 {
@@ -1091,60 +1092,68 @@ class ApplicationTest {
                     " http://example.edu/credentials/3735 due to missing proof"))
 
             var vpWithoutHolder = """
-                {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1"
-                    ],
-                    "id": "d312945e-826e-49cc-9baa-3c78d090745b",
-                    "type": [
-                        "VerifiablePresentation"
-                    ],
-                    "verifiableCredential": [
-                        {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb",
-                            "issuanceDate": "2025-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master1",
-                                    "degreeType": "Undergraduate2",
-                                    "name": "Master of Test11"
-                                },
-                                "college": "Test2",
-                                "id": "did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP"
-                            }
+            {
+                "@context": [
+                    "https://www.w3.org/2018/credentials/v1"
+                ],
+                "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
+                "type": [
+                    "VerifiablePresentation"
+                ],
+                "verifiableCredential": [
+                    {
+                        "id": "http://example.edu/credentials/3735",
+                        "@context": [
+                            "https://www.w3.org/2018/credentials/v1",
+                            "https://www.w3.org/2018/credentials/examples/v1"
+                        ],
+                        "type": [
+                            "University-Degree-Credential",
+                            "VerifiableCredential"
+                        ],
+                        "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
+                        "issuanceDate": "2021-06-16T18:56:59Z",
+                        "expirationDate": "2026-06-17T18:56:59Z",
+                        "credentialSubject": {
+                            "givenName": "TestAfterQuestion",
+                            "familyName": "Student",
+                            "degree": {
+                                "type": "Master",
+                                "degreeType": "Undergraduate",
+                                "name": "Master of Test"
+                            },
+                            "college": "Test",
+                            "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
+                        },
+                        "proof": {
+                            "type": "Ed25519Signature2018",
+                            "created": "2022-07-12T12:13:16Z",
+                            "proofPurpose": "assertionMethod",
+                            "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
+                            "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
                         }
-                    ],
-                    "proof": {
-                        "type": "Ed25519Signature2018",
-                        "created": "2022-07-13T14:47:36Z",
-                        "proofPurpose": "assertionMethod",
-                        "verificationMethod": "did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..fGJqT596Y9696mw97DVFkNZsuXU5xO-VCZWkEysOaeljl6loRZkQAVGmyzfZK4ZImcLKMFwHfgLv1E-Xxze7Bw"
                     }
+                ],
+                "proof": {
+                    "type": "Ed25519Signature2018",
+                    "created": "2022-07-12T12:28:44Z",
+                    "proofPurpose": "assertionMethod",
+                    "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
+                    "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
                 }
+            }
             """.trimIndent()
-            var exceptionVpWithoutHolder = assertFailsWith<UnprocessableEntityException> {
-                handleRequest(HttpMethod.Post, "/api/presentations/validation") {
+            handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                     addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(vpWithoutHolder)
-                }.apply { }
-            }
-            assertTrue(exceptionVpWithoutHolder.message!!.contains("Cannot verify verifiable" +
-                    " presentation due to missing holder DID"))
+                }.apply {
+                    var output = Json.decodeFromString<VerifyResponse>(response.content!!)
+                    assertEquals(HttpStatusCode.OK, response.status())
+                    assertTrue { output.valid }
+                }
+
             // clean up created wallets
             runBlocking {
                 walletService.deleteWallet("bpn1") // base wallet
