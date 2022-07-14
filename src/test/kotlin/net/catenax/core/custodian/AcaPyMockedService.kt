@@ -7,7 +7,7 @@ import net.catenax.core.managedidentitywallets.models.ssi.acapy.*
 import net.catenax.core.managedidentitywallets.services.IAcaPyService
 import java.security.SecureRandom
 
-class AcaPyMockedService: IAcaPyService {
+class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     private var currentDid: String = "EXAMPLE"
@@ -16,7 +16,7 @@ class AcaPyMockedService: IAcaPyService {
         return WalletAndAcaPyConfig(
             apiAdminUrl = "",
             networkIdentifier = "local:test",
-            baseWalletBpn = "bpn1",
+            baseWalletBpn = baseWalletBpn,
             adminApiKey = "Hj23iQUsstG!dde"
         )
     }
