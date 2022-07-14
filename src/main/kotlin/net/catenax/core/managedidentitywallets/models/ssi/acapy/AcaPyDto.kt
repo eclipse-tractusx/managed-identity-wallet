@@ -162,12 +162,13 @@ data class SignPresentationResponse(
 @Serializable
 data class VerifyResponse(
     val error: String? = null,
-    val valid: Boolean
+    val valid: Boolean,
+    val vp: VerifiablePresentationDto? = null
 )
 
 @Serializable
 data class VerifyRequest<T>(
-    @JsonProperty("doc") @SerialName("doc")val signedDoc: T?,
+    @JsonProperty("doc") @SerialName("doc") val signedDoc: T?,
     val verkey: String
 )
 

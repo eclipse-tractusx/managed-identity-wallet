@@ -2,6 +2,7 @@ package net.catenax.core.managedidentitywallets
 
 import net.catenax.core.managedidentitywallets.models.*
 import net.catenax.core.managedidentitywallets.models.ssi.DidDocumentDto
+import net.catenax.core.managedidentitywallets.models.ssi.DidVerificationMethodDto
 import net.catenax.core.managedidentitywallets.models.ssi.acapy.*
 
 import net.catenax.core.managedidentitywallets.services.IAcaPyService
@@ -11,6 +12,13 @@ class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     private var currentDid: String = "EXAMPLE"
+
+    private var didToVerKey = mapOf(
+        "did:sov:AA5EEDcn8yTfMobaTcabj9" to "5zTG9qLF8DEzR7fmCa9jy6L5Efi5QvpWEvMXszh9jStA",
+        "did:sov:LCNSw1JxSTDw7EpR1UMG7D" to "BTppBmURHHqg6PKf7ryv8VS7hrKg8nEhwmjuD9ciGssz",
+        "did:sov:M6Mis1fZKuhEw71GNY3TAb" to "BxAExpSNdKQ4KA7ocjH7qgphkbdKva8kKy1pDn5ksWxV",
+        "did:sov:YHXZLLSLnKxz5D2HQaKXcP" to "J3ymiVmkB6yEWZ9qsp62kHzGmGm2phdvapRA6bkoJmBW"
+    )
 
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
         return WalletAndAcaPyConfig(
@@ -87,16 +95,32 @@ class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
     override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse =
         VerifyResponse(error = null, valid = true)
 
-    override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult =
-        ResolutionResult(
+    override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
+        var metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
+        for (key in didToVerKey.keys) {
+            if (did == key) {
+                return ResolutionResult(
+                    didDoc = DidDocumentDto(
+                        id = did,
+                        context = emptyList(),
+                        verificationMethods = listOf(
+                            DidVerificationMethodDto(
+                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#key-1",
+                                type = "Ed25519VerificationKey2018",
+                                controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
+                                publicKeyBase58= "${didToVerKey[key]}"
+                            )
+                        )
+                    ),
+                    metadata = metadata
+                )
+            }
+        }
+        return ResolutionResult(
             didDoc = DidDocumentDto(id = did, context = emptyList()),
-            metadata = ResolutionMetaData(
-                resolverType = "",
-                resolver = "",
-                retrievedTime = "",
-                duration = 0
-            )
+            metadata = metadata
         )
+    }
 
     override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
 
@@ -105,5 +129,10 @@ class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
             .map { SecureRandom().nextInt(charPool.size) }
             .map(charPool::get)
             .joinToString("")
+    }
+
+    private fun getIdentifierOfDid(did: String): String {
+        val elementsOfDid: List<String> = did.split(":")
+        return elementsOfDid[elementsOfDid.size - 1]
     }
 }

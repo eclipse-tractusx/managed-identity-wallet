@@ -143,7 +143,8 @@ below. Here a few hints on how to set it up:
 5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
 6. `CX_AUTH_ROLE_MAPPINGS`: specify the expected role mappings within the token, e.g. `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallets:update_wallet`
 7. `CX_AUTH_RESOURCE_ID`: specify the resource id e.g. `ManagedIdentityWallets`
-8. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `managed-identity-wallets`
+8. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `ManagedIdentityWallets`
+9. `CX_AUTH_CLIENT_SECRET`: specify the client secret. It can be extracted from keycloak under `realms - catenax - clients - ManagedIdentityWallets - credentials`
 9. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
 10. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
 11. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
