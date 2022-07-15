@@ -68,7 +68,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           # Path to Docker image
-          image-ref: "ghcr.io/catenax-ng/product-core-managed-identity-wallets_acapy:0.7.4-rc1"
+          image-ref: "ghcr.io/catenax-ng/product-core-managed-identity-wallets_acapy:0.7.4"
           format: "sarif"
           output: "trivy-results2.sarif"
           exit-code: "1"
