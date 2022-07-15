@@ -141,7 +141,7 @@ below. Here a few hints on how to set it up:
 3. `CX_AUTH_JWKS_URL`: enter the keycloak certs url, e.g. `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs`
 4. `CX_AUTH_ISSUER_URL`: enter the token issue, e.g. `http://localhost:8081/auth/realms/catenax`
 5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
-6. `CX_AUTH_ROLE_MAPPINGS`: specify the expected role mappings within the token, e.g. `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallets:update_wallet`
+6. `CX_AUTH_ROLE_MAPPINGS`: specify the expected role mappings within the token, e.g. `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet`
 7. `CX_AUTH_RESOURCE_ID`: specify the resource id e.g. `ManagedIdentityWallets`
 8. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `ManagedIdentityWallets`
 9. `CX_AUTH_CLIENT_SECRET`: specify the client secret. It can be extracted from keycloak under `realms - catenax - clients - ManagedIdentityWallets - credentials`
@@ -169,11 +169,13 @@ There are two ways to set up the local environment:
 ### Preperation of Aca-Py Docker Image <a id= "acapyDockerImage"></a>
 
 Building the Aca-Py image is necessary for both setup options:
+You can either use the image `bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4` or build your own image following the steps:
 * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
 * navigate to the repository `cd aries-cloudagent-python`
-* currently tested with commit `0.7.4-rc1` from April, 28, 2022
-* run `git checkout 0.7.4-rc1`
-* run `docker build -t acapy:0.7.4-rc1 -f ./docker/Dockerfile.run .`
+* currently tested with commit `0.7.4` from June, 30, 2022
+* run `git checkout 0.7.4`
+* run `docker build -t acapy:0.7.4 -f ./docker/Dockerfile.run .`
+* change the used image for `cx_acapy` in `dev-assets/dev-containers/docker-compose.yml`
 
 ### Preparation of Managed Identity Wallet Docker Image
 
