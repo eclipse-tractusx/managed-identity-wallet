@@ -59,7 +59,7 @@ fun Route.vcRoutes(walletService: WalletService) {
                 // verify requested holder with bpn in principal, if only ROLE_VIEW_WALLET is given
                 val principal = AuthConstants.getPrincipal(call.attributes)
                 if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && holderIdentifier == principal?.bpn) {
-                    log.debug("Authorization successful: holder identifier BPN ${holderIdentifier} does match requestors BPN ${principal?.bpn}!")
+                    log.debug("Authorization successful: holder identifier BPN ${holderIdentifier} does match requestors BPN ${principal.bpn}!")
                 }
                 if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && holderIdentifier != principal?.bpn) {
                     log.error("Error: Holder identifier BPN ${holderIdentifier} does not match requestors BPN ${principal?.bpn}!")

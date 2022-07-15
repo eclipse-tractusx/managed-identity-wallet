@@ -67,7 +67,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation(kotlin("test"))
 
-    runtimeOnly("com.h2database:h2:2.1.210")
+    runtimeOnly("org.xerial:sqlite-jdbc:3.36.0.3")
     runtimeOnly("org.postgresql:postgresql:42.2.25")
 
 }

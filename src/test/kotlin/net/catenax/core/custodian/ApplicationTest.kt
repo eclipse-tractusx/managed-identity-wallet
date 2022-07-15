@@ -53,16 +53,20 @@ import java.security.KeyPairGenerator
 import java.security.spec.ECGenParameterSpec
 import java.security.KeyPair
 import java.security.interfaces.*
+import java.sql.DriverManager
 import java.util.Base64
 import java.util.Date
 
 class ApplicationTest {
 
     private fun setupEnvironment(environment: ApplicationEnvironment) {
+        val jdbcUrl = System.getenv("CX_DB_JDBC_URL") ?: "jdbc:sqlite:file:test?mode=memory&cache=shared"
         (environment.config as MapApplicationConfig).apply {
             put("app.version", System.getenv("APP_VERSION") ?: "0.0.7")
-            put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:miw;DB_CLOSE_DELAY=-1;")
-            put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
+            // put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:miw;DB_CLOSE_DELAY=-1;")
+            // put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
+            put("db.jdbcUrl", jdbcUrl)
+            put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.sqlite.JDBC")
             put("datapool.url", System.getenv("CX_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
             put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
             put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: ":indy:test")
@@ -80,6 +84,7 @@ class ApplicationTest {
             put("auth.clientSecret", System.getenv("CX_AUTH_CLIENT_SECRET") ?: "clientSecret")
             put("auth.redirectUrl", System.getenv("CX_AUTH_REDIRECT_URL") ?: "http://localhost:8080/callback")
         }
+        val keepAliveConnection = DriverManager.getConnection(jdbcUrl)
     }
 
     private fun setupEnvironmentWithMissingRoleMapping(environment: ApplicationEnvironment) {
