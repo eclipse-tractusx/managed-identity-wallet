@@ -142,14 +142,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/bpn111?withCredentials=true",
+					"raw": "{{custodian_url}}/api/wallets/bpn555?withCredentials=true",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"bpn111"
+						"bpn555"
 					],
 					"query": [
 						{
@@ -442,7 +442,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials?issuerIdentifier=bpn111",
+					"raw": "{{custodian_url}}/api/credentials?issuerIdentifier=bpn555",
 					"host": [
 						"{{custodian_url}}"
 					],
@@ -457,10 +457,6 @@
 							"disabled": true
 						},
 						{
-							"key": "issuerIdentifier",
-							"value": "bpn111"
-						},
-						{
 							"key": "holderIdentifier",
 							"value": "bpn333",
 							"disabled": true
@@ -469,6 +465,10 @@
 							"key": "type",
 							"value": "University-Degree-Credential",
 							"disabled": true
+						},
+						{
+							"key": "issuerIdentifier",
+							"value": "bpn555"
 						}
 					]
 				}
@@ -632,6 +632,43 @@
 							"key": "did",
 							"value": "M6Mis1fZKuhEw71GNY3TAb"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "businessPartnerData",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bpn\": \"bpn555\",\n    \"identifiers\": [\n        {\n            \"uuid\": \"089e828d-01ed-4d3e-ab1e-cccca26814b3\",\n            \"value\": \"BPNL000000000001\",\n            \"type\": {\n                \"technicalKey\": \"BPN\",\n                \"name\": \"Business Partner Number\",\n                \"url\": \"\"\n            },\n            \"issuingBody\": {\n                \"technicalKey\": \"CATENAX\",\n                \"name\": \"Catena-X\",\n                \"url\": \"\"\n            },\n            \"status\": {\n                \"technicalKey\": \"UNKNOWN\",\n                \"name\": \"Unknown\"\n            }\n        }\n    ],\n    \"names\": [\n        {\n            \"uuid\": \"de3f3db6-e337-436b-a4e0-fc7d17e8af81\",\n            \"value\": \"German Car Company\",\n            \"shortName\": \"GCC\",\n            \"type\": {\n                \"technicalKey\": \"REGISTERED\",\n                \"name\": \"The main name under which a business is officially registered in a country's business register.\",\n                \"url\": \"\"\n            },\n            \"language\": {\n                \"technicalKey\": \"undefined\",\n                \"name\": \"Undefined\"\n            }\n        },\n        {\n            \"uuid\": \"defc3da4-92ef-44d9-9aee-dcedc2d72e0e\",\n            \"value\": \"German Car Company\",\n            \"shortName\": \"GCC\",\n            \"type\": {\n                \"technicalKey\": \"INTERNATIONAL\",\n                \"name\": \"The international version of the local name of a business partner\",\n                \"url\": \"\"\n            },\n            \"language\": {\n                \"technicalKey\": \"undefined\",\n                \"name\": \"Undefined\"\n            }\n        }\n    ],\n    \"legalForm\": {\n        \"technicalKey\": \"DE_AG\",\n        \"name\": \"Aktiengesellschaft\",\n        \"url\": \"\",\n        \"mainAbbreviation\": \"AG\",\n        \"language\": {\n            \"technicalKey\": \"de\",\n            \"name\": \"German\"\n        },\n        \"categories\": [\n            {\n                \"name\": \"AG\"\n            }\n        ]\n    },\n    \"status\": null,\n    \"addresses\": [\n        {\n            \"uuid\": \"16701107-9559-4fdf-b1c1-8c98799d779d\",\n            \"version\": {\n                \"characterSet\": {\n                    \"technicalKey\": \"WESTERN_LATIN_STANDARD\",\n                    \"name\": \"Western Latin Standard (ISO 8859-1; Latin-1)\"\n                },\n                \"language\": {\n                    \"technicalKey\": \"en\",\n                    \"name\": \"English\"\n                }\n            },\n            \"careOf\": \"tete\",\n            \"contexts\": [],\n            \"country\": {\n                \"technicalKey\": \"DE\",\n                \"name\": \"Germany\"\n            },\n            \"administrativeAreas\": [\n                {\n                    \"uuid\": \"cc6de665-f8eb-45ed-b2bd-6caa28fa8368\",\n                    \"value\": \"Bavaria\",\n                    \"shortName\": \"BY\",\n                    \"fipsCode\": \"GM02\",\n                    \"type\": {\n                        \"technicalKey\": \"REGION\",\n                        \"name\": \"Region\",\n                        \"url\": \"\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"en\",\n                        \"name\": \"English\"\n                    }\n                }\n            ],\n            \"postCodes\": [\n                {\n                    \"uuid\": \"8a02b3d0-de1e-49a5-9528-cfde2d5273ed\",\n                    \"value\": \"80807\",\n                    \"type\": {\n                        \"technicalKey\": \"REGULAR\",\n                        \"name\": \"Regular\",\n                        \"url\": \"\"\n                    }\n                }\n            ],\n            \"localities\": [\n                {\n                    \"uuid\": \"2cd18685-fac9-49f4-a63b-322b28f7dc9a\",\n                    \"value\": \"Munich\",\n                    \"shortName\": \"M\",\n                    \"type\": {\n                        \"technicalKey\": \"CITY\",\n                        \"name\": \"City\",\n                        \"url\": \"\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"en\",\n                        \"name\": \"English\"\n                    }\n                }\n            ],\n            \"thoroughfares\": [\n                {\n                    \"uuid\": \"0c491424-b2bc-44cf-9d14-71cbe513423f\",\n                    \"value\": \"Muenchner Straße 34\",\n                    \"name\": \"Muenchner Straße\",\n                    \"shortName\": null,\n                    \"number\": \"34\",\n                    \"direction\": null,\n                    \"type\": {\n                        \"technicalKey\": \"STREET\",\n                        \"name\": \"Street\",\n                        \"url\": \"\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"en\",\n                        \"name\": \"English\"\n                    }\n                }\n            ],\n            \"premises\": [],\n            \"postalDeliveryPoints\": [],\n            \"geographicCoordinates\": null,\n            \"types\": [\n                {\n                    \"technicalKey\": \"HEADQUARTER\",\n                    \"name\": \"Headquarter\",\n                    \"url\": \"\"\n                }\n            ]\n        }\n    ],\n    \"profileClassifications\": [],\n    \"types\": [\n        {\n            \"technicalKey\": \"LEGAL_ENTITY\",\n            \"name\": \"Legal Entity\",\n            \"url\": \"\"\n        }\n    ],\n    \"bankAccounts\": [\n        {\n            \"uuid\": \"de3f3db6-e337-436b-a4e0-fc7d17e8af89\",\n            \"trustScores\": [\n                1.22,\n                3.2,\n                4.4\n            ],\n            \"nationalBankIdentifier\": \"nationalBankIdentifier1\",\n            \"nationalBankAccountIdentifier\": \"nationalBankAccountIdentifier1\",\n            \"internationalBankIdentifier\": \"internationalBankIdentifier1\",\n            \"internationalBankAccountIdentifier\": \"internationalBankAccountIdentifier1\",\n            \"currency\": {\n                \"technicalKey\": \"EU\",\n                \"name\": \"Euro\"\n            }\n        }\n    ],\n    \"roles\": [],\n    \"relations\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/businessPartnerData",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"businessPartnerData"
 					]
 				}
 			},
