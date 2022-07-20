@@ -1,10 +1,24 @@
+/********************************************************************************
+ * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ********************************************************************************/
+
 package net.catenax.core.managedidentitywallets
 
-// for 2.0.0-beta
-// import io.ktor.server.engine.*
-// import io.ktor.server.application.*
-
-// for 1.6.7
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -22,9 +36,16 @@ import net.catenax.core.managedidentitywallets.services.BusinessPartnerDataServi
 import net.catenax.core.managedidentitywallets.services.BusinessPartnerDataServiceImpl
 import net.catenax.core.managedidentitywallets.services.WalletService
 
+import org.slf4j.LoggerFactory
+
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 fun Application.module(testing: Boolean = false) {
+
+    val log = LoggerFactory.getLogger(this::class.java)
+    if (testing) {
+        log.info("Starting in testing mode...")
+    }
 
     configureSockets()
     configureSerialization()

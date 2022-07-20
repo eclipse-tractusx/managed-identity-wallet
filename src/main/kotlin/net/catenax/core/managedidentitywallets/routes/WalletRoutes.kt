@@ -1,3 +1,22 @@
+/********************************************************************************
+ * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ********************************************************************************/
+
 package net.catenax.core.managedidentitywallets.routes
 
 import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
@@ -140,12 +159,12 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                     val walletDto: WalletDto = walletService.getWallet(identifier, withCredentials)
                     // verify requested wallet with bpn in principal, if only ROLE_VIEW_WALLET is given
                     val principal = AuthConstants.getPrincipal(call.attributes)
-                    if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && walletDto.bpn == principal?.bpn) {
-                        log.debug("Authorization successful: wallet BPN ${walletDto.bpn} does match requestors BPN ${principal?.bpn}!")
+                    if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && walletDto.bpn == principal.bpn) {
+                        log.debug("Authorization successful: wallet BPN ${walletDto.bpn} does match requestors BPN ${principal.bpn}!")
                     }
-                    if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && walletDto.bpn != principal?.bpn) {
-                        log.error("Error: Wallet BPN ${walletDto.bpn} does not match requestors BPN ${principal?.bpn}!")
-                        return@notarizedGet call.respondText("Wallet BPN ${walletDto.bpn} does not match requestors BPN ${principal?.bpn}!", ContentType.Text.Plain, HttpStatusCode.Unauthorized)
+                    if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && walletDto.bpn != principal.bpn) {
+                        log.error("Error: Wallet BPN ${walletDto.bpn} does not match requestors BPN ${principal.bpn}!")
+                        return@notarizedGet call.respondText("Wallet BPN ${walletDto.bpn} does not match requestors BPN ${principal.bpn}!", ContentType.Text.Plain, HttpStatusCode.Unauthorized)
                     } else {
                         return@notarizedGet call.respond(HttpStatusCode.OK, walletDto)
                     }

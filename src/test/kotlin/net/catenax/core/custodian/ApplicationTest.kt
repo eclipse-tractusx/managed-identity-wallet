@@ -1,18 +1,26 @@
+/********************************************************************************
+ * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ********************************************************************************/
+
 package net.catenax.core.managedidentitywallets
 
 import io.ktor.http.*
 
-// for 2.0.0-beta
-// import io.ktor.server.response.*
-// import io.ktor.server.request.*
-// import io.ktor.server.routing.*
-// import io.ktor.server.websocket.*
-// import io.ktor.websocket.*
-// import io.ktor.serialization.kotlinx.json.*
-// import io.ktor.server.plugins.*
-// import io.ktor.server.application.*
-
-// for 1.6.7
 import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
 import com.auth0.jwt.interfaces.RSAKeyProvider
@@ -57,6 +65,7 @@ import java.sql.DriverManager
 import java.util.Base64
 import java.util.Date
 
+@kotlinx.serialization.ExperimentalSerializationApi
 class ApplicationTest {
 
     private fun setupEnvironment(environment: ApplicationEnvironment) {
@@ -84,7 +93,8 @@ class ApplicationTest {
             put("auth.clientSecret", System.getenv("CX_AUTH_CLIENT_SECRET") ?: "clientSecret")
             put("auth.redirectUrl", System.getenv("CX_AUTH_REDIRECT_URL") ?: "http://localhost:8080/callback")
         }
-        val keepAliveConnection = DriverManager.getConnection(jdbcUrl)
+        // just a keepAliveConnection 
+        DriverManager.getConnection(jdbcUrl)
     }
 
     private fun setupEnvironmentWithMissingRoleMapping(environment: ApplicationEnvironment) {

@@ -54,7 +54,7 @@ services:
         --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
         --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
         --seed 00000000000000000000000111111119 \
-        --genesis-url https://indy-test.bosch-digital.de/genesis \
+        --genesis-url https://indy-test.idu.network/genesis \
         --label CatenaXIssuer \
         --admin-api-key Hj23iQUsstG!dde \
         --auto-ping-connection \

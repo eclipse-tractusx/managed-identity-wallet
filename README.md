@@ -67,7 +67,7 @@ build system.
     2. Execute the request and note down your `did` and `verKey` from the response
        1. ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
 9. Register public DID
-    1. Register your DID from your Wallet at https://indy-test.bosch-digital.de/ with "Register from DID"
+    1. Register your DID from your Wallet at https://indy-test.idu.network/ with "Register from DID"
        1. ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
     2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
        `{ "verKey": "verification key from creation" }`
@@ -148,7 +148,7 @@ below. Here a few hints on how to set it up:
 9. `CX_DATAPOOL_URL`: specify the data pool API endpoint, e.g. `http://catenax-bpdm-dev.germanywestcentral.cloudapp.azure.com:8080`
 10. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
 11. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
-12. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.bosch-digital.de/register`
+12. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.idu.network/register`
 13. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
 14. `ACAPY_ADMIN_API_KEY`: specify the admin api key of Aca-Py enpoints, e.g. `Hj23iQUsstG!dde`
 15. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
@@ -195,8 +195,10 @@ Starting up Docker Containers for Postgres, Keycloak and AcaPy via following ste
 * run `docker-compose up -d` (or `docker compose up -d`, depdending on the installation) to start a Postgresql database and Keycloak instance and the AcaPy Service as Docker containers
 * To setup the Postgresql database in the application please see the section below - [Setting up progresql database](#settingUpPostgresSqlDatabase), for the database
 * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
-* Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`
+* Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`,
+  the default client id and password is `ManagedIdentityWallets` and `ManagedIdentityWallets-Secret`
 * The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `ManagedIdentityWallets` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `managed-identity-wallets-api` and a user, e.g. named `managed-identity-wallets-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
+* If you receive an error message, that the client secret is not valid, please go into keycloak admin and within clients -> credentials recreate the secret.
 
 Finally run the managed identity wallets service via
 
@@ -279,7 +281,7 @@ To run and develop using IntelliJ IDE:
 ### Initial Wallet Setup <a id= "initialWalletSetup"></a>
 
 * Create the Catena-X wallet using the value stored in `CX_BPN` as BPN
-* Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](https://indy-test.bosch-digital.de/) as Endorser
+* Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](https://indy-test.idu.network/) as Endorser
 * Assign the DID to public manually by sending a POST request `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key 
   `{ "verKey": "verification key from creation" }`
 

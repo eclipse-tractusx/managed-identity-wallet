@@ -593,7 +593,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "ManagedIdentityWallets-Secret",
       "redirectUris": [
         "http://localhost:8080/*"
       ],
