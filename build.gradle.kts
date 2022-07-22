@@ -11,9 +11,9 @@ plugins {
                 id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
 }
 
-group = "net.catenax.core"
+group = "org.eclipse.tractusx"
 application {
-    mainClass.set("net.catenax.core.managedidentitywallets.ApplicationKt")
+    mainClass.set("org.eclipse.tractusx.managedidentitywallets.ApplicationKt")
 }
 
 repositories {
