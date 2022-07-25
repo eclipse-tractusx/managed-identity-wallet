@@ -34,6 +34,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.LocalDateTime
 import java.util.*
 
 class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
@@ -95,11 +96,17 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
 
     override suspend fun pullDataAndUpdateCatenaXCredentialsAsync() {
         val listOfBpns = walletService.getAllBpns()
-        val extractedBPData = mutableListOf<BusinessPartnerDataDto>()
-        val accessToken = getAccessToken()
+        var now = LocalDateTime.now()
+        var accessToken = getAccessToken()
+        var expireAt = now.plusSeconds(accessToken.expiresIn.toLong())
         listOfBpns.forEach { bpn ->
             try {
-                extractedBPData.add(getBusinessPartnerData(bpn, accessToken))
+                now = LocalDateTime.now()
+                if (now.isAfter(expireAt)) {
+                    accessToken = getAccessToken()
+                    expireAt = now.plusSeconds(accessToken.expiresIn.toLong())
+                }
+                issueAndUpdateCatenaXCredentials(getBusinessPartnerData(bpn, accessToken.accessToken))
             } catch (e: Exception) {
                 if (!e.message.isNullOrBlank() && "Not Found" in e.message!!) {
                     log.warn("BPN $bpn does not not exist!")
@@ -107,9 +114,6 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
                     log.error("Getting Business data of bpn $bpn has thrown an error ${e.message}")
                 }
             }
-        }
-        extractedBPData.forEach {
-            issueAndUpdateCatenaXCredentials(it)
         }
     }
 
@@ -124,7 +128,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
         return Json.decodeFromString(response.readText())
     }
 
-    private suspend fun getAccessToken(): String {
+    private suspend fun getAccessToken(): AccessToken {
         val response: HttpResponse = client.submitForm(
             url = bpdmConfig.tokenUrl,
             formParameters = Parameters.build {
@@ -134,8 +138,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
                 append("scope", bpdmConfig.scope)
             }
         )
-        val accessToken: AccessToken = Json.decodeFromString(response.readText())
-        return accessToken.accessToken
+        return Json.decodeFromString(response.readText())
     }
 
     private fun isNewCredential(bpn: String, uuid: String, type: String): Boolean {

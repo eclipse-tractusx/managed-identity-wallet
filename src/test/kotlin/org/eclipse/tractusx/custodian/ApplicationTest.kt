@@ -707,7 +707,7 @@ class ApplicationTest {
             appRoutes(walletService, bpdService)
             configureSerialization()
         }) {
-            handleRequest(HttpMethod.Put, "/api/refreshBusinessPartnerData") {
+            handleRequest(HttpMethod.Post, "/api/refreshBusinessPartnerData") {
                 addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())

@@ -20,9 +20,9 @@
 package org.eclipse.tractusx.managedidentitywallets.routes
 
 import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
-import io.bkbn.kompendium.core.Notarized.notarizedPut
+import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.ResponseInfo
-import io.bkbn.kompendium.core.metadata.method.PutInfo
+import io.bkbn.kompendium.core.metadata.method.PostInfo
 
 import io.ktor.application.*
 import io.ktor.http.*
@@ -38,8 +38,8 @@ fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerD
     route("/refreshBusinessPartnerData") {
 
         notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
-            notarizedPut(
-                PutInfo<Unit, Unit, String>(
+            notarizedPost(
+                PostInfo<Unit, Unit, String>(
                     summary = "Pull business partner data from BPDM and issue or update verifiable credentials",
                     description = "Pull business partner data from BPDM and issue" +
                             "or update related verifiable credentials",
