@@ -26,9 +26,7 @@ import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataS
 
 class BusinessPartnerDataMockedService: BusinessPartnerDataService {
 
-    override suspend fun issueAndUpdateCatenaXCredentials(businessPartnerData: BusinessPartnerDataUpdateRequestDto) {
-
-    }
+    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync() {}
 
     override suspend fun <T> issueAndStoreCatenaXCredentialsAsync(
         bpn: String,

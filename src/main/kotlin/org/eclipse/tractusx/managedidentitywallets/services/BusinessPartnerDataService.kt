@@ -20,11 +20,15 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.Deferred
-import org.eclipse.tractusx.managedidentitywallets.models.BusinessPartnerDataUpdateRequestDto
+import io.ktor.client.*
+import io.ktor.client.features.logging.*
+import io.ktor.client.features.observer.*
+import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
+import org.slf4j.LoggerFactory
 
 interface BusinessPartnerDataService {
 
-    suspend fun issueAndUpdateCatenaXCredentials(businessPartnerData: BusinessPartnerDataUpdateRequestDto)
+    suspend fun pullDataAndUpdateCatenaXCredentialsAsync()
 
     suspend fun<T> issueAndStoreCatenaXCredentialsAsync(
         bpn: String,
@@ -33,8 +37,27 @@ interface BusinessPartnerDataService {
     ): Deferred<Boolean>
 
     companion object {
-        fun createBusinessPartnerDataService(walletService: WalletService): BusinessPartnerDataService {
-            return BusinessPartnerDataServiceImpl(walletService)
+        private val log = LoggerFactory.getLogger(this::class.java)
+
+        fun createBusinessPartnerDataService(walletService: WalletService,
+                                             bpdmConfig: BPDMConfig
+        ): BusinessPartnerDataService {
+            return BusinessPartnerDataServiceImpl(
+                walletService,
+                bpdmConfig,
+                HttpClient() {
+                    expectSuccess = true
+                    install(ResponseObserver) {
+                        onResponse { response ->
+                            log.debug("HTTP status: ${response.status.value}")
+                            log.debug("HTTP description: ${response.status.description}")
+                        }
+                    }
+                    install(Logging) {
+                        logger = Logger.DEFAULT
+                        level = LogLevel.BODY
+                    }
+                })
         }
     }
 }

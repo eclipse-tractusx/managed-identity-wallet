@@ -11,4 +11,6 @@
     <logger name="Exposed" level="${LOG_LEVEL_EXPOSED}"> </logger>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
+    <logger name="org.jobrunr" level="INFO"/>
+    <logger name="com.zaxxer" level="INFO"/>
 </configuration>

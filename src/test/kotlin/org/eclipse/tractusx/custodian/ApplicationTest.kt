@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.custodian
 
 import io.ktor.http.*
 
@@ -25,16 +25,12 @@ import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
 import com.auth0.jwt.interfaces.RSAKeyProvider
 import io.ktor.application.*
-import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.testing.*
 import io.ktor.config.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.client.statement.*
 import kotlinx.coroutines.*
 
 import kotlin.test.*
@@ -42,6 +38,8 @@ import kotlin.test.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.builtins.*
 import kotlinx.serialization.decodeFromString
+import org.eclipse.tractusx.managedidentitywallets.AcaPyMockedService
+import org.eclipse.tractusx.managedidentitywallets.BusinessPartnerDataMockedService
 
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
@@ -49,17 +47,10 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRespon
 
 import org.eclipse.tractusx.managedidentitywallets.routes.*
 import org.eclipse.tractusx.managedidentitywallets.services.*
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.VerifiableCredentials
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallets
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.*
 import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
-
 import java.security.KeyPairGenerator
-import java.security.spec.ECGenParameterSpec
-import java.security.KeyPair
 import java.security.interfaces.*
 import java.sql.DriverManager
 import java.util.Base64
@@ -76,7 +67,6 @@ class ApplicationTest {
             // put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
             put("db.jdbcUrl", jdbcUrl)
             put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.sqlite.JDBC")
-            put("datapool.url", System.getenv("CX_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
             put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
             put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: ":indy:test")
             put("acapy.adminApiKey", System.getenv("ACAPY_ADMIN_API_KEY") ?: "Hj23iQUsstG!dde")
@@ -92,8 +82,10 @@ class ApplicationTest {
             put("auth.clientId", System.getenv("CX_AUTH_CLIENT_ID") ?: "clientId")
             put("auth.clientSecret", System.getenv("CX_AUTH_CLIENT_SECRET") ?: "clientSecret")
             put("auth.redirectUrl", System.getenv("CX_AUTH_REDIRECT_URL") ?: "http://localhost:8080/callback")
+
+            put("bpdm.datapoolUrl", System.getenv("BPDM_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
         }
-        // just a keepAliveConnection 
+        // just a keepAliveConnection
         DriverManager.getConnection(jdbcUrl)
     }
 
@@ -130,13 +122,13 @@ class ApplicationTest {
         private val algorithm = Algorithm.RSA256(provider)
 
         fun makeBaseToken(role: String): JWTCreator.Builder = JWT.create()
-                .withSubject("Authentication")
-                .withIssuer(issuerUrl)
-                .withAudience(resourceId)
-                .withClaim("typ", "Bearer")
-                .withClaim("resource_access", mapOf(JwtConfig.resourceId to mapOf(AuthConstants.ROLES to arrayOf(role))))
-                .withExpiresAt(getExpiration())
-        
+            .withSubject("Authentication")
+            .withIssuer(issuerUrl)
+            .withAudience(resourceId)
+            .withClaim("typ", "Bearer")
+            .withClaim("resource_access", mapOf(resourceId to mapOf(AuthConstants.ROLES to arrayOf(role))))
+            .withExpiresAt(getExpiration())
+
         fun makeToken(role: String, bpn: String? = null): String {
             if (!bpn.isNullOrEmpty()) {
                 return makeBaseToken(role).withClaim("BPN", bpn).sign(algorithm)
@@ -171,8 +163,8 @@ class ApplicationTest {
         }
 
         /**
-        * Calculate the expiration Date based on current time + the given validity
-        */
+         * Calculate the expiration Date based on current time + the given validity
+         */
         private fun getExpiration() = Date(System.currentTimeMillis() + validityInMs)
 
     }
@@ -435,7 +427,7 @@ class ApplicationTest {
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
-"""
+                        """
 {
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
@@ -476,7 +468,7 @@ class ApplicationTest {
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
-"""
+                        """
 {
     "holderIdentifier": "$DEFAULT_BPN",
     "verifiableCredentials": [
@@ -551,7 +543,7 @@ class ApplicationTest {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
                     addHeader(HttpHeaders.Authorization, "Bearer $CREATE_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())       
+                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody("wrong:json")
                 }.apply {
                     assertEquals(HttpStatusCode.Created, response.status())
@@ -674,7 +666,7 @@ class ApplicationTest {
             assertTrue(exception.message!!.contains("non_existing_bpn not found"))
 
             exception = assertFailsWith<NotFoundException> {
-               handleRequest(HttpMethod.Post, "/api/wallets/non_base_bpn/public") {
+                handleRequest(HttpMethod.Post, "/api/wallets/non_base_bpn/public") {
                     addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -715,187 +707,10 @@ class ApplicationTest {
             appRoutes(walletService, bpdService)
             configureSerialization()
         }) {
-            handleRequest(HttpMethod.Post, "/api/businessPartnerData") {
+            handleRequest(HttpMethod.Put, "/api/refreshBusinessPartnerData") {
                 addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-"""{
-  "bpn": "BPNL000000000001",
-  "identifiers": [
-    {
-      "uuid": "089e828d-01ed-4d3e-ab1e-cccca26814b3",
-      "value": "BPNL000000000001",
-      "type": {
-        "technicalKey": "BPN",
-        "name": "Business Partner Number",
-        "url": ""
-      },
-      "issuingBody": {
-        "technicalKey": "CATENAX",
-        "name": "Catena-X",
-        "url": ""
-      },
-      "status": {
-        "technicalKey": "UNKNOWN",
-        "name": "Unknown"
-      }
-    }
-  ],
-  "names": [
-    {
-      "uuid": "de3f3db6-e337-436b-a4e0-fc7d17e8af89",
-      "value": "German Car Company",
-      "shortName": "GCC",
-      "type": {
-        "technicalKey": "REGISTERED",
-        "name": "The main name under which a business is officially registered in a country's business register.",
-        "url": ""
-      },
-      "language": {
-        "technicalKey": "undefined",
-        "name": "Undefined"
-      }
-    },
-    {
-      "uuid": "defc3da4-92ef-44d9-9aee-dcedc2d72e0e",
-      "value": "German Car Company",
-      "shortName": "GCC",
-      "type": {
-        "technicalKey": "INTERNATIONAL",
-        "name": "The international version of the local name of a business partner",
-        "url": ""
-      },
-      "language": {
-        "technicalKey": "undefined",
-        "name": "Undefined"
-      }
-    }
-  ],
-  "legalForm": {
-    "technicalKey": "DE_AG",
-    "name": "Aktiengesellschaft",
-    "url": "",
-    "mainAbbreviation": "AG",
-    "language": {
-      "technicalKey": "de",
-      "name": "German"
-    },
-    "categories": [
-      {
-        "name": "AG",
-        "url": ""
-      }
-    ]
-  },
-  "status": null,
-  "addresses": [
-    {
-      "uuid": "16701107-9559-4fdf-b1c1-8c98799d779d",
-      "version": {
-        "characterSet": {
-          "technicalKey": "WESTERN_LATIN_STANDARD",
-          "name": "Western Latin Standard (ISO 8859-1; Latin-1)"
-        },
-        "language": {
-          "technicalKey": "en",
-          "name": "English"
-        }
-      },
-      "careOf": null,
-      "contexts": [],
-      "country": {
-        "technicalKey": "DE",
-        "name": "Germany"
-      },
-      "administrativeAreas": [
-        {
-          "uuid": "cc6de665-f8eb-45ed-b2bd-6caa28fa8368",
-          "value": "Bavaria",
-          "shortName": "BY",
-          "fipsCode": "GM02",
-          "type": {
-            "technicalKey": "REGION",
-            "name": "Region",
-            "url": ""
-          },
-          "language": {
-            "technicalKey": "en",
-            "name": "English"
-          }
-        }
-      ],
-      "postCodes": [
-        {
-          "uuid": "8a02b3d0-de1e-49a5-9528-cfde2d5273ed",
-          "value": "80807",
-          "type": {
-            "technicalKey": "REGULAR",
-            "name": "Regular",
-            "url": ""
-          }
-        }
-      ],
-      "localities": [
-        {
-          "uuid": "2cd18685-fac9-49f4-a63b-322b28f7dc9a",
-          "value": "Munich",
-          "shortName": "M",
-          "type": {
-            "technicalKey": "CITY",
-            "name": "City",
-            "url": ""
-          },
-          "language": {
-            "technicalKey": "en",
-            "name": "English"
-          }
-        }
-      ],
-      "thoroughfares": [
-        {
-          "uuid": "0c491424-b2bc-44cf-9d14-71cbe513423f",
-          "value": "Muenchner Straße 34",
-          "name": "Muenchner Straße",
-          "shortName": null,
-          "number": "34",
-          "direction": null,
-          "type": {
-            "technicalKey": "STREET",
-            "name": "Street",
-            "url": ""
-          },
-          "language": {
-            "technicalKey": "en",
-            "name": "English"
-          }
-        }
-      ],
-      "premises": [],
-      "postalDeliveryPoints": [],
-      "geographicCoordinates": null,
-      "types": [
-        {
-          "technicalKey": "HEADQUARTER",
-          "name": "Headquarter",
-          "url": ""
-        }
-      ]
-    }
-  ],
-  "profileClassifications": [],
-  "types": [
-    {
-      "technicalKey": "LEGAL_ENTITY",
-      "name": "Legal Entity",
-      "url": ""
-    }
-  ],
-  "bankAccounts": [],
-  "roles": [],
-  "relations": []
-}"""
-                )
             }.apply {
                 assertEquals(HttpStatusCode.Accepted, response.status())
             }
@@ -1137,18 +952,18 @@ class ApplicationTest {
                 "Verifiable credential http://example.edu/credentials/3735 expired 2021-06-17T18:56:59Z"))
 
             var vpWithFutureVC = """
-                {
+                 {
                     "@context": [
                         "https://www.w3.org/2018/credentials/v1"
                     ],
-                    "id": "3dc8c2c7-5318-4b23-92e4-71a1687ca4fe",
+                    "id": "7aed00f7-8e04-4093-b467-9bd084b42086",
                     "type": [
                         "VerifiablePresentation"
                     ],
                     "holder": "did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP",
                     "verifiableCredential": [
                         {
-                            "id": "http://example.edu/credentials/3735",
+                            "id": "http://example.edu/credentials/3888",
                             "@context": [
                                 "https://www.w3.org/2018/credentials/v1",
                                 "https://www.w3.org/2018/credentials/examples/v1"
@@ -1158,8 +973,8 @@ class ApplicationTest {
                                 "VerifiableCredential"
                             ],
                             "issuer": "did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb",
-                            "issuanceDate": "2025-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
+                            "issuanceDate": "2999-06-16T18:56:59Z",
+                            "expirationDate": "2999-06-17T18:56:59Z",
                             "credentialSubject": {
                                 "givenName": "TestAfterQuestion",
                                 "familyName": "Student",
@@ -1173,19 +988,19 @@ class ApplicationTest {
                             },
                             "proof": {
                                 "type": "Ed25519Signature2018",
-                                "created": "2022-07-13T14:39:53Z",
+                                "created": "2022-07-21T13:17:21Z",
                                 "proofPurpose": "assertionMethod",
                                 "verificationMethod": "did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..by5y38wWSptUtkN3y-wgPP1zmOinaO54j1_8THLPThnOTMGGheW7ZuuFR0GoNYMQzfKf0_UxsICCe8QgCq8dAg"
+                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..CvGRIw0aqQrXsXy1n3ChGfN1xs0Y56eiwS3spTlf_Ph4l5OQSFKId7SKNxBpFfI4GaQMKi8ajDVXvaIdT-N0DA"
                             }
                         }
                     ],
                     "proof": {
                         "type": "Ed25519Signature2018",
-                        "created": "2022-07-13T14:40:10Z",
+                        "created": "2022-07-21T13:18:07Z",
                         "proofPurpose": "assertionMethod",
                         "verificationMethod": "did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..DC1O21uovuhz3t4vH_aXxBZY3QKVuVtGaghzfYgCYA2wneuwHSqDDchpcXH8v168yXlkoB-0mzk0DUcPOjMsBQ"
+                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..pnipnhAJ34b9k8kBpRJfEAOdbiaSZK38TAJveSYyoBrKAMhF3DAJ_b0pChHvgghzy9QiAsal5ZFkl5fakIGwAg"
                     }
                 }
             """.trimIndent()
@@ -1199,8 +1014,8 @@ class ApplicationTest {
                 }.apply { }
             }
             assertTrue(issuanceDateException.message!!.contains(
-                "Invalid issuance date 2025-06-16T18:56:59Z " +
-                        "in verifiable credential http://example.edu/credentials/3735"))
+                "Invalid issuance date 2999-06-16T18:56:59Z " +
+                        "in verifiable credential http://example.edu/credentials/3888"))
 
             var vpWithVcWithoutProof = """
                 {
@@ -1312,15 +1127,15 @@ class ApplicationTest {
             }
             """.trimIndent()
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
-                    addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
-                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(vpWithoutHolder)
-                }.apply {
-                    var output = Json.decodeFromString<VerifyResponse>(response.content!!)
-                    assertEquals(HttpStatusCode.OK, response.status())
-                    assertTrue { output.valid }
-                }
+                addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(vpWithoutHolder)
+            }.apply {
+                var output = Json.decodeFromString<VerifyResponse>(response.content!!)
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertTrue { output.valid }
+            }
 
             // clean up created wallets
             runBlocking {

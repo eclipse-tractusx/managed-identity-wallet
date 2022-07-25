@@ -51,6 +51,11 @@ dependencies {
 
     implementation("io.bkbn:kompendium-core:$kompendium_version")
     implementation("io.bkbn:kompendium-auth:$kompendium_version")
+
+    implementation("com.github.kibertoad:ktor-scheduler:1.0.4")
+    implementation("org.jobrunr:jobrunr:4.0.5")
+    implementation("org.postgresql:postgresql:42.4.0")
+
     // for now: using kotlinx.serialization
     // implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7")
     // for now: using redocs instead of swagger ui
@@ -68,6 +73,5 @@ dependencies {
     testImplementation(kotlin("test"))
 
     runtimeOnly("org.xerial:sqlite-jdbc:3.36.0.3")
-    runtimeOnly("org.postgresql:postgresql:42.2.25")
 
 }

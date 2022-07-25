@@ -78,7 +78,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"acapy_666_name\",\n    \"bpn\": \"bpn666\"\n}",
+					"raw": "{\n    \"name\": \"acapy_BPNL0897_name\",\n    \"bpn\": \"BPNL0897\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -142,14 +142,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/bpn555?withCredentials=true",
+					"raw": "{{custodian_url}}/api/wallets/BPNL00000000B540?withCredentials=true",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"bpn555"
+						"BPNL00000000B540"
 					],
 					"query": [
 						{
@@ -218,14 +218,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn111",
+					"raw": "{{custodian_url}}/api/didDocuments/BPNL00000000B540",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"didDocuments",
-						"bpn111"
+						"BPNL00000000B540"
 					]
 				}
 			},
@@ -248,7 +248,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3888\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn666\",\n    \"issuanceDate\": \"2025-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\"\n    },\n    \"holderIdentifier\": \"bpn666\"\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3888\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2999-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\"\n    },\n    \"holderIdentifier\": \"bpn333\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -323,7 +323,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"holderIdentifier\": \"did:indy:local:test:JPbsf8GpUYiavsK95SGpge\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/3888\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:JPbsf8GpUYiavsK95SGpge\",\n            \"issuanceDate\": \"2025-06-16T18:56:59Z\",\n            \"expirationDate\": \"2026-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master1\",\n                    \"degreeType\": \"Undergraduate2\",\n                    \"name\": \"Master of Test11\"\n                },\n                \"college\": \"Test2\",\n                \"id\": \"did:indy:local:test:JPbsf8GpUYiavsK95SGpge\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-07-15T09:37:53Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:JPbsf8GpUYiavsK95SGpge#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..83LdD5thKn4GAMmSam7PWT9_TFROnSAyFU6nknqc46dQZfnA-y7fZTlvn_80P5zY8l7et0RaJHqbn9WFXN-IDw\"\n            }\n        }\n    ]\n}",
+					"raw": "{\n    \"holderIdentifier\": \"bpn333\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/3888\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb\",\n            \"issuanceDate\": \"2999-06-16T18:56:59Z\",\n            \"expirationDate\": \"2999-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student\",\n                \"degree\": {\n                    \"type\": \"Master1\",\n                    \"degreeType\": \"Undergraduate2\",\n                    \"name\": \"Master of Test11\"\n                },\n                \"college\": \"Test2\",\n                \"id\": \"did:indy:local:test:YHXZLLSLnKxz5D2HQaKXcP\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-07-21T13:17:21Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:indy:local:test:M6Mis1fZKuhEw71GNY3TAb#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..CvGRIw0aqQrXsXy1n3ChGfN1xs0Y56eiwS3spTlf_Ph4l5OQSFKId7SKNxBpFfI4GaQMKi8ajDVXvaIdT-N0DA\"\n            }\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -442,7 +442,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials?issuerIdentifier=bpn555",
+					"raw": "{{custodian_url}}/api/credentials?holderIdentifier=bpn333",
 					"host": [
 						"{{custodian_url}}"
 					],
@@ -458,8 +458,7 @@
 						},
 						{
 							"key": "holderIdentifier",
-							"value": "bpn333",
-							"disabled": true
+							"value": "bpn333"
 						},
 						{
 							"key": "type",
@@ -468,7 +467,8 @@
 						},
 						{
 							"key": "issuerIdentifier",
-							"value": "bpn555"
+							"value": "bpn555",
+							"disabled": true
 						}
 					]
 				}
@@ -654,7 +654,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"bpn\": \"bpn555\",\n    \"identifiers\": [\n        {\n            \"uuid\": \"089e828d-01ed-4d3e-ab1e-cccca26814b3\",\n            \"value\": \"BPNL000000000001\",\n            \"type\": {\n                \"technicalKey\": \"BPN\",\n                \"name\": \"Business Partner Number\",\n                \"url\": \"\"\n            },\n            \"issuingBody\": {\n                \"technicalKey\": \"CATENAX\",\n                \"name\": \"Catena-X\",\n                \"url\": \"\"\n            },\n            \"status\": {\n                \"technicalKey\": \"UNKNOWN\",\n                \"name\": \"Unknown\"\n            }\n        }\n    ],\n    \"names\": [\n        {\n            \"uuid\": \"de3f3db6-e337-436b-a4e0-fc7d17e8af81\",\n            \"value\": \"German Car Company\",\n            \"shortName\": \"GCC\",\n            \"type\": {\n                \"technicalKey\": \"REGISTERED\",\n                \"name\": \"The main name under which a business is officially registered in a country's business register.\",\n                \"url\": \"\"\n            },\n            \"language\": {\n                \"technicalKey\": \"undefined\",\n                \"name\": \"Undefined\"\n            }\n        },\n        {\n            \"uuid\": \"defc3da4-92ef-44d9-9aee-dcedc2d72e0e\",\n            \"value\": \"German Car Company\",\n            \"shortName\": \"GCC\",\n            \"type\": {\n                \"technicalKey\": \"INTERNATIONAL\",\n                \"name\": \"The international version of the local name of a business partner\",\n                \"url\": \"\"\n            },\n            \"language\": {\n                \"technicalKey\": \"undefined\",\n                \"name\": \"Undefined\"\n            }\n        }\n    ],\n    \"legalForm\": {\n        \"technicalKey\": \"DE_AG\",\n        \"name\": \"Aktiengesellschaft\",\n        \"url\": \"\",\n        \"mainAbbreviation\": \"AG\",\n        \"language\": {\n            \"technicalKey\": \"de\",\n            \"name\": \"German\"\n        },\n        \"categories\": [\n            {\n                \"name\": \"AG\"\n            }\n        ]\n    },\n    \"status\": null,\n    \"addresses\": [\n        {\n            \"uuid\": \"16701107-9559-4fdf-b1c1-8c98799d779d\",\n            \"version\": {\n                \"characterSet\": {\n                    \"technicalKey\": \"WESTERN_LATIN_STANDARD\",\n                    \"name\": \"Western Latin Standard (ISO 8859-1; Latin-1)\"\n                },\n                \"language\": {\n                    \"technicalKey\": \"en\",\n                    \"name\": \"English\"\n                }\n            },\n            \"careOf\": \"tete\",\n            \"contexts\": [],\n            \"country\": {\n                \"technicalKey\": \"DE\",\n                \"name\": \"Germany\"\n            },\n            \"administrativeAreas\": [\n                {\n                    \"uuid\": \"cc6de665-f8eb-45ed-b2bd-6caa28fa8368\",\n                    \"value\": \"Bavaria\",\n                    \"shortName\": \"BY\",\n                    \"fipsCode\": \"GM02\",\n                    \"type\": {\n                        \"technicalKey\": \"REGION\",\n                        \"name\": \"Region\",\n                        \"url\": \"\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"en\",\n                        \"name\": \"English\"\n                    }\n                }\n            ],\n            \"postCodes\": [\n                {\n                    \"uuid\": \"8a02b3d0-de1e-49a5-9528-cfde2d5273ed\",\n                    \"value\": \"80807\",\n                    \"type\": {\n                        \"technicalKey\": \"REGULAR\",\n                        \"name\": \"Regular\",\n                        \"url\": \"\"\n                    }\n                }\n            ],\n            \"localities\": [\n                {\n                    \"uuid\": \"2cd18685-fac9-49f4-a63b-322b28f7dc9a\",\n                    \"value\": \"Munich\",\n                    \"shortName\": \"M\",\n                    \"type\": {\n                        \"technicalKey\": \"CITY\",\n                        \"name\": \"City\",\n                        \"url\": \"\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"en\",\n                        \"name\": \"English\"\n                    }\n                }\n            ],\n            \"thoroughfares\": [\n                {\n                    \"uuid\": \"0c491424-b2bc-44cf-9d14-71cbe513423f\",\n                    \"value\": \"Muenchner Straße 34\",\n                    \"name\": \"Muenchner Straße\",\n                    \"shortName\": null,\n                    \"number\": \"34\",\n                    \"direction\": null,\n                    \"type\": {\n                        \"technicalKey\": \"STREET\",\n                        \"name\": \"Street\",\n                        \"url\": \"\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"en\",\n                        \"name\": \"English\"\n                    }\n                }\n            ],\n            \"premises\": [],\n            \"postalDeliveryPoints\": [],\n            \"geographicCoordinates\": null,\n            \"types\": [\n                {\n                    \"technicalKey\": \"HEADQUARTER\",\n                    \"name\": \"Headquarter\",\n                    \"url\": \"\"\n                }\n            ]\n        }\n    ],\n    \"profileClassifications\": [],\n    \"types\": [\n        {\n            \"technicalKey\": \"LEGAL_ENTITY\",\n            \"name\": \"Legal Entity\",\n            \"url\": \"\"\n        }\n    ],\n    \"bankAccounts\": [\n        {\n            \"uuid\": \"de3f3db6-e337-436b-a4e0-fc7d17e8af89\",\n            \"trustScores\": [\n                1.22,\n                3.2,\n                4.4\n            ],\n            \"nationalBankIdentifier\": \"nationalBankIdentifier1\",\n            \"nationalBankAccountIdentifier\": \"nationalBankAccountIdentifier1\",\n            \"internationalBankIdentifier\": \"internationalBankIdentifier1\",\n            \"internationalBankAccountIdentifier\": \"internationalBankAccountIdentifier1\",\n            \"currency\": {\n                \"technicalKey\": \"EU\",\n                \"name\": \"Euro\"\n            }\n        }\n    ],\n    \"roles\": [],\n    \"relations\": []\n}",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -662,13 +662,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/businessPartnerData",
+					"raw": "{{custodian_url}}/api/refreshBusinessPartnerData",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
-						"businessPartnerData"
+						"refreshBusinessPartnerData"
 					]
 				}
 			},
