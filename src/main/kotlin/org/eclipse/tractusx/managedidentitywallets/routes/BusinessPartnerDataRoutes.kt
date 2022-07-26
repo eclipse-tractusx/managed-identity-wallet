@@ -35,7 +35,7 @@ import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataS
 
 fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerDataService) {
 
-    route("/refreshBusinessPartnerData") {
+    route("/businessPartnerDataRefresh") {
 
         notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
             notarizedPost(

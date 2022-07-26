@@ -33,7 +33,6 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Wall
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
-import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataServiceImpl
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 import org.slf4j.LoggerFactory
@@ -112,7 +111,5 @@ fun Application.module(testing: Boolean = false) {
     appRoutes(walletService, businessPartnerDataService)
     configurePersistence()
 
-    if (!testing) {
-        configureJobs()
-    }
+    configureJobs()
 }

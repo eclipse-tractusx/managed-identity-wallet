@@ -33,6 +33,7 @@ import javax.sql.DataSource
 
 fun Application.configureJobs() {
     val jdbcUrl = environment.config.property("db.jdbcUrl").getString()
+    val pullDataAtHour = environment.config.property("bpdm.pullDataAtHour").getString().toInt()
 
     install(Scheduler) {
         storageProvider = PostgresStorageProvider(initDatabase(jdbcUrl))
@@ -40,7 +41,7 @@ fun Application.configureJobs() {
     }
 
     schedule {
-        recurringJob("bpdm-update", Cron.daily()) {
+        recurringJob("bpdm-update", Cron.daily(pullDataAtHour)) {
             runJobPayload()
         }
     }

@@ -28,13 +28,13 @@ import io.ktor.http.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.*
 
 class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
@@ -95,37 +95,40 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
     }
 
     override suspend fun pullDataAndUpdateCatenaXCredentialsAsync() {
-        val listOfBpns = walletService.getAllBpns()
-        var now = LocalDateTime.now()
+        val listOfBPNs = walletService.getAllBpns()
         var accessToken = getAccessToken()
-        var expireAt = now.plusSeconds(accessToken.expiresIn.toLong())
-        listOfBpns.forEach { bpn ->
-            try {
-                now = LocalDateTime.now()
-                if (now.isAfter(expireAt)) {
-                    accessToken = getAccessToken()
-                    expireAt = now.plusSeconds(accessToken.expiresIn.toLong())
+        listOfBPNs.forEach { bpn ->
+            var businessPartnerData: BusinessPartnerDataDto;
+            var businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
+            if (businessPartnerDataResponse.status == HttpStatusCode.Unauthorized) {
+                accessToken = getAccessToken() // Get new Access Token
+                businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
+            }
+            when (businessPartnerDataResponse.status) {
+                HttpStatusCode.OK -> {
+                    businessPartnerData = Json.decodeFromString(businessPartnerDataResponse.readText())
+                    issueAndUpdateCatenaXCredentials(businessPartnerData)
+                    delay(300000)
                 }
-                issueAndUpdateCatenaXCredentials(getBusinessPartnerData(bpn, accessToken.accessToken))
-            } catch (e: Exception) {
-                if (!e.message.isNullOrBlank() && "Not Found" in e.message!!) {
+                HttpStatusCode.NotFound -> {
                     log.warn("BPN $bpn does not not exist!")
-                } else {
-                    log.error("Getting Business data of bpn $bpn has thrown an error ${e.message}")
+                }
+                else -> {
+                    log.error("Getting Business data of bpn $bpn has thrown " +
+                            "an error with details ${businessPartnerDataResponse.readText()}")
                 }
             }
         }
     }
 
-    private suspend fun getBusinessPartnerData(bpn: String, accessToken: String): BusinessPartnerDataDto {
+    private suspend fun getBusinessPartnerDataResponse(bpn: String, accessToken: String): HttpResponse {
         // This method need to be replaced by a better and more scalable one to get Data of all Business Partner
         val requestUrl = "${bpdmConfig.url}/api/catena/business-partner/$bpn?idType=BPN"
-        val response: HttpResponse = client.get(requestUrl) {
+        return client.get(requestUrl) {
             headers {
                 append(HttpHeaders.Authorization, "Bearer $accessToken")
             }
         }
-        return Json.decodeFromString(response.readText())
     }
 
     private suspend fun getAccessToken(): AccessToken {

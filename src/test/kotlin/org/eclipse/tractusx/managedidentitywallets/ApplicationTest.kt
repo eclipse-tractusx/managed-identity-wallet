@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.custodian
+package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.http.*
 
@@ -25,6 +25,7 @@ import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
 import com.auth0.jwt.interfaces.RSAKeyProvider
 import io.ktor.application.*
+import io.ktor.client.statement.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
@@ -707,13 +708,209 @@ class ApplicationTest {
             appRoutes(walletService, bpdService)
             configureSerialization()
         }) {
-            handleRequest(HttpMethod.Post, "/api/refreshBusinessPartnerData") {
+            handleRequest(HttpMethod.Post, "/api/businessPartnerDataRefresh") {
                 addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.Accepted, response.status())
             }
+        }
+    }
+
+    @Test
+    fun testBusinessPartnerDataModel() {
+        withTestApplication({
+            setupEnvironment(environment)
+            configurePersistence()
+            configureOpenAPI()
+            configureSecurity()
+            configureRouting(walletService)
+            appRoutes(walletService, bpdService)
+            configureSerialization()
+        }) {
+            val businessPartnerDataAsJson =
+                """{
+  "bpn": "BPNL000000000001",
+  "identifiers": [
+    {
+      "uuid": "089e828d-01ed-4d3e-ab1e-cccca26814b3",
+      "value": "BPNL000000000001",
+      "type": {
+        "technicalKey": "BPN",
+        "name": "Business Partner Number",
+        "url": ""
+      },
+      "issuingBody": {
+        "technicalKey": "CATENAX",
+        "name": "Catena-X",
+        "url": ""
+      },
+      "status": {
+        "technicalKey": "UNKNOWN",
+        "name": "Unknown"
+      }
+    }
+  ],
+  "names": [
+    {
+      "uuid": "de3f3db6-e337-436b-a4e0-fc7d17e8af89",
+      "value": "German Car Company",
+      "shortName": "GCC",
+      "type": {
+        "technicalKey": "REGISTERED",
+        "name": "The main name under which a business is officially registered in a country's business register.",
+        "url": ""
+      },
+      "language": {
+        "technicalKey": "undefined",
+        "name": "Undefined"
+      }
+    },
+    {
+      "uuid": "defc3da4-92ef-44d9-9aee-dcedc2d72e0e",
+      "value": "German Car Company",
+      "shortName": "GCC",
+      "type": {
+        "technicalKey": "INTERNATIONAL",
+        "name": "The international version of the local name of a business partner",
+        "url": ""
+      },
+      "language": {
+        "technicalKey": "undefined",
+        "name": "Undefined"
+      }
+    }
+  ],
+  "legalForm": {
+    "technicalKey": "DE_AG",
+    "name": "Aktiengesellschaft",
+    "url": "",
+    "mainAbbreviation": "AG",
+    "language": {
+      "technicalKey": "de",
+      "name": "German"
+    },
+    "categories": [
+      {
+        "name": "AG",
+        "url": ""
+      }
+    ]
+  },
+  "status": null,
+  "addresses": [
+    {
+      "uuid": "16701107-9559-4fdf-b1c1-8c98799d779d",
+      "version": {
+        "characterSet": {
+          "technicalKey": "WESTERN_LATIN_STANDARD",
+          "name": "Western Latin Standard (ISO 8859-1; Latin-1)"
+        },
+        "language": {
+          "technicalKey": "en",
+          "name": "English"
+        }
+      },
+      "careOf": null,
+      "contexts": [],
+      "country": {
+        "technicalKey": "DE",
+        "name": "Germany"
+      },
+      "administrativeAreas": [
+        {
+          "uuid": "cc6de665-f8eb-45ed-b2bd-6caa28fa8368",
+          "value": "Bavaria",
+          "shortName": "BY",
+          "fipsCode": "GM02",
+          "type": {
+            "technicalKey": "REGION",
+            "name": "Region",
+            "url": ""
+          },
+          "language": {
+            "technicalKey": "en",
+            "name": "English"
+          }
+        }
+      ],
+      "postCodes": [
+        {
+          "uuid": "8a02b3d0-de1e-49a5-9528-cfde2d5273ed",
+          "value": "80807",
+          "type": {
+            "technicalKey": "REGULAR",
+            "name": "Regular",
+            "url": ""
+          }
+        }
+      ],
+      "localities": [
+        {
+          "uuid": "2cd18685-fac9-49f4-a63b-322b28f7dc9a",
+          "value": "Munich",
+          "shortName": "M",
+          "type": {
+            "technicalKey": "CITY",
+            "name": "City",
+            "url": ""
+          },
+          "language": {
+            "technicalKey": "en",
+            "name": "English"
+          }
+        }
+      ],
+      "thoroughfares": [
+        {
+          "uuid": "0c491424-b2bc-44cf-9d14-71cbe513423f",
+          "value": "Muenchner Straße 34",
+          "name": "Muenchner Straße",
+          "shortName": null,
+          "number": "34",
+          "direction": null,
+          "type": {
+            "technicalKey": "STREET",
+            "name": "Street",
+            "url": ""
+          },
+          "language": {
+            "technicalKey": "en",
+            "name": "English"
+          }
+        }
+      ],
+      "premises": [],
+      "postalDeliveryPoints": [],
+      "geographicCoordinates": null,
+      "types": [
+        {
+          "technicalKey": "HEADQUARTER",
+          "name": "Headquarter",
+          "url": ""
+        }
+      ]
+    }
+  ],
+  "profileClassifications": [],
+  "types": [
+    {
+      "technicalKey": "LEGAL_ENTITY",
+      "name": "Legal Entity",
+      "url": ""
+    }
+  ],
+  "bankAccounts": [],
+  "roles": [],
+  "sites": [],
+  "relations": [],
+  "currentness": "2022-06-03T11:46:15.143429Z"
+}""".trimIndent()
+            var data: BusinessPartnerDataDto = Json.decodeFromString(businessPartnerDataAsJson)
+            assertEquals(data.bpn,"BPNL000000000001")
+            assertEquals(data.identifiers[0].issuingBody!!.name,"Catena-X")
+            assertEquals(data.roles, emptyList())
         }
     }
 

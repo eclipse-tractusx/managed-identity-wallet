@@ -46,7 +46,7 @@ interface BusinessPartnerDataService {
                 walletService,
                 bpdmConfig,
                 HttpClient() {
-                    expectSuccess = true
+                    expectSuccess = false // must set to false, to handle thrown error if access token has expired
                     install(ResponseObserver) {
                         onResponse { response ->
                             log.debug("HTTP status: ${response.status.value}")

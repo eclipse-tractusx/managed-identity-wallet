@@ -595,43 +595,39 @@
 			"response": []
 		},
 		{
-			"name": "Post created catena-x wallet",
+			"name": "Public created Catena-X wallet",
 			"request": {
 				"auth": {
 					"type": "bearer",
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3YWxsZXRfaWQiOiI4Nzc2NTNjMy00OGVhLTQ3ZWItODc3ZS00NjY0MmIzZDU4NzEiLCJpYXQiOjE2NTc2OTk1NjJ9.gD6w6aQBuQlbFqqAyyE1bR3G9TEh2Ijq2lAyXwpoJtE",
+							"value": "{{access_token}}",
 							"type": "string"
 						}
 					]
 				},
 				"method": "POST",
-				"header": [
-					{
-						"key": "x-api-key",
-						"value": "Hj23iQUsstG!dde",
-						"type": "default"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:11000/wallet/did/public?did=M6Mis1fZKuhEw71GNY3TAb",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "11000",
-					"path": [
-						"wallet",
-						"did",
-						"public"
-					],
-					"query": [
-						{
-							"key": "did",
-							"value": "M6Mis1fZKuhEw71GNY3TAb"
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"verKey\": \"<your verkey here>\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
 						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/wallets/BPNL000000000000/public",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"BPNL000000000000",
+						"public"
 					]
 				}
 			},
@@ -662,13 +658,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/refreshBusinessPartnerData",
+					"raw": "{{custodian_url}}/api/businessPartnerDataRefresh",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
-						"refreshBusinessPartnerData"
+						"businessPartnerDataRefresh"
 					]
 				}
 			},

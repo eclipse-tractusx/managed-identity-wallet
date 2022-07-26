@@ -157,6 +157,7 @@ below. Here a few hints on how to set it up:
 15. `BPDM_AUTH_GRANT_TYPE`: specify the expected grant type e.g. `client_credentials`
 15. `BPDM_AUTH_SCOPE`: specify the expected scope e.g. `openid`
 15. `BPDM_AUTH_URL`: specify the url to get the access token of `BPDM` e.g. `https://centralidp.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token`
+15. `BPDM_PULL_DATA_AT_HOUR`: specify at which hour (24-hour clock) the cron job should pull the data from the `BPDM` e.g. `23`
 
 ## Local development environment <a id= "localDevelopmentEnvironment"></a>
 
