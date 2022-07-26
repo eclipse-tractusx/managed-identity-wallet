@@ -53,7 +53,7 @@ dependencies {
     implementation("io.bkbn:kompendium-auth:$kompendium_version")
 
     implementation("com.github.kibertoad:ktor-scheduler:1.0.4")
-    implementation("org.jobrunr:jobrunr:4.0.5")
+    implementation("org.jobrunr:jobrunr:5.1.6")
     implementation("org.postgresql:postgresql:42.4.0")
 
     // for now: using kotlinx.serialization
