@@ -33,12 +33,16 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Wall
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
-import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataServiceImpl
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+
+object Services {
+    lateinit var businessPartnerDataService: BusinessPartnerDataService
+    lateinit var walletService: WalletService
+}
 
 fun Application.module(testing: Boolean = false) {
 
@@ -90,9 +94,22 @@ fun Application.module(testing: Boolean = false) {
         baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
     )
     val walletService = WalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository)
-    val businessPartnerDataService = BusinessPartnerDataService.createBusinessPartnerDataService(walletService)
+    val bpdmConfig = BPDMConfig(
+        url = environment.config.property("bpdm.datapoolUrl").getString(),
+        tokenUrl = environment.config.property("bpdm.authUrl").getString(),
+        clientId = environment.config.property("bpdm.clientId").getString(),
+        clientSecret = environment.config.property("bpdm.clientSecret").getString(),
+        scope = environment.config.property("bpdm.scope").getString(),
+        grantType = environment.config.property("bpdm.grantType").getString()
+    )
+    val businessPartnerDataService = BusinessPartnerDataService.createBusinessPartnerDataService(walletService,
+        bpdmConfig)
+    Services.businessPartnerDataService = businessPartnerDataService
+    Services.walletService = walletService
     configureRouting(walletService)
-    appRoutes(walletService, businessPartnerDataService)
 
+    appRoutes(walletService, businessPartnerDataService)
     configurePersistence()
+
+    configureJobs()
 }

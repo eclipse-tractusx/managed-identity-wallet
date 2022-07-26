@@ -20,17 +20,26 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import foundation.identity.jsonld.JsonLDUtils
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
-class BusinessPartnerDataServiceImpl(private val walletService: WalletService) : BusinessPartnerDataService {
-
+class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
+                                     private val bpdmConfig: BPDMConfig,
+                                     private val client: HttpClient): BusinessPartnerDataService {
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
     }
@@ -39,7 +48,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
     //  However, it should be checked if the issued credentials need to be updated, in this case
     //  the old credentials should be revoked and deleted from database and new should be issued
     // TODO: notify if issue credentials failed
-    override suspend fun issueAndUpdateCatenaXCredentials(businessPartnerData: BusinessPartnerDataUpdateRequestDto) {
+    private suspend fun issueAndUpdateCatenaXCredentials(businessPartnerData: BusinessPartnerDataDto) {
         val bpn = businessPartnerData.bpn
         if (businessPartnerData.names.isNotEmpty()) {
             businessPartnerData.names.forEach {
@@ -83,6 +92,55 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
                 )
             }
         }
+    }
+
+    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync() {
+        val listOfBPNs = walletService.getAllBpns()
+        var accessToken = getAccessToken()
+        listOfBPNs.forEach { bpn ->
+            var businessPartnerData: BusinessPartnerDataDto;
+            var businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
+            if (businessPartnerDataResponse.status == HttpStatusCode.Unauthorized) {
+                accessToken = getAccessToken() // Get new Access Token
+                businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
+            }
+            when (businessPartnerDataResponse.status) {
+                HttpStatusCode.OK -> {
+                    businessPartnerData = Json.decodeFromString(businessPartnerDataResponse.readText())
+                    issueAndUpdateCatenaXCredentials(businessPartnerData)
+                }
+                HttpStatusCode.NotFound -> {
+                    log.warn("BPN $bpn does not not exist!")
+                }
+                else -> {
+                    log.error("Getting Business data of bpn $bpn has thrown " +
+                            "an error with details ${businessPartnerDataResponse.readText()}")
+                }
+            }
+        }
+    }
+
+    private suspend fun getBusinessPartnerDataResponse(bpn: String, accessToken: String): HttpResponse {
+        // This method need to be replaced by a better and more scalable one to get Data of all Business Partner
+        val requestUrl = "${bpdmConfig.url}/api/catena/business-partner/$bpn?idType=BPN"
+        return client.get(requestUrl) {
+            headers {
+                append(HttpHeaders.Authorization, "Bearer $accessToken")
+            }
+        }
+    }
+
+    private suspend fun getAccessToken(): AccessToken {
+        val response: HttpResponse = client.submitForm(
+            url = bpdmConfig.tokenUrl,
+            formParameters = Parameters.build {
+                append("client_id", bpdmConfig.clientId)
+                append("grant_type", bpdmConfig.grantType)
+                append("client_secret", bpdmConfig.clientSecret)
+                append("scope", bpdmConfig.scope)
+            }
+        )
+        return Json.decodeFromString(response.readText())
     }
 
     private fun isNewCredential(bpn: String, uuid: String, type: String): Boolean {
@@ -239,6 +297,9 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService) :
         val credSubject = mutableMapOf<String, Any>()
         credSubject["type"] = listOf(JsonLdTypes.ADDRESS_TYPE, JsonLdTypes.CREDENTIAL_TYPE)
         credSubject["uuid"] = address.uuid
+        if (address.bpn != null) {
+            credSubject["bpn"] = address.bpn
+        }
         credSubject["version"] = address.version
         if (address.careOf != null) {
             credSubject["careOf"] = address.careOf

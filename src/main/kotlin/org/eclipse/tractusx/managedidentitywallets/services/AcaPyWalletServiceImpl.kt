@@ -82,6 +82,14 @@ class AcaPyWalletServiceImpl(
         }
     }
 
+    override fun getAllBpns(): List<String> {
+        log.debug("List BPNs of created wallets")
+        return transaction {
+            val listOfWallets = walletRepository.getAll()
+            listOfWallets.map { walletRepository.toObject(it).bpn }
+        }
+    }
+
     override suspend fun registerBaseWallet(verKey: String): Boolean {
         log.debug("Register base wallet with bpn $baseWalletBpn and key $verKey")
         val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)

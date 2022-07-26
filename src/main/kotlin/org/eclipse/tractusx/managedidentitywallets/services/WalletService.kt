@@ -40,6 +40,8 @@ interface WalletService {
 
     fun getAll(): List<WalletDto>
 
+    fun getAllBpns(): List<String>
+
     suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto
 
     suspend fun deleteWallet(identifier: String): Boolean

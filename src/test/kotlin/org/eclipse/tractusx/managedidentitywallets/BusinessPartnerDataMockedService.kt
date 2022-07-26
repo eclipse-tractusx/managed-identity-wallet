@@ -21,14 +21,11 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
-import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
 
 class BusinessPartnerDataMockedService: BusinessPartnerDataService {
 
-    override suspend fun issueAndUpdateCatenaXCredentials(businessPartnerData: BusinessPartnerDataUpdateRequestDto) {
-
-    }
+    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync() {}
 
     override suspend fun <T> issueAndStoreCatenaXCredentialsAsync(
         bpn: String,
