@@ -108,7 +108,6 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
                 HttpStatusCode.OK -> {
                     businessPartnerData = Json.decodeFromString(businessPartnerDataResponse.readText())
                     issueAndUpdateCatenaXCredentials(businessPartnerData)
-                    delay(300000)
                 }
                 HttpStatusCode.NotFound -> {
                     log.warn("BPN $bpn does not not exist!")
