@@ -664,8 +664,7 @@ class ApplicationTest {
 }
 """)
             }.apply {
-                // important is that it isn't Unauthorized
-                assertNotEquals(HttpStatusCode.Unauthorized, response.status())
+                assertEquals(HttpStatusCode.Created, response.status())
             }
 
             // request to store credential, wrong authorization
