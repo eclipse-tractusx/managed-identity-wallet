@@ -419,6 +419,8 @@ class AcaPyWalletServiceImpl(
 
     override fun isCatenaXWallet(bpn: String): Boolean = bpn == baseWalletBpn
 
+    override fun getCatenaXBpn(): String = baseWalletBpn
+
     override suspend fun verifyVerifiablePresentation(vpDto: VerifiablePresentationDto,
                                                       withDateValidation: Boolean): VerifyResponse {
         val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
@@ -431,6 +433,20 @@ class AcaPyWalletServiceImpl(
             }
         }
         return VerifyResponse(error = null, valid = true, vp = vpDto)
+    }
+
+    override fun isDID(identifier: String) : Boolean = identifier.startsWith("did:")
+
+    override fun getDidFromBpn(bpn: String): String = getWallet(bpn, false).did
+
+    override fun getBpnFromDid(did: String): String = getWallet(did, false).bpn
+
+    override fun getBpnFromIdentifier(identifier: String): String {
+        return if (isDID(identifier)) {
+            getWallet(identifier).bpn
+        } else {
+            identifier
+        }
     }
 
     private suspend fun validateVerifiableCredential(
@@ -481,7 +497,7 @@ class AcaPyWalletServiceImpl(
         if (vpDto.proof == null) {
             throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing proof")
         }
-        var didOfVpSigner = if (vpDto.holder.isNullOrEmpty()) {
+        val didOfVpSigner = if (vpDto.holder.isNullOrEmpty()) {
             vpDto.proof.verificationMethod.split("#").first()
         } else {
             vpDto.holder
@@ -557,5 +573,4 @@ class AcaPyWalletServiceImpl(
     private fun replaceNetworkIdentifierWithSov(input: String): String =
         input.replace(":indy:$networkIdentifier:", ":sov:")
 
-    private fun isDID(identifier: String) : Boolean = identifier.startsWith("did:")
 }

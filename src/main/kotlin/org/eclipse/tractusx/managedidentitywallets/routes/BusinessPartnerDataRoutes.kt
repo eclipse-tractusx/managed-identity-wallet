@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets.routes
 
 import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.Notarized.notarizedPost
+import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
 
@@ -37,23 +38,37 @@ fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerD
 
     route("/businessPartnerDataRefresh") {
 
-        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
             notarizedPost(
-                PostInfo<Unit, Unit, String>(
+                PostInfo<BusinessPartnerDataDtoParameter, Unit, String>(
                     summary = "Pull business partner data from BPDM and issue or update verifiable credentials",
                     description = "Pull business partner data from BPDM and issue" +
-                            "or update related verifiable credentials",
+                            "or update related verifiable credentials. " +
+                            "To update a specific wallet give its identifier as a query parameter.",
+                    parameterExamples = setOf(
+                        ParameterExample("identifier", "did", "did:example:0123"),
+                        ParameterExample("identifier", "bpn", "bpn123"),
+                    ),
                     requestInfo = null,
                     responseInfo = ResponseInfo(
                         status = HttpStatusCode.Accepted,
                         description = "Empty response body"
                     ),
                     tags = setOf("BusinessPartnerData"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name,
+                        AuthConstants.JWT_AUTH_UPDATE_SINGLE.name)
                 )
             ) {
-                businessPartnerDataService.pullDataAndUpdateCatenaXCredentialsAsync()
-                call.respond(HttpStatusCode.Accepted)
+                val authorizationResponse = AuthorizationHandler.hasRightToTriggerUpdateOwnBPD(call,
+                    call.request.queryParameters["identifier"])
+                if (!authorizationResponse.valid) {
+                    return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
+                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
+                }
+                businessPartnerDataService.pullDataAndUpdateCatenaXCredentialsAsync(
+                    call.request.queryParameters["identifier"]
+                )
+                return@notarizedPost call.respond(HttpStatusCode.Accepted)
             }
         }
     }

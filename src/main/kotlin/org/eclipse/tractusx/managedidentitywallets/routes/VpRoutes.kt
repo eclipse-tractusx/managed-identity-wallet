@@ -43,17 +43,13 @@ import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidIn
 import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
-import org.slf4j.LoggerFactory
-
 fun Route.vpRoutes(walletService: WalletService) {
-
-    val log = LoggerFactory.getLogger(this::class.java)
 
     route("/presentations") {
         notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
             notarizedPost(
                 PostInfo<Unit, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
-                    summary = "Create Verifiable Presentation ",
+                    summary = "Create Verifiable Presentation",
                     description = "Create a verifiable presentation from a list of verifiable credentials, signed by the holder",
                     requestInfo = RequestInfo(
                         description = "The verifiable presentation input data",
@@ -66,27 +62,24 @@ fun Route.vpRoutes(walletService: WalletService) {
                     ),
                     canThrow = setOf(semanticallyInvalidInputException),
                     tags = setOf("VerifiablePresentations"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name,
+                        AuthConstants.JWT_AUTH_UPDATE_SINGLE.name)
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiablePresentationRequestDto>()
 
-                // verify requested holder with bpn in principal, if only ROLE_UPDATE_WALLET is given
-                val principal = AuthConstants.getPrincipal(call.attributes)
-                if (principal?.role == AuthConstants.ROLE_UPDATE_WALLET && verifiableCredentialDto.holderIdentifier == principal.bpn) {
-                    log.debug("Authorization successful: holder identifier BPN ${verifiableCredentialDto.holderIdentifier} does match requestors BPN ${principal.bpn}!")
+                val authorizationResponse = AuthorizationHandler.hasRightToIssuePresentation(call,
+                    verifiableCredentialDto.holderIdentifier)
+                if (!authorizationResponse.valid) {
+                    return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
+                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
                 }
-                if (principal?.role == AuthConstants.ROLE_UPDATE_WALLET && verifiableCredentialDto.holderIdentifier != principal.bpn) {
-                    log.error("Error: Holder identifier BPN ${verifiableCredentialDto.holderIdentifier} does not match requestors BPN ${principal.bpn}!")
-                    return@notarizedPost call.respondText("Holder identifier BPN ${verifiableCredentialDto.holderIdentifier} does not match requestors BPN ${principal.bpn}!", ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                }
-
                 call.respond(HttpStatusCode.Created, walletService.issuePresentation(verifiableCredentialDto))
             }
         }
 
         route("/validation") {
-            notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW) {
+            notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW, AuthConstants.JWT_AUTH_VIEW_SINGLE) {
                 notarizedPost(
                     PostInfo<WithDateValidation, VerifiablePresentationDto, VerifyResponse>(
                         summary = "Validate Verifiable Presentation",
@@ -109,14 +102,14 @@ fun Route.vpRoutes(walletService: WalletService) {
                         ),
                         canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                         tags = setOf("VerifiablePresentations"),
-                        securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
+                        securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name,
+                            AuthConstants.JWT_AUTH_VIEW_SINGLE.name)
                     )
                 ) {
-                    var withDateValidation = false
                     val verifiablePresentation = call.receive<VerifiablePresentationDto>()
-                    if (call.request.queryParameters["withDateValidation"] != null) {
-                        withDateValidation = call.request.queryParameters["withDateValidation"].toBoolean()
-                    }
+                    val withDateValidation = if (call.request.queryParameters["withDateValidation"] != null) {
+                        call.request.queryParameters["withDateValidation"].toBoolean()
+                    } else { false }
                     val verifyResponse =  walletService.verifyVerifiablePresentation(
                         vpDto = verifiablePresentation,
                         withDateValidation = withDateValidation

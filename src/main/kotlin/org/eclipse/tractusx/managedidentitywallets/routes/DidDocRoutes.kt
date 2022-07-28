@@ -68,7 +68,6 @@ fun Route.didDocRoutes(walletService: WalletService) {
                     ),
                     canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                     tags = setOf("DIDDocument"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
                 )
             ) {
                 val identifier =

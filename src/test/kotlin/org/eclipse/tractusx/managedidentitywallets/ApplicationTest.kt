@@ -25,7 +25,6 @@ import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
 import com.auth0.jwt.interfaces.RSAKeyProvider
 import io.ktor.application.*
-import io.ktor.client.statement.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
@@ -39,8 +38,6 @@ import kotlin.test.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.builtins.*
 import kotlinx.serialization.decodeFromString
-import org.eclipse.tractusx.managedidentitywallets.AcaPyMockedService
-import org.eclipse.tractusx.managedidentitywallets.BusinessPartnerDataMockedService
 
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
@@ -50,6 +47,7 @@ import org.eclipse.tractusx.managedidentitywallets.routes.*
 import org.eclipse.tractusx.managedidentitywallets.services.*
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.*
 import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
+import java.security.KeyPair
 
 import java.security.KeyPairGenerator
 import java.security.interfaces.*
@@ -93,36 +91,36 @@ class ApplicationTest {
     private fun setupEnvironmentWithMissingRoleMapping(environment: ApplicationEnvironment) {
         setupEnvironment(environment)
         (environment.config as MapApplicationConfig).apply {
-            put("auth.roleMappings", System.getenv("CX_AUTH_ROLE_MAPPINGS") ?: "no_create_wallets:create_wallets,no_view_wallets:view_wallets,no_update_wallets:update_wallets,no_delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet")
+            put("auth.roleMappings", value = System.getenv("CX_AUTH_ROLE_MAPPINGS")
+                ?: "no_create_wallets:create_wallets,no_view_wallets:view_wallets,no_update_wallets:update_wallets,no_delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"
+            )
         }
     }
 
     object JwtConfig {
 
-        val issuerUrl = "http://localhost:8081/auth/realms/catenax"
-        val resourceId = "ManagedIdentityWallets"
-
-        private const val secret = "zAP5MBA4B4Ijz0MZaS48"
+        const val issuerUrl = "http://localhost:8081/auth/realms/catenax"
+        const val resourceId = "ManagedIdentityWallets"
         private const val validityInMs = 36_000_00 * 10 // 10 hours
-        val kp = KeyPairGenerator.getInstance("RSA").generateKeyPair()
-        val provider = object : RSAKeyProvider {
+        val kp: KeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair()!!
+        private val provider = object : RSAKeyProvider {
             override fun getPublicKeyById(kid: String): RSAPublicKey {
-                return kp.getPublic() as RSAPublicKey;
+                return kp.public as RSAPublicKey
             }
 
             override fun getPrivateKey(): RSAPrivateKey {
-                return kp.getPrivate() as RSAPrivateKey;
+                return kp.private as RSAPrivateKey
             }
 
             override fun getPrivateKeyId(): String {
-                return "jEpf8fJRWA9Tc7muBqbCGgcqhhzFWIyDeL9GZAv8-zY";
+                return "jEpf8fJRWA9Tc7muBqbCGgcqhhzFWIyDeL9GZAv8-zY"
             }
 
         }
 
         private val algorithm = Algorithm.RSA256(provider)
 
-        fun makeBaseToken(role: String): JWTCreator.Builder = JWT.create()
+        private fun makeBaseToken(role: String): JWTCreator.Builder = JWT.create()
             .withSubject("Authentication")
             .withIssuer(issuerUrl)
             .withAudience(resourceId)
@@ -131,17 +129,17 @@ class ApplicationTest {
             .withExpiresAt(getExpiration())
 
         fun makeToken(role: String, bpn: String? = null): String {
-            if (!bpn.isNullOrEmpty()) {
-                return makeBaseToken(role).withClaim("BPN", bpn).sign(algorithm)
+            return if (!bpn.isNullOrEmpty()) {
+                makeBaseToken(role).withClaim("BPN", bpn).sign(algorithm)
             } else {
-                return makeBaseToken(role).sign(algorithm)
+                makeBaseToken(role).sign(algorithm)
             }
         }
 
         fun jwks(): String {
-            val pubKey = kp.getPublic() as RSAPublicKey
-            val modulus = Base64.getUrlEncoder().encodeToString(pubKey.getModulus().toByteArray())
-            val exponent = Base64.getUrlEncoder().encodeToString(pubKey.getPublicExponent().toByteArray())
+            val pubKey = kp.public as RSAPublicKey
+            val modulus = Base64.getUrlEncoder().encodeToString(pubKey.modulus.toByteArray())
+            val exponent = Base64.getUrlEncoder().encodeToString(pubKey.publicExponent.toByteArray())
             return """
 {
   "keys": [
@@ -171,6 +169,7 @@ class ApplicationTest {
     }
 
     private val DEFAULT_BPN = "BPNL00000"
+    private val EXTRA_TEST_BPN = "BPNL0Test"
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN)
@@ -183,9 +182,11 @@ class ApplicationTest {
     private val DELETE_TOKEN = JwtConfig.makeToken(AuthConstants.ROLE_DELETE_WALLETS)
     private val VIEW_TOKEN_SINGLE = JwtConfig.makeToken(AuthConstants.ROLE_VIEW_WALLET, DEFAULT_BPN)
     private val VIEW_TOKEN_SINGLE_WITHOUT_BPN = JwtConfig.makeToken(AuthConstants.ROLE_VIEW_WALLET)
+    private val VIEW_TOKEN_SINGLE_EXTRA_BPN = JwtConfig.makeToken(AuthConstants.ROLE_VIEW_WALLET, EXTRA_TEST_BPN)
     private val UPDATE_TOKEN_SINGLE = JwtConfig.makeToken(AuthConstants.ROLE_UPDATE_WALLET, DEFAULT_BPN)
+    private val UPDATE_TOKEN_SINGLE_EXTRA_BPN = JwtConfig.makeToken(AuthConstants.ROLE_UPDATE_WALLET, EXTRA_TEST_BPN)
 
-    val server = embeddedServer(Netty, port = 18080) {
+    private val server = embeddedServer(Netty, port = 18080) {
         routing {
             get("/jwks") {
                 call.respondText(JwtConfig.jwks())
@@ -205,7 +206,7 @@ class ApplicationTest {
 
     @Test
     fun testMissingRoleMapping() {
-        var exception = assertFailsWith<Exception> {
+        val exception = assertFailsWith<Exception> {
             withTestApplication({
                 setupEnvironmentWithMissingRoleMapping(environment)
                 configurePersistence()
@@ -214,6 +215,8 @@ class ApplicationTest {
                 configureRouting(walletService)
                 appRoutes(walletService, bpdService)
                 configureSerialization()
+                Services.walletService = walletService
+                Services.businessPartnerDataService = bpdService
             }) {
                 assertTrue(false)
             }
@@ -231,6 +234,8 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -258,6 +263,8 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
@@ -343,6 +350,8 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
             // view wallets with wrong token should not work
             handleRequest(HttpMethod.Get, "/api/wallets") {
@@ -391,6 +400,8 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
             // view wallets with single view token should not work
             handleRequest(HttpMethod.Get, "/api/wallets") {
@@ -400,9 +411,12 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
             }
 
+            val didOfDefaultBpn: String
+            val didOfExtraBpn: String
             // programmatically add base wallet
             runBlocking {
-                walletService.createWallet(WalletCreateDto(DEFAULT_BPN, "default_name"))
+                didOfDefaultBpn = walletService.createWallet(WalletCreateDto(DEFAULT_BPN, "default_name")).did
+                didOfExtraBpn = walletService.createWallet(WalletCreateDto(EXTRA_TEST_BPN, "test_name")).did
             }
 
             // view single wallet should work
@@ -416,6 +430,13 @@ class ApplicationTest {
             // view single wallet without BPN should not work
             handleRequest(HttpMethod.Get, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE_WITHOUT_BPN")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            }
+
+            handleRequest(HttpMethod.Get, "/api/wallets/$DEFAULT_BPN") {
+                addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE_EXTRA_BPN")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
@@ -461,6 +482,44 @@ class ApplicationTest {
                 }
             }
             assertTrue(exception.message!!.contains("Error: no verification methods"))
+
+            // request a Catena-X credential using not Catena-X BPN in Token
+            handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
+                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE_EXTRA_BPN")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                        """
+{
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://www.w3.org/2018/credentials/examples/v1"
+    ],
+    "id": "http://example.edu/credentials/3735",
+    "type": [
+        "University-Degree-Credential",
+        "VerifiableCredential"
+    ],
+    "issuerIdentifier": "$EXTRA_TEST_BPN",
+    "issuanceDate": "2021-06-16T18:56:59Z",
+    "expirationDate": "2026-06-17T18:56:59Z",
+    "credentialSubject": {
+        "givenName": "TestAfterQuestion",
+        "familyName": "Student",
+        "degree": {
+            "type": "Master",
+            "degreeType": "Undergraduate",
+            "name": "Master of Test"
+        },
+        "college": "Test"
+    },
+    "holderIdentifier": "$EXTRA_TEST_BPN"
+}
+""")
+            }.apply {
+                // important is that it is Unauthorized
+                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            }
 
             // request a presentation
             exception = assertFailsWith<BadRequestException> {
@@ -515,9 +574,148 @@ class ApplicationTest {
             }
             assertTrue(exception.message!!.contains("Error: no verification methods"))
 
+            // request a presentation, wrong authorization
+            handleRequest(HttpMethod.Post, "/api/presentations") {
+                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    """
+{
+    "holderIdentifier": "$EXTRA_TEST_BPN",
+    "verifiableCredentials": [
+        {
+            "id": "http://example.edu/credentials/3732",
+            "@context": [
+                "https://www.w3.org/2018/credentials/v1",
+                "https://www.w3.org/2018/credentials/examples/v1"
+            ],
+            "type": [
+                "University-Degree-Credential",
+                "VerifiableCredential"
+            ],
+            "issuer": "did:indy:local:test:43Arq24V9uQFPKHuDb7TC5",
+            "issuanceDate": "2019-06-16T18:56:59Z",
+            "expirationDate": "2019-06-17T18:56:59Z",
+            "credentialSubject": {
+                "givenName": "Sally",
+                "familyName": "Student",
+                "degree": {
+                    "type": "Master",
+                    "degreeType": "Undergraduate",
+                    "name": "Master of Science and Arts"
+                },
+                "college": "Stuttgart",
+                "id": "did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD"
+            },
+            "proof": {
+                "type": "Ed25519Signature2018",
+                "created": "2022-03-24T09:34:02Z",
+                "proofPurpose": "assertionMethod",
+                "verificationMethod": "did:indy:local:test:43Arq24V9uQFPKHuDb7TC5#key-1",
+                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..LvCQ4TWhFHOkwMzvrx-TxHovoaCLPlK2taHxQUtUOp0Uc_jYbjL3XgVR2u6jVMvGIdPt4gs-VZb49f7GuiXFDA"
+            }
+        }
+    ]
+}
+""")
+            }.apply {
+                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            }
+
+            // request to store credential by holder and correct BPN in Token
+            handleRequest(HttpMethod.Post, "/api/wallets/$DEFAULT_BPN/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                        """
+{
+    "id": "http://example.edu/credentials/3666",
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://www.w3.org/2018/credentials/examples/v1"
+    ],
+    "type": [
+        "University-Degree-Credential",
+        "VerifiableCredential"
+    ],
+    "issuer": "$didOfExtraBpn",
+    "issuanceDate": "2025-06-16T18:56:59Z",
+    "expirationDate": "2026-06-17T18:56:59Z",
+    "credentialSubject": {
+        "givenName": "TestAfterQuestion",
+        "familyName": "Student",
+        "degree": {
+            "type": "Master1",
+            "degreeType": "Undergraduate2",
+            "name": "Master of Test11"
+        },
+        "college": "Test2",
+        "id": "$didOfDefaultBpn"
+    },
+    "proof": {
+        "type": "Ed25519Signature2018",
+        "created": "2022-07-15T09:35:59Z",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:indy:local:test:JPbsf8GpUYiavsK95SGpge#key-1",
+        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..4mFcySYFNAV6Bif6OqHeGqhQZ1kPMbq5FbOjurbIBIyYnQyRICa1b7RB_nxfz9fdP7WYxthTVnaWiXs2WbpzBQ"
+    }
+}
+""")
+            }.apply {
+                // important is that it isn't Unauthorized
+                assertNotEquals(HttpStatusCode.Unauthorized, response.status())
+            }
+
+            // request to store credential, wrong authorization
+            handleRequest(HttpMethod.Post, "/api/wallets/$DEFAULT_BPN/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE_EXTRA_BPN")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    """
+{
+    "id": "http://example.edu/credentials/3666",
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://www.w3.org/2018/credentials/examples/v1"
+    ],
+    "type": [
+        "University-Degree-Credential",
+        "VerifiableCredential"
+    ],
+    "issuer": "$didOfExtraBpn",
+    "issuanceDate": "2025-06-16T18:56:59Z",
+    "expirationDate": "2026-06-17T18:56:59Z",
+    "credentialSubject": {
+        "givenName": "TestAfterQuestion",
+        "familyName": "Student",
+        "degree": {
+            "type": "Master1",
+            "degreeType": "Undergraduate2",
+            "name": "Master of Test11"
+        },
+        "college": "Test2",
+        "id": "$didOfDefaultBpn"
+    },
+    "proof": {
+        "type": "Ed25519Signature2018",
+        "created": "2022-07-15T09:35:59Z",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:indy:local:test:JPbsf8GpUYiavsK95SGpge#key-1",
+        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..4mFcySYFNAV6Bif6OqHeGqhQZ1kPMbq5FbOjurbIBIyYnQyRICa1b7RB_nxfz9fdP7WYxthTVnaWiXs2WbpzBQ"
+    }
+}
+""")
+            }.apply {
+                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            }
+
             // clean up
             runBlocking {
                 walletService.deleteWallet(DEFAULT_BPN)
+                walletService.deleteWallet(EXTRA_TEST_BPN)
             }
 
             assertEquals(0, walletService.getAll().size)
@@ -534,6 +732,8 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
 
             // create base wallet
@@ -612,7 +812,7 @@ class ApplicationTest {
                 walletService.createWallet(WalletCreateDto("bpn4", "name4"))
             }
 
-            var ce = assertFailsWith<ConflictException> {
+            val ce = assertFailsWith<ConflictException> {
                 handleRequest(HttpMethod.Post, "/api/wallets") {
                     addHeader(HttpHeaders.Authorization, "Bearer $CREATE_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -643,6 +843,8 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
 
             var verKey: String
@@ -671,7 +873,7 @@ class ApplicationTest {
                     addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody("{\"verKey\":\"" + verKey + "\"}")
+                    setBody("{\"verKey\":\"$verKey\"}")
                 }.apply {
                     assertEquals(HttpStatusCode.NotFound, response.status())
                 }
@@ -707,6 +909,8 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
             handleRequest(HttpMethod.Post, "/api/businessPartnerDataRefresh") {
                 addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
@@ -907,7 +1111,7 @@ class ApplicationTest {
   "relations": [],
   "currentness": "2022-06-03T11:46:15.143429Z"
 }""".trimIndent()
-            var data: BusinessPartnerDataDto = Json.decodeFromString(businessPartnerDataAsJson)
+            val data: BusinessPartnerDataDto = Json.decodeFromString(businessPartnerDataAsJson)
             assertEquals(data.bpn,"BPNL000000000001")
             assertEquals(data.identifiers[0].issuingBody!!.name,"Catena-X")
             assertEquals(data.roles, emptyList())
@@ -924,13 +1128,15 @@ class ApplicationTest {
             configureRouting(walletService)
             appRoutes(walletService, bpdService)
             configureSerialization()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
         }) {
             // programmatically add base wallet and an additional one
             runBlocking {
                 walletService.createWallet(WalletCreateDto(DEFAULT_BPN, "base"))
             }
 
-            var validVP = """
+            val validVP = """
                 {
                     "@context": [
                         "https://www.w3.org/2018/credentials/v1"
@@ -1021,12 +1227,12 @@ class ApplicationTest {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(validVP)
             }.apply {
-                var output = Json.decodeFromString<VerifyResponse>(response.content!!)
+                val output = Json.decodeFromString<VerifyResponse>(response.content!!)
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertTrue { output.valid }
             }
 
-            var vpWithoutProof = """
+            val vpWithoutProof = """
                 {
                     "@context": [
                         "https://www.w3.org/2018/credentials/v1"
@@ -1073,7 +1279,7 @@ class ApplicationTest {
                 }
             """.trimIndent()
 
-            var exception = assertFailsWith<UnprocessableEntityException> {
+            val exception = assertFailsWith<UnprocessableEntityException> {
                 handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                     addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -1083,7 +1289,7 @@ class ApplicationTest {
             }
             assertTrue(exception.message!!.contains("Cannot verify verifiable presentation due to missing proof"))
 
-            var  vpWithOutdatedVC = """
+            val vpWithOutdatedVC = """
                 {
                     "@context": [
                         "https://www.w3.org/2018/credentials/v1"
@@ -1137,7 +1343,7 @@ class ApplicationTest {
                 }
             """.trimIndent()
 
-            var dateException = assertFailsWith<UnprocessableEntityException> {
+            val dateException = assertFailsWith<UnprocessableEntityException> {
                 handleRequest(HttpMethod.Post, "/api/presentations/validation?withDateValidation=true") {
                     addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -1148,7 +1354,7 @@ class ApplicationTest {
             assertTrue(dateException.message!!.contains(
                 "Verifiable credential http://example.edu/credentials/3735 expired 2021-06-17T18:56:59Z"))
 
-            var vpWithFutureVC = """
+            val vpWithFutureVC = """
                  {
                     "@context": [
                         "https://www.w3.org/2018/credentials/v1"
@@ -1202,7 +1408,7 @@ class ApplicationTest {
                 }
             """.trimIndent()
 
-            var issuanceDateException = assertFailsWith<UnprocessableEntityException> {
+            val issuanceDateException = assertFailsWith<UnprocessableEntityException> {
                 handleRequest(HttpMethod.Post, "/api/presentations/validation?withDateValidation=true") {
                     addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -1214,7 +1420,7 @@ class ApplicationTest {
                 "Invalid issuance date 2999-06-16T18:56:59Z " +
                         "in verifiable credential http://example.edu/credentials/3888"))
 
-            var vpWithVcWithoutProof = """
+            val vpWithVcWithoutProof = """
                 {
                     "@context": [
                         "https://www.w3.org/2018/credentials/v1"
@@ -1260,7 +1466,7 @@ class ApplicationTest {
                     }
                 }
             """.trimIndent()
-            var exceptionVCMissingProof = assertFailsWith<UnprocessableEntityException> {
+            val exceptionVCMissingProof = assertFailsWith<UnprocessableEntityException> {
                 handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                     addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
                     addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -1271,7 +1477,7 @@ class ApplicationTest {
             assertTrue(exceptionVCMissingProof.message!!.contains("Cannot verify verifiable credential" +
                     " http://example.edu/credentials/3735 due to missing proof"))
 
-            var vpWithoutHolder = """
+            val vpWithoutHolder = """
             {
                 "@context": [
                     "https://www.w3.org/2018/credentials/v1"
@@ -1329,7 +1535,7 @@ class ApplicationTest {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(vpWithoutHolder)
             }.apply {
-                var output = Json.decodeFromString<VerifyResponse>(response.content!!)
+                val output = Json.decodeFromString<VerifyResponse>(response.content!!)
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertTrue { output.valid }
             }

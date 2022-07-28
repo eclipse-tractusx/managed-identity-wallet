@@ -33,6 +33,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.eclipse.tractusx.managedidentitywallets.Services
 
 import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
@@ -41,11 +42,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidIn
 import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
-import org.slf4j.LoggerFactory
-
 fun Route.vcRoutes(walletService: WalletService) {
-
-    val log = LoggerFactory.getLogger(this::class.java)
 
     route("/credentials") {
 
@@ -67,7 +64,8 @@ fun Route.vcRoutes(walletService: WalletService) {
                         description = "The list of verifiable credentials matching the query, empty if no match found"
                     ),
                     tags = setOf("VerifiableCredentials"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
+                    securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name,
+                        AuthConstants.JWT_AUTH_VIEW_SINGLE.name)
                 )
             ) {
                 val id = call.request.queryParameters["id"]
@@ -75,18 +73,12 @@ fun Route.vcRoutes(walletService: WalletService) {
                 val issuerIdentifier = call.request.queryParameters["issuerIdentifier"]
                 val holderIdentifier = call.request.queryParameters["holderIdentifier"]
 
-                // verify requested holder with bpn in principal, if only ROLE_VIEW_WALLET is given
-                val principal = AuthConstants.getPrincipal(call.attributes)
-                if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && holderIdentifier == principal.bpn) {
-                    log.debug("Authorization successful: holder identifier BPN ${holderIdentifier} does match requestors BPN ${principal.bpn}!")
+                val authorizationResponse = AuthorizationHandler.hasRightsToViewOwnCredentials(call, holderIdentifier)
+                if (!authorizationResponse.valid) {
+                    return@notarizedGet call.respondText(authorizationResponse.errorMsg!!,
+                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
                 }
-                if (principal?.role == AuthConstants.ROLE_VIEW_WALLET && holderIdentifier != principal.bpn) {
-                    log.error("Error: Holder identifier BPN ${holderIdentifier} does not match requestors BPN ${principal.bpn}!")
-                    return@notarizedGet call.respondText("Holder identifier BPN ${holderIdentifier} does not match requestors BPN ${principal.bpn}!", ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                }
-
-                call.respond(
-                    HttpStatusCode.OK,
+                call.respond(HttpStatusCode.OK,
                     walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
                 )
             }
@@ -95,7 +87,7 @@ fun Route.vcRoutes(walletService: WalletService) {
         notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
             notarizedPost(
                 PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
-                    summary = "Issue Verifiable Credential ",
+                    summary = "Issue Verifiable Credential",
                     description = "Issue a verifiable credential with a given issuer DID",
                     requestInfo = RequestInfo(
                         description = "The verifiable credential input data",
@@ -112,17 +104,12 @@ fun Route.vcRoutes(walletService: WalletService) {
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
-
-                // verify requested holder with bpn in principal, if only ROLE_UPDATE_WALLET is given
-                val principal = AuthConstants.getPrincipal(call.attributes)
-                if (principal?.role == AuthConstants.ROLE_UPDATE_WALLET && verifiableCredentialDto.holderIdentifier == principal.bpn) {
-                    log.debug("Authorization successful: holder identifier BPN ${verifiableCredentialDto.holderIdentifier} does match requestors BPN ${principal.bpn}!")
+                val authorizationResponse = AuthorizationHandler.hasRightToIssueCredential(call,
+                    verifiableCredentialDto.issuerIdentifier)
+                if (!authorizationResponse.valid) {
+                    return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
+                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
                 }
-                if (principal?.role == AuthConstants.ROLE_UPDATE_WALLET && verifiableCredentialDto.holderIdentifier != principal.bpn) {
-                    log.error("Error: Holder identifier BPN ${verifiableCredentialDto.holderIdentifier} does not match requestors BPN ${principal.bpn}!")
-                    return@notarizedPost call.respondText("Holder identifier BPN ${verifiableCredentialDto.holderIdentifier} does not match requestors BPN ${principal.bpn}!", ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                }
-
                 call.respond(HttpStatusCode.Created, walletService.issueCredential(verifiableCredentialDto))
             }
         }
@@ -144,19 +131,17 @@ fun Route.vcRoutes(walletService: WalletService) {
                         ),
                         canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                         tags = setOf("VerifiableCredentials"),
-                        securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                        securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name,
+                            AuthConstants.JWT_AUTH_UPDATE_SINGLE.name)
                     )
                 ) {
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
 
-                    // verify requested holder with bpn in principal, if only ROLE_UPDATE_WALLET is given
-                    val principal = AuthConstants.getPrincipal(call.attributes)
-                    if (principal?.role == AuthConstants.ROLE_UPDATE_WALLET && verifiableCredentialRequestDto.holderIdentifier == principal.bpn) {
-                        log.debug("Authorization successful: holder identifier BPN ${verifiableCredentialRequestDto.holderIdentifier} does match requestors BPN ${principal.bpn}!")
-                    }
-                    if (principal?.role == AuthConstants.ROLE_UPDATE_WALLET && verifiableCredentialRequestDto.holderIdentifier != principal.bpn) {
-                        log.error("Error: Holder identifier BPN ${verifiableCredentialRequestDto.holderIdentifier} does not match requestors BPN ${principal.bpn}!")
-                        return@notarizedPost call.respondText("Holder identifier BPN ${verifiableCredentialRequestDto.holderIdentifier} does not match requestors BPN ${principal.bpn}!", ContentType.Text.Plain, HttpStatusCode.Unauthorized)
+                    val authorizationResponse = AuthorizationHandler.hasRightToIssueCredential(call,
+                        Services.walletService.getCatenaXBpn())
+                    if (!authorizationResponse.valid) {
+                        return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
+                            ContentType.Text.Plain, HttpStatusCode.Unauthorized)
                     }
 
                     val verifiableCredentialDto = walletService.issueCatenaXCredential(verifiableCredentialRequestDto)

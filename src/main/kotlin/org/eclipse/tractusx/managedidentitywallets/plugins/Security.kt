@@ -35,7 +35,6 @@ import io.ktor.util.Attributes
 
 import com.auth0.jwt.*
 import com.auth0.jwk.UrlJwkProvider
-import com.auth0.jwk.*
 import com.auth0.jwt.interfaces.Payload
 import com.auth0.jwt.algorithms.*
 import java.security.interfaces.*
@@ -87,7 +86,7 @@ object AuthConstants {
         if (authContextKey === null) {
             return null
         }
-        var authContext = attributes.get(authContextKey as AttributeKey<AuthenticationContext>)
+        val authContext = attributes[authContextKey as AttributeKey<AuthenticationContext>]
         return authContext.principal as MIWPrincipal
     }
 
@@ -105,7 +104,8 @@ fun Application.configureSecurity() {
     val redirectUrl = environment.config.property("auth.redirectUrl").getString()
     val jwkProvider = UrlJwkProvider(URL(jwksUrl))
 
-    val roleMap = roleMappings.split(",").map { it.split(":").get(0) to it.split(":").get(1) }.toMap()
+    val roleMap = roleMappings.split(",")
+        .associate { it.split(":")[0] to it.split(":")[1] }
 
     val oauthProvider = OAuthServerSettings.OAuth2ServerSettings(
         name = "keycloak",
@@ -121,18 +121,18 @@ fun Application.configureSecurity() {
     fun verify(credentials: JWTCredential, mappedRole: String): MIWPrincipal? {
         log.debug("Verifying " + credentials.payload.claims + " with mapped role $mappedRole")
         if (credentials.payload.claims != null && credentials.payload.claims.contains(AuthConstants.RESOURCE_ACCESS)) {
-            val clientResources = credentials.payload.claims.get(AuthConstants.RESOURCE_ACCESS)!!.asMap().get(resourceId)
-            if (clientResources != null && clientResources is Map<*, *> && clientResources.contains(AuthConstants.ROLES)) {
-                val roles = clientResources.get(AuthConstants.ROLES)
+            val clientResources = credentials.payload.claims[AuthConstants.RESOURCE_ACCESS]!!.asMap()[resourceId]
+            return if (clientResources != null && clientResources is Map<*, *> && clientResources.contains(AuthConstants.ROLES)) {
+                val roles = clientResources[AuthConstants.ROLES]
                 if (roles != null && roles is List<*> && roles.contains(mappedRole))
-                    return MIWPrincipal(credentials.payload, credentials.payload.claims["BPN"]?.asString(), mappedRole)
+                    MIWPrincipal(credentials.payload, credentials.payload.claims["BPN"]?.asString(), mappedRole)
                 else {
                     log.warn("Authentication information incomplete: missing role $mappedRole")
-                    return null
+                    null
                 }
             } else {
                 log.warn("Authentication information incomplete: missing ${AuthConstants.ROLES} for $resourceId")
-                return null
+                null
             }
         } else {
             log.warn("Authentication information incomplete: missing ${AuthConstants.RESOURCE_ACCESS}")
@@ -162,7 +162,7 @@ fun Application.configureSecurity() {
                     val decoded = JWT.decode(it.token)
                     val kid = decoded.keyId
                     val jwk = jwkProvider.get(kid)
-                    val algorithm = Algorithm.RSA256(jwk.getPublicKey() as RSAPublicKey, null)
+                    val algorithm = Algorithm.RSA256(jwk.publicKey as RSAPublicKey, null)
                     val verifier = JWT.require(algorithm).withIssuer(issuerUrl).build()
                     verifier.verify(it.token)
                     it
@@ -178,27 +178,27 @@ fun Application.configureSecurity() {
         }
 
         // verify that all mappings are there
-        if (roleMap.get(AuthConstants.ROLE_VIEW_WALLETS) == null) {
+        if (roleMap[AuthConstants.ROLE_VIEW_WALLETS] == null) {
             log.error("Configuration error, ${AuthConstants.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthConstants.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap.get(AuthConstants.ROLE_CREATE_WALLETS) == null) {
+        if (roleMap[AuthConstants.ROLE_CREATE_WALLETS] == null) {
             log.error("Configuration error, ${AuthConstants.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthConstants.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap.get(AuthConstants.ROLE_UPDATE_WALLETS) == null) {
+        if (roleMap[AuthConstants.ROLE_UPDATE_WALLETS] == null) {
             log.error("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap.get(AuthConstants.ROLE_DELETE_WALLETS) == null) {
+        if (roleMap[AuthConstants.ROLE_DELETE_WALLETS] == null) {
             log.error("Configuration error, ${AuthConstants.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthConstants.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap.get(AuthConstants.ROLE_UPDATE_WALLET) == null) {
+        if (roleMap[AuthConstants.ROLE_UPDATE_WALLET] == null) {
             log.error("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap.get(AuthConstants.ROLE_VIEW_WALLET) == null) {
+        if (roleMap[AuthConstants.ROLE_VIEW_WALLET] == null) {
             log.error("Configuration error, ${AuthConstants.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthConstants.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
         }
@@ -208,7 +208,7 @@ fun Application.configureSecurity() {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                credentials -> verify(credentials, roleMap.get(AuthConstants.ROLE_VIEW_WALLETS)!!)
+                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_VIEW_WALLETS]!!)
             }
         }
 
@@ -216,7 +216,7 @@ fun Application.configureSecurity() {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                credentials -> verify(credentials, roleMap.get(AuthConstants.ROLE_CREATE_WALLETS)!!)
+                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_CREATE_WALLETS]!!)
             }
         }
 
@@ -224,7 +224,7 @@ fun Application.configureSecurity() {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                credentials -> verify(credentials, roleMap.get(AuthConstants.ROLE_UPDATE_WALLETS)!!)
+                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_UPDATE_WALLETS]!!)
             }
         }
 
@@ -232,7 +232,7 @@ fun Application.configureSecurity() {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                credentials -> verify(credentials, roleMap.get(AuthConstants.ROLE_DELETE_WALLETS)!!)
+                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_DELETE_WALLETS]!!)
             }
         }
 
@@ -240,7 +240,7 @@ fun Application.configureSecurity() {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                credentials -> verify(credentials, roleMap.get(AuthConstants.ROLE_UPDATE_WALLET)!!)
+                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_UPDATE_WALLET]!!)
             }
         }
 
@@ -248,7 +248,7 @@ fun Application.configureSecurity() {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                credentials -> verify(credentials, roleMap.get(AuthConstants.ROLE_VIEW_WALLET)!!)
+                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_VIEW_WALLET]!!)
             }
         }
 

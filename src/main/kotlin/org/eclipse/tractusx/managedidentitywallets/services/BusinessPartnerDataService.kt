@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 
 interface BusinessPartnerDataService {
 
-    suspend fun pullDataAndUpdateCatenaXCredentialsAsync()
+    suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String? = null)
 
     suspend fun<T> issueAndStoreCatenaXCredentialsAsync(
         bpn: String,
@@ -45,8 +45,8 @@ interface BusinessPartnerDataService {
             return BusinessPartnerDataServiceImpl(
                 walletService,
                 bpdmConfig,
-                HttpClient() {
-                    expectSuccess = false // must set to false, to handle thrown error if access token has expired
+                HttpClient {
+                    expectSuccess = false // must be set to false to handle thrown error if the access token has expired
                     install(ResponseObserver) {
                         onResponse { response ->
                             log.debug("HTTP status: ${response.status.value}")

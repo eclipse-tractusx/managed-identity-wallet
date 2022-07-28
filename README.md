@@ -326,6 +326,38 @@ within the `Persistence.kt` database setup:
 SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
 ```
 
+## Scopes <a id="scopes"></a>
+The Available Scopes/Roles are:
+
+1. Role `add_wallets` to create a new wallet
+
+1. Role `view_wallets`:
+    * to get a list of all wallets
+    * to retrieve one wallet by its identifier
+    * to validate a Verifiable Presentation
+    * to get all stored Verifiable Credentials
+
+1. Role `update_wallets` for the following actions:
+    * to store Verifiable Credential
+    * to set the wallet DID to public on chain
+    * to issue a Verifiable Credential 
+    * to issue a Verifiable Presentation
+    * to add, update and delete service endpoint of DIDs
+    * to trigger the update of Business Partner Data
+  
+1. Role `delete_wallets` to remove a wallet
+
+1. Role `view_wallet` requires the BPN of Caller and it can be used:
+    * to get the Wallet of the related BPN
+    * to get stored Verifiable Credentials of the related BPN
+    * to validate any Verifiable Presentation
+
+1. Role `update_wallet` requires the BPN of Caller and it can be used:
+    * to issue Verifiable Credentials (The BPN of issuer will be checked)
+    * to issue Verifiable Presentations (The BPN of holder will be checked)
+    * to store Verifiable Credentials (The BPN of holder will be checked)
+    * to trigger Business Partner Data update for its own BPN
+
 ## Dashboard <a id="dashboard"></a>
 
 Within `ui-src` a simple Vue based dashboard application is available
