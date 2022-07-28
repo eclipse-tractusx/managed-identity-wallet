@@ -343,7 +343,7 @@ The Available Scopes/Roles are:
     * to issue a Verifiable Credential 
     * to issue a Verifiable Presentation
     * to add, update and delete service endpoint of DIDs
-    * to trigger the update of Business Partner Data
+    * to trigger the update of Business Partner Data of all existing wallets
   
 1. Role `delete_wallets` to remove a wallet
 
