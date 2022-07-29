@@ -55,6 +55,7 @@ dependencies {
     implementation("com.github.kibertoad:ktor-scheduler:1.0.4")
     implementation("org.jobrunr:jobrunr:5.1.6")
     implementation("org.postgresql:postgresql:42.4.0")
+    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
 
     // for now: using kotlinx.serialization
     // implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7")
@@ -71,7 +72,5 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation(kotlin("test"))
-
-    runtimeOnly("org.xerial:sqlite-jdbc:3.36.0.3")
 
 }

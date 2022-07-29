@@ -48,6 +48,15 @@ object AuthorizationHandler {
     private val create_role = setOf<Role>(ROLE_CREATE_WALLETS)
     private val delete_role = setOf<Role>(ROLE_DELETE_WALLETS)
 
+    private val roleMapping = mutableMapOf(
+        ROLE_CREATE_WALLETS to ROLE_CREATE_WALLETS,
+        ROLE_UPDATE_WALLETS to ROLE_UPDATE_WALLETS,
+        ROLE_VIEW_WALLETS to ROLE_VIEW_WALLETS,
+        ROLE_DELETE_WALLETS to ROLE_DELETE_WALLETS,
+        ROLE_UPDATE_WALLET to ROLE_UPDATE_WALLET,
+        ROLE_VIEW_WALLET to ROLE_VIEW_WALLET
+    )
+
     val JWT_AUTH_TOKEN = object : JwtAuthConfiguration {
         override val name: String = CONFIG_TOKEN
     }
@@ -63,8 +72,8 @@ object AuthorizationHandler {
         identifier: String? = null
     ) {
         val principal = hasAnyRolesOf(call, view_roles)
-        if (!principal.roles.contains(ROLE_VIEW_WALLETS)
-             && principal.roles.contains(ROLE_VIEW_WALLET)) {
+        if (!principal.roles.contains(roleMapping[ROLE_VIEW_WALLETS])
+             && principal.roles.contains(roleMapping[ROLE_VIEW_WALLET])) {
             return checkIfBpnMatchesToPrincipalBpn(identifier, principal, ROLE_VIEW_WALLET)
         }
     }
@@ -74,10 +83,16 @@ object AuthorizationHandler {
         identifier: String? = null
     ) {
         val principal = hasAnyRolesOf(call, update_roles)
-        if (!principal.roles.contains(ROLE_UPDATE_WALLETS)
-            && principal.roles.contains(ROLE_UPDATE_WALLET)) {
+        if (!principal.roles.contains(roleMapping[ROLE_UPDATE_WALLETS])
+            && principal.roles.contains(roleMapping[ROLE_UPDATE_WALLET])) {
             return checkIfBpnMatchesToPrincipalBpn(identifier, principal, ROLE_UPDATE_WALLET)
         }
+    }
+
+    fun setRoleMapping(
+        mapping: Map<String, String>
+    ) {
+        roleMapping += mapping
     }
 
     private fun checkIfBpnMatchesToPrincipalBpn(
@@ -100,7 +115,7 @@ object AuthorizationHandler {
             throw AuthorizationException( "Authorization failed: Principal is null or it has an empty role")
         }
         val roles: Set<Role> = principal.roles
-        if (requiredRoles.none { it in roles }) {
+        if (requiredRoles.none { roleMapping[it] in roles }) {
             throw ForbiddenException(
                 "It has none of the sufficient role(s) ${ requiredRoles.joinToString( " or " ) }"
             )

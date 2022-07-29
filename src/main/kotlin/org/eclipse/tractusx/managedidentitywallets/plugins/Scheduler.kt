@@ -26,17 +26,19 @@ import net.kiberion.ktor_scheduler.recurringJob
 import net.kiberion.ktor_scheduler.schedule
 import org.eclipse.tractusx.managedidentitywallets.Services
 import org.jobrunr.scheduling.cron.Cron
-import org.jobrunr.storage.sql.postgres.PostgresStorageProvider
+import org.jobrunr.storage.AbstractStorageProvider
+import org.jobrunr.storage.sql.common.SqlStorageProviderFactory
 import org.postgresql.ds.PGSimpleDataSource
+import org.sqlite.SQLiteDataSource
+import java.sql.DriverManager
 import javax.sql.DataSource
-
 
 fun Application.configureJobs() {
     val jdbcUrl = environment.config.property("db.jdbcUrl").getString()
     val pullDataAtHour = environment.config.property("bpdm.pullDataAtHour").getString().toInt()
 
     install(Scheduler) {
-        storageProvider = PostgresStorageProvider(initDatabase(jdbcUrl))
+        storageProvider = SqlStorageProviderFactory.using(initDatabase(jdbcUrl)) as AbstractStorageProvider
         threads = 5
     }
 
@@ -48,9 +50,19 @@ fun Application.configureJobs() {
 }
 
 fun initDatabase(jdbcUrl: String): DataSource {
-    val dataSource = PGSimpleDataSource()
-    dataSource.setUrl(jdbcUrl)
-    return dataSource
+    if (jdbcUrl.startsWith("jdbc:sqlite")) {
+        val dataSource = SQLiteDataSource()
+        dataSource.setUrl(jdbcUrl)
+
+        // just a keepAliveConnection
+        DriverManager.getConnection(jdbcUrl)
+
+        return dataSource
+    } else {
+        val dataSource = PGSimpleDataSource()
+        dataSource.setUrl(jdbcUrl)
+        return dataSource
+    }
 }
 
 fun runJobPayload() {

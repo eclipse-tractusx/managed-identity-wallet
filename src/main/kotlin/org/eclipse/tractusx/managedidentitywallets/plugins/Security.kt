@@ -155,6 +155,8 @@ fun Application.configureSecurity() {
             throw Exception("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
         }
 
+        AuthorizationHandler.setRoleMapping(roleMap)
+
         // verify that all mappings are there
         jwt(AuthorizationHandler.CONFIG_TOKEN) {
             verifier(jwkProvider, issuerUrl)
