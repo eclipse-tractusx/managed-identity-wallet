@@ -55,7 +55,7 @@ data class BPDMConfig(
 @Serializable
 data class BusinessPartnerDataDtoParameter(
     @Param(type = ParamType.QUERY)
-    @Field(description = "The DID or BPN of the Wallet to update", name = "identifier")
+    @Field(description = "The DID or BPN of the business partner whose data should be refreshed", name = "identifier")
     val identifier: String? = null
 )
 

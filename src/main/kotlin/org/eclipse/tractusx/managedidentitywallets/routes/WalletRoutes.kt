@@ -46,7 +46,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
 import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
-import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 
@@ -56,7 +55,7 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
 
     route("/wallets") {
 
-        notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW) {
+        notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedGet(
                 GetInfo<Unit, List<WalletDto>>(
                     summary = "List of wallets",
@@ -66,14 +65,15 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                         description = "List of wallets",
                     ),
                     tags = setOf("Wallets"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name)
+                    securitySchemes = setOf(AuthorizationHandler.ROLE_VIEW_WALLETS)
                 )
             ) {
+                AuthorizationHandler.hasRightsToViewWallet(call)
                 call.respond(walletService.getAll())
             }
         }
 
-        notarizedAuthenticate(AuthConstants.JWT_AUTH_CREATE) {
+        notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedPost(
                 PostInfo<Unit, WalletCreateDto, WalletDto>(
                     summary = "Create wallet",
@@ -89,9 +89,10 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                     ),
                     canThrow = setOf(syntacticallyInvalidInputException, conflictException),
                     tags = setOf("Wallets"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_CREATE.name)
+                    securitySchemes = setOf(AuthorizationHandler.ROLE_CREATE_WALLETS)
                 )
             ) {
+                AuthorizationHandler.hasRightToCreateWallets(call)
                 try {
                     val walletToCreate = call.receive<WalletCreateDto>()
                     val createdWallet = walletService.createWallet(walletToCreate)
@@ -125,7 +126,7 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
 
         route("/{identifier}") {
 
-            notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW, AuthConstants.JWT_AUTH_VIEW_SINGLE) {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedGet(
                     GetInfo<WalletDtoParameter, WalletDto>(
                         summary = "Retrieve wallet by identifier",
@@ -142,8 +143,10 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                         ),
                         canThrow = setOf(syntacticallyInvalidInputException, notFoundException),
                         tags = setOf("Wallets"),
-                        securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name,
-                            AuthConstants.JWT_AUTH_VIEW_SINGLE.name)
+                        securitySchemes = setOf(
+                            AuthorizationHandler.ROLE_VIEW_WALLETS,
+                            AuthorizationHandler.ROLE_VIEW_WALLET
+                        )
                     )
                 ) {
                     val identifier =
@@ -152,17 +155,13 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                     if (call.request.queryParameters["withCredentials"] != null) {
                         withCredentials = call.request.queryParameters["withCredentials"].toBoolean()
                     }
-                    val authorizationResponse = AuthorizationHandler.hasRightsToViewOwnWallet(call, identifier)
-                    if (!authorizationResponse.valid) {
-                        return@notarizedGet call.respondText(authorizationResponse.errorMsg!!,
-                            ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                    }
+                    AuthorizationHandler.hasRightsToViewWallet(call, identifier)
                     val walletDto: WalletDto = walletService.getWallet(identifier, withCredentials)
                     return@notarizedGet call.respond(HttpStatusCode.OK, walletDto)
                 }
-            }            
+            }
 
-            notarizedAuthenticate(AuthConstants.JWT_AUTH_DELETE) {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedDelete(
                     DeleteInfo<Unit, SuccessResponse>(
                         summary = "Remove wallet",
@@ -174,11 +173,12 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                         ),
                         canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                         tags = setOf("Wallets"),
-                        securitySchemes = setOf(AuthConstants.JWT_AUTH_DELETE.name)
+                        securitySchemes = setOf(AuthorizationHandler.ROLE_DELETE_WALLETS)
                     )
                 ) {
                     val identifier =
                         call.parameters["identifier"] ?: return@notarizedDelete call.respond(HttpStatusCode.BadRequest)
+                    AuthorizationHandler.hasRightToDeleteWallets(call)
                     if (walletService.deleteWallet(identifier)) {
                         return@notarizedDelete call.respond(
                             HttpStatusCode.OK,
@@ -190,8 +190,7 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
             }
 
             route("/credentials") {
-
-                notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
+                notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                     notarizedPost(
                         PostInfo<StoreVerifiableCredentialParameter, IssuedVerifiableCredentialRequestDto, SuccessResponse>(
                             summary = "Store Verifiable Credential",
@@ -216,21 +215,23 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                             ),
                             canThrow = setOf(semanticallyInvalidInputException, notFoundException),
                             tags = setOf("Wallets"),
-                            securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name,
-                                AuthConstants.JWT_AUTH_UPDATE_SINGLE.name)
+                            securitySchemes = setOf(
+                                AuthorizationHandler.ROLE_UPDATE_WALLETS,
+                                AuthorizationHandler.ROLE_UPDATE_WALLET
+                            )
                         )
                     ) {
                         val identifier = call.parameters["identifier"]
                             ?: throw BadRequestException("Missing or malformed identifier")
-                        val authorizationResponse = AuthorizationHandler.hasRightsToStoreCredential(call, identifier)
-                        if (!authorizationResponse.valid) {
-                            return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
-                                ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                        }
+                        AuthorizationHandler.hasRightsToUpdateWallet(call, identifier)
+
                         try {
                             val verifiableCredential = call.receive<IssuedVerifiableCredentialRequestDto>()
                             walletService.storeCredential(identifier, verifiableCredential)
-                            call.respond(HttpStatusCode.Created, SuccessResponse("Credential has been successfully stored"))
+                            call.respond(
+                                HttpStatusCode.Created,
+                                SuccessResponse("Credential has been successfully stored")
+                            )
                         } catch (e: ExposedSQLException) {
                             val isUniqueConstraintError = e.sqlState == "23505"
                             if (isUniqueConstraintError) {
@@ -246,7 +247,7 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
             }
 
             route("/public") {
-                notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+                notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                     notarizedPost(
                         PostInfo<StoreVerifiableCredentialParameter, VerKeyDto, SuccessResponse>(
                             summary = "Register on Public Chain",
@@ -270,19 +271,25 @@ fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService:
                             ),
                             canThrow = setOf(semanticallyInvalidInputException, notFoundException),
                             tags = setOf("Wallets"),
-                            securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                            securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS)
                         )
                     ) {
                         try {
                             val identifier = call.parameters["identifier"]
                                 ?: throw BadRequestException("Missing or malformed identifier")
+
+                            AuthorizationHandler.hasRightsToUpdateWallet(call, null)
+
                             val walletDto: WalletDto = walletService.getWallet(identifier)
                             if (!walletService.isCatenaXWallet(walletDto.bpn)) {
                                 throw NotFoundException("Registering endpoint is not available for any other wallet but the base wallet")
                             }
                             val verKeyDto = call.receive<VerKeyDto>()
                             if (walletService.registerBaseWallet(verKeyDto.verKey)) {
-                                call.respond(HttpStatusCode.Created, SuccessResponse("Wallet has been successfully registered on chain"))
+                                call.respond(
+                                    HttpStatusCode.Created,
+                                    SuccessResponse("Wallet has been successfully registered on chain")
+                                )
                             } else {
                                 throw Exception("Could not register base wallet on public chain, manual intervention needed!")
                             }
@@ -325,6 +332,7 @@ data class WalletDtoParameter(
 data class VerKeyDto(
     val verKey: String
 )
+
 val verKeyExample = mapOf(
     "demo" to VerKeyDto("VERIFICATION_KEY_AFTER_CREATION")
 )

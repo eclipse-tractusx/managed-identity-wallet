@@ -40,13 +40,12 @@ import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInp
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
-import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 fun Route.vpRoutes(walletService: WalletService) {
 
     route("/presentations") {
-        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
+        notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedPost(
                 PostInfo<Unit, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
                     summary = "Create Verifiable Presentation",
@@ -62,24 +61,20 @@ fun Route.vpRoutes(walletService: WalletService) {
                     ),
                     canThrow = setOf(semanticallyInvalidInputException),
                     tags = setOf("VerifiablePresentations"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name,
-                        AuthConstants.JWT_AUTH_UPDATE_SINGLE.name)
+                    securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
+                        AuthorizationHandler.ROLE_UPDATE_WALLET)
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiablePresentationRequestDto>()
 
-                val authorizationResponse = AuthorizationHandler.hasRightToIssuePresentation(call,
-                    verifiableCredentialDto.holderIdentifier)
-                if (!authorizationResponse.valid) {
-                    return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
-                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                }
+                AuthorizationHandler.hasRightsToUpdateWallet(call, verifiableCredentialDto.holderIdentifier)
+
                 call.respond(HttpStatusCode.Created, walletService.issuePresentation(verifiableCredentialDto))
             }
         }
 
         route("/validation") {
-            notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW, AuthConstants.JWT_AUTH_VIEW_SINGLE) {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedPost(
                     PostInfo<WithDateValidation, VerifiablePresentationDto, VerifyResponse>(
                         summary = "Validate Verifiable Presentation",
@@ -102,10 +97,11 @@ fun Route.vpRoutes(walletService: WalletService) {
                         ),
                         canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                         tags = setOf("VerifiablePresentations"),
-                        securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name,
-                            AuthConstants.JWT_AUTH_VIEW_SINGLE.name)
+                        securitySchemes = setOf(AuthorizationHandler.ROLE_VIEW_WALLETS,
+                            AuthorizationHandler.ROLE_VIEW_WALLET)
                     )
                 ) {
+                    AuthorizationHandler.hasAnyViewRoles(call)
                     val verifiablePresentation = call.receive<VerifiablePresentationDto>()
                     val withDateValidation = if (call.request.queryParameters["withDateValidation"] != null) {
                         call.request.queryParameters["withDateValidation"].toBoolean()

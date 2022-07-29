@@ -43,7 +43,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.notFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
-import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 fun Route.didDocRoutes(walletService: WalletService) {
@@ -76,7 +75,7 @@ fun Route.didDocRoutes(walletService: WalletService) {
             }
 
             route("/services") {
-                notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+                notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                     notarizedPost(
                         PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
                             summary = "Add New Service Endpoint",
@@ -96,12 +95,13 @@ fun Route.didDocRoutes(walletService: WalletService) {
                             ),
                             canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                             tags = setOf("DIDDocument"),
-                            securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                            securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS)
                         )
                     ) {
                         val serviceDto = call.receive<DidServiceDto>()
                         val identifier =
                             call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
+                        AuthorizationHandler.hasRightsToUpdateWallet(call)
                         return@notarizedPost call.respond(
                             HttpStatusCode.Created,
                             walletService.addService(identifier, serviceDto)
@@ -110,7 +110,7 @@ fun Route.didDocRoutes(walletService: WalletService) {
                 }
 
                 route("/{id}") {
-                    notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE) {
+                    notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                         notarizedPut(
                             PutInfo<DidDocumentServiceParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
                                 summary = "Update an existing Service Endpoint",
@@ -135,11 +135,14 @@ fun Route.didDocRoutes(walletService: WalletService) {
                                     syntacticallyInvalidInputException
                                 ),
                                 tags = setOf("DIDDocument"),
-                                securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                                securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS)
                             )
                         ) {
                             val identifier = call.parameters["identifier"]
                                 ?: throw BadRequestException("Missing or malformed identifier")
+
+                            AuthorizationHandler.hasRightsToUpdateWallet(call)
+
                             val serviceId =
                                 call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
                             val serviceDto = call.receive<DidServiceUpdateRequestDto>()
@@ -173,11 +176,12 @@ fun Route.didDocRoutes(walletService: WalletService) {
                                     syntacticallyInvalidInputException
                                 ),
                                 tags = setOf("DIDDocument"),
-                                securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                                securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS)
                             )
                         ) {
                             val identifier = call.parameters["identifier"]
                                 ?: throw BadRequestException("Missing or malformed identifier")
+                            AuthorizationHandler.hasRightsToUpdateWallet(call)
                             val serviceId =
                                 call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
                             call.respond(HttpStatusCode.OK, walletService.deleteService(identifier, serviceId))

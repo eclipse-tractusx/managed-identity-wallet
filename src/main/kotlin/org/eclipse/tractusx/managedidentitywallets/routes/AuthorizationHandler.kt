@@ -19,83 +19,101 @@
 
 package org.eclipse.tractusx.managedidentitywallets.routes
 
+import io.bkbn.kompendium.auth.configuration.JwtAuthConfiguration
 import io.ktor.application.*
-import kotlinx.serialization.Serializable
+import io.ktor.auth.*
+import io.ktor.util.*
 import org.eclipse.tractusx.managedidentitywallets.Services
-import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
-import org.slf4j.LoggerFactory
+import org.eclipse.tractusx.managedidentitywallets.models.AuthorizationException
+import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
+import org.eclipse.tractusx.managedidentitywallets.plugins.MIWPrincipal
 
-@Serializable
-data class AuthorizationResponse(
-    val valid: Boolean,
-    val errorMsg: String? = null,
-)
+typealias Role = String
 
 object AuthorizationHandler {
 
-    private val log = LoggerFactory.getLogger(this::class.java)
+    const val RESOURCE_ACCESS = "resource_access"
+    const val ROLES = "roles"
+    const val ROLE_CREATE_WALLETS = "create_wallets"
+    const val ROLE_UPDATE_WALLETS = "update_wallets"
+    const val ROLE_VIEW_WALLETS = "view_wallets"
+    const val ROLE_DELETE_WALLETS = "delete_wallets"
+    const val ROLE_UPDATE_WALLET = "update_wallet"
+    const val ROLE_VIEW_WALLET = "view_wallet"
 
-    fun hasRightsToViewOwnWallet(call: ApplicationCall, identifier: String): AuthorizationResponse {
-        return hasRightsForViewOrUpdateOwnWallet(call, identifier, AuthConstants.ROLE_VIEW_WALLET)
+    const val CONFIG_TOKEN = "auth-token"
+
+    private val view_roles = setOf<Role>(ROLE_VIEW_WALLET, ROLE_VIEW_WALLETS)
+    private val update_roles = setOf<Role>(ROLE_UPDATE_WALLET, ROLE_UPDATE_WALLETS)
+    private val create_role = setOf<Role>(ROLE_CREATE_WALLETS)
+    private val delete_role = setOf<Role>(ROLE_DELETE_WALLETS)
+
+    val JWT_AUTH_TOKEN = object : JwtAuthConfiguration {
+        override val name: String = CONFIG_TOKEN
     }
 
-    fun hasRightsToViewOwnCredentials(call: ApplicationCall, holderIdentifier: String?): AuthorizationResponse {
-        return hasRightsForViewOrUpdateOwnWallet(call, holderIdentifier, AuthConstants.ROLE_VIEW_WALLET)
-    }
+    fun hasRightToCreateWallets(call: ApplicationCall) = hasAnyRolesOf(call, create_role)
 
-    fun hasRightsToStoreCredential(call: ApplicationCall, holderIdentifier: String): AuthorizationResponse {
-        return hasRightsForViewOrUpdateOwnWallet(call, holderIdentifier, AuthConstants.ROLE_UPDATE_WALLET)
-    }
+    fun hasRightToDeleteWallets(call: ApplicationCall) = hasAnyRolesOf(call, delete_role)
 
-    fun hasRightToIssueCredential(call: ApplicationCall, issuerIdentifier: String): AuthorizationResponse {
-        return hasRightsForViewOrUpdateOwnWallet(call, issuerIdentifier, AuthConstants.ROLE_UPDATE_WALLET)
-    }
+    fun hasAnyViewRoles(call: ApplicationCall) = hasAnyRolesOf(call, view_roles)
 
-    fun hasRightToIssuePresentation(call: ApplicationCall, holderIdentifier: String): AuthorizationResponse {
-        return hasRightsForViewOrUpdateOwnWallet(call, holderIdentifier, AuthConstants.ROLE_UPDATE_WALLET)
-    }
-
-    fun hasRightToTriggerUpdateOwnBPD(call: ApplicationCall, identifier: String?): AuthorizationResponse {
-        return hasRightsForViewOrUpdateOwnWallet(call, identifier, AuthConstants.ROLE_UPDATE_WALLET)
-    }
-
-    private fun hasRightsForViewOrUpdateOwnWallet(
+    fun hasRightsToViewWallet(
         call: ApplicationCall,
-        identifier: String?,
-        role: String
-    ): AuthorizationResponse {
-        val principal = AuthConstants.getPrincipal(call.attributes)
-        if (principal == null || principal.role.isBlank()) {
-            return AuthorizationResponse(false, "Authorization failed: Principal is null " +
-                    "or it has an empty role")
+        identifier: String? = null
+    ) {
+        val principal = hasAnyRolesOf(call, view_roles)
+        if (!principal.roles.contains(ROLE_VIEW_WALLETS)
+             && principal.roles.contains(ROLE_VIEW_WALLET)) {
+            return checkIfBpnMatchesToPrincipalBpn(identifier, principal, ROLE_VIEW_WALLET)
         }
-        if (principal.role == role) {
-            if (identifier.isNullOrBlank()) {
-                val errorMsg = "Authorization failed: The Identifier is mandatory " +
-                        "for $role role"
-                log.error(errorMsg)
-                return AuthorizationResponse(false, errorMsg)
-            }
-            val bpnOfHolder = Services.walletService.getBpnFromIdentifier(identifier)
-            return checkIfBpnMatchesToPrincipalBpn(bpnOfHolder, principal.bpn)
+    }
+
+    fun hasRightsToUpdateWallet(
+        call: ApplicationCall,
+        identifier: String? = null
+    ) {
+        val principal = hasAnyRolesOf(call, update_roles)
+        if (!principal.roles.contains(ROLE_UPDATE_WALLETS)
+            && principal.roles.contains(ROLE_UPDATE_WALLET)) {
+            return checkIfBpnMatchesToPrincipalBpn(identifier, principal, ROLE_UPDATE_WALLET)
         }
-        // reaching this line means that the entity has the Role of viewing or updating all wallets, and it is checked
-        // by notarizedAuthenticate
-        return AuthorizationResponse(true)
     }
 
     private fun checkIfBpnMatchesToPrincipalBpn(
-        givenBpn: String,
-        principalBpn: String?
-    ) : AuthorizationResponse {
-        return if (!principalBpn.isNullOrEmpty() && givenBpn == principalBpn) {
-            log.debug("Authorization successful: Wallet BPN $givenBpn does match requestors BPN $principalBpn")
-            AuthorizationResponse(true)
-        } else {
-            val errorMsg = "Authorization failed: Wallet BPN $givenBpn does not match requestors BPN $principalBpn"
-            log.error(errorMsg)
-            AuthorizationResponse(false, errorMsg)
+        identifier: String?,
+        principal: MIWPrincipal,
+        role: Role
+    ) {
+        if (identifier.isNullOrBlank()) {
+            throw AuthorizationException("Authorization failed: The Identifier is mandatory for $role role")
+        }
+        val bpnOfHolder = Services.walletService.getBpnFromIdentifier(identifier)
+        if (principal.bpn.isNullOrEmpty() || bpnOfHolder != principal.bpn) {
+            throw ForbiddenException("Wallet BPN $bpnOfHolder does not match requestors BPN ${principal.bpn}")
         }
     }
 
+    private fun hasAnyRolesOf(call: ApplicationCall, requiredRoles: Set<Role>): MIWPrincipal {
+        val principal = getPrincipal(call.attributes)
+        if (principal == null || principal.roles.isNullOrEmpty()) {
+            throw AuthorizationException( "Authorization failed: Principal is null or it has an empty role")
+        }
+        val roles: Set<Role> = principal.roles
+        if (requiredRoles.none { it in roles }) {
+            throw ForbiddenException(
+                "It has none of the sufficient role(s) ${ requiredRoles.joinToString( " or " ) }"
+            )
+        }
+        return principal
+    }
+
+    private fun getPrincipal(attributes: Attributes): MIWPrincipal? {
+        val authContextKey = attributes.allKeys.firstOrNull { (it as AttributeKey<AuthenticationContext>).name == "AuthContext" }
+        if (authContextKey === null) {
+            return null
+        }
+        val authContext = attributes[authContextKey as AttributeKey<AuthenticationContext>]
+        return authContext.principal as MIWPrincipal
+    }
 }

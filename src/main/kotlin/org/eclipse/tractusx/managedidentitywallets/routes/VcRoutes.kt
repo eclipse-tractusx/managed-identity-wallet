@@ -39,14 +39,13 @@ import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInp
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
-import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 fun Route.vcRoutes(walletService: WalletService) {
 
     route("/credentials") {
 
-        notarizedAuthenticate(AuthConstants.JWT_AUTH_VIEW, AuthConstants.JWT_AUTH_VIEW_SINGLE) {
+        notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedGet(
                 GetInfo<VerifiableCredentialParameters, List<VerifiableCredentialDto>>(
                     summary = "Query Verifiable Credentials",
@@ -64,8 +63,8 @@ fun Route.vcRoutes(walletService: WalletService) {
                         description = "The list of verifiable credentials matching the query, empty if no match found"
                     ),
                     tags = setOf("VerifiableCredentials"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_VIEW.name,
-                        AuthConstants.JWT_AUTH_VIEW_SINGLE.name)
+                    securitySchemes = setOf(AuthorizationHandler.ROLE_VIEW_WALLETS,
+                        AuthorizationHandler.ROLE_VIEW_WALLET)
                 )
             ) {
                 val id = call.request.queryParameters["id"]
@@ -73,18 +72,15 @@ fun Route.vcRoutes(walletService: WalletService) {
                 val issuerIdentifier = call.request.queryParameters["issuerIdentifier"]
                 val holderIdentifier = call.request.queryParameters["holderIdentifier"]
 
-                val authorizationResponse = AuthorizationHandler.hasRightsToViewOwnCredentials(call, holderIdentifier)
-                if (!authorizationResponse.valid) {
-                    return@notarizedGet call.respondText(authorizationResponse.errorMsg!!,
-                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                }
+                AuthorizationHandler.hasRightsToViewWallet(call, holderIdentifier)
+
                 call.respond(HttpStatusCode.OK,
                     walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
                 )
             }
         }
 
-        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
+        notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedPost(
                 PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
                     summary = "Issue Verifiable Credential",
@@ -100,22 +96,20 @@ fun Route.vcRoutes(walletService: WalletService) {
                     ),
                     canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                     tags = setOf("VerifiableCredentials"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name)
+                    securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
+                        AuthorizationHandler.ROLE_UPDATE_WALLET)
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
-                val authorizationResponse = AuthorizationHandler.hasRightToIssueCredential(call,
-                    verifiableCredentialDto.issuerIdentifier)
-                if (!authorizationResponse.valid) {
-                    return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
-                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                }
+
+                AuthorizationHandler.hasRightsToUpdateWallet(call,  verifiableCredentialDto.issuerIdentifier)
+
                 call.respond(HttpStatusCode.Created, walletService.issueCredential(verifiableCredentialDto))
             }
         }
 
         route("/issuer") {
-            notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedPost(
                     PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
                         summary = "Issue a Verifiable Credential with Catena-X platform issuer",
@@ -131,18 +125,13 @@ fun Route.vcRoutes(walletService: WalletService) {
                         ),
                         canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
                         tags = setOf("VerifiableCredentials"),
-                        securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name,
-                            AuthConstants.JWT_AUTH_UPDATE_SINGLE.name)
+                        securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
+                            AuthorizationHandler.ROLE_UPDATE_WALLET)
                     )
                 ) {
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
 
-                    val authorizationResponse = AuthorizationHandler.hasRightToIssueCredential(call,
-                        Services.walletService.getCatenaXBpn())
-                    if (!authorizationResponse.valid) {
-                        return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
-                            ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                    }
+                    AuthorizationHandler.hasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
 
                     val verifiableCredentialDto = walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
                     call.respond(HttpStatusCode.Created, verifiableCredentialDto)

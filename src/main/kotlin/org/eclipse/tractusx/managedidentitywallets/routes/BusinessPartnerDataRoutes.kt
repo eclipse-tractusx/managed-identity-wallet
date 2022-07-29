@@ -31,14 +31,13 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
 import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
 
 fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerDataService) {
 
     route("/businessPartnerDataRefresh") {
 
-        notarizedAuthenticate(AuthConstants.JWT_AUTH_UPDATE, AuthConstants.JWT_AUTH_UPDATE_SINGLE) {
+        notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedPost(
                 PostInfo<BusinessPartnerDataDtoParameter, Unit, String>(
                     summary = "Pull business partner data from BPDM and issue or update verifiable credentials",
@@ -55,16 +54,12 @@ fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerD
                         description = "Empty response body"
                     ),
                     tags = setOf("BusinessPartnerData"),
-                    securitySchemes = setOf(AuthConstants.JWT_AUTH_UPDATE.name,
-                        AuthConstants.JWT_AUTH_UPDATE_SINGLE.name)
+                    securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
+                        AuthorizationHandler.ROLE_UPDATE_WALLET)
                 )
             ) {
-                val authorizationResponse = AuthorizationHandler.hasRightToTriggerUpdateOwnBPD(call,
-                    call.request.queryParameters["identifier"])
-                if (!authorizationResponse.valid) {
-                    return@notarizedPost call.respondText(authorizationResponse.errorMsg!!,
-                        ContentType.Text.Plain, HttpStatusCode.Unauthorized)
-                }
+                AuthorizationHandler.hasRightsToUpdateWallet(call, call.request.queryParameters["identifier"])
+
                 businessPartnerDataService.pullDataAndUpdateCatenaXCredentialsAsync(
                     call.request.queryParameters["identifier"]
                 )

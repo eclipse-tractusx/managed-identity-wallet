@@ -81,6 +81,9 @@ fun Application.module(testing: Boolean = false) {
         exception<ConflictException> { cause ->
             call.respond(HttpStatusCode.Conflict, ExceptionResponse(cause.message!!))
         }
+        exception<AuthorizationException> { cause ->
+            call.respond(HttpStatusCode.Unauthorized, ExceptionResponse(cause.message!!))
+        }
     }
 
     configureSecurity()

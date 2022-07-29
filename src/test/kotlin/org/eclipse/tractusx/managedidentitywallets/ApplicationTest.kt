@@ -46,7 +46,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRespon
 import org.eclipse.tractusx.managedidentitywallets.routes.*
 import org.eclipse.tractusx.managedidentitywallets.services.*
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.*
-import org.eclipse.tractusx.managedidentitywallets.plugins.AuthConstants
+import org.eclipse.tractusx.managedidentitywallets.routes.Role
 import java.security.KeyPair
 
 import java.security.KeyPairGenerator
@@ -62,8 +62,6 @@ class ApplicationTest {
         val jdbcUrl = System.getenv("CX_DB_JDBC_URL") ?: "jdbc:sqlite:file:test?mode=memory&cache=shared"
         (environment.config as MapApplicationConfig).apply {
             put("app.version", System.getenv("APP_VERSION") ?: "0.0.7")
-            // put("db.jdbcUrl", System.getenv("CX_DB_JDBC_URL") ?: "jdbc:h2:mem:miw;DB_CLOSE_DELAY=-1;")
-            // put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.h2.Driver")
             put("db.jdbcUrl", jdbcUrl)
             put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.sqlite.JDBC")
             put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
@@ -120,19 +118,19 @@ class ApplicationTest {
 
         private val algorithm = Algorithm.RSA256(provider)
 
-        private fun makeBaseToken(role: String): JWTCreator.Builder = JWT.create()
+        private fun makeBaseToken(roles: List<Role>): JWTCreator.Builder = JWT.create()
             .withSubject("Authentication")
             .withIssuer(issuerUrl)
             .withAudience(resourceId)
             .withClaim("typ", "Bearer")
-            .withClaim("resource_access", mapOf(resourceId to mapOf(AuthConstants.ROLES to arrayOf(role))))
+            .withClaim("resource_access", mapOf(resourceId to mapOf(AuthorizationHandler.ROLES to roles)))
             .withExpiresAt(getExpiration())
 
-        fun makeToken(role: String, bpn: String? = null): String {
+        fun makeToken(roles: List<Role>, bpn: String? = null): String {
             return if (!bpn.isNullOrEmpty()) {
-                makeBaseToken(role).withClaim("BPN", bpn).sign(algorithm)
+                makeBaseToken(roles).withClaim("BPN", bpn).sign(algorithm)
             } else {
-                makeBaseToken(role).sign(algorithm)
+                makeBaseToken(roles).sign(algorithm)
             }
         }
 
@@ -176,15 +174,17 @@ class ApplicationTest {
     private val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
     private val bpdService = BusinessPartnerDataMockedService()
 
-    private val CREATE_TOKEN = JwtConfig.makeToken(AuthConstants.ROLE_CREATE_WALLETS)
-    private val VIEW_TOKEN = JwtConfig.makeToken(AuthConstants.ROLE_VIEW_WALLETS)
-    private val UPDATE_TOKEN = JwtConfig.makeToken(AuthConstants.ROLE_UPDATE_WALLETS)
-    private val DELETE_TOKEN = JwtConfig.makeToken(AuthConstants.ROLE_DELETE_WALLETS)
-    private val VIEW_TOKEN_SINGLE = JwtConfig.makeToken(AuthConstants.ROLE_VIEW_WALLET, DEFAULT_BPN)
-    private val VIEW_TOKEN_SINGLE_WITHOUT_BPN = JwtConfig.makeToken(AuthConstants.ROLE_VIEW_WALLET)
-    private val VIEW_TOKEN_SINGLE_EXTRA_BPN = JwtConfig.makeToken(AuthConstants.ROLE_VIEW_WALLET, EXTRA_TEST_BPN)
-    private val UPDATE_TOKEN_SINGLE = JwtConfig.makeToken(AuthConstants.ROLE_UPDATE_WALLET, DEFAULT_BPN)
-    private val UPDATE_TOKEN_SINGLE_EXTRA_BPN = JwtConfig.makeToken(AuthConstants.ROLE_UPDATE_WALLET, EXTRA_TEST_BPN)
+    private val CREATE_TOKEN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_CREATE_WALLETS))
+    private val VIEW_TOKEN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_VIEW_WALLETS))
+    private val UPDATE_TOKEN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_UPDATE_WALLETS))
+    private val DELETE_TOKEN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_DELETE_WALLETS))
+    private val VIEW_TOKEN_SINGLE = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_VIEW_WALLET), DEFAULT_BPN)
+    private val VIEW_TOKEN_SINGLE_WITHOUT_BPN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_VIEW_WALLET))
+    private val VIEW_TOKEN_SINGLE_EXTRA_BPN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_VIEW_WALLET), EXTRA_TEST_BPN)
+    private val UPDATE_TOKEN_SINGLE = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_UPDATE_WALLET), DEFAULT_BPN)
+    private val UPDATE_TOKEN_SINGLE_EXTRA_BPN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_UPDATE_WALLET), EXTRA_TEST_BPN)
+    private val UPDATE_TOKEN_ALL_AND_SINGLE_EXTRA_BPN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_UPDATE_WALLET,
+        AuthorizationHandler.ROLE_UPDATE_WALLETS), EXTRA_TEST_BPN)
 
     private val server = embeddedServer(Netty, port = 18080) {
         routing {
@@ -354,22 +354,24 @@ class ApplicationTest {
             Services.businessPartnerDataService = bpdService
         }) {
             // view wallets with wrong token should not work
-            handleRequest(HttpMethod.Get, "/api/wallets") {
-                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-            }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            var exception = assertFailsWith<ForbiddenException> {
+                handleRequest(HttpMethod.Get, "/api/wallets") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                }
             }
+            assertTrue { exception.message!!.contains("It has none of the sufficient role(s) view_wallet or view_wallets") }
 
             // create wallet with wrong token should not work
-            handleRequest(HttpMethod.Post, "/api/wallets") {
-                addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody("""{"bpn":"$DEFAULT_BPN", "name": "name1"}""")
-            }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            exception = assertFailsWith<ForbiddenException> {
+                handleRequest(HttpMethod.Post, "/api/wallets") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody("""{"bpn":"$DEFAULT_BPN", "name": "name1"}""")
+                }
             }
+            assertTrue { exception.message!!.contains("It has none of the sufficient role(s) create_wallets") }
 
             // programmatically add base wallet
             runBlocking {
@@ -377,6 +379,16 @@ class ApplicationTest {
             }
 
             // delete should not work with wrong token
+            exception = assertFailsWith<ForbiddenException> {
+                handleRequest(HttpMethod.Delete, "/api/wallets/$DEFAULT_BPN") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $CREATE_TOKEN")
+                }.apply {
+                    assertEquals(HttpStatusCode.Unauthorized, response.status())
+                }
+            }
+            assertTrue { exception.message!!.contains("It has none of the sufficient role(s) delete_wallets") }
+
+            // delete should not work without token
             handleRequest(HttpMethod.Delete, "/api/wallets/$DEFAULT_BPN").apply {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
             }
@@ -403,13 +415,15 @@ class ApplicationTest {
             Services.walletService = walletService
             Services.businessPartnerDataService = bpdService
         }) {
+
             // view wallets with single view token should not work
-            handleRequest(HttpMethod.Get, "/api/wallets") {
-                addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-            }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            var authorizationException = assertFailsWith<AuthorizationException> {
+                handleRequest(HttpMethod.Get, "/api/wallets") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                }
             }
+            assertTrue { authorizationException.message!!.contains("The Identifier is mandatory for view_wallet role") }
 
             val didOfDefaultBpn: String
             val didOfExtraBpn: String
@@ -428,19 +442,23 @@ class ApplicationTest {
             }
 
             // view single wallet without BPN should not work
-            handleRequest(HttpMethod.Get, "/api/wallets") {
-                addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE_WITHOUT_BPN")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-            }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            authorizationException = assertFailsWith<AuthorizationException> {
+                handleRequest(HttpMethod.Get, "/api/wallets") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE_WITHOUT_BPN")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                }
             }
+            assertTrue { authorizationException.message!!.contains("The Identifier is mandatory for view_wallet role") }
 
-            handleRequest(HttpMethod.Get, "/api/wallets/$DEFAULT_BPN") {
-                addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE_EXTRA_BPN")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-            }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            // view wallet with different BPN
+            var forbiddenException = assertFailsWith<ForbiddenException> {
+                handleRequest(HttpMethod.Get, "/api/wallets/$DEFAULT_BPN") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $VIEW_TOKEN_SINGLE_EXTRA_BPN")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                }
             }
+            assertTrue { forbiddenException.message!!.contains("Wallet BPN $DEFAULT_BPN does " +
+                    "not match requestors BPN $EXTRA_TEST_BPN") }
 
             // request a credential by the Catena-X issuer
             var exception = assertFailsWith<BadRequestException> {
@@ -476,19 +494,17 @@ class ApplicationTest {
     "holderIdentifier": "$DEFAULT_BPN"
 }
 """)
-                }.apply {
-                    // important is that it isn't Unauthorized
-                    assertNotEquals(HttpStatusCode.Unauthorized, response.status())
                 }
             }
             assertTrue(exception.message!!.contains("Error: no verification methods"))
 
             // request a Catena-X credential using not Catena-X BPN in Token
-            handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
-                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE_EXTRA_BPN")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
+            forbiddenException = assertFailsWith {
+                handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE_EXTRA_BPN")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
                         """
 {
     "@context": [
@@ -516,10 +532,11 @@ class ApplicationTest {
     "holderIdentifier": "$EXTRA_TEST_BPN"
 }
 """)
-            }.apply {
-                // important is that it is Unauthorized
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+                }
             }
+            assertTrue { forbiddenException.message!!.contains("Wallet BPN $DEFAULT_BPN " +
+                    "does not match requestors BPN $EXTRA_TEST_BPN") }
+
 
             // request a presentation
             exception = assertFailsWith<BadRequestException> {
@@ -575,12 +592,13 @@ class ApplicationTest {
             assertTrue(exception.message!!.contains("Error: no verification methods"))
 
             // request a presentation, wrong authorization
-            handleRequest(HttpMethod.Post, "/api/presentations") {
-                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    """
+            forbiddenException = assertFailsWith {
+                handleRequest(HttpMethod.Post, "/api/presentations") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        """
 {
     "holderIdentifier": "$EXTRA_TEST_BPN",
     "verifiableCredentials": [
@@ -619,9 +637,11 @@ class ApplicationTest {
     ]
 }
 """)
-            }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+                }
             }
+            assertTrue(forbiddenException.message!!.contains("Wallet BPN $EXTRA_TEST_BPN " +
+                    "does not match requestors BPN $DEFAULT_BPN"))
+
 
             // request to store credential by holder and correct BPN in Token
             handleRequest(HttpMethod.Post, "/api/wallets/$DEFAULT_BPN/credentials") {
@@ -668,12 +688,13 @@ class ApplicationTest {
             }
 
             // request to store credential, wrong authorization
-            handleRequest(HttpMethod.Post, "/api/wallets/$DEFAULT_BPN/credentials") {
-                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE_EXTRA_BPN")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    """
+            forbiddenException = assertFailsWith {
+                handleRequest(HttpMethod.Post, "/api/wallets/$DEFAULT_BPN/credentials") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_SINGLE_EXTRA_BPN")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        """
 {
     "id": "http://example.edu/credentials/3666",
     "@context": [
@@ -707,8 +728,52 @@ class ApplicationTest {
     }
 }
 """)
+                }
+            }
+            assertTrue(forbiddenException.message!!.contains("Wallet BPN $DEFAULT_BPN " +
+                    "does not match requestors BPN $EXTRA_TEST_BPN"))
+
+            handleRequest(HttpMethod.Post, "/api/wallets/$DEFAULT_BPN/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN_ALL_AND_SINGLE_EXTRA_BPN")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    """
+{
+    "id": "http://example.edu/credentials/3111",
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://www.w3.org/2018/credentials/examples/v1"
+    ],
+    "type": [
+        "University-Degree-Credential",
+        "VerifiableCredential"
+    ],
+    "issuer": "$didOfExtraBpn",
+    "issuanceDate": "2025-06-16T18:56:59Z",
+    "expirationDate": "2026-06-17T18:56:59Z",
+    "credentialSubject": {
+        "givenName": "TestAfterQuestion",
+        "familyName": "Student",
+        "degree": {
+            "type": "Master1",
+            "degreeType": "Undergraduate2",
+            "name": "Master of Test11"
+        },
+        "college": "Test2",
+        "id": "$didOfDefaultBpn"
+    },
+    "proof": {
+        "type": "Ed25519Signature2018",
+        "created": "2022-07-15T09:35:59Z",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:indy:local:test:JPbsf8GpUYiavsK95SGpge#key-1",
+        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..4mFcySYFNAV6Bif6OqHeGqhQZ1kPMbq5FbOjurbIBIyYnQyRICa1b7RB_nxfz9fdP7WYxthTVnaWiXs2WbpzBQ"
+    }
+}
+""")
             }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+                assertEquals(HttpStatusCode.Created, response.status())
             }
 
             // clean up

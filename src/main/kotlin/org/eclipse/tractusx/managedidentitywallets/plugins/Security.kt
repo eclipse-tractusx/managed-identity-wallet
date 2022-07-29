@@ -19,7 +19,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
-import io.bkbn.kompendium.auth.configuration.JwtAuthConfiguration
 
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -30,67 +29,20 @@ import io.ktor.client.engine.apache.*
 import io.ktor.http.*
 import io.ktor.sessions.*
 
-import io.ktor.util.AttributeKey
-import io.ktor.util.Attributes
-
 import com.auth0.jwt.*
 import com.auth0.jwk.UrlJwkProvider
 import com.auth0.jwt.interfaces.Payload
 import com.auth0.jwt.algorithms.*
+import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
 import java.security.interfaces.*
 
 import java.net.URL
 
 data class UserSession(val token: String) : Principal
 
-class MIWPrincipal(val payload: Payload, val bpn: String?, val role: String) : Principal {
-}
+typealias Role = String
 
-object AuthConstants {
-    const val RESOURCE_ACCESS = "resource_access"
-    const val ROLES = "roles"
-    const val ROLE_CREATE_WALLETS = "create_wallets"
-    const val ROLE_UPDATE_WALLETS = "update_wallets"
-    const val ROLE_VIEW_WALLETS = "view_wallets"
-    const val ROLE_DELETE_WALLETS = "delete_wallets"
-    const val ROLE_UPDATE_WALLET = "update_wallet"
-    const val ROLE_VIEW_WALLET = "view_wallet"
-    const val CONFIG_VIEW = "auth-view"
-    const val CONFIG_CREATE = "auth-create"
-    const val CONFIG_UPDATE = "auth-update"
-    const val CONFIG_DELETE = "auth-delete"
-    const val CONFIG_VIEW_SINGLE = "auth-view-single"
-    const val CONFIG_UPDATE_SINGLE = "auth-update-single"
-
-    val JWT_AUTH_CREATE = object : JwtAuthConfiguration {
-        override val name: String = CONFIG_CREATE
-    }
-    val JWT_AUTH_VIEW = object : JwtAuthConfiguration {
-        override val name: String = CONFIG_VIEW
-    }
-    val JWT_AUTH_UPDATE = object : JwtAuthConfiguration {
-        override val name: String = CONFIG_UPDATE
-    }
-    val JWT_AUTH_DELETE = object : JwtAuthConfiguration {
-        override val name: String = CONFIG_DELETE
-    }
-    val JWT_AUTH_VIEW_SINGLE = object : JwtAuthConfiguration {
-        override val name: String = CONFIG_VIEW_SINGLE
-    }
-    val JWT_AUTH_UPDATE_SINGLE = object : JwtAuthConfiguration {
-        override val name: String = CONFIG_UPDATE_SINGLE
-    }
-
-    fun getPrincipal(attributes: Attributes): MIWPrincipal? {
-        val authContextKey = attributes.allKeys.firstOrNull { (it as AttributeKey<AuthenticationContext>).name == "AuthContext" }
-        if (authContextKey === null) {
-            return null
-        }
-        val authContext = attributes[authContextKey as AttributeKey<AuthenticationContext>]
-        return authContext.principal as MIWPrincipal
-    }
-
-}
+class MIWPrincipal(val payload: Payload, val roles: Set<Role>, val bpn: String?) : Principal
 
 fun Application.configureSecurity() {
 
@@ -115,27 +67,27 @@ fun Application.configureSecurity() {
         clientSecret = clientSecret,
         accessTokenRequiresBasicAuth = false,
         requestMethod = HttpMethod.Post, // must POST to token endpoint
-        defaultScopes = listOf(AuthConstants.ROLES)
+        defaultScopes = listOf(AuthorizationHandler.ROLES)
     )
 
-    fun verify(credentials: JWTCredential, mappedRole: String): MIWPrincipal? {
-        log.debug("Verifying " + credentials.payload.claims + " with mapped role $mappedRole")
-        if (credentials.payload.claims != null && credentials.payload.claims.contains(AuthConstants.RESOURCE_ACCESS)) {
-            val clientResources = credentials.payload.claims[AuthConstants.RESOURCE_ACCESS]!!.asMap()[resourceId]
-            return if (clientResources != null && clientResources is Map<*, *> && clientResources.contains(AuthConstants.ROLES)) {
-                val roles = clientResources[AuthConstants.ROLES]
-                if (roles != null && roles is List<*> && roles.contains(mappedRole))
-                    MIWPrincipal(credentials.payload, credentials.payload.claims["BPN"]?.asString(), mappedRole)
+    fun verify(credentials: JWTCredential): MIWPrincipal? {
+        if (credentials.payload.claims != null && credentials.payload.claims.contains(AuthorizationHandler.RESOURCE_ACCESS)) {
+            val clientResources = credentials.payload.claims[AuthorizationHandler.RESOURCE_ACCESS]!!.asMap()[resourceId]
+            return if (clientResources != null && clientResources is Map<*, *> && clientResources.contains(AuthorizationHandler.ROLES)) {
+                val roles = (clientResources[AuthorizationHandler.ROLES] as ArrayList<Role>).toSet()
+                if (roles != null && !roles.isNullOrEmpty())
+                    MIWPrincipal(payload = credentials.payload, roles = roles
+                        , bpn = credentials.payload.claims["BPN"]?.asString())
                 else {
-                    log.warn("Authentication information incomplete: missing role $mappedRole")
+                    log.warn("Authentication information incomplete: missing roles")
                     null
                 }
             } else {
-                log.warn("Authentication information incomplete: missing ${AuthConstants.ROLES} for $resourceId")
+                log.warn("Authentication information incomplete: missing ${AuthorizationHandler.ROLES} for $resourceId")
                 null
             }
         } else {
-            log.warn("Authentication information incomplete: missing ${AuthConstants.RESOURCE_ACCESS}")
+            log.warn("Authentication information incomplete: missing ${AuthorizationHandler.RESOURCE_ACCESS}")
             return null
         }
     }
@@ -178,77 +130,37 @@ fun Application.configureSecurity() {
         }
 
         // verify that all mappings are there
-        if (roleMap[AuthConstants.ROLE_VIEW_WALLETS] == null) {
-            log.error("Configuration error, ${AuthConstants.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
-            throw Exception("Configuration error, ${AuthConstants.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
+        if (roleMap[AuthorizationHandler.ROLE_VIEW_WALLETS] == null) {
+            log.error("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
+            throw Exception("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthConstants.ROLE_CREATE_WALLETS] == null) {
-            log.error("Configuration error, ${AuthConstants.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
-            throw Exception("Configuration error, ${AuthConstants.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
+        if (roleMap[AuthorizationHandler.ROLE_CREATE_WALLETS] == null) {
+            log.error("Configuration error, ${AuthorizationHandler.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
+            throw Exception("Configuration error, ${AuthorizationHandler.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthConstants.ROLE_UPDATE_WALLETS] == null) {
-            log.error("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
-            throw Exception("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
+        if (roleMap[AuthorizationHandler.ROLE_UPDATE_WALLETS] == null) {
+            log.error("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
+            throw Exception("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthConstants.ROLE_DELETE_WALLETS] == null) {
-            log.error("Configuration error, ${AuthConstants.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
-            throw Exception("Configuration error, ${AuthConstants.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
+        if (roleMap[AuthorizationHandler.ROLE_DELETE_WALLETS] == null) {
+            log.error("Configuration error, ${AuthorizationHandler.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
+            throw Exception("Configuration error, ${AuthorizationHandler.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthConstants.ROLE_UPDATE_WALLET] == null) {
-            log.error("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
-            throw Exception("Configuration error, ${AuthConstants.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
+        if (roleMap[AuthorizationHandler.ROLE_UPDATE_WALLET] == null) {
+            log.error("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
+            throw Exception("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthConstants.ROLE_VIEW_WALLET] == null) {
-            log.error("Configuration error, ${AuthConstants.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
-            throw Exception("Configuration error, ${AuthConstants.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
+        if (roleMap[AuthorizationHandler.ROLE_VIEW_WALLET] == null) {
+            log.error("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
+            throw Exception("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
         }
 
-        // for the API use JWT validation 
-        jwt(AuthConstants.CONFIG_VIEW) {
+        // verify that all mappings are there
+        jwt(AuthorizationHandler.CONFIG_TOKEN) {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_VIEW_WALLETS]!!)
-            }
-        }
-
-        jwt(AuthConstants.CONFIG_CREATE) {
-            verifier(jwkProvider, issuerUrl)
-            realm = jwkRealm
-            validate {
-                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_CREATE_WALLETS]!!)
-            }
-        }
-
-        jwt(AuthConstants.CONFIG_UPDATE) {
-            verifier(jwkProvider, issuerUrl)
-            realm = jwkRealm
-            validate {
-                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_UPDATE_WALLETS]!!)
-            }
-        }
-
-        jwt(AuthConstants.CONFIG_DELETE) {
-            verifier(jwkProvider, issuerUrl)
-            realm = jwkRealm
-            validate {
-                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_DELETE_WALLETS]!!)
-            }
-        }
-
-        jwt(AuthConstants.CONFIG_UPDATE_SINGLE) {
-            verifier(jwkProvider, issuerUrl)
-            realm = jwkRealm
-            validate {
-                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_UPDATE_WALLET]!!)
-            }
-        }
-
-        jwt(AuthConstants.CONFIG_VIEW_SINGLE) {
-            verifier(jwkProvider, issuerUrl)
-            realm = jwkRealm
-            validate {
-                credentials -> verify(credentials, roleMap[AuthConstants.ROLE_VIEW_WALLET]!!)
+                    credentials -> verify(credentials)
             }
         }
 
