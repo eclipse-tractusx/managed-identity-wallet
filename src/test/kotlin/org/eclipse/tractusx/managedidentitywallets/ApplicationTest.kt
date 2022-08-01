@@ -84,6 +84,7 @@ class ApplicationTest {
             put("auth.redirectUrl", System.getenv("CX_AUTH_REDIRECT_URL") ?: "http://localhost:8080/callback")
 
             put("bpdm.datapoolUrl", System.getenv("BPDM_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
+            put("bpdm.pullDataAtHour", System.getenv("BPDM_PULL_DATA_AT_HOUR") ?: "23")
         }
         // just a keepAliveConnection
         DriverManager.getConnection(jdbcUrl)
@@ -1609,6 +1610,25 @@ class ApplicationTest {
                 assertEquals(0, walletService.getAll().size)
             }
 
+        }
+    }
+
+    @Test
+    fun testJobs() {
+        withTestApplication({
+            setupEnvironment(environment)
+            configurePersistence()
+            configureOpenAPI()
+            configureSecurity()
+            configureRouting(walletService)
+            appRoutes(walletService, bpdService)
+            configureSerialization()
+            configureJobs()
+            Services.walletService = walletService
+            Services.businessPartnerDataService = bpdService
+        }) {
+            // expecting a successfull start
+            assertTrue(true)
         }
     }
 }
