@@ -19,34 +19,40 @@
 
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
+import com.github.kagkarlsson.scheduler.Scheduler
+import com.github.kagkarlsson.scheduler.task.helper.RecurringTask
+import com.github.kagkarlsson.scheduler.task.helper.Tasks
+import com.github.kagkarlsson.scheduler.task.schedule.Schedules
 import io.ktor.application.*
 import kotlinx.coroutines.runBlocking
-import net.kiberion.ktor_scheduler.Scheduler
-import net.kiberion.ktor_scheduler.recurringJob
-import net.kiberion.ktor_scheduler.schedule
 import org.eclipse.tractusx.managedidentitywallets.Services
-import org.jobrunr.scheduling.cron.Cron
-import org.jobrunr.storage.AbstractStorageProvider
-import org.jobrunr.storage.sql.common.SqlStorageProviderFactory
 import org.postgresql.ds.PGSimpleDataSource
 import org.sqlite.SQLiteDataSource
 import java.sql.DriverManager
+import java.time.Duration
 import javax.sql.DataSource
 
 fun Application.configureJobs() {
+
     val jdbcUrl = environment.config.property("db.jdbcUrl").getString()
     val pullDataAtHour = environment.config.property("bpdm.pullDataAtHour").getString().toInt()
 
-    install(Scheduler) {
-        storageProvider = SqlStorageProviderFactory.using(initDatabase(jdbcUrl)) as AbstractStorageProvider
-        threads = 5
-    }
-
-    schedule {
-        recurringJob("bpdm-update", Cron.daily(pullDataAtHour)) {
+    val bpdmUpdate: RecurringTask<Void> = Tasks.recurring("bpdm-update",
+        // Spring Scheduled tasks (second, minute, hour, day of month, month, day(s) of week)
+        Schedules.cron("0 0 $pullDataAtHour * * *"))
+        .execute { inst, ctx ->
             runJobPayload()
         }
-    }
+
+    val scheduler: Scheduler = Scheduler
+        .create(initDatabase(jdbcUrl))
+        .startTasks(bpdmUpdate)
+        .pollingInterval(Duration.ofHours(1))
+        .registerShutdownHook()
+        .threads(3)
+        .build()
+
+    scheduler.start()
 }
 
 fun initDatabase(jdbcUrl: String): DataSource {
