@@ -48,7 +48,7 @@ object AuthorizationHandler {
     private val create_role = setOf<Role>(ROLE_CREATE_WALLETS)
     private val delete_role = setOf<Role>(ROLE_DELETE_WALLETS)
 
-    private val roleMapping = mutableMapOf(
+    private val rolePermissionMap = mutableMapOf(
         ROLE_CREATE_WALLETS to ROLE_CREATE_WALLETS,
         ROLE_UPDATE_WALLETS to ROLE_UPDATE_WALLETS,
         ROLE_VIEW_WALLETS to ROLE_VIEW_WALLETS,
@@ -61,38 +61,40 @@ object AuthorizationHandler {
         override val name: String = CONFIG_TOKEN
     }
 
-    fun hasRightToCreateWallets(call: ApplicationCall) = hasAnyRolesOf(call, create_role)
+    fun checkHasRightToCreateWallets(call: ApplicationCall) = checkHasAnyRolesOf(call, create_role)
 
-    fun hasRightToDeleteWallets(call: ApplicationCall) = hasAnyRolesOf(call, delete_role)
+    fun checkHasRightToDeleteWallets(call: ApplicationCall) = checkHasAnyRolesOf(call, delete_role)
 
-    fun hasAnyViewRoles(call: ApplicationCall) = hasAnyRolesOf(call, view_roles)
+    fun checkHasAnyViewRoles(call: ApplicationCall) = checkHasAnyRolesOf(call, view_roles)
 
-    fun hasRightsToViewWallet(
+    fun checkHasRightsToViewWallet(
         call: ApplicationCall,
         identifier: String? = null
     ) {
-        val principal = hasAnyRolesOf(call, view_roles)
-        if (!principal.roles.contains(roleMapping[ROLE_VIEW_WALLETS])
-             && principal.roles.contains(roleMapping[ROLE_VIEW_WALLET])) {
+        val principal = checkHasAnyRolesOf(call, view_roles)
+        if (!principal.roles.contains(rolePermissionMap[ROLE_VIEW_WALLETS])
+             && principal.roles.contains(rolePermissionMap[ROLE_VIEW_WALLET])) {
             return checkIfBpnMatchesToPrincipalBpn(identifier, principal, ROLE_VIEW_WALLET)
         }
     }
 
-    fun hasRightsToUpdateWallet(
+    fun checkHasRightsToUpdateWallet(
         call: ApplicationCall,
         identifier: String? = null
     ) {
-        val principal = hasAnyRolesOf(call, update_roles)
-        if (!principal.roles.contains(roleMapping[ROLE_UPDATE_WALLETS])
-            && principal.roles.contains(roleMapping[ROLE_UPDATE_WALLET])) {
+        val principal = checkHasAnyRolesOf(call, update_roles)
+        if (!principal.roles.contains(rolePermissionMap[ROLE_UPDATE_WALLETS])
+            && principal.roles.contains(rolePermissionMap[ROLE_UPDATE_WALLET])) {
             return checkIfBpnMatchesToPrincipalBpn(identifier, principal, ROLE_UPDATE_WALLET)
         }
     }
 
-    fun setRoleMapping(
-        mapping: Map<String, String>
-    ) {
-        roleMapping += mapping
+    fun setRolePermissionMapping(mapping: Map<String, String>) {
+        rolePermissionMap += mapping
+    }
+
+    fun getPermissionOfRole(role: Role): String {
+       return rolePermissionMap[role].toString()
     }
 
     private fun checkIfBpnMatchesToPrincipalBpn(
@@ -109,13 +111,13 @@ object AuthorizationHandler {
         }
     }
 
-    private fun hasAnyRolesOf(call: ApplicationCall, requiredRoles: Set<Role>): MIWPrincipal {
+    private fun checkHasAnyRolesOf(call: ApplicationCall, requiredRoles: Set<Role>): MIWPrincipal {
         val principal = getPrincipal(call.attributes)
-        if (principal == null || principal.roles.isNullOrEmpty()) {
+        if (principal == null || principal.roles.isEmpty()) {
             throw AuthorizationException( "Authorization failed: Principal is null or it has an empty role")
         }
         val roles: Set<Role> = principal.roles
-        if (requiredRoles.none { roleMapping[it] in roles }) {
+        if (requiredRoles.none { rolePermissionMap[it] in roles }) {
             throw ForbiddenException(
                 "It has none of the sufficient role(s) ${ requiredRoles.joinToString( " or " ) }"
             )

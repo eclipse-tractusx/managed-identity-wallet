@@ -21,11 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.application.*
 import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.response.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
-import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
@@ -62,29 +58,7 @@ fun Application.module(testing: Boolean = false) {
     // Installs the Kompendium Plugin and sets up baseline server metadata
     configureOpenAPI()
 
-    install(StatusPages) {
-        exception<BadRequestException> { cause ->
-            call.respond(HttpStatusCode.BadRequest, ExceptionResponse(cause.message!!))
-        }
-        exception<UnprocessableEntityException> { cause ->
-            call.respond(HttpStatusCode.UnprocessableEntity, ExceptionResponse(cause.message!!))
-        }
-        exception<ForbiddenException> { cause ->
-            call.respond(HttpStatusCode.Forbidden, ExceptionResponse(cause.message!!))
-        }
-        exception<NotImplementedException> { cause ->
-            call.respond(HttpStatusCode.NotImplemented, ExceptionResponse(cause.message!!))
-        }
-        exception<NotFoundException> { cause ->
-            call.respond(HttpStatusCode.NotFound, ExceptionResponse(cause.message!!))
-        }
-        exception<ConflictException> { cause ->
-            call.respond(HttpStatusCode.Conflict, ExceptionResponse(cause.message!!))
-        }
-        exception<AuthorizationException> { cause ->
-            call.respond(HttpStatusCode.Unauthorized, ExceptionResponse(cause.message!!))
-        }
-    }
+    configureStatusPages()
 
     configureSecurity()
 

@@ -56,7 +56,7 @@ fun Application.configureSecurity() {
     val redirectUrl = environment.config.property("auth.redirectUrl").getString()
     val jwkProvider = UrlJwkProvider(URL(jwksUrl))
 
-    val roleMap = roleMappings.split(",")
+    val rolePermissionMap = roleMappings.split(",")
         .associate { it.split(":")[0] to it.split(":")[1] }
 
     val oauthProvider = OAuthServerSettings.OAuth2ServerSettings(
@@ -130,32 +130,32 @@ fun Application.configureSecurity() {
         }
 
         // verify that all mappings are there
-        if (roleMap[AuthorizationHandler.ROLE_VIEW_WALLETS] == null) {
+        if (rolePermissionMap[AuthorizationHandler.ROLE_VIEW_WALLETS] == null) {
             log.error("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthorizationHandler.ROLE_CREATE_WALLETS] == null) {
+        if (rolePermissionMap[AuthorizationHandler.ROLE_CREATE_WALLETS] == null) {
             log.error("Configuration error, ${AuthorizationHandler.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthorizationHandler.ROLE_CREATE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthorizationHandler.ROLE_UPDATE_WALLETS] == null) {
+        if (rolePermissionMap[AuthorizationHandler.ROLE_UPDATE_WALLETS] == null) {
             log.error("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthorizationHandler.ROLE_DELETE_WALLETS] == null) {
+        if (rolePermissionMap[AuthorizationHandler.ROLE_DELETE_WALLETS] == null) {
             log.error("Configuration error, ${AuthorizationHandler.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthorizationHandler.ROLE_DELETE_WALLETS} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthorizationHandler.ROLE_UPDATE_WALLET] == null) {
+        if (rolePermissionMap[AuthorizationHandler.ROLE_UPDATE_WALLET] == null) {
             log.error("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthorizationHandler.ROLE_UPDATE_WALLET} role mapping not defined, system will not behave correctly!")
         }
-        if (roleMap[AuthorizationHandler.ROLE_VIEW_WALLET] == null) {
+        if (rolePermissionMap[AuthorizationHandler.ROLE_VIEW_WALLET] == null) {
             log.error("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
             throw Exception("Configuration error, ${AuthorizationHandler.ROLE_VIEW_WALLET} role mapping not defined, system will not behave correctly!")
         }
 
-        AuthorizationHandler.setRoleMapping(roleMap)
+        AuthorizationHandler.setRolePermissionMapping(rolePermissionMap)
 
         // verify that all mappings are there
         jwt(AuthorizationHandler.CONFIG_TOKEN) {
@@ -165,6 +165,8 @@ fun Application.configureSecurity() {
                     credentials -> verify(credentials)
             }
         }
+
+
 
     }
 }

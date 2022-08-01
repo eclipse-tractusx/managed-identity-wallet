@@ -34,11 +34,13 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import org.eclipse.tractusx.managedidentitywallets.Services
+import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
 
 import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 fun Route.vcRoutes(walletService: WalletService) {
@@ -49,7 +51,11 @@ fun Route.vcRoutes(walletService: WalletService) {
             notarizedGet(
                 GetInfo<VerifiableCredentialParameters, List<VerifiableCredentialDto>>(
                     summary = "Query Verifiable Credentials",
-                    description = "Search verifiable credentials with filter criteria",
+                    description = "Permission: " +
+                            "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_VIEW_WALLETS)}** OR " +
+                            "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_VIEW_WALLET)}** " +
+                            "(The BPN of holderIdentifier must equal BPN of caller)\n" +
+                            "\nSearch verifiable credentials with filter criteria",
                     parameterExamples = setOf(
                         ParameterExample("id", "id", "http://example.edu/credentials/3732"),
                         ParameterExample("type", "type", "['University-Degree-Credential']"),
@@ -63,8 +69,7 @@ fun Route.vcRoutes(walletService: WalletService) {
                         description = "The list of verifiable credentials matching the query, empty if no match found"
                     ),
                     tags = setOf("VerifiableCredentials"),
-                    securitySchemes = setOf(AuthorizationHandler.ROLE_VIEW_WALLETS,
-                        AuthorizationHandler.ROLE_VIEW_WALLET)
+                    canThrow = setOf(forbiddenException, unauthorizedException)
                 )
             ) {
                 val id = call.request.queryParameters["id"]
@@ -72,7 +77,7 @@ fun Route.vcRoutes(walletService: WalletService) {
                 val issuerIdentifier = call.request.queryParameters["issuerIdentifier"]
                 val holderIdentifier = call.request.queryParameters["holderIdentifier"]
 
-                AuthorizationHandler.hasRightsToViewWallet(call, holderIdentifier)
+                AuthorizationHandler.checkHasRightsToViewWallet(call, holderIdentifier)
 
                 call.respond(HttpStatusCode.OK,
                     walletService.getCredentials(issuerIdentifier, holderIdentifier, type, id)
@@ -84,7 +89,11 @@ fun Route.vcRoutes(walletService: WalletService) {
             notarizedPost(
                 PostInfo<Unit, VerifiableCredentialRequestDto, VerifiableCredentialDto>(
                     summary = "Issue Verifiable Credential",
-                    description = "Issue a verifiable credential with a given issuer DID",
+                    description = "Permission: " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
+                            "(The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\n" +
+                        "\nIssue a verifiable credential with a given issuer DID",
                     requestInfo = RequestInfo(
                         description = "The verifiable credential input data",
                         examples = verifiableCredentialRequestDtoExample
@@ -94,15 +103,14 @@ fun Route.vcRoutes(walletService: WalletService) {
                         description = "The created Verifiable Credential",
                         examples = signedVerifiableCredentialDtoExample
                     ),
-                    canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
-                    tags = setOf("VerifiableCredentials"),
-                    securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
-                        AuthorizationHandler.ROLE_UPDATE_WALLET)
+                    canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
+                        forbiddenException, unauthorizedException),
+                    tags = setOf("VerifiableCredentials")
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiableCredentialRequestDto>()
 
-                AuthorizationHandler.hasRightsToUpdateWallet(call,  verifiableCredentialDto.issuerIdentifier)
+                AuthorizationHandler.checkHasRightsToUpdateWallet(call, verifiableCredentialDto.issuerIdentifier)
 
                 call.respond(HttpStatusCode.Created, walletService.issueCredential(verifiableCredentialDto))
             }
@@ -113,7 +121,11 @@ fun Route.vcRoutes(walletService: WalletService) {
                 notarizedPost(
                     PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
                         summary = "Issue a Verifiable Credential with Catena-X platform issuer",
-                        description = "Issue a verifiable credential by Catena-X wallet",
+                        description = "Permission: " +
+                            "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
+                            "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
+                                "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
+                            "\nIssue a verifiable credential by Catena-X wallet",
                         requestInfo = RequestInfo(
                             description = "The verifiable credential input",
                             examples = verifiableCredentialRequestWithoutIssuerDtoExample
@@ -123,15 +135,14 @@ fun Route.vcRoutes(walletService: WalletService) {
                             description = "The created Verifiable Credential",
                             examples = signedVerifiableCredentialDtoExample
                         ),
-                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
-                        tags = setOf("VerifiableCredentials"),
-                        securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
-                            AuthorizationHandler.ROLE_UPDATE_WALLET)
+                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
+                            forbiddenException, unauthorizedException),
+                        tags = setOf("VerifiableCredentials")
                     )
                 ) {
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
 
-                    AuthorizationHandler.hasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
+                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
 
                     val verifiableCredentialDto = walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
                     call.respond(HttpStatusCode.Created, verifiableCredentialDto)

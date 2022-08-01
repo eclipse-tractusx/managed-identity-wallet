@@ -39,11 +39,15 @@ fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerD
 
         notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedPost(
-                PostInfo<BusinessPartnerDataDtoParameter, Unit, String>(
+                PostInfo<BusinessPartnerDataRefreshParameters, Unit, String>(
                     summary = "Pull business partner data from BPDM and issue or update verifiable credentials",
-                    description = "Pull business partner data from BPDM and issue" +
-                            "or update related verifiable credentials. " +
-                            "To update a specific wallet give its identifier as a query parameter.",
+                    description = "Permission: " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
+                            "(The BPN of wallet to update must equal BPN of caller) \n" +
+                        "\nPull business partner data from BPDM and issue" +
+                        "or update related verifiable credentials. " +
+                        "To update a specific wallet give its identifier as a query parameter.",
                     parameterExamples = setOf(
                         ParameterExample("identifier", "did", "did:example:0123"),
                         ParameterExample("identifier", "bpn", "bpn123"),
@@ -53,12 +57,11 @@ fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerD
                         status = HttpStatusCode.Accepted,
                         description = "Empty response body"
                     ),
-                    tags = setOf("BusinessPartnerData"),
-                    securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
-                        AuthorizationHandler.ROLE_UPDATE_WALLET)
+                    canThrow = setOf(forbiddenException, unauthorizedException),
+                    tags = setOf("BusinessPartnerData")
                 )
             ) {
-                AuthorizationHandler.hasRightsToUpdateWallet(call, call.request.queryParameters["identifier"])
+                AuthorizationHandler.checkHasRightsToUpdateWallet(call, call.request.queryParameters["identifier"])
 
                 businessPartnerDataService.pullDataAndUpdateCatenaXCredentialsAsync(
                     call.request.queryParameters["identifier"]

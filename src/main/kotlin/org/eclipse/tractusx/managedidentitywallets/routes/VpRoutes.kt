@@ -35,11 +35,13 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.serialization.Serializable
+import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
 
 import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 fun Route.vpRoutes(walletService: WalletService) {
@@ -49,7 +51,11 @@ fun Route.vpRoutes(walletService: WalletService) {
             notarizedPost(
                 PostInfo<Unit, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
                     summary = "Create Verifiable Presentation",
-                    description = "Create a verifiable presentation from a list of verifiable credentials, signed by the holder",
+                    description = "Permission: " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
+                            "(The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller)\n" +
+                        "\nCreate a verifiable presentation from a list of verifiable credentials, signed by the holder",
                     requestInfo = RequestInfo(
                         description = "The verifiable presentation input data",
                         examples = verifiablePresentationRequestDtoExample
@@ -59,15 +65,13 @@ fun Route.vpRoutes(walletService: WalletService) {
                         description = "The created verifiable presentation",
                         examples = verifiablePresentationResponseDtoExample
                     ),
-                    canThrow = setOf(semanticallyInvalidInputException),
-                    tags = setOf("VerifiablePresentations"),
-                    securitySchemes = setOf(AuthorizationHandler.ROLE_UPDATE_WALLETS,
-                        AuthorizationHandler.ROLE_UPDATE_WALLET)
+                    canThrow = setOf(semanticallyInvalidInputException, forbiddenException, unauthorizedException),
+                    tags = setOf("VerifiablePresentations")
                 )
             ) {
                 val verifiableCredentialDto = call.receive<VerifiablePresentationRequestDto>()
 
-                AuthorizationHandler.hasRightsToUpdateWallet(call, verifiableCredentialDto.holderIdentifier)
+                AuthorizationHandler.checkHasRightsToUpdateWallet(call, verifiableCredentialDto.holderIdentifier)
 
                 call.respond(HttpStatusCode.Created, walletService.issuePresentation(verifiableCredentialDto))
             }
@@ -78,7 +82,10 @@ fun Route.vpRoutes(walletService: WalletService) {
                 notarizedPost(
                     PostInfo<WithDateValidation, VerifiablePresentationDto, VerifyResponse>(
                         summary = "Validate Verifiable Presentation",
-                        description = "Validate Verifiable Presentation with all included credentials",
+                        description = "Permission: " +
+                            "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_VIEW_WALLETS)}** OR " +
+                            "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_VIEW_WALLET)}**\n" +
+                            "\nValidate Verifiable Presentation with all included credentials",
                         parameterExamples = setOf(
                             ParameterExample("withDateValidation", "withDateValidation", "false")
                         ),
@@ -95,13 +102,12 @@ fun Route.vpRoutes(walletService: WalletService) {
                                 vp = verifiablePresentationResponseDtoExample["demo"]!!
                             ))
                         ),
-                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException),
-                        tags = setOf("VerifiablePresentations"),
-                        securitySchemes = setOf(AuthorizationHandler.ROLE_VIEW_WALLETS,
-                            AuthorizationHandler.ROLE_VIEW_WALLET)
+                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
+                            forbiddenException, unauthorizedException),
+                        tags = setOf("VerifiablePresentations")
                     )
                 ) {
-                    AuthorizationHandler.hasAnyViewRoles(call)
+                    AuthorizationHandler.checkHasAnyViewRoles(call)
                     val verifiablePresentation = call.receive<VerifiablePresentationDto>()
                     val withDateValidation = if (call.request.queryParameters["withDateValidation"] != null) {
                         call.request.queryParameters["withDateValidation"].toBoolean()

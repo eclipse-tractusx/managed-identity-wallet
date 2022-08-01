@@ -71,3 +71,17 @@ val conflictException = ExceptionInfo<ExceptionResponse>(
     status = HttpStatusCode.Conflict,
     examples = mapOf("demo" to ExceptionResponse("reason"))
 )
+
+val unauthorizedException = ExceptionInfo<ExceptionResponse>(
+    responseType = typeOf<ExceptionResponse>(),
+    description = "The request could not be completed due to a failed authorization.",
+    status = HttpStatusCode.Unauthorized,
+    examples = mapOf("demo" to ExceptionResponse("reason"))
+)
+
+val forbiddenException = ExceptionInfo<ExceptionResponse>(
+    responseType = typeOf<ExceptionResponse>(),
+    description = "The request could not be completed due to a forbidden access.",
+    status = HttpStatusCode.Forbidden,
+    examples = mapOf("demo" to ExceptionResponse("reason"))
+)

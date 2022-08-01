@@ -53,7 +53,7 @@ data class BPDMConfig(
 )
 
 @Serializable
-data class BusinessPartnerDataDtoParameter(
+data class BusinessPartnerDataRefreshParameters(
     @Param(type = ParamType.QUERY)
     @Field(description = "The DID or BPN of the business partner whose data should be refreshed", name = "identifier")
     val identifier: String? = null
