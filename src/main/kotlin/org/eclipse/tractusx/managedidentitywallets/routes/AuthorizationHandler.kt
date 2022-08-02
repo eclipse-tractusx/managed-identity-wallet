@@ -43,10 +43,10 @@ object AuthorizationHandler {
 
     const val CONFIG_TOKEN = "auth-token"
 
-    private val view_roles = setOf<Role>(ROLE_VIEW_WALLET, ROLE_VIEW_WALLETS)
-    private val update_roles = setOf<Role>(ROLE_UPDATE_WALLET, ROLE_UPDATE_WALLETS)
-    private val create_role = setOf<Role>(ROLE_CREATE_WALLETS)
-    private val delete_role = setOf<Role>(ROLE_DELETE_WALLETS)
+    private val view_roles = setOf(ROLE_VIEW_WALLET, ROLE_VIEW_WALLETS)
+    private val update_roles = setOf(ROLE_UPDATE_WALLET, ROLE_UPDATE_WALLETS)
+    private val create_role = setOf(ROLE_CREATE_WALLETS)
+    private val delete_role = setOf(ROLE_DELETE_WALLETS)
 
     private val rolePermissionMap = mutableMapOf(
         ROLE_CREATE_WALLETS to ROLE_CREATE_WALLETS,

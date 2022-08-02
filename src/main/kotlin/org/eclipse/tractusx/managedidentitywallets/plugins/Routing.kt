@@ -50,12 +50,12 @@ import org.eclipse.tractusx.managedidentitywallets.services.WalletService
 
 suspend fun retrieveBusinessPartnerInfo(bpdmDatapoolUrl: String, bpn: String, token: String): String {
 
-    var stringBody: String = ""
+    var stringBody = ""
     HttpClient(Apache).use { client ->
         val httpResponse: HttpResponse = client.get("$bpdmDatapoolUrl/$bpn") {
             headers {
                 append(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                append(HttpHeaders.Authorization, "Bearer " + token)
+                append(HttpHeaders.Authorization, "Bearer $token")
             }
         }
         stringBody = httpResponse.readText()
@@ -66,6 +66,8 @@ suspend fun retrieveBusinessPartnerInfo(bpdmDatapoolUrl: String, bpn: String, to
 
 @Serializable
 data class BusinessPartnerInfo(val bpn: String)
+
+private val json = Json { ignoreUnknownKeys = true }
 
 fun Application.configureRouting(walletService: WalletService) {
 
@@ -176,7 +178,7 @@ fun Application.configureRouting(walletService: WalletService) {
                     if (principal != null) {
                         val response = principal as OAuthAccessTokenResponse.OAuth2
                         // put token directly into the session, without decoding it
-                        call.sessions.set(UserSession(response.accessToken.toString()))
+                        call.sessions.set(UserSession(response.accessToken))
                         call.respondRedirect("/ui/")
                     } else {
                         call.respondRedirect("/login")
@@ -217,8 +219,8 @@ fun Application.configureRouting(walletService: WalletService) {
                         val did = call.parameters["did"]
                         if (did != null) {
                             try {
-                                val stringBody = retrieveBusinessPartnerInfo("${bpdmDatapoolUrl}", did, token)
-                                Json { ignoreUnknownKeys = true }.decodeFromString<BusinessPartnerInfo>(
+                                val stringBody = retrieveBusinessPartnerInfo(bpdmDatapoolUrl, did, token)
+                                json.decodeFromString(
                                     BusinessPartnerInfo.serializer(),
                                     stringBody
                                 )

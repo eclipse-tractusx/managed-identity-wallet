@@ -38,9 +38,9 @@ interface WalletService {
 
     fun getWallet(identifier: String, withCredentials: Boolean = false): WalletDto
 
-    fun getDidFromBpn(did: String): String
+    fun getDidFromBpn(bpn: String): String
 
-    fun getBpnFromDid(Bpn: String): String
+    fun getBpnFromDid(did: String): String
 
     fun getBpnFromIdentifier(identifier: String): String
 

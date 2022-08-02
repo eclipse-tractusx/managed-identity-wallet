@@ -99,7 +99,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
             }
         var accessToken = getAccessToken()
         listOfBPNs.forEach { bpn ->
-            var businessPartnerData: BusinessPartnerDataDto;
+            val businessPartnerData: BusinessPartnerDataDto
             var businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
             if (businessPartnerDataResponse.status == HttpStatusCode.Unauthorized) {
                 accessToken = getAccessToken() // Get new Access Token

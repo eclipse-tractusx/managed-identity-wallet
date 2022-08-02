@@ -31,7 +31,6 @@ import io.ktor.sessions.*
 
 import com.auth0.jwt.*
 import com.auth0.jwk.UrlJwkProvider
-import com.auth0.jwt.interfaces.Payload
 import com.auth0.jwt.algorithms.*
 import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
 import java.security.interfaces.*
@@ -42,7 +41,7 @@ data class UserSession(val token: String) : Principal
 
 typealias Role = String
 
-class MIWPrincipal(val payload: Payload, val roles: Set<Role>, val bpn: String?) : Principal
+class MIWPrincipal(val roles: Set<Role>, val bpn: String?) : Principal
 
 fun Application.configureSecurity() {
 
@@ -75,9 +74,8 @@ fun Application.configureSecurity() {
             val clientResources = credentials.payload.claims[AuthorizationHandler.RESOURCE_ACCESS]!!.asMap()[resourceId]
             return if (clientResources != null && clientResources is Map<*, *> && clientResources.contains(AuthorizationHandler.ROLES)) {
                 val roles = (clientResources[AuthorizationHandler.ROLES] as ArrayList<Role>).toSet()
-                if (roles != null && !roles.isNullOrEmpty())
-                    MIWPrincipal(payload = credentials.payload, roles = roles
-                        , bpn = credentials.payload.claims["BPN"]?.asString())
+                if (roles.isNotEmpty())
+                    MIWPrincipal(roles = roles, bpn = credentials.payload.claims["BPN"]?.asString())
                 else {
                     log.warn("Authentication information incomplete: missing roles")
                     null
