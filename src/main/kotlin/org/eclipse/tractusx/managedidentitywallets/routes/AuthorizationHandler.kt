@@ -112,7 +112,7 @@ object AuthorizationHandler {
     }
 
     private fun checkHasAnyRolesOf(call: ApplicationCall, requiredRoles: Set<Role>): MIWPrincipal {
-        val principal = getPrincipal(call.attributes)
+        val principal = getPrincipalFromPayload(call)
         if (principal == null || principal.roles.isEmpty()) {
             throw AuthorizationException( "Authorization failed: Principal is null or it has an empty role")
         }
@@ -125,12 +125,11 @@ object AuthorizationHandler {
         return principal
     }
 
-    private fun getPrincipal(attributes: Attributes): MIWPrincipal? {
-        val authContextKey = attributes.allKeys.firstOrNull { (it as AttributeKey<AuthenticationContext>).name == "AuthContext" }
-        if (authContextKey === null) {
-            return null
-        }
+    private fun getPrincipalFromPayload(call: ApplicationCall): MIWPrincipal? {
+        val attributes = call.attributes
+        val authContextKey = attributes.allKeys.firstOrNull { it.name == "AuthContext" } ?: return null
         val authContext = attributes[authContextKey as AttributeKey<AuthenticationContext>]
         return authContext.principal as MIWPrincipal
     }
+
 }
