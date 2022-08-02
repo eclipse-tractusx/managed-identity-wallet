@@ -26,9 +26,6 @@ import com.github.kagkarlsson.scheduler.task.schedule.Schedules
 import io.ktor.application.*
 import kotlinx.coroutines.runBlocking
 import org.eclipse.tractusx.managedidentitywallets.Services
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.SchedulerTasks
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.postgresql.ds.PGSimpleDataSource
 import org.sqlite.SQLiteDataSource
 import java.sql.DriverManager
@@ -65,12 +62,6 @@ fun initDatabase(jdbcUrl: String): DataSource {
 
         // just a keepAliveConnection
         DriverManager.getConnection(jdbcUrl)
-
-        transaction {
-            // Create missing tables
-            SchemaUtils.createMissingTablesAndColumns(SchedulerTasks)
-            commit()
-        }
 
         return dataSource
     } else {
