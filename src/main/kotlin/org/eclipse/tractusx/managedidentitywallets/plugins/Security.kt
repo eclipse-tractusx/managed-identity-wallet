@@ -69,7 +69,7 @@ fun Application.configureSecurity() {
         defaultScopes = listOf(AuthorizationHandler.ROLES)
     )
 
-    fun verify(credentials: JWTCredential): MIWPrincipal? {
+    fun getPrincipalFromPayload(credentials: JWTCredential): MIWPrincipal? {
         if (credentials.payload.claims != null && credentials.payload.claims.contains(AuthorizationHandler.RESOURCE_ACCESS)) {
             val clientResources = credentials.payload.claims[AuthorizationHandler.RESOURCE_ACCESS]!!.asMap()[resourceId]
             return if (clientResources != null && clientResources is Map<*, *> && clientResources.contains(AuthorizationHandler.ROLES)) {
@@ -160,7 +160,7 @@ fun Application.configureSecurity() {
             verifier(jwkProvider, issuerUrl)
             realm = jwkRealm
             validate {
-                    credentials -> verify(credentials)
+                    credentials -> getPrincipalFromPayload(credentials)
             }
         }
 
