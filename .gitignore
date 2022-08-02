@@ -40,3 +40,4 @@ hs_err_pid*.log
 dev.env
 
 dev-assets/secrets/*
+local.db
