@@ -22,11 +22,7 @@ package org.eclipse.tractusx.managedidentitywallets.plugins
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
 import io.ktor.routing.*
-
-import java.time.*
 
 import java.time.Duration
 
@@ -48,6 +44,9 @@ fun Application.configureSockets() {
                         if (text.equals("bye", ignoreCase = true)) {
                             close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
                         }
+                    }
+                    else -> {
+                        close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Unsupported Frame"))
                     }
                 }
             }

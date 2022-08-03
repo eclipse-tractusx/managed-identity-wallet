@@ -20,6 +20,7 @@
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
 import io.ktor.application.*
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.SchedulerTasks
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -33,7 +34,7 @@ fun Application.configurePersistence() {
     Database.connect(jdbcUrl, driver = jdbcDriver)
     transaction {
         // Create missing tables
-        SchemaUtils.createMissingTablesAndColumns(Wallets, VerifiableCredentials)
+        SchemaUtils.createMissingTablesAndColumns(Wallets, VerifiableCredentials, SchedulerTasks)
         commit()
     } 
 }

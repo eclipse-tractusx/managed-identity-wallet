@@ -38,6 +38,14 @@ interface WalletService {
 
     fun getWallet(identifier: String, withCredentials: Boolean = false): WalletDto
 
+    fun getDidFromBpn(bpn: String): String
+
+    fun getBpnFromDid(did: String): String
+
+    fun getBpnFromIdentifier(identifier: String): String
+
+    fun isDID(identifier: String) : Boolean
+
     fun getAll(): List<WalletDto>
 
     fun getAllBpns(): List<String>
@@ -77,6 +85,8 @@ interface WalletService {
 
     fun isCatenaXWallet(bpn: String): Boolean
 
+    fun getCatenaXBpn(): String
+
     suspend fun verifyVerifiablePresentation(vpDto: VerifiablePresentationDto,
                                              withDateValidation: Boolean = false): VerifyResponse
 
@@ -88,7 +98,7 @@ interface WalletService {
         ): WalletService {
             val acaPyService = IAcaPyService.create(
                 walletAndAcaPyConfig = walletAndAcaPyConfig,
-                client = HttpClient() {
+                client = HttpClient {
                     expectSuccess = true
                     install(ResponseObserver) {
                         onResponse { response ->
@@ -128,7 +138,7 @@ interface WalletService {
                         level = LogLevel.BODY
                     }
                     install(JsonFeature) {
-                        serializer = JacksonSerializer() {
+                        serializer = JacksonSerializer {
                             enable(SerializationFeature.INDENT_OUTPUT)
                             serializationConfig.defaultPrettyPrinter
                             setSerializationInclusion(JsonInclude.Include.NON_NULL)

@@ -52,9 +52,8 @@ dependencies {
     implementation("io.bkbn:kompendium-core:$kompendium_version")
     implementation("io.bkbn:kompendium-auth:$kompendium_version")
 
-    implementation("com.github.kibertoad:ktor-scheduler:1.0.4")
-    implementation("org.jobrunr:jobrunr:5.1.6")
     implementation("org.postgresql:postgresql:42.4.0")
+    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
 
     // for now: using kotlinx.serialization
     // implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7")
@@ -68,10 +67,11 @@ dependencies {
 
     implementation("decentralized-identity:did-common-java:1.0.0")
 
+    // https://mvnrepository.com/artifact/com.github.kagkarlsson/db-scheduler
+    implementation("com.github.kagkarlsson:db-scheduler:11.2")
+
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation(kotlin("test"))
-
-    runtimeOnly("org.xerial:sqlite-jdbc:3.36.0.3")
 
 }

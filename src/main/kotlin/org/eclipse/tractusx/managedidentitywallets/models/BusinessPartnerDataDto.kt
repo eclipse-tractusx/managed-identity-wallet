@@ -20,6 +20,8 @@
 package org.eclipse.tractusx.managedidentitywallets.models
 
 import io.bkbn.kompendium.annotations.Field
+import io.bkbn.kompendium.annotations.Param
+import io.bkbn.kompendium.annotations.ParamType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -48,6 +50,13 @@ data class BPDMConfig(
     val clientSecret: String,
     val grantType: String,
     val scope: String
+)
+
+@Serializable
+data class BusinessPartnerDataRefreshParameters(
+    @Param(type = ParamType.QUERY)
+    @Field(description = "The DID or BPN of the business partner whose data should be refreshed", name = "identifier")
+    val identifier: String? = null
 )
 
 // TODO need to analyze the data updates if that could be made

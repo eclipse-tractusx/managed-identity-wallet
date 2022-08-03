@@ -28,7 +28,6 @@ import io.ktor.http.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import kotlinx.serialization.decodeFromString
@@ -83,22 +82,24 @@ class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
                 }
             }
         }
-        if (businessPartnerData.legalForm != null) {
-            if (isNewLegalForm(bpn, businessPartnerData.legalForm)) {
+        if (businessPartnerData.legalForm != null && isNewLegalForm(bpn, businessPartnerData.legalForm)) {
                 issueAndStoreCatenaXCredentialsAsync(
                     bpn = bpn,
                     type = JsonLdTypes.LEGAL_FORM_TYPE,
                     data = businessPartnerData.legalForm
                 )
-            }
         }
     }
 
-    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync() {
-        val listOfBPNs = walletService.getAllBpns()
+    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String?) {
+        val listOfBPNs = if (identifier.isNullOrEmpty()) {
+                walletService.getAllBpns()
+            } else {
+                listOf(walletService.getBpnFromIdentifier(identifier))
+            }
         var accessToken = getAccessToken()
         listOfBPNs.forEach { bpn ->
-            var businessPartnerData: BusinessPartnerDataDto;
+            val businessPartnerData: BusinessPartnerDataDto
             var businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
             if (businessPartnerDataResponse.status == HttpStatusCode.Unauthorized) {
                 accessToken = getAccessToken() // Get new Access Token

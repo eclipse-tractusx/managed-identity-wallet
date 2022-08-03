@@ -42,6 +42,8 @@ class NotFoundException(message: String? =  "empty message") : Exception(message
 
 class ForbiddenException(message: String? = "empty message") : Exception(message)
 
+class AuthorizationException(message: String? = "empty message") : Exception(message)
+
 val semanticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),
     description = "The input can not be processed due to semantic mismatches",
@@ -67,5 +69,19 @@ val conflictException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),
     description = "The request could not be completed due to a conflict.",
     status = HttpStatusCode.Conflict,
+    examples = mapOf("demo" to ExceptionResponse("reason"))
+)
+
+val unauthorizedException = ExceptionInfo<ExceptionResponse>(
+    responseType = typeOf<ExceptionResponse>(),
+    description = "The request could not be completed due to a failed authorization.",
+    status = HttpStatusCode.Unauthorized,
+    examples = mapOf("demo" to ExceptionResponse("reason"))
+)
+
+val forbiddenException = ExceptionInfo<ExceptionResponse>(
+    responseType = typeOf<ExceptionResponse>(),
+    description = "The request could not be completed due to a forbidden access.",
+    status = HttpStatusCode.Forbidden,
     examples = mapOf("demo" to ExceptionResponse("reason"))
 )
