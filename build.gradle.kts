@@ -70,6 +70,8 @@ dependencies {
     // https://mvnrepository.com/artifact/com.github.kagkarlsson/db-scheduler
     implementation("com.github.kagkarlsson:db-scheduler:11.2")
 
+    implementation("network.idu.acapy:aries-client-python:0.7.26")
+
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation(kotlin("test"))
