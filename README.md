@@ -368,7 +368,7 @@ The Available Scopes/Roles are:
 Jacoco is used to generate the coverage report.
 The generated Html report can be found under `jacoco-report/html/`
 * To generate the report run the command `./gradle jacocoTestReport`
-* To check the coverage run the command `./gradle jacocoTestCoverageVerification`. Currently the Minimum is 80%
+* To check the coverage run the command `./gradle jacocoTestCoverageVerification`. Currently the Minimum is 80% (INSTRUCTIONS)
 
 ## Dashboard <a id="dashboard"></a>
 

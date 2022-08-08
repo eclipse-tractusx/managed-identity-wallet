@@ -23,6 +23,8 @@ package org.eclipse.tractusx.managedidentitywallets.models.ssi
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.bkbn.kompendium.annotations.Field
+import io.bkbn.kompendium.annotations.Param
+import io.bkbn.kompendium.annotations.ParamType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -51,4 +53,14 @@ data class VerifiablePresentationRequestDto(
     val holderIdentifier: String,
     @Field(description = "List of Verifiable Credentials", name = "verifiableCredentials")
     val verifiableCredentials: List<VerifiableCredentialDto>
+)
+
+@Serializable
+data class WithDateValidation(
+    @Param(type = ParamType.QUERY)
+    @Field(
+        description = "Flag whether issuance and expiration date of all credentials should be validated",
+        name = "withDateValidation"
+    )
+    val withDateValidation: Boolean? = false
 )

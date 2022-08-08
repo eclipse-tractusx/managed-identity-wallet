@@ -185,13 +185,3 @@ val verifiablePresentationResponseDtoExample = mapOf(
         )
     )
 )
-
-@Serializable
-data class WithDateValidation(
-    @Param(type = ParamType.QUERY)
-    @Field(
-        description = "Flag whether issuance and expiration date of all credentials should be validated",
-        name = "withDateValidation"
-    )
-    val withDateValidation: Boolean? = false
-)

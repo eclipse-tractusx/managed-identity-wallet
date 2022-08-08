@@ -133,5 +133,5 @@ tasks.jacocoTestCoverageVerification {
 }
 
 tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
 }

@@ -192,6 +192,7 @@ class ApplicationTest {
     private val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
     private val bpdService = BusinessPartnerDataMockedService()
 
+    private val EMPTY_ROLES_TOKEN = JwtConfig.makeToken(listOf())
     private val CREATE_TOKEN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_CREATE_WALLETS))
     private val VIEW_TOKEN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_VIEW_WALLETS))
     private val UPDATE_TOKEN = JwtConfig.makeToken(listOf(AuthorizationHandler.ROLE_UPDATE_WALLETS))
@@ -454,7 +455,7 @@ class ApplicationTest {
     }
 
     @Test
-    fun testCredentials() {
+    fun testGetAndStoreVerifiableCredentials() {
         withTestApplication({
             setupEnvironment(environment)
             configurePersistence()
@@ -741,7 +742,6 @@ class ApplicationTest {
         }
     }
 
-
     @Test
     fun testIssuePresentation() {
         withTestApplication({
@@ -846,7 +846,7 @@ class ApplicationTest {
     }
 
     @Test
-    fun testDidDocument() {
+    fun testDidDocumentOperations() {
         withTestApplication({
             setupEnvironment(environment)
             configurePersistence()
@@ -985,6 +985,16 @@ class ApplicationTest {
             Services.walletService = walletService
             Services.businessPartnerDataService = bpdService
         }) {
+
+            assertFails {
+                handleRequest(HttpMethod.Get, "/api/wallets") {
+                    addHeader(HttpHeaders.Authorization, "Bearer $EMPTY_ROLES_TOKEN")
+                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                }.apply{
+                    assertTrue { false }
+                }
+            }
+
             // view wallets with wrong token should not work
             handleRequest(HttpMethod.Get, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer $UPDATE_TOKEN")
@@ -1041,6 +1051,7 @@ class ApplicationTest {
 
             assertEquals(0, walletService.getAll().size)
         }
+
     }
 
     @Test
