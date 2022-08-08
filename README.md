@@ -358,8 +358,11 @@ The Available Scopes/Roles are:
     * to store Verifiable Credentials (The BPN of holder will be checked)
     * to trigger Business Partner Data update for its own BPN
 
-## Test 
-The tests can be run using the command `./gradlew test`
+## Tests
+
+### Unit Tests
+
+    ./gradlew test
 
 ### Test Coverage
 Jacoco is used to generate the coverage report.
