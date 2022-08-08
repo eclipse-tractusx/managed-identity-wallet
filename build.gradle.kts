@@ -9,6 +9,12 @@ plugins {
     application
     kotlin("jvm") version "1.6.10"
                 id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
+    jacoco
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory.set(layout.projectDirectory.dir("jacoco-report"))
 }
 
 group = "org.eclipse.tractusx"
@@ -70,10 +76,62 @@ dependencies {
     // https://mvnrepository.com/artifact/com.github.kagkarlsson/db-scheduler
     implementation("com.github.kagkarlsson:db-scheduler:11.2")
 
-    implementation("network.idu.acapy:aries-client-python:0.7.26")
-
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation(kotlin("test"))
 
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/models/**",
+                    "**/entities/**",
+                    "**/Application*",
+                    "**/plugins/Sockets*",
+                    "**/services/WalletService*", // interface
+                    "**/services/IAcaPyService*", // interface
+                    "**/services/AcaPyService*", // mocked
+                    "**/services/BusinessPartnerDataService*", // interface
+                    "**/services/BusinessPartnerDateServiceImpl*" // mocked
+                )
+            }
+        })
+    )
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.8".toBigDecimal()
+            }
+        }
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/models/**",
+                    "**/entities/**",
+                    "**/Application*",
+                    "**/plugins/Sockets*",
+                    "**/services/WalletService*", // interface
+                    "**/services/IAcaPyService*", // interface
+                    "**/services/AcaPyService*", // mocked
+                    "**/services/BusinessPartnerDataService*", // interface
+                    "**/services/BusinessPartnerDateServiceImpl*" // mocked
+                )
+            }
+        })
+    )
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
 }

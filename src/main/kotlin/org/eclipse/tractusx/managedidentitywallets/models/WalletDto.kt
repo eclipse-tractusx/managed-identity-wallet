@@ -19,6 +19,9 @@
 
 package org.eclipse.tractusx.managedidentitywallets.models
 
+import io.bkbn.kompendium.annotations.Field
+import io.bkbn.kompendium.annotations.Param
+import io.bkbn.kompendium.annotations.ParamType
 import java.time.LocalDateTime
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 
@@ -41,3 +44,32 @@ data class WalletDto(
         require(name.isNotBlank()) { "Field 'name' is required not to be blank, but it was blank" }
     }
 }
+
+// for documentation
+@Serializable
+data class StoreVerifiableCredentialParameter(
+    @Param(type = ParamType.PATH)
+    @Field(
+        description = "The DID or BPN of the credential holder. The DID must match to the id of the credential subject if present.",
+        name = "identifier"
+    )
+    val identifier: String
+)
+
+@Serializable
+data class WalletDtoParameter(
+    @Param(type = ParamType.PATH)
+    @Field(description = "The DID or BPN of the Wallet", name = "identifier")
+    val identifier: String,
+    @Param(type = ParamType.QUERY)
+    @Field(
+        description = "Flag whether all stored credentials of the wallet should be included in the response",
+        name = "withCredentials"
+    )
+    val withCredentials: Boolean
+)
+
+@Serializable
+data class VerKeyDto(
+    val verKey: String
+)

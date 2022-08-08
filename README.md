@@ -358,6 +358,15 @@ The Available Scopes/Roles are:
     * to store Verifiable Credentials (The BPN of holder will be checked)
     * to trigger Business Partner Data update for its own BPN
 
+## Test 
+The tests can be run using the command `./gradlew test`
+
+### Test Coverage
+Jacoco is used to generate the coverage report.
+The generated Html report can be found under `jacoco-report/html/`
+* To generate the report run the command `./gradle jacocoTestReport`
+* To check the coverage run the command `./gradle jacocoTestCoverageVerification`. Currently the Minimum is 80%
+
 ## Dashboard <a id="dashboard"></a>
 
 Within `ui-src` a simple Vue based dashboard application is available
