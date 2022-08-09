@@ -4,6 +4,7 @@ val logback_version: String by project
 val kompendium_version: String by project
 val exposed_version: String by project
 val version: String by project
+val coverage_excludes: String by project
 
 plugins {
     application
@@ -90,16 +91,7 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
-                exclude(
-                    "**/models/**",
-                    "**/entities/**",
-                    "**/Application*",
-                    "**/services/IWalletService*",
-                    "**/services/IAcaPyService*",
-                    "**/services/AcaPyService*",
-                    "**/services/IBusinessPartnerDataService",
-                    "**/services/BusinessPartnerDataServiceImpl*"
-                )
+                exclude(coverage_excludes.split(","))
             }
         })
     )
@@ -117,16 +109,7 @@ tasks.jacocoTestCoverageVerification {
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
-                exclude(
-                    "**/models/**",
-                    "**/entities/**",
-                    "**/Application*",
-                    "**/services/IWalletService*",
-                    "**/services/IAcaPyService*",
-                    "**/services/AcaPyService*",
-                    "**/services/IBusinessPartnerDataService",
-                    "**/services/BusinessPartnerDataServiceImpl*"
-                )
+                exclude(coverage_excludes.split(","))
             }
         })
     )
