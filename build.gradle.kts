@@ -86,6 +86,7 @@ tasks.withType<Test> {
 }
 
 tasks.jacocoTestReport {
+    dependsOn(tasks.test)
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
@@ -105,6 +106,7 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
     violationRules {
         rule {
             limit {
