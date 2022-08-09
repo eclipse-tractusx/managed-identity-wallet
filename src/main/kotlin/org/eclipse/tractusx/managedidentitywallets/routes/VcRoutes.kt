@@ -41,9 +41,9 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
-import org.eclipse.tractusx.managedidentitywallets.services.WalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
-fun Route.vcRoutes(walletService: WalletService) {
+fun Route.vcRoutes(walletService: IWalletService) {
 
     route("/credentials") {
 

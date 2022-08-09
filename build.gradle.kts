@@ -93,12 +93,11 @@ tasks.jacocoTestReport {
                     "**/models/**",
                     "**/entities/**",
                     "**/Application*",
-                    "**/plugins/Sockets*",
-                    "**/services/WalletService*", // interface
-                    "**/services/IAcaPyService*", // interface
-                    "**/services/AcaPyService*", // mocked
-                    "**/services/BusinessPartnerDataService*", // interface
-                    "**/services/BusinessPartnerDateServiceImpl*" // mocked
+                    "**/services/IWalletService*",
+                    "**/services/IAcaPyService*",
+                    "**/services/AcaPyService*",
+                    "**/services/IBusinessPartnerDataService",
+                    "**/services/BusinessPartnerDataServiceImpl*"
                 )
             }
         })
@@ -120,12 +119,11 @@ tasks.jacocoTestCoverageVerification {
                     "**/models/**",
                     "**/entities/**",
                     "**/Application*",
-                    "**/plugins/Sockets*",
-                    "**/services/WalletService*", // interface
-                    "**/services/IAcaPyService*", // interface
-                    "**/services/AcaPyService*", // mocked
-                    "**/services/BusinessPartnerDataService*", // interface
-                    "**/services/BusinessPartnerDateServiceImpl*" // mocked
+                    "**/services/IWalletService*",
+                    "**/services/IAcaPyService*",
+                    "**/services/AcaPyService*",
+                    "**/services/IBusinessPartnerDataService",
+                    "**/services/BusinessPartnerDataServiceImpl*"
                 )
             }
         })

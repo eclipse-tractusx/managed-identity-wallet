@@ -37,7 +37,7 @@ class AcaPyWalletServiceImpl(
     private val acaPyService: IAcaPyService,
     private val walletRepository: WalletRepository,
     private val credentialRepository: CredentialRepository
-) : WalletService {
+) : IWalletService {
 
     private val networkIdentifier = acaPyService.getWalletAndAcaPyConfig().networkIdentifier
     private val baseWalletBpn = acaPyService.getWalletAndAcaPyConfig().baseWalletBpn

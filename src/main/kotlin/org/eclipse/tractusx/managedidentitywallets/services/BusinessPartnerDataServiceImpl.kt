@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
-class BusinessPartnerDataServiceImpl(private val walletService: WalletService,
+class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
                                      private val bpdmConfig: BPDMConfig,
-                                     private val client: HttpClient): BusinessPartnerDataService {
+                                     private val client: HttpClient): IBusinessPartnerDataService {
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
     }

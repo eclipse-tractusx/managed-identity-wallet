@@ -20,9 +20,6 @@
 package org.eclipse.tractusx.managedidentitywallets.routes
 
 import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
-import io.bkbn.kompendium.annotations.Field
-import io.bkbn.kompendium.annotations.Param
-import io.bkbn.kompendium.annotations.ParamType
 import io.bkbn.kompendium.core.Notarized.notarizedDelete
 import io.bkbn.kompendium.core.Notarized.notarizedGet
 import io.bkbn.kompendium.core.Notarized.notarizedPost
@@ -39,19 +36,17 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-import kotlinx.serialization.Serializable
-
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
-import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
-import org.eclipse.tractusx.managedidentitywallets.services.WalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 import java.time.LocalDateTime
 
-fun Route.walletRoutes(walletService: WalletService, businessPartnerDataService: BusinessPartnerDataService) {
+fun Route.walletRoutes(walletService: IWalletService, businessPartnerDataService: IBusinessPartnerDataService) {
 
     route("/wallets") {
 

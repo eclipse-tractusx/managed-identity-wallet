@@ -21,10 +21,10 @@ package org.eclipse.tractusx.managedidentitywallets.routes
 
 import io.ktor.application.*
 import io.ktor.routing.*
-import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
-import org.eclipse.tractusx.managedidentitywallets.services.WalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
-fun Application.appRoutes(walletService: WalletService, businessPartnerDataService: BusinessPartnerDataService) {
+fun Application.appRoutes(walletService: IWalletService, businessPartnerDataService: IBusinessPartnerDataService) {
 
     routing {
         route("/api") {

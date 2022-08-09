@@ -31,9 +31,9 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
 
-fun Route.businessPartnerDataRoutes(businessPartnerDataService: BusinessPartnerDataService) {
+fun Route.businessPartnerDataRoutes(businessPartnerDataService: IBusinessPartnerDataService) {
 
     route("/businessPartnerDataRefresh") {
 

@@ -46,7 +46,7 @@ import kotlinx.serialization.json.*
 import io.bkbn.kompendium.core.routes.redoc
 
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.services.WalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
 suspend fun retrieveBusinessPartnerInfo(bpdmDatapoolUrl: String, bpn: String, token: String): String {
 
@@ -69,7 +69,7 @@ data class BusinessPartnerInfo(val bpn: String)
 
 private val json = Json { ignoreUnknownKeys = true }
 
-fun Application.configureRouting(walletService: WalletService) {
+fun Application.configureRouting(IWalletService: IWalletService) {
 
     val bpdmDatapoolUrl = environment.config.property("bpdm.datapoolUrl").getString()
 
@@ -204,7 +204,7 @@ fun Application.configureRouting(walletService: WalletService) {
                             // could be used later
                         }
 
-                        call.respond(walletService.getAll())
+                        call.respond(IWalletService.getAll())
                     }
                 }
 

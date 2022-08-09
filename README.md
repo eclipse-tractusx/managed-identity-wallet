@@ -367,8 +367,17 @@ The Available Scopes/Roles are:
 ### Test Coverage
 Jacoco is used to generate the coverage report.
 The generated Html report can be found under `jacoco-report/html/`
-* To generate the report run the command `./gradle jacocoTestReport`
-* To check the coverage run the command `./gradle jacocoTestCoverageVerification`. Currently the Minimum is 80% (INSTRUCTIONS)
+* To generate the report run the command `./gradlew jacocoTestReport`
+* To check the coverage run the command `./gradlew jacocoTestCoverageVerification`. Currently the Minimum is 80% (INSTRUCTIONS)
+* The excluded Files are
+  * Files in the folder `models`: The DTOs
+  * Files in the folder `entities`: The Wallet and Credentials Entity
+  * File `Application.kt`: The Application File
+  * File `services/IWalletService.kt`: The interface of the wallet service
+  * File `services/IAcaPyService.kt`: The interface of the AcaPy service
+  * File `services/AcaPyService.kt`: The AcaPy Service which is mocked in unit tests
+  * File `services/IBusinessPartnerDataService.kt`: The interface of the Business Partner Data Service
+  * File `services/BusinessPartnerDataServiceImpl.kt`: The Business Partner Data Service which is mocked in unit tests
 
 ## Dashboard <a id="dashboard"></a>
 

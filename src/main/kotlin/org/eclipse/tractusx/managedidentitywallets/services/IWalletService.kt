@@ -34,7 +34,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAca
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 
-interface WalletService {
+interface IWalletService {
 
     fun getWallet(identifier: String, withCredentials: Boolean = false): WalletDto
 
@@ -95,7 +95,7 @@ interface WalletService {
             walletAndAcaPyConfig: WalletAndAcaPyConfig,
             walletRepository: WalletRepository,
             credentialRepository: CredentialRepository,
-        ): WalletService {
+        ): IWalletService {
             val acaPyService = IAcaPyService.create(
                 walletAndAcaPyConfig = walletAndAcaPyConfig,
                 client = HttpClient {
