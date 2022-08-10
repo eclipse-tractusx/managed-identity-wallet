@@ -44,7 +44,7 @@ jobs:
           # token: ${{ secrets.GITHUB_TOKEN }}
           # enable_comments: true
           # exclude the dev-assets folder from scan.
-          exclude-paths: dev-assets/
+          exclude-paths: "dev-assets/"
 
       # Upload findings to GitHub Advanced Security Dashboard
       - name: Upload SARIF file for GitHub Advanced Security Dashboard
