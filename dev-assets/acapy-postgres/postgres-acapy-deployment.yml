@@ -19,6 +19,7 @@ spec:
           persistentVolumeClaim:
             claimName: postgres-pv-acapy-claim
       containers:
+        # kics-scan ignore-line
         - name: postgres-acapy-2
           image: postgres:11
           securityContext:
