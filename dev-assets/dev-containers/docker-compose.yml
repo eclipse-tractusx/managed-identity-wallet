@@ -6,6 +6,7 @@ services:
     container_name: cx_postgres
     environment:
       POSTGRES_USER: postgres
+      # kics-scan ignore-line
       POSTGRES_PASSWORD: cx_password
       PGDATA: /data/postgres-data
     volumes:
@@ -18,6 +19,7 @@ services:
     container_name: cx_keycloak
     environment:
       KEYCLOAK_USER: admin
+      # kics-scan ignore-line
       KEYCLOAK_PASSWORD: catena
       KEYCLOAK_IMPORT: /tmp/catenax-realm.json
     volumes:

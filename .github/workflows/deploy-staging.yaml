@@ -8,6 +8,7 @@ on:
 
 env:
   NAMESPACE: "ingress-custodian"
+  # kics-scan ignore-line
   SECRET: "acr-credentials"
   CLUSTER_RESOURCE_GROUP: "cxtsi-dev013-rg"
   CLUSTER_NAME: "cxtsi-dev013-aks-services"
