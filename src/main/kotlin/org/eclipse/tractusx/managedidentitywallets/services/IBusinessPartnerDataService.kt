@@ -26,7 +26,7 @@ import io.ktor.client.features.observer.*
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.slf4j.LoggerFactory
 
-interface BusinessPartnerDataService {
+interface IBusinessPartnerDataService {
 
     suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String? = null)
 
@@ -39,9 +39,9 @@ interface BusinessPartnerDataService {
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
 
-        fun createBusinessPartnerDataService(walletService: WalletService,
+        fun createBusinessPartnerDataService(walletService: IWalletService,
                                              bpdmConfig: BPDMConfig
-        ): BusinessPartnerDataService {
+        ): IBusinessPartnerDataService {
             return BusinessPartnerDataServiceImpl(
                 walletService,
                 bpdmConfig,

@@ -40,9 +40,9 @@ import io.ktor.routing.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
 
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
-import org.eclipse.tractusx.managedidentitywallets.services.WalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
-fun Route.didDocRoutes(walletService: WalletService) {
+fun Route.didDocRoutes(walletService: IWalletService) {
 
     route("/didDocuments") {
 

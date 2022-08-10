@@ -358,6 +358,23 @@ The Available Scopes/Roles are:
     * to store Verifiable Credentials (The BPN of holder will be checked)
     * to trigger Business Partner Data update for its own BPN
 
+## Tests
+
+### Unit Tests
+
+    ./gradlew test
+
+### Test Coverage
+Jacoco is used to generate the coverage report. The report generation and the coverage verification are automatically executed after tests.
+
+The generated Html report can be found under `jacoco-report/html/`
+
+To generate the report run the command `./gradlew jacocoTestReport`
+
+To check the coverage run the command `./gradlew jacocoTestCoverageVerification`. Currently the minimum is 80% (INSTRUCTIONS)
+
+Files to be excluded from the coverage calculation can be set in the `gradle.properties` using a comma-separated list of files or directories with possible wildcards as the value for the property `coverage_excludes`. The files in `models` and `entities` should be excluded as long as they don't have any logic. The services that are mocked in unit tests must be excluded. Also their interfaces need to be excluded because they have a `companion object` that is used to create those services. Files like `Application.kt` which are tested or simulated indirectly for example using `withTestApplication` should also be excluded.
+
 ## Dashboard <a id="dashboard"></a>
 
 Within `ui-src` a simple Vue based dashboard application is available

@@ -4,11 +4,18 @@ val logback_version: String by project
 val kompendium_version: String by project
 val exposed_version: String by project
 val version: String by project
+val coverage_excludes: String by project
 
 plugins {
     application
     kotlin("jvm") version "1.6.10"
                 id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
+    jacoco
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory.set(layout.projectDirectory.dir("jacoco-report"))
 }
 
 group = "org.eclipse.tractusx"
@@ -70,10 +77,44 @@ dependencies {
     // https://mvnrepository.com/artifact/com.github.kagkarlsson/db-scheduler
     implementation("com.github.kagkarlsson:db-scheduler:11.2")
 
-    implementation("network.idu.acapy:aries-client-python:0.7.26")
-
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation(kotlin("test"))
 
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(coverage_excludes.split(","))
+            }
+        })
+    )
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.8".toBigDecimal()
+            }
+        }
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(coverage_excludes.split(","))
+            }
+        })
+    )
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
 }

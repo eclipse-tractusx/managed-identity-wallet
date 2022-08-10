@@ -19,9 +19,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.routes
 
-import io.bkbn.kompendium.annotations.Field
-import io.bkbn.kompendium.annotations.Param
-import io.bkbn.kompendium.annotations.ParamType
 import io.bkbn.kompendium.auth.Notarized.notarizedAuthenticate
 import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.ParameterExample
@@ -34,7 +31,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import kotlinx.serialization.Serializable
 import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
 
 import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
@@ -42,9 +38,9 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
-import org.eclipse.tractusx.managedidentitywallets.services.WalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
-fun Route.vpRoutes(walletService: WalletService) {
+fun Route.vpRoutes(walletService: IWalletService) {
 
     route("/presentations") {
         notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
@@ -184,14 +180,4 @@ val verifiablePresentationResponseDtoExample = mapOf(
             jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
         )
     )
-)
-
-@Serializable
-data class WithDateValidation(
-    @Param(type = ParamType.QUERY)
-    @Field(
-        description = "Flag whether issuance and expiration date of all credentials should be validated",
-        name = "withDateValidation"
-    )
-    val withDateValidation: Boolean? = false
 )

@@ -56,18 +56,18 @@ fun Application.configureJobs() {
 }
 
 fun initDatabase(jdbcUrl: String): DataSource {
-    if (jdbcUrl.startsWith("jdbc:sqlite")) {
+    return if (jdbcUrl.startsWith("jdbc:sqlite")) {
         val dataSource = SQLiteDataSource()
-        dataSource.setUrl(jdbcUrl)
+        dataSource.url = jdbcUrl
 
         // just a keepAliveConnection
         DriverManager.getConnection(jdbcUrl)
 
-        return dataSource
+        dataSource
     } else {
         val dataSource = PGSimpleDataSource()
         dataSource.setUrl(jdbcUrl)
-        return dataSource
+        dataSource
     }
 }
 

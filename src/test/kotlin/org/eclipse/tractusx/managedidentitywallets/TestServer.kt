@@ -19,20 +19,21 @@
 
 package org.eclipse.tractusx.managedidentitywallets
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import io.ktor.application.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 
-class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
-
-    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String?) {}
-
-    override suspend fun <T> issueAndStoreCatenaXCredentialsAsync(
-        bpn: String,
-        type: String,
-        data: T?
-    ): Deferred<Boolean> {
-        return CompletableDeferred(true)
+class TestServer {
+    fun initServer(): NettyApplicationEngine {
+        val server = embeddedServer(Netty, port = 18080) {
+            routing {
+                get("/jwks") {
+                    call.respondText(JwtConfigTest.jwks())
+                }
+            }
+        }
+        return server
     }
-
 }

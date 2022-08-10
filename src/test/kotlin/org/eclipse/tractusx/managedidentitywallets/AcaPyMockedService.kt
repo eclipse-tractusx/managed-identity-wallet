@@ -20,14 +20,22 @@
 package org.eclipse.tractusx.managedidentitywallets
 
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidVerificationMethodDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import java.security.SecureRandom
 
-class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
+object SingletonTestData {
+    lateinit var baseWalletDID: String
+    lateinit var baseWalletVerKey: String
+    lateinit var signCredentialResponse: String
+    var isValidVerifiableCredential: Boolean = true
+    var isValidVerifiablePresentation: Boolean = true
+}
+
+class AcaPyMockedService(val baseWalletBpn: String,
+                         val networkIdentifier: String): IAcaPyService {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     private var currentDid: String = "EXAMPLE"
@@ -42,7 +50,7 @@ class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
         return WalletAndAcaPyConfig(
             apiAdminUrl = "",
-            networkIdentifier = "local:test",
+            networkIdentifier = networkIdentifier,
             baseWalletBpn = baseWalletBpn,
             adminApiKey = "Hj23iQUsstG!dde"
         )
@@ -109,10 +117,30 @@ class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
         return DidRegistrationResult(success = true)
     }
 
-    override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String = ""
+    override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String {
+        if (SingletonTestData.signCredentialResponse.isNullOrEmpty()) {
+            return ""
+        }
+        return SingletonTestData.signCredentialResponse
+    }
 
-    override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse =
-        VerifyResponse(error = null, valid = true)
+    override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse {
+        if (verifyRequest.signedDoc is VerifiablePresentationDto) {
+            return if (SingletonTestData.isValidVerifiablePresentation) {
+                VerifyResponse(error = null, valid = true)
+            } else {
+                VerifyResponse(error = "error", valid = false)
+            }
+        }
+        if (verifyRequest.signedDoc is VerifiableCredentialDto) {
+            return if (SingletonTestData.isValidVerifiableCredential) {
+                VerifyResponse(error = null, valid = true)
+            } else {
+                VerifyResponse(error = "error", valid = false)
+            }
+        }
+        return VerifyResponse(error = null, valid = true)
+    }
 
     override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
         var metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
@@ -129,14 +157,61 @@ class AcaPyMockedService(val baseWalletBpn: String): IAcaPyService {
                                 controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
                                 publicKeyBase58= "${didToVerKey[key]}"
                             )
+                        ),
+                        services = listOf(
+                            DidServiceDto(
+                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                                type = "did-communication",
+                                serviceEndpoint = "http://localhost:8000/",
+                            ),
+                            DidServiceDto(
+                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#linked_domains",
+                                type = "linked_domains",
+                                serviceEndpoint = "https://myhost:1111",
+                            )
                         )
                     ),
                     metadata = metadata
                 )
             }
         }
+        if (!SingletonTestData.baseWalletDID.isNullOrEmpty() &&
+            getIdentifierOfDid(did) == getIdentifierOfDid(SingletonTestData.baseWalletDID)) {
+            return ResolutionResult(
+                didDoc = DidDocumentDto(
+                    id = did,
+                    context = emptyList(),
+                    verificationMethods = listOf(
+                        DidVerificationMethodDto(
+                            id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#key-1",
+                            type = "Ed25519VerificationKey2018",
+                            controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
+                            publicKeyBase58= "${SingletonTestData.baseWalletVerKey}"
+                        )
+                    ),
+                    services = listOf(
+                        DidServiceDto(
+                            id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                            type = "did-communication",
+                            serviceEndpoint = "http://localhost:8000/",
+                        )
+                    )
+                ),
+                metadata = metadata
+            )
+        }
         return ResolutionResult(
-            didDoc = DidDocumentDto(id = did, context = emptyList()),
+            didDoc = DidDocumentDto(
+                id = did,
+                context = emptyList(),
+                services = listOf(
+                    DidServiceDto(
+                        id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                        type = "did-communication",
+                        serviceEndpoint = "http://localhost:8000/",
+                    )
+                )
+            ),
             metadata = metadata
         )
     }
