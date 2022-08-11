@@ -24,8 +24,6 @@ The project maintains the following source code repositories
 in the GitHub organization https://github.com/catenax-ng:
 
 * https://github.com/catenax-ng/product-core-managed-identity-wallets
-* https://github.com/catenax-ng/product-core-managed-identity-wallets-cd
-* https://github.com/catenax-ng/product-core-schemas
 
 ## Third-party Content
 
