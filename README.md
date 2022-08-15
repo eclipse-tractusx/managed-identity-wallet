@@ -29,6 +29,8 @@ build system.
     4. [Initial Wallet Setup](#initialWalletSetup)
 10. [Testing GitHub actions locally](#testingGitHubActionsLocally)
 11. [Setting up progresql database](#settingUpPostgresSqlDatabase)
+12. [Generate DID from Seed](#generateDIDFromSEED)
+13. [Tests](#tests)
 12. [Dashboard](#dashboard)
 13. [Future](#future)
 14. [Further Notes](#furtherNotes)
@@ -199,6 +201,7 @@ Starting up Docker Containers for Postgres, Keycloak and AcaPy via following ste
 
 * navigate to `./dev-assets/dev-containers`
 * run `docker-compose up -d` (or `docker compose up -d`, depdending on the installation) to start a Postgresql database and Keycloak instance and the AcaPy Service as Docker containers
+* If the used Indy ledger `--genesis-url https://indy-test.idu.network/genesis \` is write-restricted to endorsers or higher roles, the DID and its VerKey must be registered manually before starting AcaPy. To generate a new DID with a given seed see the section - [Generate DID from Seed](#generateDIDFromSEED)
 * To setup the Postgresql database in the application please see the section below - [Setting up progresql database](#settingUpPostgresSqlDatabase), for the database
 * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
 * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`,
@@ -229,7 +232,7 @@ kubectl create namespace managed-identity-wallets
 
 Altogether four secrets are needed
 * catenax-managed-identity-wallets-secrets
-* catenax-managed-identity-wallets-acapy-secrets
+* catenax-managed-identity-wallets-acapy-secrets. If the Indy ledger is write-restricted, the DID of the used seed must be registered manually before starting AcaPy.
 * postgres-acapy-secret-config
 * postgres-managed-identity-wallets-secret-config
 
@@ -357,6 +360,21 @@ The Available Scopes/Roles are:
     * to issue Verifiable Presentations (The BPN of holder will be checked)
     * to store Verifiable Credentials (The BPN of holder will be checked)
     * to trigger Business Partner Data update for its own BPN
+
+## Generate DID and get its VerKey <a id="generateDIDFromSEED"></a>
+The [Indy CLI](https://hyperledger-indy.readthedocs.io/projects/sdk/en/latest/docs/design/001-cli/README.html) in Docker using the [docker-file](https://github.com/hyperledger/indy-sdk/blob/main/cli/cli.dockerfile) can be used to generate a new DID from a given seed. However, it does not show the complete VerKey, check this [Issue](https://github.com/hyperledger/indy-sdk/issues/2553). Therefore, the easiest way to generate a DID is currently to start AcaPy with a given seed.
+  * Navigate to `./dev-assets/generate-did-from-seed`
+  * Generate a random seed that has 32 characters. If the use of an offline secure secret/password generator is not possible, then these guidelines must be followed:
+    * No repeat of characters or strings
+    * No patterns or use of dictionary words
+    * The use of uppercase and lowercase letters - as well as numbers and allowed symbols
+    * No personal preferences like names or phone numbers
+  * Set the seed as an enviroment variable e.g. `export SEED=312931k4h15989pqwpou129412i214dk`
+  * Run the script generateDidFromSeed script with `./generateDidFromSeed.sh` which starts the AcaPy container and shows the printout of the DID and VerKey from its logs in the console like the following
+    ```
+    2022-08-12 08:08:13,888 indy.did DEBUG get_my_did_with_meta: <<< res: '{"did":"Hw2eFhr3KcZw5JcRW45KNc","verkey":"AEErMofs7DcJT636pocN2RiEHgTLoF4Mpj6heFXwtb3q","tempVerkey":null,"metadata":null}'
+    ```
+  * If the script did not stop the container, the command `docker-compose down -v` can stop and delete it manually
 
 ## Tests
 
