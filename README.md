@@ -64,6 +64,7 @@ build system.
 6. Add the miwdev Database connection to DBeaver
 7. Run `application.kt` in IntelliJ or in your IDE or run it on the command line (`set -a; source dev.env; set +a` and `./gradlew run`)
 8. Start Postman and add the Environment and the collection from ./dev-assets/
+    1. In the added Enviroment make sure that the client Id and secret are correct. Check the steps in [start up Docker containers](#startupDockerContainers) to get the current values of the client id and secret
     1. In the body of *Create wallet in Managed Identity Wallets*, change the `bpn` value to your `CX_BPN`
        1. ![Change the BPN name](docs/images/ChangeBpnName.png "Adjusting the BPN Name")
     2. Execute the request and note down your `did` and `verKey` from the response
@@ -205,8 +206,19 @@ Starting up Docker Containers for Postgres, Keycloak and AcaPy via following ste
 * To setup the Postgresql database in the application please see the section below - [Setting up progresql database](#settingUpPostgresSqlDatabase), for the database
 * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
 * Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`,
-  the default client id and password is `ManagedIdentityWallets` and `ManagedIdentityWallets-Secret`
-* The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `ManagedIdentityWallets` with *valid redirect url* set to `http://localhost:8080/*`. A role, e.g. named `managed-identity-wallets-api` and a user, e.g. named `managed-identity-wallets-admin`, need to be created as well (including setting a password, e.g. `catena-x`). The user also needs to have a specific client role assigned, e.g. `access`, which is validated on access time. The instructions were taken from [this medium blog post](https://medium.com/slickteam/ktor-and-keycloak-authentication-with-openid-ecd415d7a62e).
+  the client id ist `ManagedIdentityWallets` and client secret can be found under the `Clients - ManagedIdentityWallets - Credentials`
+* The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `ManagedIdentityWallets` with *valid redirect url* set to `http://localhost:8080/*`. The following Roles `add_wallets,view_wallets,update_wallets,delete_wallets,view_wallet,update_wallet` can be added under `Clients - ManagedIdentityWallets - Roles` and then assigned to the client using `Clients - ManagedIdentityWallets - Client Scopes - Service Account Roles - Client Roles - ManagedIdentityWallets`. Additionaly a Token mapper can to be created under `Clients - ManagedIdentityWallets - Mappers - create` with the following configuration:
+```
+Name : StaticBPN
+Mapper Type : Hardcoded claim
+Token Claim Name : BPN
+Claim value : BPNL000000001
+Claim JSON Type : String
+Add to ID token : OFF
+Add to access token : ON 
+Add to userinfo : OFF
+includeInAccessTokenResponse.label : ON 
+```
 * If you receive an error message, that the client secret is not valid, please go into keycloak admin and within clients -> credentials recreate the secret.
 
 Finally run the managed identity wallets service via
@@ -482,5 +494,3 @@ kubectl -n <namespace-placeholder> create secret generic catenax-managed-identit
 
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-secrets -o yaml`
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-acapy-secrets -o yaml`
-
-
