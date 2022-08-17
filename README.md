@@ -55,26 +55,38 @@ build system.
 ## Steps for initial lokal Deployment and Wallet Creation <a id= "initialDeploymentandWalletCreation"></a>
 
 1. Clone the Github Repository - https://github.com/catenax-ng/product-core-managed-identity-wallets.git
-2. Clone the [Aca-Py Docker Image](#acapyDockerImage)
+2. (Optional) Clone the [Aca-Py Docker Image](#acapyDockerImage)
 3. Copy .env.example and rename to dev.env see section [IntelliJ Development Setup](#intellijDevelopmentSetup)
-4. Start Docker-Compose Up for deployment of Keycloack, Acapy and Postgres, see section [Startup Docker Containers](#startupDockerContainers)
-5. Setup Postgres Connection in DBeaver with Credentials -postgres, -cx_password on port 5432, see section [Setting up progresql database](#settingUpPostgresSqlDatabase)
+4. Start Docker containers of Keycloak, Acapy and Postgres, see section [Startup Docker Containers](#startupDockerContainers)
+5. Setup Postgres Connection in DBeaver with Credentials -postgres, -cx_password on port 5432
     1. Add the postgres settings to dev.env and comment out the h2-settings also in section
-    2. Create miwdev Database
-6. Add the miwdev Database connection to DBeaver
-7. Run `application.kt` in IntelliJ or in your IDE or run it on the command line (`set -a; source dev.env; set +a` and `./gradlew run`)
-8. Start Postman and add the Environment and the collection from ./dev-assets/
-    1. In the added Enviroment make sure that the client Id and secret are correct. Check the steps in [start up Docker containers](#startupDockerContainers) to get the current values of the client id and secret
-    1. In the body of *Create wallet in Managed Identity Wallets*, change the `bpn` value to your `CX_BPN`
+    2. Create miwdev Database with following commands:
+    ```
+    CREATE DATABASE miwdev;
+    CREATE ROLE miwdevuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD '^cXnF61qM1kf';
+    GRANT CONNECT ON DATABASE miwdev TO miwdevuser;
+    ```
+    
+    Then following environment settings in your local environment file (potentially
+    named `dev.env`) can be used:
+    
+    ```
+    CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password=^cXnF61qM1kf"
+    CX_DB_JDBC_DRIVER="org.postgresql.Driver"
+    ```
+6. Run `Application.kt` in IntelliJ (with `dev.env` as configuration) or in your IDE or run it on the command line (on MacOS: `set -a; source dev.env; set +a` and `./gradlew run`)
+7. Start Postman and add the environment and the collection from ./dev-assets/
+    1. In the added environment make sure that the client_id and client_secret are correct. Check the steps in [start up Docker containers](#startupDockerContainers) to get the current values of the client id and secret
+    2. In the body of *Create wallet in Managed Identity Wallets*, change the `bpn` value to your `CX_BPN` from your env file
        1. ![Change the BPN name](docs/images/ChangeBpnName.png "Adjusting the BPN Name")
-    2. Execute the request and note down your `did` and `verKey` from the response
+    3. Execute the request and note down your `did` and `verKey` from the response
        1. ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
-9. Register public DID
+8. Register public DID
     1. Register your DID from your Wallet at https://indy-test.idu.network/ with "Register from DID"
        1. ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
     2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
        `{ "verKey": "verification key from creation" }`
-11. Now you have created your own Wallet and published your DID to the Ledger, you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
+9. Now you have created your own Wallet and published your DID to the Ledger, you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
 
 ## Building with gradle <a id= "buildingWithGradle"></a>
 
@@ -296,8 +308,9 @@ kubectl -n managed-identity-wallets apply -f dev-assets/kube-local-lb.yaml
 To run and develop using IntelliJ IDE:
 * open the IntelliJ IDE and import the project
 * create file `dev.env` and copy the values from `.env.example`
-* install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile
-* Run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
+* install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile 
+
+Later you can run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
 
 ### Initial Wallet Setup <a id= "initialWalletSetup"></a>
 
@@ -318,7 +331,7 @@ act --secret-file .env
 ## Setting up progresql database <a id="settingUpPostgresSqlDatabase"></a>
 
 Based on the [documentation](https://docs.microsoft.com/en-us/azure/postgresql/howto-create-users)
-provided by Mirosoft following SQL needs to be executed to setup initiall the database:
+provided by Mirosoft following SQL needs to be executed to setup initial the database:
 
 ```
 CREATE DATABASE miwdev;
@@ -334,12 +347,7 @@ CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password
 CX_DB_JDBC_DRIVER="org.postgresql.Driver"
 ```
 
-Currently the ORM Exposed is creating the tables if they don't exist yet, done
-within the `Persistence.kt` database setup:
 
-```
-SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
-```
 
 ## Scopes <a id="scopes"></a>
 The Available Scopes/Roles are:
@@ -494,3 +502,10 @@ kubectl -n <namespace-placeholder> create secret generic catenax-managed-identit
 
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-secrets -o yaml`
 * To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-acapy-secrets -o yaml`
+
+Currently the ORM Exposed is creating the tables if they don't exist yet, done
+within the `Persistence.kt` database setup:
+
+```
+SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
+```
