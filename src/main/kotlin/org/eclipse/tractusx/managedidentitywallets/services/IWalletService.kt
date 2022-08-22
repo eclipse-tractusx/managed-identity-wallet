@@ -64,7 +64,10 @@ interface IWalletService {
 
     suspend fun registerBaseWallet(verKey: String): Boolean
 
-    suspend fun issuePresentation(vpRequest: VerifiablePresentationRequestDto): VerifiablePresentationDto
+    suspend fun issuePresentation(
+        vpRequest: VerifiablePresentationRequestDto,
+        withCredentialsValidation: Boolean
+    ): VerifiablePresentationDto
 
     fun getCredentials(
         issuerIdentifier: String?,

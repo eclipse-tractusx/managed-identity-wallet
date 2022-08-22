@@ -271,6 +271,7 @@ class AcaPyWalletServiceImpl(
         if (isDID(identifier)) {
             val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
             token = catenaXWallet.walletToken
+            checkDidMethod(identifier)
             modifiedDid = replaceNetworkIdentifierWithSov(identifier)
         } else {
             val walletData = getWalletExtendedInformation(identifier)
@@ -302,12 +303,20 @@ class AcaPyWalletServiceImpl(
         }
     }
 
-    override suspend fun issuePresentation(vpRequest: VerifiablePresentationRequestDto): VerifiablePresentationDto {
+    override suspend fun issuePresentation(
+        vpRequest: VerifiablePresentationRequestDto,
+        withCredentialsValidation: Boolean
+    ): VerifiablePresentationDto {
         log.debug("Issue Presentation $vpRequest")
         val holderWalletData = getWalletExtendedInformation(vpRequest.holderIdentifier)
         val holderDid = holderWalletData.did
         val token = holderWalletData.walletToken
         val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
+        if (withCredentialsValidation) {
+            vpRequest.verifiableCredentials.forEach {
+                validateVerifiableCredential(it, true, token)
+            }
+        }
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
             doc = SignDoc(
                 credential = VerifiablePresentationDto(
@@ -573,4 +582,10 @@ class AcaPyWalletServiceImpl(
     private fun replaceNetworkIdentifierWithSov(input: String): String =
         input.replace(":indy:$networkIdentifier:", ":sov:")
 
+    private fun checkDidMethod(did: String) {
+        val regex = """did:indy:$networkIdentifier:.[^-\s]{16,}${'$'}""".toRegex()
+        if (!regex.matches(did)){
+            throw UnprocessableEntityException("Invalid or Unsupported DID Method: $did")
+        }
+    }
 }

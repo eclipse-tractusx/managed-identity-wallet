@@ -141,11 +141,16 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
     }
 
     override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
-        return client.get {
-            url("${acaPyConfig.apiAdminUrl}/resolver/resolve/$did")
-            headers.append(HttpHeaders.Authorization, "Bearer $token")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
-            accept(ContentType.Application.Json)
+        return try {
+            client.get {
+                url("${acaPyConfig.apiAdminUrl}/resolver/resolve/$did")
+                headers.append(HttpHeaders.Authorization, "Bearer $token")
+                headers.append("X-API-Key", acaPyConfig.adminApiKey)
+                accept(ContentType.Application.Json)
+            }
+        } catch (e: Exception) {
+            throw UnprocessableEntityException("AcaPy Error while resolving DID Doc of $did " +
+                    "with message: ${e.message}")
         }
     }
 

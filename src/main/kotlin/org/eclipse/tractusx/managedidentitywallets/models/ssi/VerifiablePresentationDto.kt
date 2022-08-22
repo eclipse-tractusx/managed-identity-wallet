@@ -64,3 +64,13 @@ data class WithDateValidation(
     )
     val withDateValidation: Boolean? = false
 )
+
+@Serializable
+data class VerifiablePresentationIssuanceParameter(
+    @Param(type = ParamType.QUERY)
+    @Field(
+        description = "Optional Flag whether to check if the Verifiable Credentials are valid. Default is true",
+        name = "withCredentialsValidation"
+    )
+    val withCredentialsValidation: Boolean = true
+)

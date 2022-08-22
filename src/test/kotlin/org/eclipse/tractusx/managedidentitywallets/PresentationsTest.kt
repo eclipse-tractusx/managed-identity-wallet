@@ -64,8 +64,53 @@ class PresentationsTest {
             // programmatically add a wallet
             val walletDto: WalletDto
             runBlocking {
-                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                walletDto =  EnvironmentTestSetup
+                    .walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
             }
+
+            val networkId = EnvironmentTestSetup.NETWORK_ID
+            val invalidDID = walletDto.did.replace("did:indy:$networkId", "did:indy:$networkId WRONG")
+            val verifiablePresentationRequestWithInvalidDIDs = VerifiablePresentationRequestDto(
+                holderIdentifier = walletDto.did,
+                verifiableCredentials = listOf(
+                    VerifiableCredentialDto(
+                        context = listOf(
+                            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                        ),
+                        id = "http://example.edu/credentials/333",
+                        type = listOf("University-Degree-Credential, VerifiableCredential"),
+                        issuer = invalidDID,
+                        issuanceDate = "2019-06-16T18:56:59Z",
+                        expirationDate = "2999-06-17T18:56:59Z",
+                        credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                        proof = LdProofDto(
+                            type = "Ed25519Signature2018",
+                            created = "2021-11-17T22:20:27Z",
+                            proofPurpose = "assertionMethod",
+                            verificationMethod = "$invalidDID#key-1",
+                            jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                        )
+                    )
+                )
+            )
+
+            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+            SingletonTestData.baseWalletDID = walletDto.did
+            handleRequest(HttpMethod.Post, "/api/presentations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiablePresentationRequestDto.serializer(),
+                        verifiablePresentationRequestWithInvalidDIDs))
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+            }
+            SingletonTestData.baseWalletVerKey = ""
+            SingletonTestData.baseWalletDID = ""
+
             val verifiablePresentationRequest = VerifiablePresentationRequestDto(
                 holderIdentifier = walletDto.did,
                 verifiableCredentials = listOf(
@@ -78,18 +123,19 @@ class PresentationsTest {
                         type = listOf("University-Degree-Credential, VerifiableCredential"),
                         issuer = walletDto.did,
                         issuanceDate = "2019-06-16T18:56:59Z",
-                        expirationDate = "2019-06-17T18:56:59Z",
+                        expirationDate = "2999-06-17T18:56:59Z",
                         credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
                         proof = LdProofDto(
                             type = "Ed25519Signature2018",
                             created = "2021-11-17T22:20:27Z",
                             proofPurpose = "assertionMethod",
-                            verificationMethod = "${walletDto.did}#keys-1",
+                            verificationMethod = "${walletDto.did}#key-1",
                             jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                         )
                     )
                 )
             )
+
             SingletonTestData.baseWalletVerKey = walletDto.verKey!!
             SingletonTestData.baseWalletDID = walletDto.did
             val signedCred = Json.encodeToString(
@@ -108,13 +154,13 @@ class PresentationsTest {
                             type = listOf("University-Degree-Credential, VerifiableCredential"),
                             issuer = walletDto.did,
                             issuanceDate = "2019-06-16T18:56:59Z",
-                            expirationDate = "2019-06-17T18:56:59Z",
+                            expirationDate = "2999-06-17T18:56:59Z",
                             credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
                             proof = LdProofDto(
                                 type = "Ed25519Signature2018",
                                 created = "2021-11-17T22:20:27Z",
                                 proofPurpose = "assertionMethod",
-                                verificationMethod = "${walletDto.did}#keys-1",
+                                verificationMethod = "${walletDto.did}#key-1",
                                 jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                             )
                         )
@@ -123,14 +169,60 @@ class PresentationsTest {
                         type = "Ed25519Signature2018",
                         created = "2021-11-17T22:20:27Z",
                         proofPurpose = "assertionMethod",
-                        verificationMethod = "${walletDto.did}#keys-1",
+                        verificationMethod = "${walletDto.did}#key-1",
                         jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                     )
                 )
             )
-            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
 
+            // Verifiable Credential is not valid
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
+            SingletonTestData.isValidVerifiableCredential = false
             handleRequest(HttpMethod.Post, "/api/presentations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiablePresentationRequestDto.serializer(),
+                        verifiablePresentationRequest))
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+            }
+
+            // Good Case: Verifiable Credential is valid
+            SingletonTestData.isValidVerifiableCredential = true
+            handleRequest(HttpMethod.Post, "/api/presentations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiablePresentationRequestDto.serializer(),
+                        verifiablePresentationRequest))
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // Ignore credential validation
+            SingletonTestData.isValidVerifiableCredential = false
+            handleRequest(HttpMethod.Post, "/api/presentations?withCredentialsValidation=false") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiablePresentationRequestDto.serializer(),
+                        verifiablePresentationRequest))
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // Empty signed Presentation
+            val nullValue = null
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $nullValue, "error": "mocked Error" }"""
+            SingletonTestData.isValidVerifiableCredential = false
+            handleRequest(HttpMethod.Post, "/api/presentations?withCredentialsValidation=false") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -139,12 +231,13 @@ class PresentationsTest {
                         VerifiablePresentationRequestDto.serializer(),
                     verifiablePresentationRequest))
             }.apply {
-                assertEquals(HttpStatusCode.Created, response.status())
+                assertEquals(HttpStatusCode.BadRequest, response.status())
             }
 
             SingletonTestData.baseWalletVerKey = ""
             SingletonTestData.baseWalletDID = ""
             SingletonTestData.signCredentialResponse = ""
+            SingletonTestData.isValidVerifiableCredential = true
 
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
@@ -266,6 +359,101 @@ class PresentationsTest {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertTrue { output.valid }
             }
+
+            val vpWithInvalidDID = """
+                {
+                    "@context": [
+                        "https://www.w3.org/2018/credentials/v1"
+                    ],
+                    "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
+                    "type": [
+                        "VerifiablePresentation"
+                    ],
+                    "holder": "did:local:indy:test:AA5EEDcn8yTfMobaTcabj9",
+                    "verifiableCredential": [
+                        {
+                            "id": "http://example.edu/credentials/3735",
+                            "@context": [
+                                "https://www.w3.org/2018/credentials/v1",
+                                "https://www.w3.org/2018/credentials/examples/v1"
+                            ],
+                            "type": [
+                                "University-Degree-Credential",
+                                "VerifiableCredential"
+                            ],
+                            "issuer": "did:local:indy:test:LCNSw1JxSTDw7EpR1UMG7D",
+                            "issuanceDate": "2021-06-16T18:56:59Z",
+                            "expirationDate": "2026-06-17T18:56:59Z",
+                            "credentialSubject": {
+                                "givenName": "TestAfterQuestion",
+                                "familyName": "Student",
+                                "degree": {
+                                    "type": "Master",
+                                    "degreeType": "Undergraduate",
+                                    "name": "Master of Test"
+                                },
+                                "college": "Test",
+                                "id": "did:local:indy:test:AA5EEDcn8yTfMobaTcabj9"
+                            },
+                            "proof": {
+                                "type": "Ed25519Signature2018",
+                                "created": "2022-07-12T12:13:16Z",
+                                "proofPurpose": "assertionMethod",
+                                "verificationMethod": "did:local:indy:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
+                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
+                            }
+                        },
+                        {
+                            "id": "http://example.edu/credentials/3735",
+                            "@context": [
+                                "https://www.w3.org/2018/credentials/v1",
+                                "https://www.w3.org/2018/credentials/examples/v1"
+                            ],
+                            "type": [
+                                "University-Degree-Credential",
+                                "VerifiableCredential"
+                            ],
+                            "issuer": "did:local:indy:test:LCNSw1JxSTDw7EpR1UMG7D",
+                            "issuanceDate": "2021-06-16T18:56:59Z",
+                            "expirationDate": "2027-06-17T18:56:59Z",
+                            "credentialSubject": {
+                                "givenName": "TestAfterQuestion",
+                                "familyName": "Student",
+                                "degree": {
+                                    "type": "Master1",
+                                    "degreeType": "Undergraduate2",
+                                    "name": "Master of Test1"
+                                },
+                                "college": "Test2",
+                                "id": "did:local:indy:test:AA5EEDcn8yTfMobaTcabj9"
+                            },
+                            "proof": {
+                                "type": "Ed25519Signature2018",
+                                "created": "2022-07-12T12:16:45Z",
+                                "proofPurpose": "assertionMethod",
+                                "verificationMethod": "did:local:indy:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
+                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..6oIPVm3ealRVzpgiFKItyIzVWlNUT150fbh9OcBElj9FvaICAd-wc1yzrwka3ns1SmrPFsWIIe0wC1rJQLISBA"
+                            }
+                        }
+                    ],
+                    "proof": {
+                        "type": "Ed25519Signature2018",
+                        "created": "2022-07-12T12:28:44Z",
+                        "proofPurpose": "assertionMethod",
+                        "verificationMethod": "did:local:indy:test:AA5EEDcn8yTfMobaTcabj9#key-1",
+                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
+                    }
+                }
+            """.trimIndent()
+            handleRequest(HttpMethod.Post, "/api/presentations/validation") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(vpWithInvalidDID)
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+            }
+
 
             val vpWithoutProof = """
                 {

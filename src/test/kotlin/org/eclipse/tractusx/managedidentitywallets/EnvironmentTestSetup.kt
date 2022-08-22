@@ -32,7 +32,7 @@ object EnvironmentTestSetup {
 
     const val DEFAULT_BPN = "BPNL00000"
     const val EXTRA_TEST_BPN = "BPNL0Test"
-    private const val NETWORK_ID = "local:test"
+    const val NETWORK_ID = "local:test"
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
