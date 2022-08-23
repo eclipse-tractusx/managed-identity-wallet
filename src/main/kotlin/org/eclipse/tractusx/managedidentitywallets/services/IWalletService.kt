@@ -44,8 +44,6 @@ interface IWalletService {
 
     fun getBpnFromIdentifier(identifier: String): String
 
-    fun isDID(identifier: String) : Boolean
-
     fun getAll(): List<WalletDto>
 
     fun getAllBpns(): List<String>
@@ -64,7 +62,11 @@ interface IWalletService {
 
     suspend fun registerBaseWallet(verKey: String): Boolean
 
-    suspend fun issuePresentation(vpRequest: VerifiablePresentationRequestDto): VerifiablePresentationDto
+    suspend fun issuePresentation(
+        vpRequest: VerifiablePresentationRequestDto,
+        withCredentialsValidation: Boolean,
+        withCredentialsDateValidation: Boolean
+    ): VerifiablePresentationDto
 
     fun getCredentials(
         issuerIdentifier: String?,
@@ -95,9 +97,11 @@ interface IWalletService {
             walletAndAcaPyConfig: WalletAndAcaPyConfig,
             walletRepository: WalletRepository,
             credentialRepository: CredentialRepository,
+            utilsService: UtilsService
         ): IWalletService {
             val acaPyService = IAcaPyService.create(
                 walletAndAcaPyConfig = walletAndAcaPyConfig,
+                utilsService = utilsService,
                 client = HttpClient {
                     expectSuccess = true
                     install(ResponseObserver) {
@@ -146,7 +150,7 @@ interface IWalletService {
                     }
                 }
             )
-            return AcaPyWalletServiceImpl(acaPyService, walletRepository, credentialRepository)
+            return AcaPyWalletServiceImpl(acaPyService, walletRepository, credentialRepository, utilsService)
         }
     }
 }

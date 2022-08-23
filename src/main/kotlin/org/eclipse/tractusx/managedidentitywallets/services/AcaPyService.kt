@@ -28,7 +28,10 @@ import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 
-class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val client: HttpClient): IAcaPyService {
+class AcaPyService(
+    private val acaPyConfig: WalletAndAcaPyConfig,
+    private val utilsService: UtilsService,
+    private val client: HttpClient): IAcaPyService {
 
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
         return WalletAndAcaPyConfig(
@@ -141,11 +144,16 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
     }
 
     override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
-        return client.get {
-            url("${acaPyConfig.apiAdminUrl}/resolver/resolve/$did")
-            headers.append(HttpHeaders.Authorization, "Bearer $token")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
-            accept(ContentType.Application.Json)
+        return try {
+            client.get {
+                url("${acaPyConfig.apiAdminUrl}/resolver/resolve/$did")
+                headers.append(HttpHeaders.Authorization, "Bearer $token")
+                headers.append("X-API-Key", acaPyConfig.adminApiKey)
+                accept(ContentType.Application.Json)
+            }
+        } catch (e: Exception) {
+            val givenDid = utilsService.replaceSovWithNetworkIdentifier(did)
+            throw UnprocessableEntityException("AcaPy Error while resolving DID Doc of $givenDid")
         }
     }
 

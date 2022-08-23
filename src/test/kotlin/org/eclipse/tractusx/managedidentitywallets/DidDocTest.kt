@@ -24,6 +24,7 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
@@ -57,18 +58,46 @@ class DidDocTest {
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             // programmatically add a wallet
+            val walletDto: WalletDto
             runBlocking {
-                EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name1")).did
+                walletDto = EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name1"))
                 EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "name_extra"))
             }
 
             handleRequest(HttpMethod.Get, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}") {
-                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
+            }
+
+            handleRequest(HttpMethod.Get, "/api/didDocuments/${walletDto.did}") {
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+
+            val notValidDidMethod = "did:local:indy:test:XMcRfSUkkQK38p6CCjHZz6"
+            handleRequest(HttpMethod.Get, "/api/didDocuments/$notValidDidMethod") {
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+            }
+
+            val notValidDidMethodShortId = "did:indy:${EnvironmentTestSetup.NETWORK_ID}:XMcRfSU"
+            handleRequest(HttpMethod.Get, "/api/didDocuments/$notValidDidMethodShortId") {
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+            }
+
+            val notSupportedDidMethod = "did:sov:XMcRfSUkkQK38p6CCjHZz6"
+            handleRequest(HttpMethod.Get, "/api/didDocuments/$notSupportedDidMethod") {
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
             }
 
             handleRequest(HttpMethod.Post, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services") {
@@ -162,6 +191,11 @@ class DidDocTest {
                 }
             }
             assertTrue { exception.message!!.contains("Update Service Endpoint is not supported for the wallet ${EnvironmentTestSetup.EXTRA_TEST_BPN}") }
+
+            val notImplException = assertFailsWith<NotImplementedException> {
+                Services.utilsService.mapServiceTypeToEnum("UnknownType")
+            }
+            assertTrue { notImplException.message!!.contains("Service type UnknownType is not supported") }
 
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)

@@ -63,6 +63,7 @@ class CredentialsTest {
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -201,6 +202,7 @@ class CredentialsTest {
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -282,6 +284,7 @@ class CredentialsTest {
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto

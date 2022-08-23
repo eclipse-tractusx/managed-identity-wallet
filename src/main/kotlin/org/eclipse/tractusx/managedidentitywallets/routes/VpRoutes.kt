@@ -31,13 +31,10 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.*
 
-import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
-import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
-import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
 fun Route.vpRoutes(walletService: IWalletService) {
@@ -45,13 +42,25 @@ fun Route.vpRoutes(walletService: IWalletService) {
     route("/presentations") {
         notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedPost(
-                PostInfo<Unit, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
+                PostInfo<VerifiablePresentationIssuanceParameter, VerifiablePresentationRequestDto, VerifiablePresentationDto>(
                     summary = "Create Verifiable Presentation",
                     description = "Permission: " +
                         "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
                         "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
                             "(The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller)\n" +
                         "\nCreate a verifiable presentation from a list of verifiable credentials, signed by the holder",
+                    parameterExamples = setOf(
+                        ParameterExample(
+                            "withCredentialsValidation",
+                            "withCredentialsValidation",
+                            "false"
+                        ),
+                        ParameterExample(
+                            "withCredentialsDateValidation",
+                            "withCredentialsDateValidation",
+                            "false"
+                        )
+                    ),
                     requestInfo = RequestInfo(
                         description = "The verifiable presentation input data",
                         examples = verifiablePresentationRequestDtoExample
@@ -69,7 +78,22 @@ fun Route.vpRoutes(walletService: IWalletService) {
 
                 AuthorizationHandler.checkHasRightsToUpdateWallet(call, verifiableCredentialDto.holderIdentifier)
 
-                call.respond(HttpStatusCode.Created, walletService.issuePresentation(verifiableCredentialDto))
+                val withCredentialsValidation = if (call.request.queryParameters["withCredentialsValidation"] != null) {
+                    call.request.queryParameters["withCredentialsValidation"].toBoolean()
+                } else { true }
+
+                val withCredentialsDateValidation = if (call.request.queryParameters["withCredentialsDateValidation"] != null) {
+                    call.request.queryParameters["withCredentialsDateValidation"].toBoolean()
+                } else { true }
+
+                call.respond(
+                    HttpStatusCode.Created,
+                    walletService.issuePresentation(
+                        verifiableCredentialDto,
+                        withCredentialsValidation,
+                        withCredentialsDateValidation
+                    )
+                )
             }
         }
 
