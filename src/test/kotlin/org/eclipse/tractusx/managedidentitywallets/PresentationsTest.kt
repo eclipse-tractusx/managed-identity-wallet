@@ -260,7 +260,7 @@ class PresentationsTest {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
 
-            // Ignore credential validation / withCredentialsDateValidation is true
+            // withCredentialsDateValidation will be ignored
             SingletonTestData.isValidVerifiableCredential = false
             handleRequest(HttpMethod.Post, "/api/presentations?" +
                     "withCredentialsValidation=false&withCredentialsDateValidation=true") {
@@ -270,7 +270,7 @@ class PresentationsTest {
                 setBody(
                     Json.encodeToString(
                         VerifiablePresentationRequestDto.serializer(),
-                        verifiablePresentationRequest))
+                        verifiablePresentationRequestWithInvalidDate))
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
