@@ -30,6 +30,7 @@ import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
+import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 
 import org.slf4j.LoggerFactory
 
@@ -38,6 +39,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 object Services {
     lateinit var businessPartnerDataService: IBusinessPartnerDataService
     lateinit var walletService: IWalletService
+    lateinit var utilsService: UtilsService
 }
 
 fun Application.module(testing: Boolean = false) {
@@ -70,7 +72,8 @@ fun Application.module(testing: Boolean = false) {
         adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
         baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
     )
-    val walletService = IWalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository)
+    val utilsService = UtilsService(networkIdentifier = acaPyConfig.networkIdentifier)
+    val walletService = IWalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository, utilsService)
     val bpdmConfig = BPDMConfig(
         url = environment.config.property("bpdm.datapoolUrl").getString(),
         tokenUrl = environment.config.property("bpdm.authUrl").getString(),
@@ -83,6 +86,7 @@ fun Application.module(testing: Boolean = false) {
         bpdmConfig)
     Services.businessPartnerDataService = businessPartnerDataService
     Services.walletService = walletService
+    Services.utilsService = utilsService
     configureRouting(walletService)
 
     appRoutes(walletService, businessPartnerDataService)

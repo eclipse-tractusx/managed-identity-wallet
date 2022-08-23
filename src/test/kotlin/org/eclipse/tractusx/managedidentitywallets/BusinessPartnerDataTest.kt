@@ -55,6 +55,7 @@ class BusinessPartnerDataTest {
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             handleRequest(HttpMethod.Post, "/api/businessPartnerDataRefresh") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")

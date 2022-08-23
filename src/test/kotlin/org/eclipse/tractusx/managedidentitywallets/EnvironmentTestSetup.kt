@@ -26,6 +26,7 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Cred
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
+import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 import java.sql.DriverManager
 
 object EnvironmentTestSetup {
@@ -36,7 +37,8 @@ object EnvironmentTestSetup {
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
-    val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository)
+    val utilsService = UtilsService(NETWORK_ID)
+    val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository, utilsService)
     val bpdService = BusinessPartnerDataMockedService()
 
     val EMPTY_ROLES_TOKEN = JwtConfigTest.makeToken(listOf())

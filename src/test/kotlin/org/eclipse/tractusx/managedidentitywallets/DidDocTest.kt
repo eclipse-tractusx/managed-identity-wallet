@@ -58,9 +58,10 @@ class DidDocTest {
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto;
+            val walletDto: WalletDto
             runBlocking {
                 walletDto = EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name1"))
                 EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "name_extra"))
@@ -190,6 +191,11 @@ class DidDocTest {
                 }
             }
             assertTrue { exception.message!!.contains("Update Service Endpoint is not supported for the wallet ${EnvironmentTestSetup.EXTRA_TEST_BPN}") }
+
+            val notImplException = assertFailsWith<NotImplementedException> {
+                Services.utilsService.mapServiceTypeToEnum("UnknownType")
+            }
+            assertTrue { notImplException.message!!.contains("Service type UnknownType is not supported") }
 
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)

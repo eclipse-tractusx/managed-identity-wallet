@@ -28,7 +28,10 @@ import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 
-class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val client: HttpClient): IAcaPyService {
+class AcaPyService(
+    private val acaPyConfig: WalletAndAcaPyConfig,
+    private val utilsService: UtilsService,
+    private val client: HttpClient): IAcaPyService {
 
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
         return WalletAndAcaPyConfig(
@@ -149,8 +152,8 @@ class AcaPyService(private val acaPyConfig: WalletAndAcaPyConfig, private val cl
                 accept(ContentType.Application.Json)
             }
         } catch (e: Exception) {
-            throw UnprocessableEntityException("AcaPy Error while resolving DID Doc of $did " +
-                    "with message: ${e.message}")
+            val givenDid = utilsService.replaceSovWithNetworkIdentifier(did)
+            throw UnprocessableEntityException("AcaPy Error while resolving DID Doc of $givenDid")
         }
     }
 

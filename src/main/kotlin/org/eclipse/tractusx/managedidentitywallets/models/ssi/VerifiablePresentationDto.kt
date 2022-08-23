@@ -72,5 +72,12 @@ data class VerifiablePresentationIssuanceParameter(
         description = "Optional Flag whether to check if the Verifiable Credentials are valid. Default is true",
         name = "withCredentialsValidation"
     )
-    val withCredentialsValidation: Boolean = true
+    val withCredentialsValidation: Boolean = true,
+    @Param(type = ParamType.QUERY)
+    @Field(
+        description = "Optional Flag whether to check if the Dates of the Verifiable Credentials are valid. " +
+                "Default is true. If `withCredentialsValidation` is false then this value will be ignored.",
+        name = "withCredentialsDateValidation"
+    )
+    val withCredentialsDateValidation: Boolean = true
 )

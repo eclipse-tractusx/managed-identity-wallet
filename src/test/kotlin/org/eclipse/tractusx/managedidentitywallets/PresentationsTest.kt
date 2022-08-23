@@ -60,6 +60,7 @@ class PresentationsTest {
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -97,7 +98,7 @@ class PresentationsTest {
 
             SingletonTestData.baseWalletVerKey = walletDto.verKey!!
             SingletonTestData.baseWalletDID = walletDto.did
-            handleRequest(HttpMethod.Post, "/api/presentations") {
+           handleRequest(HttpMethod.Post, "/api/presentations") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -108,6 +109,46 @@ class PresentationsTest {
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
             }
+
+            // With invalid issuanceDate
+            val verifiablePresentationRequestWithInvalidDate = VerifiablePresentationRequestDto(
+                holderIdentifier = walletDto.did,
+                verifiableCredentials = listOf(
+                    VerifiableCredentialDto(
+                        context = listOf(
+                            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                        ),
+                        id = "http://example.edu/credentials/333",
+                        type = listOf("University-Degree-Credential, VerifiableCredential"),
+                        issuer = walletDto.did,
+                        issuanceDate = "2999-06-16T18:56:59Z",
+                        expirationDate = "2999-06-17T18:56:59Z",
+                        credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                        proof = LdProofDto(
+                            type = "Ed25519Signature2018",
+                            created = "2021-11-17T22:20:27Z",
+                            proofPurpose = "assertionMethod",
+                            verificationMethod = "${walletDto.did}#key-1",
+                            jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                        )
+                    )
+                )
+            )
+
+            // Validate Credential and its Dates
+            handleRequest(HttpMethod.Post, "/api/presentations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiablePresentationRequestDto.serializer(),
+                        verifiablePresentationRequestWithInvalidDate))
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+            }
+
             SingletonTestData.baseWalletVerKey = ""
             SingletonTestData.baseWalletDID = ""
 
@@ -175,6 +216,21 @@ class PresentationsTest {
                 )
             )
 
+            // issue presentation for verifiablePresentationRequestWithInvalidDate without checking date
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
+            SingletonTestData.isValidVerifiableCredential = true
+            handleRequest(HttpMethod.Post, "/api/presentations?withCredentialsDateValidation=false") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiablePresentationRequestDto.serializer(),
+                        verifiablePresentationRequestWithInvalidDate))
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
             // Verifiable Credential is not valid
             SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
             SingletonTestData.isValidVerifiableCredential = false
@@ -204,9 +260,25 @@ class PresentationsTest {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
 
-            // Ignore credential validation
+            // Ignore credential validation / withCredentialsDateValidation is true
             SingletonTestData.isValidVerifiableCredential = false
-            handleRequest(HttpMethod.Post, "/api/presentations?withCredentialsValidation=false") {
+            handleRequest(HttpMethod.Post, "/api/presentations?" +
+                    "withCredentialsValidation=false&withCredentialsDateValidation=true") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiablePresentationRequestDto.serializer(),
+                        verifiablePresentationRequest))
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // Ignore credential validation / withCredentialsDateValidation is false
+            SingletonTestData.isValidVerifiableCredential = false
+            handleRequest(HttpMethod.Post, "/api/presentations?" +
+                    "withCredentialsValidation=false&withCredentialsDateValidation=false") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())

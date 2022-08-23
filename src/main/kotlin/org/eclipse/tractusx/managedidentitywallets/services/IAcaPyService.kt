@@ -50,8 +50,12 @@ interface IAcaPyService {
     suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String)
 
     companion object {
-        fun create(walletAndAcaPyConfig: WalletAndAcaPyConfig, client: HttpClient): IAcaPyService {
-            return AcaPyService(walletAndAcaPyConfig, client)
+        fun create(
+            walletAndAcaPyConfig: WalletAndAcaPyConfig,
+            utilsService: UtilsService,
+            client: HttpClient
+        ): IAcaPyService {
+            return AcaPyService(walletAndAcaPyConfig, utilsService, client)
         }
     }
 }

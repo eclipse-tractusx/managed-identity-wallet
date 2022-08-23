@@ -54,6 +54,11 @@ fun Route.vpRoutes(walletService: IWalletService) {
                             "withCredentialsValidation",
                             "withCredentialsValidation",
                             "false"
+                        ),
+                        ParameterExample(
+                            "withCredentialsDateValidation",
+                            "withCredentialsDateValidation",
+                            "false"
                         )
                     ),
                     requestInfo = RequestInfo(
@@ -73,18 +78,20 @@ fun Route.vpRoutes(walletService: IWalletService) {
 
                 AuthorizationHandler.checkHasRightsToUpdateWallet(call, verifiableCredentialDto.holderIdentifier)
 
-                val vpIssuanceParameter: VerifiablePresentationIssuanceParameter =
-                    if (call.request.queryParameters["withCredentialsValidation"] != null) {
-                        VerifiablePresentationIssuanceParameter(call.request.queryParameters["withCredentialsValidation"].toBoolean())
-                    } else {
-                        VerifiablePresentationIssuanceParameter()
-                    }
+                val withCredentialsValidation = if (call.request.queryParameters["withCredentialsValidation"] != null) {
+                    call.request.queryParameters["withCredentialsValidation"].toBoolean()
+                } else { true }
+
+                val withCredentialsDateValidation = if (call.request.queryParameters["withCredentialsDateValidation"] != null) {
+                    call.request.queryParameters["withCredentialsDateValidation"].toBoolean()
+                } else { true }
 
                 call.respond(
                     HttpStatusCode.Created,
                     walletService.issuePresentation(
                         verifiableCredentialDto,
-                        vpIssuanceParameter.withCredentialsValidation
+                        withCredentialsValidation,
+                        withCredentialsDateValidation
                     )
                 )
             }

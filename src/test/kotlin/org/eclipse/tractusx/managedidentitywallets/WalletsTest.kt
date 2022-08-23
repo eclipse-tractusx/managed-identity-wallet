@@ -56,6 +56,7 @@ class WalletsTest {
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
@@ -175,6 +176,7 @@ class WalletsTest {
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
 
             handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}") {
@@ -285,6 +287,7 @@ class WalletsTest {
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
         }) {
 
             var verKey: String

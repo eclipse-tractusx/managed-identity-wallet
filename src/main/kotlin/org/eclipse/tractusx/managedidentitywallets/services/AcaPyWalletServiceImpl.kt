@@ -22,6 +22,7 @@ package org.eclipse.tractusx.managedidentitywallets.services
 import foundation.identity.jsonld.JsonLDUtils
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
@@ -29,20 +30,18 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Cred
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
-import java.security.SecureRandom
 import java.time.Instant
 import java.util.*
 
 class AcaPyWalletServiceImpl(
     private val acaPyService: IAcaPyService,
     private val walletRepository: WalletRepository,
-    private val credentialRepository: CredentialRepository
+    private val credentialRepository: CredentialRepository,
+    private val utilsService: UtilsService
 ) : IWalletService {
 
     private val networkIdentifier = acaPyService.getWalletAndAcaPyConfig().networkIdentifier
     private val baseWalletBpn = acaPyService.getWalletAndAcaPyConfig().baseWalletBpn
-    private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    private val arrayOfSupportedIds = listOf("did-communication", "linked_domains", "profile")
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
@@ -114,7 +113,7 @@ class AcaPyWalletServiceImpl(
             label = walletCreateDto.name,
             walletWebhookUrls = emptyList(),
             walletDispatchType = WalletDispatchType.BASE.toString(),
-            walletKey = createRandomString(),
+            walletKey = utilsService.createRandomString(),
             walletName = walletCreateDto.bpn + "-" + JsonLDUtils.dateToString(Date.from(Instant.now())),
             walletType = WalletType.ASKAR.toString()
         )
@@ -251,7 +250,7 @@ class AcaPyWalletServiceImpl(
                 options = SignOptions(
                     proofPurpose = "assertionMethod",
                     type = "Ed25519Signature2018",
-                    verificationMethod = replaceSovWithNetworkIdentifier(verificationMethod.id)
+                    verificationMethod = utilsService.replaceSovWithNetworkIdentifier(verificationMethod.id)
                 )
             ),
             verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
@@ -268,19 +267,19 @@ class AcaPyWalletServiceImpl(
         log.debug("Resolve DID Document $identifier")
         val token: String
         val modifiedDid: String
-        if (isDID(identifier)) {
+        if (utilsService.isDID(identifier)) {
             val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
             token = catenaXWallet.walletToken
-            checkDidMethod(identifier)
-            modifiedDid = replaceNetworkIdentifierWithSov(identifier)
+            utilsService.checkIndyDid(identifier)
+            modifiedDid = utilsService.replaceNetworkIdentifierWithSov(identifier)
         } else {
             val walletData = getWalletExtendedInformation(identifier)
             token = walletData.walletToken
-            modifiedDid = replaceNetworkIdentifierWithSov(walletData.did)
+            modifiedDid = utilsService.replaceNetworkIdentifierWithSov(walletData.did)
         }
         val didDocResult = acaPyService.resolveDidDoc(modifiedDid, token)
         val resolutionResultAsJson = Json.encodeToString(ResolutionResult.serializer(), didDocResult)
-        val res: ResolutionResult = Json.decodeFromString(replaceSovWithNetworkIdentifier(resolutionResultAsJson))
+        val res: ResolutionResult = Json.decodeFromString(utilsService.replaceSovWithNetworkIdentifier(resolutionResultAsJson))
         return res.didDoc
     }
 
@@ -305,7 +304,8 @@ class AcaPyWalletServiceImpl(
 
     override suspend fun issuePresentation(
         vpRequest: VerifiablePresentationRequestDto,
-        withCredentialsValidation: Boolean
+        withCredentialsValidation: Boolean,
+        withCredentialsDateValidation: Boolean
     ): VerifiablePresentationDto {
         log.debug("Issue Presentation $vpRequest")
         val holderWalletData = getWalletExtendedInformation(vpRequest.holderIdentifier)
@@ -314,7 +314,7 @@ class AcaPyWalletServiceImpl(
         val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
         if (withCredentialsValidation) {
             vpRequest.verifiableCredentials.forEach {
-                validateVerifiableCredential(it, true, token)
+                validateVerifiableCredential(it, withCredentialsDateValidation, token)
             }
         }
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
@@ -329,7 +329,7 @@ class AcaPyWalletServiceImpl(
                 options = SignOptions(
                     proofPurpose = "assertionMethod",
                     type = "Ed25519Signature2018",
-                    verificationMethod = replaceSovWithNetworkIdentifier(verificationMethod.id)
+                    verificationMethod = utilsService.replaceSovWithNetworkIdentifier(verificationMethod.id)
                 )
             ),
             verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
@@ -344,7 +344,7 @@ class AcaPyWalletServiceImpl(
 
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto {
         log.debug("Add Service Endpoint for $identifier")
-        checkSupportedId(serviceDto.id)
+        utilsService.checkSupportedId(serviceDto.id)
         val walletData = getWalletExtendedInformation(identifier)
         if (!isCatenaXWallet(walletData.bpn)) {
             throw NotImplementedException("Add Service Endpoint is not supported for the given wallet $identifier")
@@ -359,9 +359,9 @@ class AcaPyWalletServiceImpl(
         }
         acaPyService.updateService(
             DidEndpointWithType(
-                didIdentifier = getIdentifierOfDid(walletData.did),
+                didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
                 endpoint = serviceDto.serviceEndpoint,
-                endpointType = mapServiceTypeToEnum(serviceDto.type)
+                endpointType = utilsService.mapServiceTypeToEnum(serviceDto.type)
             ),
             walletData.walletToken
         )
@@ -374,7 +374,7 @@ class AcaPyWalletServiceImpl(
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
     ): DidDocumentDto {
         log.debug("Update Service Endpoint for $identifier")
-        checkSupportedId(id)
+        utilsService.checkSupportedId(id)
         val walletData = getWalletExtendedInformation(identifier)
         if (!isCatenaXWallet(walletData.bpn)) {
             throw NotImplementedException("Update Service Endpoint is not supported for the wallet $identifier")
@@ -386,9 +386,9 @@ class AcaPyWalletServiceImpl(
                 if (it.id.split("#")[1] == id) {
                     acaPyService.updateService(
                         DidEndpointWithType(
-                            didIdentifier = getIdentifierOfDid(walletData.did),
+                            didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
                             endpoint = serviceUpdateRequestDto.serviceEndpoint,
-                            endpointType = mapServiceTypeToEnum(serviceUpdateRequestDto.type)
+                            endpointType = utilsService.mapServiceTypeToEnum(serviceUpdateRequestDto.type)
                         ),
                         walletData.walletToken
                     )
@@ -444,14 +444,12 @@ class AcaPyWalletServiceImpl(
         return VerifyResponse(error = null, valid = true, vp = vpDto)
     }
 
-    override fun isDID(identifier: String) : Boolean = identifier.startsWith("did:")
-
     override fun getDidFromBpn(bpn: String): String = getWallet(bpn, false).did
 
     override fun getBpnFromDid(did: String): String = getWallet(did, false).bpn
 
     override fun getBpnFromIdentifier(identifier: String): String {
-        return if (isDID(identifier)) {
+        return if (utilsService.isDID(identifier)) {
             getWallet(identifier).bpn
         } else {
             identifier
@@ -551,41 +549,4 @@ class AcaPyWalletServiceImpl(
         }
     }
 
-    private fun createRandomString(): String {
-        return (1..25)
-            .map { SecureRandom().nextInt(charPool.size) }
-            .map(charPool::get)
-            .joinToString("")
-    }
-
-    private fun getIdentifierOfDid(did: String): String {
-        val elementsOfDid: List<String> = did.split(":")
-        return elementsOfDid[elementsOfDid.size - 1]
-    }
-
-    private fun mapServiceTypeToEnum(type: String): String = when (type) {
-        "did-communication" -> EndPointType.Endpoint.name
-        "linked_domains" -> EndPointType.LinkedDomains.name
-        "profile" -> EndPointType.Profile.name
-        else -> throw NotImplementedException("Service type $type is not supported")
-    }
-
-    private fun checkSupportedId(id: String) {
-        if (!arrayOfSupportedIds.contains(id)) {
-            throw NotImplementedException("The Id $id of the service is not supported")
-        }
-    }
-
-    private fun replaceSovWithNetworkIdentifier(input: String): String =
-        input.replace(":sov:", ":indy:$networkIdentifier:")
-
-    private fun replaceNetworkIdentifierWithSov(input: String): String =
-        input.replace(":indy:$networkIdentifier:", ":sov:")
-
-    private fun checkDidMethod(did: String) {
-        val regex = """did:indy:$networkIdentifier:.[^-\s]{16,}${'$'}""".toRegex()
-        if (!regex.matches(did)){
-            throw UnprocessableEntityException("Invalid or Unsupported DID Method: $did")
-        }
-    }
 }
