@@ -1,10 +1,11 @@
 # Security Policy
 
+## Reporting a Vulnerability
 
+Please report a found vulnerability here:
+[https://www.eclipse.org/security/](https://www.eclipse.org/security/)
 
 ## Reporting a bug in Catena-X
-
-
 
 Report security bugs in Catena-X to "dl_CoP_IT_Security@catena-x.net".
 
@@ -35,11 +36,9 @@ Please include the requested information listed below (as much as you can provid
 This information will help us triage your report more quickly.
 
 
-
 ## Reporting a bug in a third party module
 
 Security bugs in third party modules should be reported to their respective maintainers.
-
 
 
 ## Disclosure policy
