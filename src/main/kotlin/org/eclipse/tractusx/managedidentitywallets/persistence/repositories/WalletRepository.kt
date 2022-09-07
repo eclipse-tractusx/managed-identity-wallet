@@ -57,6 +57,7 @@ class WalletRepository {
             walletKey = wallet.walletKey
             walletToken = wallet.walletToken
             createdAt = LocalDateTime.now()
+            revocationListName = wallet.revocationListName
         }
     }
 
@@ -66,10 +67,11 @@ class WalletRepository {
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
-        WalletDto(name, bpn, did, null, createdAt, emptyList<VerifiableCredentialDto>().toMutableList())
+        WalletDto(name, bpn, did, null, createdAt,
+            emptyList<VerifiableCredentialDto>().toMutableList(), revocationListName)
     }
 
     fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {
-        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey, walletToken)
+        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey, walletToken, revocationListName)
     }
 }

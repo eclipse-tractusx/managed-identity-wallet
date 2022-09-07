@@ -29,6 +29,7 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Wall
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 
@@ -40,6 +41,7 @@ object Services {
     lateinit var businessPartnerDataService: IBusinessPartnerDataService
     lateinit var walletService: IWalletService
     lateinit var utilsService: UtilsService
+    lateinit var revocationService: IRevocationService
 }
 
 fun Application.module(testing: Boolean = false) {
@@ -73,7 +75,15 @@ fun Application.module(testing: Boolean = false) {
         baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
     )
     val utilsService = UtilsService(networkIdentifier = acaPyConfig.networkIdentifier)
-    val walletService = IWalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository, utilsService)
+    val revocationUrl = environment.config.property("revocation.baseUrl").getString()
+    val revocationService = IRevocationService.createRevocationService(revocationUrl)
+    val walletService = IWalletService.createWithAcaPyService(
+        acaPyConfig,
+        walletRepository,
+        credRepository,
+        utilsService,
+        revocationService
+    )
     val bpdmConfig = BPDMConfig(
         url = environment.config.property("bpdm.datapoolUrl").getString(),
         tokenUrl = environment.config.property("bpdm.authUrl").getString(),
@@ -87,9 +97,10 @@ fun Application.module(testing: Boolean = false) {
     Services.businessPartnerDataService = businessPartnerDataService
     Services.walletService = walletService
     Services.utilsService = utilsService
+    Services.revocationService = revocationService
     configureRouting(walletService)
 
-    appRoutes(walletService, businessPartnerDataService)
+    appRoutes(walletService, businessPartnerDataService, revocationService, utilsService)
     configurePersistence()
 
     configureJobs()

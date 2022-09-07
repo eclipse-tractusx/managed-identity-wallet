@@ -52,11 +52,12 @@ class WalletsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
@@ -171,12 +172,13 @@ class WalletsTest {
             configureSecurity()
             configureOpenAPI()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
 
             handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}") {
@@ -283,11 +285,12 @@ class WalletsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
 
             var verKey: String

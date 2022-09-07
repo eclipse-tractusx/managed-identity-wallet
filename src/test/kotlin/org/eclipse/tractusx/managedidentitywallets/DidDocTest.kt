@@ -53,12 +53,13 @@ class DidDocTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto

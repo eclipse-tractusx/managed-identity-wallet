@@ -35,6 +35,8 @@ object Wallets : IntIdTable("wallets") {
     val walletId = varchar("wallet_id", 4096)
     val walletKey = varchar("wallet_key", 4096)
     val walletToken = varchar("wallet_token", 4096)
+
+    val revocationListName = varchar("revocation_list_name", 4096)
 }
 
 class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
@@ -49,4 +51,6 @@ class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
     var walletId by Wallets.walletId
     var walletKey by Wallets.walletKey
     var walletToken by Wallets.walletToken
+
+    var revocationListName by Wallets.revocationListName
 }

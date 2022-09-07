@@ -35,7 +35,8 @@ data class WalletDto(
     val did: String,
     val verKey: String? = null,
     @Serializable(with = LocalDateTimeAsStringSerializer::class) val createdAt: LocalDateTime,
-    val vcs: List<VerifiableCredentialDto>
+    val vcs: List<VerifiableCredentialDto>,
+    val revocationListName: String? = null
 ) {
 
     init {

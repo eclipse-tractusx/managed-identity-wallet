@@ -22,7 +22,6 @@ package org.eclipse.tractusx.managedidentitywallets.services
 import foundation.identity.jsonld.JsonLDUtils
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
@@ -37,7 +36,8 @@ class AcaPyWalletServiceImpl(
     private val acaPyService: IAcaPyService,
     private val walletRepository: WalletRepository,
     private val credentialRepository: CredentialRepository,
-    private val utilsService: UtilsService
+    private val utilsService: UtilsService,
+    private val revocationService: IRevocationService
 ) : IWalletService {
 
     private val networkIdentifier = acaPyService.getWalletAndAcaPyConfig().networkIdentifier
@@ -65,7 +65,8 @@ class AcaPyWalletServiceImpl(
                     walletDto.did,
                     walletDto.verKey,
                     walletDto.createdAt,
-                    credentials
+                    credentials,
+                    walletDto.revocationListName,
                 )
             } else {
                 walletDto
@@ -130,25 +131,39 @@ class AcaPyWalletServiceImpl(
         if (!isCatenaXWallet(walletCreateDto.bpn)) {
             registerSubWalletUsingCatenaXWallet(walletCreateDto, createdDid)
         }
+
+        // create revocation list
+        val revocationListName = revocationService.registerList(createdDid.result.did, issueCredential = false)
+
         val walletToCreate = WalletExtendedData(
             name = walletCreateDto.name,
             bpn = walletCreateDto.bpn,
             did = "did:indy:${networkIdentifier}:${createdDid.result.did}",
             walletId = createdSubWalletDto.walletId,
             walletKey = subWalletToCreate.walletKey,
-            walletToken = createdSubWalletDto.token
+            walletToken = createdSubWalletDto.token,
+            revocationListName = revocationListName
         )
         val storedWallet = transaction {
             val createdWalletData = walletRepository.addWallet(walletToCreate)
             walletRepository.toObject(createdWalletData)
         }
+        // For Catena-X Wallet The DID is not registered yet and therefore a credential cannot be issued!
+        if (!isCatenaXWallet(walletCreateDto.bpn)) {
+            revocationService.issueStatusListCredentials(
+                profileName = utilsService.getIdentifierOfDid(storedWallet.did),
+                force = true
+            )
+        }
+
         return WalletDto(
             storedWallet.name,
             storedWallet.bpn,
             storedWallet.did,
             createdDid.result.verkey,
             storedWallet.createdAt,
-            storedWallet.vcs
+            storedWallet.vcs,
+            storedWallet.revocationListName
         )
     }
 
@@ -218,6 +233,7 @@ class AcaPyWalletServiceImpl(
             expirationDate = vcCatenaXRequest.expirationDate,
             credentialSubject = vcCatenaXRequest.credentialSubject,
             holderIdentifier = vcCatenaXRequest.holderIdentifier,
+            isRevocable = vcCatenaXRequest.isRevocable
         )
         return issueCredential(verifiableCredentialRequestDto)
     }
@@ -225,38 +241,36 @@ class AcaPyWalletServiceImpl(
     override suspend fun issueCredential(vcRequest: VerifiableCredentialRequestDto): VerifiableCredentialDto {
         log.debug("Issue Credential $vcRequest")
         val issuerWalletData = getWalletExtendedInformation(vcRequest.issuerIdentifier)
-        val holderWalletData = getWalletExtendedInformation(vcRequest.holderIdentifier)
-
         val issuerDid = issuerWalletData.did
-        val holderDid = holderWalletData.did
         val credentialSubject = vcRequest.credentialSubject.toMutableMap()
-        if (credentialSubject["id"] != null || credentialSubject["id"] != holderDid) {
-            credentialSubject["id"] = holderDid
+        // If the ID of Credential Subject exist then ignore the given holderIdentifier.
+        if (!credentialSubject.containsKey("id") && !vcRequest.holderIdentifier.isNullOrBlank()) {
+            credentialSubject["id"] = try {
+                val holderWalletData = getWalletExtendedInformation(vcRequest.holderIdentifier)
+                holderWalletData.did
+            } catch (e: NotFoundException) {
+                vcRequest.holderIdentifier
+            }
+        }
+
+        var credentialStatus: CredentialStatus? = null
+        if (vcRequest.isRevocable) {
+            credentialStatus = revocationService.addStatusEntry(utilsService.getIdentifierOfDid(issuerDid))
         }
         val verificationMethod = getVerificationMethod(issuerDid, 0)
         val convertedDatetime: Date = Date.from(Instant.now())
-        val issuanceDate = vcRequest.issuanceDate ?: JsonLDUtils.dateToString(convertedDatetime)
-        val signRequest: SignRequest<VerifiableCredentialDto> = SignRequest(
-            SignDoc(
-                credential = VerifiableCredentialDto(
-                    id = vcRequest.id,
-                    context = vcRequest.context,
-                    type = vcRequest.type,
-                    issuer = issuerDid,
-                    issuanceDate = issuanceDate,
-                    credentialSubject = credentialSubject,
-                    expirationDate = vcRequest.expirationDate
-                ),
-                options = SignOptions(
-                    proofPurpose = "assertionMethod",
-                    type = "Ed25519Signature2018",
-                    verificationMethod = utilsService.replaceSovWithNetworkIdentifier(verificationMethod.id)
-                )
-            ),
-            verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
+        val verifiableCredentialToSign = VerifiableCredentialDto(
+            id = vcRequest.id,
+            context = vcRequest.context,
+            type = vcRequest.type,
+            issuer = issuerDid,
+            issuanceDate = vcRequest.issuanceDate ?: JsonLDUtils.dateToString(convertedDatetime),
+            credentialSubject = credentialSubject,
+            credentialStatus = credentialStatus,
+            expirationDate = vcRequest.expirationDate
         )
-        val signedVcResultAsJsonString = acaPyService.signJsonLd(signRequest, issuerWalletData.walletToken)
-        val signedVcResult: SignCredentialResponse = Json.decodeFromString(signedVcResultAsJsonString)
+        val signedVcResult: SignCredentialResponse =
+            signVerifiableCredential(verifiableCredentialToSign, verificationMethod, issuerWalletData)
         if (signedVcResult.signedDoc != null) {
             return signedVcResult.signedDoc
         }
@@ -305,7 +319,8 @@ class AcaPyWalletServiceImpl(
     override suspend fun issuePresentation(
         vpRequest: VerifiablePresentationRequestDto,
         withCredentialsValidation: Boolean,
-        withCredentialsDateValidation: Boolean
+        withCredentialsDateValidation: Boolean,
+        withRevocationValidation: Boolean
     ): VerifiablePresentationDto {
         log.debug("Issue Presentation $vpRequest")
         val holderWalletData = getWalletExtendedInformation(vpRequest.holderIdentifier)
@@ -314,7 +329,7 @@ class AcaPyWalletServiceImpl(
         val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
         if (withCredentialsValidation) {
             vpRequest.verifiableCredentials.forEach {
-                validateVerifiableCredential(it, withCredentialsDateValidation, token)
+                validateVerifiableCredential(it, withCredentialsDateValidation, withRevocationValidation, token)
             }
         }
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
@@ -430,15 +445,18 @@ class AcaPyWalletServiceImpl(
 
     override fun getCatenaXBpn(): String = baseWalletBpn
 
-    override suspend fun verifyVerifiablePresentation(vpDto: VerifiablePresentationDto,
-                                                      withDateValidation: Boolean): VerifyResponse {
+    override suspend fun verifyVerifiablePresentation(
+        vpDto: VerifiablePresentationDto,
+        withDateValidation: Boolean,
+        withRevocationValidation: Boolean
+    ): VerifyResponse {
         val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
         validateVerifiablePresentation(vpDto, catenaXWallet.walletToken)
 
         val listOfVerifiableCredentials = vpDto.verifiableCredential
         if (!listOfVerifiableCredentials.isNullOrEmpty()) {
             listOfVerifiableCredentials.forEach {
-                validateVerifiableCredential(it, withDateValidation, catenaXWallet.walletToken)
+                validateVerifiableCredential(it, withDateValidation, withRevocationValidation, catenaXWallet.walletToken)
             }
         }
         return VerifyResponse(error = null, valid = true, vp = vpDto)
@@ -459,6 +477,7 @@ class AcaPyWalletServiceImpl(
     private suspend fun validateVerifiableCredential(
         vc: VerifiableCredentialDto,
         withDateValidation: Boolean,
+        withRevocationCheck: Boolean,
         walletToken: String
     ) {
         if (withDateValidation) {
@@ -475,6 +494,9 @@ class AcaPyWalletServiceImpl(
         }
         if (vc.proof == null) {
             throw UnprocessableEntityException("Cannot verify verifiable credential ${vc.id} due to missing proof")
+        }
+        if (withRevocationCheck) {
+            validateRevocation(vc, walletToken)
         }
         val verifyReq = VerifyRequest(
             signedDoc = vc,
@@ -546,6 +568,132 @@ class AcaPyWalletServiceImpl(
         return transaction {
             val extractedWallet = walletRepository.getWallet(identifier)
             walletRepository.toWalletCompleteDataObject(extractedWallet)
+        }
+    }
+
+    private suspend fun validateRevocation(vc: VerifiableCredentialDto, walletToken: String) {
+        // Credential is not revocable
+        if (vc.credentialStatus == null) {
+            return
+        }
+        verifyPropertiesOfCredentialStatus(vc.id, vc.credentialStatus)
+
+        val statusListVerifiableCredential = revocationService.getStatusListCredentialOfUrl(vc.credentialStatus.listUrl)
+
+        if (statusListVerifiableCredential.issuer != vc.issuer) {
+            throw UnprocessableEntityException("Cannot verify revocation: " +
+                    "The issuer of the given credential ${vc.id} is not the issuer of the StatusListCredential")
+        }
+
+        val listCredentialSubjectAsMap  = statusListVerifiableCredential.credentialSubject
+
+        if (listCredentialSubjectAsMap.containsKey(ListCredentialSubject.CREDENTIAL_TYPE_KEY) &&
+            listCredentialSubjectAsMap[ListCredentialSubject.CREDENTIAL_TYPE_KEY] != ListCredentialSubject.CREDENTIAL_TYPE) {
+            throw UnprocessableEntityException("Cannot verify revocation status of credential ${vc.id} " +
+                    "due to wrong type of extracted StatusList Credential")
+        }
+        if (listCredentialSubjectAsMap.containsKey(ListCredentialSubject.STATUS_PURPOSE_KEY) &&
+            listCredentialSubjectAsMap[ListCredentialSubject.STATUS_PURPOSE_KEY] != ListCredentialSubject.STATUS_PURPOSE) {
+            throw UnprocessableEntityException("Cannot verify revocation status of credential ${vc.id} " +
+                    "due to wrong statusPurpose of extracted StatusList Credential")
+        }
+        if (listCredentialSubjectAsMap.containsKey(ListCredentialSubject.ENCODED_LIST_KEY) &&
+            listCredentialSubjectAsMap[ListCredentialSubject.ENCODED_LIST_KEY].toString().isBlank()) {
+            throw UnprocessableEntityException("Cannot verify revocation status of credential ${vc.id} " +
+                    "due to empty or null encodedList of extracted StatusList Credential")
+        }
+
+        validateVerifiableCredential(vc = statusListVerifiableCredential,
+            withDateValidation = true,
+            withRevocationCheck = false,
+            walletToken = walletToken
+        )
+
+        val bitSet = utilsService.decodeBitset(listCredentialSubjectAsMap["encodedList"] as String)
+        if (bitSet.get(Integer.valueOf(vc.credentialStatus.index))) {
+            throw UnprocessableEntityException("The credential ${vc.id} has been revoked!")
+        }
+    }
+
+    override suspend fun issueStatusListCredential(
+        profileName: String,
+        listCredentialRequestData: ListCredentialRequestData
+    ): VerifiableCredentialDto {
+        val issuerDid = "did:indy:$networkIdentifier:$profileName"
+        val verifiableCredentialRequestDto = VerifiableCredentialRequestDto(
+            id = listCredentialRequestData.listId,
+            context = listOf(
+                JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                JsonLdContexts.JSONLD_CONTEXT_W3C_STATUS_LIST_2021_V1
+            ),
+            type = listOf("VerifiableCredential", "StatusList2021Credential"),
+            issuerIdentifier = issuerDid,
+            credentialSubject = mapOf(
+                "id" to listCredentialRequestData.subject.credentialId,
+                "type" to "StatusList2021",
+                "statusPurpose" to "revocation",
+                "encodedList" to listCredentialRequestData.subject.encodedList
+            ),
+            issuanceDate = JsonLDUtils.dateToString(Date.from(Instant.now())),
+            isRevocable = false
+        )
+        return issueCredential(verifiableCredentialRequestDto)
+    }
+
+    private suspend fun signVerifiableCredential(
+        verifiableCredentialToSign: VerifiableCredentialDto,
+        verificationMethod: DidVerificationMethodDto,
+        issuerWalletData: WalletExtendedData
+    ): SignCredentialResponse {
+        val signRequest: SignRequest<VerifiableCredentialDto> = SignRequest(
+            SignDoc(
+                credential = verifiableCredentialToSign,
+                options = SignOptions(
+                    proofPurpose = "assertionMethod",
+                    type = "Ed25519Signature2018",
+                    verificationMethod = utilsService.replaceSovWithNetworkIdentifier(verificationMethod.id)
+                )
+            ),
+            verkey = getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
+        )
+        val signedVcResultAsJsonString = acaPyService.signJsonLd(signRequest, issuerWalletData.walletToken)
+        return Json.decodeFromString(signedVcResultAsJsonString)
+    }
+
+    override suspend fun revokeVerifiableCredential(vc: VerifiableCredentialDto) {
+        val issuerDid = vc.issuer
+        val walletOfIssuer = getWalletExtendedInformation(issuerDid)
+
+        if (vc.credentialStatus == null) {
+            throw UnprocessableEntityException("The given verifiable credential is not revocable!")
+        }
+        verifyPropertiesOfCredentialStatus(vc.id, vc.credentialStatus)
+
+        validateVerifiableCredential(vc, withDateValidation = false, withRevocationCheck = false, walletOfIssuer.walletToken)
+
+        val profileName = utilsService.getIdentifierOfDid(walletOfIssuer.did)
+        revocationService.revoke(
+            profileName = profileName,
+            indexOfCredential = vc.credentialStatus.index.toLong()
+        )
+        revocationService.issueStatusListCredentials(profileName, true)
+    }
+
+    private fun verifyPropertiesOfCredentialStatus(
+        credentialId: String? = "",
+        credentialStatus: CredentialStatus
+    ) {
+        if (credentialStatus.credentialType != CredentialStatus.CREDENTIAL_TYPE) {
+            throw UnprocessableEntityException("Credential with Id $credentialId has invalid credential status 'Type'")
+        }
+        if (credentialStatus.statusPurpose != CredentialStatus.STATUS_PURPOSE) {
+            throw UnprocessableEntityException("Credential with Id $credentialId has invalid 'statusPurpose'")
+        }
+        if (credentialStatus.index.isBlank() || credentialStatus.index.toLong() < 0) {
+            throw UnprocessableEntityException("Credential with Id $credentialId has invalid 'statusListIndex'")
+        }
+        if (credentialStatus.listUrl.isBlank()) {
+            throw UnprocessableEntityException("Credential with Id $credentialId has invalid 'statusListCredential'")
         }
     }
 

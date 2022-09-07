@@ -229,7 +229,8 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
                     name = name.language.name
                 )
             ),
-            holderIdentifier = bpn
+            holderIdentifier = bpn,
+            isRevocable = true
         )
     }
 
@@ -255,7 +256,8 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
                 "language" to legalForm.language,
                 "categories" to legalForm.categories
             ),
-            holderIdentifier = bpn
+            holderIdentifier = bpn,
+            isRevocable = true
         )
     }
 
@@ -285,7 +287,8 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
                 "nationalBankAccountIdentifier" to bankAccount.nationalBankAccountIdentifier,
                 "nationalBankIdentifier" to bankAccount.nationalBankIdentifier
             ),
-            holderIdentifier = bpn
+            holderIdentifier = bpn,
+            isRevocable = true
         )
     }
 
@@ -406,7 +409,8 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
             type = listOf(JsonLdTypes.ADDRESS_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
             issuanceDate = currentDateAsString,
             credentialSubject = credSubject,
-            holderIdentifier = bpn
+            holderIdentifier = bpn,
+            isRevocable = true
         )
     }
 
@@ -426,7 +430,8 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
                 "status" to "Active",
                 "startTime" to currentDateAsString
             ),
-            holderIdentifier = bpn
+            holderIdentifier = bpn,
+            isRevocable = true
         )
     }
 
@@ -443,7 +448,8 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
                 "type" to listOf(JsonLdTypes.BPN_TYPE),
                 "bpn" to bpn
             ),
-            holderIdentifier = bpn
+            holderIdentifier = bpn,
+            isRevocable = false // THE BPN Credential is not Revocable!
         )
     }
 
@@ -459,6 +465,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
                 issuanceDate = vcDto.issuanceDate,
                 expirationDate = vcDto.expirationDate,
                 credentialSubject = vcDto.credentialSubject,
+                credentialStatus = vcDto.credentialStatus,
                 proof = vcDto.proof
             )
         }

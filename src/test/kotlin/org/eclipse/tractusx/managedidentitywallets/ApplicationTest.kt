@@ -113,12 +113,13 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureJobs()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
             assertTrue(true)
         }
@@ -132,11 +133,12 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -178,11 +180,12 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
 
             assertFails {
@@ -263,11 +266,12 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
 
             // view wallets with single view token should not work

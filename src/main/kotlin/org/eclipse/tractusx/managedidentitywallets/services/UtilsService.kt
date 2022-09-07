@@ -21,7 +21,10 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import java.io.ByteArrayInputStream
 import java.security.SecureRandom
+import java.util.*
+import java.util.zip.GZIPInputStream
 
 class UtilsService(private val networkIdentifier: String) {
 
@@ -65,6 +68,20 @@ class UtilsService(private val networkIdentifier: String) {
         val regex = """did:indy:$networkIdentifier:.[^-\s]{16,}${'$'}""".toRegex()
         if (!regex.matches(did)) {
             throw UnprocessableEntityException("The DID must be a valid and supported Indy DID")
+        }
+    }
+
+    fun decodeBitset(encoded: String): BitSet {
+        val unzipped = decodeBytes(encoded)
+        return BitSet.valueOf(unzipped)
+    }
+
+    private fun decodeBytes(encoded: String): ByteArray {
+        val rawBytes = Base64.getDecoder().decode(encoded)
+        return ByteArrayInputStream(rawBytes).run {
+            GZIPInputStream(this).use {
+                it.readBytes()
+            }
         }
     }
 

@@ -46,7 +46,7 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 import java.time.LocalDateTime
 
-fun Route.walletRoutes(walletService: IWalletService, businessPartnerDataService: IBusinessPartnerDataService) {
+fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService: IBusinessPartnerDataService) {
 
     route("/wallets") {
 
@@ -325,11 +325,18 @@ val issuedVerifiableCredentialRequestDtoExample = mapOf(
         issuanceDate = "2019-06-16T18:56:59Z",
         expirationDate = "2019-06-17T18:56:59Z",
         credentialSubject = mapOf("college" to "Test-University"),
+        credentialStatus = CredentialStatus(
+            statusId = "http://example.edu/api/credentials/status/test#3",
+            credentialType = "StatusList2021Entry",
+            statusPurpose = "revocation",
+            index= "3",
+            listUrl= "http://example.edu/api/credentials/status/test"
+        ),
         proof = LdProofDto(
             type = "Ed25519Signature2018",
             created = "2021-11-17T22:20:27Z",
             proofPurpose = "assertionMethod",
-            verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+            verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
             jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
         )
     )

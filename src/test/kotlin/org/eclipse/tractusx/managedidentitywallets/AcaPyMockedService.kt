@@ -26,14 +26,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import java.security.SecureRandom
 
-object SingletonTestData {
-    lateinit var baseWalletDID: String
-    lateinit var baseWalletVerKey: String
-    lateinit var signCredentialResponse: String
-    var isValidVerifiableCredential: Boolean = true
-    var isValidVerifiablePresentation: Boolean = true
-}
-
 class AcaPyMockedService(val baseWalletBpn: String,
                          val networkIdentifier: String): IAcaPyService {
 

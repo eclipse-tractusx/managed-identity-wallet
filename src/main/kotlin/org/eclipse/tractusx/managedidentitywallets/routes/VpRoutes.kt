@@ -59,6 +59,11 @@ fun Route.vpRoutes(walletService: IWalletService) {
                             "withCredentialsDateValidation",
                             "withCredentialsDateValidation",
                             "false"
+                        ),
+                        ParameterExample(
+                            "withRevocationValidation",
+                            "withRevocationValidation",
+                            "false"
                         )
                     ),
                     requestInfo = RequestInfo(
@@ -86,12 +91,17 @@ fun Route.vpRoutes(walletService: IWalletService) {
                     call.request.queryParameters["withCredentialsDateValidation"].toBoolean()
                 } else { true }
 
+                val withRevocationValidation = if (call.request.queryParameters["withRevocationValidation"] != null) {
+                    call.request.queryParameters["withRevocationValidation"].toBoolean()
+                } else { true }
+
                 call.respond(
                     HttpStatusCode.Created,
                     walletService.issuePresentation(
                         verifiableCredentialDto,
                         withCredentialsValidation,
-                        withCredentialsDateValidation
+                        withCredentialsDateValidation,
+                        withRevocationValidation
                     )
                 )
             }
@@ -107,7 +117,8 @@ fun Route.vpRoutes(walletService: IWalletService) {
                             "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_VIEW_WALLET)}**\n" +
                             "\nValidate Verifiable Presentation with all included credentials",
                         parameterExamples = setOf(
-                            ParameterExample("withDateValidation", "withDateValidation", "false")
+                            ParameterExample("withDateValidation", "withDateValidation", "false"),
+                            ParameterExample("withRevocationValidation", "withRevocationValidation", "false")
                         ),
                         requestInfo = RequestInfo(
                             description = "The verifiable presentation to validate",
@@ -132,9 +143,13 @@ fun Route.vpRoutes(walletService: IWalletService) {
                     val withDateValidation = if (call.request.queryParameters["withDateValidation"] != null) {
                         call.request.queryParameters["withDateValidation"].toBoolean()
                     } else { false }
+                    val withRevocationValidation = if (call.request.queryParameters["withRevocationValidation"] != null) {
+                        call.request.queryParameters["withRevocationValidation"].toBoolean()
+                    } else { true }
                     val verifyResponse =  walletService.verifyVerifiablePresentation(
                         vpDto = verifiablePresentation,
-                        withDateValidation = withDateValidation
+                        withDateValidation = withDateValidation,
+                        withRevocationValidation = withRevocationValidation
                     )
                     call.respond(HttpStatusCode.OK, verifyResponse)
                 }
@@ -191,7 +206,7 @@ val verifiablePresentationResponseDtoExample = mapOf(
                     type = "Ed25519Signature2018",
                     created = "2021-11-17T22:20:27Z",
                     proofPurpose = "assertionMethod",
-                    verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+                    verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
                     jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                 )
             )
@@ -200,7 +215,7 @@ val verifiablePresentationResponseDtoExample = mapOf(
             type = "Ed25519Signature2018",
             created = "2021-11-17T22:20:27Z",
             proofPurpose = "assertionMethod",
-            verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+            verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
             jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
         )
     )
