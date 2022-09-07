@@ -17,22 +17,19 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallet
+package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.EnvironmentTestSetup
-import org.eclipse.tractusx.managedidentitywallets.Services
-import org.eclipse.tractusx.managedidentitywallets.SingletonTestData
-import org.eclipse.tractusx.managedidentitywallets.TestServer
 import org.eclipse.tractusx.managedidentitywallets.models.StoreVerifiableCredentialParameter
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
+import java.io.File
 import kotlin.test.*
 
 @kotlinx.serialization.ExperimentalSerializationApi
@@ -48,6 +45,11 @@ class CredentialsTest {
     @AfterTest
     fun tearDown() {
         server.stop(1000, 10000)
+    }
+
+    @AfterTest
+    fun cleanSingletonTestData() {
+        SingletonTestData.cleanSingletonTestData()
     }
 
     @Test
@@ -81,41 +83,9 @@ class CredentialsTest {
             credentials = EnvironmentTestSetup.walletService.getCredentials(
                 null,null,null,null)
             assertTrue { credentials.isEmpty() }
-            val vcAsString ="""
-                {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "${walletDto.did}"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-            """.trimIndent()
 
+            val vcAsString: String = File("./src/test/resources/credentials-test-data/vcWithReplaceableSubjectId.json")
+                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>", walletDto.did)
             val storeVerifiableCredentialParameter = StoreVerifiableCredentialParameter(EnvironmentTestSetup.DEFAULT_BPN)
             assertEquals(EnvironmentTestSetup.DEFAULT_BPN, storeVerifiableCredentialParameter.identifier)
 
@@ -128,40 +98,8 @@ class CredentialsTest {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
 
-            val vcWithWrongSubjectAsString ="""
-                {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:NotEqualWalletDID"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-            """.trimIndent()
+            val vcWithWrongSubjectAsString: String = File("./src/test/resources/credentials-test-data/vcWithReplaceableSubjectId.json")
+                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>", "did:indy:local:test:NotEqualWalletDID")
             handleRequest(HttpMethod.Post, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}/credentials") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -207,9 +145,10 @@ class CredentialsTest {
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto
             runBlocking {
-                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                val walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+                SingletonTestData.baseWalletDID = walletDto.did
             }
             val verifiableCredentialRequest = VerifiableCredentialRequestDto(
                 context = listOf(
@@ -218,15 +157,14 @@ class CredentialsTest {
                 ),
                 id = "http://example.edu/credentials/3732",
                 type = listOf("University-Degree-Credential, VerifiableCredential"),
-                issuerIdentifier = walletDto.did,
+                issuerIdentifier = SingletonTestData.baseWalletDID,
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
                 credentialSubject = mapOf("college" to "Test-University"),
-                holderIdentifier = walletDto.did,
+                holderIdentifier = SingletonTestData.baseWalletDID,
                 isRevocable = true
             )
-            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-            SingletonTestData.baseWalletDID = walletDto.did
+
             val signedCred = Json.encodeToString(
                 VerifiableCredentialDto.serializer(),
                 VerifiableCredentialDto(
@@ -236,15 +174,15 @@ class CredentialsTest {
                     ),
                     id = "http://example.edu/credentials/3732",
                     type = listOf("University-Degree-Credential, VerifiableCredential"),
-                    issuer = walletDto.did,
+                    issuer = SingletonTestData.baseWalletDID,
                     issuanceDate = "2019-06-16T18:56:59Z",
                     expirationDate = "2019-06-17T18:56:59Z",
-                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialSubject = mapOf("college" to "Test-University", "id" to SingletonTestData.baseWalletDID),
                     proof = LdProofDto(
                         type = "Ed25519Signature2018",
                         created = "2021-11-17T22:20:27Z",
                         proofPurpose = "assertionMethod",
-                        verificationMethod = "${walletDto.did}#keys-1",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#key-1",
                         jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                     )
                 )
@@ -273,10 +211,10 @@ class CredentialsTest {
                 ),
                 id = "http://example.edu/credentials/3732",
                 type = listOf("University-Degree-Credential, VerifiableCredential"),
-                issuerIdentifier = walletDto.did,
+                issuerIdentifier = SingletonTestData.baseWalletDID,
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
-                credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                credentialSubject = mapOf("college" to "Test-University", "id" to SingletonTestData.baseWalletDID),
             )
             handleRequest(HttpMethod.Post, "/api/credentials") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
@@ -300,7 +238,7 @@ class CredentialsTest {
                 ),
                 id = "http://example.edu/credentials/3732",
                 type = listOf("University-Degree-Credential, VerifiableCredential"),
-                issuerIdentifier = walletDto.did,
+                issuerIdentifier = SingletonTestData.baseWalletDID,
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
                 credentialSubject = mapOf("college" to "Test-University"),
@@ -315,7 +253,7 @@ class CredentialsTest {
                     ),
                     id = "http://example.edu/credentials/3732",
                     type = listOf("University-Degree-Credential, VerifiableCredential"),
-                    issuer = walletDto.did,
+                    issuer = SingletonTestData.baseWalletDID,
                     issuanceDate = "2019-06-16T18:56:59Z",
                     expirationDate = "2019-06-17T18:56:59Z",
                     credentialSubject = mapOf("college" to "Test-University", "id" to "Random-Value"),
@@ -323,7 +261,7 @@ class CredentialsTest {
                         type = "Ed25519Signature2018",
                         created = "2021-11-17T22:20:27Z",
                         proofPurpose = "assertionMethod",
-                        verificationMethod = "${walletDto.did}#keys-1",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#key-1",
                         jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                     )
                 )
@@ -353,7 +291,7 @@ class CredentialsTest {
                     ),
                     id = "http://example.edu/credentials/3732",
                     type = listOf("University-Degree-Credential, VerifiableCredential"),
-                    issuer = walletDto.did,
+                    issuer = SingletonTestData.baseWalletDID,
                     issuanceDate = "2019-06-16T18:56:59Z",
                     expirationDate = "2019-06-17T18:56:59Z",
                     credentialSubject = mapOf("college" to "Test-University"),
@@ -361,7 +299,7 @@ class CredentialsTest {
                         type = "Ed25519Signature2018",
                         created = "2021-11-17T22:20:27Z",
                         proofPurpose = "assertionMethod",
-                        verificationMethod = "${walletDto.did}#keys-1",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#keys-1",
                         jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                     )
                 )
@@ -374,7 +312,7 @@ class CredentialsTest {
                 ),
                 id = "http://example.edu/credentials/3732",
                 type = listOf("University-Degree-Credential, VerifiableCredential"),
-                issuerIdentifier = walletDto.did,
+                issuerIdentifier = SingletonTestData.baseWalletDID,
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
                 credentialSubject = mapOf("college" to "Test-University"),
@@ -406,10 +344,6 @@ class CredentialsTest {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
 
-            SingletonTestData.baseWalletVerKey = ""
-            SingletonTestData.baseWalletDID = ""
-            SingletonTestData.signCredentialResponse = ""
-
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
             }
@@ -433,9 +367,10 @@ class CredentialsTest {
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto
             runBlocking {
-                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                val walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+                SingletonTestData.baseWalletDID = walletDto.did
             }
             val verifiableCredentialRequest = VerifiableCredentialRequestWithoutIssuerDto(
                 context = listOf(
@@ -447,10 +382,9 @@ class CredentialsTest {
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
                 credentialSubject = mapOf("college" to "Test-University"),
-                holderIdentifier = walletDto.did
+                holderIdentifier = SingletonTestData.baseWalletDID
             )
-            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-            SingletonTestData.baseWalletDID = walletDto.did
+
             val signedCred = Json.encodeToString(
                 VerifiableCredentialDto.serializer(),
                 VerifiableCredentialDto(
@@ -460,15 +394,15 @@ class CredentialsTest {
                     ),
                     id = "http://example.edu/credentials/3732",
                     type = listOf("University-Degree-Credential, VerifiableCredential"),
-                    issuer = walletDto.did,
+                    issuer = SingletonTestData.baseWalletDID,
                     issuanceDate = "2019-06-16T18:56:59Z",
                     expirationDate = "2019-06-17T18:56:59Z",
-                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialSubject = mapOf("college" to "Test-University", "id" to SingletonTestData.baseWalletDID),
                     proof = LdProofDto(
                         type = "Ed25519Signature2018",
                         created = "2021-11-17T22:20:27Z",
                         proofPurpose = "assertionMethod",
-                        verificationMethod = "${walletDto.did}#key-1",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#key-1",
                         jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                     )
                 )
@@ -496,7 +430,7 @@ class CredentialsTest {
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
                 credentialSubject = mapOf("college" to "Test-University"),
-                holderIdentifier = walletDto.did
+                holderIdentifier = SingletonTestData.baseWalletDID
             )
             handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
@@ -509,9 +443,6 @@ class CredentialsTest {
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
-            SingletonTestData.baseWalletVerKey = ""
-            SingletonTestData.baseWalletDID = ""
-            SingletonTestData.signCredentialResponse = ""
 
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
@@ -816,14 +747,6 @@ class CredentialsTest {
                 assertTrue(response.content!!.contains("Credential with Id null has invalid 'statusListIndex'"))
             }
 
-            SingletonTestData.baseWalletVerKey = ""
-            SingletonTestData.baseWalletDID = ""
-            SingletonTestData.signCredentialResponse = ""
-            SingletonTestData.revocationListName = ""
-            SingletonTestData.credentialIndex = -1
-            SingletonTestData.isValidVerifiableCredential = false
-
-
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
             }
@@ -905,11 +828,6 @@ class CredentialsTest {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
 
-            SingletonTestData.baseWalletVerKey = ""
-            SingletonTestData.baseWalletDID = ""
-            SingletonTestData.signCredentialResponse = ""
-            SingletonTestData.revocationListName = ""
-
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
             }
@@ -964,16 +882,11 @@ class CredentialsTest {
                 assertEquals(HttpStatusCode.NotFound, response.status())
             }
 
-            SingletonTestData.baseWalletVerKey = ""
-            SingletonTestData.baseWalletDID = ""
-            SingletonTestData.revocationListName = ""
-
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
             }
         }
     }
-
 
     @Test
     fun testIssueAndUpdateStatusListCredential() {
