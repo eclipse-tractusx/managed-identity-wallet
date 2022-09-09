@@ -629,20 +629,20 @@ class PresentationsTest {
                 SingletonTestData.revocationListName = walletDto.revocationListName!!
             }
 
-            val verifiablePresentation = File("./src/test/resources/presentations-test-data/vpWithPlaceholders.json").readText(Charsets.UTF_8)
-            var vp = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
-            vp = vp.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
-            vp = vp.replace("<revocation-list-to-replace>",
+            val vpWithPlaceholders = File("./src/test/resources/presentations-test-data/vpWithPlaceholders.json").readText(Charsets.UTF_8)
+            var validVp = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
-            vp = vp.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
-            vp = vp.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
-            vp = vp.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
+                .replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+                .replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+                .replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             SingletonTestData.encodedList = EnvironmentTestSetup.NONE_REVOKED_ENCODED_LIST
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(vp)
+                setBody(validVp)
             }.apply {
                 val output = Json.decodeFromString<VerifyResponse>(response.content!!)
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -654,19 +654,19 @@ class PresentationsTest {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(vp)
+                setBody(validVp)
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
                 assertTrue(response.content!!.contains("The credential http://example.edu/credentials/3735 has been revoked!"))
             }
 
-            var vpWithWrongStatusType = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<revocation-list-to-replace>",
+            var vpWithWrongStatusType = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<status-type-to-replace>", "WRONG_TYPE")
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
+                .replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+                .replace("<status-type-to-replace>", "WRONG_TYPE")
+                .replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -677,13 +677,13 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid credential status 'Type'"))
             }
 
-            var vpWithWrongStatusPurpose = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<revocation-list-to-replace>",
+            var vpWithWrongStatusPurpose = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
-            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
-            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
-            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<status-purpose-to-replace>", "WRONG_PURPOSE")
+                .replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+                .replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+                .replace("<status-purpose-to-replace>", "WRONG_PURPOSE")
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -695,13 +695,13 @@ class PresentationsTest {
             }
 
             var vpWithEmptyStatusListIndex =
-                verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<revocation-list-to-replace>",
+                vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
-            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<index-to-replace>", "  ")
-            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
-            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
+                .replace("<index-to-replace>", "  ")
+                .replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+                .replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -712,12 +712,12 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid 'statusListIndex'"))
             }
 
-            var vpWithEmptyStatusListUrl = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<revocation-list-to-replace>", "  ")
-            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
-            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
-            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
+            var vpWithEmptyStatusListUrl = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<revocation-list-to-replace>", "  ")
+                .replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+                .replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+                .replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -729,13 +729,13 @@ class PresentationsTest {
             }
 
             var vpWithIssuerConflict =
-                verifiablePresentation.replace("<issuer-to-replace>", "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9")
-            vpWithIssuerConflict = vpWithIssuerConflict.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
-            vpWithIssuerConflict = vpWithIssuerConflict.replace("<revocation-list-to-replace>",
+                vpWithPlaceholders.replace("<issuer-to-replace>", "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9")
+                .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+                .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
-            vpWithIssuerConflict = vpWithIssuerConflict.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
-            vpWithIssuerConflict = vpWithIssuerConflict.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
-            vpWithIssuerConflict = vpWithIssuerConflict.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
+                .replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+                .replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+                .replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
