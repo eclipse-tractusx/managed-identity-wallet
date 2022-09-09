@@ -629,106 +629,20 @@ class PresentationsTest {
                 SingletonTestData.revocationListName = walletDto.revocationListName!!
             }
 
-            val verifiablePresentation = """
-                {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1"
-                    ],
-                    "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
-                    "type": [
-                        "VerifiablePresentation"
-                    ],
-                    "holder": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
-                    "verifiableCredential": [
-                        {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "${SingletonTestData.baseWalletDID}",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
-                            },
-                            "credentialStatus": {
-                                "id": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
-                                "type": "StatusList2021Entry",
-                                "statusPurpose": "revocation",
-                                "statusListIndex": "${SingletonTestData.credentialIndex}",
-                                "statusListCredential": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "${SingletonTestData.baseWalletDID}#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        },
-                        {
-                            "id": "http://example.edu/credentials/3333",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2027-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master1",
-                                    "degreeType": "Undergraduate2",
-                                    "name": "Master of Test1"
-                                },
-                                "college": "Test2",
-                                "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:16:45Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..6oIPVm3ealRVzpgiFKItyIzVWlNUT150fbh9OcBElj9FvaICAd-wc1yzrwka3ns1SmrPFsWIIe0wC1rJQLISBA"
-                            }
-                        }
-                    ],
-                    "proof": {
-                        "type": "Ed25519Signature2018",
-                        "created": "2022-07-12T12:28:44Z",
-                        "proofPurpose": "assertionMethod",
-                        "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
-                    }
-                }
-            """.trimIndent()
-
-
+            val verifiablePresentation = File("./src/test/resources/presentations-test-data/vpWithPlaceholders.json").readText(Charsets.UTF_8)
+            var vp = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            vp = vp.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+            vp = vp.replace("<revocation-list-to-replace>",
+                "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
+            vp = vp.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+            vp = vp.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+            vp = vp.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             SingletonTestData.encodedList = EnvironmentTestSetup.NONE_REVOKED_ENCODED_LIST
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(verifiablePresentation)
+                setBody(vp)
             }.apply {
                 val output = Json.decodeFromString<VerifyResponse>(response.content!!)
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -740,357 +654,93 @@ class PresentationsTest {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(verifiablePresentation)
+                setBody(vp)
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
                 assertTrue(response.content!!.contains("The credential http://example.edu/credentials/3735 has been revoked!"))
             }
 
-            val verifiablePresentationWithWrongStatusType = """
-                {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1"
-                    ],
-                    "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
-                    "type": [
-                        "VerifiablePresentation"
-                    ],
-                    "holder": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
-                    "verifiableCredential": [
-                        {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "${SingletonTestData.baseWalletDID}",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
-                            },
-                            "credentialStatus": {
-                                "id": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
-                                "type": "WrongType",
-                                "statusPurpose": "revocation",
-                                "statusListIndex": "${SingletonTestData.credentialIndex}",
-                                "statusListCredential": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "${SingletonTestData.baseWalletDID}#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-                    ],
-                    "proof": {
-                        "type": "Ed25519Signature2018",
-                        "created": "2022-07-12T12:28:44Z",
-                        "proofPurpose": "assertionMethod",
-                        "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
-                    }
-                }
-            """.trimIndent()
+            var vpWithWrongStatusType = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<revocation-list-to-replace>",
+                "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<status-type-to-replace>", "WRONG_TYPE")
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(verifiablePresentationWithWrongStatusType)
+                setBody(vpWithWrongStatusType)
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
                 assertTrue(response.content!!.contains("has invalid credential status 'Type'"))
             }
 
-            val verifiablePresentationWithWrongStatusPurpose = """
-                {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1"
-                    ],
-                    "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
-                    "type": [
-                        "VerifiablePresentation"
-                    ],
-                    "holder": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
-                    "verifiableCredential": [
-                        {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "${SingletonTestData.baseWalletDID}",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
-                            },
-                            "credentialStatus": {
-                                "id": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
-                                "type": "StatusList2021Entry",
-                                "statusPurpose": "wrong-purpose",
-                                "statusListIndex": "${SingletonTestData.credentialIndex}",
-                                "statusListCredential": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "${SingletonTestData.baseWalletDID}#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-                    ],
-                    "proof": {
-                        "type": "Ed25519Signature2018",
-                        "created": "2022-07-12T12:28:44Z",
-                        "proofPurpose": "assertionMethod",
-                        "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
-                    }
-                }
-            """.trimIndent()
+            var vpWithWrongStatusPurpose = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<revocation-list-to-replace>",
+                "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
+            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+            vpWithWrongStatusPurpose = vpWithWrongStatusPurpose.replace("<status-purpose-to-replace>", "WRONG_PURPOSE")
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(verifiablePresentationWithWrongStatusPurpose)
+                setBody(vpWithWrongStatusPurpose)
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
                 assertTrue(response.content!!.contains("has invalid 'statusPurpose'"))
             }
 
-            val verifiablePresentationWithEmptyStatusListIndex = """
-                {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1"
-                    ],
-                    "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
-                    "type": [
-                        "VerifiablePresentation"
-                    ],
-                    "holder": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
-                    "verifiableCredential": [
-                        {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "${SingletonTestData.baseWalletDID}",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
-                            },
-                            "credentialStatus": {
-                                "id": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
-                                "type": "StatusList2021Entry",
-                                "statusPurpose": "revocation",
-                                "statusListIndex": " ",
-                                "statusListCredential": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "${SingletonTestData.baseWalletDID}#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-                    ],
-                    "proof": {
-                        "type": "Ed25519Signature2018",
-                        "created": "2022-07-12T12:28:44Z",
-                        "proofPurpose": "assertionMethod",
-                        "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
-                    }
-                }
-            """.trimIndent()
+            var vpWithEmptyStatusListIndex =
+                verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<revocation-list-to-replace>",
+                "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
+            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<index-to-replace>", "  ")
+            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+            vpWithEmptyStatusListIndex = vpWithEmptyStatusListIndex.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(verifiablePresentationWithEmptyStatusListIndex)
+                setBody(vpWithEmptyStatusListIndex)
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
                 assertTrue(response.content!!.contains("has invalid 'statusListIndex'"))
             }
 
-            val verifiablePresentationWithEmptyStatusListUrl = """
-                {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1"
-                    ],
-                    "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
-                    "type": [
-                        "VerifiablePresentation"
-                    ],
-                    "holder": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
-                    "verifiableCredential": [
-                        {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "${SingletonTestData.baseWalletDID}",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
-                            },
-                            "credentialStatus": {
-                                "id": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
-                                "type": "StatusList2021Entry",
-                                "statusPurpose": "revocation",
-                                "statusListIndex": "3",
-                                "statusListCredential": "   "
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "${SingletonTestData.baseWalletDID}#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-                    ],
-                    "proof": {
-                        "type": "Ed25519Signature2018",
-                        "created": "2022-07-12T12:28:44Z",
-                        "proofPurpose": "assertionMethod",
-                        "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
-                    }
-                }
-            """.trimIndent()
+            var vpWithEmptyStatusListUrl = verifiablePresentation.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithWrongStatusType = vpWithWrongStatusType.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<revocation-list-to-replace>", "  ")
+            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+            vpWithEmptyStatusListUrl = vpWithEmptyStatusListUrl.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(verifiablePresentationWithEmptyStatusListUrl)
+                setBody(vpWithEmptyStatusListUrl)
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
                 assertTrue(response.content!!.contains("has invalid 'statusListCredential'"))
             }
 
-            val verifiablePresentationWithIssuerConflict = """
-                {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1"
-                    ],
-                    "id": "73e9e2f1-c0f9-4453-9619-d26244c83f15",
-                    "type": [
-                        "VerifiablePresentation"
-                    ],
-                    "holder": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
-                    "verifiableCredential": [
-                        {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
-                            },
-                            "credentialStatus": {
-                                "id": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
-                                "type": "StatusList2021Entry",
-                                "statusPurpose": "revocation",
-                                "statusListIndex": "${SingletonTestData.credentialIndex}",
-                                "statusListCredential": "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "${SingletonTestData.baseWalletDID}#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-                    ],
-                    "proof": {
-                        "type": "Ed25519Signature2018",
-                        "created": "2022-07-12T12:28:44Z",
-                        "proofPurpose": "assertionMethod",
-                        "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
-                        "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
-                    }
-                }
-            """.trimIndent()
+            var vpWithIssuerConflict =
+                verifiablePresentation.replace("<issuer-to-replace>", "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9")
+            vpWithIssuerConflict = vpWithIssuerConflict.replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
+            vpWithIssuerConflict = vpWithIssuerConflict.replace("<revocation-list-to-replace>",
+                "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
+            vpWithIssuerConflict = vpWithIssuerConflict.replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
+            vpWithIssuerConflict = vpWithIssuerConflict.replace("<status-type-to-replace>", CredentialStatus.CREDENTIAL_TYPE)
+            vpWithIssuerConflict = vpWithIssuerConflict.replace("<status-purpose-to-replace>", CredentialStatus.STATUS_PURPOSE)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(verifiablePresentationWithIssuerConflict)
+                setBody(vpWithIssuerConflict)
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
                 assertTrue(response.content!!.contains("The issuer of the given credential " +
