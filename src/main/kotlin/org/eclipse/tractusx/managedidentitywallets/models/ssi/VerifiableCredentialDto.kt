@@ -149,8 +149,8 @@ data class CredentialStatus (
     @SerialName("statusListCredential") @JsonProperty("statusListCredential") var listUrl: String,
 ) {
     companion object {
-        val CREDENTIAL_TYPE = "StatusList2021Entry"
-        val STATUS_PURPOSE = "revocation"
+        const val CREDENTIAL_TYPE = "StatusList2021Entry"
+        const val STATUS_PURPOSE = "revocation"
     }
 }
 
@@ -168,11 +168,11 @@ data class ListCredentialSubject (
     var encodedList: String
 ) {
     companion object {
-        val CREDENTIAL_TYPE_KEY = "credentialType"
-        val CREDENTIAL_TYPE = "StatusList2021"
-        val STATUS_PURPOSE_KEY = "statusPurpose"
-        val STATUS_PURPOSE = "revocation"
-        val ENCODED_LIST_KEY = "encodedList"
+        const val CREDENTIAL_TYPE_KEY = "credentialType"
+        const val CREDENTIAL_TYPE = "StatusList2021"
+        const val STATUS_PURPOSE_KEY = "statusPurpose"
+        const val STATUS_PURPOSE = "revocation"
+        const val ENCODED_LIST_KEY = "encodedList"
     }
 }
 
