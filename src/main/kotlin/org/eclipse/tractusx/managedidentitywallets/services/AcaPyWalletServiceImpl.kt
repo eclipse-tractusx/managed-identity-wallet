@@ -125,7 +125,7 @@ class AcaPyWalletServiceImpl(
             createdSubWalletDto.token
         )
 
-        // For Catena-X Wallet 
+        // For Catena-X Wallet
         //   1. The DID will be registered externally with endorser role.
         //   2. The Assign to public will be triggered manually
         if (!isCatenaXWallet(walletCreateDto.bpn)) {
@@ -253,15 +253,17 @@ class AcaPyWalletServiceImpl(
             }
         }
 
+        val context = vcRequest.context.toMutableList()
         var credentialStatus: CredentialStatus? = null
         if (vcRequest.isRevocable) {
             credentialStatus = revocationService.addStatusEntry(utilsService.getIdentifierOfDid(issuerDid))
+            context.add(JsonLdContexts.JSONLD_CONTEXT_W3C_STATUS_LIST_2021_V1)
         }
         val verificationMethod = getVerificationMethod(issuerDid, 0)
         val convertedDatetime: Date = Date.from(Instant.now())
         val verifiableCredentialToSign = VerifiableCredentialDto(
             id = vcRequest.id,
-            context = vcRequest.context,
+            context = context,
             type = vcRequest.type,
             issuer = issuerDid,
             issuanceDate = vcRequest.issuanceDate ?: JsonLDUtils.dateToString(convertedDatetime),
