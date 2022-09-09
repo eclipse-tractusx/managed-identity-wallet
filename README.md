@@ -54,7 +54,7 @@ build system.
   
 ## Steps for initial lokal Deployment and Wallet Creation <a id= "initialDeploymentandWalletCreation"></a>
 
-1. Clone the Github Repository - https://github.com/catenax-ng/product-core-managed-identity-wallets.git
+1. Clone the Github Repository - https://github.com/eclipse-tractusx/managed-identity-wallets.git
 2. (Optional) Clone the [Aca-Py Docker Image](#acapyDockerImage)
 3. Copy .env.example and rename to dev.env see section [IntelliJ Development Setup](#intellijDevelopmentSetup)
 4. Start Docker containers of Keycloak, Acapy and Postgres, see section [Startup Docker Containers](#startupDockerContainers)

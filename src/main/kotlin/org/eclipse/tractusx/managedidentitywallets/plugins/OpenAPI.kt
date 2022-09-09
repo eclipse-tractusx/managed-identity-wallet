@@ -48,7 +48,7 @@ fun Application.configureOpenAPI() {
           ),
           license = License(
               name = "Apache 2.0",
-              url = URI("https://github.com/catenax-ng/product-core-managed-identity-wallets/blob/develop/LICENSE")
+              url = URI("https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE")
           )
           ),
           servers = mutableListOf(
