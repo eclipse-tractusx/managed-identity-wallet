@@ -30,5 +30,5 @@ data class WalletExtendedData(
     var walletId: String,
     var walletKey: String,
     var walletToken: String,
-    var revocationListName: String
+    var revocationListName: String?
 )

@@ -36,7 +36,7 @@ object Wallets : IntIdTable("wallets") {
     val walletKey = varchar("wallet_key", 4096)
     val walletToken = varchar("wallet_token", 4096)
 
-    val revocationListName = varchar("revocation_list_name", 4096)
+    val revocationListName = varchar("revocation_list_name", 4096).nullable()
 }
 
 class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
