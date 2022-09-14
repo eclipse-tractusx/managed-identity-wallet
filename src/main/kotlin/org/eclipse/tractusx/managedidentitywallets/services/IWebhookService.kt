@@ -19,39 +19,37 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import kotlinx.coroutines.Deferred
 import io.ktor.client.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
-import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
-import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Webhook
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
+import org.hyperledger.aries.api.connection.ConnectionRecord
+import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.slf4j.LoggerFactory
 
-interface IBusinessPartnerDataService {
+interface IWebhookService {
 
-    suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String? = null)
+    fun addWebhook(threadId: String, url:String, state: String)
 
-    suspend fun<T> issueAndStoreCatenaXCredentialsAsync(
-        bpn: String,
-        type: String,
-        data: T? = null
-    ): Deferred<Boolean>
+    fun getWebhookByThreadId(threadId: String?): Webhook?
 
-    suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
-        targetWallet: WalletDto,
-        connectionId: String,
-        webhookUrl: String? = null
-    ): Deferred<Boolean>
+    fun sendWebhookConnectionMessage(url: String, connection: ConnectionRecord): Boolean
+
+    fun sendWebhookCredentialMessage(url: String, v20CredExRecord: V20CredExRecord): Boolean
+
+    fun sendWebhookPresentationMessage(url: String): Boolean
+
+    fun updateStateOfWebhook(threadId: String, state: String)
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
 
-        fun createBusinessPartnerDataService(walletService: IWalletService,
-                                             bpdmConfig: BPDMConfig
-        ): IBusinessPartnerDataService {
-            return BusinessPartnerDataServiceImpl(
-                walletService,
-                bpdmConfig,
+        fun createWebhookService(
+            webhookRepository: WebhookRepository
+        ): IWebhookService {
+            return WebhookServiceImpl(
+                webhookRepository,
                 HttpClient {
                     expectSuccess = false // must be set to false to handle thrown error if the access token has expired
                     install(ResponseObserver) {
@@ -64,7 +62,8 @@ interface IBusinessPartnerDataService {
                         logger = Logger.DEFAULT
                         level = LogLevel.BODY
                     }
-                })
+                }
+            )
         }
     }
 }

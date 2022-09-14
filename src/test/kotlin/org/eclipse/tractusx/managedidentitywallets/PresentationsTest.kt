@@ -67,6 +67,7 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -329,6 +330,7 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -479,6 +481,7 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add base wallet
             runBlocking {
@@ -617,6 +620,7 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add base wallet
             runBlocking {

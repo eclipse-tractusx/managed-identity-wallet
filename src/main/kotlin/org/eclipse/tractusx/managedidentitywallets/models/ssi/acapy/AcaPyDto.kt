@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -29,6 +30,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationDto
 import org.eclipse.tractusx.managedidentitywallets.plugins.AnySerializer
+import org.hyperledger.aries.api.connection.ConnectionRecord
 
 enum class EndPointType { Endpoint, Profile, LinkedDomains }
 
@@ -210,4 +212,11 @@ data class DidEndpointWithType(
     @JsonProperty("did") @SerialName("did") val didIdentifier: String,
     val endpoint: String,
     @JsonProperty("endpoint_type") @SerialName("endpoint_type") val endpointType: String
+)
+
+@Serializable
+data class ConnectionResponse(
+    val error: String? = null,
+    val valid: Boolean,
+    @Contextual val connection: ConnectionRecord? = null
 )

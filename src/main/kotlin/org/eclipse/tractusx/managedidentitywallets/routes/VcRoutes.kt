@@ -154,6 +154,37 @@ fun Route.vcRoutes(
             }
         }
 
+        route("/issuance-flow ") {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
+                notarizedPost(
+                    PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
+                        summary = "Issue a Verifiable Credential by Catena-X for self managed wallets",
+                        description = "Permission: " +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
+                                "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
+                                "\nIssue a verifiable credential by Catena-X for an self managed wallet",
+                        requestInfo = RequestInfo(
+                            description = "The verifiable credential input",
+                            examples = verifiableCredentialRequestWithoutIssuerDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Accepted,
+                            description = "Empty response",
+                        ),
+                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
+                            forbiddenException, unauthorizedException),
+                        tags = setOf("VerifiableCredentials")
+                    )
+                ) {
+                    val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
+                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
+                    walletService.issueCatenaXCredentialForSelfManagedWallet(verifiableCredentialRequestDto)
+                    call.respond(HttpStatusCode.Accepted)
+                }
+            }
+        }
+
         route("/revocations") {
             notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedPost(

@@ -32,13 +32,16 @@ import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.eclipse.tractusx.managedidentitywallets.Services
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
-class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
-                                     private val bpdmConfig: BPDMConfig,
-                                     private val client: HttpClient): IBusinessPartnerDataService {
+class BusinessPartnerDataServiceImpl(
+    private val walletService: IWalletService,
+    private val bpdmConfig: BPDMConfig,
+    private val client: HttpClient): IBusinessPartnerDataService {
+
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
     }
@@ -203,6 +206,23 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
             false
         }
     }
+
+    override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+        targetWallet: WalletDto,
+        connectionId: String,
+        webhookUrl: String?
+    ): Deferred<Boolean> =
+        GlobalScope.async {
+            val bpn = targetWallet.bpn
+            val membershipVC = prepareMembershipCredential(bpn, targetWallet.did)
+            val bpnVC = prepareBpnCredentials(bpn, targetWallet.did)
+            //TODO The library does not support credential status
+            walletService.issueCatenaXCredentialIssuanceFlow(membershipVC, connectionId, webhookUrl)
+            walletService.issueCatenaXCredentialIssuanceFlow(bpnVC, connectionId, webhookUrl)
+            true
+        }
+
+    // ============== Private ==============
 
     private fun prepareNamesCredential(bpn: String, name: ExtendedMultiPurposeDto): VerifiableCredentialRequestWithoutIssuerDto {
         val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
@@ -414,28 +434,47 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
         )
     }
 
-    private fun prepareMembershipCredential(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
+    private fun prepareMembershipCredential(
+        bpn: String,
+        didOfSelfManagedWallet: String? = null,
+    ): VerifiableCredentialRequestWithoutIssuerDto {
         val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
+        val credentialSubject = mutableMapOf(
+            "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
+            "memberOf" to "Catena-X",
+            "status" to "Active",
+            "startTime" to currentDateAsString
+        )
+        val contexts = mutableListOf(
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_BPD_CREDENTIALS
+        )
+        if (!didOfSelfManagedWallet.isNullOrBlank()) {
+            credentialSubject["id"] = Services.utilsService.replaceNetworkIdentifierWithSov(didOfSelfManagedWallet)
+            contexts.add(JsonLdContexts.JSONLD_CONTEXT_W3C_STATUS_LIST_2021_V1)
+        }
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = UUID.randomUUID().toString(),
-            context = listOf(
-                JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
-                JsonLdContexts.JSONLD_CONTEXT_BPD_CREDENTIALS
-            ),
+            context = contexts,
             type = listOf(JsonLdTypes.MEMBERSHIP_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
             issuanceDate = currentDateAsString,
-            credentialSubject = mapOf(
-                "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-                "memberOf" to "Catena-X",
-                "status" to "Active",
-                "startTime" to currentDateAsString
-            ),
+            credentialSubject = credentialSubject,
             holderIdentifier = bpn,
             isRevocable = true
         )
     }
 
-    private fun prepareBpnCredentials(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
+    private fun prepareBpnCredentials(
+        bpn: String,
+        didOfSelfManagedWallet: String? = null
+    ): VerifiableCredentialRequestWithoutIssuerDto {
+        val credentialSubject = mutableMapOf(
+            "type" to listOf(JsonLdTypes.BPN_TYPE),
+            "bpn" to bpn
+        )
+        if (!didOfSelfManagedWallet.isNullOrBlank()) {
+            credentialSubject["id"] = Services.utilsService.replaceNetworkIdentifierWithSov(didOfSelfManagedWallet)
+        }
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = UUID.randomUUID().toString(),
             context = listOf(
@@ -444,10 +483,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
             ),
             type = listOf(JsonLdTypes.BPN_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
             issuanceDate = JsonLDUtils.dateToString(Date.from(Instant.now())),
-            credentialSubject = mapOf(
-                "type" to listOf(JsonLdTypes.BPN_TYPE),
-                "bpn" to bpn
-            ),
+            credentialSubject = credentialSubject,
             holderIdentifier = bpn,
             isRevocable = false // THE BPN Credential is not Revocable!
         )

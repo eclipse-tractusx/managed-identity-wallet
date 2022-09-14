@@ -58,6 +58,7 @@ class WalletsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
@@ -179,6 +180,7 @@ class WalletsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}") {
@@ -291,6 +293,7 @@ class WalletsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             var verKey: String

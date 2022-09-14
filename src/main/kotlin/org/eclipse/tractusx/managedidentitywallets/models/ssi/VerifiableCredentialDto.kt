@@ -137,7 +137,9 @@ data class VerifiableCredentialRequestWithoutIssuerDto(
         name = "holderIdentifier")
     val holderIdentifier: String,
     @Field(description = "Flag whether credential is revocable or not. Default true", name = "isRevocable")
-    val isRevocable: Boolean = true
+    val isRevocable: Boolean = true,
+    @Field(description = "url to be used as webhook. currently only supported for self managed wallet", name = "webhookUrl")
+    val webhookUrl: String? = null
 )
 
 @Serializable

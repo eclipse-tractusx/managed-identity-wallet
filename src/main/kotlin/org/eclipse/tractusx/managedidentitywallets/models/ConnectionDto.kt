@@ -17,31 +17,19 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.models
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
-import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import io.bkbn.kompendium.annotations.Field
+import kotlinx.serialization.Serializable
 
-class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
-
-    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String?) {}
-
-    override suspend fun <T> issueAndStoreCatenaXCredentialsAsync(
-        bpn: String,
-        type: String,
-        data: T?
-    ): Deferred<Boolean> {
-        return CompletableDeferred(true)
-    }
-
-    override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
-        targetWallet: WalletDto,
-        connectionId: String,
-        webhookUrl: String?
-    ): Deferred<Boolean> {
-        TODO("Not yet implemented")
-    }
-
-}
+@Serializable
+data class ConnectionDto(
+    @Field(description = "The aries connection Id", name = "connectionId")
+    val connectionId: String,
+    @Field(description = "The DID of the partner", name = "did")
+    val theirDid: String,
+    @Field(description = "The internal wallet did", name = "myDid")
+    val myDid: String,
+    @Field(description = "The State at which the connection is at - request|accepted", name = "state")
+    val state: String
+)

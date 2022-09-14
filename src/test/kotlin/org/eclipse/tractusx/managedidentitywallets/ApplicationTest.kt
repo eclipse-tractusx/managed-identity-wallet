@@ -113,13 +113,14 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService, EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureJobs()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             assertTrue(true)
         }
@@ -139,6 +140,7 @@ class ApplicationTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -186,6 +188,7 @@ class ApplicationTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             assertFails {
@@ -272,6 +275,7 @@ class ApplicationTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             // view wallets with single view token should not work

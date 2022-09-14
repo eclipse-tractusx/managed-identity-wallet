@@ -25,8 +25,20 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.hyperledger.aries.AriesClient
+import org.hyperledger.aries.AriesWebSocketClient
+import org.hyperledger.aries.api.connection.ConnectionRecord
+import org.hyperledger.aries.api.did_exchange.DidExchangeCreateRequestFilter
+import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
+import org.hyperledger.aries.api.issue_credential_v2.V2CredentialExchangeFree
+import org.hyperledger.aries.api.jsonld.ProofType
+import org.hyperledger.aries.api.jsonld.VerifiableCredential
+import org.hyperledger.aries.config.GsonConfig
+import java.util.*
 
 class AcaPyService(
     private val acaPyConfig: WalletAndAcaPyConfig,
@@ -79,7 +91,7 @@ class AcaPyService(
             url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet/${walletData.walletId}/remove")
             headers.append("X-API-Key", acaPyConfig.adminApiKey)
             contentType(ContentType.Application.Json)
-            body = WalletKey(walletData.walletKey)
+            body = WalletKey(walletData.walletKey!!)
         }
     }
 
@@ -166,6 +178,104 @@ class AcaPyService(
             contentType(ContentType.Application.Json)
             body = serviceEndPoint
         }
+    }
+
+    override fun subscribeForWebSocket(subscriberWallet: WalletExtendedData) {
+        val wsUrl = acaPyConfig.apiAdminUrl
+            .replace("http", "ws")
+            .plus("/ws")
+
+        AriesWebSocketClient
+            .builder()
+            .bearerToken(subscriberWallet.walletToken)
+            .url(wsUrl)
+            .apiKey(acaPyConfig.adminApiKey)
+            .walletId(subscriberWallet.walletId)
+            .handler(
+                BaseWalletAriesEventHandler(
+                    Services.businessPartnerDataService,
+                    Services.walletService,
+                    Services.webhookService
+                )
+            )
+            .build()
+    }
+
+    override suspend fun getAcapyClient(walletToken: String): AriesClient {
+        return AriesClient
+            .builder()
+            .url(acaPyConfig.apiAdminUrl)
+            .apiKey(acaPyConfig.adminApiKey)
+            .bearerToken(walletToken)
+            .build()
+    }
+
+    override suspend fun connect(
+        selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
+        token: String
+    ): ConnectionResponse {
+        val ariesClient = getAcapyClient(token)
+        val didOfPartner = utilsService.replaceNetworkIdentifierWithSov(selfManagedWalletCreateDto.did)
+        val pendingCon: Optional<ConnectionRecord> = ariesClient.didExchangeCreateRequest(
+            DidExchangeCreateRequestFilter
+                .builder()
+                .theirPublicDid(didOfPartner)
+                .alias(selfManagedWalletCreateDto.name)
+                .usePublicDid(true)
+                .build()
+        )
+
+        if (pendingCon.isPresent) {
+            return ConnectionResponse(
+                connection = pendingCon.get(),
+                valid = true
+            )
+        }
+
+        return ConnectionResponse(
+            valid = false,
+            error = "Connection Request Failed"
+        )
+    }
+
+    override suspend fun issueCredentialSend(
+        token: String,
+        issuerDid: String,
+        connectionId: String,
+        vc: VerifiableCredentialRequestWithoutIssuerDto
+    ): V20CredExRecord? {
+        val ariesClient = getAcapyClient(token)
+
+        val credential = VerifiableCredential.builder()
+            .context(vc.context)
+            .credentialSubject(GsonConfig.defaultConfig().toJsonTree(vc.credentialSubject).asJsonObject)
+            .issuanceDate(vc.issuanceDate)
+            .issuer(issuerDid)
+            .type(vc.type)
+            .build()
+
+        val credentialRequest = V2CredentialExchangeFree.builder()
+            .connectionId(UUID.fromString(connectionId))
+            .filter(
+                V2CredentialExchangeFree.V20CredFilter.builder()
+                    .ldProof(
+                        V2CredentialExchangeFree.LDProofVCDetail.builder()
+                            .credential(credential)
+                            .options(
+                                V2CredentialExchangeFree.LDProofVCDetailOptions.builder()
+                                    .proofType(ProofType.Ed25519Signature2018)
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            ).build()
+
+        val vc2CredExRecord: Optional<V20CredExRecord> = ariesClient.issueCredentialV2Send(credentialRequest)
+        if (vc2CredExRecord.isPresent) {
+            return vc2CredExRecord.get()
+        }
+        return null
     }
 
 }

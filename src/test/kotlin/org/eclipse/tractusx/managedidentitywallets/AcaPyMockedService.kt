@@ -24,6 +24,8 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
+import org.hyperledger.aries.AriesClient
+import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import java.security.SecureRandom
 
 class AcaPyMockedService(val baseWalletBpn: String,
@@ -209,6 +211,29 @@ class AcaPyMockedService(val baseWalletBpn: String,
     }
 
     override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
+    override fun subscribeForWebSocket(subscriberWallet: WalletExtendedData) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAcapyClient(walletToken: String): AriesClient {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun connect(
+        selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
+        token: String
+    ): ConnectionResponse {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun issueCredentialSend(
+        token: String,
+        issuerDid: String,
+        connectionId: String,
+        vc: VerifiableCredentialRequestWithoutIssuerDto
+    ): V20CredExRecord? {
+        TODO("Not yet implemented")
+    }
 
     private fun createRandomString(): String {
         return (1..25)

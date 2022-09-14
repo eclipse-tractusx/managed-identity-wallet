@@ -67,6 +67,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -143,6 +144,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -365,6 +367,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -465,6 +468,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -849,6 +853,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto

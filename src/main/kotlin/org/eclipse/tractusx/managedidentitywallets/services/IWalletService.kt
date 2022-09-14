@@ -31,8 +31,11 @@ import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Connection
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
+import org.hyperledger.aries.api.connection.ConnectionState
 import org.slf4j.LoggerFactory
 
 interface IWalletService {
@@ -51,13 +54,25 @@ interface IWalletService {
 
     suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto
 
+    suspend fun registerSelfManagedWalletAndBuildConnection(
+        selfManagedWalletCreateDto: SelfManagedWalletCreateDto
+    ): SelfManagedWalletResultDto
+
     suspend fun deleteWallet(identifier: String): Boolean
 
     fun storeCredential(identifier: String, issuedCredential: IssuedVerifiableCredentialRequestDto): Boolean
 
     suspend fun issueCredential(vcRequest: VerifiableCredentialRequestDto): VerifiableCredentialDto
 
-    suspend fun issueCatenaXCredential(vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto): VerifiableCredentialDto
+    suspend fun issueCatenaXCredential(
+        vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto
+    ): VerifiableCredentialDto
+
+    suspend fun issueCatenaXCredentialIssuanceFlow(
+        vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto,
+        connectionId: String,
+        webhookUrl: String?
+    )
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 
@@ -104,6 +119,16 @@ interface IWalletService {
 
     suspend fun revokeVerifiableCredential(vc: VerifiableCredentialDto)
 
+    fun setPartnerMembershipIssued(walletDto: WalletDto)
+
+    fun updateConnectionState(connectionId: String, state: ConnectionState)
+
+    fun getConnection(connectionId: String): Connection
+
+    fun subscribeForAriesWS()
+
+    suspend fun issueCatenaXCredentialForSelfManagedWallet(vc: VerifiableCredentialRequestWithoutIssuerDto)
+
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -112,7 +137,9 @@ interface IWalletService {
             walletRepository: WalletRepository,
             credentialRepository: CredentialRepository,
             utilsService: UtilsService,
-            revocationService: IRevocationService
+            revocationService: IRevocationService,
+            webhookService: IWebhookService,
+            connectionRepository: ConnectionRepository
         ): IWalletService {
             val acaPyService = IAcaPyService.create(
                 walletAndAcaPyConfig = walletAndAcaPyConfig,
@@ -166,7 +193,7 @@ interface IWalletService {
                 }
             )
             return AcaPyWalletServiceImpl(acaPyService, walletRepository, credentialRepository,
-                utilsService, revocationService)
+                utilsService, revocationService, webhookService, connectionRepository)
         }
     }
 }

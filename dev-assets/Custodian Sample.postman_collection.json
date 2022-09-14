@@ -78,7 +78,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"acapy_bpn111_name\",\n    \"bpn\": \"bpn111\"\n}",
+					"raw": "{\n    \"name\": \"acapy_bpn2222_name\",\n    \"bpn\": \"bpn222\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -142,14 +142,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/bpn111?withCredentials=true",
+					"raw": "{{custodian_url}}/api/wallets/bpn234?withCredentials=true",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"bpn111"
+						"bpn234"
 					],
 					"query": [
 						{
@@ -220,6 +220,82 @@
 			"response": []
 		},
 		{
+			"name": "Register self managed wallets",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bpn\": \"TestX1\",\n    \"did\": \"did:indy:local:test:7rB93fLvW5kgujZ4E57ZxL\",\n    \"name\": \"TestX1\",\n    \"webhookUrl\": \"ME_WEB_HOOK\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/wallets/self-managed-wallets",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"self-managed-wallets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issuance flow (currently for self managed wallet by catena X)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n            \"https://www.w3.org/2018/credentials/v1\",\n            \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739141414\",\n    \"type\": [\n        \"BpnCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n            \"type\": [\n                \"BpnCredential\"\n            ],\n            \"bpn\": \"GQRWQRWQ\",\n            \"id\": \"did:indy:local:test:7rB93fLvW5kgujZ4E57ZxL\"\n    },\n    \"holderIdentifier\": \"did:indy:local:test:7rB93fLvW5kgujZ4E57ZxL\",\n    \"webhookUrl\": \"test-me-2\",\n    \"isRevocable\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{custodian_url}}/api/credentials/issuance-flow ",
+					"host": [
+						"{{custodian_url}}"
+					],
+					"path": [
+						"api",
+						"credentials",
+						"issuance-flow "
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Issue Credential",
 			"request": {
 				"auth": {
@@ -236,7 +312,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3888\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student5\",\n        \"degree\": {\n            \"type\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\"\n    },\n    \"holderIdentifier\": \"bpn111\",\n    \"isRevocable\": true\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3888\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student5\",\n        \"degree\": {\n            \"typeeee\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\"\n    },\n    \"holderIdentifier\": \"bpn111\",\n    \"isRevocable\": true\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -641,7 +717,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"type\": \"did-communication\",\n  \"serviceEndpoint\": \"https://cx_acapy:8000\"\n}",
+					"raw": "{\n  \"type\": \"did-communication\",\n  \"serviceEndpoint\": \"http://cx_acapy:8000/\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -729,14 +805,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/BPNL000000000000/public",
+					"raw": "{{custodian_url}}/api/wallets/bpn111/public",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"BPNL000000000000",
+						"bpn111",
 						"public"
 					]
 				}

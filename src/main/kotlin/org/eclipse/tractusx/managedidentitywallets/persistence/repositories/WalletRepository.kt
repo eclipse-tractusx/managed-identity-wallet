@@ -19,10 +19,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.persistence.repositories
 
-import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
-import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
-import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
-import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
 import org.jetbrains.exposed.sql.or
@@ -58,6 +55,7 @@ class WalletRepository {
             walletToken = wallet.walletToken
             createdAt = LocalDateTime.now()
             revocationListName = wallet.revocationListName
+            pendingMembershipIssuance = wallet.pendingMembershipIssuance
         }
     }
 
@@ -66,12 +64,20 @@ class WalletRepository {
         return true
     }
 
+    fun updatePending(did: String,isPending: Boolean) {
+        getWallet(did).apply {
+            pendingMembershipIssuance = isPending
+        }
+    }
+
     fun toObject(entity: Wallet): WalletDto = entity.run {
         WalletDto(name, bpn, did, null, createdAt,
-            emptyList<VerifiableCredentialDto>().toMutableList(), revocationListName)
+            emptyList<VerifiableCredentialDto>().toMutableList(), revocationListName,
+            pendingMembershipIssuance, emptyList<ConnectionDto>().toMutableList())
     }
 
     fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {
-        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey, walletToken, revocationListName)
+        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey,
+            walletToken, revocationListName, pendingMembershipIssuance)
     }
 }
