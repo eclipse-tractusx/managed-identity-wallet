@@ -1,0 +1,241 @@
+{
+	"info": {
+		"_postman_id": "ca9fc822-6f4a-4a2e-a37a-90b186bd714b",
+		"name": "Test Acapy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get connections",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/connections",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"connections"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accept connection (replace connection id)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/didexchange/e842a370-d6bc-4230-9085-a6ed0f5b4e6b/accept-request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"didexchange",
+						"e842a370-d6bc-4230-9085-a6ed0f5b4e6b",
+						"accept-request"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Records (replace connection id)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/issue-credential-2.0/records?connection_id=e842a370-d6bc-4230-9085-a6ed0f5b4e6b",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"issue-credential-2.0",
+						"records"
+					],
+					"query": [
+						{
+							"key": "connection_id",
+							"value": "e842a370-d6bc-4230-9085-a6ed0f5b4e6b"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Credential Request (replace cred_ex_id)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"holder_did\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:11001/issue-credential-2.0/records/917538c2-eef3-4141-be8f-177df7622a29/send-request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"issue-credential-2.0",
+						"records",
+						"917538c2-eef3-4141-be8f-177df7622a29",
+						"send-request"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store Credential Request (replace cred_ex_id and credential_id)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"credential_id\": \"917538c2-eef3-4141-be8f-177df7622a29\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:11001/issue-credential-2.0/records/917538c2-eef3-4141-be8f-177df7622a29/store",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"issue-credential-2.0",
+						"records",
+						"917538c2-eef3-4141-be8f-177df7622a29",
+						"store"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Credential (replace credential id)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/credential/w3c/917538c2-eef3-4141-be8f-177df7622a29",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"credential",
+						"w3c",
+						"917538c2-eef3-4141-be8f-177df7622a29"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove connections (replace connection id)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/connections/e842a370-d6bc-4230-9085-a6ed0f5b4e6b",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"connections",
+						"e842a370-d6bc-4230-9085-a6ed0f5b4e6b"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

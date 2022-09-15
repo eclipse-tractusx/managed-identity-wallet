@@ -27,12 +27,13 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowInternal
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.AriesWebSocketClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.did_exchange.DidExchangeCreateRequestFilter
+import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.api.issue_credential_v2.V2CredentialExchangeFree
 import org.hyperledger.aries.api.jsonld.ProofType
@@ -213,7 +214,7 @@ class AcaPyService(
     override suspend fun connect(
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
         token: String
-    ): ConnectionResponse {
+    ): ConnectionRecord {
         val ariesClient = getAcapyClient(token)
         val didOfPartner = utilsService.replaceNetworkIdentifierWithSov(selfManagedWalletCreateDto.did)
         val pendingCon: Optional<ConnectionRecord> = ariesClient.didExchangeCreateRequest(
@@ -225,37 +226,29 @@ class AcaPyService(
                 .build()
         )
 
-        if (pendingCon.isPresent) {
-            return ConnectionResponse(
-                connection = pendingCon.get(),
-                valid = true
-            )
+        return if (pendingCon.isPresent) {
+            pendingCon.get()
+        } else {
+            throw InternalServerErrorException("Connection Request Failed")
         }
-
-        return ConnectionResponse(
-            valid = false,
-            error = "Connection Request Failed"
-        )
     }
 
-    override suspend fun issueCredentialSend(
+    override suspend fun issuanceFlowCredentialSend(
         token: String,
-        issuerDid: String,
-        connectionId: String,
-        vc: VerifiableCredentialRequestWithoutIssuerDto
-    ): V20CredExRecord? {
+        vc: VerifiableCredentialIssuanceFlowInternal
+    ): V20CredExRecord {
         val ariesClient = getAcapyClient(token)
 
         val credential = VerifiableCredential.builder()
             .context(vc.context)
             .credentialSubject(GsonConfig.defaultConfig().toJsonTree(vc.credentialSubject).asJsonObject)
             .issuanceDate(vc.issuanceDate)
-            .issuer(issuerDid)
+            .issuer(vc.issuerIdentifier)
             .type(vc.type)
             .build()
 
         val credentialRequest = V2CredentialExchangeFree.builder()
-            .connectionId(UUID.fromString(connectionId))
+            .connectionId(UUID.fromString(vc.connectionId))
             .filter(
                 V2CredentialExchangeFree.V20CredFilter.builder()
                     .ldProof(
@@ -273,9 +266,14 @@ class AcaPyService(
 
         val vc2CredExRecord: Optional<V20CredExRecord> = ariesClient.issueCredentialV2Send(credentialRequest)
         if (vc2CredExRecord.isPresent) {
-            return vc2CredExRecord.get()
+            if (vc2CredExRecord.get().state == CredentialExchangeState.OFFER_SENT) {
+                return vc2CredExRecord.get()
+            } else {
+                throw InternalServerErrorException("Credential Record is not in OFFER_SENT state. " +
+                        "current state: ${vc2CredExRecord.get().state}")
+            }
         }
-        return null
+        throw InternalServerErrorException("Failed to issue credential: $credential")
     }
 
 }

@@ -37,8 +37,7 @@ data class WalletDto(
     @Serializable(with = LocalDateTimeAsStringSerializer::class) val createdAt: LocalDateTime,
     val vcs: List<VerifiableCredentialDto>,
     val revocationListName: String? = null,
-    val pendingMembershipIssuance: Boolean,
-    val connections: List<ConnectionDto>
+    val pendingMembershipIssuance: Boolean
 ) {
 
     init {
@@ -83,4 +82,12 @@ data class SelfManagedWalletResultDto(
     val bpn: String,
     val did: String,
     @Serializable(with = LocalDateTimeAsStringSerializer::class) val createdAt: LocalDateTime,
+)
+
+@Serializable
+data class ConnectionDto(
+    val connectionId: String,
+    val theirDid: String,
+    val myDid: String,
+    val state: String
 )

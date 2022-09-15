@@ -137,9 +137,7 @@ data class VerifiableCredentialRequestWithoutIssuerDto(
         name = "holderIdentifier")
     val holderIdentifier: String,
     @Field(description = "Flag whether credential is revocable or not. Default true", name = "isRevocable")
-    val isRevocable: Boolean = true,
-    @Field(description = "url to be used as webhook. currently only supported for self managed wallet", name = "webhookUrl")
-    val webhookUrl: String? = null
+    val isRevocable: Boolean = true
 )
 
 @Serializable
@@ -193,4 +191,49 @@ data class StatusListRefreshParameters(
     @Param(type = ParamType.QUERY)
     @Field(description = "Force an update. Default is false", name = "force")
     val force: Boolean? = false,
+)
+
+@Serializable
+data class VerifiableCredentialIssuanceFlowRequestDto (
+    @Field(description = "The ID of credential as String (URI compatible)", name = "id")
+    val id: String? = null,
+    @JsonProperty("@context") @SerialName("@context")
+    @Field(description = "List of Contexts", name = "@context")
+    val context: List<String>,
+    @Field(description = "List of Credential Types", name = "type")
+    val type: List<String>,
+    @Field(description = "The DID or BPN of Issuer", name = "issuerIdentifier")
+    val issuerIdentifier: String,
+    @Field(description = "The Issuance Date as String in Rfc3339 format, if null, the current time is used", name = "issuanceDate")
+    var issuanceDate: String?, // In Rfc3339
+    @Field(description = "The Expiration Date as String in Rfc3339 format", name = "expirationDate")
+    val expirationDate: String? = null, // In Rfc3339
+    @Field(description = "The Credential Subject representing the payload", name = "credentialSubject")
+    val credentialSubject: Map<String, Any>,
+    @Field(description = "The Identifier of the holder, It Should be a DID or BPN. " +
+            "This value will be ignored if the credential subject has an id, " +
+            "otherwise it will be set as the id attribute in the credential subject",
+        name = "holderIdentifier")
+    val holderIdentifier: String?= null,
+    @Field(description = "Flag whether credential is revocable or not. Default true", name = "isRevocable")
+    val isRevocable: Boolean = true,
+    @Field(description = "The URL to be used as webhook to inform the requester when the issuance flow is done", name = "webhookUrl")
+    val webhookUrl: String? = null,
+    @Field(description = "The connection id between issuer and holder", name = "connectionId")
+    val connectionId: String?= null
+)
+
+@Serializable
+data class VerifiableCredentialIssuanceFlowInternal (
+    val id: String? = null,
+    @JsonProperty("@context") @SerialName("@context")
+    val context: List<String>,
+    val type: List<String>,
+    val issuerIdentifier: String,
+    var issuanceDate: String?, // In Rfc3339
+    val expirationDate: String? = null, // In Rfc3339
+    val credentialSubject: Map<String, Any>,
+    val credentialStatus: CredentialStatus?,
+    val webhookUrl: String? = null,
+    val connectionId: String
 )

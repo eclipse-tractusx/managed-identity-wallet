@@ -50,5 +50,8 @@ fun Application.configureStatusPages() {
         exception<AuthorizationException> { cause ->
             call.respond(HttpStatusCode.Unauthorized, ExceptionResponse(cause.message!!))
         }
+        exception<InternalServerErrorException> { cause ->
+            call.respond(HttpStatusCode.InternalServerError, ExceptionResponse(cause.message!!))
+        }
     }
 }

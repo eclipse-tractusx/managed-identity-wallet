@@ -214,11 +214,38 @@ class BusinessPartnerDataServiceImpl(
     ): Deferred<Boolean> =
         GlobalScope.async {
             val bpn = targetWallet.bpn
-            val membershipVC = prepareMembershipCredential(bpn, targetWallet.did)
-            val bpnVC = prepareBpnCredentials(bpn, targetWallet.did)
-            //TODO The library does not support credential status
-            walletService.issueCatenaXCredentialIssuanceFlow(membershipVC, connectionId, webhookUrl)
-            walletService.issueCatenaXCredentialIssuanceFlow(bpnVC, connectionId, webhookUrl)
+            val membershipVC = prepareMembershipCredential(bpn)
+            val bpnVC = prepareBpnCredentials(bpn)
+            val catenaXWallet = walletService.getWallet(walletService.getCatenaXBpn())
+            val membershipVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequestDto(
+                id =  membershipVC.id,
+                context = membershipVC.context,
+                type = membershipVC.type,
+                issuanceDate = membershipVC.issuanceDate,
+                issuerIdentifier = catenaXWallet.did,
+                expirationDate = membershipVC.expirationDate,
+                credentialSubject = membershipVC.credentialSubject,
+                holderIdentifier = membershipVC.holderIdentifier,
+                isRevocable = membershipVC.isRevocable,
+                webhookUrl = webhookUrl,
+                connectionId = connectionId
+            )
+            val bpnVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequestDto(
+                id =  bpnVC.id,
+                context = bpnVC.context,
+                type = bpnVC.type,
+                issuanceDate = bpnVC.issuanceDate,
+                issuerIdentifier = catenaXWallet.did,
+                expirationDate = bpnVC.expirationDate,
+                credentialSubject = bpnVC.credentialSubject,
+                holderIdentifier = bpnVC.holderIdentifier,
+                isRevocable = bpnVC.isRevocable,
+                webhookUrl = webhookUrl,
+                connectionId = connectionId
+            )
+            //TODO The AcaPy java library does not support credential status
+            walletService.triggerCredentialIssuanceFlow(membershipVCIssuanceFlowRequest)
+            walletService.triggerCredentialIssuanceFlow(bpnVCIssuanceFlowRequest)
             true
         }
 
@@ -435,8 +462,7 @@ class BusinessPartnerDataServiceImpl(
     }
 
     private fun prepareMembershipCredential(
-        bpn: String,
-        didOfSelfManagedWallet: String? = null,
+        bpn: String
     ): VerifiableCredentialRequestWithoutIssuerDto {
         val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
         val credentialSubject = mutableMapOf(
@@ -449,10 +475,6 @@ class BusinessPartnerDataServiceImpl(
             JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
             JsonLdContexts.JSONLD_CONTEXT_BPD_CREDENTIALS
         )
-        if (!didOfSelfManagedWallet.isNullOrBlank()) {
-            credentialSubject["id"] = Services.utilsService.replaceNetworkIdentifierWithSov(didOfSelfManagedWallet)
-            contexts.add(JsonLdContexts.JSONLD_CONTEXT_W3C_STATUS_LIST_2021_V1)
-        }
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = UUID.randomUUID().toString(),
             context = contexts,
@@ -465,16 +487,12 @@ class BusinessPartnerDataServiceImpl(
     }
 
     private fun prepareBpnCredentials(
-        bpn: String,
-        didOfSelfManagedWallet: String? = null
+        bpn: String
     ): VerifiableCredentialRequestWithoutIssuerDto {
         val credentialSubject = mutableMapOf(
             "type" to listOf(JsonLdTypes.BPN_TYPE),
             "bpn" to bpn
         )
-        if (!didOfSelfManagedWallet.isNullOrBlank()) {
-            credentialSubject["id"] = Services.utilsService.replaceNetworkIdentifierWithSov(didOfSelfManagedWallet)
-        }
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = UUID.randomUUID().toString(),
             context = listOf(

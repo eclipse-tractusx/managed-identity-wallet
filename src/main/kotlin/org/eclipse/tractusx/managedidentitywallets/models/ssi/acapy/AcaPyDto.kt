@@ -213,10 +213,3 @@ data class DidEndpointWithType(
     val endpoint: String,
     @JsonProperty("endpoint_type") @SerialName("endpoint_type") val endpointType: String
 )
-
-@Serializable
-data class ConnectionResponse(
-    val error: String? = null,
-    val valid: Boolean,
-    @Contextual val connection: ConnectionRecord? = null
-)

@@ -36,6 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Conn
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.hyperledger.aries.api.connection.ConnectionState
+import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
 import org.slf4j.LoggerFactory
 
 interface IWalletService {
@@ -68,11 +69,7 @@ interface IWalletService {
         vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto
     ): VerifiableCredentialDto
 
-    suspend fun issueCatenaXCredentialIssuanceFlow(
-        vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto,
-        connectionId: String,
-        webhookUrl: String?
-    )
+    suspend fun triggerCredentialIssuanceFlow(vc: VerifiableCredentialIssuanceFlowRequestDto): String
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 
@@ -126,8 +123,6 @@ interface IWalletService {
     fun getConnection(connectionId: String): Connection
 
     fun subscribeForAriesWS()
-
-    suspend fun issueCatenaXCredentialForSelfManagedWallet(vc: VerifiableCredentialRequestWithoutIssuerDto)
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)

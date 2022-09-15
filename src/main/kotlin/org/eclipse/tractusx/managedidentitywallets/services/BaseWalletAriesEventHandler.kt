@@ -38,36 +38,46 @@ class BaseWalletAriesEventHandler(
     override fun handleConnection(walletId: String, connection: ConnectionRecord) {
         super.handleConnection(walletId, connection)
 
-        if (connection.state == ConnectionState.COMPLETED) {
-            var webhookUrl: String?= null
-            val walletOfConnectionTarget: WalletDto = transaction {
-                val webhook = webhookService.getWebhookByThreadId(connection.requestId)
-                if (webhook != null) {
-                    webhookService.sendWebhookConnectionMessage(webhook.threadId, connection)
-                    webhookService.updateStateOfWebhook(webhook.threadId, ConnectionState.COMPLETED.name)
-                    webhookUrl = webhook.webhookUrl
-                }
-                val storedConnection = walletService.getConnection(connection.connectionId)
-                walletService.updateConnectionState(storedConnection.connectionId, ConnectionState.COMPLETED)
-                walletService.getWallet(storedConnection.theirDid, false)
-            }
-
-            if (walletOfConnectionTarget.pendingMembershipIssuance) {
-                GlobalScope.launch {
-                    val success = businessPartnerDataService
-                        .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
-                            targetWallet = walletOfConnectionTarget,
-                            connectionId = connection.connectionId,
-                            webhookUrl = webhookUrl
-                        ).await()
-                    if (success) {
-                        transaction {
-                            walletService.setPartnerMembershipIssued(walletOfConnectionTarget)
+        when(connection.state) {
+            ConnectionState.COMPLETED -> {
+                val pairOfWebhookUrlAndWallet = updateConnectionStateAndSendWebhook(connection)
+                var webhookUrl: String? = pairOfWebhookUrlAndWallet.first
+                val walletOfConnectionTarget: WalletDto = pairOfWebhookUrlAndWallet.second
+                if (walletOfConnectionTarget.pendingMembershipIssuance) {
+                    GlobalScope.launch {
+                        val success = businessPartnerDataService
+                            .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                                targetWallet = walletOfConnectionTarget,
+                                connectionId = connection.connectionId,
+                                webhookUrl = webhookUrl
+                            ).await()
+                        if (success) {
+                            transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }
                         }
                     }
                 }
             }
+            ConnectionState.ABANDONED,
+            ConnectionState.ERROR -> {
+                updateConnectionStateAndSendWebhook(connection)
+            }
         }
+    }
+
+    private fun updateConnectionStateAndSendWebhook(connection: ConnectionRecord): Pair<String?, WalletDto> {
+        var webhookUrl: String? = null
+        val walletOfConnectionTarget: WalletDto = transaction {
+            val webhook = webhookService.getWebhookByThreadId(connection.requestId)
+            if (webhook != null) {
+                webhookService.sendWebhookConnectionMessage(webhook.threadId, connection)
+                webhookService.updateStateOfWebhook(webhook.threadId,  connection.state.name)
+                webhookUrl = webhook.webhookUrl
+            }
+            val storedConnection = walletService.getConnection(connection.connectionId)
+            walletService.updateConnectionState(storedConnection.connectionId, connection.state)
+            walletService.getWallet(storedConnection.theirDid, false)
+        }
+        return Pair(webhookUrl, walletOfConnectionTarget)
     }
 
     override fun handleCredentialV2(walletId: String?, v20Credential: V20CredExRecord?) {
@@ -77,33 +87,21 @@ class BaseWalletAriesEventHandler(
             when(v20Credential.state) {
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {
                     transaction {
-                        val webhook = webhookService.getWebhookByThreadId(threadId)
-                        if (webhook != null) {
-                            webhookService.sendWebhookCredentialMessage(threadId, v20Credential)
-                            webhookService.updateStateOfWebhook(threadId, CredentialExchangeState.CREDENTIAL_ISSUED.name)
+                        if (webhookService.getWebhookByThreadId(threadId) != null) {
+                            webhookService.updateStateOfWebhook(threadId, v20Credential.state.name)
                         }
                     }
                 }
-                CredentialExchangeState.DONE -> {
+                CredentialExchangeState.DONE,
+                CredentialExchangeState.ABANDONED,
+                CredentialExchangeState.DECLINED -> {
                     transaction {
-                        val webhook = webhookService.getWebhookByThreadId(threadId)
-                        if (webhook != null) {
+                        if (webhookService.getWebhookByThreadId(threadId) != null) {
                             webhookService.sendWebhookCredentialMessage(threadId, v20Credential)
-                            webhookService.updateStateOfWebhook(threadId, CredentialExchangeState.DONE.name)
+                            webhookService.updateStateOfWebhook(threadId, v20Credential.state.name)
                         }
                     }
                 }
-                CredentialExchangeState.ABANDONED -> {
-                    transaction {
-                        val webhook = webhookService.getWebhookByThreadId(threadId)
-                        if (webhook != null) {
-                            webhookService.sendWebhookCredentialMessage(threadId, v20Credential)
-                            webhookService.updateStateOfWebhook(threadId, CredentialExchangeState.ABANDONED.name)
-                        }
-                    }
-                }
-
-                else -> {}
             }
         }
     }

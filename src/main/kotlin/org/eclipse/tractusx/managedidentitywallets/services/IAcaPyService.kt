@@ -21,9 +21,11 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import io.ktor.client.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowInternal
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.hyperledger.aries.AriesClient
+import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 
 interface IAcaPyService {
@@ -59,14 +61,12 @@ interface IAcaPyService {
     suspend fun connect(
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
         token: String
-    ): ConnectionResponse
+    ): ConnectionRecord
 
-    suspend fun issueCredentialSend(
+    suspend fun issuanceFlowCredentialSend(
         token: String,
-        issuerDid: String,
-        connectionId: String,
-        vc: VerifiableCredentialRequestWithoutIssuerDto
-    ): V20CredExRecord?
+        vc: VerifiableCredentialIssuanceFlowInternal
+    ): V20CredExRecord
 
     companion object {
         fun create(

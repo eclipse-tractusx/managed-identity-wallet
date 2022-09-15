@@ -379,7 +379,6 @@ val walletDtoWithVerKeyExample = mapOf(
         "verkey",
         LocalDateTime.now(),
         vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
-        connections = emptyList<ConnectionDto>().toMutableList(),
         pendingMembershipIssuance = false
     )
 )
@@ -392,7 +391,6 @@ val walletDtoExample = mapOf(
         null,
         LocalDateTime.now(),
         vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
-        connections = emptyList<ConnectionDto>().toMutableList(),
         pendingMembershipIssuance = false
     )
 )
@@ -407,7 +405,7 @@ val walletCreateDtoExample = mapOf(
 val selfManagedWalletCreateDtoExample = mapOf(
     "demo" to SelfManagedWalletCreateDto(
         name ="name",
-        bpn = "bpn123",
-        did = "did://",
+        bpn = "bpn",
+        did = "did",
     )
 )

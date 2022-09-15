@@ -44,6 +44,20 @@ class WalletRepository {
          }
     }
 
+    @Throws(NotFoundException::class, UnprocessableEntityException::class)
+    fun getSelfManagedWalletOrThrow(identifier: String): Wallet {
+        return transaction {
+            val wallet = Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.firstOrNull()
+            if (wallet == null) {
+                throw NotFoundException("Wallet with identifier $identifier not found")
+            } else if (!wallet.walletId.isNullOrBlank()) {
+                throw UnprocessableEntityException("The Wallet with identifier $identifier is not a self managed wallet")
+            } else {
+                wallet
+            }
+        }
+    }
+
     fun addWallet(wallet: WalletExtendedData): Wallet {
         // no VCs are added in this step, they will come in through the business partner data service
         return Wallet.new {
@@ -73,7 +87,7 @@ class WalletRepository {
     fun toObject(entity: Wallet): WalletDto = entity.run {
         WalletDto(name, bpn, did, null, createdAt,
             emptyList<VerifiableCredentialDto>().toMutableList(), revocationListName,
-            pendingMembershipIssuance, emptyList<ConnectionDto>().toMutableList())
+            pendingMembershipIssuance)
     }
 
     fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {
