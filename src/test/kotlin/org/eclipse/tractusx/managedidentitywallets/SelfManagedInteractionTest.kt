@@ -81,7 +81,7 @@ class SelfManagedInteractionTest {
 
             val selfManagedWalletCreateDto = SelfManagedWalletCreateDto(
                 bpn = "e-bpn",
-                did = "did:indy:${EnvironmentTestSetup.NETWORK_ID}:YHXZLLSLnKxz5D2HQaKXcP",
+                did = "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}YHXZLLSLnKxz5D2HQaKXcP",
                 name = "e-name",
                 webhookUrl = "http://example.com/webhook"
             )

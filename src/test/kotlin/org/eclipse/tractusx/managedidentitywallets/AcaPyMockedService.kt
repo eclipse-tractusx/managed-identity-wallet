@@ -152,20 +152,20 @@ class AcaPyMockedService(val baseWalletBpn: String,
                         context = emptyList(),
                         verificationMethods = listOf(
                             DidVerificationMethodDto(
-                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#key-1",
+                                id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#key-1",
                                 type = "Ed25519VerificationKey2018",
-                                controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
+                                controller = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}",
                                 publicKeyBase58= "${didToVerKey[key]}"
                             )
                         ),
                         services = listOf(
                             DidServiceDto(
-                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                                id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#did-communication",
                                 type = "did-communication",
                                 serviceEndpoint = "http://localhost:8000/",
                             ),
                             DidServiceDto(
-                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#linked_domains",
+                                id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#linked_domains",
                                 type = "linked_domains",
                                 serviceEndpoint = "https://myhost:1111",
                             )
@@ -183,7 +183,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
                     context = emptyList(),
                     verificationMethods = listOf(
                         DidVerificationMethodDto(
-                            id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#key-1",
+                            id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#key-1",
                             type = "Ed25519VerificationKey2018",
                             controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
                             publicKeyBase58= "${SingletonTestData.baseWalletVerKey}"
@@ -191,7 +191,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
                     ),
                     services = listOf(
                         DidServiceDto(
-                            id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                            id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#did-communication",
                             type = "did-communication",
                             serviceEndpoint = "http://localhost:8000/",
                         )
@@ -206,7 +206,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
                 context = emptyList(),
                 services = listOf(
                     DidServiceDto(
-                        id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                        id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#did-communication",
                         type = "did-communication",
                         serviceEndpoint = "http://localhost:8000/",
                     )
@@ -230,7 +230,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
     ): ConnectionRecord {
         val connReq = ConnectionRecord()
         connReq.connectionId = SingletonTestData.connectionId
-        connReq.theirDid = "did:indy:..."
+        connReq.theirDid = "${getDidMethodPrefixWithNetworkIdentifier()}:..."
         connReq.myDid = SingletonTestData.baseWalletDID
         connReq.state = ConnectionState.REQUEST
         connReq.requestId = SingletonTestData.threadId
@@ -264,5 +264,9 @@ class AcaPyMockedService(val baseWalletBpn: String,
     private fun getIdentifierOfDid(did: String): String {
         val elementsOfDid: List<String> = did.split(":")
         return elementsOfDid[elementsOfDid.size - 1]
+    }
+
+    private fun getDidMethodPrefixWithNetworkIdentifier(): String {
+        return SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()
     }
 }

@@ -88,14 +88,14 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
             }
 
-            val notValidDidMethodShortId = "did:indy:${EnvironmentTestSetup.NETWORK_ID}:XMcRfSU"
+            val notValidDidMethodShortId = "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}XMcRfSU"
             handleRequest(HttpMethod.Get, "/api/didDocuments/$notValidDidMethodShortId") {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
             }
 
-            val notSupportedDidMethod = "did:sov:XMcRfSUkkQK38p6CCjHZz6"
+            val notSupportedDidMethod = "did:wrong:network:XMcRfSUkkQK38p6CCjHZz6"
             handleRequest(HttpMethod.Get, "/api/didDocuments/$notSupportedDidMethod") {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {

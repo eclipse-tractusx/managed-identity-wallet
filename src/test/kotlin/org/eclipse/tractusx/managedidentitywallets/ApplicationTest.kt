@@ -423,7 +423,7 @@ class ApplicationTest {
                 "University-Degree-Credential",
                 "VerifiableCredential"
             ],
-            "issuer": "did:indy:local:test:43Arq24V9uQFPKHuDb7TC5",
+            "issuer": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}43Arq24V9uQFPKHuDb7TC5",
             "issuanceDate": "2019-06-16T18:56:59Z",
             "expirationDate": "2019-06-17T18:56:59Z",
             "credentialSubject": {
@@ -435,13 +435,13 @@ class ApplicationTest {
                     "name": "Master of Science and Arts"
                 },
                 "college": "Stuttgart",
-                "id": "did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD"
+                "id": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}QZakhgHUUAowUbhgZ9PZLD"
             },
             "proof": {
                 "type": "Ed25519Signature2018",
                 "created": "2022-03-24T09:34:02Z",
                 "proofPurpose": "assertionMethod",
-                "verificationMethod": "did:indy:local:test:43Arq24V9uQFPKHuDb7TC5#key-1",
+                "verificationMethod": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}43Arq24V9uQFPKHuDb7TC5#key-1",
                 "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..LvCQ4TWhFHOkwMzvrx-TxHovoaCLPlK2taHxQUtUOp0Uc_jYbjL3XgVR2u6jVMvGIdPt4gs-VZb49f7GuiXFDA"
             }
         }
@@ -473,7 +473,7 @@ class ApplicationTest {
                 "University-Degree-Credential",
                 "VerifiableCredential"
             ],
-            "issuer": "did:indy:local:test:43Arq24V9uQFPKHuDb7TC5",
+            "issuer": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}43Arq24V9uQFPKHuDb7TC5",
             "issuanceDate": "2019-06-16T18:56:59Z",
             "expirationDate": "2019-06-17T18:56:59Z",
             "credentialSubject": {
@@ -485,13 +485,13 @@ class ApplicationTest {
                     "name": "Master of Science and Arts"
                 },
                 "college": "Stuttgart",
-                "id": "did:indy:local:test:QZakhgHUUAowUbhgZ9PZLD"
+                "id": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}QZakhgHUUAowUbhgZ9PZLD"
             },
             "proof": {
                 "type": "Ed25519Signature2018",
                 "created": "2022-03-24T09:34:02Z",
                 "proofPurpose": "assertionMethod",
-                "verificationMethod": "did:indy:local:test:43Arq24V9uQFPKHuDb7TC5#key-1",
+                "verificationMethod": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}43Arq24V9uQFPKHuDb7TC5#key-1",
                 "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..LvCQ4TWhFHOkwMzvrx-TxHovoaCLPlK2taHxQUtUOp0Uc_jYbjL3XgVR2u6jVMvGIdPt4gs-VZb49f7GuiXFDA"
             }
         }
@@ -539,7 +539,7 @@ class ApplicationTest {
         "type": "Ed25519Signature2018",
         "created": "2022-07-15T09:35:59Z",
         "proofPurpose": "assertionMethod",
-        "verificationMethod": "did:indy:local:test:JPbsf8GpUYiavsK95SGpge#key-1",
+        "verificationMethod": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}JPbsf8GpUYiavsK95SGpge#key-1",
         "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..4mFcySYFNAV6Bif6OqHeGqhQZ1kPMbq5FbOjurbIBIyYnQyRICa1b7RB_nxfz9fdP7WYxthTVnaWiXs2WbpzBQ"
     }
 }
@@ -583,7 +583,7 @@ class ApplicationTest {
         "type": "Ed25519Signature2018",
         "created": "2022-07-15T09:35:59Z",
         "proofPurpose": "assertionMethod",
-        "verificationMethod": "did:indy:local:test:JPbsf8GpUYiavsK95SGpge#key-1",
+        "verificationMethod": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}JPbsf8GpUYiavsK95SGpge#key-1",
         "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..4mFcySYFNAV6Bif6OqHeGqhQZ1kPMbq5FbOjurbIBIyYnQyRICa1b7RB_nxfz9fdP7WYxthTVnaWiXs2WbpzBQ"
     }
 }
@@ -628,7 +628,7 @@ class ApplicationTest {
         "type": "Ed25519Signature2018",
         "created": "2022-07-15T09:35:59Z",
         "proofPurpose": "assertionMethod",
-        "verificationMethod": "did:indy:local:test:JPbsf8GpUYiavsK95SGpge#key-1",
+        "verificationMethod": "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}JPbsf8GpUYiavsK95SGpge#key-1",
         "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..4mFcySYFNAV6Bif6OqHeGqhQZ1kPMbq5FbOjurbIBIyYnQyRICa1b7RB_nxfz9fdP7WYxthTVnaWiXs2WbpzBQ"
     }
 }

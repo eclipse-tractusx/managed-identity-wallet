@@ -58,16 +58,28 @@ class UtilsService(private val networkIdentifier: String) {
         }
     }
 
-    fun replaceSovWithNetworkIdentifier(input: String): String =
-        input.replace(":sov:", ":indy:$networkIdentifier:")
+    fun getDidMethodPrefixWithNetworkIdentifier(): String {
+        //TODO replace implementation when indy is supported by AcaPy
+        //return "did:indy:$networkIdentifier:"
+        return "did:sov:"
+    }
 
-    fun replaceNetworkIdentifierWithSov(input: String): String =
-        input.replace(":indy:$networkIdentifier:", ":sov:")
+    fun replaceSovWithNetworkIdentifier(input: String): String {
+        //TODO check if this method is needed when indy is supported by AcaPy
+        //input.replace(":sov:", ":indy:$networkIdentifier:")
+        return input
+    }
+
+    fun replaceNetworkIdentifierWithSov(input: String): String {
+        //TODO check if this method is needed when indy is supported by AcaPy
+        //input.replace(":indy:$networkIdentifier:", ":sov:")
+        return input
+    }
 
     fun checkIndyDid(did: String) {
-        val regex = """did:indy:$networkIdentifier:.[^-\s]{16,}${'$'}""".toRegex()
+        val regex = """${getDidMethodPrefixWithNetworkIdentifier()}.[^-\s]{16,}${'$'}""".toRegex()
         if (!regex.matches(did)) {
-            throw UnprocessableEntityException("The DID must be a valid and supported Indy DID")
+            throw UnprocessableEntityException("The DID must be a valid and supported DID: ${getDidMethodPrefixWithNetworkIdentifier()}")
         }
     }
 

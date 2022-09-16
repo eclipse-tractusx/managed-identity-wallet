@@ -8,7 +8,7 @@
     "University-Degree-Credential",
     "VerifiableCredential"
   ],
-  "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
+  "issuer": "did:sov:LCNSw1JxSTDw7EpR1UMG7D",
   "issuanceDate": "2021-06-16T18:56:59Z",
   "expirationDate": "2026-06-17T18:56:59Z",
   "credentialSubject": {

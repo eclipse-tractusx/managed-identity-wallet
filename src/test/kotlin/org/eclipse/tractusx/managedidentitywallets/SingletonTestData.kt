@@ -24,4 +24,10 @@ object SingletonTestData {
         this.connectionId = ""
         this.threadId = ""
     }
+
+    fun getDidMethodPrefixWithNetworkIdentifier(): String {
+        //TODO replace implementation when indy method is supported by AcaPy
+        //return "did:indy:${EnvironmentTestSetup.NETWORK_ID}:"
+        return "did:sov:"
+    }
 }

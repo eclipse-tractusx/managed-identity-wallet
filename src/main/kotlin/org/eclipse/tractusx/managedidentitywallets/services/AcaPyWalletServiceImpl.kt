@@ -47,7 +47,6 @@ class AcaPyWalletServiceImpl(
     private val connectionRepository: ConnectionRepository
 ) : IWalletService {
 
-    private val networkIdentifier = acaPyService.getWalletAndAcaPyConfig().networkIdentifier
     private val baseWalletBpn = acaPyService.getWalletAndAcaPyConfig().baseWalletBpn
 
     companion object {
@@ -100,7 +99,7 @@ class AcaPyWalletServiceImpl(
     override suspend fun registerBaseWallet(verKey: String): Boolean {
         log.debug("Register base wallet with bpn $baseWalletBpn and key $verKey")
         val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
-        val shortDid = catenaXWallet.did.substring(("did:indy:$networkIdentifier:").length)
+        val shortDid = catenaXWallet.did.substring(("${utilsService.getDidMethodPrefixWithNetworkIdentifier()}").length)
 
         // Register DID with public DID on ledger
         acaPyService.assignDidToPublic(
@@ -145,7 +144,7 @@ class AcaPyWalletServiceImpl(
         val walletToCreate = WalletExtendedData(
             name = walletCreateDto.name,
             bpn = walletCreateDto.bpn,
-            did = "did:indy:${networkIdentifier}:${createdDid.result.did}",
+            did = "${utilsService.getDidMethodPrefixWithNetworkIdentifier()}${createdDid.result.did}",
             walletId = createdSubWalletDto.walletId,
             walletKey = subWalletToCreate.walletKey,
             walletToken = createdSubWalletDto.token,
@@ -679,7 +678,7 @@ class AcaPyWalletServiceImpl(
         profileName: String,
         listCredentialRequestData: ListCredentialRequestData
     ): VerifiableCredentialDto {
-        val issuerDid = "did:indy:$networkIdentifier:$profileName"
+        val issuerDid = "${utilsService.getDidMethodPrefixWithNetworkIdentifier()}$profileName"
         val verifiableCredentialRequestDto = VerifiableCredentialRequestDto(
             id = listCredentialRequestData.listId,
             context = listOf(
