@@ -41,7 +41,7 @@ class BaseWalletAriesEventHandler(
         when(connection.state) {
             ConnectionState.COMPLETED -> {
                 val pairOfWebhookUrlAndWallet = updateConnectionStateAndSendWebhook(connection)
-                var webhookUrl: String? = pairOfWebhookUrlAndWallet.first
+                val webhookUrl: String? = pairOfWebhookUrlAndWallet.first
                 val walletOfConnectionTarget: WalletDto = pairOfWebhookUrlAndWallet.second
                 if (walletOfConnectionTarget.pendingMembershipIssuance) {
                     GlobalScope.launch {
@@ -61,6 +61,7 @@ class BaseWalletAriesEventHandler(
             ConnectionState.ERROR -> {
                 updateConnectionStateAndSendWebhook(connection)
             }
+            else -> { }
         }
     }
 
@@ -102,6 +103,7 @@ class BaseWalletAriesEventHandler(
                         }
                     }
                 }
+                else -> { }
             }
         }
     }

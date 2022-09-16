@@ -1,12 +1,12 @@
 {
 	"info": {
 		"_postman_id": "ca9fc822-6f4a-4a2e-a37a-90b186bd714b",
-		"name": "Test Acapy",
+		"name": "Test-Acapy-SelfManagedWallet",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Get connections",
+			"name": "Get Connections",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -38,7 +38,7 @@
 			"response": []
 		},
 		{
-			"name": "Accept connection (replace connection id)",
+			"name": "Accept Connection (replace connection id)",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -139,7 +139,7 @@
 			"response": []
 		},
 		{
-			"name": "Store Credential Request (replace cred_ex_id and credential_id)",
+			"name": "Store Credential (replace cred_ex_id and credential_id)",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -205,7 +205,7 @@
 			"response": []
 		},
 		{
-			"name": "Remove connections (replace connection id)",
+			"name": "Remove Connection (replace connection id)",
 			"request": {
 				"method": "DELETE",
 				"header": [

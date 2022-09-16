@@ -27,7 +27,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowInternal
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.AriesWebSocketClient
@@ -235,7 +235,7 @@ class AcaPyService(
 
     override suspend fun issuanceFlowCredentialSend(
         token: String,
-        vc: VerifiableCredentialIssuanceFlowInternal
+        vc: VerifiableCredentialIssuanceFlowRequest
     ): V20CredExRecord {
         val ariesClient = getAcapyClient(token)
 

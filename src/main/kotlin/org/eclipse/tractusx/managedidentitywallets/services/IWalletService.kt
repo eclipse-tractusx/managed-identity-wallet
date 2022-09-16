@@ -29,6 +29,7 @@ import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Connection
@@ -69,7 +70,9 @@ interface IWalletService {
         vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto
     ): VerifiableCredentialDto
 
-    suspend fun triggerCredentialIssuanceFlow(vc: VerifiableCredentialIssuanceFlowRequestDto): String
+    suspend fun triggerCredentialIssuanceFlow(
+        vc: VerifiableCredentialIssuanceFlowRequest
+    ): CredentialOfferResponse
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 

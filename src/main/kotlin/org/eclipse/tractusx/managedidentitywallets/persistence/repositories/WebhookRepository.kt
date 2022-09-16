@@ -37,6 +37,11 @@ class WebhookRepository {
         threadId: String,
     ): Webhook?  = Webhook.find { Webhooks.threadId eq threadId }.firstOrNull()
 
+    fun deleteWebhook(threadId: String): Boolean {
+        get(threadId).delete()
+        return true
+    }
+
     fun add(
         webhookThreadId: String,
         url: String,

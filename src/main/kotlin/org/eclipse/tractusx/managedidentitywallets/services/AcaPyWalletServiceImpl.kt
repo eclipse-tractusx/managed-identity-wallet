@@ -761,8 +761,8 @@ class AcaPyWalletServiceImpl(
     }
 
     override suspend fun triggerCredentialIssuanceFlow(
-        vc: VerifiableCredentialIssuanceFlowRequestDto
-    ): String {
+        vc: VerifiableCredentialIssuanceFlowRequest
+    ): CredentialOfferResponse {
         val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
         if (vc.issuerIdentifier != catenaXWallet.did && vc.issuerIdentifier != catenaXWallet.bpn) {
             throw UnprocessableEntityException("The Issuance Flow supports only the CatenaX wallet as issuer")
@@ -779,7 +779,7 @@ class AcaPyWalletServiceImpl(
             credentialSubject["id"] = utilsService.replaceNetworkIdentifierWithSov(wallet.did)
             wallet
         } else {
-            throw UnprocessableEntityException("The credential subject aka. Holder is not defined")
+            throw UnprocessableEntityException("The credential subject id aka. Holder is not defined")
         }
 
         // Check connections
@@ -787,16 +787,13 @@ class AcaPyWalletServiceImpl(
         if (connection == null || connection.state != ConnectionState.COMPLETED.name) {
             throw InternalServerErrorException("Invalid connection between ${catenaXWallet.did} and ${holderWallet.did}")
         }
-        if (!vc.connectionId.isNullOrBlank() && vc.connectionId != connection.connectionId) {
-            throw UnprocessableEntityException("The given connection Id ${vc.connectionId} " +
-                    "is not equal to the stored connection ${connection.connectionId}")
-        }
+
         val vcContext: List<String> = if (vc.isRevocable) {
             val mutableContexts = vc.context.toMutableList()
             mutableContexts.add(JsonLdContexts.JSONLD_CONTEXT_W3C_STATUS_LIST_2021_V1)
             mutableContexts
         } else { vc.context }
-        val vcAcapyRequest = VerifiableCredentialIssuanceFlowInternal(
+        val vcAcapyRequest = VerifiableCredentialIssuanceFlowRequest(
             id = vc.id ,
             context = vcContext,
             type = vc.type,
@@ -819,7 +816,10 @@ class AcaPyWalletServiceImpl(
                 webhookService.addWebhook(v20CredExRecord.threadId, vc.webhookUrl, CredentialExchangeState.OFFER_SENT.name)
             }
         }
-        return String(Base64.getDecoder().decode(v20CredExRecord.credOffer.offersAttach[0].data.base64), Charsets.UTF_8)
+        return CredentialOfferResponse(
+            credentialOffer = String(Base64.getDecoder().decode(v20CredExRecord.credOffer.offersAttach[0].data.base64), Charsets.UTF_8),
+            threadId = v20CredExRecord.threadId
+        )
     }
 
     private fun getConnections(myDid: String?, theirDid: String?): List<ConnectionDto> {

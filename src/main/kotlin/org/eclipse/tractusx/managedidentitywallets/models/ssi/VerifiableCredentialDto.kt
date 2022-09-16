@@ -219,12 +219,28 @@ data class VerifiableCredentialIssuanceFlowRequestDto (
     val isRevocable: Boolean = true,
     @Field(description = "The URL to be used as webhook to inform the requester when the issuance flow is done", name = "webhookUrl")
     val webhookUrl: String? = null,
-    @Field(description = "The connection id between issuer and holder", name = "connectionId")
-    val connectionId: String?= null
-)
+
+) {
+    fun toInternalVerifiableCredentialIssuanceFlowRequest(): VerifiableCredentialIssuanceFlowRequest {
+        return VerifiableCredentialIssuanceFlowRequest(
+            id = this.id,
+            context = this.context,
+            type = this.type,
+            issuerIdentifier = this.issuerIdentifier,
+            issuanceDate = this.issuanceDate,
+            expirationDate = this.expirationDate,
+            credentialSubject = this.credentialSubject,
+            holderIdentifier = this.holderIdentifier,
+            isRevocable = this.isRevocable,
+            webhookUrl = this.webhookUrl,
+            credentialStatus = null,
+            connectionId = null
+        )
+    }
+}
 
 @Serializable
-data class VerifiableCredentialIssuanceFlowInternal (
+data class VerifiableCredentialIssuanceFlowRequest(
     val id: String? = null,
     @JsonProperty("@context") @SerialName("@context")
     val context: List<String>,
@@ -234,6 +250,8 @@ data class VerifiableCredentialIssuanceFlowInternal (
     val expirationDate: String? = null, // In Rfc3339
     val credentialSubject: Map<String, Any>,
     val credentialStatus: CredentialStatus?,
+    val holderIdentifier: String?= null,
+    val isRevocable: Boolean = true,
     val webhookUrl: String? = null,
-    val connectionId: String
+    val connectionId: String?= null
 )

@@ -32,7 +32,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.Services
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
@@ -217,7 +216,7 @@ class BusinessPartnerDataServiceImpl(
             val membershipVC = prepareMembershipCredential(bpn)
             val bpnVC = prepareBpnCredentials(bpn)
             val catenaXWallet = walletService.getWallet(walletService.getCatenaXBpn())
-            val membershipVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequestDto(
+            val membershipVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
                 id =  membershipVC.id,
                 context = membershipVC.context,
                 type = membershipVC.type,
@@ -225,12 +224,13 @@ class BusinessPartnerDataServiceImpl(
                 issuerIdentifier = catenaXWallet.did,
                 expirationDate = membershipVC.expirationDate,
                 credentialSubject = membershipVC.credentialSubject,
+                credentialStatus = null,
                 holderIdentifier = membershipVC.holderIdentifier,
                 isRevocable = membershipVC.isRevocable,
                 webhookUrl = webhookUrl,
                 connectionId = connectionId
             )
-            val bpnVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequestDto(
+            val bpnVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
                 id =  bpnVC.id,
                 context = bpnVC.context,
                 type = bpnVC.type,
@@ -238,6 +238,7 @@ class BusinessPartnerDataServiceImpl(
                 issuerIdentifier = catenaXWallet.did,
                 expirationDate = bpnVC.expirationDate,
                 credentialSubject = bpnVC.credentialSubject,
+                credentialStatus = null,
                 holderIdentifier = bpnVC.holderIdentifier,
                 isRevocable = bpnVC.isRevocable,
                 webhookUrl = webhookUrl,

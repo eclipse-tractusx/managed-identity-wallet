@@ -39,10 +39,10 @@ import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
-import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
 
 fun Route.vcRoutes(
     walletService: IWalletService,
@@ -158,13 +158,14 @@ fun Route.vcRoutes(
         route("/issuance-flow") {
             notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedPost(
-                    PostInfo<Unit, VerifiableCredentialIssuanceFlowRequestDto, String>(
-                        summary = "Issue a Verifiable Credential for self managed wallets",
+                    PostInfo<Unit, VerifiableCredentialIssuanceFlowRequestDto, CredentialOfferResponse>(
+                        summary = "Issue credential flow according to Aries RFC 0453",
                         description = "Permission: " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
                                 "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
-                                "\nIssue a verifiable credential for self managed wallet",
+                                "\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. " + 
+                                "Issuer must be a DID managed by the MIW",
                         requestInfo = RequestInfo(
                             description = "The verifiable credential input",
                             examples = verifiableCredentialIssuanceFlowRequestDtoExample
@@ -172,6 +173,7 @@ fun Route.vcRoutes(
                         responseInfo = ResponseInfo(
                             status = HttpStatusCode.Created,
                             description = "The credential Offer as String",
+                            examples = credentialOfferResponseExample
                         ),
                         canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
                             forbiddenException, unauthorizedException),
@@ -180,9 +182,10 @@ fun Route.vcRoutes(
                 ) {
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialIssuanceFlowRequestDto>()
                     AuthorizationHandler.checkHasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
+                    val vc = verifiableCredentialRequestDto.toInternalVerifiableCredentialIssuanceFlowRequest()
                     call.respond(
                         HttpStatusCode.Created,
-                        walletService.triggerCredentialIssuanceFlow(verifiableCredentialRequestDto)
+                        walletService.triggerCredentialIssuanceFlow(vc)
                     )
                 }
             }
@@ -403,3 +406,10 @@ val verifiableCredentialIssuanceFlowRequestDtoExample = mapOf(
 val credentialOfferAsString = """
 {"credential": {"@context": ["https://www.w3.org/2018/credentials/v1", "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData"], "type": ["BpnCredential", "VerifiableCredential"], "issuer": "did:sov:HsfwvUFcZkAcxDa2kASMr7", "issuanceDate": "2021-06-16T18:56:59Z", "credentialSubject": {"type": ["BpnCredential"], "bpn": "NEWNEWTestTest", "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"}}, "options": {"proofType": "Ed25519Signature2018"}}
 """.trimIndent()
+
+val credentialOfferResponseExample = mapOf(
+    "demo" to CredentialOfferResponse(
+        credentialOffer = credentialOfferAsString,
+        threadId = "2ewqe-qwe24-eqweqwrqwr-rwqrqwr"
+    )
+)

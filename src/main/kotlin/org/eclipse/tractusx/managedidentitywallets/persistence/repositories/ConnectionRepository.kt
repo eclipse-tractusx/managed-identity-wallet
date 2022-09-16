@@ -59,6 +59,11 @@ class ConnectionRepository {
         }
     }
 
+    fun deleteConnection(connectionId: String): Boolean {
+        get(connectionId).delete()
+        return true
+    }
+
     fun getConnections(
         myDid: String?,
         theirDid: String?

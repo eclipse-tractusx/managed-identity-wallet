@@ -21,8 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import io.ktor.client.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowInternal
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
@@ -65,7 +64,7 @@ interface IAcaPyService {
 
     suspend fun issuanceFlowCredentialSend(
         token: String,
-        vc: VerifiableCredentialIssuanceFlowInternal
+        vc: VerifiableCredentialIssuanceFlowRequest
     ): V20CredExRecord
 
     companion object {

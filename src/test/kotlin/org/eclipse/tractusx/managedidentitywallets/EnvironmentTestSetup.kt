@@ -42,8 +42,8 @@ object EnvironmentTestSetup {
     const val ZERO_THIRD_REVOKED_ENCODED_LIST ="H4sIAAAAAAAAAO3BIQEAAAACIKv/DzvDAjQAAAAAAAAAAAAAAAAAAADA2wBHo2oBAEAAAA=="
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
-    private val connectionRepository = ConnectionRepository()
-    private val webhookRepository = WebhookRepository()
+    val connectionRepository = ConnectionRepository()
+    val webhookRepository = WebhookRepository()
 
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
     val revocationMockedService = RevocationMockedService(NETWORK_ID)

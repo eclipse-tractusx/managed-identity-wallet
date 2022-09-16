@@ -24,9 +24,14 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
+import org.hyperledger.acy_py.generated.model.AttachDecorator
+import org.hyperledger.acy_py.generated.model.AttachDecoratorData
+import org.hyperledger.acy_py.generated.model.CredentialOffer
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
+import org.hyperledger.aries.api.connection.ConnectionState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
+import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
 import java.security.SecureRandom
 
 class AcaPyMockedService(val baseWalletBpn: String,
@@ -223,14 +228,30 @@ class AcaPyMockedService(val baseWalletBpn: String,
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
         token: String
     ): ConnectionRecord {
-        TODO("Not yet implemented")
+        val connReq = ConnectionRecord()
+        connReq.connectionId = SingletonTestData.connectionId
+        connReq.theirDid = "did:indy:..."
+        connReq.myDid = SingletonTestData.baseWalletDID
+        connReq.state = ConnectionState.REQUEST
+        connReq.requestId = SingletonTestData.threadId
+        return connReq
     }
 
     override suspend fun issuanceFlowCredentialSend(
         token: String,
-        vc: VerifiableCredentialIssuanceFlowInternal
+        vc: VerifiableCredentialIssuanceFlowRequest
     ): V20CredExRecord {
-        TODO("Not yet implemented")
+        val attachDecoratorData = AttachDecoratorData()
+        attachDecoratorData.base64 = "Y3JlZGVudGlhbA=="
+        val attach = AttachDecorator()
+        attach.data = attachDecoratorData
+        val offerAttach = listOf(attach)
+        val credOffer = V20CredOffer()
+        val credExRecord = V20CredExRecord()
+        credExRecord.credOffer = credOffer
+        credExRecord.credOffer.offersAttach = offerAttach
+        credExRecord.threadId = SingletonTestData.threadId
+        return credExRecord
     }
 
     private fun createRandomString(): String {

@@ -9,6 +9,8 @@ object SingletonTestData {
     lateinit var revocationListName: String
     lateinit var credentialIndex: Number
     lateinit var encodedList: String
+    lateinit var connectionId: String
+    lateinit var threadId: String
 
     fun cleanSingletonTestData() {
         this.baseWalletDID = ""
@@ -19,5 +21,7 @@ object SingletonTestData {
         this.revocationListName = ""
         this.credentialIndex = 0
         this.encodedList = EnvironmentTestSetup.NONE_REVOKED_ENCODED_LIST
+        this.connectionId = ""
+        this.threadId = ""
     }
 }
