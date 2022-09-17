@@ -1,359 +1,192 @@
-# Catena-X Core Managed Identity Wallets <a id= "introduction"></a>
+# Managed Identity Wallets <a id="introduction"></a>
 
 This repository is part of the overarching Catena-X project, and more specifically
 developed within the Catena-X Core Agile Release Train.
 
-The Managed Identity Wallets service implements the Self-Sovereign-Identity (SSI)
+The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI)
 readiness by providing a wallet hosting platform including a DID resolver,
 service endpoints and the company wallets itself.
 
 Technically this project is developed using the [ktor](https://ktor.io) Microservices
 framework and thus the Kotlin language. It is using [gradle](https://gradle.org/) as
-build system.
+build system. To store the wallets and communicate with an external ledger MIW is using
+[Aries Cloud Agent Python](https://github.com/hyperledger/aries-cloudagent-python) with
+it's [multi-tenant feature](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md)
+and [JSON-LD credential](https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
+To support credential revocation MIW is using the [GXFS revocation service](tbd)
 
-# Table of contents
+> **Warning**
+> This is not yet ready for production usage, as
+> [Aries Cloud Agent Python](https://github.com/hyperledger/aries-cloudagent-python)
+> does not support `did:indy` resolution yet. This disclaimer will be removed,
+> once it is available.
 
-1. [Introduction](#introduction)
-2. [Used Technologies](#usedtechnologies)
-3. [Local Deployment Toolstack](#deploymentwithIntellij)
-4. [Steps for initial lokal Deployment and Wallet Creation](#initialDeploymentandWalletCreation)
-5. [Building with gradle](#buildingWithGradle)
-6. [Running locally with gradle (MacOS)](#runningLocallyWithGradle)
-   1. [Under IntelliJ](#underIntelliJ)
-7. [Building and running the Docker image](#buildingAndRunningTheDockerImage)
-8. [Environment variable setup](#environmentVariableSetup)
-9. [Local development environment](#localDevelopmentEnvironment)
-    1. [Aca-Py Docker Image](#acapyDockerImage)
-    2. [Start up Docker Containers for Postgres, Keycloak and AcaPy](#startupDockerContainers)
-    3. [IntelliJ Development Setup](#intellijDevelopmentSetup)
-    4. [Initial Wallet Setup](#initialWalletSetup)
-10. [Testing GitHub actions locally](#testingGitHubActionsLocally)
-11. [Setting up progresql database](#settingUpPostgresSqlDatabase)
-12. [Generate DID from Seed](#generateDIDFromSEED)
-13. [Tests](#tests)
-12. [Dashboard](#dashboard)
-13. [Future](#future)
-14. [Further Notes](#furtherNotes)
-15. [Helm Setup and Auto Deployment](#helmSetupAndAutoDeployment)
+# Developer Documentation
 
-## Used technologies in this Project <a id= "usedtechnologies"></a>
+To run MIW locally, this section describes the tooling as well as
+the local development setup.
+## Tooling
 
-- ACA-Py (Aries Cloud Agent Python) https://github.com/hyperledger/aries-cloudagent-python
-    * specifially the multi-tenant feature https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md)
-    * and the JSON-LD credential https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
-- Hyperledger Indy https://hyperledger-indy.readthedocs.io/en/latest/
-- Ktor Framework https://ktor.io/
+Following tools the MIW development team used successfully:
 
-## Local Deployment Toolstack <a id= "deploymentwithIntellij"></a>
+| Area        | Tool               | Download Link    | Comment     |
+|-------------|--------------------|------------------|-------------|
+| IDE         | IntelliJ           | https://www.jetbrains.com/idea/download/ | Additionally the [envfile plugin](https://plugins.jetbrains.com/plugin/7861-envfile) is suggested |
+|             | Visual Studio Code | https://code.visualstudio.com/download | Additionally Git, Kotlin, Kubernetes plugins are suggested |
+| Build       | Gradle             | https://gradle.org/install/ | |
+| Runtime     | Docker Desktop     | https://www.docker.com/products/docker-desktop/ | |
+|             | Rancher Desktop    | | |
+| API Testing | Postman            | https://www.postman.com/downloads/ | |
+| Database    | DBeaver            | https://dbeaver.io/ | |
 
-- Intellij - https://www.jetbrains.com/de-de/idea/download/
-- Postman - https://www.postman.com/downloads/
-- Docker - https://www.docker.com/products/docker-desktop/
-- DBeaver - https://dbeaver.io/
-- Gradle - https://gradle.org/install/
-  
-## Steps for initial local deployment and wallet Creation <a id= "initialDeploymentandWalletCreation"></a>
 
-1. Clone the Github Repository - https://github.com/catenax-ng/product-core-managed-identity-wallets.git
-1. (Optional) Clone the [Aca-Py Docker Image](#acapyDockerImage)
-1. Copy .env.example and rename to dev.env see section [IntelliJ Development Setup](#intellijDevelopmentSetup)
-1. Start Docker containers of Keycloak, Acapy and Postgres, see section [Startup Docker Containers](#startupDockerContainers)
-1. Setup Postgres Connection in DBeaver with Credentials -postgres, -cx_password on port 5432
-1. Create miwdev Database with following commands:
-    ```
-    CREATE DATABASE miwdev;
-    CREATE ROLE miwdevuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD '^cXnF61qM1kf';
-    GRANT CONNECT ON DATABASE miwdev TO miwdevuser;
-    ```
-    
-    Then following environment settings in your local environment file (potentially named `dev.env`) can be used (already pre-defined in `.env.example`):
-    
-    ```
-    CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password=^cXnF61qM1kf"
-    CX_DB_JDBC_DRIVER="org.postgresql.Driver"
-    ```
-1. Add the tables of the `Revocation Service` to the `miwdev` database using the sql script `./dev-asset/dev-containers/revocation/V1.0.0__Create_DB.sql`
-1. Run `Application.kt` in IntelliJ (with `dev.env` as configuration) or in your IDE or run it on the command line (on MacOS: `set -a; source dev.env; set +a` and `./gradlew run`)
-1. Start Postman and add the environment and the collection from ./dev-assets/
-    1. In the added environment make sure that the client_id and client_secret are correct. Check the steps in [start up Docker containers](#startupDockerContainers) to get the current values of the client id and secret
-    2. In the body of *Create wallet in Managed Identity Wallets*, change the `bpn` value to your `CX_BPN` from your env file
-       1. ![Change the BPN name](docs/images/ChangeBpnName.png "Adjusting the BPN Name")
-    3. Execute the request and note down your `did` and `verKey` from the response
-       1. ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
-1. Register public DID
-    1. Register your DID from your Wallet at https://indy-test.idu.network/ with "Register from DID"
-       1. ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
-    2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
-       `{ "verKey": "verification key from creation" }`
-1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is required because the Credential can only be issued after the DID is registiered on Ledger and set to Public
-1. Now you have created your own Wallet and published your DID to the Ledger, you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
-
-## Building with gradle <a id= "buildingWithGradle"></a>
-
-To install gradle just follow [the official guide](https://gradle.org/install/), e.g. on MacOS homebrew can be used:
-
-```
-brew install gradle
-```
-
-Building then works with
-
-```
-gradle build
-```
-
-Or, as we also use gradle in the CI/CD pipeline, the gradle wrapper can be used
-
-```
-./gradlew build
-```
-
-In the following the `gradle` commands are using the gradle wrapper `gradlew`.
-
-## Running locally with gradle (MacOS) <a id= "runningLocallyWithGradle"></a>
-
-Copy the file `.env.example` and rename it to `dev.env`
-
-```
-set -a; source dev.env; set +a
-./gradlew run
-```
-### Under Intellij <a id= "underIntelliJ"></a>
-
-Download the Intellij envFile Plugin, copy the file `.env.example` and rename it to `dev.env`
-
-## Building and running the Docker image <a id= "buildingAndRunningTheDockerImage"></a>
-
-Based on the [official documentation](https://ktor.io/docs/docker.html#getting-the-application-ready)
-below the steps to build and run this service via Docker.
-
-First step is to create the distribution of the application (in this case using Gradle):
-
-```
-./gradlew installDist
-```
-
-Next step is to build and tag the Docker image:
-
-```
-docker build -t catena-x/managed-identity-wallets:<placeholder> .
-```
-
-Finally, start the image (please make sure that there are no quotes around the
-values in the env file):
-
-```
-docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets:<placeholder>
-```
-
-## Environment variable setup <a id= "environmentVariableSetup"></a>
+## Environment Variables <a id= "environmentVariables"></a>
 
 Please see the file `.env.example` for the environment examples that are used
 below. Here a few hints on how to set it up:
 
-1. `CX_DB_JDBC_URL`: enter the database url, default is `jdbc:h2:mem:miwdev;DB_CLOSE_DELAY=-1;`
-2. `CX_DB_JDBC_DRIVER`: enter the driver, default is `org.h2.Driver`
-3. `CX_AUTH_JWKS_URL`: enter the keycloak certs url, e.g. `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs`
-4. `CX_AUTH_ISSUER_URL`: enter the token issue, e.g. `http://localhost:8081/auth/realms/catenax`
-5. `CX_AUTH_REALM`: specify the realm, e.g. `catenax`
-6. `CX_AUTH_ROLE_MAPPINGS`: specify the expected role mappings within the token, e.g. `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet`
-7. `CX_AUTH_RESOURCE_ID`: specify the resource id e.g. `ManagedIdentityWallets`
-8. `CX_AUTH_CLIENT_ID`: specify the expected client id, e.g. `ManagedIdentityWallets`
-9. `CX_AUTH_CLIENT_SECRET`: specify the client secret. It can be extracted from keycloak under `realms - catenax - clients - ManagedIdentityWallets - credentials`
-10. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
-11. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
-12. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.idu.network/register`
-13. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
-14. `ACAPY_ADMIN_API_KEY`: specify the admin api key of Aca-Py enpoints, e.g. `Hj23iQUsstG!dde`
-15. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
-15. `BPDM_DATAPOOL_URL`: specify the base data pool API endpoint of the `BPDM` e.g. `https://catenax-bpdm-int.demo.catena-x.net`
-15. `BPDM_AUTH_CLIENT_ID`: specify the expected client id
-15. `BPDM_AUTH_CLIENT_SECRET=`: specify the expected client secret
-15. `BPDM_AUTH_GRANT_TYPE`: specify the expected grant type e.g. `client_credentials`
-15. `BPDM_AUTH_SCOPE`: specify the expected scope e.g. `openid`
-15. `BPDM_AUTH_URL`: specify the url to get the access token of `BPDM` e.g. `https://centralidp.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token`
-15. `BPDM_PULL_DATA_AT_HOUR`: specify at which hour (24-hour clock) the cron job should pull the data from the `BPDM` e.g. `23`
-15. `REVOCATION_URL`: specify the url of the revocation service e.g. `http://localhost:8086`
-15. `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR`: specify at which hour (24-hour clock) the cron job should issue/update status-list credentials
+| Key                       | Type   | Default | Description |
+|---------------------------|--------|---------|-------------|
+| `CX_DB_JDBC_URL`          | URL    | `jdbc:sqlite:file:test?mode=memory&cache=shared` | database connection string, most commonly postgreSQL is used |
+| `CX_DB_JDBC_DRIVER`       | URL    | `org.sqlite.JDBC`| database driver to use, most commonly postgreSQL is used |
+| `CX_AUTH_JWKS_URL`        | URL    | `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs` | IAM certs url |
+| `CX_AUTH_ISSUER_URL`      | URL    | `http://localhost:8081/auth/realms/catenax` | IAM token issuer url |
+| `CX_AUTH_REALM`           | String | `catenax` | IAM realm |
+| `CX_AUTH_ROLE_MAPPINGS`   | String | `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet` | IAM role mapping |
+| `CX_AUTH_RESOURCE_ID`     | String | `ManagedIdentityWallets` | IAM resource id |
+| `CX_AUTH_CLIENT_ID`       | String | `ManagedIdentityWallets` | IAM client id |
+| `CX_AUTH_CLIENT_SECRET`   | String | `ManagedIdentityWallets-Secret`| It can be extracted from keycloak under **realms** &gt; catenax &gt; clients &gt; ManagedIdentityWallets &gt; credentials |
+| `APP_VERSION`             | String | `0.4.0` | application version, this should be in-line with  |
+| `ACAPY_API_ADMIN_URL`     | String | `http://localhost:11000` | admin url of ACA-Py |
+| `ACAPY_ADMIN_API_KEY`     | String | `Hj23iQUsstG!dde` | admin api key of ACA-Py enpoints |
+| `ACAPY_LEDGER_URL`        | String | `https://indy-test.idu.network/register` | Hyperledger Indy ledger url for registration |
+| `ACAPY_NETWORK_IDENTIFIER`| String | `local:test` | name space of indy ledger |
+| `CX_BPN`                  | String |  `Bpn111` | BPN of the base wallet, this wallet is the first to create |
+| `BPDM_DATAPOOL_URL`       | String | `https://catenax-bpdm-int.demo.catena-x.net` | BPDM data pool API endpoint |
+| `BPDM_AUTH_CLIENT_ID`     | String | | client id for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_CLIENT_SECRET` | String | | client secret for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_GRANT_TYPE`    | String | `client_credentials` | grant type for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_SCOPE`         | String | `openid` | openid scope for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_URL`           | String | `https://centralidp.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token` | IAM url to get the access token for BPDM data pool endpoint |
+| `BPDM_PULL_DATA_AT_HOUR`  | String | `23` | specify at which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
+| `REVOCATION_URL`          | String | `http://localhost:8086` | URL of the revocation service |
+| `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR` | String | `23` | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
 
-## Local development environment <a id= "localDevelopmentEnvironment"></a>
+## Local Development Setup
 
-To resemble the staging and production system as much as possible also on the
-local machine, an external Postgresql database should be used instead of
-the default included h2 in-memory database. Additionally the authentication and authorization could be done via
-[keycloak](https://www.keycloak.org).
+To get a full development environment up (first with a in-memory database)
+run following these steps:
 
-There are two ways to set up the local environment:
-1. *Run from source*: using keycloak and postgres as stand-alone docker containers and running the managed identity wallets service via gradle, or 
-2. *Run in Kubernetes*: packaging all of the services and run them on a local kubernetes cluster
+1. Clone the GitHub repository
 
-![Development Environment Setup Options](docs/images/DevEnvSetupOptions.png "Development Environment Setup Options")
+    ```bash
+    git clone https://github.com/catenax-ng/product-core-managed-identity-wallets.git
+    cd product-core-managed-identity-wallets
+    ```
 
-### Preperation of Aca-Py Docker Image <a id= "acapyDockerImage"></a>
-
-Building the Aca-Py image is necessary for both setup options:
-You can either use the image `bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4` or build your own image following the steps:
-* clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
-* navigate to the repository `cd aries-cloudagent-python`
-* currently tested with commit `0.7.4` from June, 30, 2022
-* run `git checkout 0.7.4`
-* run `docker build -t acapy:0.7.4 -f ./docker/Dockerfile.run .`
-* change the used image for `cx_acapy` in `dev-assets/dev-containers/docker-compose.yml`
-
-### Preparation of Managed Identity Wallet Docker Image
-
-Building the service image is necessary for both setup options, it is recommended
-to use as version tag the version specified in `gradle.properties`:
-
-```
-./gradlew installDist
-docker build -t catena-x/managed-identity-wallets:<placeholder> .
-```
-
-### Option 1: Run from source <a id= "startupDockerContainers"></a>
-
-Starting up Docker Containers for Postgres, Keycloak and AcaPy via following steps:
-
-* navigate to `./dev-assets/dev-containers`
-* run `docker-compose up -d` (or `docker compose up -d`, depdending on the installation) to start a Postgresql database and Keycloak instance and the AcaPy Service and the revocation Service as Docker containers
-* If the used Indy ledger `--genesis-url https://indy-test.idu.network/genesis \` is write-restricted to endorsers or higher roles, the DID and its VerKey must be registered manually before starting AcaPy. To generate a new DID with a given seed see the section - [Generate DID from Seed](#generateDIDFromSEED)
-* To setup the Postgresql database in the application please see the section below - [Setting up progresql database](#settingUpPostgresSqlDatabase), for the database
-* The tables of the `Revocation Service` should be added manually to the `miwdev` database using the sql script `./dev-asset/dev-containers/revocation/V1.0.0__Create_DB.sql`
-* The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
-* Keycloak is reachable at `http://localhost:8081/` with `username: admin` and `password: catena`,
-  the client id ist `ManagedIdentityWallets` and client secret can be found under the `Clients - ManagedIdentityWallets - Credentials`
-* The new realm of keycloak could also be manually added and configured at http://localhost:8081 via the "Add realm" button. It can be for example named `catenax`. Also add an additional client, e.g. named `ManagedIdentityWallets` with *valid redirect url* set to `http://localhost:8080/*`. The following Roles `add_wallets,view_wallets,update_wallets,delete_wallets,view_wallet,update_wallet` can be added under `Clients - ManagedIdentityWallets - Roles` and then assigned to the client using `Clients - ManagedIdentityWallets - Client Scopes - Service Account Roles - Client Roles - ManagedIdentityWallets`. Additionaly a Token mapper can to be created under `Clients - ManagedIdentityWallets - Mappers - create` with the following configuration:
-```
-Name : StaticBPN
-Mapper Type : Hardcoded claim
-Token Claim Name : BPN
-Claim value : BPNL000000001
-Claim JSON Type : String
-Add to ID token : OFF
-Add to access token : ON 
-Add to userinfo : OFF
-includeInAccessTokenResponse.label : ON 
-```
-* If you receive an error message, that the client secret is not valid, please go into keycloak admin and within clients -> credentials recreate the secret.
-
-Finally run the managed identity wallets service via
-
-```
-./gradlew run
-```
-
-or respectively in your IDE.
-### Option 2: Run in Kubernetes
-
-*Work in progress*
-
-1. Create a namespace
-
-Using as example `managed-identity-wallets`:
-
-```
-kubectl create namespace managed-identity-wallets
-```
-
-2. Create relevant secrets
-
-Altogether four secrets are needed
-* catenax-managed-identity-wallets-secrets
-* catenax-managed-identity-wallets-acapy-secrets. If the Indy ledger is write-restricted, the DID of the used seed must be registered manually before starting AcaPy.
-* postgres-acapy-secret-config
-* postgres-managed-identity-wallets-secret-config
-
-Create these with following commands, after replacing the placeholders:
-
-```
-kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-secrets \
-  --from-literal=cx-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/miwdev?user=miwdevuser&password=<placeholder>' \
-  --from-literal=cx-auth-client-id='ManagedIdentityWallets' \
-  --from-literal=cx-auth-client-secret='<placeholder>'
-
-kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-acapy-secrets \
-  --from-literal=acapy-wallet-key='<placeholder>' \
-  --from-literal=acapy-agent-wallet-seed='<placeholder>' \
-  --from-literal=acapy-jwt-secret='<placeholder>' \
-  --from-literal=acapy-db-account='postgres' \
-  --from-literal=acapy-db-password='<placeholder>' \
-  --from-literal=acapy-db-admin='postgres' \
-  --from-literal=acapy-db-admin-password='<placeholder>' \
-  --from-literal=acapy-admin-api-key='<placeholder>'
-
-kubectl -n managed-identity-wallets create secret generic postgres-acapy-secret-config \
---from-literal=password='<placeholder>' \
---from-literal=postgres-password='<placeholder>' \
---from-literal=user='postgres'
-
-kubectl -n managed-identity-wallets create secret generic postgres-managed-identity-wallets-secret-config \
---from-literal=password='<placeholder>' \
---from-literal=postgres-password='<placeholder>' \
---from-literal=user='postgres'
-```
-
-3. Install a new deployment via helm
-
-Run following command to use the base values as well as the predefined values for local deployment:
-
-```
-helm install managed-identity-wallets ./helm/managed-identity-wallets/ -n managed-identity-wallets -f ./helm/managed-identity-wallets/values.yaml -f ./helm/managed-identity-wallets/values-local.yaml
-```
-
-4. Expose via loadbalancer
-
-```
-kubectl -n managed-identity-wallets apply -f dev-assets/kube-local-lb.yaml
-```
-
-### IntelliJ Development Setup <a id= "intellijDevelopmentSetup"></a>
-
-To run and develop using IntelliJ IDE:
-* open the IntelliJ IDE and import the project
-* create file `dev.env` and copy the values from `.env.example`
-* install the plugin `Env File` https://plugins.jetbrains.com/plugin/7861-envfile 
-
-Later you can run `Application.kt` after adding the `dev.env` to the Run/Debug configuration
-
-### Initial Wallet Setup <a id= "initialWalletSetup"></a>
-
-* Create the Catena-X wallet using the value stored in `CX_BPN` as BPN
-* Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](https://indy-test.idu.network/) as Endorser
-* Assign the DID to public manually by sending a POST request `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key 
-  `{ "verKey": "verification key from creation" }`
-
-## Testing GitHub actions locally <a id= "testingGitHubActionsLocally"></a>
-
-Using [act](https://github.com/nektos/act) it is possible to test GitHub actions
-locally. To run it needs a secrets file, which could be derived on `.env.example`,
-see the section above.
-
-```
-act --secret-file .env
-```
-## Setting up progresql database <a id="settingUpPostgresSqlDatabase"></a>
-
-Based on the [documentation](https://docs.microsoft.com/en-us/azure/postgresql/howto-create-users)
-provided by Mirosoft following SQL needs to be executed to setup initial the database:
-
-```
-CREATE DATABASE miwdev;
-CREATE ROLE miwdevuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD '^cXnF61qM1kf';
-GRANT CONNECT ON DATABASE miwdev TO miwdevuser;
-```
-
-Then following environment settings in your local environment file (potentially
-named `dev.env`) can be used:
-
-```
-CX_DB_JDBC_URL="jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password=^cXnF61qM1kf"
-CX_DB_JDBC_DRIVER="org.postgresql.Driver"
-```
+1. Copy over the `.env.example` to `dev.env`
 
 
+    ```bash
+    cp .env.example dev.env
+    ```
 
-## Scopes <a id="scopes"></a>
-The Available Scopes/Roles are:
+1. Start the supporting containers for postgreSQL (database), keycloak (identity
+management), ACA-Py (ledger communication) and revocation service (credential
+revocation handling)
+
+    ```bash
+    cd dev-assets/dev-containers
+    docker compose up -d
+    ```
+
+    You can stop the containers via `docker-compose down -v`
+
+1. Run the MIW service from the project rootfolder via (on MacOS)
+
+    ```bash
+    cd ../../
+    set -a; source dev.env; set +a
+    ./gradlew run
+    ```
+
+    or respectively run `Application.kt` within in your IDE (using `dev.env` as configuration).
+
+1. :tada: **First milestone reached the MIW service is up and running!**
+
+    Suggested next step is to use the postgreSQL database to have persistent storage
+    across starts, this can be done via changing following variables in `dev.env`
+    (assuming the standard port for postgreSQL 5432 is available).
+
+    | Key               | Value           |
+    |-------------------|-----------------|
+    | CX_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password=cx_password` |
+    | CX_DB_JDBC_DRIVER | `org.postgresql.Driver` |
+
+    Then restart the service via `./gradlew run`
+
+## Advanced Development Setup
+
+With the following steps you can explore the API and create your first wallet
+
+1. Start Postman and add the environment and the collection from ./dev-assets/
+    1. In the added environment make sure that the client_id and client_secret are the same as in your `dev.env` configuration.
+    2. In the body of *Create wallet in Managed Identity Wallets*, change the `bpn` value to your `CX_BPN` from your env file
+
+       ![Change the BPN name](docs/images/ChangeBpnName.png "Adjusting the BPN Name")
+
+    3. Execute the request and note down your `did` and `verKey` from the response
+       
+       ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
+
+1. Register public DID
+    1. Register your DID from your Wallet at https://indy-test.idu.network/ with "Register from DID"
+
+       ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
+
+    2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
+       `{ "verKey": "verification key from creation" }`
+
+1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is required because the Credential can only be issued after the DID is registiered on Ledger and set to Public
+
+1. :tada: **Second milestone reached: Your own wallet!**
+
+Now you have achieved the following:
+
+* set up the development environment to run it from source
+* created your own wallet and published your DID to the ledger
+* you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
+
+## Setup Summary
+
+| Service               | URL                     | Description |
+|-----------------------|-------------------------|-------------|
+| postgreSQL database   | port 5432 on `localhost`| within the Docker Compose setup |
+| Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `catena`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
+| revocation service    | | within the Docker Compose setup |
+| acapy                 | http://localhost:10000  | within the Docker Compose setup |
+| MIW service           | http://localhost:8080/  | |
+
+# Administrator Documentation
+
+## Manual Keycloak Configuration
+
+Within the development setup the Keycloak is initially prepared with the
+values in `./dev-assets/dev-containers/keycloak`. The realm could also be
+manually added and configured at http://localhost:8081 via the "Add realm"
+button. It can be for example named `catenax`. Also add an additional client,
+e.g. named `ManagedIdentityWallets` with *valid redirect url* set to
+`http://localhost:8080/*`. The roles
+ * add_wallets
+ * view_wallets
+ * update_wallets
+ * delete_wallets
+ * view_wallet
+ * update_wallet
+can be added under *Clients > ManagedIdentityWallets > Roles* and then
+assigned to the client using *Clients > ManagedIdentityWallets > Client Scopes*
+*> Service Account Roles > Client Roles > ManagedIdentityWallets*. The
+available scopes/roles are:
 
 1. Role `add_wallets` to create a new wallet
 
@@ -384,37 +217,223 @@ The Available Scopes/Roles are:
     * to store Verifiable Credentials (The BPN of holder will be checked)
     * to trigger Business Partner Data update for its own BPN
 
-## Generate DID and get its VerKey <a id="generateDIDFromSEED"></a>
-The [Indy CLI](https://hyperledger-indy.readthedocs.io/projects/sdk/en/latest/docs/design/001-cli/README.html) in Docker using the [docker-file](https://github.com/hyperledger/indy-sdk/blob/main/cli/cli.dockerfile) can be used to generate a new DID from a given seed. However, it does not show the complete VerKey, check this [Issue](https://github.com/hyperledger/indy-sdk/issues/2553). Therefore, the easiest way to generate a DID is currently to start AcaPy with a given seed.
+Additionaly a Token mapper can to be created under *Clients > ManagedIdentityWallets*
+*> Mappers > create* with the following configuration:
+
+```
+Name : StaticBPN
+Mapper Type : Hardcoded claim
+Token Claim Name : BPN
+Claim value : BPNL000000001
+Claim JSON Type : String
+Add to ID token : OFF
+Add to access token : ON 
+Add to userinfo : OFF
+includeInAccessTokenResponse.label : ON 
+```
+
+* If you receive an error message, that the client secret is not valid, please go into
+keycloak admin and within *Clients > Credentials* recreate the secret.
+
+## Manual Database Configuration
+
+Within the development setup databases are initially prepared as needed, in the
+cloud deployment that is done via init containers. The MIW and the ACA-Py
+service are setting up the required tables on the first start. For MIW this is
+done within the `src/main/.../managedidentitywallets/plugins/Persistence.kt` database
+setup:
+
+```
+SchemaUtils.createMissingTablesAndColumns(Wallets, VerifiableCredentials, SchedulerTasks)
+```
+
+The tables of the **Revocation Service** are added manually to the database using the
+SQL script at `./dev-asset/dev-containers/revocation/V1.0.0__Create_DB.sql`
+
+
+## Local docker deployment
+
+First step is to create the distribution of the application:
+
+```bash
+./gradlew installDist
+```
+
+Next step is to build and tag the Docker image, replacing the
+`<VERSION>` with the app version:
+
+```
+docker build -t catena-x/managed-identity-wallets:<VERSION> .
+```
+
+Finally, start the image (please make sure that there are no quotes around the
+values in the env file):
+
+```
+docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets:<VERSION>
+```
+
+## Deployment on Kubernetes
+
+*Work in progress*
+
+1. Create a namespace
+
+    Using as example `managed-identity-wallets`:
+
+    ```
+    kubectl create namespace managed-identity-wallets
+    ```
+
+1. Create relevant secrets
+
+    Altogether four secrets are needed
+    * catenax-managed-identity-wallets-secrets
+    * catenax-managed-identity-wallets-acapy-secrets    
+    * postgres-acapy-secret-config
+    * postgres-managed-identity-wallets-secret-config
+
+    Create these with following commands, after replacing the placeholders:
+
+    ```
+    kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-secrets \
+      --from-literal=cx-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/miwdev?user=miwdevuser&password=<placeholder>' \
+      --from-literal=cx-auth-client-id='ManagedIdentityWallets' \
+      --from-literal=cx-auth-client-secret='<placeholder>'
+
+    kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-acapy-secrets \
+      --from-literal=acapy-wallet-key='<placeholder>' \
+      --from-literal=acapy-agent-wallet-seed='<placeholder>' \
+      --from-literal=acapy-jwt-secret='<placeholder>' \
+      --from-literal=acapy-db-account='postgres' \
+      --from-literal=acapy-db-password='<placeholder>' \
+      --from-literal=acapy-db-admin='postgres' \
+      --from-literal=acapy-db-admin-password='<placeholder>' \
+      --from-literal=acapy-admin-api-key='<placeholder>'
+
+    kubectl -n managed-identity-wallets create secret generic postgres-acapy-secret-config \
+    --from-literal=password='<placeholder>' \
+    --from-literal=postgres-password='<placeholder>' \
+    --from-literal=user='postgres'
+
+    kubectl -n managed-identity-wallets create secret generic postgres-managed-identity-wallets-secret-config \
+    --from-literal=password='<placeholder>' \
+    --from-literal=postgres-password='<placeholder>' \
+    --from-literal=user='postgres'
+    ```
+
+1.  If the Indy ledger is write-restricted, the DID of the used seed
+    must be registered manually before starting ACA-Py.
+
+1. Install a new deployment via helm
+
+    Run following command to use the base values as well as the predefined values for local deployment:
+
+    ```
+    helm install managed-identity-wallets ./helm/managed-identity-wallets/ -n managed-identity-wallets -f ./helm/managed-identity-wallets/values.yaml -f ./helm/managed-identity-wallets/values-local.yaml
+    ```
+
+4. Expose via loadbalancer
+
+    ```
+    kubectl -n managed-identity-wallets apply -f dev-assets/kube-local-lb.yaml
+    ```
+
+5. To check the current deployment and version run `helm list -n <namespace-placeholder>`. Example output:
+
+    ```
+    NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	                APP VERSION
+    cx-miw       	ingress-miw     	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-managed-identity-wallets-0.1.0	0.0.5      
+    ```
+
+# End Users
+
+See OpenAPI documentation
+
+# Further Guides
+
+In this section there are advanced cases (e.g. building your own ACA-Py image)
+described.
+
+## Preparation of ACA-Py Docker Image <a id= "acapyDockerImage"></a>
+
+ACA-Py can be used via the official image at `bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4`
+or build your own image following the steps:
+* clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
+* navigate to the repository `cd aries-cloudagent-python`
+* currently tested with commit `0.7.4` from June, 30, 2022
+* run `git checkout 0.7.4`
+* run `docker build -t acapy:0.7.4 -f ./docker/Dockerfile.run .`
+* change the used image for `cx_acapy` in `dev-assets/dev-containers/docker-compose.yml`
+
+## Integrate with an write-restricted Indy Ledger
+
+If the used Indy ledger (see parameter `--genesis-url https://indy-test.idu.network/genesis`)
+is write-restricted to endorsers or higher roles, the DID and its VerKey must be registered
+manually before starting ACA-Py.
+
+The [Indy CLI](https://hyperledger-indy.readthedocs.io/projects/sdk/en/latest/docs/design/001-cli/README.html)
+in Docker using the [docker-file](https://github.com/hyperledger/indy-sdk/blob/main/cli/cli.dockerfile)
+can be used to generate a new DID from a given seed. However, it does not show the
+complete `VerKey`, check this [Issue](https://github.com/hyperledger/indy-sdk/issues/2553). 
+Therefore, the easiest way to generate a DID is currently to start ACA-Py with a given seed.
+
   * Navigate to `./dev-assets/generate-did-from-seed`
-  * Generate a random seed that has 32 characters. If the use of an offline secure secret/password generator is not possible, then these guidelines must be followed:
+  * Generate a random seed that has 32 characters. If the use of an offline secure secret/password
+    generator is not possible, then these guidelines must be followed:
     * No repeat of characters or strings
     * No patterns or use of dictionary words
     * The use of uppercase and lowercase letters - as well as numbers and allowed symbols
     * No personal preferences like names or phone numbers
   * Set the seed as an enviroment variable e.g. `export SEED=312931k4h15989pqwpou129412i214dk`
-  * Run the script generateDidFromSeed script with `./generateDidFromSeed.sh` which starts the AcaPy container and shows the printout of the DID and VerKey from its logs in the console like the following
+  * Run the script generateDidFromSeed script with `./generateDidFromSeed.sh` which starts the
+    ACA-Py container and shows the printout of the `DID` and `VerKey` from its logs in the console
+    like the following
     ```
-    2022-08-12 08:08:13,888 indy.did DEBUG get_my_did_with_meta: <<< res: '{"did":"Hw2eFhr3KcZw5JcRW45KNc","verkey":"AEErMofs7DcJT636pocN2RiEHgTLoF4Mpj6heFXwtb3q","tempVerkey":null,"metadata":null}'
+    2022-08-12 08:08:13,888 indy.did DEBUG get_my_did_with_meta: <<< res: '{"did":"HW2eFhr3KcZw5JcRW45KNc","verkey":"aEErMofs7DcJT636pocN2RiEHgTLoF4Mpj6heFXwtb3q","tempVerkey":null,"metadata":null}'
     ```
-  * If the script did not stop the container, the command `docker-compose down -v` can stop and delete it manually
+  * If the script did not stop the container, the command `docker compose down -v` can stop and delete it manually
 
-## Tests
+## Testing GitHub actions locally <a id= "testingGitHubActionsLocally"></a>
 
-### Unit Tests
+Using [act](https://github.com/nektos/act) it is possible to test GitHub actions
+locally. To run it needs a secrets file, which could be derived on `.env.example`,
+see the section above.
 
-    ./gradlew test
+```
+act --secret-file .env
+```
 
-### Test Coverage
-Jacoco is used to generate the coverage report. The report generation and the coverage verification are automatically executed after tests.
+## Test Coverage
 
-The generated Html report can be found under `jacoco-report/html/`
+Jacoco is used to generate the coverage report. The report generation
+and the coverage verification are automatically executed after tests.
 
-To generate the report run the command `./gradlew jacocoTestReport`
+The generated HTML report can be found under `jacoco-report/html/`
 
-To check the coverage run the command `./gradlew jacocoTestCoverageVerification`. Currently the minimum is 80% (INSTRUCTIONS)
+To generate the report run the command
 
-Files to be excluded from the coverage calculation can be set in the `gradle.properties` using a comma-separated list of files or directories with possible wildcards as the value for the property `coverage_excludes`. The files in `models` and `entities` should be excluded as long as they don't have any logic. The services that are mocked in unit tests must be excluded. Also their interfaces need to be excluded because they have a `companion object` that is used to create those services. Files like `Application.kt` which are tested or simulated indirectly for example using `withTestApplication` should also be excluded.
+```
+./gradlew jacocoTestReport
+```
+
+To check the coverage run the command
+
+```
+./gradlew jacocoTestCoverageVerification
+```
+
+Currently the minimum is 80%
+
+Files to be excluded from the coverage calculation can be set in
+`gradle.properties` using a comma-separated list of files or directories
+with possible wildcards as the value for the property `coverage_excludes`.
+The files in `models` and `entities` should be excluded as long as they
+don't have any logic. The services that are mocked in unit tests must be
+excluded. Also their interfaces need to be excluded because they have a
+`companion object` that is used to create those services. Files like
+`Application.kt` which are tested or simulated indirectly for example
+using `withTestApplication` should also be excluded.
 
 ## Dashboard <a id="dashboard"></a>
 
@@ -440,75 +459,4 @@ cd ui-src
 yarn build
 rm -rf ../static/*
 cp -r dist/* ../static
-```
-
-## Future <a id="future"></a>
-
-Potentially following libraries and frameworks could be added in future
-
-* [HikariCP](https://github.com/brettwooldridge/HikariCP) for connection pooling
-* [Koin](https://github.com/InsertKoinIO/koin) for dependency injection
-
-------
-
-# Further notes <a id= "furtherNotes"></a>
-
-Deployment to be adjusted to the ArgoCD deployment, below notes are just for reference
-
-## Helm Setup and Auto Deployment <a id= "helmSetupAndAutoDeployment"></a>
-The Helm setup is configured under `helm/managed-identity-wallets` and used by `github-actions` for auto deployment. Before pushing to the `develop` branch, please check if the version of the `gradle.properties` need to be updated, the Aca-Py image is uploaded as described [section](##Aca-Py_Build_and_ Upload_Image) and the secret files and `values-staging.yaml` sill accurate.
-
-* To check the current deployment and version run `helm list -n <namespace-placeholder>`. Example output:
-```
-NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	                APP VERSION
-cx-miw       	ingress-miw     	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-managed-identity-wallets-0.1.0	0.0.5      
-```
-
-The deployment requires also a secret file `catenax-managed-identity-wallets-secrets` that include the following data:
-1. `cx-db-jdbc-url` (includes password/credentials for DB access)
-1. `cx-auth-client-id`
-1. `cx-auth-client-secret`
-
-To add a secret file to the namespace in the cluster:
-* login to AKS
-* either import them using a file `kubectl -n <namespace-placeholder> create secret generic catenax-managed-identity-wallets-secrets --from-file <path to file>`
-* or run the following command after replaceing the placeholders
-```
-  kubectl -n <namespace-placeholder> create secret generic catenax-managed-identity-wallets-secrets \
-  --from-literal=cx-db-jdbc-url='<placeholder>' \
-  --from-literal=cx-auth-client-id='<placeholder>' \
-  --from-literal=cx-auth-client-secret='<placeholder>'
-```
-
-Aca-py will be deployed and connected to a postgres database pod in the same namespace. The postgres database is deployed using the following [instructions](https://www.sumologic.com/blog/kubernetes-deploy-postgres/) The used files can be found under `dev-assets/acapy-postgres` without adding a Service. The IP of the acapy-postgres pod should be updated in the `values-staging.yaml` whenever the postgres pod is changed
-
-The deployment of AcaPy instance requires also a secret file `catenax-managed-identity-wallets-acapy-secrets` that include the following data:
-1. `acapy-wallet-key` the key of the base wallet
-1. `acapy-agent-wallet-seed` the seed of the base wallet
-1. `acapy-jwt-secret` the jwt secret for the tokens
-1. `acapy-db-account` postgres account
-1. `acapy-db-password` postgres password
-1. `acapy-db-admin` postgres admin
-1. `acapy-db-admin-password` postgres admin password
-1. `acapy-admin-api-key` the admin api key used by the managed identity wallets and acapy instance
-```
-kubectl -n <namespace-placeholder> create secret generic catenax-managed-identity-wallets-acapy-secrets \
-  --from-literal=acapy-wallet-key='<placeholder>' \
-  --from-literal=acapy-agent-wallet-seed='<placeholder>' \
-  --from-literal=acapy-jwt-secret='<placeholder>' \
-  --from-literal=acapy-db-account='<placeholder>' \
-  --from-literal=acapy-db-password='<placeholder>' \
-  --from-literal=acapy-db-admin='<placeholder>' \
-  --from-literal=acapy-db-admin-password='<placeholder>' \
-  --from-literal=acapy-admin-api-key='<placeholder>'
-```
-
-* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-secrets -o yaml`
-* To check if the secrets stored correctly run `kubectl -n <namespace-placeholder> get secret/catenax-managed-identity-wallets-acapy-secrets -o yaml`
-
-Currently the ORM Exposed is creating the tables if they don't exist yet, done
-within the `Persistence.kt` database setup:
-
-```
-SchemaUtils.createMissingTablesAndColumns(Companies, Wallets, VerifiableCredentials)
 ```
