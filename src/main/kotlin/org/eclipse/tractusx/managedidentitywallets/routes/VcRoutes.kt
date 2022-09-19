@@ -39,6 +39,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
@@ -150,6 +151,42 @@ fun Route.vcRoutes(
 
                     val verifiableCredentialDto = walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
                     call.respond(HttpStatusCode.Created, verifiableCredentialDto)
+                }
+            }
+        }
+
+        route("/issuance-flow") {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
+                notarizedPost(
+                    PostInfo<Unit, VerifiableCredentialIssuanceFlowRequestDto, CredentialOfferResponse>(
+                        summary = "Issue credential flow according to Aries RFC 0453",
+                        description = "Permission: " +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
+                                "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
+                                "\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. " + 
+                                "Issuer must be a DID managed by the MIW",
+                        requestInfo = RequestInfo(
+                            description = "The verifiable credential input",
+                            examples = verifiableCredentialIssuanceFlowRequestDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Created,
+                            description = "The credential Offer as String",
+                            examples = credentialOfferResponseExample
+                        ),
+                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
+                            forbiddenException, unauthorizedException),
+                        tags = setOf("VerifiableCredentials")
+                    )
+                ) {
+                    val verifiableCredentialRequestDto = call.receive<VerifiableCredentialIssuanceFlowRequestDto>()
+                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
+                    val vc = verifiableCredentialRequestDto.toInternalVerifiableCredentialIssuanceFlowRequest()
+                    call.respond(
+                        HttpStatusCode.Created,
+                        walletService.triggerCredentialIssuanceFlow(vc)
+                    )
                 }
             }
         }
@@ -346,5 +383,33 @@ val statusListCredentialExample = mapOf(
             verificationMethod = "did:indy:local:test:Ae49DuXZy2PLBjSL9W2V2i#key-1",
             jws = "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0FB66o-WAn8W4qnNK0NsHBFMJj_ZM42ADdbwYO-P8oGywaYWeBPZylgD35AV2-CR0b5Hs8uDq0EIn8iHycjmBQ"
         )
+    )
+)
+
+val verifiableCredentialIssuanceFlowRequestDtoExample = mapOf(
+    "demo" to VerifiableCredentialIssuanceFlowRequestDto(
+        context = listOf(
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+        ),
+        id = "http://example.edu/credentials/3732",
+        type = listOf("University-Degree-Credential, VerifiableCredential"),
+        issuerIdentifier = "did:example:76e12ec712ebc6f1c221ebfeb1f",
+        issuanceDate = "2019-06-16T18:56:59Z",
+        expirationDate = "2019-06-17T18:56:59Z",
+        credentialSubject = mapOf("college" to "Test-University"),
+        holderIdentifier = "did:example:492edf208",
+        webhookUrl = "http://example.com/webhooks"
+    )
+)
+
+val credentialOfferAsString = """
+{"credential": {"@context": ["https://www.w3.org/2018/credentials/v1", "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData"], "type": ["BpnCredential", "VerifiableCredential"], "issuer": "did:sov:HsfwvUFcZkAcxDa2kASMr7", "issuanceDate": "2021-06-16T18:56:59Z", "credentialSubject": {"type": ["BpnCredential"], "bpn": "NEWNEWTestTest", "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"}}, "options": {"proofType": "Ed25519Signature2018"}}
+""".trimIndent()
+
+val credentialOfferResponseExample = mapOf(
+    "demo" to CredentialOfferResponse(
+        credentialOffer = credentialOfferAsString,
+        threadId = "2ewqe-qwe24-eqweqwrqwr-rwqrqwr"
     )
 )

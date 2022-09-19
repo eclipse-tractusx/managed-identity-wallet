@@ -81,7 +81,7 @@ build system.
     3. Execute the request and note down your `did` and `verKey` from the response
        1. ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
 1. Register public DID
-    1. Register your DID from your Wallet at https://indy-test.idu.network/ with "Register from DID"
+    1. Register your DID from your Wallet at http://dev.greenlight.bcovrin.vonx.io/ with "Register from DID"
        1. ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
     2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
        `{ "verKey": "verification key from creation" }`
@@ -162,8 +162,8 @@ below. Here a few hints on how to set it up:
 9. `CX_AUTH_CLIENT_SECRET`: specify the client secret. It can be extracted from keycloak under `realms - catenax - clients - ManagedIdentityWallets - credentials`
 10. `APP_VERSION`: specify the application version, e.g. `0.0.10` note that github actions replace the value before the helm deployment
 11. `ACAPY_API_ADMIN_URL`: specify the admin url of Aca-Py, e.g. `http://localhost:11000`
-12. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`https://indy-test.idu.network/register`
-13. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`
+12. `ACAPY_LEDGER_URL`: specify the indy ledger url for registeration, e.g.`http://dev.greenlight.bcovrin.vonx.io/register`
+13. `ACAPY_NETWORK_IDENTIFIER`: specify the name space of indy ledger, e.g. `local:test`. This value is currently ignored until AcaPy supports the indy did method
 14. `ACAPY_ADMIN_API_KEY`: specify the admin api key of Aca-Py enpoints, e.g. `Hj23iQUsstG!dde`
 15. `CX_BPN`: specify the bpn of the catenaX wallet, e.g. `Bpn111` This wallet should be the first wallet to create.
 15. `BPDM_DATAPOOL_URL`: specify the base data pool API endpoint of the `BPDM` e.g. `https://catenax-bpdm-int.demo.catena-x.net`
@@ -216,7 +216,7 @@ Starting up Docker Containers for Postgres, Keycloak and AcaPy via following ste
 
 * navigate to `./dev-assets/dev-containers`
 * run `docker-compose up -d` (or `docker compose up -d`, depdending on the installation) to start a Postgresql database and Keycloak instance and the AcaPy Service and the revocation Service as Docker containers
-* If the used Indy ledger `--genesis-url https://indy-test.idu.network/genesis \` is write-restricted to endorsers or higher roles, the DID and its VerKey must be registered manually before starting AcaPy. To generate a new DID with a given seed see the section - [Generate DID from Seed](#generateDIDFromSEED)
+* If the used Indy ledger `--genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \` is write-restricted to endorsers or higher roles, the DID and its VerKey must be registered manually before starting AcaPy. To generate a new DID with a given seed see the section - [Generate DID from Seed](#generateDIDFromSEED)
 * To setup the Postgresql database in the application please see the section below - [Setting up progresql database](#settingUpPostgresSqlDatabase), for the database
 * The tables of the `Revocation Service` should be added manually to the `miwdev` database using the sql script `./dev-asset/dev-containers/revocation/V1.0.0__Create_DB.sql`
 * The keycloak configuration are imported from `./dev-assets/dev-containers/keycloak` in the docker compose file.
@@ -318,7 +318,7 @@ Later you can run `Application.kt` after adding the `dev.env` to the Run/Debug c
 ### Initial Wallet Setup <a id= "initialWalletSetup"></a>
 
 * Create the Catena-X wallet using the value stored in `CX_BPN` as BPN
-* Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](https://indy-test.idu.network/) as Endorser
+* Register the DID of Catena-X Wallet and its VerKey on the ledger [Register from DID](http://dev.greenlight.bcovrin.vonx.io/) as Endorser
 * Assign the DID to public manually by sending a POST request `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key 
   `{ "verKey": "verification key from creation" }`
 

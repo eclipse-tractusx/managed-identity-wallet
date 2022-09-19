@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
 
 class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
@@ -33,6 +34,14 @@ class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
         data: T?
     ): Deferred<Boolean> {
         return CompletableDeferred(true)
+    }
+
+    override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+        targetWallet: WalletDto,
+        connectionId: String,
+        webhookUrl: String?
+    ): Deferred<Boolean> {
+        TODO("Not yet implemented")
     }
 
 }

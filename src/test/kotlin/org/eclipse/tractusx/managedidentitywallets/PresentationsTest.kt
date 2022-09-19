@@ -67,6 +67,7 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -78,7 +79,10 @@ class PresentationsTest {
 
             val networkId = EnvironmentTestSetup.NETWORK_ID
             val invalidDID = SingletonTestData.baseWalletDID
-                .replace("did:indy:$networkId", "did:indy:$networkId WRONG")
+                .replace(
+                    "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}",
+                    "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()} WRONG"
+                )
             val verifiablePresentationRequestWithInvalidDIDs = VerifiablePresentationRequestDto(
                 holderIdentifier = SingletonTestData.baseWalletDID,
                 verifiableCredentials = listOf(
@@ -329,6 +333,7 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -479,12 +484,13 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add base wallet
             runBlocking {
                 EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "base"))
             }
-
+            //TODO replace did:sov in all used json files when indy did method is supported by AcaPy
             val validVP = File("./src/test/resources/presentations-test-data/validVP.json").readText(Charsets.UTF_8)
             handleRequest(HttpMethod.Post, "/api/presentations/validation") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
@@ -617,6 +623,7 @@ class PresentationsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add base wallet
             runBlocking {
@@ -729,7 +736,8 @@ class PresentationsTest {
             }
 
             var vpWithIssuerConflict =
-                vpWithPlaceholders.replace("<issuer-to-replace>", "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9")
+                vpWithPlaceholders.replace("<issuer-to-replace>",
+                    "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}AA5EEDcn8yTfMobaTcabj9")
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
