@@ -185,7 +185,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
                         DidVerificationMethodDto(
                             id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#key-1",
                             type = "Ed25519VerificationKey2018",
-                            controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
+                            controller = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}",
                             publicKeyBase58= "${SingletonTestData.baseWalletVerKey}"
                         )
                     ),

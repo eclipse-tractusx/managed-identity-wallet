@@ -177,14 +177,14 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/did:indy:local:test:GoVWzSKLChMM91MGpw4LAi",
+					"raw": "{{custodian_url}}/api/wallets/TestX1",
 					"host": [
 						"{{custodian_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"did:indy:local:test:GoVWzSKLChMM91MGpw4LAi"
+						"TestX1"
 					]
 				}
 			},
@@ -274,7 +274,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n            \"https://www.w3.org/2018/credentials/v1\",\n            \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739141414\",\n    \"type\": [\n        \"BpnCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n            \"type\": [\n                \"BpnCredential\"\n            ],\n            \"bpn\": \"NEWNEWTestTest\",\n            \"id\": \"did:indy:local:test:7rB93fLvW5kgujZ4E57ZxL\"\n    },\n    \"holderIdentifier\": \"did:indy:local:test:7rB93fLvW5kgujZ4E57ZxL\",\n    \"isRevocable\": false\n}",
+					"raw": "{\n    \"@context\": [\n            \"https://www.w3.org/2018/credentials/v1\",\n            \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739141414\",\n    \"type\": [\n        \"BpnCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n            \"type\": [\n                \"BpnCredential\"\n            ],\n            \"bpn\": \"NEWNEWTestTest\",\n            \"id\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\"\n    },\n    \"holderIdentifier\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"isRevocable\": false\n}",
 					"options": {
 						"raw": {
 							"language": "json"

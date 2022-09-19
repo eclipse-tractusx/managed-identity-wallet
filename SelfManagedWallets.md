@@ -1,33 +1,32 @@
 ## Interaction with self managed wallet <a id= "self-managed-wallets"></a>
 
 - Interaction with self managed wallet involves:
-  - Establich connection with self managed wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/25464a5c8f8a17b14edaa4310393df6094ace7b0/features/0023-did-exchange)
+  - Establish connection with self managed wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/25464a5c8f8a17b14edaa4310393df6094ace7b0/features/0023-did-exchange)
   - Issue credential to self managed wallet as defined in [Aries RFC 0453](https://github.com/hyperledger/aries-rfcs/tree/cd27fc64aa2805f756a118043d7c880354353047/features/0453-issue-credential-v2)
   - Request presentation from self managed wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/eace815c3e8598d4a8dd7881d8c731fdb2bcc0aa/features/0454-present-proof-v2)
 
 - Current limitation:
   - Self managed wallets can only interact with the Catena-X wallet
-  - The Catena-X wallet is connected to AcaPy using WebSocket
   - Request presentation from self managed wallet is not implemented yet
   - Credential revocation is not supported for credentials issued to self managed wallet
 
-### Register, Establich Connection and Issue MemeberShip and Bpn Credential
+### Register, Establish Connection and Issue Membership and Bpn Credential
 A self managed wallet can be registered on the MIW by giving the `bpn`, `did`, `name`, and an optional `webhookUrl` to inform the requester when the connection reaches the state `Completed` and the Membership and BPN credentials are issued. 
 
 The following instruction will be executed when a self managed wallet is registered:
-  - Establich connection between Catena-X wallet DID and the given DID of the self managed wallet
+  - Establish connection between Catena-X wallet DID and the given DID of the self managed wallet
   - Store the connection Id in database
   - If webhookUrl exist then store it with the request Id of the connection in database
   - Set the state of connection and webhook to `Request``
   - When the self managed wallet accepts the connection, then the built websocket connected to Acapy will trigger a function to perform the following steps:
     - Set the connection state to `Completed`
     - If the WebhookUrl exist then send the information to the stored url
-    - Trigger the creation of the Memebership and BPN credentials which sends a `Credential Offer` to the self managed wallet
-    - The self managed wallet should accept the offer. This can be done by requesting the credential using the credential exchange Id `cred_ex_id` and then store it
+    - Trigger the creation of the Membership and BPN credentials which sends a `Credential Offer` to the self managed wallet
+    - When the self managed wallet accepts the offer, then the two credentials will be issued by the Catena X wallet.
 
 
 ### Issue Verifiable Credential for Self Managed Wallet
-A credential can be sent to the self managed wallet by calling the `issuance-flow` endpoint: This endpoint takes required infromationen to construct the credential, also an optional webhookUrl as input. This call will trigger the application to send a `Credential Offer` to the self managed wallet. When the `Credential Offer` get accepted by the self managed wallet the managed wallet will issue a credential and send it. When the credential is accepted and stored by the self managed wallet the MIW will then set the state to `Done`. If the webhookUrl exist a notification will be sent.
+A credential can be sent to the self managed wallet by calling the `issuance-flow` endpoint: This endpoint takes required information to construct the credential, also an optional webhookUrl as input. This call will trigger the application to send a `Credential Offer` to the self managed wallet. When the `Credential Offer` get accepted by the self managed wallet the managed wallet will issue a credential and send it. When the credential is accepted and stored by the self managed wallet the MIW will then set the state to `Done`. If the webhookUrl exist a notification will be sent.
 
 ### Request Verifiable Presentation from Self Managed Wallet
   not implemented yet!

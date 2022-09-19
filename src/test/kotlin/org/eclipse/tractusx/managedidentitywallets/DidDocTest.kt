@@ -81,7 +81,7 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.OK, response.status())
             }
 
-            val notValidDidMethod = "did:local:indy:test:XMcRfSUkkQK38p6CCjHZz6"
+            val notValidDidMethod = "did:local:test:test:XMcRfSUkkQK38p6CCjHZz6"
             handleRequest(HttpMethod.Get, "/api/didDocuments/$notValidDidMethod") {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {

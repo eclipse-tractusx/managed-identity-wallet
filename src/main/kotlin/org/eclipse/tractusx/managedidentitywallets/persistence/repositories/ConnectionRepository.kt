@@ -25,6 +25,8 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.ConnectionState
 import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -41,15 +43,13 @@ class ConnectionRepository {
     fun add(
         connectionOwnerDid: String,
         connectionTargetDid: String,
-        connectionRecord: ConnectionRecord,
-        connectionOwnerWallet: Wallet
+        connectionRecord: ConnectionRecord
     ): Connection {
         return Connection.new {
             connectionId = connectionRecord.connectionId
             theirDid = connectionTargetDid
             myDid =  connectionOwnerDid
             state = connectionRecord.state.toString()
-            wallet = connectionOwnerWallet
         }
     }
 
@@ -57,6 +57,13 @@ class ConnectionRepository {
         get(connectionId).apply {
             state = connectionState.name
         }
+    }
+
+    fun deleteConnections(did: String): Boolean {
+        Connections.deleteWhere {
+            (Connections.myDid eq did) or (Connections.theirDid eq did)
+        }
+        return true
     }
 
     fun deleteConnection(connectionId: String): Boolean {

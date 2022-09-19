@@ -26,7 +26,7 @@
     "type": "Ed25519Signature2018",
     "created": "2022-07-12T12:13:16Z",
     "proofPurpose": "assertionMethod",
-    "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
+    "verificationMethod": "did:sov:LCNSw1JxSTDw7EpR1UMG7D#key-1",
     "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
   }
 }

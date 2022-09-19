@@ -99,7 +99,7 @@ class AcaPyWalletServiceImpl(
     override suspend fun registerBaseWallet(verKey: String): Boolean {
         log.debug("Register base wallet with bpn $baseWalletBpn and key $verKey")
         val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
-        val shortDid = catenaXWallet.did.substring(("${utilsService.getDidMethodPrefixWithNetworkIdentifier()}").length)
+        val shortDid = utilsService.getIdentifierOfDid(catenaXWallet.did)
 
         // Register DID with public DID on ledger
         acaPyService.assignDidToPublic(
@@ -219,8 +219,7 @@ class AcaPyWalletServiceImpl(
             connectionRepository.add(
                 connectionOwnerDid = connectionOwnerWallet.did,
                 connectionTargetDid = selfManagedWalletCreateDto.did,
-                connectionRecord =  connectionRecord,
-                connectionOwnerWallet = connectionOwnerWallet
+                connectionRecord =  connectionRecord
             )
             if (!selfManagedWalletCreateDto.webhookUrl.isNullOrBlank()) {
                 webhookService.addWebhook(
@@ -242,11 +241,16 @@ class AcaPyWalletServiceImpl(
     override suspend fun deleteWallet(identifier: String): Boolean {
         log.debug("Delete Wallet with identifier $identifier")
         val walletData = getWalletExtendedInformation(identifier)
+        val isSelfManagedWallet = walletData.walletId.isNullOrBlank()
         transaction {
             credentialRepository.deleteCredentialsOfWallet(walletId = walletData.id!!)
+            connectionRepository.deleteConnections(walletData.did)
             walletRepository.deleteWallet(identifier)
         }
-        acaPyService.deleteSubWallet(walletData)
+        if (!isSelfManagedWallet) {
+            acaPyService.deleteSubWallet(walletData)
+        }
+        //TODO delete Connections with self managed wallets in AcaPy
         return true
     }
 

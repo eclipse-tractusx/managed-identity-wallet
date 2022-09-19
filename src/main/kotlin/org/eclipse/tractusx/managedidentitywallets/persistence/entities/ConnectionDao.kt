@@ -29,7 +29,6 @@ object Connections : IntIdTable("connections") {
     val theirDid = varchar("their_did", 4096)
     val myDid = varchar("my_did", 4096)
     val state = varchar("state", 4096)
-    val walletId = reference("wallet_id", Wallets)
 }
 
 class Connection(id: EntityID<Int>) : Entity<Int>(id) {
@@ -38,5 +37,4 @@ class Connection(id: EntityID<Int>) : Entity<Int>(id) {
     var theirDid by Connections.theirDid
     var myDid by Connections.myDid
     var state by Connections.state
-    var wallet by Wallet referencedOn Connections.walletId
 }
