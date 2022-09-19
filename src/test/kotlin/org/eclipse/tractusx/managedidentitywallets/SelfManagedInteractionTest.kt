@@ -115,7 +115,7 @@ class SelfManagedInteractionTest {
             }
 
             // Issuance flow
-            var vc = VerifiableCredentialIssuanceFlowRequestDto(
+            val vc = VerifiableCredentialIssuanceFlowRequestDto(
                 context = listOf(
                     JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
                     JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
@@ -178,7 +178,7 @@ class SelfManagedInteractionTest {
                 }
             }
 
-            var vcWithCredentialSubjectId = VerifiableCredentialIssuanceFlowRequestDto(
+            val vcWithCredentialSubjectId = VerifiableCredentialIssuanceFlowRequestDto(
                 context = listOf(
                     JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
                     JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
@@ -219,18 +219,19 @@ class SelfManagedInteractionTest {
             // clean
             runBlocking {
                 transaction {
-                    EnvironmentTestSetup.connectionRepository.deleteConnection(SingletonTestData.connectionId)
-                    val connections = EnvironmentTestSetup.connectionRepository
-                        .getConnections(SingletonTestData.baseWalletDID, null)
-                    assertEquals(0, connections.size)
-
                     EnvironmentTestSetup.webhookRepository.deleteWebhook(SingletonTestData.threadId)
                     val webhookCredential = EnvironmentTestSetup.webhookService.getWebhookByThreadId(SingletonTestData.threadId)
                     assertEquals(null, webhookCredential)
                 }
 
-                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN) // base wallet
+                var connections = EnvironmentTestSetup.connectionRepository.getAll()
+                assertEquals(1, connections.size)
+
                 EnvironmentTestSetup.walletService.deleteWallet("e-bpn")
+                connections = EnvironmentTestSetup.connectionRepository.getAll()
+                assertEquals(0, connections.size)
+
+                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN) // base wallet
                 val listOfBpn = EnvironmentTestSetup.walletService.getAllBpns()
                 assertEquals(0, listOfBpn.size)
             }

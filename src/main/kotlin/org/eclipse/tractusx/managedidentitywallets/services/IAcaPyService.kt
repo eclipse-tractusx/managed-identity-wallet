@@ -67,6 +67,8 @@ interface IAcaPyService {
         vc: VerifiableCredentialIssuanceFlowRequest
     ): V20CredExRecord
 
+    suspend fun deleteConnection(connectionId: String, token: String)
+
     companion object {
         fun create(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,

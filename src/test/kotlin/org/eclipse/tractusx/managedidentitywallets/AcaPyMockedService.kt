@@ -26,7 +26,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
-import org.hyperledger.acy_py.generated.model.CredentialOffer
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.ConnectionState
@@ -253,6 +252,8 @@ class AcaPyMockedService(val baseWalletBpn: String,
         credExRecord.threadId = SingletonTestData.threadId
         return credExRecord
     }
+
+    override suspend fun deleteConnection(connectionId: String, token: String) { return }
 
     private fun createRandomString(): String {
         return (1..25)

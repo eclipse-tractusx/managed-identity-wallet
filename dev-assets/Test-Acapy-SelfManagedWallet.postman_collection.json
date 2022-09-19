@@ -102,6 +102,40 @@
 			"response": []
 		},
 		{
+			"name": "Delete Record (replace with cred_ex_id)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/issue-credential-2.0/records/cc12a037-fcbc-4c4d-a82f-ee0c01965b52",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"issue-credential-2.0",
+						"records",
+						"cc12a037-fcbc-4c4d-a82f-ee0c01965b52"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Send Credential Request (replace cred_ex_id)",
 			"request": {
 				"method": "POST",
@@ -216,7 +250,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:11001/connections/e842a370-d6bc-4230-9085-a6ed0f5b4e6b",
+					"raw": "http://localhost:11001/connections/61be1bae-471b-4fa0-b9ff-662d365d16c9",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -224,7 +258,76 @@
 					"port": "11001",
 					"path": [
 						"connections",
-						"e842a370-d6bc-4230-9085-a6ed0f5b4e6b"
+						"61be1bae-471b-4fa0-b9ff-662d365d16c9"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Credentials",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:11001/credentials/w3c",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"credentials",
+						"w3c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Credential (replace with record_id of credential)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "Hj23iQUsstG!dde",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/credential/w3c/cc12a037-fcbc-4c4d-a82f-ee0c01965b52",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"credential",
+						"w3c",
+						"cc12a037-fcbc-4c4d-a82f-ee0c01965b52"
 					],
 					"query": [
 						{

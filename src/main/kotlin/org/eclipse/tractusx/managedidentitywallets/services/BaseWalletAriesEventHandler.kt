@@ -61,7 +61,7 @@ class BaseWalletAriesEventHandler(
             ConnectionState.ERROR -> {
                 updateConnectionStateAndSendWebhook(connection)
             }
-            else -> { }
+            else -> { return }
         }
     }
 
@@ -103,7 +103,7 @@ class BaseWalletAriesEventHandler(
                         }
                     }
                 }
-                else -> { }
+                else -> { return }
             }
         }
     }

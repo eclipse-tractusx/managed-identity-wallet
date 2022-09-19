@@ -181,6 +181,15 @@ class AcaPyService(
         }
     }
 
+    override suspend fun deleteConnection(connectionId: String, token: String) {
+        client.delete<Any> {
+            url("${acaPyConfig.apiAdminUrl}/connections/$connectionId")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
+            accept(ContentType.Application.Json)
+        }
+    }
+
     override fun subscribeForWebSocket(subscriberWallet: WalletExtendedData) {
         val wsUrl = acaPyConfig.apiAdminUrl
             .replace("http", "ws")

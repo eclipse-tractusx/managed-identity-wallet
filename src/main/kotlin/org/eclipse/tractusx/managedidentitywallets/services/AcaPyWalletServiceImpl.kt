@@ -20,6 +20,7 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import foundation.identity.jsonld.JsonLDUtils
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.*
@@ -243,6 +244,16 @@ class AcaPyWalletServiceImpl(
         val walletData = getWalletExtendedInformation(identifier)
         val isSelfManagedWallet = walletData.walletId.isNullOrBlank()
         transaction {
+            val connections = connectionRepository.getConnections(null, walletData.did)
+            connections.forEach {
+                val connectionOwnerWallet = getWalletExtendedInformation(it.myDid)
+                runBlocking {
+                    acaPyService.deleteConnection(
+                        connectionId = it.connectionId,
+                        token = connectionOwnerWallet.walletToken!!
+                    )
+                }
+            }
             credentialRepository.deleteCredentialsOfWallet(walletId = walletData.id!!)
             connectionRepository.deleteConnections(walletData.did)
             walletRepository.deleteWallet(identifier)
@@ -250,7 +261,6 @@ class AcaPyWalletServiceImpl(
         if (!isSelfManagedWallet) {
             acaPyService.deleteSubWallet(walletData)
         }
-        //TODO delete Connections with self managed wallets in AcaPy
         return true
     }
 

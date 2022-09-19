@@ -24,10 +24,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.ConnectionState
-import org.jetbrains.exposed.sql.andWhere
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.or
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ConnectionRepository {
