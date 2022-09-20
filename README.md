@@ -13,7 +13,7 @@ build system. To store the wallets and communicate with an external ledger MIW i
 [Aries Cloud Agent Python](https://github.com/hyperledger/aries-cloudagent-python) with
 it's [multi-tenant feature](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md)
 and [JSON-LD credential](https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
-To support credential revocation MIW is using the [GXFS revocation service](tbd)
+To support credential revocation MIW is using the revocation service within the [GXFS Notarization API/Service](https://gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/-/tree/main/services/revocation)
 
 > **Warning**
 > This is not yet ready for production usage, as
@@ -32,45 +32,43 @@ Following tools the MIW development team used successfully:
 | Area        | Tool               | Download Link    | Comment     |
 |-------------|--------------------|------------------|-------------|
 | IDE         | IntelliJ           | https://www.jetbrains.com/idea/download/ | Additionally the [envfile plugin](https://plugins.jetbrains.com/plugin/7861-envfile) is suggested |
-|             | Visual Studio Code | https://code.visualstudio.com/download | Additionally Git, Kotlin, Kubernetes plugins are suggested |
-| Build       | Gradle             | https://gradle.org/install/ | |
+|             | Visual Studio Code | https://code.visualstudio.com/download | Test with version 1.71.2, additionally Git, Kotlin, Kubernetes plugins are suggested |
+| Build       | Gradle             | https://gradle.org/install/ | Tested with version 7.3.3 |
 | Runtime     | Docker Desktop     | https://www.docker.com/products/docker-desktop/ | |
-|             | Rancher Desktop    | | |
-| API Testing | Postman            | https://www.postman.com/downloads/ | |
-| Database    | DBeaver            | https://dbeaver.io/ | |
-
+|             | Rancher Desktop    | https://rancherdesktop.io | Tested with version 1.5.1, and Docker cli version `Docker version 20.10.17-rd, build c2e4e01` and Docker Compose cli version `Docker Compose version v2.6.1` |
+| API Testing | Postman            | https://www.postman.com/downloads/ | Tested with version 9.31.0 |
+| Database    | DBeaver            | https://dbeaver.io/ | Tested with version 22.2.0.202209051344 |
 
 ## Environment Variables <a id= "environmentVariables"></a>
 
 Please see the file `.env.example` for the environment examples that are used
 below. Here a few hints on how to set it up:
 
-| Key                       | Type   | Default | Description |
-|---------------------------|--------|---------|-------------|
-| `CX_DB_JDBC_URL`          | URL    | `jdbc:sqlite:file:test?mode=memory&cache=shared` | database connection string, most commonly postgreSQL is used |
-| `CX_DB_JDBC_DRIVER`       | URL    | `org.sqlite.JDBC`| database driver to use, most commonly postgreSQL is used |
-| `CX_AUTH_JWKS_URL`        | URL    | `http://localhost:8081/auth/realms/catenax/protocol/openid-connect/certs` | IAM certs url |
-| `CX_AUTH_ISSUER_URL`      | URL    | `http://localhost:8081/auth/realms/catenax` | IAM token issuer url |
-| `CX_AUTH_REALM`           | String | `catenax` | IAM realm |
-| `CX_AUTH_ROLE_MAPPINGS`   | String | `create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet` | IAM role mapping |
-| `CX_AUTH_RESOURCE_ID`     | String | `ManagedIdentityWallets` | IAM resource id |
-| `CX_AUTH_CLIENT_ID`       | String | `ManagedIdentityWallets` | IAM client id |
-| `CX_AUTH_CLIENT_SECRET`   | String | `ManagedIdentityWallets-Secret`| It can be extracted from keycloak under **realms** &gt; catenax &gt; clients &gt; ManagedIdentityWallets &gt; credentials |
-| `APP_VERSION`             | String | `0.4.0` | application version, this should be in-line with  |
-| `ACAPY_API_ADMIN_URL`     | String | `http://localhost:11000` | admin url of ACA-Py |
-| `ACAPY_ADMIN_API_KEY`     | String | `Hj23iQUsstG!dde` | admin api key of ACA-Py enpoints |
-| `ACAPY_LEDGER_URL`        | String | `https://indy-test.idu.network/register` | Hyperledger Indy ledger url for registration |
-| `ACAPY_NETWORK_IDENTIFIER`| String | `local:test` | name space of indy ledger |
-| `CX_BPN`                  | String |  `Bpn111` | BPN of the base wallet, this wallet is the first to create |
-| `BPDM_DATAPOOL_URL`       | String | `https://catenax-bpdm-int.demo.catena-x.net` | BPDM data pool API endpoint |
-| `BPDM_AUTH_CLIENT_ID`     | String | | client id for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_CLIENT_SECRET` | String | | client secret for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_GRANT_TYPE`    | String | `client_credentials` | grant type for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_SCOPE`         | String | `openid` | openid scope for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_URL`           | String | `https://centralidp.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token` | IAM url to get the access token for BPDM data pool endpoint |
-| `BPDM_PULL_DATA_AT_HOUR`  | String | `23` | specify at which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
-| `REVOCATION_URL`          | String | `http://localhost:8086` | URL of the revocation service |
-| `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR` | String | `23` | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
+| Key                       | Type   | Description |
+|---------------------------|--------|-------------|
+| `CX_DB_JDBC_URL`          | URL    | database connection string, most commonly postgreSQL is used |
+| `CX_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
+| `CX_AUTH_JWKS_URL`        | URL    | IAM certs url |
+| `CX_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
+| `CX_AUTH_REALM`           | String | IAM realm |
+| `CX_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
+| `CX_AUTH_RESOURCE_ID`     | String | IAM resource id |
+| `CX_AUTH_CLIENT_ID`       | String | IAM client id |
+| `CX_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*catenax* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
+| `APP_VERSION`             | String | application version, this should be in-line with the version in the deployment |
+| `ACAPY_API_ADMIN_URL`     | String | admin url of ACA-Py |
+| `ACAPY_ADMIN_API_KEY`     | String | admin api key of ACA-Py endpoints |
+| `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space |
+| `CX_BPN`                  | String | BPN of the base wallet, this wallet is the first to create |
+| `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
+| `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_GRANT_TYPE`    | String | grant type for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_SCOPE`         | String | openid scope for accessing the BPDM data pool endpoint |
+| `BPDM_AUTH_URL`           | String | IAM url to get the access token for BPDM data pool endpoint |
+| `BPDM_PULL_DATA_AT_HOUR`  | String | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
+| `REVOCATION_URL`          | String | URL of the revocation service |
+| `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR` | String | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
 
 ## Local Development Setup
 
@@ -100,7 +98,7 @@ revocation handling)
     docker compose up -d
     ```
 
-    You can stop the containers via `docker-compose down -v`
+    You can stop the containers via `docker compose down -v`
 
 1. Run the MIW service from the project rootfolder via (on MacOS)
 
@@ -163,8 +161,8 @@ Now you have achieved the following:
 |-----------------------|-------------------------|-------------|
 | postgreSQL database   | port 5432 on `localhost`| within the Docker Compose setup |
 | Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `catena`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
-| revocation service    | | within the Docker Compose setup |
-| acapy                 | http://localhost:10000  | within the Docker Compose setup |
+| revocation service    | http://localhost:8086   | within the Docker Compose setup |
+| ACA-Py                | http://localhost:10000  | within the Docker Compose setup |
 | MIW service           | http://localhost:8080/  | |
 
 # Administrator Documentation
@@ -217,22 +215,23 @@ available scopes/roles are:
     * to store Verifiable Credentials (The BPN of holder will be checked)
     * to trigger Business Partner Data update for its own BPN
 
-Additionaly a Token mapper can to be created under *Clients > ManagedIdentityWallets*
-*> Mappers > create* with the following configuration:
+Additionally a Token mapper can to be created under *Clients* &gt;
+*ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
+configuration (using as example `BPNL000000001`):
 
-```
-Name : StaticBPN
-Mapper Type : Hardcoded claim
-Token Claim Name : BPN
-Claim value : BPNL000000001
-Claim JSON Type : String
-Add to ID token : OFF
-Add to access token : ON 
-Add to userinfo : OFF
-includeInAccessTokenResponse.label : ON 
-```
+| Key                 | Value                     |
+|---------------------|---------------------------|
+| Name                | StaticBPN                 |
+| Mapper Type         | Hardcoded claim           |
+| Token Claim Name    | BPN                       |
+| Claim value         | BPNL000000001             |
+| Claim JSON Type     | String                    |
+| Add to ID token     | OFF                       |
+| Add to access token | ON                        |
+| Add to userinfo     | OFF                       |
+| includeInAccessTokenResponse.label | ON         | 
 
-* If you receive an error message, that the client secret is not valid, please go into
+If you receive an error message, that the client secret is not valid, please go into
 keycloak admin and within *Clients > Credentials* recreate the secret.
 
 ## Manual Database Configuration
@@ -249,7 +248,6 @@ SchemaUtils.createMissingTablesAndColumns(Wallets, VerifiableCredentials, Schedu
 
 The tables of the **Revocation Service** are added manually to the database using the
 SQL script at `./dev-asset/dev-containers/revocation/V1.0.0__Create_DB.sql`
-
 
 ## Local docker deployment
 
@@ -348,7 +346,9 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 
 # End Users
 
-See OpenAPI documentation
+See OpenAPI documentation, which is automatically created from
+the source and available on each deployment at the `/docs` endpoint
+(e.g. locally at http://localhost:8080/docs).
 
 # Further Guides
 

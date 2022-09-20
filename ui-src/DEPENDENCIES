@@ -157,7 +157,7 @@ npm/npmjs/-/eslint-utils/3.0.0, MIT, approved, #2431
 npm/npmjs/-/eslint-visitor-keys/2.1.0, Apache-2.0, approved, #2433
 npm/npmjs/-/eslint-visitor-keys/3.3.0, Apache-2.0, approved, #2696
 npm/npmjs/-/eslint-webpack-plugin/3.1.1, MIT, approved, clearlydefined
-npm/npmjs/-/eslint/8.15.0, LGPL-2.0-or-later AND MIT AND ISC AND OFL-1.1 AND (CC-BY-3.0 AND CC-BY-SA-2.0) AND (JSON AND LicenseRef-scancode-proprietary-license AND MIT), restricted, #3095
+npm/npmjs/-/eslint/8.15.0, , approved, #3095
 npm/npmjs/-/espree/9.3.1, BSD-2-Clause AND BSD-3-Clause AND MIT, approved, #2697
 npm/npmjs/-/espree/9.3.2, BSD-2-Clause AND BSD-3-Clause AND MIT, approved, #2697
 npm/npmjs/-/esquery/1.4.0, BSD-3-Clause, approved, #1100
