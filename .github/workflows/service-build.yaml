@@ -83,15 +83,10 @@ jobs:
         with:
           appname: 'project-managed-identity-wallets'
           createprofile: false
-          filepath: 'build/install/net.catenax.core.managedidentitywallets/lib/*' # add filepath for upload
-          vid: '${{ secrets.VERACODE_API_ID }}' # store and reference veracode API ID in github secrets
-          vkey: '${{ secrets.VERACODE_API_KEY }}' #store and reference veracode API KEY in github secrets
-          include: 'build/install/net.catenax.core.managedidentitywallets/lib/net.catenax.core.managedidentitywallets-*jar'
-#          createsandbox: 'true'
-#          sandboxname: 'SANDBOXNAME'
-#          scantimeout: 0
-#          exclude: '*.js'
-#          criticality: 'VeryHigh'
+          filepath: 'build/install/org.eclipse.tractusx.managedidentitywallets/lib/*' # add filepath for upload
+          vid: '${{ secrets.ORG_VERACODE_API_ID }}' # reference to API ID, which is set as github org. secret
+          vkey: '${{ secrets.ORG_VERACODE_API_KEY }}' #reference to API Key in github, which is set as github or. secret
+          include: 'build/install/org.eclipse.tractusx.managedidentitywallets/lib/org.eclipse.tractusx.managedidentitywallets-*jar'
 
       - name: setup nodejs
         uses: actions/setup-node@master

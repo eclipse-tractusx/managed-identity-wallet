@@ -7,7 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}_acapy
-  IMAGE_VERSION: 0.7.4-rc1
+  IMAGE_VERSION: 0.7.4
 
 jobs:
   build-and-push-acapy-image:
@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        run: git clone https://github.com/hyperledger/aries-cloudagent-python.git && cd aries-cloudagent-python && git checkout 0.7.4-rc1
+        run: git clone https://github.com/hyperledger/aries-cloudagent-python.git && cd aries-cloudagent-python && git checkout 0.7.4
 
       - name: Login to GitHub Container Registry
         if: ${{ !env.ACT }}

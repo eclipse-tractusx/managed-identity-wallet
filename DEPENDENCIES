@@ -1,0 +1,209 @@
+maven/mavencentral/ch.qos.logback/logback-classic/1.2.11, EPL-1.0, approved, CQ13636
+maven/mavencentral/ch.qos.logback/logback-classic/1.2.9, EPL-1.0, approved, CQ13636
+maven/mavencentral/ch.qos.logback/logback-core/1.2.11, EPL-1.0, approved, CQ13635
+maven/mavencentral/ch.qos.logback/logback-core/1.2.9, EPL-1.0, approved, CQ13635
+maven/mavencentral/com.apicatalog/titanium-json-ld/1.0.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.apicatalog/titanium-json-ld/1.1.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.auth0/java-jwt/3.13.0, MIT, approved, clearlydefined
+maven/mavencentral/com.auth0/jwks-rsa/0.17.0, MIT, approved, #3117
+maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.13.1, Apache-2.0, approved, CQ24135
+maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.12.5, Apache-2.0, approved, CQ23845
+maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.13.1, Apache-2.0, approved, #2133
+maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.11.0, Apache-2.0, approved, CQ23093
+maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.11.1, Apache-2.0, approved, CQ23093
+maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.11.3, Apache-2.0, approved, CQ23093
+maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.13.1, Apache-2.0, approved, #2134
+maven/mavencentral/com.fasterxml.jackson.module/jackson-module-kotlin/2.13.1, Apache-2.0, approved, #2759
+maven/mavencentral/com.fasterxml.jackson/jackson-bom/2.13.1, Apache-2.0, approved, #2404
+maven/mavencentral/com.github.kagkarlsson/db-scheduler/11.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.kagkarlsson/micro-jdbc/0.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.peteroupc/numbers/1.7.4, CC0-1.0, approved, CQ22895
+maven/mavencentral/com.google.code.findbugs/jsr305/3.0.2, Apache-2.0, approved, #20
+maven/mavencentral/com.google.errorprone/error_prone_annotations/2.3.4, Apache-2.0, approved, #807
+maven/mavencentral/com.google.guava/failureaccess/1.0.1, Apache-2.0, approved, CQ22654
+maven/mavencentral/com.google.guava/guava/30.0-jre, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.google.guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava, LicenseRef-NONE, approved, #803
+maven/mavencentral/com.google.j2objc/j2objc-annotations/1.3, Apache-2.0, approved, CQ21195
+maven/mavencentral/com.googlecode.json-simple/json-simple/1.1.1, Apache-2.0, approved, CQ9858
+maven/mavencentral/com.sabnf/apg/1.1.0, BSD-2-Clause, approved, #3114
+maven/mavencentral/com.typesafe/config/1.4.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.upokecenter/cbor/4.4.3, CC0-1.0, approved, #254
+maven/mavencentral/commons-codec/commons-codec/1.11, Apache-2.0 AND BSD-3-Clause, approved, CQ15971
+maven/mavencentral/commons-codec/commons-codec/1.14, Apache-2.0, approved, clearlydefined
+maven/mavencentral/commons-codec/commons-codec/1.15, Apache-2.0 AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, CQ22641
+maven/mavencentral/commons-logging/commons-logging/1.2, Apache-2.0, approved, CQ10162
+maven/mavencentral/decentralized-identity/did-common-java/1.0.0, Apache-2.0 AND BSD-2-Clause, approved, #3113
+maven/mavencentral/decentralized-identity/jsonld-common-java/1.0.0, Apache-2.0, approved, #3108
+maven/mavencentral/io.bkbn/kompendium-annotations/2.3.5, MIT, approved, #3115
+maven/mavencentral/io.bkbn/kompendium-auth/2.3.5, MIT, approved, #3116
+maven/mavencentral/io.bkbn/kompendium-core/2.3.5, MIT, approved, #3119
+maven/mavencentral/io.bkbn/kompendium-oas/2.3.5, MIT, approved, #3111
+maven/mavencentral/io.github.classgraph/classgraph/4.8.115, MIT, approved, CQ22530
+maven/mavencentral/io.ktor/ktor-auth-jwt/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-auth-kotlinMultiplatform/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-auth/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-apache/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-cio-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-cio/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-core-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-core/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-jackson/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-jetty-kotlinMultiplatform/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-jetty/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-json-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-json/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-logging-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-logging/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-serialization-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-client-serialization/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-html-builder/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-http-cio-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-http-cio/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-http-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-http/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-io-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-io/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-network-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-network-tls-certificates-kotlinMultiplatform/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-network-tls-certificates/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-network-tls-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-network-tls/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-network/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-serialization/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-core-kotlinMultiplatform/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-core/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-host-common-kotlinMultiplatform/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-host-common/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-netty/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-test-host-kotlinMultiplatform/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-test-host/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-server-tests/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-utils-jvm/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-utils/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-webjars/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-websockets-kotlinMultiplatform/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.ktor/ktor-websockets/1.6.8, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.netty/netty-buffer/4.1.74.Final, Apache-2.0, approved, CQ21842
+maven/mavencentral/io.netty/netty-codec-http/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-codec-http2/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-codec/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-common/4.1.74.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
+maven/mavencentral/io.netty/netty-handler/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-resolver/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-tcnative-classes/2.0.48.Final, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.netty/netty-transport-classes-epoll/4.1.74.Final, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.netty/netty-transport-classes-kqueue/4.1.74.Final, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.netty/netty-transport-native-epoll/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-native-kqueue/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-native-unix-common/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport/4.1.74.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.setl/rdf-urdna/1.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/junit/junit/4.10, CPL-1.0, approved, CQ5958
+maven/mavencentral/junit/junit/4.13.2, EPL-2.0, approved, CQ23636
+maven/mavencentral/net.java.dev.jna/jna-platform/5.9.0, Apache-2.0 OR LGPL-2.1-or-later, approved, #3118
+maven/mavencentral/net.java.dev.jna/jna/5.6.0, Apache-2.0 AND LGPL-2.1-or-later, approved, CQ22391
+maven/mavencentral/net.java.dev.jna/jna/5.9.0, Apache-2.0 AND LGPL-2.1-or-later, approved, #3110
+maven/mavencentral/org.apache.httpcomponents/httpasyncclient/4.1.5, Apache-2.0, approved, CQ13506
+maven/mavencentral/org.apache.httpcomponents/httpclient/4.5.13, Apache-2.0 AND LicenseRef-Public-Domain, approved, CQ23527
+maven/mavencentral/org.apache.httpcomponents/httpcore-nio/4.4.15, Apache-2.0, approved, CQ13509
+maven/mavencentral/org.apache.httpcomponents/httpcore/4.4.13, Apache-2.0, approved, CQ23528
+maven/mavencentral/org.apache.httpcomponents/httpcore/4.4.15, Apache-2.0, approved, CQ23528
+maven/mavencentral/org.apiguardian/apiguardian-api/1.1.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.checkerframework/checker-qual/3.5.0, MIT, approved, clearlydefined
+maven/mavencentral/org.eclipse.jetty.alpn/alpn-api/1.1.3.v20160715, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty.http2/http2-client/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty.http2/http2-common/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty.http2/http2-hpack/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty.http2/http2-http-client-transport/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-alpn-client/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-alpn-java-client/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-alpn-openjdk8-client/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-client/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.45.v20220203, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.fusesource.jansi/jansi/2.4.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.glassfish/jakarta.json/2.0.0, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jsonp
+maven/mavencentral/org.hamcrest/hamcrest-core/1.1, , approved, CQ2027
+maven/mavencentral/org.hamcrest/hamcrest-core/1.3, BSD-2-Clause, approved, CQ11429
+maven/mavencentral/org.jacoco/org.jacoco.agent/0.8.8, EPL-2.0, approved, CQ24008
+maven/mavencentral/org.jacoco/org.jacoco.ant/0.8.8, EPL-2.0, approved, #1068
+maven/mavencentral/org.jacoco/org.jacoco.core/0.8.8, EPL-2.0, approved, CQ24006
+maven/mavencentral/org.jacoco/org.jacoco.report/0.8.8, EPL-2.0 AND Apache-2.0, approved, CQ24007
+maven/mavencentral/org.jetbrains.exposed/exposed-core/0.38.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.exposed/exposed-dao/0.38.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.exposed/exposed-java-time/0.38.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.exposed/exposed-jdbc/0.38.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.intellij.deps/trove4j/1.0.20181211, LGPL-2.1-or-later AND MIT, approved, CQ23531
+maven/mavencentral/org.jetbrains.kotlin/kotlin-compiler-embeddable/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-daemon-embeddable/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-gradle-plugin-api/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-klib-commonizer-embeddable/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-native-utils/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-project-model/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-reflect/1.5.30, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-reflect/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-reflect/1.6.20, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-script-runtime/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-scripting-common/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-scripting-compiler-embeddable/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-scripting-compiler-impl-embeddable/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-scripting-jvm/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-serialization/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-common/1.4.31, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-common/1.5.31, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-common/1.6.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-common/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-common/1.6.21, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.6.21, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.4.31, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.5.30, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.6.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.6.20, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.6.21, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/1.5.31, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/1.6.20, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/1.6.21, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-test-annotations-common/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-test-common/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-test-junit5/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-test/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlin/kotlin-util-io/1.6.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-bom/1.6.1, Apache-2.0, approved, #3120
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.6.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.5.2-native-mt, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.6.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-debug/1.5.2-native-mt, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-debug/1.6.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.5.2-native-mt, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.6.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-html-jvm/0.7.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.3.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.3.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-core/1.3.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-core/1.3.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.3.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.3.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-json/1.3.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains.kotlinx/kotlinx-serialization-json/1.3.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.jetbrains/annotations/13.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.junit.jupiter/junit-jupiter-api/5.6.0, EPL-2.0, approved, CQ21545
+maven/mavencentral/org.junit.jupiter/junit-jupiter-engine/5.6.0, EPL-2.0, approved, CQ21545
+maven/mavencentral/org.junit.platform/junit-platform-commons/1.6.0, EPL-2.0, approved, CQ21545
+maven/mavencentral/org.junit.platform/junit-platform-engine/1.6.0, EPL-2.0, approved, CQ21545
+maven/mavencentral/org.junit/junit-bom/5.6.0, EPL-2.0, approved, CQ21545
+maven/mavencentral/org.opentest4j/opentest4j/1.2.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.ow2.asm/asm-analysis/9.2, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/org.ow2.asm/asm-commons/9.2, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/org.ow2.asm/asm-tree/9.2, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/org.ow2.asm/asm/9.2, BSD-3-Clause, approved, CQ23635
+maven/mavencentral/org.postgresql/postgresql/42.4.0, BSD-2-Clause, approved, #3112
+maven/mavencentral/org.slf4j/slf4j-api/1.7.25, MIT, approved, CQ13368
+maven/mavencentral/org.slf4j/slf4j-api/1.7.30, MIT, approved, CQ13368
+maven/mavencentral/org.slf4j/slf4j-api/1.7.32, MIT, approved, CQ13368
+maven/mavencentral/org.slf4j/slf4j-api/1.7.36, MIT, approved, CQ13368
+maven/mavencentral/org.webjars/webjars-locator-core/0.48, MIT, approved, clearlydefined
+maven/mavencentral/org.xerial/sqlite-jdbc/3.36.0.3, Apache-2.0 AND BSD-2-Clause AND ISC AND Artistic-2.0, approved, #3109

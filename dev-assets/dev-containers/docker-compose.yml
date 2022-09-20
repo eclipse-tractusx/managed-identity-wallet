@@ -2,7 +2,9 @@ version: '3'
 
 services:
   cx_postgres:
-    image: postgres:14.2
+    build:
+      context: .
+      dockerfile: db.Dockerfile
     container_name: cx_postgres
     environment:
       POSTGRES_USER: postgres
@@ -26,7 +28,7 @@ services:
       - "8081:8080"
 
   cx_acapy:
-    image: acapy:0.7.4-rc1
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4
     container_name: cx_acapy
     ports:
       - "11000:11000"
@@ -42,7 +44,7 @@ services:
     command: [
        "-c",
        "aca-py start \
-        -e http://localhost:8000/ \
+        -e http://cx_acapy:8000/ \
         --auto-provision \
         --inbound-transport http '0.0.0.0' 8000 \
         --outbound-transport http \
@@ -54,7 +56,7 @@ services:
         --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
         --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
         --seed 00000000000000000000000111111119 \
-        --genesis-url https://indy-test.bosch-digital.de/genesis \
+        --genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \
         --label CatenaXIssuer \
         --admin-api-key Hj23iQUsstG!dde \
         --auto-ping-connection \
@@ -63,6 +65,53 @@ services:
         --multitenant-admin \
         --log-level DEBUG",
     ]
+
+  test_acapy:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4
+    container_name: test_acapy
+    ports:
+      - "11001:11001"
+      - "8001:8001"
+    entrypoint: /bin/bash
+    command: [
+       "-c",
+       "aca-py start \
+        -e http://test_acapy:8001/ \
+        --auto-provision \
+        --inbound-transport http '0.0.0.0' 8001 \
+        --outbound-transport http \
+        --admin '0.0.0.0' 11001 \
+        --wallet-name TestWallet \
+        --wallet-type indy \
+        --wallet-key issuerKeySecret19 \
+        --seed 04001600008020004050050111111119 \
+        --genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \
+        --label TestWallet \
+        --admin-api-key Hj23iQUsstG!dde \
+        --auto-ping-connection \
+        --jwt-secret jwtSecret19 \
+        --public-invites \
+        --log-level DEBUG",
+    ]
+
+  cx_revocation_service:
+    image: registry.gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/revocation:1.0.0-SNAPSHOT-quarkus-2.10.2.Final-java17
+    container_name: cx_revocation_service
+    ports:
+      - "8086:8086"
+    depends_on:
+      - cx_postgres
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://cx_postgres:5432/postgres?user=postgres&password=cx_password
+      QUARKUS_HTTP_PORT: 8086
+      QUARKUS_HTTP_ACCESS_LOG_ENABLED: "true"
+      REVOCATION_BASE_URL: http://localhost:8080/api/credentials/
+      REVOCATION_MIN_ISSUE_INTERVAL: 2
+      QUARKUS_REST_CLIENT_SSI_ISSUANCE_API_URL: "${SSI_SERVICE_URL:-http://host.docker.internal:8080}"
+      WAIT_HOSTS: "cx_postgres:5432"
+      WAIT_HOSTS_TIMEOUT: "300"
+      WAIT_SLEEP_INTERVAL: "5"
+      WAIT_HOST_CONNECT_TIMEOUT: "3"
 
 volumes:
   postgres-data:

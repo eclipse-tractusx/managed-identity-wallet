@@ -1,1 +1,1 @@
-rootProject.name = "net.catenax.core.managedidentitywallets"
+rootProject.name = "org.eclipse.tractusx.managedidentitywallets"
