@@ -6,7 +6,7 @@
   "type": [
     "VerifiablePresentation"
   ],
-  "holder": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9",
+  "holder": "did:sov:AA5EEDcn8yTfMobaTcabj9",
   "verifiableCredential": [
     {
       "id": "http://example.edu/credentials/3735",
@@ -30,7 +30,7 @@
           "name": "Master of Test"
         },
         "college": "Test",
-        "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
+        "id": "did:sov:AA5EEDcn8yTfMobaTcabj9"
       },
       "credentialStatus": {
         "id": "<revocation-list-to-replace>#<index-to-replace>",
@@ -57,7 +57,7 @@
         "University-Degree-Credential",
         "VerifiableCredential"
       ],
-      "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
+      "issuer": "did:sov:LCNSw1JxSTDw7EpR1UMG7D",
       "issuanceDate": "2021-06-16T18:56:59Z",
       "expirationDate": "2027-06-17T18:56:59Z",
       "credentialSubject": {
@@ -69,13 +69,13 @@
           "name": "Master of Test1"
         },
         "college": "Test2",
-        "id": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9"
+        "id": "did:sov:AA5EEDcn8yTfMobaTcabj9"
       },
       "proof": {
         "type": "Ed25519Signature2018",
         "created": "2022-07-12T12:16:45Z",
         "proofPurpose": "assertionMethod",
-        "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
+        "verificationMethod": "did:sov:LCNSw1JxSTDw7EpR1UMG7D#key-1",
         "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..6oIPVm3ealRVzpgiFKItyIzVWlNUT150fbh9OcBElj9FvaICAd-wc1yzrwka3ns1SmrPFsWIIe0wC1rJQLISBA"
       }
     }
@@ -84,7 +84,7 @@
     "type": "Ed25519Signature2018",
     "created": "2022-07-12T12:28:44Z",
     "proofPurpose": "assertionMethod",
-    "verificationMethod": "did:indy:local:test:AA5EEDcn8yTfMobaTcabj9#key-1",
+    "verificationMethod": "did:sov:AA5EEDcn8yTfMobaTcabj9#key-1",
     "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..FYkZonVoXojBcwC3yWvhiyBh4uR0hNZR1qyu5cZS5_PXiB8BEyKUolWzqBAX_u7bbKD5QGqbTECs9qLyD63wAg"
   }
 }

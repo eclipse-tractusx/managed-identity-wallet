@@ -32,11 +32,12 @@ object Wallets : IntIdTable("wallets") {
     var bpn = varchar("bpn", 36).uniqueIndex("bpn")
     val did = varchar("did", 4096).uniqueIndex("did")
 
-    val walletId = varchar("wallet_id", 4096)
-    val walletKey = varchar("wallet_key", 4096)
-    val walletToken = varchar("wallet_token", 4096)
+    val walletId = varchar("wallet_id", 4096).nullable()
+    val walletKey = varchar("wallet_key", 4096).nullable()
+    val walletToken = varchar("wallet_token", 4096).nullable()
 
     val revocationListName = varchar("revocation_list_name", 4096).nullable()
+    val pendingMembershipIssuance = bool("pending_membership_issuance").default(false)
 }
 
 class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
@@ -53,4 +54,6 @@ class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
     var walletToken by Wallets.walletToken
 
     var revocationListName by Wallets.revocationListName
+
+    var pendingMembershipIssuance by Wallets.pendingMembershipIssuance
 }

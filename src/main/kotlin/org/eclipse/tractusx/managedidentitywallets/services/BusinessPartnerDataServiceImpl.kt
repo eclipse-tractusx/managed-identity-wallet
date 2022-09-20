@@ -36,9 +36,11 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
-class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
-                                     private val bpdmConfig: BPDMConfig,
-                                     private val client: HttpClient): IBusinessPartnerDataService {
+class BusinessPartnerDataServiceImpl(
+    private val walletService: IWalletService,
+    private val bpdmConfig: BPDMConfig,
+    private val client: HttpClient): IBusinessPartnerDataService {
+
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
     }
@@ -203,6 +205,52 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
             false
         }
     }
+
+    override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+        targetWallet: WalletDto,
+        connectionId: String,
+        webhookUrl: String?
+    ): Deferred<Boolean> =
+        GlobalScope.async {
+            val bpn = targetWallet.bpn
+            val membershipVC = prepareMembershipCredential(bpn)
+            val bpnVC = prepareBpnCredentials(bpn)
+            val catenaXWallet = walletService.getWallet(walletService.getCatenaXBpn())
+            val membershipVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
+                id =  membershipVC.id,
+                context = membershipVC.context,
+                type = membershipVC.type,
+                issuanceDate = membershipVC.issuanceDate,
+                issuerIdentifier = catenaXWallet.did,
+                expirationDate = membershipVC.expirationDate,
+                credentialSubject = membershipVC.credentialSubject,
+                credentialStatus = null,
+                holderIdentifier = membershipVC.holderIdentifier,
+                isRevocable = membershipVC.isRevocable,
+                webhookUrl = webhookUrl,
+                connectionId = connectionId
+            )
+            val bpnVCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
+                id =  bpnVC.id,
+                context = bpnVC.context,
+                type = bpnVC.type,
+                issuanceDate = bpnVC.issuanceDate,
+                issuerIdentifier = catenaXWallet.did,
+                expirationDate = bpnVC.expirationDate,
+                credentialSubject = bpnVC.credentialSubject,
+                credentialStatus = null,
+                holderIdentifier = bpnVC.holderIdentifier,
+                isRevocable = bpnVC.isRevocable,
+                webhookUrl = webhookUrl,
+                connectionId = connectionId
+            )
+            //TODO The AcaPy java library does not support credential status
+            walletService.triggerCredentialIssuanceFlow(membershipVCIssuanceFlowRequest)
+            walletService.triggerCredentialIssuanceFlow(bpnVCIssuanceFlowRequest)
+            true
+        }
+
+    // ============== Private ==============
 
     private fun prepareNamesCredential(bpn: String, name: ExtendedMultiPurposeDto): VerifiableCredentialRequestWithoutIssuerDto {
         val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
@@ -414,28 +462,38 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
         )
     }
 
-    private fun prepareMembershipCredential(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
+    private fun prepareMembershipCredential(
+        bpn: String
+    ): VerifiableCredentialRequestWithoutIssuerDto {
         val currentDateAsString = JsonLDUtils.dateToString(Date.from(Instant.now()))
+        val credentialSubject = mutableMapOf(
+            "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
+            "memberOf" to "Catena-X",
+            "status" to "Active",
+            "startTime" to currentDateAsString
+        )
+        val contexts = mutableListOf(
+            JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+            JsonLdContexts.JSONLD_CONTEXT_BPD_CREDENTIALS
+        )
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = UUID.randomUUID().toString(),
-            context = listOf(
-                JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
-                JsonLdContexts.JSONLD_CONTEXT_BPD_CREDENTIALS
-            ),
+            context = contexts,
             type = listOf(JsonLdTypes.MEMBERSHIP_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
             issuanceDate = currentDateAsString,
-            credentialSubject = mapOf(
-                "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-                "memberOf" to "Catena-X",
-                "status" to "Active",
-                "startTime" to currentDateAsString
-            ),
+            credentialSubject = credentialSubject,
             holderIdentifier = bpn,
             isRevocable = true
         )
     }
 
-    private fun prepareBpnCredentials(bpn: String): VerifiableCredentialRequestWithoutIssuerDto {
+    private fun prepareBpnCredentials(
+        bpn: String
+    ): VerifiableCredentialRequestWithoutIssuerDto {
+        val credentialSubject = mutableMapOf(
+            "type" to listOf(JsonLdTypes.BPN_TYPE),
+            "bpn" to bpn
+        )
         return VerifiableCredentialRequestWithoutIssuerDto(
             id = UUID.randomUUID().toString(),
             context = listOf(
@@ -444,10 +502,7 @@ class BusinessPartnerDataServiceImpl(private val walletService: IWalletService,
             ),
             type = listOf(JsonLdTypes.BPN_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
             issuanceDate = JsonLDUtils.dateToString(Date.from(Instant.now())),
-            credentialSubject = mapOf(
-                "type" to listOf(JsonLdTypes.BPN_TYPE),
-                "bpn" to bpn
-            ),
+            credentialSubject = credentialSubject,
             holderIdentifier = bpn,
             isRevocable = false // THE BPN Credential is not Revocable!
         )

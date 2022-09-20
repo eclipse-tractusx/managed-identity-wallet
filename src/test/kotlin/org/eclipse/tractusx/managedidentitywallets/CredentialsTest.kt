@@ -67,6 +67,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -84,6 +85,7 @@ class CredentialsTest {
                 null,null,null,null)
             assertTrue { credentials.isEmpty() }
 
+            //TODO replace issuerDid inside vcWithReplaceableSubjectId when did indy method is supported by AcaPy
             val vcAsString: String = File("./src/test/resources/credentials-test-data/vcWithReplaceableSubjectId.json")
                 .readText(Charsets.UTF_8).replace("<subject-id-to-replace>", walletDto.did)
             val storeVerifiableCredentialParameter = StoreVerifiableCredentialParameter(EnvironmentTestSetup.DEFAULT_BPN)
@@ -99,7 +101,8 @@ class CredentialsTest {
             }
 
             val vcWithWrongSubjectAsString: String = File("./src/test/resources/credentials-test-data/vcWithReplaceableSubjectId.json")
-                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>", "did:indy:local:test:NotEqualWalletDID")
+                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>",
+                    "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}NotEqualWalletDID")
             handleRequest(HttpMethod.Post, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}/credentials") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -143,6 +146,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -365,6 +369,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -465,6 +470,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -849,6 +855,7 @@ class CredentialsTest {
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto

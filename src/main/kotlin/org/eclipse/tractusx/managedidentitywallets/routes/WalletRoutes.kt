@@ -123,6 +123,35 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
             }
         }
 
+        route("/self-managed-wallets") {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
+                notarizedPost(
+                    PostInfo<Unit, SelfManagedWalletCreateDto, SelfManagedWalletResultDto>(
+                        summary = "Register and Establish Initial Connection with Partners",
+                        description = "Permission: " +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_CREATE_WALLETS)}**\n" +
+                                "\n Register self managed wallet and establish the initial connection with CatenaX. " +
+                                "Also issue their membership and BPN credentials",
+                        requestInfo = RequestInfo(
+                            description = "Register self managed wallet, establish a connection and issue membership and BPN credentials",
+                            examples = selfManagedWalletCreateDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Created,
+                            description = "The request was able send a connection request to the DID",
+                        ),
+                        canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
+                    )
+                ) {
+                    val selfManagedWalletCreateDto = call.receive<SelfManagedWalletCreateDto>()
+                    return@notarizedPost call.respond(
+                        HttpStatusCode.Created,
+                        walletService.registerSelfManagedWalletAndBuildConnection(selfManagedWalletCreateDto)
+                    )
+                }
+            }
+        }
+
         route("/{identifier}") {
 
             notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
@@ -349,7 +378,8 @@ val walletDtoWithVerKeyExample = mapOf(
         "did",
         "verkey",
         LocalDateTime.now(),
-        emptyList<VerifiableCredentialDto>().toMutableList()
+        vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
+        pendingMembershipIssuance = false
     )
 )
 
@@ -360,7 +390,8 @@ val walletDtoExample = mapOf(
         "did",
         null,
         LocalDateTime.now(),
-        emptyList<VerifiableCredentialDto>().toMutableList()
+        vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
+        pendingMembershipIssuance = false
     )
 )
 
@@ -368,5 +399,13 @@ val walletCreateDtoExample = mapOf(
     "demo" to WalletCreateDto(
         "name",
         "bpn"
+    )
+)
+
+val selfManagedWalletCreateDtoExample = mapOf(
+    "demo" to SelfManagedWalletCreateDto(
+        name ="name",
+        bpn = "bpn",
+        did = "did",
     )
 )

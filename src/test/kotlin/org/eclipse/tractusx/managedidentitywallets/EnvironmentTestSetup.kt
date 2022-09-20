@@ -21,11 +21,14 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.application.*
 import io.ktor.config.*
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
+import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 import java.sql.DriverManager
 import java.util.*
@@ -39,11 +42,19 @@ object EnvironmentTestSetup {
     const val ZERO_THIRD_REVOKED_ENCODED_LIST ="H4sIAAAAAAAAAO3BIQEAAAACIKv/DzvDAjQAAAAAAAAAAAAAAAAAAADA2wBHo2oBAEAAAA=="
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
+    val connectionRepository = ConnectionRepository()
+    val webhookRepository = WebhookRepository()
+
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
     val revocationMockedService = RevocationMockedService(NETWORK_ID)
+    val webhookService = IWebhookService.createWebhookService(webhookRepository)
     val utilsService = UtilsService(NETWORK_ID)
-    val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository,
-        credentialRepository, utilsService, revocationMockedService)
+
+    val walletService = AcaPyWalletServiceImpl(
+        acaPyMockedService, walletRepository,
+        credentialRepository, utilsService, revocationMockedService,
+        webhookService, connectionRepository
+    )
     val bpdService = BusinessPartnerDataMockedService()
 
     val EMPTY_ROLES_TOKEN = JwtConfigTest.makeToken(listOf())
