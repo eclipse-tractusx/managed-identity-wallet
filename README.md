@@ -348,7 +348,8 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 
 See OpenAPI documentation, which is automatically created from
 the source and available on each deployment at the `/docs` endpoint
-(e.g. locally at http://localhost:8080/docs).
+(e.g. locally at http://localhost:8080/docs). An export of the JSON
+document can be also found in [docs/openapi_v200.json](docs/openapi_v200.json).
 
 # Further Guides
 
