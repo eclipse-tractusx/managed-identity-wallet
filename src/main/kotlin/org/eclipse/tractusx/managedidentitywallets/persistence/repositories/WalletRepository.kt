@@ -34,13 +34,13 @@ class WalletRepository {
     fun getWallet(identifier: String): Wallet {
         return Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }
             .firstOrNull()
-            ?: throw NotFoundException("Wallet with identifier $identifier not found")
+            ?: throw NotFoundException("Wallet with given identifier not found")
     }
 
     @Throws(ConflictException::class)
     fun checkWalletAlreadyExists(identifier: String) {
          if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
-             throw ConflictException("Wallet with identifier $identifier already exists!")
+             throw ConflictException("Wallet with given identifier already exists!")
          }
     }
 
@@ -49,9 +49,9 @@ class WalletRepository {
         return transaction {
             val wallet = Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.firstOrNull()
             if (wallet == null) {
-                throw NotFoundException("Wallet with identifier $identifier not found")
+                throw NotFoundException("Wallet with given identifier not found")
             } else if (!wallet.walletId.isNullOrBlank()) {
-                throw UnprocessableEntityException("The Wallet with identifier $identifier is not a self managed wallet")
+                throw UnprocessableEntityException("The Wallet with given identifier is not a self managed wallet")
             } else {
                 wallet
             }

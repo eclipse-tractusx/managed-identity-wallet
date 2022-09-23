@@ -267,7 +267,7 @@ class WalletsTest {
                 setBody("""{"bpn":"bpn4", "name": "name4"}""")
             }.apply {
                 assertEquals(HttpStatusCode.Conflict, response.status())
-                assertTrue(response.content!!.contains("Wallet with identifier bpn4 already exists!"))
+                assertTrue(response.content!!.contains("Wallet with given identifier already exists!"))
             }
 
             // clean up created wallets
@@ -323,7 +323,7 @@ class WalletsTest {
                     assertEquals(HttpStatusCode.NotFound, response.status())
                 }
             }
-            assertTrue(exception.message!!.contains("non_existing_bpn not found"))
+            assertTrue(exception.message!!.contains("not found"))
 
             exception = assertFailsWith<NotFoundException> {
                 handleRequest(HttpMethod.Post, "/api/wallets/non_base_bpn/public") {
