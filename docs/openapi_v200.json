@@ -29,8 +29,7 @@
                 ],
                 "summary": "List of wallets",
                 "description": "Permission: **view_wallets**\n\nRetrieve list of registered wallets",
-                "parameters": [
-                ],
+                "parameters": [],
                 "responses": {
                     "200": {
                         "description": "List of wallets",
@@ -40,6 +39,7 @@
                                     "items": {
                                         "$ref": "#/components/schemas/WalletDto"
                                     },
+                                    "maxItems": 999,
                                     "type": "array"
                                 }
                             }
@@ -90,8 +90,7 @@
                 ],
                 "summary": "Create wallet",
                 "description": "Permission: **add_wallets**\n\nCreate a wallet and store it ",
-                "parameters": [
-                ],
+                "parameters": [],
                 "requestBody": {
                     "description": "wallet to create",
                     "content": {
@@ -127,8 +126,7 @@
                                             "did": "did",
                                             "verKey": "verkey",
                                             "createdAt": "2022-09-17T14:31:47.056108748",
-                                            "vcs": [
-                                            ]
+                                            "vcs": []
                                         }
                                     }
                                 }
@@ -266,8 +264,7 @@
                                             "bpn": "bpn",
                                             "did": "did",
                                             "createdAt": "2022-09-17T14:31:47.056263746",
-                                            "vcs": [
-                                            ]
+                                            "vcs": []
                                         }
                                     }
                                 }
@@ -355,8 +352,7 @@
                 ],
                 "summary": "Remove wallet",
                 "description": "Permission: **delete_wallets**\n\nRemove hosted wallet",
-                "parameters": [
-                ],
+                "parameters": [],
                 "responses": {
                     "200": {
                         "description": "Wallet successfully removed!",
@@ -1482,6 +1478,7 @@
                             "items": {
                                 "type": "string"
                             },
+                            "maxItems": 999,
                             "type": "array"
                         },
                         "required": true,
@@ -1502,6 +1499,7 @@
                                     "items": {
                                         "$ref": "#/components/schemas/VerifiableCredentialDto"
                                     },
+                                    "maxItems": 999,
                                     "type": "array"
                                 }
                             }
@@ -1552,8 +1550,7 @@
                 ],
                 "summary": "Issue Verifiable Credential",
                 "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\n\nIssue a verifiable credential with a given issuer DID",
-                "parameters": [
-                ],
+                "parameters": [],
                 "requestBody": {
                     "description": "The verifiable credential input data",
                     "content": {
@@ -1715,8 +1712,7 @@
                 ],
                 "summary": "Issue a Verifiable Credential with Catena-X platform issuer",
                 "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of Catena-X wallet must equal BPN of caller)\n\nIssue a verifiable credential by Catena-X wallet",
-                "parameters": [
-                ],
+                "parameters": [],
                 "requestBody": {
                     "description": "The verifiable credential input",
                     "content": {
@@ -1877,8 +1873,7 @@
                 ],
                 "summary": "Revoke issued Verifiable Credential",
                 "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\n\nRevoke issued Verifiable Credential by issuer",
-                "parameters": [
-                ],
+                "parameters": [],
                 "requestBody": {
                     "description": "The signed verifiable credential",
                     "content": {
@@ -2650,8 +2645,7 @@
                 ],
                 "summary": "Issue a List Status credential",
                 "description": "This endpoint is called by the revocation service to issue a list status credential for a given profileName",
-                "parameters": [
-                ],
+                "parameters": [],
                 "requestBody": {
                     "description": "The subject of the status list credential",
                     "content": {
@@ -2757,6 +2751,7 @@
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "verKey": {
@@ -2800,8 +2795,7 @@
                 "type": "object"
             },
             "Short": {
-                "properties": {
-                },
+                "properties": {},
                 "type": "object"
             },
             "LocalTime": {
@@ -2823,8 +2817,7 @@
                 "type": "object"
             },
             "Byte": {
-                "properties": {
-                },
+                "properties": {},
                 "type": "object"
             },
             "VerifiableCredentialDto": {
@@ -2833,6 +2826,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "credentialStatus": {
@@ -2865,6 +2859,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -2903,8 +2898,7 @@
                 "type": "object"
             },
             "Any": {
-                "properties": {
-                },
+                "properties": {},
                 "type": "object"
             },
             "LdProofDto": {
@@ -3000,6 +2994,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "CredentialStatus": {
@@ -3032,6 +3027,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3067,30 +3063,35 @@
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "authenticationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "capabilityDelegationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "capabilityInvocationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "context": {
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "controller": {
@@ -3103,18 +3104,21 @@
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "services": {
                         "items": {
                             "$ref": "#/components/schemas/DidServiceDto"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "verificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/DidVerificationMethodDto"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3139,6 +3143,7 @@
                             "type": "string",
                             "nullable": true
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "routingKeys": {
@@ -3146,6 +3151,7 @@
                             "type": "string",
                             "nullable": true
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "serviceEndpoint": {
@@ -3225,6 +3231,7 @@
                             "type": "string",
                             "nullable": true
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "kid": {
@@ -3273,6 +3280,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "credentialSubject": {
@@ -3307,6 +3315,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3325,6 +3334,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "credentialSubject": {
@@ -3355,6 +3365,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3376,6 +3387,7 @@
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3391,6 +3403,7 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "holder": {
@@ -3408,12 +3421,14 @@
                         "items": {
                             "type": "string"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     },
                     "verifiableCredential": {
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
+                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3486,8 +3501,6 @@
             }
         }
     },
-    "security": [
-    ],
-    "tags": [
-    ]
+    "security": [],
+    "tags": []
 }
