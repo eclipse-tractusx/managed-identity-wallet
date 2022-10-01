@@ -99,5 +99,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest${{ env.TAG_SUFFIX }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}.${{ env.SHORT_SHA }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest${{ env.TAG_SUFFIX }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}.${{ env.SHORT_SHA }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}${{ env.TAG_SUFFIX }}
           labels: ${{ steps.meta.outputs.labels }}

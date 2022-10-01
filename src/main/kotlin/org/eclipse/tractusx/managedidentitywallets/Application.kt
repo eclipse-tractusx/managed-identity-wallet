@@ -55,7 +55,9 @@ fun Application.module(testing: Boolean = false) {
     configureSockets()
     configureSerialization()
 
-    install(DefaultHeaders)
+    install(DefaultHeaders) {
+        header("X-Frame-Options", "DENY")
+    }
     
     // for debugging
     install(CallLogging)
