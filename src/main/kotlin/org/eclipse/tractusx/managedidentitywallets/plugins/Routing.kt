@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -161,7 +161,7 @@ fun Application.configureRouting(IWalletService: IWalletService) {
     <p>The Managed Identity Wallets service implements the Self-Sovereign-Identity (SSI) readiness by providing a wallet hosting platform including a DID resolver, service endpoints and the company wallets itself.</p>
     <p>&gt; <a href="/docs">API documentation</a></p>
     <p>&gt; <a href="/ui/">Admin UI</a></p>
-    <p>&gt; <a href="https://github.com/catenax-ng/product-core-managed-identity-wallets">Code repository</a></p>
+    <p>&gt; <a href="https://github.com/eclipse-tractusx/managed-identity-wallets/">Code repository</a></p>
   </body>
 </html>
 """, ContentType.Text.Html)

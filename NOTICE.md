@@ -1,8 +1,12 @@
-# Notices
+# Notices for Eclipse Tractus-X
 
-This content is part of [CatenaX](https://catena-x.net). 
+This content is produced and maintained by the Eclipse Tractus-X project.
 
-* Project home: https://github.com/catenax-ng
+* Project home: https://projects.eclipse.org/projects/automotive.tractusx
+
+## Trademarks
+
+Eclipse Tractus-X is a trademark of the Eclipse Foundation.
 
 ## Copyright
 
@@ -21,9 +25,10 @@ SPDX-License-Identifier: Apache-2.0
 ## Source Code
 
 The project maintains the following source code repositories 
-in the GitHub organization https://github.com/catenax-ng:
+in the GitHub organization https://github.com/eclipse-tractusx:
 
-* https://github.com/catenax-ng/product-core-managed-identity-wallets
+* https://github.com/eclipse-tractusx/managed-identity-wallets
+
 
 ## Third-party Content
 

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -48,7 +48,7 @@ fun Application.configureOpenAPI() {
           ),
           license = License(
               name = "Apache 2.0",
-              url = URI("https://github.com/catenax-ng/product-core-managed-identity-wallets/blob/develop/LICENSE")
+              url = URI("https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE")
           )
           ),
           servers = mutableListOf(

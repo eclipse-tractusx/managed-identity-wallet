@@ -13,7 +13,8 @@ build system. To store the wallets and communicate with an external ledger MIW i
 [Aries Cloud Agent Python](https://github.com/hyperledger/aries-cloudagent-python) with
 it's [multi-tenant feature](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md)
 and [JSON-LD credential](https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
-To support credential revocation MIW is using the revocation service within the [GXFS Notarization API/Service](https://gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/-/tree/main/services/revocation)
+To support credential revocation MIW is using the revocation service within the
+[GXFS Notarization API/Service](https://gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/-/tree/main/services/revocation)
 
 > **Warning**
 > This is not yet ready for production usage, as
