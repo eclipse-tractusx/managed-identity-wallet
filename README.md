@@ -13,7 +13,8 @@ build system. To store the wallets and communicate with an external ledger MIW i
 [Aries Cloud Agent Python](https://github.com/hyperledger/aries-cloudagent-python) with
 it's [multi-tenant feature](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md)
 and [JSON-LD credential](https://github.com/hyperledger/aries-cloudagent-python/blob/main/JsonLdCredentials.md)
-To support credential revocation MIW is using the revocation service within the [GXFS Notarization API/Service](https://gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/-/tree/main/services/revocation)
+To support credential revocation MIW is using the revocation service within the
+[GXFS Notarization API/Service](https://gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/-/tree/main/services/revocation)
 
 > **Warning**
 > This is not yet ready for production usage, as
@@ -348,7 +349,8 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 
 See OpenAPI documentation, which is automatically created from
 the source and available on each deployment at the `/docs` endpoint
-(e.g. locally at http://localhost:8080/docs).
+(e.g. locally at http://localhost:8080/docs). An export of the JSON
+document can be also found in [docs/openapi_v200.json](docs/openapi_v200.json).
 
 # Further Guides
 
