@@ -72,8 +72,8 @@ class UtilsService(private val networkIdentifier: String) {
 
     fun replaceNetworkIdentifierWithSov(input: String): String {
         //TODO check if this method is needed when indy is supported by AcaPy
-        //input.replace(":indy:$networkIdentifier:", ":sov:")
-        return input
+        // supporting old and new identifiers, thus need to remove the prefix for now
+        return input.replace(":indy:$networkIdentifier:", ":sov:")
     }
 
     fun checkIndyDid(did: String) {
