@@ -20,6 +20,7 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -44,10 +45,23 @@ class RevocationServiceImpl(
     }
 
     override suspend fun addStatusEntry(profileName: String): CredentialStatus {
-        val httpResponse: HttpResponse = client.post {
+        var httpResponse: HttpResponse = client.config {
+            expectSuccess = false
+        }.post {
             url("$revocationUrl/management/lists/$profileName/entry")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
+        }
+        if (httpResponse.status == HttpStatusCode.NotFound) {
+            // create and retry to implement self healing if list for the bpn was not created yet
+            registerList(profileName, false)
+            httpResponse = client.post {
+                url("$revocationUrl/management/lists/$profileName/entry")
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+            }
+        } else if (httpResponse.status.value >= 300) {
+            throw UnprocessableEntityException(httpResponse.readText())
         }
         return Json.decodeFromString(httpResponse.readText())
     }

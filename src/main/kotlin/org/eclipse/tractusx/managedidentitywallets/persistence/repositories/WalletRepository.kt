@@ -78,7 +78,7 @@ class WalletRepository {
         return true
     }
 
-    fun updatePending(did: String,isPending: Boolean) {
+    fun updatePending(did: String, isPending: Boolean) {
         getWallet(did).apply {
             pendingMembershipIssuance = isPending
         }
