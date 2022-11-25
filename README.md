@@ -359,13 +359,13 @@ described.
 
 ## Preparation of ACA-Py Docker Image <a id= "acapyDockerImage"></a>
 
-ACA-Py can be used via the official image at `bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4`
+ACA-Py can be used via the official image at `bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5`
 or build your own image following the steps:
 * clone the repository `git clone https://github.com/hyperledger/aries-cloudagent-python.git`
 * navigate to the repository `cd aries-cloudagent-python`
-* currently tested with commit `0.7.4` from June, 30, 2022
-* run `git checkout 0.7.4`
-* run `docker build -t acapy:0.7.4 -f ./docker/Dockerfile.run .`
+* currently tested with version `0.7.5`
+* run `git checkout 0.7.5`
+* run `docker build -t acapy:0.7.5 -f ./docker/Dockerfile.run .`
 * change the used image for `cx_acapy` in `dev-assets/dev-containers/docker-compose.yml`
 
 ## Integrate with an write-restricted Indy Ledger
