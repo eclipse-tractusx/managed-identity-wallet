@@ -78,6 +78,10 @@ dependencies {
     // https://mvnrepository.com/artifact/com.github.kagkarlsson/db-scheduler
     implementation("com.github.kagkarlsson:db-scheduler:11.2")
 
+
+    testImplementation("org.mockito:mockito-inline:4.9.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation("io.ktor:ktor-client-mock:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation(kotlin("test"))
 

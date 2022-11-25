@@ -37,7 +37,6 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Conn
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.hyperledger.aries.api.connection.ConnectionState
-import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
 import org.slf4j.LoggerFactory
 
 interface IWalletService {
@@ -92,6 +91,8 @@ interface IWalletService {
         credentialId: String?
     ): List<VerifiableCredentialDto>
 
+    suspend fun deleteCredential(credentialId: String): Boolean
+
     suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto
 
     suspend fun updateService(
@@ -123,7 +124,9 @@ interface IWalletService {
 
     fun updateConnectionState(connectionId: String, state: ConnectionState)
 
-    fun getConnection(connectionId: String): Connection
+    fun getConnection(connectionId: String): ConnectionDto
+
+    fun getConnectionWithCatenaX(theirDid: String): ConnectionDto?
 
     fun subscribeForAriesWS()
 

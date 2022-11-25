@@ -878,7 +878,7 @@ class CredentialsTest {
             SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
             SingletonTestData.isValidVerifiableCredential = true
             val listCredentialRequestData = ListCredentialRequestData(
-                listId = "uuid-of-list",
+                listId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f661421",
                 subject = ListCredentialSubject (
                     credentialId = "https://example.com/status/3#list",
                     credentialType = "StatusList2021",

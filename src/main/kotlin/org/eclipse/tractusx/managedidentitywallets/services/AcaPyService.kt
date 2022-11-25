@@ -19,6 +19,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
+import com.google.gson.FieldNamingPolicy
+import com.google.gson.GsonBuilder
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -38,13 +40,14 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.api.issue_credential_v2.V2CredentialExchangeFree
 import org.hyperledger.aries.api.jsonld.ProofType
 import org.hyperledger.aries.api.jsonld.VerifiableCredential
-import org.hyperledger.aries.config.GsonConfig
 import java.util.*
 
 class AcaPyService(
     private val acaPyConfig: WalletAndAcaPyConfig,
     private val utilsService: UtilsService,
     private val client: HttpClient): IAcaPyService {
+
+    private val gson = GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create()
 
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
         return WalletAndAcaPyConfig(
@@ -248,12 +251,18 @@ class AcaPyService(
     ): V20CredExRecord {
         val ariesClient = getAcapyClient(token)
 
+        val idOfCredential = if (!vc.id.isNullOrBlank() && !vc.id.startsWith("http")
+            && !vc.id.startsWith("https") && !vc.id.startsWith("urn:uuid") && checkIfUUID(vc.id)) {
+                "urn:uuid:${vc.id}"
+        } else { vc.id }
+
         val credential = VerifiableCredential.builder()
             .context(vc.context)
-            .credentialSubject(GsonConfig.defaultConfig().toJsonTree(vc.credentialSubject).asJsonObject)
+            .credentialSubject(gson.toJsonTree(vc.credentialSubject).asJsonObject)
             .issuanceDate(vc.issuanceDate)
             .issuer(vc.issuerIdentifier)
             .type(vc.type)
+            .id(idOfCredential)
             .build()
 
         val credentialRequest = V2CredentialExchangeFree.builder()
@@ -283,6 +292,15 @@ class AcaPyService(
             }
         }
         throw InternalServerErrorException("Failed to issue credential: $credential")
+    }
+
+    private fun checkIfUUID(id: String): Boolean {
+        return try {
+            UUID.fromString(id)
+            true
+        } catch (exception: IllegalArgumentException) {
+            false
+        }
     }
 
 }

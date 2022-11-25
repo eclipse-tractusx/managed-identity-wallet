@@ -26,12 +26,16 @@ import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerData
 
 class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
 
-    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String?) {}
+    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(
+        identifier: String?
+    ): Deferred<Boolean> {
+        return CompletableDeferred(true)
+    }
 
-    override suspend fun <T> issueAndStoreCatenaXCredentialsAsync(
-        bpn: String,
+    override suspend fun issueAndStoreCatenaXCredentialsAsync(
+        walletHolderDto: WalletDto,
         type: String,
-        data: T?
+        data: Any?
     ): Deferred<Boolean> {
         return CompletableDeferred(true)
     }
@@ -39,9 +43,11 @@ class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
     override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
-        webhookUrl: String?
+        webhookUrl: String?,
+        type: String,
+        data: Any?
     ): Deferred<Boolean> {
-        TODO("Not yet implemented")
+        return CompletableDeferred(true)
     }
 
 }

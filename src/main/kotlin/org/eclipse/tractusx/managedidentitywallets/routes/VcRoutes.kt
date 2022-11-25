@@ -353,7 +353,7 @@ val signedVerifiableCredentialDtoExample =  mapOf(
 
 val listCredentialRequestData = mapOf(
     "demo" to ListCredentialRequestData(
-        listId = "uuid-of-list",
+        listId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f661422",
         subject = ListCredentialSubject (
             credentialId = "https://example.com/status/3#list",
             credentialType = "StatusList2021",
@@ -367,7 +367,7 @@ val statusListCredentialExample = mapOf(
     "demo" to VerifiableCredentialDto(
         id = "https://example.com/api/credentials/status/5c145c85-8fcb-42d4-893c-d19a55581e00",
         context = listOf("https://www.w3.org/2018/credentials/v1", "https://w3id.org/vc/status-list/2021/v1"),
-        type = listOf(    "VerifiableCredential", "StatusList2021Credential"),
+        type = listOf( "VerifiableCredential", "StatusList2021Credential"),
         issuer =  "did:indy:local:test:Ae49DuXZy2PLBjSL9W2V2i",
         issuanceDate = "2022-08-31T07:19:36Z",
         credentialSubject = mapOf(

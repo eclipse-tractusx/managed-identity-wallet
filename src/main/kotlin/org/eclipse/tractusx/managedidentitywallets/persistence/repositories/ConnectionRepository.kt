@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets.persistence.repositories
 
 import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.ConnectionState
@@ -89,4 +90,12 @@ class ConnectionRepository {
         }
     }
 
+    fun toObject(entity: Connection): ConnectionDto = entity.run {
+        ConnectionDto(
+            connectionId,
+            theirDid,
+            myDid,
+            state
+        )
+    }
 }

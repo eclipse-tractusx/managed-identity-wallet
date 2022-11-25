@@ -76,7 +76,8 @@ class AcaPyWalletServiceImpl(
                 createdAt = walletDto.createdAt,
                 vcs = credentials,
                 revocationListName = walletDto.revocationListName,
-                pendingMembershipIssuance = walletDto.pendingMembershipIssuance
+                pendingMembershipIssuance = walletDto.pendingMembershipIssuance,
+                isSelfManaged = extractedWallet.walletId.isNullOrBlank()
             )
         }
     }
@@ -292,6 +293,10 @@ class AcaPyWalletServiceImpl(
         }
     }
 
+    override suspend fun deleteCredential(credentialId: String): Boolean {
+        return credentialRepository.deleteCredentialByCredentialId(credentialId)
+    }
+
     override suspend fun issueCatenaXCredential(
         vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto
     ): VerifiableCredentialDto {
@@ -342,6 +347,7 @@ class AcaPyWalletServiceImpl(
             credentialStatus = credentialStatus,
             expirationDate = vcRequest.expirationDate
         )
+
         val signedVcResult: SignCredentialResponse =
             signVerifiableCredential(verifiableCredentialToSign, verificationMethod, issuerWalletData)
         if (signedVcResult.signedDoc != null) {
@@ -366,7 +372,8 @@ class AcaPyWalletServiceImpl(
         }
         val didDocResult = acaPyService.resolveDidDoc(modifiedDid, token)
         val resolutionResultAsJson = Json.encodeToString(ResolutionResult.serializer(), didDocResult)
-        val res: ResolutionResult = Json.decodeFromString(utilsService.replaceSovWithNetworkIdentifier(resolutionResultAsJson))
+        val res: ResolutionResult =
+            Json.decodeFromString(utilsService.replaceSovWithNetworkIdentifier(resolutionResultAsJson))
         return res.didDoc
     }
 
@@ -408,7 +415,7 @@ class AcaPyWalletServiceImpl(
         val signRequest: SignRequest<VerifiablePresentationDto> = SignRequest(
             doc = SignDoc(
                 credential = VerifiablePresentationDto(
-                    id = UUID.randomUUID().toString(),
+                    id = "urn:uuid:${UUID.randomUUID()}",
                     context = listOf(JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1),
                     type = listOf("VerifiablePresentation"),
                     holder = holderDid,
@@ -764,8 +771,13 @@ class AcaPyWalletServiceImpl(
         )
     }
 
-    override fun getConnection(connectionId: String): Connection {
-        return connectionRepository.get(connectionId)
+    override fun getConnection(connectionId: String): ConnectionDto {
+        return connectionRepository.toObject(connectionRepository.get(connectionId))
+    }
+
+    override fun getConnectionWithCatenaX(theirDid: String): ConnectionDto? {
+        val catenaXWallet = getWallet(getCatenaXBpn());
+        return getConnections(catenaXWallet.did, theirDid).firstOrNull()
     }
 
     override fun subscribeForAriesWS() {

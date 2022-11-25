@@ -53,7 +53,7 @@ class SelfManagedInteractionTest {
     }
 
     @Test
-    fun testRegisterSelfManagedWalletAndTriggerIssuanceFlow() { // true
+    fun testRegisterSelfManagedWalletAndTriggerIssuanceFlow() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()

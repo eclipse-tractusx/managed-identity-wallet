@@ -102,7 +102,8 @@ fun Application.module(testing: Boolean = false) {
         scope = environment.config.property("bpdm.scope").getString(),
         grantType = environment.config.property("bpdm.grantType").getString()
     )
-    val businessPartnerDataService = IBusinessPartnerDataService.createBusinessPartnerDataService(walletService,
+    val businessPartnerDataService = IBusinessPartnerDataService.createBusinessPartnerDataService(
+        walletService,
         bpdmConfig)
     Services.businessPartnerDataService = businessPartnerDataService
     Services.walletService = walletService
