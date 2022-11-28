@@ -44,6 +44,7 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.webhook.TenantAwareEventHandler
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mockito.kotlin.*
+import java.io.File
 import java.lang.RuntimeException
 import kotlin.test.*
 
@@ -275,9 +276,8 @@ class BaseWalletAriesEventHandlerTest {
 
     private fun createCredentialExchange(threadId: String, state: CredentialExchangeState): V20CredExRecord {
         val data = AttachDecoratorData()
-        data.base64 = """
-                    ewogICJpZCI6ICJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczNSIsCiAgIkBjb250ZXh0IjogWwogICAgImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwKICAgICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vY2F0ZW5heC1uZy9wcm9kdWN0LWNvcmUtc2NoZW1hcy9tYWluL2xlZ2FsRW50aXR5RGF0YSIKICBdLAogICJ0eXBlIjogWwogICAgIk5hbWVDcmVkZW50aWFsIiwKICAgICJWZXJpZmlhYmxlQ3JlZGVudGlhbCIKICBdLAogICJpc3N1ZXIiOiAiZGlkOnNvdjpjYXRlbmF4MSIsCiAgImlzc3VhbmNlRGF0ZSI6ICIyMDIxLTA2LTE2VDE4OjU2OjU5WiIsCiAgImNyZWRlbnRpYWxTdWJqZWN0IjogewogICAgImRhdGEiOiB7CiAgICAgICJ2YWx1ZSI6ICJ0ZXN0IgogICAgfSwKICAgICJ0eXBlIjogWyJOYW1lQ3JlZGVudGlhbCJdLAogICAgImlkIjogImRpZDpzb3Y6aG9sZGVyMSIKICB9LAogICJwcm9vZiI6IHsKICAgICJ0eXBlIjogIkVkMjU1MTlTaWduYXR1cmUyMDE4IiwKICAgICJjcmVhdGVkIjogIjIwMjItMDctMTJUMTI6MTM6MTZaIiwKICAgICJwcm9vZlB1cnBvc2UiOiAiYXNzZXJ0aW9uTWV0aG9kIiwKICAgICJ2ZXJpZmljYXRpb25NZXRob2QiOiAiZGlkOnNvdjpMQ05TdzFKeFNURHc3RXBSMVVNRzdEI2tleS0xIiwKICAgICJqd3MiOiAiZXlKaGJHY2lPaUFpUldSRVUwRWlMQ0FpWWpZMElqb2dabUZzYzJVc0lDSmpjbWwwSWpvZ1d5SmlOalFpWFgwLi4wXzFwU2p5eGs0TUNQa2FhdEZsdjc4clRpRTZKa0k0aVhNOVFFT1B3SUd3TGl5T1Jra0tQZTZUd2FIb1Z2dWFyb3VDN296cEdaeFdFR21WUnFmaVdEZyIKICB9Cn0=
-                """.trimIndent()
+        data.base64 = File("./src/test/resources/credentials-test-data/vcBase64.txt")
+            .readText(Charsets.UTF_8)
         val dataDecorator = AttachDecorator()
         dataDecorator.data = data
         val credentialTildeAttach = listOf(dataDecorator)

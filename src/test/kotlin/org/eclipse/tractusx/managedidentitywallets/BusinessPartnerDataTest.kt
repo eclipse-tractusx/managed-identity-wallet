@@ -94,6 +94,7 @@ class BusinessPartnerDataTest {
             assertEquals(emptyList(), address[0].legalAddress.premises)
             assertEquals("WESTERN_LATIN_STANDARD", address[0].legalAddress.version.characterSet.technicalKey.toString())
             assertEquals(1, address[0].legalAddress.administrativeAreas.size)
+            assertEquals("Münchner Straße 34", address[0].legalAddress.thoroughfares[0].value)
         }
     }
 }

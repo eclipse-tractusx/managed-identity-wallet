@@ -26,7 +26,6 @@ import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Connection
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallet
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
@@ -151,7 +150,7 @@ class AcaPyWalletServiceImpl(
             walletKey = subWalletToCreate.walletKey,
             walletToken = createdSubWalletDto.token,
             revocationListName = revocationListName,
-            pendingMembershipIssuance = true
+            pendingMembershipIssuance = false
         )
         val storedWallet = transaction {
             val createdWalletData = walletRepository.addWallet(walletToCreate)
@@ -208,11 +207,11 @@ class AcaPyWalletServiceImpl(
             name = selfManagedWalletCreateDto.name,
             bpn = selfManagedWalletCreateDto.bpn,
             did = selfManagedWalletCreateDto.did,
-            pendingMembershipIssuance = true,
             walletId = null,
             walletKey = null,
             walletToken = null,
-            revocationListName = null
+            revocationListName = null,
+            pendingMembershipIssuance = true
         )
 
         return transaction {

@@ -24,6 +24,7 @@ import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.*
+import junit.framework.TestFailure
 import kotlinx.coroutines.*
 import okhttp3.internal.toImmutableList
 import org.eclipse.tractusx.managedidentitywallets.models.*
@@ -155,8 +156,8 @@ class BusinessPartnerServiceTest {
     private val nameResponseData = NameResponse(
         value = "German Car Company",
         shortName = "GCC",
-        type = TypeKeyNameUrlDto<NameType>(
-            technicalKey = NameType.REGISTERED,
+        type = TypeKeyNameUrlDto<String>(
+            technicalKey = "REGISTERED",
             name = "The main name under which a business is officially registered in a country's business register.",
             url = ""
         ),
@@ -224,10 +225,8 @@ class BusinessPartnerServiceTest {
                 headers = headersOf(HttpHeaders.ContentType, "application/json")
             )
         } else if (request.url.toString().endsWith("legal-addresses/search")) {
-            val legaAddressAsString: String = File("./src/test/resources/bpdm-test-data/emptyAddress.json")
-                .readText(Charsets.UTF_8)
             respond(
-                content = ByteReadChannel(legaAddressAsString),
+                content = ByteReadChannel("""[]"""), // empty addresses
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json")
             )
@@ -240,7 +239,7 @@ class BusinessPartnerServiceTest {
                 headers = headersOf(HttpHeaders.ContentType, "application/json")
             )
         } else {
-            respondOk("true")
+            throw RuntimeException("Unexpected State")
         }
     }
 
@@ -340,7 +339,7 @@ class BusinessPartnerServiceTest {
                     nameResponseData
                 ).await()
 
-                // Test all 3 credentials are created and stored correctly
+                // Test all 3 previously created credentials are stored correctly
                 transaction {
                     val extractedWallet = walletServiceSpy.getWallet(holderWallet.did, true)
                     assertEquals(3, extractedWallet.vcs.size)
@@ -412,7 +411,8 @@ class BusinessPartnerServiceTest {
 
                 assertEquals(false, resultWithException)
                 assertEquals(false, resultWithEmptyProofForIssuedCred)
-                // Test all 3 credentials are created and stored correctly
+
+                // Test no credentials are created and stored due mocked exceptions
                 transaction {
                     val extractedWallet = walletServiceSpy.getWallet(holderWallet.did, true)
                     assertEquals(0, extractedWallet.vcs.size)
@@ -572,7 +572,7 @@ class BusinessPartnerServiceTest {
                                 }
                             }
                             else -> {
-                                respondOk()
+                                throw RuntimeException("Unexpected State")
                             }
                         }
                 }
@@ -586,20 +586,18 @@ class BusinessPartnerServiceTest {
                     client
                 )
                 val spyBpdmService = spy(bpdmService)
-                doReturn(
-                    CompletableDeferred(true)
-                ).whenever(spyBpdmService).issueAndStoreCatenaXCredentialsAsync(
-                    any(),
-                    any(),
-                    any(),
-                )
 
                 // Test `pullDataAndUpdateCatenaXCredentialsAsync` for a created Wallet
+                // no credentials will be created because The HTTP.OK state is never reached due the mockEngine
                 assertDoesNotThrow {
                     runBlocking {
                         spyBpdmService.pullDataAndUpdateCatenaXCredentialsAsync(holderWallet.did).await()
                         callCounter = 0
                         spyBpdmService.pullDataAndUpdateCatenaXCredentialsAsync(holderWallet.did).await()
+                        var credentials = credentialRepository.getCredentials(
+                            null, holderWallet.did, null, null
+                        )
+                        assertEquals(0, credentials.size)
                     }
                 }
 
@@ -839,9 +837,8 @@ class BusinessPartnerServiceTest {
 
     private fun createCredentialExchange(threadId: String): V20CredExRecord {
         val data = AttachDecoratorData()
-        data.base64 = """
-                    ewogICJpZCI6ICJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczNSIsCiAgIkBjb250ZXh0IjogWwogICAgImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwKICAgICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vY2F0ZW5heC1uZy9wcm9kdWN0LWNvcmUtc2NoZW1hcy9tYWluL2xlZ2FsRW50aXR5RGF0YSIKICBdLAogICJ0eXBlIjogWwogICAgIk5hbWVDcmVkZW50aWFsIiwKICAgICJWZXJpZmlhYmxlQ3JlZGVudGlhbCIKICBdLAogICJpc3N1ZXIiOiAiZGlkOnNvdjpjYXRlbmF4MSIsCiAgImlzc3VhbmNlRGF0ZSI6ICIyMDIxLTA2LTE2VDE4OjU2OjU5WiIsCiAgImNyZWRlbnRpYWxTdWJqZWN0IjogewogICAgImRhdGEiOiB7CiAgICAgICJ2YWx1ZSI6ICJ0ZXN0IgogICAgfSwKICAgICJ0eXBlIjogWyJOYW1lQ3JlZGVudGlhbCJdLAogICAgImlkIjogImRpZDpzb3Y6aG9sZGVyMSIKICB9LAogICJwcm9vZiI6IHsKICAgICJ0eXBlIjogIkVkMjU1MTlTaWduYXR1cmUyMDE4IiwKICAgICJjcmVhdGVkIjogIjIwMjItMDctMTJUMTI6MTM6MTZaIiwKICAgICJwcm9vZlB1cnBvc2UiOiAiYXNzZXJ0aW9uTWV0aG9kIiwKICAgICJ2ZXJpZmljYXRpb25NZXRob2QiOiAiZGlkOnNvdjpMQ05TdzFKeFNURHc3RXBSMVVNRzdEI2tleS0xIiwKICAgICJqd3MiOiAiZXlKaGJHY2lPaUFpUldSRVUwRWlMQ0FpWWpZMElqb2dabUZzYzJVc0lDSmpjbWwwSWpvZ1d5SmlOalFpWFgwLi4wXzFwU2p5eGs0TUNQa2FhdEZsdjc4clRpRTZKa0k0aVhNOVFFT1B3SUd3TGl5T1Jra0tQZTZUd2FIb1Z2dWFyb3VDN296cEdaeFdFR21WUnFmaVdEZyIKICB9Cn0=
-                """.trimIndent()
+        data.base64 = File("./src/test/resources/credentials-test-data/vcBase64.txt")
+            .readText(Charsets.UTF_8)
         val dataDecorator = AttachDecorator()
         dataDecorator.data = data
         val credentialAttach = listOf(dataDecorator)

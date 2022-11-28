@@ -32,7 +32,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.internal.wait
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -56,9 +55,7 @@ class BusinessPartnerDataServiceImpl(
     : Deferred<Boolean> = GlobalScope.async {
         val listOfBPNs = if (identifier.isNullOrEmpty()) {
                 walletService.getAllBpns()
-            } else {
-                listOf(walletService.getBpnFromIdentifier(identifier))
-            }
+            } else listOf(walletService.getBpnFromIdentifier(identifier))
         var accessToken = getAccessToken()
 
         val legalAddressDataResponse = getLegalAddressResponse(listOfBPNs, accessToken.accessToken)
@@ -174,6 +171,7 @@ class BusinessPartnerDataServiceImpl(
                 checkExistencesAndIssueCredential(holder, existingNamesData,
                     JsonLdTypes.NAME_TYPE, name, connection)
             }
+            revokeAndDeleteCredentialsAsync(existingNamesData, holder.isSelfManaged).await()
 
             // Bank Account Credentials
             val existingBankAccountsData: MutableList<Pair<BankAccountDto, VerifiableCredentialDto>> =
@@ -182,6 +180,7 @@ class BusinessPartnerDataServiceImpl(
                 checkExistencesAndIssueCredential(holder, existingBankAccountsData,
                     JsonLdTypes.BANK_ACCOUNT_TYPE, bankAccount, connection)
             }
+            revokeAndDeleteCredentialsAsync(existingBankAccountsData, holder.isSelfManaged).await()
 
             // Legal Form Credentials
             val existingLegalFormData: MutableList<Pair<LegalFormDto, VerifiableCredentialDto>> =
@@ -190,6 +189,7 @@ class BusinessPartnerDataServiceImpl(
                 checkExistencesAndIssueCredential(holder, existingLegalFormData,
                     JsonLdTypes.LEGAL_FORM_TYPE, businessPartnerData.legalForm, connection)
             }
+            revokeAndDeleteCredentialsAsync(existingLegalFormData, holder.isSelfManaged).await()
 
             // Address Credentials
             if (pulledAddressOfBpn != null) {
@@ -201,10 +201,6 @@ class BusinessPartnerDataServiceImpl(
                 }
                 revokeAndDeleteCredentialsAsync(existingLegalAddressData, holder.isSelfManaged).await()
             }
-
-            revokeAndDeleteCredentialsAsync(existingNamesData, holder.isSelfManaged).await()
-            revokeAndDeleteCredentialsAsync(existingBankAccountsData, holder.isSelfManaged).await()
-            revokeAndDeleteCredentialsAsync(existingLegalFormData, holder.isSelfManaged).await()
         }
         return@async true
     }.await()
@@ -316,7 +312,7 @@ class BusinessPartnerDataServiceImpl(
             credentialsToRevoke.forEach {
                 transaction {
                     runBlocking {
-                        // The acapy java library does not support revocation yet
+                        // TODO The Acapy java library does not support revocation yet
                         if (!isSelfManagedWallet) {
                             walletService.revokeVerifiableCredential(it.second)
                         }
