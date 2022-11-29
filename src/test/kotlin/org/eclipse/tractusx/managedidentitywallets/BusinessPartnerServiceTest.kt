@@ -230,7 +230,7 @@ class BusinessPartnerServiceTest {
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json")
             )
-        } else if (request.url.toString().endsWith("?idType=BPN")) {
+        } else if (request.url.toString().endsWith("legal-entities/search")) {
             val legalEntityAsString: String = File("./src/test/resources/bpdm-test-data/legalEntityOnlyName.json")
                 .readText(Charsets.UTF_8)
             respond(
@@ -239,7 +239,7 @@ class BusinessPartnerServiceTest {
                 headers = headersOf(HttpHeaders.ContentType, "application/json")
             )
         } else {
-            throw RuntimeException("Unexpected State")
+            fail("Unexpected Http request")
         }
     }
 
@@ -465,7 +465,7 @@ class BusinessPartnerServiceTest {
                 )
 
                 // Mock LegalForm Credential
-                var credentialLegalFormId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f771333"
+                val credentialLegalFormId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f771333"
                 doReturn(
                     createVCDto(
                         credentialLegalFormId,
@@ -491,9 +491,8 @@ class BusinessPartnerServiceTest {
                     legalFormdata
                 ).await()
                 transaction {
-                    var webhook = webhookRepository.get(threadId)
+                    val webhook = webhookRepository.get(threadId)
                     assertEquals(CredentialExchangeState.OFFER_SENT.toString(), webhook.state)
-
                 }
 
                 // Remove wallets, webhook and connection
@@ -526,7 +525,6 @@ class BusinessPartnerServiceTest {
                     webhookService = webhookService,
                     connectionRepository = connectionRepository
                 )
-                var returnNotFound = true
                 var callCounter = 0
                 val mockEngine = MockEngine {
                         when (callCounter) {
@@ -544,42 +542,17 @@ class BusinessPartnerServiceTest {
                             }
                             2 -> { // get business partner data first try
                                 callCounter++
-                                respondError(
-                                    status = HttpStatusCode.Unauthorized,
-                                    content = "error",
-                                    headers = headersOf(HttpHeaders.ContentType, "application/json")
-                                )
-                            }
-                            3 -> { // retry get Access Token
-                                callCounter++
-                                respond(
-                                    content = ByteReadChannel(accessToken),
-                                    status = HttpStatusCode.OK,
-                                    headers = headersOf(HttpHeaders.ContentType, "application/json")
-                                )
-                            }
-                            4 -> { // get business partner data second try
-                                callCounter++
-                                if (returnNotFound) { // return notfound
-                                    returnNotFound = false
-                                    respondError(
-                                        status = HttpStatusCode.NotFound,
-                                        content = "error",
-                                        headers = headersOf(HttpHeaders.ContentType, "application/json")
-                                    )
-                                } else { // return bad request
-                                    respondBadRequest()
-                                }
+                                respondBadRequest()
                             }
                             else -> {
-                                throw RuntimeException("Unexpected State")
+                                fail("Unexpected Http request")
                             }
                         }
                 }
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
                 }
-                var walletServiceSpy = spy(walletService)
+                val walletServiceSpy = spy(walletService)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -592,9 +565,19 @@ class BusinessPartnerServiceTest {
                 assertDoesNotThrow {
                     runBlocking {
                         spyBpdmService.pullDataAndUpdateCatenaXCredentialsAsync(holderWallet.did).await()
-                        callCounter = 0
-                        spyBpdmService.pullDataAndUpdateCatenaXCredentialsAsync(holderWallet.did).await()
-                        var credentials = credentialRepository.getCredentials(
+                        verify(spyBpdmService, never()).issueAndStoreCatenaXCredentialsAsync(
+                            any(),
+                            any(),
+                            any()
+                        )
+                        verify(spyBpdmService, never()).issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                            any(),
+                            any(),
+                            any(),
+                            any(),
+                            any()
+                        )
+                        val credentials = credentialRepository.getCredentials(
                             null, holderWallet.did, null, null
                         )
                         assertEquals(0, credentials.size)
@@ -631,7 +614,7 @@ class BusinessPartnerServiceTest {
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
                 }
-                var walletServiceSpy = spy(walletService)
+                val walletServiceSpy = spy(walletService)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -651,6 +634,21 @@ class BusinessPartnerServiceTest {
                     runBlocking {
                         spyBpdmService.pullDataAndUpdateCatenaXCredentialsAsync(holderWallet.did).await()
                     }
+                }
+                verify(spyBpdmService, never()).issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+                transaction {
+                    val credentials = credentialRepository.getCredentials(
+                        null, holderWallet.did, null, null
+                    )
+                    // The issue credential method `issueAndStoreCatenaXCredentialsAsync`
+                    //  is mocked to do nothing. Therefore, there is no new Credential
+                    assertEquals(0, credentials.size)
                 }
 
                 // Remove wallets
@@ -684,7 +682,7 @@ class BusinessPartnerServiceTest {
                     webhookService = webhookService,
                     connectionRepository = connectionRepository
                 )
-                var spyWalletService = spy(walletService)
+                val spyWalletService = spy(walletService)
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
                 }
@@ -710,6 +708,19 @@ class BusinessPartnerServiceTest {
                     runBlocking {
                         bpdmServiceSpy.pullDataAndUpdateCatenaXCredentialsAsync(selfManagedWallet.did).await()
                     }
+                }
+                verify(bpdmServiceSpy, never()).issueAndStoreCatenaXCredentialsAsync(
+                    any(),
+                    any(),
+                    any()
+                )
+                transaction {
+                    val credentials = credentialRepository.getCredentials(
+                        null, holderWallet.did, null, null
+                    )
+                    // The issue credential method `issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync`
+                    //  is mocked to do nothing. Therefore, there is no new Credential
+                    assertEquals(0, credentials.size)
                 }
 
                 // Remove wallets and connection
@@ -850,7 +861,6 @@ class BusinessPartnerServiceTest {
         v20CredentialExchange.credOffer = credOffer
         return v20CredentialExchange
     }
-
 
     private fun addWallets(walletRepo: WalletRepository, wallets: List<WalletExtendedData>) {
         transaction {

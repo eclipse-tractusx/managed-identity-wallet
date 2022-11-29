@@ -59,43 +59,45 @@ class BusinessPartnerDataServiceImpl(
         var accessToken = getAccessToken()
 
         val legalAddressDataResponse = getLegalAddressResponse(listOfBPNs, accessToken.accessToken)
-        val legalAddressData: List<LegalAddressDto>? =
+        val legalAddressDataList: List<LegalAddressDto> =
             if (legalAddressDataResponse.status == HttpStatusCode.OK) {
                 Json.decodeFromString(legalAddressDataResponse.readText())
             } else {
-                log.warn("Pull Legal Addresses failed with code ${legalAddressDataResponse.status}")
-                null
+                log.error("Getting Legal Addresses of LegalEntity has thrown " +
+                        "an error with details ${legalAddressDataResponse.readText()}")
+                emptyList()
             }
+        val legalAddressDataMap: Map<String, LegalAddressDto> = legalAddressDataList.map {
+            it.legalEntity to it
+        }.toMap()
+
+        val legalEntitiesSearchResponse = getBusinessPartnerSearchResponse(listOfBPNs, accessToken.accessToken)
+        val legalEntityDataList: List<BusinessPartnerDataDto> =
+            if (legalEntitiesSearchResponse.status == HttpStatusCode.OK) {
+                Json.decodeFromString(legalEntitiesSearchResponse.readText())
+            } else {
+                log.error("Getting Business data of LegalEntity has thrown " +
+                        "an error with details ${legalEntitiesSearchResponse.readText()}")
+                emptyList()
+            }
+        val legalEntityDataMap: Map<String, BusinessPartnerDataDto> = legalEntityDataList.map {
+            it.bpn to it
+        }.toMap()
 
         listOfBPNs.forEach { bpn ->
-            val holder = walletService.getWallet(bpn)
-            val connectionId: ConnectionDto? = if (holder.isSelfManaged) {
-                walletService.getConnectionWithCatenaX(holder.did)
-            } else { null }
-            var businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
-            if (businessPartnerDataResponse.status == HttpStatusCode.Unauthorized) {
-                accessToken = getAccessToken() // Get new Access Token
-                businessPartnerDataResponse = getBusinessPartnerDataResponse(bpn, accessToken.accessToken)
-            }
-            when (businessPartnerDataResponse.status) {
-                HttpStatusCode.OK -> {
-                    issueAndUpdateCatenaXCredentials(
-                        holder = holder,
-                        businessPartnerData = Json.decodeFromString(businessPartnerDataResponse.readText()),
-                        pulledAddressOfBpn = legalAddressData?.filter {
-                            it.legalEntity == holder.bpn
-                        },
-                        connection = connectionId
-                    )
-                }
-                HttpStatusCode.NotFound -> {
-                    log.warn("BPN $bpn does not not exist!")
-                }
-                else -> {
-                    log.error("Getting Business data of bpn $bpn has thrown " +
-                            "an error with details ${businessPartnerDataResponse.readText()}")
-
-                }
+            if (legalEntityDataMap.containsKey(bpn) || legalAddressDataMap.containsKey(bpn)) {
+                val holder = walletService.getWallet(bpn)
+                val connectionId: ConnectionDto? = if (holder.isSelfManaged) {
+                    walletService.getConnectionWithCatenaX(holder.did)
+                } else { null }
+                issueAndUpdateCatenaXCredentials(
+                    holder = holder,
+                    businessPartnerData = legalEntityDataMap.get(bpn),
+                    pulledAddressOfBpn = legalAddressDataMap.get(bpn),
+                    connection = connectionId
+                )
+            } else {
+                log.warn("There are no legalEntity or legalAddress associated to Bpn $bpn")
             }
         }
         return@async true
@@ -155,50 +157,48 @@ class BusinessPartnerDataServiceImpl(
 
     private suspend fun issueAndUpdateCatenaXCredentials(
         holder: WalletDto,
-        businessPartnerData: BusinessPartnerDataDto,
-        pulledAddressOfBpn: List<LegalAddressDto>?,
+        businessPartnerData: BusinessPartnerDataDto?,
+        pulledAddressOfBpn: LegalAddressDto?,
         connection: ConnectionDto?
     ): Boolean = GlobalScope.async {
         runBlocking {
             val catenaXCredentialsOfBpn = walletService.getCredentials(
                 walletService.getCatenaXBpn(), holder.bpn, null, null
             )
+            if (businessPartnerData != null) {
+                // Name Credentials
+                val existingNamesData: MutableList<Pair<NameResponse, VerifiableCredentialDto>> =
+                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.NAME_TYPE)
+                businessPartnerData.names.forEach { name ->
+                    checkExistencesAndIssueCredential(holder, existingNamesData,
+                        JsonLdTypes.NAME_TYPE, name, connection)
+                }
+                revokeAndDeleteCredentialsAsync(existingNamesData, holder.isSelfManaged).await()
 
-            // Name Credentials
-            val existingNamesData: MutableList<Pair<NameResponse, VerifiableCredentialDto>> =
-                extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.NAME_TYPE)
-            businessPartnerData.names.forEach { name ->
-                checkExistencesAndIssueCredential(holder, existingNamesData,
-                    JsonLdTypes.NAME_TYPE, name, connection)
+                // Bank Account Credentials
+                val existingBankAccountsData: MutableList<Pair<BankAccountDto, VerifiableCredentialDto>> =
+                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.BANK_ACCOUNT_TYPE)
+                businessPartnerData.bankAccounts.forEach { bankAccount ->
+                    checkExistencesAndIssueCredential(holder, existingBankAccountsData,
+                        JsonLdTypes.BANK_ACCOUNT_TYPE, bankAccount, connection)
+                }
+                revokeAndDeleteCredentialsAsync(existingBankAccountsData, holder.isSelfManaged).await()
+
+                // Legal Form Credentials
+                val existingLegalFormData: MutableList<Pair<LegalFormDto, VerifiableCredentialDto>> =
+                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.LEGAL_FORM_TYPE)
+                if (businessPartnerData.legalForm != null) {
+                    checkExistencesAndIssueCredential(holder, existingLegalFormData,
+                        JsonLdTypes.LEGAL_FORM_TYPE, businessPartnerData.legalForm, connection)
+                }
+                revokeAndDeleteCredentialsAsync(existingLegalFormData, holder.isSelfManaged).await()
             }
-            revokeAndDeleteCredentialsAsync(existingNamesData, holder.isSelfManaged).await()
-
-            // Bank Account Credentials
-            val existingBankAccountsData: MutableList<Pair<BankAccountDto, VerifiableCredentialDto>> =
-                extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.BANK_ACCOUNT_TYPE)
-            businessPartnerData.bankAccounts.forEach { bankAccount ->
-                checkExistencesAndIssueCredential(holder, existingBankAccountsData,
-                    JsonLdTypes.BANK_ACCOUNT_TYPE, bankAccount, connection)
-            }
-            revokeAndDeleteCredentialsAsync(existingBankAccountsData, holder.isSelfManaged).await()
-
-            // Legal Form Credentials
-            val existingLegalFormData: MutableList<Pair<LegalFormDto, VerifiableCredentialDto>> =
-                extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.LEGAL_FORM_TYPE)
-            if (businessPartnerData.legalForm != null) {
-                checkExistencesAndIssueCredential(holder, existingLegalFormData,
-                    JsonLdTypes.LEGAL_FORM_TYPE, businessPartnerData.legalForm, connection)
-            }
-            revokeAndDeleteCredentialsAsync(existingLegalFormData, holder.isSelfManaged).await()
-
             // Address Credentials
             if (pulledAddressOfBpn != null) {
                 val existingLegalAddressData : MutableList<Pair<AddressDto, VerifiableCredentialDto>> =
                     extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.ADDRESS_TYPE)
-                pulledAddressOfBpn.forEach { legalAddress ->
-                    checkExistencesAndIssueCredential(holder, existingLegalAddressData,
-                        JsonLdTypes.ADDRESS_TYPE, legalAddress.legalAddress, connection)
-                }
+                checkExistencesAndIssueCredential(holder, existingLegalAddressData,
+                    JsonLdTypes.ADDRESS_TYPE, pulledAddressOfBpn.legalAddress, connection)
                 revokeAndDeleteCredentialsAsync(existingLegalAddressData, holder.isSelfManaged).await()
             }
         }
@@ -327,12 +327,14 @@ class BusinessPartnerDataServiceImpl(
         }
     }
 
-    private suspend fun getBusinessPartnerDataResponse(bpn: String, accessToken: String): HttpResponse {
-        val requestUrl = "${bpdmConfig.url}/api/catena/legal-entities/$bpn?idType=BPN"
-        return client.get(requestUrl) {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $accessToken")
-            }
+    private suspend fun getBusinessPartnerSearchResponse(listOfBPNs: List<String>, accessToken: String): HttpResponse {
+        val requestUrl = "${bpdmConfig.url}/api/catena/legal-entities/search"
+        return client.post(requestUrl) {
+            url(requestUrl)
+            headers.append(HttpHeaders.Authorization, "Bearer $accessToken")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = Json.encodeToString(listOfBPNs)
         }
     }
 

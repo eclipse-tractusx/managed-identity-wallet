@@ -76,7 +76,7 @@ class AcaPyWalletServiceImpl(
                 vcs = credentials,
                 revocationListName = walletDto.revocationListName,
                 pendingMembershipIssuance = walletDto.pendingMembershipIssuance,
-                isSelfManaged = extractedWallet.walletId.isNullOrBlank()
+                isSelfManaged = walletDto.isSelfManaged
             )
         }
     }
@@ -172,7 +172,8 @@ class AcaPyWalletServiceImpl(
             storedWallet.createdAt,
             storedWallet.vcs,
             storedWallet.revocationListName,
-            storedWallet.pendingMembershipIssuance
+            storedWallet.pendingMembershipIssuance,
+            storedWallet.isSelfManaged
         )
     }
 
@@ -775,7 +776,7 @@ class AcaPyWalletServiceImpl(
     }
 
     override fun getConnectionWithCatenaX(theirDid: String): ConnectionDto? {
-        val catenaXWallet = getWallet(getCatenaXBpn());
+        val catenaXWallet = getWallet(getCatenaXBpn())
         return getConnections(catenaXWallet.did, theirDid).firstOrNull()
     }
 

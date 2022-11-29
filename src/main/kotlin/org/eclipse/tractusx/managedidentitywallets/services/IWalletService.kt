@@ -180,6 +180,11 @@ interface IWalletService {
                             }
                         }
                     }
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = 30000
+                        connectTimeoutMillis = 30000
+                        socketTimeoutMillis = 30000
+                    }
                     install(Logging) {
                         logger = Logger.DEFAULT
                         level = LogLevel.BODY

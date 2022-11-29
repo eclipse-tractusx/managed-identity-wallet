@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.Deferred
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
@@ -62,6 +63,11 @@ interface IBusinessPartnerDataService {
                             log.debug("HTTP status: ${response.status.value}")
                             log.debug("HTTP description: ${response.status.description}")
                         }
+                    }
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = 30000
+                        connectTimeoutMillis = 30000
+                        socketTimeoutMillis = 30000
                     }
                     install(Logging) {
                         logger = Logger.DEFAULT

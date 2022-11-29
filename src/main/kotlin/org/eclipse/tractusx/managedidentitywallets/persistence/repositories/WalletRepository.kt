@@ -85,13 +85,30 @@ class WalletRepository {
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
-        WalletDto(name, bpn, did, null, createdAt,
-            emptyList<VerifiableCredentialDto>().toMutableList(), revocationListName,
-            pendingMembershipIssuance)
+        WalletDto(
+            name = name,
+            bpn = bpn,
+            did = did,
+            verKey = null,
+            createdAt = createdAt,
+            vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
+            revocationListName = revocationListName,
+            pendingMembershipIssuance = pendingMembershipIssuance,
+            isSelfManaged = entity.walletId.isNullOrEmpty()
+        )
     }
 
     fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {
-        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey,
-            walletToken, revocationListName, pendingMembershipIssuance)
+        WalletExtendedData(
+            id.value,
+            name,
+            bpn,
+            did,
+            walletId,
+            walletKey,
+            walletToken,
+            revocationListName,
+            pendingMembershipIssuance
+        )
     }
 }

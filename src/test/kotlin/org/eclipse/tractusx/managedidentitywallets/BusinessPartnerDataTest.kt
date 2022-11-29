@@ -82,10 +82,10 @@ class BusinessPartnerDataTest {
         }) {
             val businessPartnerDataAsJson: String = File("./src/test/resources/bpdm-test-data/legalEntity.json")
                 .readText(Charsets.UTF_8)
-            val data: BusinessPartnerDataDto = Json.decodeFromString(businessPartnerDataAsJson)
-            assertEquals("BPNL000000000001", data.bpn)
-            assertEquals(emptyList(), data.roles)
-            assertEquals(null, data.status)
+            val data: List<BusinessPartnerDataDto> = Json.decodeFromString(businessPartnerDataAsJson)
+            assertEquals("BPNL000000000001", data[0].bpn)
+            assertEquals(emptyList(), data[0].roles)
+            assertEquals(null, data[0].status)
 
             val legaAddressAsString: String = File("./src/test/resources/bpdm-test-data/legalAddressOfEntity.json")
                 .readText(Charsets.UTF_8)
