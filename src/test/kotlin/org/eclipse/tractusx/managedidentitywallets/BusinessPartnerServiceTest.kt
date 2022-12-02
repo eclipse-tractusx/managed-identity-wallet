@@ -275,7 +275,7 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init services and mocks
-                addWallets(walletRepo, listOf( issuerWallet, holderWallet))
+                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
                 walletService = IWalletService.createWithAcaPyService(
                     walletAndAcaPyConfig = walletAcapyConfig,
                     walletRepository = walletRepo,
@@ -365,7 +365,7 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init services and mocks
-                addWallets(walletRepo, listOf( issuerWallet, holderWallet))
+                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
                 walletService = IWalletService.createWithAcaPyService(
                     walletAndAcaPyConfig = walletAcapyConfig,
                     walletRepository = walletRepo,
@@ -435,7 +435,7 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create wallets and connection, init services and mocks
-                addWallets(walletRepo, listOf( issuerWallet, selfManagedWallet))
+                addWallets(walletRepo, listOf(issuerWallet, selfManagedWallet))
                 addConnection(
                     connectionRepository,
                     ConnectionState.COMPLETED,
@@ -508,7 +508,7 @@ class BusinessPartnerServiceTest {
     }
 
     @Test
-    fun testPullDataAndUpdateCatenaXCredentialsAsyncBpdmHttpRequest()  {
+    fun testPullDataAndUpdateCatenaXCredentialsAsyncBpdmHttpRequest() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
@@ -527,27 +527,27 @@ class BusinessPartnerServiceTest {
                 )
                 var callCounter = 0
                 val mockEngine = MockEngine {
-                        when (callCounter) {
-                            0 -> { // access Token
-                                callCounter++
-                                respond(
-                                    content = ByteReadChannel(accessToken),
-                                    status = HttpStatusCode.OK,
-                                    headers = headersOf(HttpHeaders.ContentType, "application/json")
-                                )
-                            }
-                            1 -> { // get legal address
-                                callCounter++
-                                respondBadRequest()
-                            }
-                            2 -> { // get business partner data first try
-                                callCounter++
-                                respondBadRequest()
-                            }
-                            else -> {
-                                fail("Unexpected Http request")
-                            }
+                    when (callCounter) {
+                        0 -> { // access Token
+                            callCounter++
+                            respond(
+                                content = ByteReadChannel(accessToken),
+                                status = HttpStatusCode.OK,
+                                headers = headersOf(HttpHeaders.ContentType, "application/json")
+                            )
                         }
+                        1 -> { // get legal address
+                            callCounter++
+                            respondBadRequest()
+                        }
+                        2 -> { // get business partner data first try
+                            callCounter++
+                            respondBadRequest()
+                        }
+                        else -> {
+                            fail("Unexpected Http request")
+                        }
+                    }
                 }
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
@@ -588,6 +588,75 @@ class BusinessPartnerServiceTest {
                 transaction {
                     walletRepo.deleteWallet(issuerWallet.did)
                     walletRepo.deleteWallet(holderWallet.did)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testPullDataAndUpdateCatenaXCredentialsAsyncBigNumberOfBpns() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+        }) {
+            runBlocking {
+                walletService = IWalletService.createWithAcaPyService(
+                    walletAndAcaPyConfig = walletAcapyConfig,
+                    walletRepository = walletRepo,
+                    credentialRepository = credentialRepository,
+                    utilsService = utilsService,
+                    revocationService = revocationService,
+                    webhookService = webhookService,
+                    connectionRepository = connectionRepository
+                )
+                var numberOfCalls = 0
+                val mockEngineEmptyLists = MockEngine { request ->
+                    if (request.url.toString().endsWith(bpdmConfig.tokenUrl)) {
+                        numberOfCalls++
+                        respond(
+                            content = ByteReadChannel(accessToken),
+                            status = HttpStatusCode.OK,
+                            headers = headersOf(HttpHeaders.ContentType, "application/json")
+                        )
+                    } else if (request.url.toString().endsWith("legal-addresses/search")) {
+                        numberOfCalls++
+                        respond(
+                            content = ByteReadChannel("""[]"""), // empty addresses
+                            status = HttpStatusCode.OK,
+                            headers = headersOf(HttpHeaders.ContentType, "application/json")
+                        )
+                    } else if (request.url.toString().endsWith("legal-entities/search")) {
+                        numberOfCalls++
+                        respond(
+                            content = ByteReadChannel("""[]"""),
+                            status = HttpStatusCode.OK,
+                            headers = headersOf(HttpHeaders.ContentType, "application/json")
+                        )
+                    } else {
+                        fail("Unexpected Http request")
+                    }
+                }
+                val client = HttpClient(mockEngineEmptyLists) {
+                    expectSuccess = false
+                }
+                val walletServiceSpy = spy(walletService)
+                val bigBpnsList: List<String> = (1..5001).map { "Bpn$it" }
+                doReturn(bigBpnsList).whenever(walletServiceSpy).getAllBpns()
+
+                bpdmService = BusinessPartnerDataServiceImpl(
+                    walletServiceSpy,
+                    bpdmConfig,
+                    client
+                )
+
+                assertDoesNotThrow {
+                    runBlocking {
+                        bpdmService.pullDataAndUpdateCatenaXCredentialsAsync().await()
+                        // The Bpns will be split in 2 chunks [[1..5000], [5001]]
+                        // Therefore there will be 6 requests (2 access token, 2 legal entities, 2 legal addresses)
+                        assertEquals(6, numberOfCalls)
+                    }
+
                 }
             }
         }
