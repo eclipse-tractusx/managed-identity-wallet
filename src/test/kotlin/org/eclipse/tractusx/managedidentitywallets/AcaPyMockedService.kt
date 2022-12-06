@@ -28,13 +28,15 @@ import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
-import org.hyperledger.aries.api.connection.ConnectionState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
 import java.security.SecureRandom
 
-class AcaPyMockedService(val baseWalletBpn: String,
-                         val networkIdentifier: String): IAcaPyService {
+class AcaPyMockedService(
+    val baseWalletBpn: String,
+    val networkIdentifier: String,
+    val ledgerType: String
+): IAcaPyService {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     private var currentDid: String = "EXAMPLE"
@@ -51,7 +53,9 @@ class AcaPyMockedService(val baseWalletBpn: String,
             apiAdminUrl = "",
             networkIdentifier = networkIdentifier,
             baseWalletBpn = baseWalletBpn,
-            adminApiKey = "Hj23iQUsstG!dde"
+            adminApiKey = "TestAdminApiKey",
+            ledgerType = ledgerType,
+            ledgerRegistrationUrl = ""
         )
     }
 
@@ -117,7 +121,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
     }
 
     override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String {
-        if (SingletonTestData.signCredentialResponse.isNullOrEmpty()) {
+        if (SingletonTestData.signCredentialResponse.isEmpty()) {
             return ""
         }
         return SingletonTestData.signCredentialResponse
@@ -142,7 +146,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
     }
 
     override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
-        var metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
+        val metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
         for (key in didToVerKey.keys) {
             if (did == key) {
                 return ResolutionResult(
@@ -174,7 +178,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
                 )
             }
         }
-        if (!SingletonTestData.baseWalletDID.isNullOrEmpty() &&
+        if (SingletonTestData.baseWalletDID.isNotEmpty() &&
             getIdentifierOfDid(did) == getIdentifierOfDid(SingletonTestData.baseWalletDID)) {
             return ResolutionResult(
                 didDoc = DidDocumentDto(
@@ -185,7 +189,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
                             id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#key-1",
                             type = "Ed25519VerificationKey2018",
                             controller = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}",
-                            publicKeyBase58= "${SingletonTestData.baseWalletVerKey}"
+                            publicKeyBase58 = SingletonTestData.baseWalletVerKey
                         )
                     ),
                     services = listOf(
@@ -231,7 +235,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
         connReq.connectionId = SingletonTestData.connectionId
         connReq.theirDid = "${getDidMethodPrefixWithNetworkIdentifier()}:..."
         connReq.myDid = SingletonTestData.baseWalletDID
-        connReq.state = ConnectionState.REQUEST
+        connReq.rfc23State = Rfc23State.REQUEST_SENT.toString()
         connReq.requestId = SingletonTestData.threadId
         return connReq
     }
@@ -254,6 +258,34 @@ class AcaPyMockedService(val baseWalletBpn: String,
     }
 
     override suspend fun deleteConnection(connectionId: String, token: String) { return }
+
+    override suspend fun acceptInvitationRequest(connectionId: String, token: String): String {
+        return ""
+    }
+
+    override suspend fun acceptCredentialOfferBySendingRequest(
+        holderDid: String,
+        credentialExchangeId: String,
+        token: String
+    ) {
+        return
+    }
+
+    override suspend fun acceptCredentialReceivedByStoringIssuedCredential(
+        credentialId: String,
+        credentialExchangeId: String,
+        token: String
+    ) {
+        return
+    }
+
+    override suspend fun registerNymIdunion(registerNymIdunionDto: RegisterNymIdunionDto) {
+        return
+    }
+
+    override suspend fun registerNymPublic(registerNymDto: RegisterNymPublicDto) {
+        return
+    }
 
     private fun createRandomString(): String {
         return (1..25)

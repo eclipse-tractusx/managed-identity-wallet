@@ -19,6 +19,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
+import com.google.gson.GsonBuilder
 import foundation.identity.jsonld.JsonLDUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
@@ -30,8 +31,10 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallet
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
-import org.hyperledger.aries.api.connection.ConnectionState
+import org.hyperledger.acy_py.generated.model.ConnRecord
+import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
+import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -48,9 +51,13 @@ class AcaPyWalletServiceImpl(
 ) : IWalletService {
 
     private val baseWalletBpn = acaPyService.getWalletAndAcaPyConfig().baseWalletBpn
+    private val ledgerType = acaPyService.getWalletAndAcaPyConfig().ledgerType
+
+    private lateinit var catenaXWallet: WalletExtendedData
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
+        private val gson = GsonBuilder().create()
     }
 
     override fun getWallet(identifier: String, withCredentials: Boolean): WalletDto {
@@ -65,7 +72,7 @@ class AcaPyWalletServiceImpl(
                     null,
                     null
                 )
-            } else {  listOf() }
+            } else { listOf() }
 
             WalletDto(
                 name = walletDto.name,
@@ -79,6 +86,10 @@ class AcaPyWalletServiceImpl(
                 isSelfManaged = walletDto.isSelfManaged
             )
         }
+    }
+
+    override fun getCatenaXWallet(): WalletExtendedData {
+        return catenaXWallet
     }
 
     override fun getAll(): List<WalletDto> {
@@ -99,15 +110,15 @@ class AcaPyWalletServiceImpl(
 
     override suspend fun registerBaseWallet(verKey: String): Boolean {
         log.debug("Register base wallet with bpn $baseWalletBpn and key $verKey")
-        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
-        val shortDid = utilsService.getIdentifierOfDid(catenaXWallet.did)
+        val catenaXWalletWithToken = getWalletExtendedInformation(baseWalletBpn)
+        val shortDid = utilsService.getIdentifierOfDid(catenaXWalletWithToken.did)
 
         // Register DID with public DID on ledger
         acaPyService.assignDidToPublic(
             shortDid,
-            catenaXWallet.walletToken!!
+            catenaXWalletWithToken.walletToken!!
         )
-        subscribeForAriesWS()
+        initCatenaXWalletAndSubscribeForAriesWS()
         return true
     }
 
@@ -131,13 +142,14 @@ class AcaPyWalletServiceImpl(
             DidCreate(method = DidMethod.SOV.toString(), options = DidCreateOptions(KeyType.ED25519.toString())),
             createdSubWalletDto.token
         )
+        val isCreatedCatenaXWallet = isCatenaXWallet(walletCreateDto.bpn)
 
-        // For Catena-X Wallet
-        //   1. The DID will be registered externally with endorser role.
-        //   2. The Assign to public will be triggered manually
-        if (!isCatenaXWallet(walletCreateDto.bpn)) {
-            registerSubWalletUsingCatenaXWallet(walletCreateDto, createdDid)
-        }
+        registerDidAndSetAsPublicBasedOnLedgerType(
+            isCreatedCatenaXWallet,
+            walletCreateDto,
+            createdDid,
+            createdSubWalletDto
+        )
 
         // create revocation list
         val revocationListName = revocationService.registerList(createdDid.result.did, issueCredential = false)
@@ -156,12 +168,18 @@ class AcaPyWalletServiceImpl(
             val createdWalletData = walletRepository.addWallet(walletToCreate)
             walletRepository.toObject(createdWalletData)
         }
+
         // For Catena-X Wallet The DID is not registered yet and therefore a credential cannot be issued!
-        if (!isCatenaXWallet(walletCreateDto.bpn)) {
+        if (!isCreatedCatenaXWallet || ledgerType != "closed") {
             revocationService.issueStatusListCredentials(
                 profileName = utilsService.getIdentifierOfDid(storedWallet.did),
                 force = true
             )
+        }
+
+        // Subscribe to Websocket
+        if (isCreatedCatenaXWallet) {
+            this.initCatenaXWalletAndSubscribeForAriesWS()
         }
 
         return WalletDto(
@@ -177,9 +195,54 @@ class AcaPyWalletServiceImpl(
         )
     }
 
+    private suspend fun registerDidAndSetAsPublicBasedOnLedgerType(
+        isCreatedCatenaXWallet: Boolean,
+        walletCreateDto: WalletCreateDto,
+        createdDid: DidResult,
+        createdSubWalletDto: CreatedSubWalletResult
+    ) {
+        when (ledgerType) {
+            "closed" -> {
+                // For Catena-X Wallet
+                //   1. The DID will be registered externally with endorser role.
+                //   2. The Assign to public will be triggered manually
+                if (!isCreatedCatenaXWallet) {
+                    registerSubWalletUsingCatenaXWallet(walletCreateDto, createdDid)
+                }
+            }
+            "idunion" -> {
+                acaPyService.registerNymIdunion(
+                    RegisterNymIdunionDto(
+                        did = createdDid.result.did,
+                        verkey = createdDid.result.verkey,
+                    )
+                )
+                assignDidToPublic(
+                    did = createdDid.result.did,
+                    verKey = createdDid.result.verkey,
+                    walletToken = createdSubWalletDto.token
+                )
+            }
+            "public" -> {
+                acaPyService.registerNymPublic(
+                    RegisterNymPublicDto(
+                        did = createdDid.result.did,
+                        verkey = createdDid.result.verkey,
+                        role = "ENDORSER"
+                    )
+                )
+                assignDidToPublic(
+                    did = createdDid.result.did,
+                    verKey = createdDid.result.verkey,
+                    walletToken = createdSubWalletDto.token
+                )
+            }
+        }
+    }
+
     private suspend fun registerSubWalletUsingCatenaXWallet(walletCreateDto: WalletCreateDto, createdDid: DidResult) {
-        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
         // Register DID on ledger
+        val catenaXWalletToken = getWalletExtendedInformation(baseWalletBpn).walletToken!!
         acaPyService.registerDidOnLedger(
             DidRegistration(
                 alias = walletCreateDto.name,
@@ -187,8 +250,19 @@ class AcaPyWalletServiceImpl(
                 verkey = createdDid.result.verkey,
                 role = "NONE"
             ),
-            catenaXWallet.walletToken!!
+            catenaXWalletToken
         )
+    }
+
+    // For managed wallet it works only it the wallet has an endorser role (ledger.type: idunion and public)
+    private suspend fun assignDidToPublic(did: String, verKey: String, walletToken: String): Boolean {
+        log.debug("Add public endpoint to wallet $did with key $verKey")
+        val shortDid = utilsService.getIdentifierOfDid(did)
+        acaPyService.assignDidToPublic(
+            shortDid,
+            walletToken
+        )
+        return true
     }
 
     override suspend fun registerSelfManagedWalletAndBuildConnection(
@@ -196,13 +270,13 @@ class AcaPyWalletServiceImpl(
     ): SelfManagedWalletResultDto {
 
         utilsService.checkIndyDid(selfManagedWalletCreateDto.did)
-        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
+        val catenaXWalletWithToken = getWalletExtendedInformation(baseWalletBpn)
 
         transaction {
             walletRepository.checkWalletAlreadyExists(selfManagedWalletCreateDto.did)
         }
 
-        val connectionRecord = acaPyService.connect(selfManagedWalletCreateDto, catenaXWallet.walletToken!!)
+        val connectionRecord = acaPyService.connect(selfManagedWalletCreateDto, catenaXWalletWithToken.walletToken!!)
 
         val walletToCreate = WalletExtendedData(
             name = selfManagedWalletCreateDto.name,
@@ -217,18 +291,19 @@ class AcaPyWalletServiceImpl(
 
         return transaction {
             val createdWalletData = walletRepository.addWallet(walletToCreate)
-            val connectionOwnerWallet = walletRepository.getWallet(catenaXWallet.did)
+            val connectionOwnerWallet = walletRepository.getWallet(catenaXWalletWithToken.did)
             connectionRepository.add(
+                idOfConnection = connectionRecord.connectionId,
                 connectionOwnerDid = connectionOwnerWallet.did,
                 connectionTargetDid = selfManagedWalletCreateDto.did,
-                connectionRecord =  connectionRecord
+                rfc23State =  connectionRecord.rfc23State
             )
             if (!selfManagedWalletCreateDto.webhookUrl.isNullOrBlank()) {
                 webhookService.addWebhook(
                     // The ConnectionRecord has no threadId. Therefore, the requestId as an Identifier.
                     threadId = connectionRecord.requestId,
                     url = selfManagedWalletCreateDto.webhookUrl,
-                    state = ConnectionState.REQUEST.name
+                    state = connectionRecord.rfc23State
                 )
             }
             SelfManagedWalletResultDto(
@@ -361,8 +436,7 @@ class AcaPyWalletServiceImpl(
         val token: String
         val modifiedDid: String
         if (utilsService.isDID(identifier)) {
-            val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
-            token = catenaXWallet.walletToken!!
+            token = getWalletExtendedInformation(baseWalletBpn).walletToken!!
             utilsService.checkIndyDid(identifier)
             modifiedDid = utilsService.replaceNetworkIdentifierWithSov(identifier)
         } else {
@@ -441,8 +515,9 @@ class AcaPyWalletServiceImpl(
         log.debug("Add Service Endpoint for $identifier")
         utilsService.checkSupportedId(serviceDto.id)
         val walletData = getWalletExtendedInformation(identifier)
-        if (!isCatenaXWallet(walletData.bpn)) {
-            throw NotImplementedException("Add Service Endpoint is not supported for the given wallet $identifier")
+        if (!isCatenaXWallet(walletData.bpn) && ledgerType == "closed") {
+            throw NotImplementedException("Add Service Endpoint is not supported " +
+                    "for the given wallet $identifier in a closed ledger")
         }
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
@@ -471,8 +546,9 @@ class AcaPyWalletServiceImpl(
         log.debug("Update Service Endpoint for $identifier")
         utilsService.checkSupportedId(id)
         val walletData = getWalletExtendedInformation(identifier)
-        if (!isCatenaXWallet(walletData.bpn)) {
-            throw NotImplementedException("Update Service Endpoint is not supported for the wallet $identifier")
+        if (!isCatenaXWallet(walletData.bpn) && ledgerType == "closed") {
+            throw NotImplementedException("Update Service Endpoint is not supported " +
+                    "for the wallet $identifier in a closed ledger")
         }
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
@@ -521,22 +597,25 @@ class AcaPyWalletServiceImpl(
         return credentialRepository.getCredentials(issuerDid, holderDid, type, credentialId)
     }
 
-    override fun isCatenaXWallet(bpn: String): Boolean = bpn == baseWalletBpn
-
-    override fun getCatenaXBpn(): String = baseWalletBpn
+    private fun isCatenaXWallet(bpn: String): Boolean = bpn == baseWalletBpn
 
     override suspend fun verifyVerifiablePresentation(
         vpDto: VerifiablePresentationDto,
         withDateValidation: Boolean,
         withRevocationValidation: Boolean
     ): VerifyResponse {
-        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
-        validateVerifiablePresentation(vpDto, catenaXWallet.walletToken!!)
+        val catenaXWalletWithToken = getWalletExtendedInformation(baseWalletBpn)
+        validateVerifiablePresentation(vpDto, catenaXWalletWithToken.walletToken!!)
 
         val listOfVerifiableCredentials = vpDto.verifiableCredential
         if (!listOfVerifiableCredentials.isNullOrEmpty()) {
             listOfVerifiableCredentials.forEach {
-                validateVerifiableCredential(it, withDateValidation, withRevocationValidation, catenaXWallet.walletToken!!)
+                validateVerifiableCredential(
+                    it,
+                    withDateValidation,
+                    withRevocationValidation,
+                    catenaXWalletWithToken.walletToken!!
+                )
             }
         }
         return VerifyResponse(error = null, valid = true, vp = vpDto)
@@ -760,8 +839,8 @@ class AcaPyWalletServiceImpl(
         revocationService.issueStatusListCredentials(profileName, true)
     }
 
-    override fun updateConnectionState(connectionId: String, state: ConnectionState) {
-        connectionRepository.updateConnectionState(connectionId, state)
+    override fun updateConnectionState(connectionId: String, rfc23State: String) {
+        connectionRepository.updateConnectionState(connectionId, rfc23State)
     }
 
     override fun setPartnerMembershipIssued(walletDto: WalletDto) {
@@ -776,20 +855,31 @@ class AcaPyWalletServiceImpl(
     }
 
     override fun getConnectionWithCatenaX(theirDid: String): ConnectionDto? {
-        val catenaXWallet = getWallet(getCatenaXBpn())
-        return getConnections(catenaXWallet.did, theirDid).firstOrNull()
+        return getConnections(getCatenaXWallet().did, theirDid).firstOrNull()
     }
 
-    override fun subscribeForAriesWS() {
+    override fun initCatenaXWalletAndSubscribeForAriesWS() {
         val baseWallet = getWalletExtendedInformation(baseWalletBpn)
+        this.catenaXWallet = WalletExtendedData(
+            id = null,
+            name = baseWallet.name,
+            did = baseWallet.did,
+            bpn = baseWallet.bpn,
+            walletId = baseWallet.walletId,
+            walletToken = null,
+            walletKey = null,
+            revocationListName = null,
+            pendingMembershipIssuance = false
+        )
         acaPyService.subscribeForWebSocket(baseWallet)
     }
 
     override suspend fun triggerCredentialIssuanceFlow(
         vc: VerifiableCredentialIssuanceFlowRequest
     ): CredentialOfferResponse {
-        val catenaXWallet = getWalletExtendedInformation(baseWalletBpn)
-        if (vc.issuerIdentifier != catenaXWallet.did && vc.issuerIdentifier != catenaXWallet.bpn) {
+        val catenaXWalletWithToken = getWalletExtendedInformation(baseWalletBpn)
+        if (vc.issuerIdentifier != catenaXWalletWithToken.did &&
+            vc.issuerIdentifier != catenaXWalletWithToken.bpn) {
             throw UnprocessableEntityException("The Issuance Flow supports only the CatenaX wallet as issuer")
         }
 
@@ -808,9 +898,10 @@ class AcaPyWalletServiceImpl(
         }
 
         // Check connections
-        val connection = getConnections(catenaXWallet.did, holderWallet.did).firstOrNull()
-        if (connection == null || connection.state != ConnectionState.COMPLETED.name) {
-            throw InternalServerErrorException("Invalid connection between ${catenaXWallet.did} and ${holderWallet.did}")
+        val connection = getConnections(catenaXWalletWithToken.did, holderWallet.did).firstOrNull()
+        if (connection == null || connection.state != Rfc23State.COMPLETED.toString()) {
+            throw InternalServerErrorException("Invalid connection between " +
+                    "${catenaXWalletWithToken.did} and ${holderWallet.did}")
         }
 
         val vcContext: List<String> = if (vc.isRevocable) {
@@ -822,7 +913,7 @@ class AcaPyWalletServiceImpl(
             id = vc.id ,
             context = vcContext,
             type = vc.type,
-            issuerIdentifier = utilsService.replaceNetworkIdentifierWithSov(catenaXWallet.did),
+            issuerIdentifier = utilsService.replaceNetworkIdentifierWithSov(catenaXWalletWithToken.did),
             issuanceDate = vc.issuanceDate,
             expirationDate = vc.expirationDate,
             credentialSubject = credentialSubject,
@@ -832,19 +923,102 @@ class AcaPyWalletServiceImpl(
         )
 
         val v20CredExRecord = acaPyService.issuanceFlowCredentialSend(
-            token = catenaXWallet.walletToken!!,
+            token = catenaXWalletWithToken.walletToken!!,
             vc = vcAcapyRequest
         )
 
         transaction {
             if (!vc.webhookUrl.isNullOrBlank()) {
-                webhookService.addWebhook(v20CredExRecord.threadId, vc.webhookUrl, CredentialExchangeState.OFFER_SENT.name)
+                webhookService.addWebhook(
+                    v20CredExRecord.threadId,
+                    vc.webhookUrl,
+                    CredentialExchangeState.OFFER_SENT.name
+                )
             }
         }
         return CredentialOfferResponse(
-            credentialOffer = String(Base64.getDecoder().decode(v20CredExRecord.credOffer.offersAttach[0].data.base64), Charsets.UTF_8),
+            credentialOffer = String(Base64.getDecoder()
+                .decode(v20CredExRecord.credOffer.offersAttach[0].data.base64), Charsets.UTF_8
+            ),
             threadId = v20CredExRecord.threadId
         )
+    }
+
+    override suspend fun acceptConnectionRequest(walletId: String, connectionRecord: ConnectionRecord) {
+        transaction {
+            runBlocking {
+                val targetWallet = getWalletExtendedInformation(walletId)
+                val response = acaPyService.acceptInvitationRequest(
+                    connectionRecord.connectionId,
+                    targetWallet.walletToken!!
+                )
+                val updateConnectionRecord: ConnRecord = gson.fromJson(response, ConnRecord::class.java)
+
+                if (updateConnectionRecord.rfc23State != "response-sent") {
+                    log.error("Expected rdc23State ${updateConnectionRecord.rfc23State} of wallet ${targetWallet.bpn} " +
+                            "is not equal to response-sent")
+                }
+            }
+        }
+    }
+
+    override suspend fun acceptReceivedOfferVc(walletId: String, credExRecord: V20CredExRecord) {
+        val offerReceiverWallet = getWalletExtendedInformation(walletId)
+        acaPyService.acceptCredentialOfferBySendingRequest(
+            offerReceiverWallet.did,
+            credExRecord.credentialExchangeId,
+            offerReceiverWallet.walletToken!!
+        )
+    }
+
+    override suspend fun acceptReceivedIssuedVc(walletId: String, credExRecord: V20CredExRecord) {
+        transaction {
+            runBlocking {
+                val extractedWallet = walletRepository.getWallet(walletId)
+                val credentialId = credExRecord.resolveLDCredential().credential.id ?: credExRecord.credentialExchangeId
+
+                acaPyService.acceptCredentialReceivedByStoringIssuedCredential(
+                    credentialId,
+                    credExRecord.credentialExchangeId,
+                    extractedWallet.walletToken!!
+                )
+
+                val verifiableCredential = credExRecord.resolveLDCredential().credential
+                val types = verifiableCredential.type
+                    .filter { it != JsonLdTypes.CREDENTIAL_TYPE }.joinToString(",")
+
+                val idOfSubject: String = if (verifiableCredential.credentialSubject.has("id")) {
+                    verifiableCredential.credentialSubject.get("id").asString
+                } else {
+                    extractedWallet.did
+                }
+
+                credentialRepository.storeCredential(
+                    credentialId,
+                    verifiableCredential.issuer!!,
+                    idOfSubject,
+                    gson.toJson(credExRecord.resolveLDCredential().credential),
+                    types,
+                    extractedWallet
+                )
+            }
+        }
+    }
+
+    override fun addConnection(
+        connectionId: String,
+        managedWalletDid: String,
+        externalWalletDid: String,
+        connectionState: String
+    ) {
+        transaction {
+            connectionRepository.add(
+                idOfConnection = connectionId,
+                connectionOwnerDid = managedWalletDid,
+                connectionTargetDid = externalWalletDid,
+                rfc23State = connectionState
+            )
+        }
     }
 
     private fun getConnections(myDid: String?, theirDid: String?): List<ConnectionDto> {

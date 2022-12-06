@@ -73,6 +73,24 @@ class CredentialRepository {
         }
     }
 
+    fun storeCredential(
+        issuedCredentialId: String,
+        issuerOfCredential: String,
+        holderOfCredential: String,
+        credentialAsJson: String,
+        typesAsString: String,
+        holderWallet: Wallet
+    ): VerifiableCredential {
+        return VerifiableCredential.new {
+            credentialId = issuedCredentialId
+            issuerDid = issuerOfCredential
+            holderDid = holderOfCredential
+            content = credentialAsJson
+            type = typesAsString
+            wallet = holderWallet
+        }
+    }
+
     fun deleteCredentialByCredentialId(credentialId: String): Boolean {
         VerifiableCredentials.deleteWhere { VerifiableCredentials.credentialId eq credentialId }
         return true

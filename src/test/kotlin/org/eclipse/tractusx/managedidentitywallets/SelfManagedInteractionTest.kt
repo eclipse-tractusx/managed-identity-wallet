@@ -26,9 +26,9 @@ import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
-import org.hyperledger.aries.api.connection.ConnectionState
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.test.*
 
@@ -60,7 +60,8 @@ class SelfManagedInteractionTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -104,11 +105,11 @@ class SelfManagedInteractionTest {
                     val connections = EnvironmentTestSetup.connectionRepository
                         .getConnections(SingletonTestData.baseWalletDID, null)
                     assertEquals(1, connections.size)
-                    assertEquals(ConnectionState.REQUEST.name, connections[0].state)
+                    assertEquals(Rfc23State.REQUEST_SENT.toString(), connections[0].state)
 
                     val webhook = EnvironmentTestSetup.webhookService.getWebhookByThreadId(SingletonTestData.threadId)
                     assertNotNull(webhook)
-                    assertEquals(ConnectionState.REQUEST.name, webhook.state)
+                    assertEquals(Rfc23State.REQUEST_SENT.toString(), webhook.state)
 
                     EnvironmentTestSetup.webhookRepository.deleteWebhook(SingletonTestData.threadId)
                     val webhookConnection = EnvironmentTestSetup.webhookService.getWebhookByThreadId(SingletonTestData.threadId)
@@ -158,7 +159,7 @@ class SelfManagedInteractionTest {
                 transaction {
                     EnvironmentTestSetup.connectionRepository.updateConnectionState(
                         SingletonTestData.connectionId,
-                        ConnectionState.COMPLETED
+                        Rfc23State.COMPLETED.toString()
                     )
                 }
             }

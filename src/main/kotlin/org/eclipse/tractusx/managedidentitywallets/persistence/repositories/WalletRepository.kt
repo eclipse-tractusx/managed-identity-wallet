@@ -32,16 +32,16 @@ class WalletRepository {
 
     @Throws(NotFoundException::class)
     fun getWallet(identifier: String): Wallet {
-        return Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }
-            .firstOrNull()
-            ?: throw NotFoundException("Wallet with given identifier not found")
+        return Wallet.find {
+            (Wallets.did eq identifier) or (Wallets.bpn eq identifier) or (Wallets.walletId eq identifier)
+        }.firstOrNull() ?: throw NotFoundException("Wallet with given identifier not found")
     }
 
     @Throws(ConflictException::class)
     fun checkWalletAlreadyExists(identifier: String) {
-         if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
-             throw ConflictException("Wallet with given identifier already exists!")
-         }
+        if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
+            throw ConflictException("Wallet with given identifier already exists!")
+        }
     }
 
     @Throws(NotFoundException::class, UnprocessableEntityException::class)

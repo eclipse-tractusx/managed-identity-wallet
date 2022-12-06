@@ -22,8 +22,6 @@ package org.eclipse.tractusx.managedidentitywallets.persistence.repositories
 import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
-import org.hyperledger.aries.api.connection.ConnectionRecord
-import org.hyperledger.aries.api.connection.ConnectionState
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -38,21 +36,22 @@ class ConnectionRepository {
         ?: throw NotFoundException("Connection with id $connectionId not found")
 
     fun add(
+        idOfConnection: String,
         connectionOwnerDid: String,
         connectionTargetDid: String,
-        connectionRecord: ConnectionRecord
+        rfc23State: String
     ): Connection {
         return Connection.new {
-            connectionId = connectionRecord.connectionId
+            connectionId = idOfConnection
             theirDid = connectionTargetDid
             myDid =  connectionOwnerDid
-            state = connectionRecord.state.toString()
+            state = rfc23State
         }
     }
 
-    fun updateConnectionState(connectionId: String, connectionState: ConnectionState) {
+    fun updateConnectionState(connectionId: String, rfc23State: String) {
         get(connectionId).apply {
-            state = connectionState.name
+            state = rfc23State
         }
     }
 

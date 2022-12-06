@@ -81,7 +81,9 @@ fun Application.module(testing: Boolean = false) {
         apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
         networkIdentifier = environment.config.property("acapy.networkIdentifier").getString(),
         adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
-        baseWalletBpn = baseWalletBpn
+        baseWalletBpn = baseWalletBpn,
+        ledgerRegistrationUrl = environment.config.property("ledger.registrationUrl").getString(),
+        ledgerType = environment.config.property("ledger.type").getString()
     )
     val utilsService = UtilsService(networkIdentifier = acaPyConfig.networkIdentifier)
     val revocationUrl = environment.config.property("revocation.baseUrl").getString()
@@ -118,14 +120,12 @@ fun Application.module(testing: Boolean = false) {
     appRoutes(walletService, businessPartnerDataService, revocationService, utilsService)
     configurePersistence()
 
-    configureJobs()
-
     val wallets = transaction {
         walletService.getAll()
     }
 
     if (wallets.isNotEmpty() && wallets.stream().anyMatch{ wallet -> wallet.bpn == baseWalletBpn }) {
-        walletService.subscribeForAriesWS()
+        walletService.initCatenaXWalletAndSubscribeForAriesWS()
     }
 
 }

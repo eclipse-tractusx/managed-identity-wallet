@@ -32,12 +32,8 @@ import io.ktor.routing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialRequestData
-import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
-import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
-import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
-import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
+import org.eclipse.tractusx.managedidentitywallets.services.*
 
 fun Application.appRoutes(
     walletService: IWalletService,
@@ -81,10 +77,44 @@ fun Application.appRoutes(
                     tags = setOf("VerifiableCredentials")
                 )
             ) {
-                val profileName =  call.parameters["profileName"] ?: throw BadRequestException("Missing or malformed profileName")
+                val profileName =
+                    call.parameters["profileName"] ?: throw BadRequestException("Missing or malformed profileName")
                 val listCredentialRequestData = call.receive<ListCredentialRequestData>()
-                val verifiableCredentialDto = walletService.issueStatusListCredential(profileName, listCredentialRequestData)
+                val verifiableCredentialDto =
+                    walletService.issueStatusListCredential(profileName, listCredentialRequestData)
                 call.respond(HttpStatusCode.Created, Json.encodeToString(verifiableCredentialDto))
+            }
+        }
+
+
+        route("/webhook/topic/{topic}/") {
+            notarizedPost(
+                PostInfo<Unit, Any, String>(
+                    summary = "Webhook to receive messages from Acapy",
+                    description = "",
+                    parameterExamples = setOf(
+                        ParameterExample("topic", "topic", "connections"),
+                    ),
+                    requestInfo = RequestInfo(
+                        description = "the object related to the topic",
+                    ),
+                    responseInfo = ResponseInfo(
+                        status = HttpStatusCode.OK,
+                        description = "The webhook endpoint is triggered successfully"
+                    ),
+                    tags = setOf("Webhook")
+                )
+            ) {
+                val walletId: String = call.request.headers["x-wallet-id"]
+                    ?: throw throw BadRequestException("Missing or malformed walletId")
+                val topic = call.parameters["topic"] ?: throw BadRequestException("Missing or malformed bpn")
+                val managedWalletHandler = ManagedWalletsAriesEventHandler(
+                    walletService,
+                    utilsService
+                )
+                val payload = call.receiveText()
+                managedWalletHandler.handleEvent(walletId, topic, payload)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

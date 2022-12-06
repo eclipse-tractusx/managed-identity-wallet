@@ -95,7 +95,7 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                 try {
                     val walletToCreate = call.receive<WalletCreateDto>()
                     val createdWallet = walletService.createWallet(walletToCreate)
-                    if (!walletService.isCatenaXWallet(createdWallet.bpn)) {
+                    if (walletService.getCatenaXWallet().bpn != createdWallet.bpn) {
                         // TODO: notify if issue credentials failed
                         // Issue and store credentials async
                         businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
@@ -315,8 +315,9 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                             AuthorizationHandler.checkHasRightsToUpdateWallet(call, null)
 
                             val walletDto: WalletDto = walletService.getWallet(identifier)
-                            if (!walletService.isCatenaXWallet(walletDto.bpn)) {
-                                throw NotFoundException("Registering endpoint is not available for any other wallet but the base wallet")
+                            if (walletService.getCatenaXWallet().bpn != walletDto.bpn) {
+                                throw NotFoundException("Registering endpoint is not available " +
+                                        "for any other wallet but the base wallet")
                             }
                             val verKeyDto = call.receive<VerKeyDto>()
                             if (walletService.registerBaseWallet(verKeyDto.verKey)) {

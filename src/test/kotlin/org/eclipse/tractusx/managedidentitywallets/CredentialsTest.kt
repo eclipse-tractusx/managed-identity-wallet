@@ -150,7 +150,9 @@ class CredentialsTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                val walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                val walletDto =  EnvironmentTestSetup.walletService.createWallet(
+                    WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default")
+                )
                 SingletonTestData.baseWalletVerKey = walletDto.verKey!!
                 SingletonTestData.baseWalletDID = walletDto.did
             }

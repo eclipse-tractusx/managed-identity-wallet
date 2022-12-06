@@ -70,6 +70,8 @@ below. Here a few hints on how to set it up:
 | `BPDM_PULL_DATA_AT_HOUR`  | String | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
 | `REVOCATION_URL`          | String | URL of the revocation service |
 | `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR` | String | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
+`LEDGER_TYPE` | String | The registration type of the ledger. It can be `public` (DIDs can be registered as an Endorser using an http request to an open api), `idunion` (special registration on the idunion ledger using an url and an Api-Key), or `closed` (Only the base wallet is registered manually as an Endorser) |
+`LEDGER_REGISTRATION_URL` | String | the registration link of the ledger e.g. `http://dev.greenlight.bcovrin.vonx.io/register` for `public`, `https://<url-to-host>/api/dids?apiKey=` for `idunion`, and empty for `closed` |
 
 ## Local Development Setup
 
@@ -138,7 +140,7 @@ With the following steps you can explore the API and create your first wallet
        
        ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
 
-1. Register public DID
+1. Register public DID (Only required if the ledger type is `closed`)
     1. Register your DID from your Wallet at https://indy-test.idu.network/ with "Register from DID"
 
        ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
@@ -146,7 +148,7 @@ With the following steps you can explore the API and create your first wallet
     2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
        `{ "verKey": "verification key from creation" }`
 
-1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is required because the Credential can only be issued after the DID is registiered on Ledger and set to Public
+1. Issue Status-List Credential (Only required if the ledger type is `closed`) by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is required because the Credential can only be issued after the DID is registiered on Ledger and set to Public
 
 1. :tada: **Second milestone reached: Your own wallet!**
 
@@ -165,6 +167,7 @@ Now you have achieved the following:
 | revocation service    | http://localhost:8086   | within the Docker Compose setup |
 | ACA-Py                | http://localhost:10000  | within the Docker Compose setup |
 | MIW service           | http://localhost:8080/  | |
+| ACA-Py (External Wallet) | http://localhost:10001  | within the Docker Compose setup |
 
 # Administrator Documentation
 

@@ -29,8 +29,12 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.RegisterNymIdunionDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.RegisterNymPublicDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.hyperledger.acy_py.generated.model.V20CredRequestRequest
+import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.AriesWebSocketClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
@@ -45,7 +49,8 @@ import java.util.*
 class AcaPyService(
     private val acaPyConfig: WalletAndAcaPyConfig,
     private val utilsService: UtilsService,
-    private val client: HttpClient): IAcaPyService {
+    private val client: HttpClient
+) : IAcaPyService {
 
     private val gson = GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create()
 
@@ -54,7 +59,9 @@ class AcaPyService(
             apiAdminUrl = acaPyConfig.apiAdminUrl,
             networkIdentifier = acaPyConfig.networkIdentifier,
             baseWalletBpn = acaPyConfig.baseWalletBpn,
-            adminApiKey = "" // don't expose the api key outside the AcaPyService
+            adminApiKey = "", // don't expose the api key outside the AcaPyService
+            ledgerType = acaPyConfig.ledgerType,
+            ledgerRegistrationUrl = acaPyConfig.ledgerRegistrationUrl
         )
     }
 
@@ -136,6 +143,24 @@ class AcaPyService(
         }
     }
 
+    override suspend fun registerNymPublic(registerNymDto: RegisterNymPublicDto) {
+        client.post<Any> {
+            url(getWalletAndAcaPyConfig().ledgerRegistrationUrl)
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = registerNymDto
+        }
+    }
+
+    override suspend fun registerNymIdunion(registerNymIdunionDto: RegisterNymIdunionDto) {
+        client.post<Any> {
+            url(getWalletAndAcaPyConfig().ledgerRegistrationUrl)
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = registerNymIdunionDto
+        }
+    }
+
     override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String {
         val httpResponse: HttpResponse = client.post {
             url("${acaPyConfig.apiAdminUrl}/jsonld/sign")
@@ -191,6 +216,45 @@ class AcaPyService(
             headers.append("X-API-Key", acaPyConfig.adminApiKey)
             accept(ContentType.Application.Json)
         }
+    }
+
+    override suspend fun acceptInvitationRequest(connectionId: String, token: String): String {
+        val httpResponse: HttpResponse = client.post {
+            url("${acaPyConfig.apiAdminUrl}/connections/$connectionId/accept-request")
+            headers.append(HttpHeaders.Authorization, "Bearer $token")
+            headers.append("X-API-Key", acaPyConfig.adminApiKey)
+            accept(ContentType.Application.Json)
+        }
+        return httpResponse.readText()
+    }
+
+    override suspend fun acceptCredentialOfferBySendingRequest(
+        holderDid: String,
+        credentialExchangeId: String,
+        token: String
+    ) {
+        val ariesClient = getAcapyClient(token)
+        val credRequest = V20CredRequestRequest.builder().holderDid(holderDid).build()
+        ariesClient.issueCredentialV2RecordsSendRequest(
+            credentialExchangeId,
+            credRequest
+        )
+    }
+
+    override suspend fun acceptCredentialReceivedByStoringIssuedCredential(
+        credentialId: String,
+        credentialExchangeId: String,
+        token: String
+    ) {
+        val ariesClient = getAcapyClient(token)
+        val v20CredStoreRequest = V20CredStoreRequest
+            .builder()
+            .credentialId(credentialId)
+            .build()
+        ariesClient.issueCredentialV2RecordsStore(
+            credentialExchangeId,
+            v20CredStoreRequest
+        )
     }
 
     override fun subscribeForWebSocket(subscriberWallet: WalletExtendedData) {

@@ -41,6 +41,7 @@ object EnvironmentTestSetup {
     const val DEFAULT_BPN = "BPNL00000"
     const val EXTRA_TEST_BPN = "BPNL0Test"
     const val NETWORK_ID = "local:test"
+    private const val LEDGER_TYPE = "closed"
     const val NONE_REVOKED_ENCODED_LIST = "H4sIAAAAAAAAAO3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
     const val ZERO_THIRD_REVOKED_ENCODED_LIST ="H4sIAAAAAAAAAO3BIQEAAAACIKv/DzvDAjQAAAAAAAAAAAAAAAAAAADA2wBHo2oBAEAAAA=="
     private val walletRepository = WalletRepository()
@@ -48,7 +49,7 @@ object EnvironmentTestSetup {
     val connectionRepository = ConnectionRepository()
     val webhookRepository = WebhookRepository()
 
-    private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
+    private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID, LEDGER_TYPE)
     val revocationMockedService = RevocationMockedService(NETWORK_ID)
     val webhookService = IWebhookService.createWebhookService(webhookRepository)
     val utilsService = UtilsService(NETWORK_ID)
@@ -109,6 +110,9 @@ object EnvironmentTestSetup {
 
             put("revocation.baseUrl", System.getenv("REVOCATION_URL") ?: "http://0.0.0.0:8086")
             put("revocation.createStatusListCredentialAtHour", System.getenv("REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR") ?: "3")
+
+            put("ledger.type", System.getenv("LEDGER_TYPE") ?: "closed")
+
         }
         // just a keepAliveConnection
         DriverManager.getConnection(jdbcUrl)

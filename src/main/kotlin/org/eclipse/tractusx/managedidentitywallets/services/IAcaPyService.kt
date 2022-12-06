@@ -21,6 +21,8 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import io.ktor.client.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.RegisterNymIdunionDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.RegisterNymPublicDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.hyperledger.aries.AriesClient
@@ -69,6 +71,8 @@ interface IAcaPyService {
 
     suspend fun deleteConnection(connectionId: String, token: String)
 
+    suspend fun acceptInvitationRequest(connectionId: String, token: String): String
+
     companion object {
         fun create(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,
@@ -78,4 +82,19 @@ interface IAcaPyService {
             return AcaPyService(walletAndAcaPyConfig, utilsService, client)
         }
     }
+
+    suspend fun acceptCredentialOfferBySendingRequest(
+        holderDid: String,
+        credentialExchangeId: String,
+        token: String
+    )
+
+    suspend fun acceptCredentialReceivedByStoringIssuedCredential(
+        credentialId: String,
+        credentialExchangeId: String,
+        token: String
+    )
+
+    suspend fun registerNymIdunion(registerNymIdunionDto: RegisterNymIdunionDto)
+    suspend fun registerNymPublic(registerNymDto: RegisterNymPublicDto)
 }

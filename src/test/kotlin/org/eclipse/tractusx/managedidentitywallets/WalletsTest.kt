@@ -25,8 +25,15 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
+import org.eclipse.tractusx.managedidentitywallets.services.*
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.mockito.kotlin.*
 import kotlin.test.*
 
 @kotlinx.serialization.ExperimentalSerializationApi
@@ -45,7 +52,7 @@ class WalletsTest {
     }
 
     @Test
-    fun testWalletCrud() { // true
+    fun testWalletCrud() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
@@ -361,4 +368,231 @@ class WalletsTest {
         }
     }
 
+    @Test
+    fun testCreateWalletWithLedgerTypePublic() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+        }) {
+            transaction {
+                runBlocking {
+                    val acapyService = mock<IAcaPyService>()
+                    whenever(acapyService.getWalletAndAcaPyConfig()).thenReturn(
+                        WalletAndAcaPyConfig(
+                            "adminUrl",
+                            "networkId",
+                            EnvironmentTestSetup.DEFAULT_BPN,
+                            "adminApiKey",
+                            "public",
+                            "url"
+                        )
+                    )
+                    whenever(acapyService.createSubWallet(any())).thenReturn(
+                        CreatedSubWalletResult(
+                            "createdAt",
+                            "wallet_id_catenaX",
+                            "managed",
+                            "updated_at",
+                            WalletSettings(
+                                "askar",
+                                "catenXWallet",
+                                emptyList(),
+                                "base",
+                                "wallet_id_catenaX",
+                                "lable",
+                                ""
+                            ),
+                            "wallet_token_catenaX"
+                        )
+                    ).thenReturn(
+                        CreatedSubWalletResult(
+                            "createdAt",
+                            "wallet_id_extrawallet",
+                            "managed",
+                            "updated_at",
+                            WalletSettings(
+                                "askar",
+                                "extraWallet",
+                                emptyList(),
+                                "base",
+                                "wallet_id_extrawallet",
+                                "lable",
+                                ""
+                            ),
+                            "wallet_token_extrawallet"
+                        )
+                    )
+
+                    whenever(acapyService.createLocalDidForWallet(any(), any()))
+                        .thenReturn(
+                            DidResult(
+                                DidResultDetails(
+                                    "catenax1did", "", "", "", "verkey_catenax"
+                                )
+                            )
+                        )
+                        .thenReturn(
+                            DidResult(
+                                DidResultDetails(
+                                 "extrawallet1did", "", "", "", "verkey_extrawallet"
+                                )
+                            )
+                        )
+                    whenever(acapyService.registerNymPublic(any())).thenReturn(Unit)
+                    whenever(acapyService.assignDidToPublic(any(), any())).thenReturn(Unit)
+                    whenever(acapyService.subscribeForWebSocket(any())).thenAnswer {  }
+                    val walletRepository = WalletRepository()
+                    val connectionRepository = ConnectionRepository()
+                    val credentialRepository = CredentialRepository()
+                    val utilsService = UtilsService("")
+                    val revocationService = mock<IRevocationService>()
+                    whenever(revocationService.registerList(any(), any()))
+                        .thenReturn("revocation-list-${EnvironmentTestSetup.DEFAULT_BPN}")
+                        .thenReturn("revocation-list-${EnvironmentTestSetup.EXTRA_TEST_BPN}")
+                    whenever(revocationService.issueStatusListCredentials(any(), any())).thenReturn(Unit)
+                    val webhookService = mock<IWebhookService>()
+                    val walletService = AcaPyWalletServiceImpl(
+                        acapyService,
+                        walletRepository,
+                        credentialRepository,
+                        utilsService,
+                        revocationService,
+                        webhookService,
+                        connectionRepository
+                    )
+                    val walletServiceSpy = spy(walletService)
+
+                    walletServiceSpy.createWallet(
+                        WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "catenaX")
+                    )
+                    walletServiceSpy.createWallet(
+                        WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "extraWallet")
+                    )
+                    var listOfWallets = walletServiceSpy.getAll()
+                    assertEquals(2, listOfWallets.size)
+                    assertEquals("did:sov:catenax1did", listOfWallets[0].did)
+                    assertEquals("did:sov:extrawallet1did", listOfWallets[1].did)
+
+                    walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
+                    walletService.deleteWallet(EnvironmentTestSetup.EXTRA_TEST_BPN)
+                    listOfWallets = walletServiceSpy.getAll()
+                    assertEquals(0, listOfWallets.size)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testCreateWalletWithLedgerTypeIdunion() { // same as public
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+        }) {
+            transaction {
+                runBlocking {
+                    val acapyService = mock<IAcaPyService>()
+                    whenever(acapyService.getWalletAndAcaPyConfig()).thenReturn(
+                        WalletAndAcaPyConfig(
+                            "adminUrl",
+                            "networkId",
+                            EnvironmentTestSetup.DEFAULT_BPN,
+                            "adminApiKey",
+                            "idunion",
+                            "url"
+                        )
+                    )
+                    whenever(acapyService.createSubWallet(any())).thenReturn(
+                        CreatedSubWalletResult(
+                            "createdAt",
+                            "wallet_id_catenaX",
+                            "managed",
+                            "updated_at",
+                            WalletSettings(
+                                "askar",
+                                "catenXWallet",
+                                emptyList(),
+                                "base",
+                                "wallet_id_catenaX",
+                                "lable",
+                                ""
+                            ),
+                            "wallet_token_catenaX"
+                        )
+                    ).thenReturn(
+                        CreatedSubWalletResult(
+                            "createdAt",
+                            "wallet_id_extrawallet",
+                            "managed",
+                            "updated_at",
+                            WalletSettings(
+                                "askar",
+                                "extraWallet",
+                                emptyList(),
+                                "base",
+                                "wallet_id_extrawallet",
+                                "lable",
+                                ""
+                            ),
+                            "wallet_token_extrawallet"
+                        )
+                    )
+
+                    whenever(acapyService.createLocalDidForWallet(any(), any()))
+                        .thenReturn(
+                            DidResult(
+                                DidResultDetails(
+                                    "catenax1did", "", "", "", "verkey_catenax"
+                                )
+                            )
+                        )
+                        .thenReturn(
+                            DidResult(
+                                DidResultDetails(
+                                    "extrawallet1did", "", "", "", "verkey_extrawallet"
+                                )
+                            )
+                        )
+                    whenever(acapyService.registerNymPublic(any())).thenReturn(Unit)
+                    whenever(acapyService.assignDidToPublic(any(), any())).thenReturn(Unit)
+                    whenever(acapyService.subscribeForWebSocket(any())).thenAnswer {  }
+                    val walletRepository = WalletRepository()
+                    val connectionRepository = ConnectionRepository()
+                    val credentialRepository = CredentialRepository()
+                    val utilsService = UtilsService("")
+                    val revocationService = mock<IRevocationService>()
+                    whenever(revocationService.registerList(any(), any()))
+                        .thenReturn("revocation-list-${EnvironmentTestSetup.DEFAULT_BPN}")
+                        .thenReturn("revocation-list-${EnvironmentTestSetup.EXTRA_TEST_BPN}")
+                    whenever(revocationService.issueStatusListCredentials(any(), any())).thenReturn(Unit)
+                    val webhookService = mock<IWebhookService>()
+                    val walletService = AcaPyWalletServiceImpl(
+                        acapyService,
+                        walletRepository,
+                        credentialRepository,
+                        utilsService,
+                        revocationService,
+                        webhookService,
+                        connectionRepository
+                    )
+                    val walletServiceSpy = spy(walletService)
+
+                    walletServiceSpy.createWallet(
+                        WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "catenaX")
+                    )
+                    walletServiceSpy.createWallet(
+                        WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "extraWallet")
+                    )
+                    var listOfWallets = walletServiceSpy.getAll()
+                    assertEquals(2, listOfWallets.size)
+                    assertEquals("did:sov:catenax1did", listOfWallets[0].did)
+                    assertEquals("did:sov:extrawallet1did", listOfWallets[1].did)
+
+                    walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
+                    walletService.deleteWallet(EnvironmentTestSetup.EXTRA_TEST_BPN)
+                    listOfWallets = walletServiceSpy.getAll()
+                    assertEquals(0, listOfWallets.size)
+                }
+            }
+        }
+    }
 }

@@ -25,8 +25,8 @@ import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.hyperledger.aries.api.connection.ConnectionRecord
-import org.hyperledger.aries.api.connection.ConnectionState
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.webhook.TenantAwareEventHandler
@@ -47,8 +47,8 @@ class BaseWalletAriesEventHandler(
     override fun handleConnection(walletId: String, connection: ConnectionRecord) {
         super.handleConnection(walletId, connection)
 
-        when(connection.state) {
-            ConnectionState.COMPLETED -> {
+        when(connection.rfc23State) {
+            Rfc23State.COMPLETED.toString() -> {
                 val pairOfWebhookUrlAndWallet = updateConnectionStateAndSendWebhook(connection)
                 val webhookUrl: String? = pairOfWebhookUrlAndWallet.first
                 val walletOfConnectionTarget: WalletDto = pairOfWebhookUrlAndWallet.second
@@ -76,8 +76,7 @@ class BaseWalletAriesEventHandler(
                     }
                 }
             }
-            ConnectionState.ABANDONED,
-            ConnectionState.ERROR -> {
+            Rfc23State.ABANDONED.toString() -> {
                 updateConnectionStateAndSendWebhook(connection)
             }
             else -> { return }
@@ -90,11 +89,11 @@ class BaseWalletAriesEventHandler(
             val webhook = webhookService.getWebhookByThreadId(connection.requestId)
             if (webhook != null) {
                 webhookService.sendWebhookConnectionMessage(webhook.threadId, connection)
-                webhookService.updateStateOfWebhook(webhook.threadId,  connection.state.name)
+                webhookService.updateStateOfWebhook(webhook.threadId, connection.rfc23State)
                 webhookUrl = webhook.webhookUrl
             }
             val storedConnection = walletService.getConnection(connection.connectionId)
-            walletService.updateConnectionState(storedConnection.connectionId, connection.state)
+            walletService.updateConnectionState(storedConnection.connectionId, connection.rfc23State)
             walletService.getWallet(storedConnection.theirDid, false)
         }
         return Pair(webhookUrl, walletOfConnectionTarget)
@@ -106,7 +105,7 @@ class BaseWalletAriesEventHandler(
             val threadId = v20Credential.threadId
             when(v20Credential.state) {
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {
-                    val catenaXCredentialTypes = JsonLdTypes.getCatenaXCredentialTypes();
+                    val catenaXCredentialTypes = JsonLdTypes.getCatenaXCredentialTypes()
                     try {
                         val issuedCred: IssuedVerifiableCredentialRequestDto = Json.decodeFromString(
                             IssuedVerifiableCredentialRequestDto.serializer(),

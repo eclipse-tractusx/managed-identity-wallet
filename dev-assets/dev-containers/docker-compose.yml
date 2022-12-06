@@ -63,6 +63,8 @@ services:
         --jwt-secret jwtSecret19 \
         --multitenant \
         --multitenant-admin \
+        --public-invites \
+        --webhook-url http://host.docker.internal:8080/webhook \
         --log-level DEBUG",
     ]
 
