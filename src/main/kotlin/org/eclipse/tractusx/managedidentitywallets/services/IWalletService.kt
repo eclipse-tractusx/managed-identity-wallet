@@ -43,7 +43,7 @@ interface IWalletService {
 
     fun getWallet(identifier: String, withCredentials: Boolean = false): WalletDto
 
-    fun getCatenaXWallet(): WalletExtendedData
+    fun getCatenaXWalletWithoutSecrets(): WalletExtendedData
 
     fun getDidFromBpn(bpn: String): String
 

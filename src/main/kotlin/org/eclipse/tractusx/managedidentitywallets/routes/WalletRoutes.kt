@@ -95,7 +95,7 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                 try {
                     val walletToCreate = call.receive<WalletCreateDto>()
                     val createdWallet = walletService.createWallet(walletToCreate)
-                    if (walletService.getCatenaXWallet().bpn != createdWallet.bpn) {
+                    if (walletService.getCatenaXWalletWithoutSecrets().bpn != createdWallet.bpn) {
                         // TODO: notify if issue credentials failed
                         // Issue and store credentials async
                         businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
@@ -129,7 +129,7 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                     PostInfo<Unit, SelfManagedWalletCreateDto, SelfManagedWalletResultDto>(
                         summary = "Register and Establish Initial Connection with Partners",
                         description = "Permission: " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_CREATE_WALLETS)}**\n" +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
                                 "\n Register self managed wallet and establish the initial connection with CatenaX. " +
                                 "Also issue their membership and BPN credentials",
                         requestInfo = RequestInfo(
@@ -144,6 +144,7 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                     )
                 ) {
                     val selfManagedWalletCreateDto = call.receive<SelfManagedWalletCreateDto>()
+                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, selfManagedWalletCreateDto.bpn)
                     return@notarizedPost call.respond(
                         HttpStatusCode.Created,
                         walletService.registerSelfManagedWalletAndBuildConnection(selfManagedWalletCreateDto)
@@ -315,7 +316,7 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                             AuthorizationHandler.checkHasRightsToUpdateWallet(call, null)
 
                             val walletDto: WalletDto = walletService.getWallet(identifier)
-                            if (walletService.getCatenaXWallet().bpn != walletDto.bpn) {
+                            if (walletService.getCatenaXWalletWithoutSecrets().bpn != walletDto.bpn) {
                                 throw NotFoundException("Registering endpoint is not available " +
                                         "for any other wallet but the base wallet")
                             }

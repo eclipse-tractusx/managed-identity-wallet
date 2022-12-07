@@ -55,7 +55,7 @@ interface IAcaPyService {
 
     suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String)
 
-    fun subscribeForWebSocket(subscriberWallet: WalletExtendedData)
+    fun subscribeForWebSocket(walletId: String, walletToken: String)
 
     suspend fun getAcapyClient(walletToken: String): AriesClient
 
@@ -71,7 +71,7 @@ interface IAcaPyService {
 
     suspend fun deleteConnection(connectionId: String, token: String)
 
-    suspend fun acceptInvitationRequest(connectionId: String, token: String): String
+    suspend fun acceptConnectionRequest(connectionId: String, token: String): ConnectionRecord
 
     companion object {
         fun create(

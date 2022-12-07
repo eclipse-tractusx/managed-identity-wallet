@@ -221,7 +221,7 @@ class AcaPyMockedService(
 
     override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
 
-    override fun subscribeForWebSocket(subscriberWallet: WalletExtendedData) { }
+    override fun subscribeForWebSocket(walletId: String, walletToken: String) { }
 
     override suspend fun getAcapyClient(walletToken: String): AriesClient {
         TODO("Not yet implemented")
@@ -259,8 +259,8 @@ class AcaPyMockedService(
 
     override suspend fun deleteConnection(connectionId: String, token: String) { return }
 
-    override suspend fun acceptInvitationRequest(connectionId: String, token: String): String {
-        return ""
+    override suspend fun acceptConnectionRequest(connectionId: String, token: String): ConnectionRecord {
+        return ConnectionRecord()
     }
 
     override suspend fun acceptCredentialOfferBySendingRequest(

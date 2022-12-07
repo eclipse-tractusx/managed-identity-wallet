@@ -39,7 +39,7 @@ class ManagedWalletsAriesEventHandler(
     override fun handleConnection(walletId: String, connection: ConnectionRecord) {
         super.handleConnection(walletId, connection)
         val wallet = walletService.getWallet(walletId)
-        if (walletService.getCatenaXWallet().walletId == walletId) {
+        if (walletService.getCatenaXWalletWithoutSecrets().walletId == walletId) {
             return // Catena X wallet
         }
         when (connection.rfc23State) {
@@ -85,7 +85,7 @@ class ManagedWalletsAriesEventHandler(
 
     override fun handleCredentialV2(walletId: String?, v20Credential: V20CredExRecord?) {
         super.handleCredentialV2(walletId, v20Credential)
-        if (walletService.getCatenaXWallet().walletId == walletId) {
+        if (walletService.getCatenaXWalletWithoutSecrets().walletId == walletId) {
             return // Catena X wallet
         }
         if (v20Credential != null) {

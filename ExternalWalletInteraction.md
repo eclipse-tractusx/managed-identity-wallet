@@ -8,19 +8,16 @@
 - Current limitation:
   - The managed wallets do not send invitation requests
   - The managed wallets accept all invitation and credentials
-  - This is not possible for `ledgerType` equal `closed` because the managed wallets have no `Endorser` role and have no service endpoints in their DID Document
-
+  - The interaction is not possible when `ledgerType` is to equal `closed`, because the managed wallets have no `Endorser` role and have no service endpoints in their DID Document
 
 ### Establish Connection
 All managed wallets in AcaPy has a `webhookUrl` as described in the [documentation](https://github.com/hyperledger/aries-cloudagent-python/blob/main/AdminAPI.md#administration-api-webhooks), which is used to notify the MIW to accept connections, credentials and store them.
 
 The following instruction will be executed to establich connection:
-  - The managed wallet must have a service endpoint in its DID Document
   - The external wallet send an invitation request using its public DID and the public DID of the managed wallet
   - The MIW get triggered by the Webhook endpoint and it trigger Acapy back to accept the request
   - The external wallet receive the response from the managed wallet and change its state to `completed`
   - The MIW get triggered again by its Webhook and store the connection with state `completed` using the external DIDs of the wallets
-
 
 ### Receive Verifiable Credential from External Wallet
 A Credential-Offer is sent from the external wallet using the established connection with the managed wallet. The Credential-Offer is received by the managed wallet, and this triggers the MIW to send a Credential-Request back to the external Wallet. The external wallet issue the credential and send it to the managed wallet and this triggers the MIW again to store the credential which sends `ack` to the external wallet and change the state of the credential exchange to `DONE` 

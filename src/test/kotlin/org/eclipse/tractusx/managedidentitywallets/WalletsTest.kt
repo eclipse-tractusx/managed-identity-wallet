@@ -440,7 +440,7 @@ class WalletsTest {
                         )
                     whenever(acapyService.registerNymPublic(any())).thenReturn(Unit)
                     whenever(acapyService.assignDidToPublic(any(), any())).thenReturn(Unit)
-                    whenever(acapyService.subscribeForWebSocket(any())).thenAnswer {  }
+                    whenever(acapyService.subscribeForWebSocket(any(), any())).thenAnswer {  }
                     val walletRepository = WalletRepository()
                     val connectionRepository = ConnectionRepository()
                     val credentialRepository = CredentialRepository()
@@ -554,7 +554,7 @@ class WalletsTest {
                         )
                     whenever(acapyService.registerNymPublic(any())).thenReturn(Unit)
                     whenever(acapyService.assignDidToPublic(any(), any())).thenReturn(Unit)
-                    whenever(acapyService.subscribeForWebSocket(any())).thenAnswer {  }
+                    whenever(acapyService.subscribeForWebSocket(any(), any())).thenAnswer {  }
                     val walletRepository = WalletRepository()
                     val connectionRepository = ConnectionRepository()
                     val credentialRepository = CredentialRepository()

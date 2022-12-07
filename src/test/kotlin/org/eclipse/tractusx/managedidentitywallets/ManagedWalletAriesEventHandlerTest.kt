@@ -19,7 +19,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets
 
-import com.google.gson.GsonBuilder
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
@@ -33,7 +32,7 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Wall
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import org.eclipse.tractusx.managedidentitywallets.services.*
-import org.hyperledger.acy_py.generated.model.*
+import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.kotlin.*
@@ -80,7 +79,6 @@ class ManagedWalletAriesEventHandlerTest {
     private lateinit var webhookServiceMocked: IWebhookService
     private lateinit var walletServiceSpy: IWalletService
     private lateinit var acaPyServiceMocked: IAcaPyService
-    private val gson = GsonBuilder().create()
 
     @BeforeTest
     fun setup() {
@@ -106,8 +104,10 @@ class ManagedWalletAriesEventHandlerTest {
                 )
         )
         runBlocking {
-            whenever(acaPyServiceMocked.acceptInvitationRequest(any(), any()))
-                .thenAnswer { """ {"rfc23_state":"response-sent"} """.trimIndent() }
+            val connectionRecord = ConnectionRecord()
+            connectionRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
+            whenever(acaPyServiceMocked.acceptConnectionRequest(any(), any()))
+                .thenAnswer { connectionRecord }
         }
         val walletService = AcaPyWalletServiceImpl(
             acaPyServiceMocked,
@@ -120,7 +120,7 @@ class ManagedWalletAriesEventHandlerTest {
         )
         walletServiceSpy = spy(walletService)
         runBlocking {
-            doReturn(issuerWallet).whenever(walletServiceSpy).getCatenaXWallet()
+            doReturn(issuerWallet).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
         }
     }
 
@@ -167,10 +167,10 @@ class ManagedWalletAriesEventHandlerTest {
                 addWallets(walletRepo, listOf(issuerWallet, holderWallet))
 
                 // Mock acceptInvitationRequest call to Acapy Service
-                val connRecord  = ConnRecord()
-                connRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
-                doAnswer { gson.toJson(connRecord) }
-                    .whenever(acaPyServiceMocked).acceptInvitationRequest(any(), any())
+                val connectionRecord  = ConnectionRecord()
+                connectionRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
+                doAnswer { connectionRecord }
+                    .whenever(acaPyServiceMocked).acceptConnectionRequest(any(), any())
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
                     walletService = walletServiceSpy,
                     utilsService = utilsService

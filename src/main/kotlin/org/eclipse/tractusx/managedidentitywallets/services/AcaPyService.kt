@@ -218,14 +218,9 @@ class AcaPyService(
         }
     }
 
-    override suspend fun acceptInvitationRequest(connectionId: String, token: String): String {
-        val httpResponse: HttpResponse = client.post {
-            url("${acaPyConfig.apiAdminUrl}/connections/$connectionId/accept-request")
-            headers.append(HttpHeaders.Authorization, "Bearer $token")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
-            accept(ContentType.Application.Json)
-        }
-        return httpResponse.readText()
+    override suspend fun acceptConnectionRequest(connectionId: String, token: String): ConnectionRecord {
+        val ariesClient = getAcapyClient(token)
+        return ariesClient.connectionsAcceptRequest(connectionId, null).orElse(ConnectionRecord())
     }
 
     override suspend fun acceptCredentialOfferBySendingRequest(
@@ -257,17 +252,17 @@ class AcaPyService(
         )
     }
 
-    override fun subscribeForWebSocket(subscriberWallet: WalletExtendedData) {
+    override fun subscribeForWebSocket(walletId: String, walletToken: String) {
         val wsUrl = acaPyConfig.apiAdminUrl
             .replace("http", "ws")
             .plus("/ws")
 
         AriesWebSocketClient
             .builder()
-            .bearerToken(subscriberWallet.walletToken)
+            .bearerToken(walletToken)
             .url(wsUrl)
             .apiKey(acaPyConfig.adminApiKey)
-            .walletId(subscriberWallet.walletId)
+            .walletId(walletId)
             .handler(
                 BaseWalletAriesEventHandler(
                     Services.businessPartnerDataService,

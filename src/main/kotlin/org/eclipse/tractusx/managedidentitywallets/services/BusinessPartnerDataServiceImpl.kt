@@ -132,7 +132,7 @@ class BusinessPartnerDataServiceImpl(
         data: Any?
     ): Deferred<Boolean> =
         GlobalScope.async {
-            val catenaXWalletDid = walletService.getCatenaXWallet().did
+            val catenaXWalletDid = walletService.getCatenaXWalletWithoutSecrets().did
             val credentialFlowRequest: VerifiableCredentialRequestWithoutIssuerDto =
                 prepareCatenaXCredential(targetWallet.bpn, type, data)
             val vCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
@@ -163,7 +163,7 @@ class BusinessPartnerDataServiceImpl(
     ): Boolean = GlobalScope.async {
         runBlocking {
             val catenaXCredentialsOfBpn = walletService.getCredentials(
-                walletService.getCatenaXWallet().bpn, holder.bpn, null, null
+                walletService.getCatenaXWalletWithoutSecrets().bpn, holder.bpn, null, null
             )
             if (businessPartnerData != null) {
                 // Name Credentials
