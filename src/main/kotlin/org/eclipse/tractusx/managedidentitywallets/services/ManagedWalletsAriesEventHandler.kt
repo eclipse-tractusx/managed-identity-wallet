@@ -103,9 +103,6 @@ class ManagedWalletsAriesEventHandler(
                         walletService.acceptReceivedIssuedVc(walletId!!, v20Credential)
                     }
                 }
-                CredentialExchangeState.DONE -> {
-                    log.debug("CredExRecord ${v20Credential.credentialExchangeId} is in state DONE")
-                }
                 CredentialExchangeState.ABANDONED -> {
                     log.error("CredExRecord ${v20Credential.credentialExchangeId} is in state ABANDONED")
                 }

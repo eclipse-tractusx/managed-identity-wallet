@@ -1,9 +1,9 @@
 ## Interaction with self managed wallet <a id= "self-managed-wallets"></a>
 
 - Interaction with self managed wallet involves:
-  - Establish connection with self managed wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/25464a5c8f8a17b14edaa4310393df6094ace7b0/features/0023-did-exchange)
-  - Issue credential to self managed wallet as defined in [Aries RFC 0453](https://github.com/hyperledger/aries-rfcs/tree/cd27fc64aa2805f756a118043d7c880354353047/features/0453-issue-credential-v2)
-  - Request presentation from self managed wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/eace815c3e8598d4a8dd7881d8c731fdb2bcc0aa/features/0454-present-proof-v2)
+  - Establish connection with self managed wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/main/features/0023-did-exchange)
+  - Issue credential to self managed wallet as defined in [Aries RFC 0453](https://github.com/hyperledger/aries-rfcs/tree/main/features/0453-issue-credential-v2)
+  - Request presentation from self managed wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2)
 
 - Current limitation:
   - Self managed wallets can only interact with the Catena-X wallet

@@ -1,21 +1,25 @@
 ## Interaction with External Wallets <a id= "external-wallets"></a>
 
 - Interaction with external wallet involves:
-  - Establish connection with external wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/25464a5c8f8a17b14edaa4310393df6094ace7b0/features/0023-did-exchange)
-  - Receive a credential from external wallet as defined in [Aries RFC 0453](https://github.com/hyperledger/aries-rfcs/tree/cd27fc64aa2805f756a118043d7c880354353047/features/0453-issue-credential-v2)
-  - Send a presentation to external wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/eace815c3e8598d4a8dd7881d8c731fdb2bcc0aa/features/0454-present-proof-v2)
+  - Accept a connection request from an external wallet to a managed wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/main/features/0023-did-exchange)
+  - Receive a credential from external wallet as defined in [Aries RFC 0453](https://github.com/hyperledger/aries-rfcs/tree/main/features/0453-issue-credential-v2)
+  - Send a presentation to external wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2)
 
 - Current limitation:
   - The managed wallets do not send invitation requests
-  - The managed wallets accept all invitation and credentials
-  - The interaction is not possible when `ledgerType` is to equal `closed`, because the managed wallets have no `Endorser` role and have no service endpoints in their DID Document
+  - The managed wallets accept all invitations and credentials
+  - The interaction is not possible when `ledgerType` is equal to `closed`, because the managed wallets have no `Endorser` role and have no service endpoints in their DID Document
+  - The issuer must be an Indy DID on the same ledger as the MIW.
+
+- Note
+  - Each wallet uses the same endpoint, so to the outside world, it is not obvious [multiple tenants](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md#general-concept) are using the same agent. The message routing from the base wallet to sub-wallets is described in this [docs](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md#message-routing)
 
 ### Establish Connection
-All managed wallets in AcaPy has a `webhookUrl` as described in the [documentation](https://github.com/hyperledger/aries-cloudagent-python/blob/main/AdminAPI.md#administration-api-webhooks), which is used to notify the MIW to accept connections, credentials and store them.
+All managed wallets in AcaPy have a `webhookUrl` as described in the [documentation](https://github.com/hyperledger/aries-cloudagent-python/blob/main/AdminAPI.md#administration-api-webhooks), which is used to notify the MIW to accept connections, credentials and store them.
 
-The following instruction will be executed to establich connection:
-  - The external wallet send an invitation request using its public DID and the public DID of the managed wallet
-  - The MIW get triggered by the Webhook endpoint and it trigger Acapy back to accept the request
+The following steps are executed to establish the connection:
+  - The external wallet sends an invitation request using its public DID and the public DID of the managed wallet
+  - The MIW get triggered by the Webhook endpoint, and it triggers AcaPy back to accept the request
   - The external wallet receive the response from the managed wallet and change its state to `completed`
   - The MIW get triggered again by its Webhook and store the connection with state `completed` using the external DIDs of the wallets
 

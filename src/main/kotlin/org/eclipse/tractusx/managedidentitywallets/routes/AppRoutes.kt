@@ -107,7 +107,7 @@ fun Application.appRoutes(
             ) {
                 val walletId: String = call.request.headers["x-wallet-id"]
                     ?: throw throw BadRequestException("Missing or malformed walletId")
-                val topic = call.parameters["topic"] ?: throw BadRequestException("Missing or malformed bpn")
+                val topic = call.parameters["topic"] ?: throw BadRequestException("Missing or malformed topic")
                 val managedWalletHandler = ManagedWalletsAriesEventHandler(
                     walletService,
                     utilsService
