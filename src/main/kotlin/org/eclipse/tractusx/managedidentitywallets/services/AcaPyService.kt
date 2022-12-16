@@ -29,21 +29,27 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.RegisterNymIdunionDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.RegisterNymPublicDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.hyperledger.acy_py.generated.model.DIDEndpointWithType
+import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.acy_py.generated.model.V20CredRequestRequest
 import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.AriesWebSocketClient
+import org.hyperledger.aries.api.connection.ConnectionFilter
 import org.hyperledger.aries.api.connection.ConnectionRecord
+import org.hyperledger.aries.api.connection.ConnectionState
 import org.hyperledger.aries.api.did_exchange.DidExchangeCreateRequestFilter
+import org.hyperledger.aries.api.endorser.EndorserInfoFilter
+import org.hyperledger.aries.api.endorser.SetEndorserInfoFilter
+import org.hyperledger.aries.api.endorser.SetEndorserRoleFilter
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.api.issue_credential_v2.V2CredentialExchangeFree
 import org.hyperledger.aries.api.jsonld.ProofType
 import org.hyperledger.aries.api.jsonld.VerifiableCredential
+import org.hyperledger.aries.api.multitenancy.RemoveWalletRequest
 import java.util.*
 
 class AcaPyService(
@@ -56,16 +62,18 @@ class AcaPyService(
 
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
         return WalletAndAcaPyConfig(
-            apiAdminUrl = acaPyConfig.apiAdminUrl,
             networkIdentifier = acaPyConfig.networkIdentifier,
+            apiAdminUrl = acaPyConfig.apiAdminUrl,
             baseWalletBpn = acaPyConfig.baseWalletBpn,
+            baseWalletDID = acaPyConfig.baseWalletDID,
+            baseWalletVerkey = acaPyConfig.baseWalletVerkey,
             adminApiKey = "", // don't expose the api key outside the AcaPyService
-            ledgerType = acaPyConfig.ledgerType,
-            ledgerRegistrationUrl = acaPyConfig.ledgerRegistrationUrl
+            baseWalletAdminUrl = acaPyConfig.baseWalletAdminUrl,
+            baseWalletAdminApiKey = "" // don't expose the api key outside the AcaPyService
         )
     }
 
-    override suspend fun getWallets(): WalletList {
+    override suspend fun getSubWallets(): WalletList {
         return try {
             client.get {
                 url("${acaPyConfig.apiAdminUrl}/multitenancy/wallets")
@@ -88,22 +96,12 @@ class AcaPyService(
         return Json.decodeFromString(httpResponse.readText())
     }
 
-    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {
-        client.post<Any> {
-            url("${acaPyConfig.apiAdminUrl}/wallet/did/public?did=$didIdentifier")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
-            headers.append(HttpHeaders.Authorization, "Bearer $token")
-            accept(ContentType.Application.Json)
-        }
-    }
-
     override suspend fun deleteSubWallet(walletData: WalletExtendedData) {
-        client.post<Any> {
-            url("${acaPyConfig.apiAdminUrl}/multitenancy/wallet/${walletData.walletId}/remove")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
-            contentType(ContentType.Application.Json)
-            body = WalletKey(walletData.walletKey!!)
-        }
+        val multiTenancyAriesClient = getAcapyClient("")
+        multiTenancyAriesClient.multitenancyWalletRemove(
+            walletData.walletId!!,
+            RemoveWalletRequest.builder().walletKey(walletData.walletKey!!).build()
+        )
     }
 
     override suspend fun getTokenByWalletIdAndKey(id: String, key: String): CreateWalletTokenResponse {
@@ -126,46 +124,27 @@ class AcaPyService(
         }
     }
 
-    override suspend fun registerDidOnLedger(
-        didRegistration: DidRegistration,
-        endorserWalletToken: String
+    override suspend fun registerDidOnLedgerUsingBaseWallet(
+        didRegistration: DidRegistration
     ): DidRegistrationResult {
         return client.post {
             // Role is ignored because endorser cannot register nym with role other than NONE
-            url("${acaPyConfig.apiAdminUrl}/ledger/" +
+            url("${acaPyConfig.baseWalletAdminUrl}/ledger/" +
                     "register-nym?" +
                     "did=${didRegistration.did}&" +
                     "verkey=${didRegistration.verkey}&" +
                     "alias=${didRegistration.alias}")
-            headers.append(HttpHeaders.Authorization, "Bearer $endorserWalletToken")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
+            headers.append("X-API-Key", acaPyConfig.baseWalletAdminApiKey)
             accept(ContentType.Application.Json)
         }
     }
 
-    override suspend fun registerNymPublic(registerNymDto: RegisterNymPublicDto) {
-        client.post<Any> {
-            url(getWalletAndAcaPyConfig().ledgerRegistrationUrl)
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            body = registerNymDto
-        }
-    }
-
-    override suspend fun registerNymIdunion(registerNymIdunionDto: RegisterNymIdunionDto) {
-        client.post<Any> {
-            url(getWalletAndAcaPyConfig().ledgerRegistrationUrl)
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            body = registerNymIdunionDto
-        }
-    }
-
-    override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String {
+    override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String?): String {
+        val acapyUrlAndApiKey = getAcaPyUrlAndApiKeyBasedOnToken(token)
         val httpResponse: HttpResponse = client.post {
-            url("${acaPyConfig.apiAdminUrl}/jsonld/sign")
+            url("${acapyUrlAndApiKey.first}/jsonld/sign")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
+            headers.append("X-API-Key", acapyUrlAndApiKey.second)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = signRequest
@@ -173,23 +152,25 @@ class AcaPyService(
         return httpResponse.readText()
     }
 
-    override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse {
+    override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String?): VerifyResponse {
+        val acapyUrlAndApiKey = getAcaPyUrlAndApiKeyBasedOnToken(token)
         return client.post {
-            url("${acaPyConfig.apiAdminUrl}/jsonld/verify")
+            url("${acapyUrlAndApiKey.first}/jsonld/verify")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
+            headers.append("X-API-Key", acapyUrlAndApiKey.second)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = verifyRequest
         }
     }
 
-    override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
+    override suspend fun resolveDidDoc(did: String, token: String?): ResolutionResult {
+        val acapyUrlAndApiKey = getAcaPyUrlAndApiKeyBasedOnToken(token)
         return try {
             client.get {
-                url("${acaPyConfig.apiAdminUrl}/resolver/resolve/$did")
+                url("${acapyUrlAndApiKey.first}/resolver/resolve/$did")
                 headers.append(HttpHeaders.Authorization, "Bearer $token")
-                headers.append("X-API-Key", acaPyConfig.adminApiKey)
+                headers.append("X-API-Key", acapyUrlAndApiKey.second)
                 accept(ContentType.Application.Json)
             }
         } catch (e: Exception) {
@@ -198,27 +179,34 @@ class AcaPyService(
         }
     }
 
-    override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {
+    override suspend fun updateServiceOfBaseWallet(serviceEndPoint: DidEndpointWithType) {
         client.post<Any> {
-            url("${acaPyConfig.apiAdminUrl}/wallet/set-did-endpoint")
-            headers.append(HttpHeaders.Authorization, "Bearer $token")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
+            url("${acaPyConfig.baseWalletAdminUrl}/wallet/set-did-endpoint")
+            headers.append("X-API-Key", acaPyConfig.baseWalletAdminApiKey)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = serviceEndPoint
         }
     }
 
-    override suspend fun deleteConnection(connectionId: String, token: String) {
-        client.delete<Any> {
-            url("${acaPyConfig.apiAdminUrl}/connections/$connectionId")
+    override suspend fun updateServiceUsingEndorsement(serviceEndPoint: DidEndpointWithType, token: String) {
+        val acapyUrlAndApiKey = getAcaPyUrlAndApiKeyBasedOnToken(token)
+        client.post<Any> {
+            url("${acapyUrlAndApiKey.first}/wallet/set-did-endpoint?create_transaction_for_endorser=true")
             headers.append(HttpHeaders.Authorization, "Bearer $token")
-            headers.append("X-API-Key", acaPyConfig.adminApiKey)
+            headers.append("X-API-Key", acapyUrlAndApiKey.second)
             accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = serviceEndPoint
         }
     }
 
-    override suspend fun acceptConnectionRequest(connectionId: String, token: String): ConnectionRecord {
+    override suspend fun deleteConnection(connectionId: String, token: String?) {
+        val acapyClient = getAcapyClient(token)
+        acapyClient.connectionsRemove(connectionId)
+    }
+
+    override suspend fun acceptConnectionRequest(connectionId: String, token: String?): ConnectionRecord {
         val ariesClient = getAcapyClient(token)
         return ariesClient.connectionsAcceptRequest(connectionId, null).orElse(ConnectionRecord())
     }
@@ -226,7 +214,7 @@ class AcaPyService(
     override suspend fun acceptCredentialOfferBySendingRequest(
         holderDid: String,
         credentialExchangeId: String,
-        token: String
+        token: String?
     ) {
         val ariesClient = getAcapyClient(token)
         val credRequest = V20CredRequestRequest.builder().holderDid(holderDid).build()
@@ -239,7 +227,7 @@ class AcaPyService(
     override suspend fun acceptCredentialReceivedByStoringIssuedCredential(
         credentialId: String,
         credentialExchangeId: String,
-        token: String
+        token: String?
     ) {
         val ariesClient = getAcapyClient(token)
         val v20CredStoreRequest = V20CredStoreRequest
@@ -252,17 +240,14 @@ class AcaPyService(
         )
     }
 
-    override fun subscribeForWebSocket(walletId: String, walletToken: String) {
-        val wsUrl = acaPyConfig.apiAdminUrl
+    override fun subscribeBaseWalletForWebSocket() {
+        val wsUrl = acaPyConfig.baseWalletAdminUrl
             .replace("http", "ws")
             .plus("/ws")
-
         AriesWebSocketClient
             .builder()
-            .bearerToken(walletToken)
             .url(wsUrl)
-            .apiKey(acaPyConfig.adminApiKey)
-            .walletId(walletId)
+            .apiKey(acaPyConfig.baseWalletAdminApiKey)
             .handler(
                 BaseWalletAriesEventHandler(
                     Services.businessPartnerDataService,
@@ -273,18 +258,9 @@ class AcaPyService(
             .build()
     }
 
-    override suspend fun getAcapyClient(walletToken: String): AriesClient {
-        return AriesClient
-            .builder()
-            .url(acaPyConfig.apiAdminUrl)
-            .apiKey(acaPyConfig.adminApiKey)
-            .bearerToken(walletToken)
-            .build()
-    }
-
-    override suspend fun connect(
+    override suspend fun sendConnectionRequest(
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
-        token: String
+        token: String?
     ): ConnectionRecord {
         val ariesClient = getAcapyClient(token)
         val didOfPartner = utilsService.replaceNetworkIdentifierWithSov(selfManagedWalletCreateDto.did)
@@ -304,8 +280,91 @@ class AcaPyService(
         }
     }
 
+    override suspend fun getRequestedConnectionsToBaseWallet(): List<ConnectionRecord> {
+        val ariesClient = getAcapyClient(null)
+        val connectionFilter: ConnectionFilter = ConnectionFilter.builder()
+            .state(ConnectionState.REQUEST)
+            .build()
+        return ariesClient.connections(connectionFilter).orElseGet { emptyList() }
+    }
+
+    override suspend fun setEndorserMetaData(connectionId: String): TransactionJobs? {
+        val ariesClient = getAcapyClient(null)
+        val txJob = SetEndorserRoleFilter.builder()
+            .transactionMyJob(SetEndorserRoleFilter.TransactionJobEnum.TRANSACTION_ENDORSER)
+            .build()
+        return ariesClient.endorseTransactionSetEndorserRole(connectionId, txJob).orElseGet { null }
+    }
+
+    override suspend fun setAuthorRoleAndInfoMetaData(connectionId: String, endorserDID: String, token: String) {
+        val ariesClient = getAcapyClient(token)
+        val txJob = SetEndorserRoleFilter.builder()
+            .transactionMyJob(SetEndorserRoleFilter.TransactionJobEnum.TRANSACTION_AUTHOR)
+            .build()
+        ariesClient.endorseTransactionSetEndorserRole(connectionId, txJob)
+        val endorserInfoFilter = SetEndorserInfoFilter.builder()
+            .endorserName("endorser")
+            .endorserDid(endorserDID)
+            .build()
+        ariesClient.endorseTransactionSetEndorserInfo(connectionId, endorserInfoFilter)
+    }
+
+    override suspend fun getAcapyClient(walletToken: String?): AriesClient {
+        val ariesClient = AriesClient.builder()
+        if (walletToken == null) {
+            // Catena X Wallet
+            ariesClient
+                .url(acaPyConfig.baseWalletAdminUrl)
+                .apiKey(acaPyConfig.baseWalletAdminApiKey)
+        } else {
+            // Managed Wallets or multi-tenancy management wallet
+            ariesClient
+                .url(acaPyConfig.apiAdminUrl)
+                .apiKey(acaPyConfig.adminApiKey)
+            if (walletToken.isNotBlank()) {
+                ariesClient.bearerToken(walletToken)
+            }
+        }
+        return ariesClient.build()
+    }
+
+    override suspend fun setDidAsPublicUsingEndorser(did: String, token: String) {
+        val ariesClient = getAcapyClient(token)
+        val endorserInfoFilter = EndorserInfoFilter.builder()
+            .createTransactionForEndorser(true)
+            .build()
+        // it does not need the connection-id because it uses the connection with the alias `endorser`
+        ariesClient.walletDidPublic(did, endorserInfoFilter)
+    }
+
+
+    override suspend fun sendConnectionRequest(
+        didOfTheirWallet: String,
+        usePublicDid: Boolean,
+        alias: String?,
+        token: String?,
+        lable: String?
+    ): ConnectionRecord {
+        val ariesClient = getAcapyClient(token)
+        val pendingCon: Optional<ConnectionRecord> = ariesClient.didExchangeCreateRequest(
+            DidExchangeCreateRequestFilter
+                .builder()
+                .theirPublicDid(utilsService.replaceNetworkIdentifierWithSov(didOfTheirWallet))
+                .alias(alias)
+                .myLabel(lable)
+                .usePublicDid(usePublicDid)
+                .build()
+        )
+
+        return if (pendingCon.isPresent) {
+            pendingCon.get()
+        } else {
+            throw InternalServerErrorException("Connection Request Failed")
+        }
+    }
+
     override suspend fun issuanceFlowCredentialSend(
-        token: String,
+        token: String?,
         vc: VerifiableCredentialIssuanceFlowRequest
     ): V20CredExRecord {
         val ariesClient = getAcapyClient(token)
@@ -360,6 +419,15 @@ class AcaPyService(
         } catch (exception: IllegalArgumentException) {
             false
         }
+    }
+
+    private fun getAcaPyUrlAndApiKeyBasedOnToken(token: String?): Pair<String, String> {
+        if (token == null) {
+            // The Catena X Wallet
+            return acaPyConfig.baseWalletAdminUrl to acaPyConfig.baseWalletAdminApiKey
+        }
+        // Other wallets and multi-tenancy management wallet
+        return acaPyConfig.apiAdminUrl to acaPyConfig.adminApiKey
     }
 
 }

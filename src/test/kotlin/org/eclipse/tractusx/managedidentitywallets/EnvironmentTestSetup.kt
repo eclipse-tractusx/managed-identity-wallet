@@ -41,7 +41,6 @@ object EnvironmentTestSetup {
     const val DEFAULT_BPN = "BPNL00000"
     const val EXTRA_TEST_BPN = "BPNL0Test"
     const val NETWORK_ID = "local:test"
-    private const val LEDGER_TYPE = "closed"
     const val NONE_REVOKED_ENCODED_LIST = "H4sIAAAAAAAAAO3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
     const val ZERO_THIRD_REVOKED_ENCODED_LIST ="H4sIAAAAAAAAAO3BIQEAAAACIKv/DzvDAjQAAAAAAAAAAAAAAAAAAADA2wBHo2oBAEAAAA=="
     private val walletRepository = WalletRepository()
@@ -49,7 +48,7 @@ object EnvironmentTestSetup {
     val connectionRepository = ConnectionRepository()
     val webhookRepository = WebhookRepository()
 
-    private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID, LEDGER_TYPE)
+    private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
     val revocationMockedService = RevocationMockedService(NETWORK_ID)
     val webhookService = IWebhookService.createWebhookService(webhookRepository)
     val utilsService = UtilsService(NETWORK_ID)

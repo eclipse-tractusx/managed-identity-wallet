@@ -35,10 +35,15 @@ class ConnectionRepository {
         .firstOrNull()
         ?: throw NotFoundException("Connection with id $connectionId not found")
 
+    fun getOrNull(
+        connectionId: String,
+    ): Connection? = Connection.find { Connections.connectionId eq connectionId }
+        .firstOrNull()
+
     fun add(
         idOfConnection: String,
-        connectionOwnerDid: String,
         connectionTargetDid: String,
+        connectionOwnerDid: String,
         rfc23State: String
     ): Connection {
         return Connection.new {

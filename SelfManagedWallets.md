@@ -6,7 +6,6 @@
   - Request presentation from self managed wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2)
 
 - Current limitation:
-  - Self managed wallets can only interact with the Catena-X wallet
   - Request presentation from self managed wallet is not implemented yet
   - Credential revocation is not supported for credentials issued to self managed wallet
 

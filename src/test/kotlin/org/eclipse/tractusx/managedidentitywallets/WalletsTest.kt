@@ -59,7 +59,9 @@ class WalletsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
@@ -183,7 +185,9 @@ class WalletsTest {
             configureSecurity()
             configureOpenAPI()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -297,7 +301,9 @@ class WalletsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
@@ -384,7 +390,9 @@ class WalletsTest {
                             EnvironmentTestSetup.DEFAULT_BPN,
                             "adminApiKey",
                             "public",
-                            "url"
+                            "url",
+                            "",
+                            ""
                         )
                     )
                     whenever(acapyService.createSubWallet(any())).thenReturn(
@@ -438,9 +446,8 @@ class WalletsTest {
                                 )
                             )
                         )
-                    whenever(acapyService.registerNymPublic(any())).thenReturn(Unit)
-                    whenever(acapyService.assignDidToPublic(any(), any())).thenReturn(Unit)
-                    whenever(acapyService.subscribeForWebSocket(any(), any())).thenAnswer {  }
+
+                    whenever(acapyService.subscribeBaseWalletForWebSocket()).thenAnswer {  }
                     val walletRepository = WalletRepository()
                     val connectionRepository = ConnectionRepository()
                     val credentialRepository = CredentialRepository()
@@ -498,7 +505,9 @@ class WalletsTest {
                             EnvironmentTestSetup.DEFAULT_BPN,
                             "adminApiKey",
                             "idunion",
-                            "url"
+                            "url",
+                            "",
+                            "",
                         )
                     )
                     whenever(acapyService.createSubWallet(any())).thenReturn(
@@ -552,9 +561,7 @@ class WalletsTest {
                                 )
                             )
                         )
-                    whenever(acapyService.registerNymPublic(any())).thenReturn(Unit)
-                    whenever(acapyService.assignDidToPublic(any(), any())).thenReturn(Unit)
-                    whenever(acapyService.subscribeForWebSocket(any(), any())).thenAnswer {  }
+                    whenever(acapyService.subscribeBaseWalletForWebSocket()).thenAnswer {  }
                     val walletRepository = WalletRepository()
                     val connectionRepository = ConnectionRepository()
                     val credentialRepository = CredentialRepository()

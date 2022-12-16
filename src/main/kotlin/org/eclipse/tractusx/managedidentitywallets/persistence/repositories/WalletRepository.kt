@@ -32,9 +32,11 @@ class WalletRepository {
 
     @Throws(NotFoundException::class)
     fun getWallet(identifier: String): Wallet {
-        return Wallet.find {
-            (Wallets.did eq identifier) or (Wallets.bpn eq identifier) or (Wallets.walletId eq identifier)
-        }.firstOrNull() ?: throw NotFoundException("Wallet with given identifier not found")
+        return transaction {
+            Wallet.find {
+                (Wallets.did eq identifier) or (Wallets.bpn eq identifier) or (Wallets.walletId eq identifier)
+            }.firstOrNull() ?: throw NotFoundException("Wallet with given identifier not found")
+        }
     }
 
     @Throws(ConflictException::class)
@@ -44,17 +46,10 @@ class WalletRepository {
         }
     }
 
-    @Throws(NotFoundException::class, UnprocessableEntityException::class)
-    fun getSelfManagedWalletOrThrow(identifier: String): Wallet {
-        return transaction {
-            val wallet = Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.firstOrNull()
-            if (wallet == null) {
-                throw NotFoundException("Wallet with given identifier not found")
-            } else if (!wallet.walletId.isNullOrBlank()) {
-                throw UnprocessableEntityException("The Wallet with given identifier is not a self managed wallet")
-            } else {
-                wallet
-            }
+
+    fun isWalletExists(identifier: String): Boolean {
+        return transaction{
+            !Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()
         }
     }
 
@@ -84,6 +79,12 @@ class WalletRepository {
         }
     }
 
+    fun addRevocationList(did: String, revocationList: String) {
+        getWallet(did).apply {
+            revocationListName = revocationList
+        }
+    }
+
     fun toObject(entity: Wallet): WalletDto = entity.run {
         WalletDto(
             name = name,
@@ -94,7 +95,7 @@ class WalletRepository {
             vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
             revocationListName = revocationListName,
             pendingMembershipIssuance = pendingMembershipIssuance,
-            isSelfManaged = entity.walletId.isNullOrEmpty()
+            isSelfManaged = entity.walletId.isNullOrEmpty() && entity.revocationListName.isNullOrEmpty()
         )
     }
 

@@ -103,4 +103,12 @@ class UtilsService(private val networkIdentifier: String) {
         }
     }
 
+    fun convertIfShortDid(did: String): String {
+        return if (!did.startsWith("did:")) {
+            getDidMethodPrefixWithNetworkIdentifier() + did
+        } else {
+            did
+        }
+    }
+
 }

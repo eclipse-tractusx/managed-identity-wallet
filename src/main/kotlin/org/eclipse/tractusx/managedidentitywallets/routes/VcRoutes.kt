@@ -147,7 +147,7 @@ fun Route.vcRoutes(
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
                     AuthorizationHandler.checkHasRightsToUpdateWallet(
                         call,
-                        walletService.getCatenaXWalletWithoutSecrets().bpn
+                        walletService.getCatenaXWallet().bpn
                     )
 
                     val verifiableCredentialDto = walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
@@ -184,7 +184,7 @@ fun Route.vcRoutes(
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialIssuanceFlowRequestDto>()
                     AuthorizationHandler.checkHasRightsToUpdateWallet(
                         call,
-                        walletService.getCatenaXWalletWithoutSecrets().bpn
+                        walletService.getCatenaXWallet().bpn
                     )
                     val vc = verifiableCredentialRequestDto.toInternalVerifiableCredentialIssuanceFlowRequest()
                     call.respond(

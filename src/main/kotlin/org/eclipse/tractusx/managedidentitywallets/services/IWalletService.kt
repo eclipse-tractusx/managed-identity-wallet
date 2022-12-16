@@ -43,7 +43,7 @@ interface IWalletService {
 
     fun getWallet(identifier: String, withCredentials: Boolean = false): WalletDto
 
-    fun getCatenaXWalletWithoutSecrets(): WalletExtendedData
+    fun getCatenaXWallet(): WalletExtendedData
 
     fun getDidFromBpn(bpn: String): String
 
@@ -77,8 +77,6 @@ interface IWalletService {
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 
-    suspend fun registerBaseWallet(verKey: String): Boolean
-
     suspend fun issuePresentation(
         vpRequest: VerifiablePresentationRequestDto,
         withCredentialsValidation: Boolean,
@@ -95,13 +93,13 @@ interface IWalletService {
 
     suspend fun deleteCredential(credentialId: String): Boolean
 
-    suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto
+    suspend fun addService(identifier: String, serviceDto: DidServiceDto)
 
     suspend fun updateService(
         identifier: String,
         id: String,
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
-    ): DidDocumentDto
+    )
 
     suspend fun deleteService(identifier: String, id: String): DidDocumentDto
 
@@ -122,24 +120,32 @@ interface IWalletService {
 
     fun updateConnectionState(connectionId: String, rfc23State: String)
 
-    fun getConnection(connectionId: String): ConnectionDto
+    fun getConnection(connectionId: String): ConnectionDto?
 
     fun getConnectionWithCatenaX(theirDid: String): ConnectionDto?
 
     fun addConnection(
         connectionId: String,
-        managedWalletDid: String,
-        externalWalletDid: String,
+        connectionTargetDid: String,
+        connectionOwnerDid: String,
         connectionState: String
     )
 
-    fun initCatenaXWalletAndSubscribeForAriesWS()
+    suspend fun initCatenaXWalletAndSubscribeForAriesWS(bpn: String, did: String, verkey: String, name: String)
 
-    suspend fun acceptConnectionRequest(walletId: String, connectionRecord: ConnectionRecord)
+    suspend fun acceptConnectionRequest(identifier: String, connectionRecord: ConnectionRecord)
 
-    suspend fun acceptReceivedOfferVc(walletId: String, credExRecord: V20CredExRecord)
+    suspend fun acceptReceivedOfferVc(identifier: String, credExRecord: V20CredExRecord)
 
-    suspend fun acceptReceivedIssuedVc(walletId: String, credExRecord: V20CredExRecord)
+    suspend fun acceptAndStoreReceivedIssuedVc(identifier: String, credExRecord: V20CredExRecord)
+
+    suspend fun setEndorserMetaDataForAcapyConnection(connectionId: String)
+
+    suspend fun setAuthorMetaData(walletId: String, connectionId: String)
+
+    suspend fun sendInvitation(identifier: String, invitationRequestDto: InvitationRequestDto)
+
+    suspend fun setDidAsPublicWithEndorsement(walletId: String)
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)

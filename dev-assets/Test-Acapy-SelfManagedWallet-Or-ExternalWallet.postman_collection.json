@@ -12,7 +12,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -38,18 +38,18 @@
 			"response": []
 		},
 		{
-			"name": "Send Connection Request",
+			"name": "Send Connection Request (replace their public did)",
 			"request": {
 				"method": "POST",
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://localhost:11001/didexchange/create-request?their_public_did=did:sov:T55QWWHJ5tbD63nEbHZDYT&alias=TestToManagedWallet&my_label=OK777&use_public_did=true",
+					"raw": "http://localhost:11001/didexchange/create-request?their_public_did=did:sov:J9eT3XfyaASHTqQ82YeJv9&alias=TestToManagedWallet&my_label=OK111&use_public_did=true",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -62,7 +62,7 @@
 					"query": [
 						{
 							"key": "their_public_did",
-							"value": "did:sov:T55QWWHJ5tbD63nEbHZDYT"
+							"value": "did:sov:J9eT3XfyaASHTqQ82YeJv9"
 						},
 						{
 							"key": "alias",
@@ -70,7 +70,7 @@
 						},
 						{
 							"key": "my_label",
-							"value": "OK777"
+							"value": "OK111"
 						},
 						{
 							"key": "use_public_did",
@@ -88,12 +88,12 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://localhost:11001/didexchange/e842a370-d6bc-4230-9085-a6ed0f5b4e6b/accept-request",
+					"raw": "http://localhost:11001/didexchange/7506988a-f8a1-4775-8881-539674f26d8d/accept-request",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -101,7 +101,7 @@
 					"port": "11001",
 					"path": [
 						"didexchange",
-						"e842a370-d6bc-4230-9085-a6ed0f5b4e6b",
+						"7506988a-f8a1-4775-8881-539674f26d8d",
 						"accept-request"
 					]
 				}
@@ -115,7 +115,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -148,7 +148,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -185,7 +185,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -219,7 +219,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -256,7 +256,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -288,7 +288,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -322,7 +322,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -357,7 +357,7 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
@@ -391,13 +391,13 @@
 				"header": [
 					{
 						"key": "X-API-KEY",
-						"value": "Hj23iQUsstG!dde",
+						"value": "{{x-api-key}}",
 						"type": "default"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"auto_remove\": true,\n  \"comment\": \"string\",\n  \"connection_id\": \"5d2133ac-b1a0-4fd4-b05d-e69ab8859dcc\",\n  \"credential_preview\": {\n    \"@type\": \"issue-credential/2.0/credential-preview\",\n    \"attributes\": [\n      {\n        \"mime-type\": \"image/jpeg\",\n        \"name\": \"favourite_drink\",\n        \"value\": \"martini\"\n      }\n    ]\n  },\n  \"filter\": {\n    \"ld_proof\": {\n      \"credential\": {\n        \"@context\": [\n          \"https://www.w3.org/2018/credentials/v1\",\n          \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntityData\"\n        ],\n        \"credentialSubject\": {\n          \"data\": {\n            \"value\": \"WTF\",\n            \"nameType\": {\n              \"technicalKey\": \"LOCAL\",\n              \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n              \"url\": \"http://test.de\"\n            },\n            \"language\": {\n              \"technicalKey\": \"undefined\",\n              \"name\": \"Undefined\"\n            }\n          },\n          \"type\": [\n            \"NameCredential\"\n          ],\n           \"id\":\"did:sov:NXpcCePHdiLEJgnnBurCN3\"\n        },\n        \"id\": \"urn:uuid:93731387-dec1-4bf6-2227-31710f977177\",\n        \"issuanceDate\": \"2019-12-03T12:19:52Z\",\n        \"issuer\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n        \"type\": [\n          \"VerifiableCredential\",\n          \"NameCredential\"\n        ]\n      },\n      \"options\": {\n        \"proofType\": \"Ed25519Signature2018\"\n      }\n    }\n  },\n  \"trace\": true\n}",
+					"raw": "{\n  \"auto_remove\": true,\n  \"comment\": \"string\",\n  \"connection_id\": \"b752194b-29d4-4178-b301-3ff8b5434bc3\",\n  \"credential_preview\": {\n    \"@type\": \"issue-credential/2.0/credential-preview\",\n    \"attributes\": [\n      {\n        \"mime-type\": \"image/jpeg\",\n        \"name\": \"favourite_drink\",\n        \"value\": \"martini\"\n      }\n    ]\n  },\n  \"filter\": {\n    \"ld_proof\": {\n      \"credential\": {\n        \"@context\": [\n          \"https://www.w3.org/2018/credentials/v1\",\n          \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntityData\"\n        ],\n        \"credentialSubject\": {\n          \"data\": {\n            \"value\": \"BBBBB\",\n            \"nameType\": {\n              \"technicalKey\": \"LOCAL\",\n              \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n              \"url\": \"http://test.de\"\n            },\n            \"language\": {\n              \"technicalKey\": \"BBBBB\",\n              \"name\": \"BBBB\"\n            }\n          },\n          \"type\": [\n            \"NameCredential\"\n          ],\n           \"id\":\"did:sov:UNgYEVCC7LTgvm3o1AKVot\"\n        },\n        \"id\": \"urn:uuid:23711187-dec1-4bf6-2227-55710f977171\",\n        \"issuanceDate\": \"2019-12-03T12:19:52Z\",\n        \"issuer\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n        \"type\": [\n          \"VerifiableCredential\",\n          \"NameCredential\"\n        ]\n      },\n      \"options\": {\n        \"proofType\": \"Ed25519Signature2018\"\n      }\n    }\n  },\n  \"trace\": true\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -414,6 +414,42 @@
 					"path": [
 						"issue-credential-2.0",
 						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get DIDs",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3YWxsZXRfaWQiOiJiMDI4NjM4Yi0xYzRhLTQzYTUtYTBmMy1mZGU0ZDJlMTY1ZjEiLCJpYXQiOjE2NzA1NzcxNTd9.JBBo4B-FZ9z-mX9Njy9t4VrSAMIXNe0vqLG4G_dKH8Y",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{x-api-key}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:11001/wallet/did",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "11001",
+					"path": [
+						"wallet",
+						"did"
 					]
 				}
 			},

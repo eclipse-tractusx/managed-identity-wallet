@@ -299,7 +299,7 @@ class BusinessPartnerServiceTest {
                 val walletServiceSpy = spy(walletService)
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
@@ -392,7 +392,7 @@ class BusinessPartnerServiceTest {
                 val walletServiceSpy = spy(walletService)
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
@@ -476,7 +476,7 @@ class BusinessPartnerServiceTest {
                 val walletServiceSpy = spy(walletService)
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 val selfManagedWalletDto = walletService.getWallet(selfManagedWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
@@ -575,7 +575,7 @@ class BusinessPartnerServiceTest {
                 val walletServiceSpy = spy(walletService)
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -640,7 +640,7 @@ class BusinessPartnerServiceTest {
                 val walletServiceSpy = spy(walletService)
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -711,7 +711,7 @@ class BusinessPartnerServiceTest {
                 val walletServiceSpy = spy(walletService)
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
                 }
@@ -783,7 +783,7 @@ class BusinessPartnerServiceTest {
                 var walletServiceSpy = spy(walletService)
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 doAnswer { null }.whenever(walletServiceSpy).revokeVerifiableCredential(any())
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false

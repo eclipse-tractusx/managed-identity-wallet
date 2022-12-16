@@ -68,12 +68,14 @@ enum class Rfc23State {
 
 @Serializable
 data class WalletAndAcaPyConfig(
-    val apiAdminUrl: String,
     val networkIdentifier: String,
     val baseWalletBpn: String,
+    val baseWalletDID: String,
+    val baseWalletVerkey: String,
+    val apiAdminUrl: String,
     val adminApiKey: String,
-    val ledgerType: String,
-    val ledgerRegistrationUrl: String
+    val baseWalletAdminUrl: String,
+    val baseWalletAdminApiKey: String
 )
 
 @Serializable

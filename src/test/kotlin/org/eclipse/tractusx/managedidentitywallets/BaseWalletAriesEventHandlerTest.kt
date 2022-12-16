@@ -111,8 +111,12 @@ class BaseWalletAriesEventHandlerTest {
             networkIdentifier = "",
             baseWalletBpn = issuerWallet.bpn,
             adminApiKey = "",
-            ledgerType = "",
-            ledgerRegistrationUrl = "closed"
+             baseWalletDID = issuerWallet.did,
+            baseWalletVerkey = "",
+            baseWalletAdminApiKey = "",
+            baseWalletAdminUrl = ""
+
+
         )
         val walletService = IWalletService.createWithAcaPyService(
             walletAndAcaPyConfig = config,
@@ -179,7 +183,7 @@ class BaseWalletAriesEventHandlerTest {
                 // Test `handleConnection` for state COMPLETED
                 ariesEventHandler.handleConnection(issuerWallet.bpn, newConnectionRecord)
                 transaction {
-                    val updatedConnectionObj = connectionRepository.toObject(connectionRepository.get(connectionId))
+                    val updatedConnectionObj = connectionRepository.toObject(connectionRepository.getOrNull(connectionId)!!)
                     assertEquals(Rfc23State.COMPLETED.toString(), updatedConnectionObj.state)
                     val updatedWebhook = webhookRepository.get(connectionThreadId)
                     assertEquals(Rfc23State.COMPLETED.toString(), updatedWebhook.state)

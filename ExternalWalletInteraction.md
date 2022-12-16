@@ -6,10 +6,10 @@
   - Send a presentation to external wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2)
 
 - Current limitation:
-  - The managed wallets do not send invitation requests
   - The managed wallets accept all invitations and credentials
-  - The interaction is not possible when `ledgerType` is equal to `closed`, because the managed wallets have no `Endorser` role and have no service endpoints in their DID Document
-  - The issuer must be an Indy DID on the same ledger as the MIW.
+  - The managed wallets can issue credentials only to registierd wallets after a connection is established
+  - The issuer must be an Indy DID on the same ledger as the MIW
+  - Credential revocation is not supported for credentials issued using the flows
 
 - Note
   - Each wallet uses the same endpoint, so to the outside world, it is not obvious [multiple tenants](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md#general-concept) are using the same agent. The message routing from the base wallet to sub-wallets is described in this [docs](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md#message-routing)

@@ -26,6 +26,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
+import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
@@ -34,8 +35,7 @@ import java.security.SecureRandom
 
 class AcaPyMockedService(
     val baseWalletBpn: String,
-    val networkIdentifier: String,
-    val ledgerType: String
+    val networkIdentifier: String
 ): IAcaPyService {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
@@ -50,16 +50,18 @@ class AcaPyMockedService(
 
     override fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig {
         return WalletAndAcaPyConfig(
-            apiAdminUrl = "",
             networkIdentifier = networkIdentifier,
             baseWalletBpn = baseWalletBpn,
+            baseWalletDID = "did",
+            baseWalletVerkey = "verkey",
+            apiAdminUrl = "",
             adminApiKey = "TestAdminApiKey",
-            ledgerType = ledgerType,
-            ledgerRegistrationUrl = ""
+            baseWalletAdminUrl = "",
+            baseWalletAdminApiKey = ""
         )
     }
 
-    override suspend fun getWallets(): WalletList = WalletList(results = emptyList())
+    override suspend fun getSubWallets(): WalletList = WalletList(results = emptyList())
 
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
         return CreatedSubWalletResult(
@@ -80,14 +82,6 @@ class AcaPyMockedService(
         )
     }
 
-    override suspend fun assignDidToPublic(didIdentifier: String, token: String) {
-        if (didIdentifier.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
-            throw Exception("Cannot process did containing network identifier!")
-        }
-        if (didIdentifier.indexOf(":") == 0) {
-            throw Exception("Cannot process did starting with a colon!")
-        }
-    }
 
     override suspend fun deleteSubWallet(walletData: WalletExtendedData) {}
 
@@ -107,9 +101,8 @@ class AcaPyMockedService(
         )
     }
 
-    override suspend fun registerDidOnLedger(
-        didRegistration: DidRegistration,
-        endorserWalletToken: String
+    override suspend fun registerDidOnLedgerUsingBaseWallet(
+        didRegistration: DidRegistration
     ): DidRegistrationResult {
         if (didRegistration.did.contains(getWalletAndAcaPyConfig().networkIdentifier)) {
             throw Exception("Cannot process did containing network identifier!")
@@ -120,14 +113,14 @@ class AcaPyMockedService(
         return DidRegistrationResult(success = true)
     }
 
-    override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String {
+    override suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String?): String {
         if (SingletonTestData.signCredentialResponse.isEmpty()) {
             return ""
         }
         return SingletonTestData.signCredentialResponse
     }
 
-    override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse {
+    override suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String?): VerifyResponse {
         if (verifyRequest.signedDoc is VerifiablePresentationDto) {
             return if (SingletonTestData.isValidVerifiablePresentation) {
                 VerifyResponse(error = null, valid = true)
@@ -145,7 +138,7 @@ class AcaPyMockedService(
         return VerifyResponse(error = null, valid = true)
     }
 
-    override suspend fun resolveDidDoc(did: String, token: String): ResolutionResult {
+    override suspend fun resolveDidDoc(did: String, token: String?): ResolutionResult {
         val metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
         for (key in didToVerKey.keys) {
             if (did == key) {
@@ -219,17 +212,23 @@ class AcaPyMockedService(
         )
     }
 
-    override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
-
-    override fun subscribeForWebSocket(walletId: String, walletToken: String) { }
-
-    override suspend fun getAcapyClient(walletToken: String): AriesClient {
+    override suspend fun updateServiceOfBaseWallet(serviceEndPoint: DidEndpointWithType) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun connect(
+    override suspend fun updateServiceUsingEndorsement(serviceEndPoint: DidEndpointWithType, token: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun subscribeBaseWalletForWebSocket() { }
+
+    override suspend fun getAcapyClient(walletToken: String?): AriesClient {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun sendConnectionRequest(
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
-        token: String
+        token: String?
     ): ConnectionRecord {
         val connReq = ConnectionRecord()
         connReq.connectionId = SingletonTestData.connectionId
@@ -240,8 +239,18 @@ class AcaPyMockedService(
         return connReq
     }
 
+    override suspend fun sendConnectionRequest(
+        didOfTheirWallet: String,
+        usePublicDid: Boolean,
+        alias: String?,
+        token: String?,
+        lable: String?
+    ): ConnectionRecord {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun issuanceFlowCredentialSend(
-        token: String,
+        token: String?,
         vc: VerifiableCredentialIssuanceFlowRequest
     ): V20CredExRecord {
         val attachDecoratorData = AttachDecoratorData()
@@ -257,16 +266,16 @@ class AcaPyMockedService(
         return credExRecord
     }
 
-    override suspend fun deleteConnection(connectionId: String, token: String) { return }
+    override suspend fun deleteConnection(connectionId: String, token: String?) { return }
 
-    override suspend fun acceptConnectionRequest(connectionId: String, token: String): ConnectionRecord {
+    override suspend fun acceptConnectionRequest(connectionId: String, token: String?): ConnectionRecord {
         return ConnectionRecord()
     }
 
     override suspend fun acceptCredentialOfferBySendingRequest(
         holderDid: String,
         credentialExchangeId: String,
-        token: String
+        token: String?
     ) {
         return
     }
@@ -274,17 +283,25 @@ class AcaPyMockedService(
     override suspend fun acceptCredentialReceivedByStoringIssuedCredential(
         credentialId: String,
         credentialExchangeId: String,
-        token: String
+        token: String?
     ) {
         return
     }
 
-    override suspend fun registerNymIdunion(registerNymIdunionDto: RegisterNymIdunionDto) {
-        return
+    override suspend fun getRequestedConnectionsToBaseWallet(): List<ConnectionRecord> {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun registerNymPublic(registerNymDto: RegisterNymPublicDto) {
-        return
+    override suspend fun setEndorserMetaData(connectionId: String): TransactionJobs? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setAuthorRoleAndInfoMetaData(connectionId: String, endorserDID: String, token: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setDidAsPublicUsingEndorser(did: String, token: String) {
+        TODO("Not yet implemented")
     }
 
     private fun createRandomString(): String {

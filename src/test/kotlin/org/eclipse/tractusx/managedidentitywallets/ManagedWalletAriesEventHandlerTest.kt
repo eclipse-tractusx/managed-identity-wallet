@@ -120,7 +120,7 @@ class ManagedWalletAriesEventHandlerTest {
         )
         walletServiceSpy = spy(walletService)
         runBlocking {
-            doReturn(issuerWallet).whenever(walletServiceSpy).getCatenaXWalletWithoutSecrets()
+            doReturn(issuerWallet).whenever(walletServiceSpy).getCatenaXWallet()
         }
     }
 
@@ -249,7 +249,7 @@ class ManagedWalletAriesEventHandlerTest {
                     )
                 }
                 verify(walletServiceSpy, times(1)).acceptReceivedOfferVc(any(), any())
-                verify(walletServiceSpy, times(0)).acceptReceivedIssuedVc(any(), any())
+                verify(walletServiceSpy, times(0)).acceptAndStoreReceivedIssuedVc(any(), any())
 
                 val receivedIssuedCredAsJson = File("./src/test/resources/credentials-test-data/credentialReceived.json")
                     .readText(Charsets.UTF_8)
@@ -261,7 +261,7 @@ class ManagedWalletAriesEventHandlerTest {
                         receivedIssuedCredAsJson
                     )
                 }
-                verify(walletServiceSpy, times(1)).acceptReceivedIssuedVc(any(), any())
+                verify(walletServiceSpy, times(1)).acceptAndStoreReceivedIssuedVc(any(), any())
 
                 transaction{
                     val credentials = walletServiceSpy.getCredentials(null, null, null, null)

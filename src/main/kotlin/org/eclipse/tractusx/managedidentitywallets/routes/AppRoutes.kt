@@ -39,13 +39,14 @@ fun Application.appRoutes(
     walletService: IWalletService,
     businessPartnerDataService: IBusinessPartnerDataService,
     revocationService: IRevocationService,
+    webhookService: IWebhookService,
     utilsService: UtilsService
 ) {
 
     routing {
         route("/api") {
 
-            walletRoutes(walletService, businessPartnerDataService)
+            walletRoutes(walletService)
             businessPartnerDataRoutes(businessPartnerDataService)
             didDocRoutes(walletService)
             vcRoutes(walletService, revocationService, utilsService)
@@ -110,6 +111,8 @@ fun Application.appRoutes(
                 val topic = call.parameters["topic"] ?: throw BadRequestException("Missing or malformed topic")
                 val managedWalletHandler = ManagedWalletsAriesEventHandler(
                     walletService,
+                    revocationService,
+                    webhookService,
                     utilsService
                 )
                 val payload = call.receiveText()
@@ -117,6 +120,5 @@ fun Application.appRoutes(
                 call.respond(HttpStatusCode.OK)
             }
         }
-
     }
 }
