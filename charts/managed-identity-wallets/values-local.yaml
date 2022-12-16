@@ -1,0 +1,31 @@
+auth:
+  jwksUrl: "http://192.168.205.1:8081/auth/realms/catenax/protocol/openid-connect/certs"
+  issuerUrl: "http://192.168.205.1:8081/auth/realms/catenax"
+  redirectUrl: "http://localhost:8080/callback"
+  realm: "catenax"
+  roleMappings: "create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"
+  resourceId: "ManagedIdentityWallets"
+datapool:
+  url: "https://catenax-bpdm-dev.demo.catena-x.net"
+  authUrl: "https://centralidp.dev.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token"
+revocationService:
+  baseUrlForCredentialList: "https://managed-identity-wallets.dev.demo.catena-x.net/api/credentials/"
+  clientIssuanceApiUrl: "${SSI_SERVICE_URL:-http://localhost:8080}"  
+acapy:
+  logLevel: "DEBUG"
+  ledgerUrl: "https://indy-test.idu.network"
+  endpointPort: "8000"
+  endpointUrl: "https://managed-identity-wallets.dev.demo.catena-x.net:8000/"
+  adminPort: "11000"
+  adminUrl: "http://localhost:11000"
+  imageName: "bcgovimages/aries-cloudagent"
+  tag: "py36-1.16-1_0.7.4"
+ingress:
+  enabled: true
+certificate:
+  host: "managed-identity-wallets.local.demo.catena-x.net"
+image:
+  name: "catena-x/managed-identity-wallets"
+postgresql:
+  enabled: false
+isLocal: true
