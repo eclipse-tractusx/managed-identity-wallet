@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -347,6 +347,69 @@ class CredentialsTest {
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
+
+            // change did of test wallet
+            val originalDID = SingletonTestData.baseWalletDID
+            val replacedDID = SingletonTestData.baseWalletDID.replace(
+                Services.utilsService.getDidMethodPrefixWithNetworkIdentifier(),
+                Services.utilsService.getOldDidMethodPrefixWithNetworkIdentifier()
+            )
+            EnvironmentTestSetup.replaceWalletDid(originalDID, replacedDID)
+            SingletonTestData.baseWalletDID = replacedDID
+
+            // try to issue a credential
+            val signedCredWithoutSubjectIdReplacedDid = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = SingletonTestData.baseWalletDID,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University"),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#keys-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCredWithoutSubjectIdReplacedDid }"""
+            val verifiableCredentialRequestNoHolderNoSubjectIdReplacedDid = VerifiableCredentialRequestDto(
+                context = listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                ),
+                id = "http://example.edu/credentials/3732",
+                type = listOf("University-Degree-Credential, VerifiableCredential"),
+                issuerIdentifier = SingletonTestData.baseWalletDID,
+                issuanceDate = "2019-06-16T18:56:59Z",
+                expirationDate = "2019-06-17T18:56:59Z",
+                credentialSubject = mapOf("college" to "Test-University"),
+            )
+            handleRequest(HttpMethod.Post, "/api/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiableCredentialRequestDto.serializer(),
+                        verifiableCredentialRequestNoHolderNoSubjectIdReplacedDid,
+                    )
+                )
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // change it back
+            EnvironmentTestSetup.replaceWalletDid(SingletonTestData.baseWalletDID, originalDID)
+            SingletonTestData.baseWalletDID = originalDID
 
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)

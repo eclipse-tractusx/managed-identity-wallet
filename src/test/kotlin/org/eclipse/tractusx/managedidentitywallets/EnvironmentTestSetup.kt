@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,8 +21,8 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.application.*
 import io.ktor.config.*
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
@@ -30,6 +30,9 @@ import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
 import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
+
+import org.jetbrains.exposed.sql.transactions.transaction
+
 import java.sql.DriverManager
 import java.util.*
 
@@ -75,7 +78,6 @@ object EnvironmentTestSetup {
             AuthorizationHandler.ROLE_UPDATE_WALLETS
         ), EXTRA_TEST_BPN
     )
-
 
     fun setupEnvironment(environment: ApplicationEnvironment) {
         val jdbcUrl = System.getenv("CX_DB_JDBC_URL") ?: "jdbc:sqlite:file:test?mode=memory&cache=shared"
@@ -139,6 +141,14 @@ object EnvironmentTestSetup {
             put(
                 "auth.roleMappings", value = System.getenv("CX_AUTH_ROLE_MAPPINGS") ?: roleMapping
             )
+        }
+    }
+
+    fun replaceWalletDid(bpn: String, desiredDid: String) {
+        transaction {
+                walletRepository.getWallet(bpn).apply {
+                did = desiredDid
+            }
         }
     }
 
