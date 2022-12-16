@@ -44,6 +44,8 @@ class ForbiddenException(message: String? = "empty message") : Exception(message
 
 class AuthorizationException(message: String? = "empty message") : Exception(message)
 
+class InternalServerErrorException(message: String? = "empty message") : Exception(message)
+
 val semanticallyInvalidInputException = ExceptionInfo<ExceptionResponse>(
     responseType = typeOf<ExceptionResponse>(),
     description = "The input can not be processed due to semantic mismatches",

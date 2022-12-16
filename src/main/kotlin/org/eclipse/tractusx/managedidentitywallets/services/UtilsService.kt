@@ -21,7 +21,10 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import java.io.ByteArrayInputStream
 import java.security.SecureRandom
+import java.util.*
+import java.util.zip.GZIPInputStream
 
 class UtilsService(private val networkIdentifier: String) {
 
@@ -55,16 +58,48 @@ class UtilsService(private val networkIdentifier: String) {
         }
     }
 
-    fun replaceSovWithNetworkIdentifier(input: String): String =
-        input.replace(":sov:", ":indy:$networkIdentifier:")
+    fun getDidMethodPrefixWithNetworkIdentifier(): String {
+        //TODO replace implementation when indy is supported by AcaPy
+        //return "did:indy:$networkIdentifier:"
+        return "did:sov:"
+    }
 
-    fun replaceNetworkIdentifierWithSov(input: String): String =
-        input.replace(":indy:$networkIdentifier:", ":sov:")
+    fun getOldDidMethodPrefixWithNetworkIdentifier(): String {
+        //TODO replace implementation when indy is supported by AcaPy
+        return "did:indy:$networkIdentifier:"
+    }
+
+    fun replaceSovWithNetworkIdentifier(input: String): String {
+        //TODO check if this method is needed when indy is supported by AcaPy
+        //input.replace(":sov:", ":indy:$networkIdentifier:")
+        return input
+    }
+
+    fun replaceNetworkIdentifierWithSov(input: String): String {
+        //TODO check if this method is needed when indy is supported by AcaPy
+        // replacing always because of AcaPys limitations
+        return input.replace(":indy:$networkIdentifier:", ":sov:")
+    }
 
     fun checkIndyDid(did: String) {
-        val regex = """did:indy:$networkIdentifier:.[^-\s]{16,}${'$'}""".toRegex()
+        // allow old and new DID methods to accomodate migrated scenarios
+        val regex = """(${getDidMethodPrefixWithNetworkIdentifier()}|${getOldDidMethodPrefixWithNetworkIdentifier()}).[^-\s]{16,}${'$'}""".toRegex()
         if (!regex.matches(did)) {
-            throw UnprocessableEntityException("The DID must be a valid and supported Indy DID")
+            throw UnprocessableEntityException("The DID must be a valid and supported DID: ${getDidMethodPrefixWithNetworkIdentifier()} or ${getOldDidMethodPrefixWithNetworkIdentifier()}")
+        }
+    }
+
+    fun decodeBitset(encoded: String): BitSet {
+        val unzipped = decodeBytes(encoded)
+        return BitSet.valueOf(unzipped)
+    }
+
+    private fun decodeBytes(encoded: String): ByteArray {
+        val rawBytes = Base64.getDecoder().decode(encoded)
+        return ByteArrayInputStream(rawBytes).run {
+            GZIPInputStream(this).use {
+                it.readBytes()
+            }
         }
     }
 

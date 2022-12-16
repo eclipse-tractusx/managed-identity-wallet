@@ -46,7 +46,7 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 import java.time.LocalDateTime
 
-fun Route.walletRoutes(walletService: IWalletService, businessPartnerDataService: IBusinessPartnerDataService) {
+fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService: IBusinessPartnerDataService) {
 
     route("/wallets") {
 
@@ -119,6 +119,35 @@ fun Route.walletRoutes(walletService: IWalletService, businessPartnerDataService
                     } else {
                         throw UnprocessableEntityException(e.message)
                     }
+                }
+            }
+        }
+
+        route("/self-managed-wallets") {
+            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
+                notarizedPost(
+                    PostInfo<Unit, SelfManagedWalletCreateDto, SelfManagedWalletResultDto>(
+                        summary = "Register and Establish Initial Connection with Partners",
+                        description = "Permission: " +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_CREATE_WALLETS)}**\n" +
+                                "\n Register self managed wallet and establish the initial connection with CatenaX. " +
+                                "Also issue their membership and BPN credentials",
+                        requestInfo = RequestInfo(
+                            description = "Register self managed wallet, establish a connection and issue membership and BPN credentials",
+                            examples = selfManagedWalletCreateDtoExample
+                        ),
+                        responseInfo = ResponseInfo(
+                            status = HttpStatusCode.Created,
+                            description = "The request was able send a connection request to the DID",
+                        ),
+                        canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
+                    )
+                ) {
+                    val selfManagedWalletCreateDto = call.receive<SelfManagedWalletCreateDto>()
+                    return@notarizedPost call.respond(
+                        HttpStatusCode.Created,
+                        walletService.registerSelfManagedWalletAndBuildConnection(selfManagedWalletCreateDto)
+                    )
                 }
             }
         }
@@ -325,11 +354,18 @@ val issuedVerifiableCredentialRequestDtoExample = mapOf(
         issuanceDate = "2019-06-16T18:56:59Z",
         expirationDate = "2019-06-17T18:56:59Z",
         credentialSubject = mapOf("college" to "Test-University"),
+        credentialStatus = CredentialStatus(
+            statusId = "http://example.edu/api/credentials/status/test#3",
+            credentialType = "StatusList2021Entry",
+            statusPurpose = "revocation",
+            index= "3",
+            listUrl= "http://example.edu/api/credentials/status/test"
+        ),
         proof = LdProofDto(
             type = "Ed25519Signature2018",
             created = "2021-11-17T22:20:27Z",
             proofPurpose = "assertionMethod",
-            verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+            verificationMethod = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
             jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
         )
     )
@@ -342,7 +378,8 @@ val walletDtoWithVerKeyExample = mapOf(
         "did",
         "verkey",
         LocalDateTime.now(),
-        emptyList<VerifiableCredentialDto>().toMutableList()
+        vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
+        pendingMembershipIssuance = false
     )
 )
 
@@ -353,7 +390,8 @@ val walletDtoExample = mapOf(
         "did",
         null,
         LocalDateTime.now(),
-        emptyList<VerifiableCredentialDto>().toMutableList()
+        vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
+        pendingMembershipIssuance = false
     )
 )
 
@@ -361,5 +399,13 @@ val walletCreateDtoExample = mapOf(
     "demo" to WalletCreateDto(
         "name",
         "bpn"
+    )
+)
+
+val selfManagedWalletCreateDtoExample = mapOf(
+    "demo" to SelfManagedWalletCreateDto(
+        name ="name",
+        bpn = "bpn",
+        did = "did",
     )
 )

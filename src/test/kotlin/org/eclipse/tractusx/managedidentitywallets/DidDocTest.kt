@@ -53,12 +53,14 @@ class DidDocTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -79,21 +81,21 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.OK, response.status())
             }
 
-            val notValidDidMethod = "did:local:indy:test:XMcRfSUkkQK38p6CCjHZz6"
+            val notValidDidMethod = "did:local:test:test:XMcRfSUkkQK38p6CCjHZz6"
             handleRequest(HttpMethod.Get, "/api/didDocuments/$notValidDidMethod") {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
             }
 
-            val notValidDidMethodShortId = "did:indy:${EnvironmentTestSetup.NETWORK_ID}:XMcRfSU"
+            val notValidDidMethodShortId = "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}XMcRfSU"
             handleRequest(HttpMethod.Get, "/api/didDocuments/$notValidDidMethodShortId") {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
             }
 
-            val notSupportedDidMethod = "did:sov:XMcRfSUkkQK38p6CCjHZz6"
+            val notSupportedDidMethod = "did:wrong:network:XMcRfSUkkQK38p6CCjHZz6"
             handleRequest(HttpMethod.Get, "/api/didDocuments/$notSupportedDidMethod") {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {

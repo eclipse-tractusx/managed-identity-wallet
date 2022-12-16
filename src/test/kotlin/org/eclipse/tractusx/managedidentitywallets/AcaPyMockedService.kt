@@ -24,15 +24,14 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
 
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
+import org.hyperledger.acy_py.generated.model.AttachDecorator
+import org.hyperledger.acy_py.generated.model.AttachDecoratorData
+import org.hyperledger.aries.AriesClient
+import org.hyperledger.aries.api.connection.ConnectionRecord
+import org.hyperledger.aries.api.connection.ConnectionState
+import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
+import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
 import java.security.SecureRandom
-
-object SingletonTestData {
-    lateinit var baseWalletDID: String
-    lateinit var baseWalletVerKey: String
-    lateinit var signCredentialResponse: String
-    var isValidVerifiableCredential: Boolean = true
-    var isValidVerifiablePresentation: Boolean = true
-}
 
 class AcaPyMockedService(val baseWalletBpn: String,
                          val networkIdentifier: String): IAcaPyService {
@@ -152,20 +151,20 @@ class AcaPyMockedService(val baseWalletBpn: String,
                         context = emptyList(),
                         verificationMethods = listOf(
                             DidVerificationMethodDto(
-                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#key-1",
+                                id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#key-1",
                                 type = "Ed25519VerificationKey2018",
-                                controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
+                                controller = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}",
                                 publicKeyBase58= "${didToVerKey[key]}"
                             )
                         ),
                         services = listOf(
                             DidServiceDto(
-                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                                id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#did-communication",
                                 type = "did-communication",
                                 serviceEndpoint = "http://localhost:8000/",
                             ),
                             DidServiceDto(
-                                id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#linked_domains",
+                                id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#linked_domains",
                                 type = "linked_domains",
                                 serviceEndpoint = "https://myhost:1111",
                             )
@@ -183,15 +182,15 @@ class AcaPyMockedService(val baseWalletBpn: String,
                     context = emptyList(),
                     verificationMethods = listOf(
                         DidVerificationMethodDto(
-                            id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#key-1",
+                            id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#key-1",
                             type = "Ed25519VerificationKey2018",
-                            controller = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}",
+                            controller = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}",
                             publicKeyBase58= "${SingletonTestData.baseWalletVerKey}"
                         )
                     ),
                     services = listOf(
                         DidServiceDto(
-                            id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                            id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#did-communication",
                             type = "did-communication",
                             serviceEndpoint = "http://localhost:8000/",
                         )
@@ -206,7 +205,7 @@ class AcaPyMockedService(val baseWalletBpn: String,
                 context = emptyList(),
                 services = listOf(
                     DidServiceDto(
-                        id = "did:indy:${getWalletAndAcaPyConfig().networkIdentifier}:${getIdentifierOfDid(did)}#did-communication",
+                        id = "${getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(did)}#did-communication",
                         type = "did-communication",
                         serviceEndpoint = "http://localhost:8000/",
                     )
@@ -218,6 +217,44 @@ class AcaPyMockedService(val baseWalletBpn: String,
 
     override suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String) {}
 
+    override fun subscribeForWebSocket(subscriberWallet: WalletExtendedData) { }
+
+    override suspend fun getAcapyClient(walletToken: String): AriesClient {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun connect(
+        selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
+        token: String
+    ): ConnectionRecord {
+        val connReq = ConnectionRecord()
+        connReq.connectionId = SingletonTestData.connectionId
+        connReq.theirDid = "${getDidMethodPrefixWithNetworkIdentifier()}:..."
+        connReq.myDid = SingletonTestData.baseWalletDID
+        connReq.state = ConnectionState.REQUEST
+        connReq.requestId = SingletonTestData.threadId
+        return connReq
+    }
+
+    override suspend fun issuanceFlowCredentialSend(
+        token: String,
+        vc: VerifiableCredentialIssuanceFlowRequest
+    ): V20CredExRecord {
+        val attachDecoratorData = AttachDecoratorData()
+        attachDecoratorData.base64 = "Y3JlZGVudGlhbA=="
+        val attach = AttachDecorator()
+        attach.data = attachDecoratorData
+        val offerAttach = listOf(attach)
+        val credOffer = V20CredOffer()
+        val credExRecord = V20CredExRecord()
+        credExRecord.credOffer = credOffer
+        credExRecord.credOffer.offersAttach = offerAttach
+        credExRecord.threadId = SingletonTestData.threadId
+        return credExRecord
+    }
+
+    override suspend fun deleteConnection(connectionId: String, token: String) { return }
+
     private fun createRandomString(): String {
         return (1..25)
             .map { SecureRandom().nextInt(charPool.size) }
@@ -228,5 +265,9 @@ class AcaPyMockedService(val baseWalletBpn: String,
     private fun getIdentifierOfDid(did: String): String {
         val elementsOfDid: List<String> = did.split(":")
         return elementsOfDid[elementsOfDid.size - 1]
+    }
+
+    private fun getDidMethodPrefixWithNetworkIdentifier(): String {
+        return SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()
     }
 }

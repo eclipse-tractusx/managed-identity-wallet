@@ -52,11 +52,13 @@ class WalletsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             handleRequest(HttpMethod.Get, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
@@ -171,12 +173,14 @@ class WalletsTest {
             configureSecurity()
             configureOpenAPI()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}") {
@@ -263,7 +267,7 @@ class WalletsTest {
                 setBody("""{"bpn":"bpn4", "name": "name4"}""")
             }.apply {
                 assertEquals(HttpStatusCode.Conflict, response.status())
-                assertTrue(response.content!!.contains("Wallet with identifier bpn4 already exists!"))
+                assertTrue(response.content!!.contains("Wallet with given identifier already exists!"))
             }
 
             // clean up created wallets
@@ -283,11 +287,13 @@ class WalletsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             var verKey: String
@@ -317,7 +323,7 @@ class WalletsTest {
                     assertEquals(HttpStatusCode.NotFound, response.status())
                 }
             }
-            assertTrue(exception.message!!.contains("non_existing_bpn not found"))
+            assertTrue(exception.message!!.contains("not found"))
 
             exception = assertFailsWith<NotFoundException> {
                 handleRequest(HttpMethod.Post, "/api/wallets/non_base_bpn/public") {

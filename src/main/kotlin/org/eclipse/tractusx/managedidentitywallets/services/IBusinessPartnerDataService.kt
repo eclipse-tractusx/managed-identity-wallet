@@ -24,6 +24,7 @@ import io.ktor.client.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.slf4j.LoggerFactory
 
 interface IBusinessPartnerDataService {
@@ -34,6 +35,12 @@ interface IBusinessPartnerDataService {
         bpn: String,
         type: String,
         data: T? = null
+    ): Deferred<Boolean>
+
+    suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+        targetWallet: WalletDto,
+        connectionId: String,
+        webhookUrl: String? = null
     ): Deferred<Boolean>
 
     companion object {

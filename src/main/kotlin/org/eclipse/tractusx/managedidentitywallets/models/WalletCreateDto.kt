@@ -28,3 +28,17 @@ data class WalletCreateDto(val bpn: String, val name: String) {
         require(name.isNotBlank()) { "Field 'name' is required not to be blank, but it was blank" }
     }
 }
+
+@Serializable
+data class SelfManagedWalletCreateDto(
+    val bpn: String,
+    val name: String,
+    val did: String,
+    val webhookUrl: String? = null
+) {
+    init {
+        require(bpn.isNotBlank()) { "Field 'bpn' is required not to be blank, but it was blank" }
+        require(name.isNotBlank()) { "Field 'name' is required not to be blank, but it was blank" }
+        require(did.isNotBlank()) { "Field 'did' is required not to be blank, but it was blank" }
+    }
+}

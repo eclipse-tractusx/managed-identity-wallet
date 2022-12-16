@@ -17,22 +17,19 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallet
+package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.EnvironmentTestSetup
-import org.eclipse.tractusx.managedidentitywallets.Services
-import org.eclipse.tractusx.managedidentitywallets.SingletonTestData
-import org.eclipse.tractusx.managedidentitywallets.TestServer
 import org.eclipse.tractusx.managedidentitywallets.models.StoreVerifiableCredentialParameter
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
+import java.io.File
 import kotlin.test.*
 
 @kotlinx.serialization.ExperimentalSerializationApi
@@ -50,6 +47,11 @@ class CredentialsTest {
         server.stop(1000, 10000)
     }
 
+    @AfterTest
+    fun cleanSingletonTestData() {
+        SingletonTestData.cleanSingletonTestData()
+    }
+
     @Test
     fun testGetAndStoreVerifiableCredentials() {
         withTestApplication({
@@ -58,12 +60,14 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             val walletDto: WalletDto
@@ -80,41 +84,10 @@ class CredentialsTest {
             credentials = EnvironmentTestSetup.walletService.getCredentials(
                 null,null,null,null)
             assertTrue { credentials.isEmpty() }
-            val vcAsString ="""
-                {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "${walletDto.did}"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-            """.trimIndent()
 
+            //TODO replace issuerDid inside vcWithReplaceableSubjectId when did indy method is supported by AcaPy
+            val vcAsString: String = File("./src/test/resources/credentials-test-data/vcWithReplaceableSubjectId.json")
+                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>", walletDto.did)
             val storeVerifiableCredentialParameter = StoreVerifiableCredentialParameter(EnvironmentTestSetup.DEFAULT_BPN)
             assertEquals(EnvironmentTestSetup.DEFAULT_BPN, storeVerifiableCredentialParameter.identifier)
 
@@ -127,40 +100,9 @@ class CredentialsTest {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
 
-            val vcWithWrongSubjectAsString ="""
-                {
-                            "id": "http://example.edu/credentials/3735",
-                            "@context": [
-                                "https://www.w3.org/2018/credentials/v1",
-                                "https://www.w3.org/2018/credentials/examples/v1"
-                            ],
-                            "type": [
-                                "University-Degree-Credential",
-                                "VerifiableCredential"
-                            ],
-                            "issuer": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D",
-                            "issuanceDate": "2021-06-16T18:56:59Z",
-                            "expirationDate": "2026-06-17T18:56:59Z",
-                            "credentialSubject": {
-                                "givenName": "TestAfterQuestion",
-                                "familyName": "Student",
-                                "degree": {
-                                    "type": "Master",
-                                    "degreeType": "Undergraduate",
-                                    "name": "Master of Test"
-                                },
-                                "college": "Test",
-                                "id": "did:indy:local:test:NotEqualWalletDID"
-                            },
-                            "proof": {
-                                "type": "Ed25519Signature2018",
-                                "created": "2022-07-12T12:13:16Z",
-                                "proofPurpose": "assertionMethod",
-                                "verificationMethod": "did:indy:local:test:LCNSw1JxSTDw7EpR1UMG7D#key-1",
-                                "jws": "eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..0_1pSjyxk4MCPkaatFlv78rTiE6JkI4iXM9QEOPwIGwLiyORkkKPe6TwaHoVvuarouC7ozpGZxWEGmVRqfiWDg"
-                            }
-                        }
-            """.trimIndent()
+            val vcWithWrongSubjectAsString: String = File("./src/test/resources/credentials-test-data/vcWithReplaceableSubjectId.json")
+                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>",
+                    "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}NotEqualWalletDID")
             handleRequest(HttpMethod.Post, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}/credentials") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -197,17 +139,20 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto
             runBlocking {
-                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                val walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+                SingletonTestData.baseWalletDID = walletDto.did
             }
             val verifiableCredentialRequest = VerifiableCredentialRequestDto(
                 context = listOf(
@@ -216,14 +161,14 @@ class CredentialsTest {
                 ),
                 id = "http://example.edu/credentials/3732",
                 type = listOf("University-Degree-Credential, VerifiableCredential"),
-                issuerIdentifier = walletDto.did,
+                issuerIdentifier = SingletonTestData.baseWalletDID,
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
                 credentialSubject = mapOf("college" to "Test-University"),
-                holderIdentifier = walletDto.did
+                holderIdentifier = SingletonTestData.baseWalletDID,
+                isRevocable = true
             )
-            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-            SingletonTestData.baseWalletDID = walletDto.did
+
             val signedCred = Json.encodeToString(
                 VerifiableCredentialDto.serializer(),
                 VerifiableCredentialDto(
@@ -233,15 +178,15 @@ class CredentialsTest {
                     ),
                     id = "http://example.edu/credentials/3732",
                     type = listOf("University-Degree-Credential, VerifiableCredential"),
-                    issuer = walletDto.did,
+                    issuer = SingletonTestData.baseWalletDID,
                     issuanceDate = "2019-06-16T18:56:59Z",
                     expirationDate = "2019-06-17T18:56:59Z",
-                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialSubject = mapOf("college" to "Test-University", "id" to SingletonTestData.baseWalletDID),
                     proof = LdProofDto(
                         type = "Ed25519Signature2018",
                         created = "2021-11-17T22:20:27Z",
                         proofPurpose = "assertionMethod",
-                        verificationMethod = "${walletDto.did}#keys-1",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#key-1",
                         jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                     )
                 )
@@ -254,16 +199,217 @@ class CredentialsTest {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Json.encodeToString(
-                    VerifiableCredentialRequestDto.serializer(),
-                    verifiableCredentialRequest,
-                ))
+                        VerifiableCredentialRequestDto.serializer(),
+                        verifiableCredentialRequest,
+                    )
+                )
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
 
-            SingletonTestData.baseWalletVerKey = ""
-            SingletonTestData.baseWalletDID = ""
-            SingletonTestData.signCredentialResponse = ""
+            // No Holder identifier , only subject ID
+            val verifiableCredentialRequestNoHolderButWithSubjectId = VerifiableCredentialRequestDto(
+                context = listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                ),
+                id = "http://example.edu/credentials/3732",
+                type = listOf("University-Degree-Credential, VerifiableCredential"),
+                issuerIdentifier = SingletonTestData.baseWalletDID,
+                issuanceDate = "2019-06-16T18:56:59Z",
+                expirationDate = "2019-06-17T18:56:59Z",
+                credentialSubject = mapOf("college" to "Test-University", "id" to SingletonTestData.baseWalletDID),
+            )
+            handleRequest(HttpMethod.Post, "/api/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiableCredentialRequestDto.serializer(),
+                        verifiableCredentialRequestNoHolderButWithSubjectId,
+                    )
+                )
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // The Holder identifier is not a managed wallet
+            val verifiableCredentialRequestWithRandomHolder = VerifiableCredentialRequestDto(
+                context = listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                ),
+                id = "http://example.edu/credentials/3732",
+                type = listOf("University-Degree-Credential, VerifiableCredential"),
+                issuerIdentifier = SingletonTestData.baseWalletDID,
+                issuanceDate = "2019-06-16T18:56:59Z",
+                expirationDate = "2019-06-17T18:56:59Z",
+                credentialSubject = mapOf("college" to "Test-University"),
+                holderIdentifier = "Random-Value"
+            )
+            val signedCredWithRandomHolder = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = SingletonTestData.baseWalletDID,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University", "id" to "Random-Value"),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCredWithRandomHolder }"""
+            handleRequest(HttpMethod.Post, "/api/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiableCredentialRequestDto.serializer(),
+                        verifiableCredentialRequestWithRandomHolder,
+                    )
+                )
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // No Holder identifier and no subject ID
+            val signedCredWithoutSubjectId = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = SingletonTestData.baseWalletDID,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University"),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#keys-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCredWithoutSubjectId }"""
+            val verifiableCredentialRequestNoHolderNoSubjectId = VerifiableCredentialRequestDto(
+                context = listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                ),
+                id = "http://example.edu/credentials/3732",
+                type = listOf("University-Degree-Credential, VerifiableCredential"),
+                issuerIdentifier = SingletonTestData.baseWalletDID,
+                issuanceDate = "2019-06-16T18:56:59Z",
+                expirationDate = "2019-06-17T18:56:59Z",
+                credentialSubject = mapOf("college" to "Test-University"),
+            )
+            handleRequest(HttpMethod.Post, "/api/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiableCredentialRequestDto.serializer(),
+                        verifiableCredentialRequestNoHolderNoSubjectId,
+                    )
+                )
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            handleRequest(HttpMethod.Post, "/api/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiableCredentialRequestDto.serializer(),
+                        verifiableCredentialRequest,
+                    ))
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // change did of test wallet
+            val originalDID = SingletonTestData.baseWalletDID
+            val replacedDID = SingletonTestData.baseWalletDID.replace(
+                Services.utilsService.getDidMethodPrefixWithNetworkIdentifier(),
+                Services.utilsService.getOldDidMethodPrefixWithNetworkIdentifier()
+            )
+            EnvironmentTestSetup.replaceWalletDid(originalDID, replacedDID)
+            SingletonTestData.baseWalletDID = replacedDID
+
+            // try to issue a credential
+            val signedCredWithoutSubjectIdReplacedDid = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = SingletonTestData.baseWalletDID,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University"),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#keys-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCredWithoutSubjectIdReplacedDid }"""
+            val verifiableCredentialRequestNoHolderNoSubjectIdReplacedDid = VerifiableCredentialRequestDto(
+                context = listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                ),
+                id = "http://example.edu/credentials/3732",
+                type = listOf("University-Degree-Credential, VerifiableCredential"),
+                issuerIdentifier = SingletonTestData.baseWalletDID,
+                issuanceDate = "2019-06-16T18:56:59Z",
+                expirationDate = "2019-06-17T18:56:59Z",
+                credentialSubject = mapOf("college" to "Test-University"),
+            )
+            handleRequest(HttpMethod.Post, "/api/credentials") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiableCredentialRequestDto.serializer(),
+                        verifiableCredentialRequestNoHolderNoSubjectIdReplacedDid,
+                    )
+                )
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            // change it back
+            EnvironmentTestSetup.replaceWalletDid(SingletonTestData.baseWalletDID, originalDID)
+            SingletonTestData.baseWalletDID = originalDID
 
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
@@ -279,17 +425,20 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto
             runBlocking {
-                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                val walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+                SingletonTestData.baseWalletDID = walletDto.did
             }
             val verifiableCredentialRequest = VerifiableCredentialRequestWithoutIssuerDto(
                 context = listOf(
@@ -301,10 +450,9 @@ class CredentialsTest {
                 issuanceDate = "2019-06-16T18:56:59Z",
                 expirationDate = "2019-06-17T18:56:59Z",
                 credentialSubject = mapOf("college" to "Test-University"),
-                holderIdentifier = walletDto.did
+                holderIdentifier = SingletonTestData.baseWalletDID
             )
-            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-            SingletonTestData.baseWalletDID = walletDto.did
+
             val signedCred = Json.encodeToString(
                 VerifiableCredentialDto.serializer(),
                 VerifiableCredentialDto(
@@ -314,15 +462,15 @@ class CredentialsTest {
                     ),
                     id = "http://example.edu/credentials/3732",
                     type = listOf("University-Degree-Credential, VerifiableCredential"),
-                    issuer = walletDto.did,
+                    issuer = SingletonTestData.baseWalletDID,
                     issuanceDate = "2019-06-16T18:56:59Z",
                     expirationDate = "2019-06-17T18:56:59Z",
-                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialSubject = mapOf("college" to "Test-University", "id" to SingletonTestData.baseWalletDID),
                     proof = LdProofDto(
                         type = "Ed25519Signature2018",
                         created = "2021-11-17T22:20:27Z",
                         proofPurpose = "assertionMethod",
-                        verificationMethod = "${walletDto.did}#keys-1",
+                        verificationMethod = "${SingletonTestData.baseWalletDID}#key-1",
                         jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                     )
                 )
@@ -340,9 +488,29 @@ class CredentialsTest {
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
-            SingletonTestData.baseWalletVerKey = ""
-            SingletonTestData.baseWalletDID = ""
-            SingletonTestData.signCredentialResponse = ""
+            val verifiableCredentialRequestIrrevocable = VerifiableCredentialRequestWithoutIssuerDto(
+                context = listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                ),
+                id = "http://example.edu/credentials/3732",
+                type = listOf("University-Degree-Credential, VerifiableCredential"),
+                issuanceDate = "2019-06-16T18:56:59Z",
+                expirationDate = "2019-06-17T18:56:59Z",
+                credentialSubject = mapOf("college" to "Test-University"),
+                holderIdentifier = SingletonTestData.baseWalletDID
+            )
+            handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Json.encodeToString(
+                        VerifiableCredentialRequestWithoutIssuerDto.serializer(),
+                        verifiableCredentialRequestIrrevocable))
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
 
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
@@ -350,4 +518,502 @@ class CredentialsTest {
         }
     }
 
+    @Test
+    fun testIssueAndRevokeCredential() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+            configureOpenAPI()
+            configureSecurity()
+            configureRouting(EnvironmentTestSetup.walletService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            configureSerialization()
+            configureStatusPages()
+            Services.walletService = EnvironmentTestSetup.walletService
+            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
+        }) {
+            // programmatically add a wallet
+            val walletDto: WalletDto
+            runBlocking {
+                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+            }
+
+            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+            SingletonTestData.baseWalletDID = walletDto.did
+            SingletonTestData.revocationListName = walletDto.revocationListName!!
+            SingletonTestData.credentialIndex = 0
+            val signedCred = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = walletDto.did,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialStatus = CredentialStatus(
+                        statusId = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
+                        credentialType = "StatusList2021Entry",
+                        statusPurpose = "revocation",
+                        index = SingletonTestData.credentialIndex.toString(),
+                        listUrl = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}"
+                    ),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${walletDto.did}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
+            SingletonTestData.isValidVerifiableCredential = true
+            SingletonTestData.credentialIndex = 1
+            // revoke credential
+            handleRequest(HttpMethod.Post, "/api/credentials/revocations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(signedCred)
+            }.apply {
+                assertEquals(HttpStatusCode.Accepted, response.status())
+            }
+
+            val signedIrrevocableCredential = VerifiableCredentialDto(
+                context = listOf(
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                    JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                ),
+                id = "http://example.edu/credentials/3732",
+                type = listOf("University-Degree-Credential, VerifiableCredential"),
+                issuer = walletDto.did,
+                issuanceDate = "2019-06-16T18:56:59Z",
+                expirationDate = "2019-06-17T18:56:59Z",
+                credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                proof = LdProofDto(
+                    type = "Ed25519Signature2018",
+                    created = "2021-11-17T22:20:27Z",
+                    proofPurpose = "assertionMethod",
+                    verificationMethod = "${walletDto.did}#key-1",
+                    jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                )
+            )
+
+            handleRequest(HttpMethod.Post, "/api/credentials/revocations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(Json.encodeToString(VerifiableCredentialDto.serializer(), signedIrrevocableCredential))
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+                assertTrue(response.content!!.contains("The given verifiable credential is not revocable!"))
+            }
+
+            val signedCredWithInvalidStatusType = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = walletDto.did,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialStatus = CredentialStatus(
+                        statusId = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
+                        credentialType = "Wrong-status-type",
+                        statusPurpose = "revocation",
+                        index = "-1",
+                        listUrl = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}"
+                    ),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${walletDto.did}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+
+            handleRequest(HttpMethod.Post, "/api/credentials/revocations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(signedCredWithInvalidStatusType)
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+                assertTrue(response.content!!.contains("has invalid credential status 'Type'"))
+            }
+
+            val signedCredWithInvalidStatusPurpose = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = walletDto.did,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialStatus = CredentialStatus(
+                        statusId = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
+                        credentialType = "StatusList2021Entry",
+                        statusPurpose = "wrong-purpose",
+                        index = "1",
+                        listUrl = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}"
+                    ),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${walletDto.did}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+
+            handleRequest(HttpMethod.Post, "/api/credentials/revocations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(signedCredWithInvalidStatusPurpose)
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+                assertTrue(response.content!!.contains("has invalid 'statusPurpose'"))
+            }
+
+            val signedCredWithInvalidIndex = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = walletDto.did,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialStatus = CredentialStatus(
+                        statusId = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
+                        credentialType = "StatusList2021Entry",
+                        statusPurpose = "revocation",
+                        index = "-1",
+                        listUrl = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}"
+                    ),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${walletDto.did}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+
+            handleRequest(HttpMethod.Post, "/api/credentials/revocations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(signedCredWithInvalidIndex)
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+                assertTrue(response.content!!.contains("has invalid 'statusListIndex'"))
+            }
+
+            val signedCredWithInvalidStatusListUrl = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = walletDto.did,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialStatus = CredentialStatus(
+                        statusId = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
+                        credentialType = "StatusList2021Entry",
+                        statusPurpose = "revocation",
+                        index = "3",
+                        listUrl = "  "
+                    ),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${walletDto.did}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+
+            handleRequest(HttpMethod.Post, "/api/credentials/revocations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(signedCredWithInvalidStatusListUrl)
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+                assertTrue(response.content!!.contains("has invalid 'statusListCredential'"))
+            }
+
+            val signedCredWithInvalidStatusListUrlWithoutCredentialId = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    type = listOf("University-Degree-Credential, VerifiableCredential"),
+                    issuer = walletDto.did,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    expirationDate = "2019-06-17T18:56:59Z",
+                    credentialSubject = mapOf("college" to "Test-University", "id" to walletDto.did),
+                    credentialStatus = CredentialStatus(
+                        statusId = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}#${SingletonTestData.credentialIndex}",
+                        credentialType = "StatusList2021Entry",
+                        statusPurpose = "revocation",
+                        index = "  ",
+                        listUrl = "  "
+                    ),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${walletDto.did}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+
+            handleRequest(HttpMethod.Post, "/api/credentials/revocations") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(signedCredWithInvalidStatusListUrlWithoutCredentialId)
+            }.apply {
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
+                assertTrue(response.content!!.contains("Credential with Id null has invalid 'statusListIndex'"))
+            }
+
+            runBlocking {
+                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
+            }
+        }
+    }
+
+    @Test
+    fun testIssueStatusListCredential() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+            configureOpenAPI()
+            configureSecurity()
+            configureRouting(EnvironmentTestSetup.walletService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            configureSerialization()
+            configureStatusPages()
+            Services.walletService = EnvironmentTestSetup.walletService
+            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+        }) {
+            // programmatically add a wallet
+            val walletDto: WalletDto
+            runBlocking {
+                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+            }
+
+            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+            SingletonTestData.baseWalletDID = walletDto.did
+            SingletonTestData.revocationListName = walletDto.revocationListName!!
+            SingletonTestData.credentialIndex = 0
+
+            val signedCred = Json.encodeToString(
+                VerifiableCredentialDto.serializer(),
+                VerifiableCredentialDto(
+                    context = listOf(
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_V1,
+                        JsonLdContexts.JSONLD_CONTEXT_W3C_2018_CREDENTIALS_EXAMPLES_V1
+                    ),
+                    id = "http://example.edu/credentials/3732",
+                    type = listOf("StatusList2021Credential, VerifiableCredential"),
+                    issuer = walletDto.did,
+                    issuanceDate = "2019-06-16T18:56:59Z",
+                    credentialSubject = mapOf(
+                        "id" to "https://example.com/status/${Services.utilsService.getIdentifierOfDid(walletDto.did)}#list",
+                        "type" to "StatusList2021",
+                        "statusPurpose" to "revocation",
+                        "encodedList" to "H4sIAAAAAAAAA-3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
+                    ),
+                    proof = LdProofDto(
+                        type = "Ed25519Signature2018",
+                        created = "2021-11-17T22:20:27Z",
+                        proofPurpose = "assertionMethod",
+                        verificationMethod = "${walletDto.did}#key-1",
+                        jws = "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                    )
+                )
+            )
+            SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
+            SingletonTestData.isValidVerifiableCredential = true
+            val listCredentialRequestData = ListCredentialRequestData(
+                listId = "uuid-of-list",
+                subject = ListCredentialSubject (
+                    credentialId = "https://example.com/status/3#list",
+                    credentialType = "StatusList2021",
+                    statusPurpose = "revocation",
+                    encodedList = "H4sIAAAAAAAAA-3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
+                )
+            )
+
+            handleRequest(
+                HttpMethod.Post, "/list-credential/${Services.utilsService.getIdentifierOfDid(walletDto.did)}/issue") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(Json.encodeToString(ListCredentialRequestData.serializer(), listCredentialRequestData))
+            }.apply {
+                assertEquals(HttpStatusCode.Created, response.status())
+            }
+
+            runBlocking {
+                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
+            }
+        }
+    }
+
+    @Test
+    fun testGetStatusListCredential() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+            configureOpenAPI()
+            configureSecurity()
+            configureRouting(EnvironmentTestSetup.walletService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            configureSerialization()
+            configureStatusPages()
+            Services.walletService = EnvironmentTestSetup.walletService
+            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+            Services.webhookService = EnvironmentTestSetup.webhookService
+        }) {
+            // programmatically add a wallet
+            val walletDto: WalletDto
+            runBlocking {
+                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+            }
+
+            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+            SingletonTestData.baseWalletDID = walletDto.did
+            SingletonTestData.revocationListName = walletDto.revocationListName!!
+
+            handleRequest(
+                HttpMethod.Get, "/api/credentials/status/${walletDto.revocationListName}") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                val credential = Json.decodeFromString(VerifiableCredentialDto.serializer(), response.content!!)
+                assertEquals(
+                    "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}#list",
+                    credential.credentialSubject["id"]
+                )
+            }
+
+            // without listName
+            handleRequest(
+                HttpMethod.Get, "/api/credentials/status/") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.NotFound, response.status())
+            }
+
+            runBlocking {
+                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
+            }
+        }
+    }
+
+    @Test
+    fun testIssueAndUpdateStatusListCredential() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+            configureOpenAPI()
+            configureSecurity()
+            configureRouting(EnvironmentTestSetup.walletService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            configureSerialization()
+            configureStatusPages()
+            Services.walletService = EnvironmentTestSetup.walletService
+            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
+            Services.utilsService = EnvironmentTestSetup.utilsService
+            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
+        }) {
+            // programmatically add a wallet
+            var walletDto: WalletDto
+            runBlocking {
+                walletDto = EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+            }
+
+            handleRequest(
+                HttpMethod.Post, "/api/credentials/revocations/statusListCredentialRefresh") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.Accepted, response.status())
+            }
+
+            handleRequest(
+                HttpMethod.Post, "/api/credentials/revocations/statusListCredentialRefresh?identifier=${walletDto.did}&force=false") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.Accepted, response.status())
+            }
+
+            handleRequest(
+                HttpMethod.Post, "/api/credentials/revocations/statusListCredentialRefresh?identifier=${walletDto.did}&force=true") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.Accepted, response.status())
+            }
+
+            handleRequest(
+                HttpMethod.Get, "/api/credentials/status/listName=${walletDto.revocationListName}") {
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+
+            runBlocking {
+                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
+            }
+        }
+    }
 }

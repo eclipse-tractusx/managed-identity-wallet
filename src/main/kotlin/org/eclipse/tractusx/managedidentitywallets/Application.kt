@@ -23,14 +23,15 @@ import io.ktor.application.*
 import io.ktor.features.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
-import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
-import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
-import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
+import org.eclipse.tractusx.managedidentitywallets.services.*
+import org.jetbrains.exposed.sql.transactions.transaction
 
 import org.slf4j.LoggerFactory
 
@@ -40,6 +41,8 @@ object Services {
     lateinit var businessPartnerDataService: IBusinessPartnerDataService
     lateinit var walletService: IWalletService
     lateinit var utilsService: UtilsService
+    lateinit var revocationService: IRevocationService
+    lateinit var webhookService: IWebhookService
 }
 
 fun Application.module(testing: Boolean = false) {
@@ -52,7 +55,9 @@ fun Application.module(testing: Boolean = false) {
     configureSockets()
     configureSerialization()
 
-    install(DefaultHeaders)
+    install(DefaultHeaders) {
+        header("X-Frame-Options", "DENY")
+    }
     
     // for debugging
     install(CallLogging)
@@ -66,14 +71,29 @@ fun Application.module(testing: Boolean = false) {
 
     val walletRepository = WalletRepository()
     val credRepository = CredentialRepository()
+    val connectionRepository = ConnectionRepository()
+    val webhookRepository = WebhookRepository()
+
+    val baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
     val acaPyConfig = WalletAndAcaPyConfig(
         apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
         networkIdentifier = environment.config.property("acapy.networkIdentifier").getString(),
         adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
-        baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
+        baseWalletBpn = baseWalletBpn
     )
     val utilsService = UtilsService(networkIdentifier = acaPyConfig.networkIdentifier)
-    val walletService = IWalletService.createWithAcaPyService(acaPyConfig, walletRepository, credRepository, utilsService)
+    val revocationUrl = environment.config.property("revocation.baseUrl").getString()
+    val revocationService = IRevocationService.createRevocationService(revocationUrl)
+    val webhookService = IWebhookService.createWebhookService(webhookRepository)
+    val walletService = IWalletService.createWithAcaPyService(
+        acaPyConfig,
+        walletRepository,
+        credRepository,
+        utilsService,
+        revocationService,
+        webhookService,
+        connectionRepository
+    )
     val bpdmConfig = BPDMConfig(
         url = environment.config.property("bpdm.datapoolUrl").getString(),
         tokenUrl = environment.config.property("bpdm.authUrl").getString(),
@@ -87,10 +107,21 @@ fun Application.module(testing: Boolean = false) {
     Services.businessPartnerDataService = businessPartnerDataService
     Services.walletService = walletService
     Services.utilsService = utilsService
+    Services.revocationService = revocationService
+    Services.webhookService = webhookService
+
     configureRouting(walletService)
 
-    appRoutes(walletService, businessPartnerDataService)
+    appRoutes(walletService, businessPartnerDataService, revocationService, utilsService)
     configurePersistence()
 
     configureJobs()
+
+    val wallets = transaction {
+        walletService.getAll()
+    }
+
+    if (wallets.isNotEmpty() && wallets.stream().anyMatch{ wallet -> wallet.bpn == baseWalletBpn }) {
+        walletService.subscribeForAriesWS()
+    }
 }

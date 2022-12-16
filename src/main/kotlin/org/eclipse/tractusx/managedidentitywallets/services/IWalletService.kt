@@ -29,10 +29,16 @@ import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Connection
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
+import org.hyperledger.aries.api.connection.ConnectionState
+import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
+import org.slf4j.LoggerFactory
 
 interface IWalletService {
 
@@ -50,13 +56,23 @@ interface IWalletService {
 
     suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto
 
+    suspend fun registerSelfManagedWalletAndBuildConnection(
+        selfManagedWalletCreateDto: SelfManagedWalletCreateDto
+    ): SelfManagedWalletResultDto
+
     suspend fun deleteWallet(identifier: String): Boolean
 
     fun storeCredential(identifier: String, issuedCredential: IssuedVerifiableCredentialRequestDto): Boolean
 
     suspend fun issueCredential(vcRequest: VerifiableCredentialRequestDto): VerifiableCredentialDto
 
-    suspend fun issueCatenaXCredential(vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto): VerifiableCredentialDto
+    suspend fun issueCatenaXCredential(
+        vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto
+    ): VerifiableCredentialDto
+
+    suspend fun triggerCredentialIssuanceFlow(
+        vc: VerifiableCredentialIssuanceFlowRequest
+    ): CredentialOfferResponse
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 
@@ -65,7 +81,8 @@ interface IWalletService {
     suspend fun issuePresentation(
         vpRequest: VerifiablePresentationRequestDto,
         withCredentialsValidation: Boolean,
-        withCredentialsDateValidation: Boolean
+        withCredentialsDateValidation: Boolean,
+        withRevocationValidation: Boolean
     ): VerifiablePresentationDto
 
     fun getCredentials(
@@ -89,15 +106,38 @@ interface IWalletService {
 
     fun getCatenaXBpn(): String
 
-    suspend fun verifyVerifiablePresentation(vpDto: VerifiablePresentationDto,
-                                             withDateValidation: Boolean = false): VerifyResponse
+    suspend fun verifyVerifiablePresentation(
+        vpDto: VerifiablePresentationDto,
+        withDateValidation: Boolean = false,
+        withRevocationValidation: Boolean
+    ): VerifyResponse
+
+    suspend fun issueStatusListCredential(
+        profileName: String,
+        listCredentialRequestData: ListCredentialRequestData
+    ): VerifiableCredentialDto
+
+    suspend fun revokeVerifiableCredential(vc: VerifiableCredentialDto)
+
+    fun setPartnerMembershipIssued(walletDto: WalletDto)
+
+    fun updateConnectionState(connectionId: String, state: ConnectionState)
+
+    fun getConnection(connectionId: String): Connection
+
+    fun subscribeForAriesWS()
 
     companion object {
+        private val log = LoggerFactory.getLogger(this::class.java)
+
         fun createWithAcaPyService(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,
             walletRepository: WalletRepository,
             credentialRepository: CredentialRepository,
-            utilsService: UtilsService
+            utilsService: UtilsService,
+            revocationService: IRevocationService,
+            webhookService: IWebhookService,
+            connectionRepository: ConnectionRepository
         ): IWalletService {
             val acaPyService = IAcaPyService.create(
                 walletAndAcaPyConfig = walletAndAcaPyConfig,
@@ -106,8 +146,8 @@ interface IWalletService {
                     expectSuccess = true
                     install(ResponseObserver) {
                         onResponse { response ->
-                            println("HTTP status: ${response.status.value}")
-                            println("HTTP description: ${response.status.description}")
+                            log.debug("HTTP status: ${response.status.value}")
+                            log.debug("HTTP description: ${response.status.description}")
                         }
                     }
                     HttpResponseValidator {
@@ -150,7 +190,8 @@ interface IWalletService {
                     }
                 }
             )
-            return AcaPyWalletServiceImpl(acaPyService, walletRepository, credentialRepository, utilsService)
+            return AcaPyWalletServiceImpl(acaPyService, walletRepository, credentialRepository,
+                utilsService, revocationService, webhookService, connectionRepository)
         }
     }
 }

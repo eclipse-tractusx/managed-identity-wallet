@@ -22,23 +22,42 @@ package org.eclipse.tractusx.managedidentitywallets
 import io.ktor.application.*
 import io.ktor.config.*
 
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
+import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
+import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
+
+import org.jetbrains.exposed.sql.transactions.transaction
+
 import java.sql.DriverManager
+import java.util.*
 
 object EnvironmentTestSetup {
 
     const val DEFAULT_BPN = "BPNL00000"
     const val EXTRA_TEST_BPN = "BPNL0Test"
     const val NETWORK_ID = "local:test"
+    const val NONE_REVOKED_ENCODED_LIST = "H4sIAAAAAAAAAO3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
+    const val ZERO_THIRD_REVOKED_ENCODED_LIST ="H4sIAAAAAAAAAO3BIQEAAAACIKv/DzvDAjQAAAAAAAAAAAAAAAAAAADA2wBHo2oBAEAAAA=="
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
+    val connectionRepository = ConnectionRepository()
+    val webhookRepository = WebhookRepository()
+
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
+    val revocationMockedService = RevocationMockedService(NETWORK_ID)
+    val webhookService = IWebhookService.createWebhookService(webhookRepository)
     val utilsService = UtilsService(NETWORK_ID)
-    val walletService = AcaPyWalletServiceImpl(acaPyMockedService, walletRepository, credentialRepository, utilsService)
+
+    val walletService = AcaPyWalletServiceImpl(
+        acaPyMockedService, walletRepository,
+        credentialRepository, utilsService, revocationMockedService,
+        webhookService, connectionRepository
+    )
     val bpdService = BusinessPartnerDataMockedService()
 
     val EMPTY_ROLES_TOKEN = JwtConfigTest.makeToken(listOf())
@@ -59,7 +78,6 @@ object EnvironmentTestSetup {
             AuthorizationHandler.ROLE_UPDATE_WALLETS
         ), EXTRA_TEST_BPN
     )
-
 
     fun setupEnvironment(environment: ApplicationEnvironment) {
         val jdbcUrl = System.getenv("CX_DB_JDBC_URL") ?: "jdbc:sqlite:file:test?mode=memory&cache=shared"
@@ -88,6 +106,9 @@ object EnvironmentTestSetup {
 
             put("bpdm.pullDataAtHour", System.getenv("BPDM_PULL_DATA_AT_HOUR") ?: "23")
             put("bpdm.datapoolUrl", System.getenv("BPDM_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
+
+            put("revocation.baseUrl", System.getenv("REVOCATION_URL") ?: "http://0.0.0.0:8086")
+            put("revocation.createStatusListCredentialAtHour", System.getenv("REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR") ?: "3")
         }
         // just a keepAliveConnection
         DriverManager.getConnection(jdbcUrl)
@@ -97,6 +118,9 @@ object EnvironmentTestSetup {
         SingletonTestData.signCredentialResponse = ""
         SingletonTestData.isValidVerifiablePresentation = true
         SingletonTestData.isValidVerifiableCredential = true
+        SingletonTestData.credentialIndex = 1
+        SingletonTestData.revocationListName = UUID.randomUUID().toString()
+        SingletonTestData.encodedList = NONE_REVOKED_ENCODED_LIST
     }
 
     fun setupEnvironmentWithMissingRoleMapping(environment: ApplicationEnvironment) {
@@ -104,9 +128,9 @@ object EnvironmentTestSetup {
         (environment.config as MapApplicationConfig).apply {
             put(
                 "auth.roleMappings", value = System.getenv("CX_AUTH_ROLE_MAPPINGS")
-                    ?: "no_create_wallets:create_wallets,no_view_wallets:view_wallets," +
-                    "no_update_wallets:update_wallets,no_delete_wallets:delete_wallets," +
-                    "view_wallet:view_wallet,update_wallet:update_wallet"
+                    ?: ("no_create_wallets:create_wallets,no_view_wallets:view_wallets," +
+                            "no_update_wallets:update_wallets,no_delete_wallets:delete_wallets," +
+                            "view_wallet:view_wallet,update_wallet:update_wallet")
             )
         }
     }
@@ -117,6 +141,14 @@ object EnvironmentTestSetup {
             put(
                 "auth.roleMappings", value = System.getenv("CX_AUTH_ROLE_MAPPINGS") ?: roleMapping
             )
+        }
+    }
+
+    fun replaceWalletDid(bpn: String, desiredDid: String) {
+        transaction {
+                walletRepository.getWallet(bpn).apply {
+                did = desiredDid
+            }
         }
     }
 

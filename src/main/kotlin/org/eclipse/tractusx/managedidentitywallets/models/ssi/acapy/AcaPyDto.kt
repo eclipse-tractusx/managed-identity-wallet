@@ -211,3 +211,9 @@ data class DidEndpointWithType(
     val endpoint: String,
     @JsonProperty("endpoint_type") @SerialName("endpoint_type") val endpointType: String
 )
+
+@Serializable
+data class CredentialOfferResponse(
+    @JsonProperty("credential_offer") @SerialName("credential_offer") val credentialOffer: String,
+    @JsonProperty("threadId") @SerialName("threadId") val threadId: String
+)

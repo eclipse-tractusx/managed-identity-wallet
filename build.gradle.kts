@@ -59,7 +59,7 @@ dependencies {
     implementation("io.bkbn:kompendium-core:$kompendium_version")
     implementation("io.bkbn:kompendium-auth:$kompendium_version")
 
-    implementation("org.postgresql:postgresql:42.4.0")
+    implementation("org.postgresql:postgresql:42.4.1")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
 
     // for now: using kotlinx.serialization
@@ -73,6 +73,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
 
     implementation("decentralized-identity:did-common-java:1.0.0")
+    implementation("network.idu.acapy:aries-client-python:0.7.29")
 
     // https://mvnrepository.com/artifact/com.github.kagkarlsson/db-scheduler
     implementation("com.github.kagkarlsson:db-scheduler:11.2")

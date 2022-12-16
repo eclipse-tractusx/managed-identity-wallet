@@ -19,10 +19,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.persistence.repositories
 
-import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
-import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
-import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
-import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
 import org.jetbrains.exposed.sql.or
@@ -37,14 +34,28 @@ class WalletRepository {
     fun getWallet(identifier: String): Wallet {
         return Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }
             .firstOrNull()
-            ?: throw NotFoundException("Wallet with identifier $identifier not found")
+            ?: throw NotFoundException("Wallet with given identifier not found")
     }
 
     @Throws(ConflictException::class)
     fun checkWalletAlreadyExists(identifier: String) {
          if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
-             throw ConflictException("Wallet with identifier $identifier already exists!")
+             throw ConflictException("Wallet with given identifier already exists!")
          }
+    }
+
+    @Throws(NotFoundException::class, UnprocessableEntityException::class)
+    fun getSelfManagedWalletOrThrow(identifier: String): Wallet {
+        return transaction {
+            val wallet = Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.firstOrNull()
+            if (wallet == null) {
+                throw NotFoundException("Wallet with given identifier not found")
+            } else if (!wallet.walletId.isNullOrBlank()) {
+                throw UnprocessableEntityException("The Wallet with given identifier is not a self managed wallet")
+            } else {
+                wallet
+            }
+        }
     }
 
     fun addWallet(wallet: WalletExtendedData): Wallet {
@@ -57,6 +68,8 @@ class WalletRepository {
             walletKey = wallet.walletKey
             walletToken = wallet.walletToken
             createdAt = LocalDateTime.now()
+            revocationListName = wallet.revocationListName
+            pendingMembershipIssuance = wallet.pendingMembershipIssuance
         }
     }
 
@@ -65,11 +78,20 @@ class WalletRepository {
         return true
     }
 
+    fun updatePending(did: String, isPending: Boolean) {
+        getWallet(did).apply {
+            pendingMembershipIssuance = isPending
+        }
+    }
+
     fun toObject(entity: Wallet): WalletDto = entity.run {
-        WalletDto(name, bpn, did, null, createdAt, emptyList<VerifiableCredentialDto>().toMutableList())
+        WalletDto(name, bpn, did, null, createdAt,
+            emptyList<VerifiableCredentialDto>().toMutableList(), revocationListName,
+            pendingMembershipIssuance)
     }
 
     fun toWalletCompleteDataObject(entity: Wallet): WalletExtendedData = entity.run {
-        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey, walletToken)
+        WalletExtendedData(id.value, name, bpn, did, walletId, walletKey,
+            walletToken, revocationListName, pendingMembershipIssuance)
     }
 }
