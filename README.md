@@ -62,9 +62,9 @@ below. Here a few hints on how to set it up:
 | `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the catena-x endorser ACA-Py |
 | `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the catena-x endorser ACA-Py endpoints |
 | `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space |
-| `CX_BPN`                  | String | BPN of the catena-x base wallet |
-| `CX_DID`                  | String | BPN of the base wallet, this wallet is an endorser |
-| `CX_VERKEY`               | String | DID of the base wallet, this wallet is an endorser  |
+| `CX_BPN`                  | String | BPN of the catena-x wallet |
+| `CX_DID`                  | String | BPN of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
+| `CX_VERKEY`               | String | DID of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
 | `CX_NAME`                 | String | Name of the catena-x base wallet |
 | `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
 | `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |

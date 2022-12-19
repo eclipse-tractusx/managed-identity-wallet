@@ -28,6 +28,7 @@ services:
       - "8081:8080"
 
   # DID: ArqouCjqi4RwBXQqjAbQrG, Verkey: 6Ng3Cu39yTViaEUg1BETpze78nXZqHpb6Q783X2rRhe6
+  # This wallet must have the endorser role
   cx_base_acapy:
     image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
     container_name: cx_base_acapy
@@ -68,6 +69,7 @@ services:
         --log-level DEBUG"
     ]
 
+  # The management multi-tenancy wallet must be registered on ledger 
   cx_acapy:
     image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
     container_name: cx_acapy
@@ -116,6 +118,7 @@ services:
     ]
 
   # DID: 7rB93fLvW5kgujZ4E57ZxL, Verkey: 4jUUkyPCYXje9xadw63s59qfLZiC4Ad7StqncbkkXDvK
+  # must be registered on ledger and have an endpoint service a
   test_acapy:
     image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
     container_name: test_acapy
