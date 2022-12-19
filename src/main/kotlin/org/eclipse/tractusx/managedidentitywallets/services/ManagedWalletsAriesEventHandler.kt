@@ -73,7 +73,7 @@ class ManagedWalletsAriesEventHandler(
                     }
                     if (connection.theirRole == ConnectionTheirRole.INVITER && connection.alias == "endorser") {
                         walletService.setAuthorMetaData(walletId, connection.connectionId)
-                        walletService.setDidAsPublicWithEndorsement(walletId)
+                        walletService.setCommunicationEndpointUsingEndorsement(walletId)
                         revocationService.issueStatusListCredentials(
                             profileName = utilsService.getIdentifierOfDid(wallet.did),
                             force = true

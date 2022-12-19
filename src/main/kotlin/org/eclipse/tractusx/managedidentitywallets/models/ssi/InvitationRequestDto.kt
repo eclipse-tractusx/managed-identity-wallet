@@ -25,5 +25,5 @@ import kotlinx.serialization.Serializable
 data class InvitationRequestDto(
     val theirPublicDid: String,
     val alias: String?,
-    val myLable: String?
+    val myLabel: String?
 )

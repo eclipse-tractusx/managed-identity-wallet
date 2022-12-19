@@ -47,7 +47,7 @@ class BaseWalletAriesEventHandler(
     // Connection only with registered wallets
     override fun handleConnection(walletId: String?, connection: ConnectionRecord) {
         super.handleConnection(null, connection)
-        log.error("Connection ${connection.connectionId} is in state ${connection.rfc23State}")
+        log.debug("Connection ${connection.connectionId} is in state ${connection.rfc23State}")
         when(connection.rfc23State) {
             Rfc23State.REQUEST_RECEIVED.toString() -> {
                 //TODO accept only from whitelisted public DIDs

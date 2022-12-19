@@ -99,7 +99,7 @@ interface IAcaPyService {
         usePublicDid: Boolean,
         alias: String?,
         token: String?,
-        lable: String?
+        label: String?
     ): ConnectionRecord
 
     suspend fun getRequestedConnectionsToBaseWallet(): List<ConnectionRecord>

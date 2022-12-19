@@ -31,7 +31,6 @@ import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
-import org.hyperledger.acy_py.generated.model.DIDEndpointWithType
 import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.acy_py.generated.model.V20CredRequestRequest
 import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
@@ -343,7 +342,7 @@ class AcaPyService(
         usePublicDid: Boolean,
         alias: String?,
         token: String?,
-        lable: String?
+        label: String?
     ): ConnectionRecord {
         val ariesClient = getAcapyClient(token)
         val pendingCon: Optional<ConnectionRecord> = ariesClient.didExchangeCreateRequest(
@@ -351,7 +350,7 @@ class AcaPyService(
                 .builder()
                 .theirPublicDid(utilsService.replaceNetworkIdentifierWithSov(didOfTheirWallet))
                 .alias(alias)
-                .myLabel(lable)
+                .myLabel(label)
                 .usePublicDid(usePublicDid)
                 .build()
         )

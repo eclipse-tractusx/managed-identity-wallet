@@ -52,8 +52,8 @@ class AcaPyMockedService(
         return WalletAndAcaPyConfig(
             networkIdentifier = networkIdentifier,
             baseWalletBpn = baseWalletBpn,
-            baseWalletDID = "did",
-            baseWalletVerkey = "verkey",
+            baseWalletDID = EnvironmentTestSetup.DEFAULT_DID,
+            baseWalletVerkey = EnvironmentTestSetup.DEFAULT_VERKEY,
             apiAdminUrl = "",
             adminApiKey = "TestAdminApiKey",
             baseWalletAdminUrl = "",
@@ -140,6 +140,16 @@ class AcaPyMockedService(
 
     override suspend fun resolveDidDoc(did: String, token: String?): ResolutionResult {
         val metadata = ResolutionMetaData(resolverType = "", resolver = "", retrievedTime = "", duration = 0)
+        if (SingletonTestData.didDocWithoutService) {
+            return ResolutionResult(
+                didDoc = DidDocumentDto(
+                    id = did,
+                    context = emptyList(),
+                    services = emptyList()
+                ),
+                metadata = metadata
+            )
+        }
         for (key in didToVerKey.keys) {
             if (did == key) {
                 return ResolutionResult(
@@ -212,13 +222,9 @@ class AcaPyMockedService(
         )
     }
 
-    override suspend fun updateServiceOfBaseWallet(serviceEndPoint: DidEndpointWithType) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun updateServiceOfBaseWallet(serviceEndPoint: DidEndpointWithType) {  }
 
-    override suspend fun updateServiceUsingEndorsement(serviceEndPoint: DidEndpointWithType, token: String) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun updateServiceUsingEndorsement(serviceEndPoint: DidEndpointWithType, token: String) { }
 
     override fun subscribeBaseWalletForWebSocket() { }
 
@@ -244,9 +250,9 @@ class AcaPyMockedService(
         usePublicDid: Boolean,
         alias: String?,
         token: String?,
-        lable: String?
+        label: String?
     ): ConnectionRecord {
-        TODO("Not yet implemented")
+        return ConnectionRecord()
     }
 
     override suspend fun issuanceFlowCredentialSend(

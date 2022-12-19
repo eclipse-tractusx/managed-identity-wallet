@@ -7,7 +7,7 @@
 
 - Current limitation:
   - The managed wallets accept all invitations and credentials
-  - The managed wallets can issue credentials only to registierd wallets after a connection is established
+  - The managed wallets can issue credentials only to other managed or registered self-managed wallets after a connection is established
   - The issuer must be an Indy DID on the same ledger as the MIW
   - Credential revocation is not supported for credentials issued using the flows
 

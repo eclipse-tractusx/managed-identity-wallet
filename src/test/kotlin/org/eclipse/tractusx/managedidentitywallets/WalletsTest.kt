@@ -83,7 +83,7 @@ class WalletsTest {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.CREATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody("""{"bpn":"${EnvironmentTestSetup.DEFAULT_BPN}", "name": "name1"}""")
+                setBody("""{"bpn":"BPNL101", "name": "name1"}""")
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())
             }
@@ -97,7 +97,7 @@ class WalletsTest {
                 assertEquals(1, wallets.size)
             }
 
-            // create wallet (not Catena X)
+            // create second wallet
             handleRequest(HttpMethod.Post, "/api/wallets") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.CREATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -117,38 +117,40 @@ class WalletsTest {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                val wallets: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
+                val wallets: List<WalletDto> = Json.decodeFromString(ListSerializer(
+                    WalletDto.serializer()), response.content!!
+                )
                 assertEquals(3, wallets.size)
                 wallets.forEach {
-                    assertEquals(false, it.pendingMembershipIssuance)
+                    assertEquals(true, it.pendingMembershipIssuance)
                 }
             }
 
-            handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}") {
+            handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.EXTRA_TEST_BPN}") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 val wallet: WalletDto = Json.decodeFromString(WalletDto.serializer(), response.content!!)
-                assertEquals(EnvironmentTestSetup.DEFAULT_BPN, wallet.bpn)
+                assertEquals(EnvironmentTestSetup.EXTRA_TEST_BPN, wallet.bpn)
             }
 
-            val walletDtoParameter = WalletDtoParameter(EnvironmentTestSetup.DEFAULT_BPN, true)
-            assertEquals(EnvironmentTestSetup.DEFAULT_BPN, walletDtoParameter.identifier)
+            val walletDtoParameter = WalletDtoParameter(EnvironmentTestSetup.EXTRA_TEST_BPN, true)
+            assertEquals(EnvironmentTestSetup.EXTRA_TEST_BPN, walletDtoParameter.identifier)
             assertTrue { walletDtoParameter.withCredentials }
             // Get wallet with Cred
-            handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}?withCredentials=true") {
+            handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.EXTRA_TEST_BPN}?withCredentials=true") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.VIEW_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 val wallet: WalletDto = Json.decodeFromString(WalletDto.serializer(), response.content!!)
-                assertEquals(EnvironmentTestSetup.DEFAULT_BPN, wallet.bpn)
+                assertEquals(EnvironmentTestSetup.EXTRA_TEST_BPN, wallet.bpn)
                 assertTrue { wallet.vcs.isEmpty() }
             }
 
             // delete wallet from the store
-            handleRequest(HttpMethod.Delete, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}") {
+            handleRequest(HttpMethod.Delete, "/api/wallets/BPNL101") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.DELETE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
@@ -294,7 +296,7 @@ class WalletsTest {
     }
 
     @Test
-    fun testRegisterBaseWallet() {
+    fun testInitCatenaXWallet() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
@@ -312,70 +314,39 @@ class WalletsTest {
             Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
-            var verKey: String
-
-            // programmatically add base wallet and an additional one
             runBlocking {
-                val createdWallet = EnvironmentTestSetup.walletService.createWallet(
-                    WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "base")
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "CatenaX"
                 )
-                verKey = createdWallet.verKey!!
-                EnvironmentTestSetup.walletService.createWallet(WalletCreateDto("non_base_bpn", "non_base"))
             }
 
             val didOfWallet = EnvironmentTestSetup.walletService.getDidFromBpn(EnvironmentTestSetup.DEFAULT_BPN)
             val bpnOfWallet = EnvironmentTestSetup.walletService.getBpnFromDid(didOfWallet)
-            assertTrue { bpnOfWallet ==EnvironmentTestSetup.DEFAULT_BPN}
+            assertTrue { bpnOfWallet == EnvironmentTestSetup.DEFAULT_BPN}
             var bpnOfWalletUsingIdentifier = EnvironmentTestSetup.walletService.getBpnFromIdentifier(didOfWallet)
-            assertTrue { bpnOfWalletUsingIdentifier ==EnvironmentTestSetup.DEFAULT_BPN}
+            assertTrue { bpnOfWalletUsingIdentifier == EnvironmentTestSetup.DEFAULT_BPN}
             bpnOfWalletUsingIdentifier = EnvironmentTestSetup.walletService.getBpnFromIdentifier(EnvironmentTestSetup.DEFAULT_BPN)
-            assertTrue { bpnOfWalletUsingIdentifier ==EnvironmentTestSetup.DEFAULT_BPN}
+            assertTrue { bpnOfWalletUsingIdentifier == EnvironmentTestSetup.DEFAULT_BPN}
 
-            var exception = assertFailsWith<NotFoundException> {
-                handleRequest(HttpMethod.Post, "/api/wallets/non_existing_bpn/public") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
-                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody("{\"verKey\":\"$verKey\"}")
-                }.apply {
-                    assertEquals(HttpStatusCode.NotFound, response.status())
-                }
-            }
-            assertTrue(exception.message!!.contains("not found"))
-
-            exception = assertFailsWith<NotFoundException> {
-                handleRequest(HttpMethod.Post, "/api/wallets/non_base_bpn/public") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
-                    addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody("{\"verKey\":\"$verKey\"}")
-                }.apply {
-                    assertEquals(HttpStatusCode.NotFound, response.status())
-                }
-            }
-            assertTrue(exception.message!!.contains("wallet but the base wallet"))
-
-            handleRequest(HttpMethod.Post, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}/public") {
-                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody("{\"verKey\":\"$verKey\"}")
-            }.apply {
-                assertEquals(HttpStatusCode.Created, response.status())
-            }
+            val wallet = EnvironmentTestSetup.walletService.getCatenaXWallet()
+            assertTrue { wallet.bpn == EnvironmentTestSetup.DEFAULT_BPN }
+            assertTrue { wallet.did == EnvironmentTestSetup.DEFAULT_DID }
+            assertNull(wallet.walletId )
 
             // clean up created wallets
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN) // base wallet
-                EnvironmentTestSetup.walletService.deleteWallet("non_base_bpn")
                 assertEquals(0, EnvironmentTestSetup.walletService.getAll().size)
             }
-
         }
     }
 
+
     @Test
-    fun testCreateWalletWithLedgerTypePublic() {
+    fun testCreateWalletCalls() { // same as public
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
@@ -385,34 +356,18 @@ class WalletsTest {
                     val acapyService = mock<IAcaPyService>()
                     whenever(acapyService.getWalletAndAcaPyConfig()).thenReturn(
                         WalletAndAcaPyConfig(
-                            "adminUrl",
                             "networkId",
                             EnvironmentTestSetup.DEFAULT_BPN,
-                            "adminApiKey",
-                            "public",
-                            "url",
+                            EnvironmentTestSetup.DEFAULT_DID,
+                            EnvironmentTestSetup.DEFAULT_VERKEY,
+                            "apiAdminUrl",
+                            "AdminApiKey",
                             "",
-                            ""
+                            "",
                         )
                     )
-                    whenever(acapyService.createSubWallet(any())).thenReturn(
-                        CreatedSubWalletResult(
-                            "createdAt",
-                            "wallet_id_catenaX",
-                            "managed",
-                            "updated_at",
-                            WalletSettings(
-                                "askar",
-                                "catenXWallet",
-                                emptyList(),
-                                "base",
-                                "wallet_id_catenaX",
-                                "lable",
-                                ""
-                            ),
-                            "wallet_token_catenaX"
-                        )
-                    ).thenReturn(
+                    whenever(acapyService.createSubWallet(any()))
+                    .thenReturn(
                         CreatedSubWalletResult(
                             "createdAt",
                             "wallet_id_extrawallet",
@@ -432,128 +387,6 @@ class WalletsTest {
                     )
 
                     whenever(acapyService.createLocalDidForWallet(any(), any()))
-                        .thenReturn(
-                            DidResult(
-                                DidResultDetails(
-                                    "catenax1did", "", "", "", "verkey_catenax"
-                                )
-                            )
-                        )
-                        .thenReturn(
-                            DidResult(
-                                DidResultDetails(
-                                 "extrawallet1did", "", "", "", "verkey_extrawallet"
-                                )
-                            )
-                        )
-
-                    whenever(acapyService.subscribeBaseWalletForWebSocket()).thenAnswer {  }
-                    val walletRepository = WalletRepository()
-                    val connectionRepository = ConnectionRepository()
-                    val credentialRepository = CredentialRepository()
-                    val utilsService = UtilsService("")
-                    val revocationService = mock<IRevocationService>()
-                    whenever(revocationService.registerList(any(), any()))
-                        .thenReturn("revocation-list-${EnvironmentTestSetup.DEFAULT_BPN}")
-                        .thenReturn("revocation-list-${EnvironmentTestSetup.EXTRA_TEST_BPN}")
-                    whenever(revocationService.issueStatusListCredentials(any(), any())).thenReturn(Unit)
-                    val webhookService = mock<IWebhookService>()
-                    val walletService = AcaPyWalletServiceImpl(
-                        acapyService,
-                        walletRepository,
-                        credentialRepository,
-                        utilsService,
-                        revocationService,
-                        webhookService,
-                        connectionRepository
-                    )
-                    val walletServiceSpy = spy(walletService)
-
-                    walletServiceSpy.createWallet(
-                        WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "catenaX")
-                    )
-                    walletServiceSpy.createWallet(
-                        WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "extraWallet")
-                    )
-                    var listOfWallets = walletServiceSpy.getAll()
-                    assertEquals(2, listOfWallets.size)
-                    assertEquals("did:sov:catenax1did", listOfWallets[0].did)
-                    assertEquals("did:sov:extrawallet1did", listOfWallets[1].did)
-
-                    walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
-                    walletService.deleteWallet(EnvironmentTestSetup.EXTRA_TEST_BPN)
-                    listOfWallets = walletServiceSpy.getAll()
-                    assertEquals(0, listOfWallets.size)
-                }
-            }
-        }
-    }
-
-    @Test
-    fun testCreateWalletWithLedgerTypeIdunion() { // same as public
-        withTestApplication({
-            EnvironmentTestSetup.setupEnvironment(environment)
-            configurePersistence()
-        }) {
-            transaction {
-                runBlocking {
-                    val acapyService = mock<IAcaPyService>()
-                    whenever(acapyService.getWalletAndAcaPyConfig()).thenReturn(
-                        WalletAndAcaPyConfig(
-                            "adminUrl",
-                            "networkId",
-                            EnvironmentTestSetup.DEFAULT_BPN,
-                            "adminApiKey",
-                            "idunion",
-                            "url",
-                            "",
-                            "",
-                        )
-                    )
-                    whenever(acapyService.createSubWallet(any())).thenReturn(
-                        CreatedSubWalletResult(
-                            "createdAt",
-                            "wallet_id_catenaX",
-                            "managed",
-                            "updated_at",
-                            WalletSettings(
-                                "askar",
-                                "catenXWallet",
-                                emptyList(),
-                                "base",
-                                "wallet_id_catenaX",
-                                "lable",
-                                ""
-                            ),
-                            "wallet_token_catenaX"
-                        )
-                    ).thenReturn(
-                        CreatedSubWalletResult(
-                            "createdAt",
-                            "wallet_id_extrawallet",
-                            "managed",
-                            "updated_at",
-                            WalletSettings(
-                                "askar",
-                                "extraWallet",
-                                emptyList(),
-                                "base",
-                                "wallet_id_extrawallet",
-                                "lable",
-                                ""
-                            ),
-                            "wallet_token_extrawallet"
-                        )
-                    )
-
-                    whenever(acapyService.createLocalDidForWallet(any(), any()))
-                        .thenReturn(
-                            DidResult(
-                                DidResultDetails(
-                                    "catenax1did", "", "", "", "verkey_catenax"
-                                )
-                            )
-                        )
                         .thenReturn(
                             DidResult(
                                 DidResultDetails(
@@ -561,16 +394,17 @@ class WalletsTest {
                                 )
                             )
                         )
-                    whenever(acapyService.subscribeBaseWalletForWebSocket()).thenAnswer {  }
+                    whenever(acapyService.registerDidOnLedgerUsingBaseWallet(any()))
+                        .thenAnswer {  }
+                    whenever(acapyService.sendConnectionRequest(any(), any(), any(), any(), any()))
+                        .thenAnswer {  }
                     val walletRepository = WalletRepository()
                     val connectionRepository = ConnectionRepository()
                     val credentialRepository = CredentialRepository()
                     val utilsService = UtilsService("")
                     val revocationService = mock<IRevocationService>()
                     whenever(revocationService.registerList(any(), any()))
-                        .thenReturn("revocation-list-${EnvironmentTestSetup.DEFAULT_BPN}")
                         .thenReturn("revocation-list-${EnvironmentTestSetup.EXTRA_TEST_BPN}")
-                    whenever(revocationService.issueStatusListCredentials(any(), any())).thenReturn(Unit)
                     val webhookService = mock<IWebhookService>()
                     val walletService = AcaPyWalletServiceImpl(
                         acapyService,
@@ -583,16 +417,26 @@ class WalletsTest {
                     )
                     val walletServiceSpy = spy(walletService)
 
-                    walletServiceSpy.createWallet(
-                        WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "catenaX")
+                    EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                        EnvironmentTestSetup.DEFAULT_BPN,
+                        EnvironmentTestSetup.DEFAULT_DID,
+                        EnvironmentTestSetup.DEFAULT_VERKEY,
+                        "CatenaX"
                     )
+
                     walletServiceSpy.createWallet(
                         WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "extraWallet")
                     )
                     var listOfWallets = walletServiceSpy.getAll()
                     assertEquals(2, listOfWallets.size)
-                    assertEquals("did:sov:catenax1did", listOfWallets[0].did)
                     assertEquals("did:sov:extrawallet1did", listOfWallets[1].did)
+
+                    verify(acapyService, times(1)).createSubWallet(any())
+                    verify(acapyService, times(1)).createLocalDidForWallet(any(), any())
+                    verify(acapyService, times(1)).registerDidOnLedgerUsingBaseWallet(any())
+                    verify(acapyService, times(1)).sendConnectionRequest(
+                        any(), any(), any(), any(), any()
+                    )
 
                     walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
                     walletService.deleteWallet(EnvironmentTestSetup.EXTRA_TEST_BPN)

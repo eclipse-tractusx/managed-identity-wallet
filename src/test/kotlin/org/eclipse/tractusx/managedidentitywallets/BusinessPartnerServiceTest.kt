@@ -29,7 +29,6 @@ import okhttp3.internal.toImmutableList
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
@@ -58,10 +57,10 @@ class BusinessPartnerServiceTest {
         id = 1,
         name = "CatenaX_Wallet",
         bpn = EnvironmentTestSetup.DEFAULT_BPN,
-        did = "did:sov:catenax1",
-        walletId = "walletId",
-        walletKey = "walletKey",
-        walletToken = "walletToken",
+        did = EnvironmentTestSetup.DEFAULT_DID,
+        walletId = null,
+        walletKey = null,
+        walletToken = null,
         revocationListName = null,
         pendingMembershipIssuance = false
     )
@@ -110,15 +109,6 @@ class BusinessPartnerServiceTest {
         clientSecret = "test",
         grantType = "test",
         scope = "test",
-    )
-
-    private val walletAcapyConfig = WalletAndAcaPyConfig(
-        apiAdminUrl = "test",
-        networkIdentifier = "",
-        baseWalletBpn = issuerWallet.bpn,
-        adminApiKey = "",
-        ledgerType = "",
-        ledgerRegistrationUrl = "closed"
     )
 
     private val bpnSubject = mapOf(
@@ -286,9 +276,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init services and mocks
-                addWallets(walletRepo, listOf( issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acapyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acapyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acapyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acapyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -297,15 +290,13 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 val walletServiceSpy = spy(walletService)
-                doReturn(
-                    catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWallet()
-                val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
                     client
                 )
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+                val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 val listOfCredentialIds = listOf(
                     "urn:uuid:93731387-dec1-4bf6-8087-d5210f771421",
                     "urn:uuid:93731387-dec1-4bf6-8087-d5210f771422",
@@ -379,9 +370,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init services and mocks
-                addWallets(walletRepo, listOf( issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -390,9 +384,7 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 val walletServiceSpy = spy(walletService)
-                doReturn(
-                    catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWallet()
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
@@ -452,7 +444,7 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create wallets and connection, init services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, selfManagedWallet))
+
                 addConnection(
                     connectionRepository,
                     Rfc23State.COMPLETED.toString(),
@@ -462,8 +454,17 @@ class BusinessPartnerServiceTest {
                 )
                 val acapyServiceMocked = mock<AcaPyService>()
                 whenever(acapyServiceMocked.getWalletAndAcaPyConfig()).thenReturn(
-                    walletAcapyConfig
+                    EnvironmentTestSetup.walletAcapyConfig
                 )
+                doNothing().whenever(acapyServiceMocked).subscribeBaseWalletForWebSocket()
+
+                // Mock credential exchange offer
+                val threadId = "thread-id"
+                val v20CredentialExchange = createCredentialExchange(threadId)
+                whenever(acapyServiceMocked.issuanceFlowCredentialSend(anyOrNull(), any()))
+                    .doReturn(v20CredentialExchange)
+
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
                 walletService = AcaPyWalletServiceImpl(
                     acaPyService = acapyServiceMocked,
                     walletRepository = walletRepo,
@@ -474,9 +475,7 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 val walletServiceSpy = spy(walletService)
-                doReturn(
-                    catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWallet()
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, selfManagedWallet))
                 val selfManagedWalletDto = walletService.getWallet(selfManagedWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
@@ -495,12 +494,7 @@ class BusinessPartnerServiceTest {
                     )
                 ).whenever(walletServiceSpy).issueCatenaXCredential(any())
 
-                // Mock credential exchange offer
-                val threadId = "thread-id"
-                val v20CredentialExchange = createCredentialExchange(threadId)
-                doReturn(
-                    v20CredentialExchange
-                ).whenever(acapyServiceMocked).issuanceFlowCredentialSend(any(), any())
+
 
                 // Test `issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync`
                 bpdmService.issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
@@ -535,9 +529,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init Services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -573,9 +570,7 @@ class BusinessPartnerServiceTest {
                     expectSuccess = false
                 }
                 val walletServiceSpy = spy(walletService)
-                doReturn(
-                    catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWallet()
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -624,9 +619,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init Services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -638,9 +636,7 @@ class BusinessPartnerServiceTest {
                     expectSuccess = false
                 }
                 val walletServiceSpy = spy(walletService)
-                doReturn(
-                    catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWallet()
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -694,13 +690,19 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create wallet and connection, init services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, selfManagedWallet))
                 addConnection(
-                    connectionRepository, Rfc23State.COMPLETED.toString(),
-                    connectionId, issuerWallet.did, selfManagedWallet.did
+                    connectionRepository = connectionRepository,
+                    state = Rfc23State.COMPLETED.toString(),
+                    connectionId = connectionId,
+                    myDid = issuerWallet.did,
+                    theirDid = selfManagedWallet.did
                 )
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -709,6 +711,7 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 val walletServiceSpy = spy(walletService)
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, selfManagedWallet))
                 doReturn(
                     catenaXWallet
                 ).whenever(walletServiceSpy).getCatenaXWallet()
@@ -770,9 +773,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create wallets, init Services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -781,9 +787,7 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 var walletServiceSpy = spy(walletService)
-                doReturn(
-                    catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWallet()
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 doAnswer { null }.whenever(walletServiceSpy).revokeVerifiableCredential(any())
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
@@ -802,7 +806,7 @@ class BusinessPartnerServiceTest {
                     any(),
                 )
                 // Store mocked credential in DB. This credential is not equal to the pulled data from Bpdm
-                var credentialId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f771421"
+                val credentialId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f771421"
                 transaction {
                     // not equal to the pulled data
                     walletService.storeCredential(
@@ -816,7 +820,7 @@ class BusinessPartnerServiceTest {
                             type = listOf(JsonLdTypes.NAME_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
                             issuanceDate = "2021-06-16T18:56:59Z",
                             expirationDate = "2026-06-17T18:56:59Z",
-                            issuer = "${issuerWallet.did}",
+                            issuer = issuerWallet.did,
                             credentialSubject = newNameSubject,
                             credentialStatus = null,
                             proof = LdProofDto(
@@ -894,10 +898,21 @@ class BusinessPartnerServiceTest {
         return v20CredentialExchange
     }
 
-    private fun addWallets(walletRepo: WalletRepository, wallets: List<WalletExtendedData>) {
+    private fun addWallets(walletRepo: WalletRepository, walletService: IWalletService, wallets: List<WalletExtendedData>) {
         transaction {
             wallets.forEach {
-                walletRepo.addWallet(it)
+                if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
+                    runBlocking {
+                        walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                            EnvironmentTestSetup.DEFAULT_BPN,
+                            EnvironmentTestSetup.DEFAULT_DID,
+                            EnvironmentTestSetup.DEFAULT_VERKEY,
+                            "Catena-X-Wallet"
+                        )
+                    }
+                } else {
+                    walletRepo.addWallet(it)
+                }
             }
         }
     }
@@ -911,10 +926,10 @@ class BusinessPartnerServiceTest {
     ) {
         transaction {
             connectionRepository.add(
-                connectionId,
-                myDid,
-                theirDid,
-                state
+                idOfConnection = connectionId,
+                connectionTargetDid = theirDid,
+                connectionOwnerDid = myDid,
+                rfc23State = state
             )
         }
     }

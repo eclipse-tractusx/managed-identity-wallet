@@ -133,17 +133,21 @@ revocation handling)
 
 With the following steps you can explore the API 
 
-1. Start Postman and add the environment and the collection from ./dev-assets/
+1. Start Postman and add the environment `custodian-local.postman_environment` and the collection `Custodian Sample.postman_collection` from ./dev-assets/
     1. In the added environment make sure that the client_id and client_secret are the same as in your `dev.env` configuration.
 
     1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is temporary until the update to Ktor 2.x
+
+1. The two Postman collections `Cx_Base_Wallet_Acapy.postman_collection` and `Managed_Wallets_Acapy.postman_collection` are additional for debugging purposes. these collections include direct calls to the admin API of the Catena-X AcaPy instance and the Multi-tenancy AcaPy instance.
+
+1. The Postman collection `Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` sends requests to the external AcaPy instance that simulate an external wallet or self managed wallet.
 
 1. :tada: **Second milestone reached: Your own wallet!**
 
 Now you have achieved the following:
 
 * set up the development environment to run it from source
-* created your own wallet and published your DID to the ledger
+* initialized the catena-x wallet and its revocation list
 * you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
 
 ## Setup Summary

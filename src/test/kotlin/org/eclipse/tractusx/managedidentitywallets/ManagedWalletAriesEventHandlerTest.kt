@@ -25,7 +25,6 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
@@ -37,6 +36,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.kotlin.*
 import java.io.File
+import java.util.*
 import kotlin.test.*
 
 @kotlinx.serialization.ExperimentalSerializationApi
@@ -46,10 +46,10 @@ class ManagedWalletAriesEventHandlerTest {
         id = 1,
         name = "CatenaX_Wallet",
         bpn = EnvironmentTestSetup.DEFAULT_BPN,
-        did = "did:sov:catenax1",
-        walletId = "walletId_catenaX1",
-        walletKey = "walletKey_catenaX1",
-        walletToken = "walletToken_catenaX1",
+        did = EnvironmentTestSetup.DEFAULT_DID,
+        walletId = null,
+        walletKey = null,
+        walletToken = null,
         revocationListName = null,
         pendingMembershipIssuance = false
     )
@@ -92,17 +92,18 @@ class ManagedWalletAriesEventHandlerTest {
         bpdServiceMocked = mock<IBusinessPartnerDataService>()
         webhookServiceMocked = mock<IWebhookService>()
         revocationServiceMocked = mock<IRevocationService>()
+        runBlocking {
+            whenever(revocationServiceMocked.issueStatusListCredentials(anyOrNull(), anyOrNull())).doAnswer{ }
+            whenever(revocationServiceMocked.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+        }
         acaPyServiceMocked = mock<IAcaPyService>()
-        whenever(acaPyServiceMocked.getWalletAndAcaPyConfig()).thenReturn(
-            WalletAndAcaPyConfig(
-                "adminUrl",
-                "networkId",
-                issuerWallet.bpn,
-                "adminApiKey",
-                "closed",
-                "url"
-                )
-        )
+        whenever(acaPyServiceMocked.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+        doNothing().whenever(acaPyServiceMocked).subscribeBaseWalletForWebSocket()
+        runBlocking {
+            whenever(acaPyServiceMocked.setAuthorRoleAndInfoMetaData(any(), any(), any())).doAnswer{ }
+            whenever(acaPyServiceMocked.setDidAsPublicUsingEndorser(any(), any())).doAnswer{ }
+        }
+
         runBlocking {
             val connectionRecord = ConnectionRecord()
             connectionRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
@@ -119,9 +120,6 @@ class ManagedWalletAriesEventHandlerTest {
             connectionRepository
         )
         walletServiceSpy = spy(walletService)
-        runBlocking {
-            doReturn(issuerWallet).whenever(walletServiceSpy).getCatenaXWallet()
-        }
     }
 
     @Test
@@ -136,6 +134,7 @@ class ManagedWalletAriesEventHandlerTest {
                 walletServiceSpy,
                 bpdServiceMocked,
                 revocationServiceMocked,
+                webhookServiceMocked,
                 utilsService
             )
             configureSerialization()
@@ -164,15 +163,17 @@ class ManagedWalletAriesEventHandlerTest {
         }) {
             runBlocking {
                 // Setup
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
 
                 // Mock acceptInvitationRequest call to Acapy Service
                 val connectionRecord  = ConnectionRecord()
                 connectionRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
                 doAnswer { connectionRecord }
-                    .whenever(acaPyServiceMocked).acceptConnectionRequest(any(), any())
+                    .whenever(acaPyServiceMocked).acceptConnectionRequest(any(), anyOrNull())
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
                     walletService = walletServiceSpy,
+                    revocationService = revocationServiceMocked,
+                    webhookService = webhookServiceMocked,
                     utilsService = utilsService
                 )
                 // Test `handleEvent` for connection with rfc23 state request-received
@@ -217,6 +218,68 @@ class ManagedWalletAriesEventHandlerTest {
     }
 
     @Test
+    fun testHandleAriesEventsConnectionsFromEndorser() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+            configureSerialization()
+        }) {
+            runBlocking {
+                // Setup
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+
+                val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
+                    walletService = walletServiceSpy,
+                    revocationService = revocationServiceMocked,
+                    webhookService = webhookServiceMocked,
+                    utilsService = utilsService
+                )
+
+                transaction {
+                    connectionRepository.add(
+                        idOfConnection = connectionId,
+                        connectionOwnerDid = holderWallet.did,
+                        connectionTargetDid = issuerWallet.did,
+                        rfc23State = "request-received"
+                    )
+                }
+
+                // Test `handleEvent` for connection with rfc23 state completed
+                assertDoesNotThrow {
+                    managedWalletAriesEventHandler.handleEvent(
+                        holderWallet.walletId,
+                        "connections",
+                        """
+                            {
+                                "rfc23_state":"completed",
+                                "connection_id":"$connectionId",
+                                "their_did":"${utilsService.getIdentifierOfDid(issuerWallet.did)}",
+                                "their_role":"inviter",
+                                "alias":"endorser"
+                            }
+                        """.trimIndent()
+                    )
+                }
+                //verify(walletServiceSpy, times(1)).addConnection(any(), any(), any(), any())
+                verify(walletServiceSpy, times(1)).setAuthorMetaData(any(), any())
+                verify(walletServiceSpy, times(1)).setCommunicationEndpointUsingEndorsement(any())
+                transaction {
+                    val connections = connectionRepository.getConnections(holderWallet.did, issuerWallet.did)
+                    assertEquals(1, connections.size)
+                    assertEquals(connectionId, connections[0].connectionId)
+                }
+
+                // clean data
+                transaction {
+                    walletRepo.deleteWallet(issuerWallet.bpn)
+                    walletRepo.deleteWallet(holderWallet.bpn)
+                    connectionRepository.deleteConnections(holderWallet.did)
+                }
+            }
+        }
+    }
+
+    @Test
     fun testHandleAriesEventsCredentials() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
@@ -225,7 +288,7 @@ class ManagedWalletAriesEventHandlerTest {
         }) {
             runBlocking {
                 // Setup
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
 
                 // Mock calls to AcaPy Service
                 whenever(acaPyServiceMocked.acceptCredentialOfferBySendingRequest(any(), any(), any()))
@@ -235,6 +298,8 @@ class ManagedWalletAriesEventHandlerTest {
 
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
                     walletService = walletServiceSpy,
+                    revocationService = revocationServiceMocked,
+                    webhookService = webhookServiceMocked,
                     utilsService = utilsService
                 )
                 // Test `handleEvent` for connection
@@ -279,10 +344,25 @@ class ManagedWalletAriesEventHandlerTest {
         }
     }
 
-    private fun addWallets(walletRepo: WalletRepository, wallets: List<WalletExtendedData>) {
+    private fun addWallets(
+        walletRepo: WalletRepository,
+        walletService: IWalletService,
+        wallets: List<WalletExtendedData>
+    ) {
         transaction {
             wallets.forEach {
-                walletRepo.addWallet(it)
+                if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
+                    runBlocking {
+                        walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                            EnvironmentTestSetup.DEFAULT_BPN,
+                            EnvironmentTestSetup.DEFAULT_DID,
+                            EnvironmentTestSetup.DEFAULT_VERKEY,
+                            "Catena-X-Wallet"
+                        )
+                    }
+                } else {
+                    walletRepo.addWallet(it)
+                }
             }
         }
     }

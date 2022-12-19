@@ -61,7 +61,8 @@ class SelfManagedInteractionTest {
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
             appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
-                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -72,10 +73,14 @@ class SelfManagedInteractionTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                val baseWallet = EnvironmentTestSetup.walletService.createWallet(
-                    WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name1")
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X"
                 )
-                SingletonTestData.baseWalletDID = baseWallet.did
+
+                SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
                 SingletonTestData.connectionId = "123"
                 SingletonTestData.threadId = "456"
             }

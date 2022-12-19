@@ -145,7 +145,7 @@ interface IWalletService {
 
     suspend fun sendInvitation(identifier: String, invitationRequestDto: InvitationRequestDto)
 
-    suspend fun setDidAsPublicWithEndorsement(walletId: String)
+    suspend fun setCommunicationEndpointUsingEndorsement(walletId: String)
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)

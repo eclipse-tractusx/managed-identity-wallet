@@ -168,7 +168,7 @@ class AcaPyWalletServiceImpl(
             usePublicDid = false,
             alias = "endorser",
             token = createdSubWalletDto.token,
-            lable = walletToCreate.bpn
+            label = walletToCreate.bpn
         )
 
         return WalletDto(
@@ -395,7 +395,7 @@ class AcaPyWalletServiceImpl(
         log.debug("Issue Presentation $vpRequest")
         val holderWalletData = getWalletExtendedInformation(vpRequest.holderIdentifier)
         val holderDid = holderWalletData.did
-        val token = holderWalletData.walletToken!!
+        val token = holderWalletData.walletToken
         val verificationMethod = getVerificationMethod(vpRequest.holderIdentifier, 0)
         if (withCredentialsValidation) {
             vpRequest.verifiableCredentials.forEach {
@@ -439,27 +439,24 @@ class AcaPyWalletServiceImpl(
                 }
             }
         }
-        try {
-            if (isCatenaXWallet(walletData.bpn)) {
-                acaPyService.updateServiceOfBaseWallet(
-                    DidEndpointWithType(
-                        didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
-                        endpoint = serviceDto.serviceEndpoint,
-                        endpointType = utilsService.mapServiceTypeToEnum(serviceDto.type)
-                    )
+
+        if (isCatenaXWallet(walletData.bpn)) {
+            acaPyService.updateServiceOfBaseWallet(
+                DidEndpointWithType(
+                    didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
+                    endpoint = serviceDto.serviceEndpoint,
+                    endpointType = utilsService.mapServiceTypeToEnum(serviceDto.type)
                 )
-            } else {
-                acaPyService.updateServiceUsingEndorsement(
-                    DidEndpointWithType(
-                        didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
-                        endpoint = serviceDto.serviceEndpoint,
-                        endpointType = utilsService.mapServiceTypeToEnum(serviceDto.type)
-                    ),
-                    walletData.walletToken!!
-                )
-            }
-        } catch (e: Exception) {
-            throw BadRequestException("Add Service failed with error ${e.message}")
+            )
+        } else {
+            acaPyService.updateServiceUsingEndorsement(
+                DidEndpointWithType(
+                    didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
+                    endpoint = serviceDto.serviceEndpoint,
+                    endpointType = utilsService.mapServiceTypeToEnum(serviceDto.type)
+                ),
+                walletData.walletToken!!
+            )
         }
     }
 
@@ -760,7 +757,7 @@ class AcaPyWalletServiceImpl(
         verifyPropertiesOfCredentialStatus(vc.id, vc.credentialStatus)
 
         validateVerifiableCredential(vc,
-            withDateValidation = false, withRevocationCheck = false, walletOfIssuer.walletToken!!)
+            withDateValidation = false, withRevocationCheck = false, walletOfIssuer.walletToken)
 
         val profileName = utilsService.getIdentifierOfDid(walletOfIssuer.did)
         revocationService.revoke(
@@ -1006,7 +1003,7 @@ class AcaPyWalletServiceImpl(
     }
 
 
-    override suspend fun setDidAsPublicWithEndorsement(
+    override suspend fun setCommunicationEndpointUsingEndorsement(
         walletId: String
     ) {
         val walletExtendedData = getWalletExtendedInformation(walletId)
@@ -1035,7 +1032,7 @@ class AcaPyWalletServiceImpl(
             usePublicDid = true,
             alias = invitationRequestDto.alias,
             token = extendedData.walletToken,
-            lable = invitationRequestDto.myLable,
+            label = invitationRequestDto.myLabel,
         )
         transaction {
             addConnection(
