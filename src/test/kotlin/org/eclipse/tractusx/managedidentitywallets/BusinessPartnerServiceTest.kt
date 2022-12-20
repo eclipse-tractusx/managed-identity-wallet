@@ -786,7 +786,7 @@ class BusinessPartnerServiceTest {
                     webhookService = webhookService,
                     connectionRepository = connectionRepository
                 )
-                var walletServiceSpy = spy(walletService)
+                val walletServiceSpy = spy(walletService)
                 addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 doAnswer { null }.whenever(walletServiceSpy).revokeVerifiableCredential(any())
                 val client = HttpClient(mockEngine) {

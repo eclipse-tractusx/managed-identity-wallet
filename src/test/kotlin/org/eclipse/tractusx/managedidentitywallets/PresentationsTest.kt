@@ -24,7 +24,6 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
@@ -83,10 +82,9 @@ class PresentationsTest {
                 SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
             }
 
-            val networkId = EnvironmentTestSetup.NETWORK_ID
             val invalidDID = SingletonTestData.baseWalletDID
                 .replace(
-                    "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}",
+                    SingletonTestData.getDidMethodPrefixWithNetworkIdentifier(),
                     "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()} WRONG"
                 )
             val verifiablePresentationRequestWithInvalidDIDs = VerifiablePresentationRequestDto(
@@ -663,7 +661,7 @@ class PresentationsTest {
             }
 
             val vpWithPlaceholders = File("./src/test/resources/presentations-test-data/vpWithPlaceholders.json").readText(Charsets.UTF_8)
-            var validVp = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            val validVp = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
@@ -727,7 +725,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid 'statusPurpose'"))
             }
 
-            var vpWithEmptyStatusListIndex =
+            val vpWithEmptyStatusListIndex =
                 vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>",
@@ -745,7 +743,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid 'statusListIndex'"))
             }
 
-            var vpWithEmptyStatusListUrl = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            val vpWithEmptyStatusListUrl = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>", "  ")
                 .replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
@@ -761,7 +759,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid 'statusListCredential'"))
             }
 
-            var vpWithIssuerConflict =
+            val vpWithIssuerConflict =
                 vpWithPlaceholders.replace("<issuer-to-replace>",
                     "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}AA5EEDcn8yTfMobaTcabj9")
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)

@@ -227,9 +227,8 @@ class ApplicationTest {
             }
 
             // programmatically add base wallet
-            val walletVerifyKey: String?
             runBlocking {
-                walletVerifyKey = EnvironmentTestSetup.walletService.createWallet(
+                 EnvironmentTestSetup.walletService.createWallet(
                     WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name1")).verKey
             }
 
