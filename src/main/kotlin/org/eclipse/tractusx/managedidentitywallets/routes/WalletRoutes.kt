@@ -301,7 +301,7 @@ val exampleInvitation = mapOf(
     "demo" to InvitationRequestDto(
         theirPublicDid = "did:sov:example",
         alias = "alias",
-        myLabel = "myLable"
+        myLabel = "myLabel"
     )
 )
 

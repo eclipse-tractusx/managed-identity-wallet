@@ -260,7 +260,6 @@ class ManagedWalletAriesEventHandlerTest {
                         """.trimIndent()
                     )
                 }
-                //verify(walletServiceSpy, times(1)).addConnection(any(), any(), any(), any())
                 verify(walletServiceSpy, times(1)).setAuthorMetaData(any(), any())
                 verify(walletServiceSpy, times(1)).setCommunicationEndpointUsingEndorsement(any())
                 transaction {

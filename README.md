@@ -63,8 +63,8 @@ below. Here a few hints on how to set it up:
 | `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the catena-x endorser ACA-Py endpoints |
 | `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space |
 | `CX_BPN`                  | String | BPN of the catena-x wallet |
-| `CX_DID`                  | String | BPN of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
-| `CX_VERKEY`               | String | DID of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
+| `CX_DID`                  | String | DID of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
+| `CX_VERKEY`               | String | Verification key of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
 | `CX_NAME`                 | String | Name of the catena-x base wallet |
 | `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
 | `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
@@ -133,7 +133,7 @@ revocation handling)
 
 With the following steps you can explore the API 
 
-1. Start Postman and add the environment `custodian-local.postman_environment` and the collection `Custodian Sample.postman_collection` from ./dev-assets/
+1. Start Postman and add the environment `Managed_Identity_Wallet_Local.postman_environment` and the collection `Managed_Identity_Wallet.postman_collection` from ./dev-assets/
     1. In the added environment make sure that the client_id and client_secret are the same as in your `dev.env` configuration.
 
     1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is temporary until the update to Ktor 2.x

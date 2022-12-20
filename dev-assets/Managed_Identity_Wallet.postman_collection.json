@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "6966c120-e2de-46df-8bc8-6c7ab9203ee9",
-		"name": "Custodian Sample",
+		"name": "Managed_Identity_Wallet",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -62,7 +62,7 @@
 			"response": []
 		},
 		{
-			"name": "Create wallet  in Custodian",
+			"name": "Create wallet  in MIW",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -86,9 +86,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets",
+					"raw": "{{miw_url}}/api/wallets",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -99,7 +99,7 @@
 			"response": []
 		},
 		{
-			"name": "Get wallets from Custodian ",
+			"name": "Get wallets from MIW",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -114,9 +114,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets",
+					"raw": "{{miw_url}}/api/wallets",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -142,9 +142,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/BPNL000000015PGU?withCredentials=true",
+					"raw": "{{miw_url}}/api/wallets/BPNL000000015PGU?withCredentials=true",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -162,7 +162,7 @@
 			"response": []
 		},
 		{
-			"name": "Delete wallet with identifier from Custodian",
+			"name": "Delete wallet with identifier from MIW",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -177,9 +177,9 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/BPNL000000015QG5",
+					"raw": "{{miw_url}}/api/wallets/BPNL000000015QG5",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -206,9 +206,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn222",
+					"raw": "{{miw_url}}/api/didDocuments/bpn222",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -236,7 +236,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"theirPublicDid\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"alias\": \"TestX1\",\n    \"myLable\": \"ME_WEB_HOOK\"\n}",
+					"raw": "{\n    \"theirPublicDid\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"alias\": \"TestX1\",\n    \"myLabel\": \"MY_LABEL\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -244,9 +244,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/bpn/send-invitation",
+					"raw": "{{miw_url}}/api/wallets/bpn/send-invitation",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -283,9 +283,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/self-managed-wallets",
+					"raw": "{{miw_url}}/api/wallets/self-managed-wallets",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -321,9 +321,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/issuance-flow",
+					"raw": "{{miw_url}}/api/credentials/issuance-flow",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -359,9 +359,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials",
+					"raw": "{{miw_url}}/api/credentials",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -396,9 +396,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/issuer",
+					"raw": "{{miw_url}}/api/credentials/issuer",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -434,9 +434,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/revocations",
+					"raw": "{{miw_url}}/api/credentials/revocations",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -463,9 +463,9 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/revocations/statusListCredentialRefresh",
+					"raw": "{{miw_url}}/api/credentials/revocations/statusListCredentialRefresh",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -483,9 +483,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/status/5c145c85-8fcb-42d4-893c-d19a55581e00",
+					"raw": "{{miw_url}}/api/credentials/status/5c145c85-8fcb-42d4-893c-d19a55581e00",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -522,9 +522,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/presentations?withCredentialsValidation=true&withCredentialsDateValidation=true&withRevocationValidation=true",
+					"raw": "{{miw_url}}/api/presentations?withCredentialsValidation=true&withCredentialsDateValidation=true&withRevocationValidation=true",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -573,9 +573,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/presentations/validation?withDateValidation=true&withRevocationValidation=true",
+					"raw": "{{miw_url}}/api/presentations/validation?withDateValidation=true&withRevocationValidation=true",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -621,9 +621,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/did:sov:CXaLzgEtynxaMQcqxYtJkW/credentials",
+					"raw": "{{miw_url}}/api/wallets/did:sov:CXaLzgEtynxaMQcqxYtJkW/credentials",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -651,9 +651,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials?issuerIdentifier=bpn111",
+					"raw": "{{miw_url}}/api/credentials?issuerIdentifier=bpn111",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -709,9 +709,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/did:sov:XvBe422jiQuwUeZ7dH8VB8/services",
+					"raw": "{{miw_url}}/api/didDocuments/did:sov:XvBe422jiQuwUeZ7dH8VB8/services",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -748,9 +748,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn111/services/did-communication",
+					"raw": "{{miw_url}}/api/didDocuments/bpn111/services/did-communication",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -788,9 +788,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn111/services/linked_domains",
+					"raw": "{{miw_url}}/api/didDocuments/bpn111/services/linked_domains",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -828,9 +828,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/businessPartnerDataRefresh?identifier=BPNL000000015QG5",
+					"raw": "{{miw_url}}/api/businessPartnerDataRefresh?identifier=BPNL000000015QG5",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
