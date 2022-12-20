@@ -124,8 +124,6 @@ object EnvironmentTestSetup {
             put("revocation.baseUrl", System.getenv("REVOCATION_URL") ?: "http://0.0.0.0:8086")
             put("revocation.createStatusListCredentialAtHour", System.getenv("REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR") ?: "3")
 
-            put("ledger.type", System.getenv("LEDGER_TYPE") ?: "closed")
-
         }
         // just a keepAliveConnection
         DriverManager.getConnection(jdbcUrl)
