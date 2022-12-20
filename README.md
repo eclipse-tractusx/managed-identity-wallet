@@ -79,8 +79,8 @@ run following these steps:
 1. Clone the GitHub repository
 
     ```bash
-    git clone https://github.com/catenax-ng/product-core-managed-identity-wallets.git
-    cd product-core-managed-identity-wallets
+    git clone https://github.com/eclipse-tractusx/managed-identity-wallets
+    cd managed-identity-wallets
     ```
 
 1. Copy over the `.env.example` to `dev.env`
