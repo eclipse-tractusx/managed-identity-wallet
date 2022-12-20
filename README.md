@@ -79,7 +79,7 @@ run following these steps:
 1. Clone the GitHub repository
 
     ```bash
-    git clone https://github.com/eclipse-tractusx/managed-identity-wallets
+    git clone https://github.com/eclipse-tractusx/managed-identity-wallets.git
     cd managed-identity-wallets
     ```
 
