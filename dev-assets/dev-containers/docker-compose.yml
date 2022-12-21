@@ -28,7 +28,7 @@ services:
       - "8081:8080"
 
   cx_acapy:
-    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
     container_name: cx_acapy
     ports:
       - "11000:11000"
@@ -67,7 +67,7 @@ services:
     ]
 
   test_acapy:
-    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
     container_name: test_acapy
     ports:
       - "11001:11001"

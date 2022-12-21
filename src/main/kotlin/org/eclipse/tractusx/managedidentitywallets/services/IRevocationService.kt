@@ -22,6 +22,7 @@ package org.eclipse.tractusx.managedidentitywallets.services
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.observer.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
@@ -51,6 +52,11 @@ interface IRevocationService {
                 revocationUrl,
                 HttpClient {
                     expectSuccess = true
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = 30000
+                        connectTimeoutMillis = 30000
+                        socketTimeoutMillis = 30000
+                    }
                     install(ResponseObserver) {
                         onResponse { response ->
                             log.debug("HTTP status: ${response.status.value}")

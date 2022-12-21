@@ -52,6 +52,8 @@ fun Application.module(testing: Boolean = false) {
         log.info("Starting in testing mode...")
     }
 
+    environment.monitor.subscribe(ApplicationStarted, ::onStarted)
+
     configureSockets()
     configureSerialization()
 
@@ -102,7 +104,8 @@ fun Application.module(testing: Boolean = false) {
         scope = environment.config.property("bpdm.scope").getString(),
         grantType = environment.config.property("bpdm.grantType").getString()
     )
-    val businessPartnerDataService = IBusinessPartnerDataService.createBusinessPartnerDataService(walletService,
+    val businessPartnerDataService = IBusinessPartnerDataService.createBusinessPartnerDataService(
+        walletService,
         bpdmConfig)
     Services.businessPartnerDataService = businessPartnerDataService
     Services.walletService = walletService
@@ -124,4 +127,10 @@ fun Application.module(testing: Boolean = false) {
     if (wallets.isNotEmpty() && wallets.stream().anyMatch{ wallet -> wallet.bpn == baseWalletBpn }) {
         walletService.subscribeForAriesWS()
     }
+
+}
+
+private fun onStarted(app: Application) {
+    // the revocation service that is triggered by the scheduler has a callback function to the application.
+    app.configureJobs()
 }

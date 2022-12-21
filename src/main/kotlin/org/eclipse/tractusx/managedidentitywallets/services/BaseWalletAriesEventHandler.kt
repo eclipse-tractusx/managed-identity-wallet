@@ -21,19 +21,28 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.ConnectionState
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.webhook.TenantAwareEventHandler
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
+import java.util.*
 
 class BaseWalletAriesEventHandler(
         private val businessPartnerDataService: IBusinessPartnerDataService,
         private val walletService: IWalletService,
         private val webhookService: IWebhookService
 ): TenantAwareEventHandler() {
+
+    companion object {
+        private val log = LoggerFactory.getLogger(this::class.java)
+    }
 
     override fun handleConnection(walletId: String, connection: ConnectionRecord) {
         super.handleConnection(walletId, connection)
@@ -45,13 +54,23 @@ class BaseWalletAriesEventHandler(
                 val walletOfConnectionTarget: WalletDto = pairOfWebhookUrlAndWallet.second
                 if (walletOfConnectionTarget.pendingMembershipIssuance) {
                     GlobalScope.launch {
-                        val success = businessPartnerDataService
+                        val successBpnCred = businessPartnerDataService
                             .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
                                 targetWallet = walletOfConnectionTarget,
                                 connectionId = connection.connectionId,
-                                webhookUrl = webhookUrl
+                                webhookUrl = webhookUrl,
+                                type = JsonLdTypes.BPN_TYPE,
+                                null
                             ).await()
-                        if (success) {
+                        val successMembershipCred = businessPartnerDataService
+                            .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                                targetWallet = walletOfConnectionTarget,
+                                connectionId = connection.connectionId,
+                                webhookUrl = webhookUrl,
+                                type = JsonLdTypes.MEMBERSHIP_TYPE,
+                                null
+                            ).await()
+                        if (successBpnCred && successMembershipCred) {
                             transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }
                         }
                     }
@@ -87,6 +106,25 @@ class BaseWalletAriesEventHandler(
             val threadId = v20Credential.threadId
             when(v20Credential.state) {
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {
+                    val catenaXCredentialTypes = JsonLdTypes.getCatenaXCredentialTypes();
+                    try {
+                        val issuedCred: IssuedVerifiableCredentialRequestDto = Json.decodeFromString(
+                            IssuedVerifiableCredentialRequestDto.serializer(),
+                            String(Base64.getDecoder().decode(
+                                v20Credential.credIssue.credentialsTildeAttach[0].data.base64)
+                            )
+                        )
+                        if (issuedCred.type.any { catenaXCredentialTypes.contains(it) }) {
+                            transaction {
+                                walletService.storeCredential(
+                                    issuedCred.credentialSubject["id"] as String,
+                                    issuedCred
+                                )
+                            }
+                        }
+                    } catch (e: Exception) {
+                        log.error("Store Credential with thread Id ${v20Credential.threadId} failed!")
+                    }
                     transaction {
                         if (webhookService.getWebhookByThreadId(threadId) != null) {
                             webhookService.updateStateOfWebhook(threadId, v20Credential.state.name)

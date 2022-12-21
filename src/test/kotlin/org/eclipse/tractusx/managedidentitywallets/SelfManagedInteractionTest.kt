@@ -53,7 +53,7 @@ class SelfManagedInteractionTest {
     }
 
     @Test
-    fun testRegisterSelfManagedWalletAndTriggerIssuanceFlow() { // true
+    fun testRegisterSelfManagedWalletAndTriggerIssuanceFlow() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
@@ -96,6 +96,11 @@ class SelfManagedInteractionTest {
 
             runBlocking {
                 transaction {
+                    val storedSelfManagedWallet = EnvironmentTestSetup.walletService.getWallet(
+                        selfManagedWalletCreateDto.did
+                    )
+                    assertEquals(true, storedSelfManagedWallet.pendingMembershipIssuance)
+
                     val connections = EnvironmentTestSetup.connectionRepository
                         .getConnections(SingletonTestData.baseWalletDID, null)
                     assertEquals(1, connections.size)

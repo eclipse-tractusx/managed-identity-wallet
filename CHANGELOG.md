@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2022-12-20
+
+### Changed
+- update the supported AcaPy version to 0.7.5
+- update the Business Partner data integration from external BPDM service
+- other improvements and additional Tests
+
 ## [2.1.1] - 2022-10-07
 
 ### Added

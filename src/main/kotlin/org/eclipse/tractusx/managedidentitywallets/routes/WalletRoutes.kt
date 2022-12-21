@@ -99,12 +99,12 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                         // TODO: notify if issue credentials failed
                         // Issue and store credentials async
                         businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
-                            createdWallet.bpn,
+                            createdWallet,
                             JsonLdTypes.BPN_TYPE,
                             null
                         )
                         businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
-                            createdWallet.bpn,
+                            createdWallet,
                             JsonLdTypes.MEMBERSHIP_TYPE,
                             null
                         )

@@ -89,4 +89,12 @@ class ConnectionRepository {
         }
     }
 
+    fun toObject(entity: Connection): ConnectionDto = entity.run {
+        ConnectionDto(
+            connectionId,
+            theirDid,
+            myDid,
+            state
+        )
+    }
 }

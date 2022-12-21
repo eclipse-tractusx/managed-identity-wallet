@@ -21,12 +21,23 @@ package org.eclipse.tractusx.managedidentitywallets.models.ssi
 
 class JsonLdTypes {
     companion object {
-        val CREDENTIAL_TYPE = "VerifiableCredential"
-        val MEMBERSHIP_TYPE = "MembershipCredential"
-        val BPN_TYPE = "BpnCredential"
-        val NAME_TYPE = "NameCredential"
-        val BANK_ACCOUNT_TYPE = "BankAccountCredential"
-        val ADDRESS_TYPE = "AddressCredential"
-        val LEGAL_FORM_TYPE = "LegalFormCredential"
+        const val CREDENTIAL_TYPE = "VerifiableCredential"
+        const val MEMBERSHIP_TYPE = "MembershipCredential"
+        const val BPN_TYPE = "BpnCredential"
+        const val NAME_TYPE = "NameCredential"
+        const val BANK_ACCOUNT_TYPE = "BankAccountCredential"
+        const val ADDRESS_TYPE = "AddressCredential"
+        const val LEGAL_FORM_TYPE = "LegalFormCredential"
+
+        fun getCatenaXCredentialTypes() : List<String>{
+            return listOf(
+                MEMBERSHIP_TYPE,
+                BPN_TYPE,
+                NAME_TYPE,
+                BANK_ACCOUNT_TYPE,
+                ADDRESS_TYPE,
+                LEGAL_FORM_TYPE
+            )
+        }
     }
 }

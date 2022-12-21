@@ -110,6 +110,9 @@ class WalletsTest {
                 assertEquals(HttpStatusCode.OK, response.status())
                 val wallets: List<WalletDto> = Json.decodeFromString(ListSerializer(WalletDto.serializer()), response.content!!)
                 assertEquals(3, wallets.size)
+                wallets.forEach {
+                    assertEquals(false, it.pendingMembershipIssuance)
+                }
             }
 
             handleRequest(HttpMethod.Get, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}") {
@@ -300,7 +303,9 @@ class WalletsTest {
 
             // programmatically add base wallet and an additional one
             runBlocking {
-                val createdWallet = EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "base"))
+                val createdWallet = EnvironmentTestSetup.walletService.createWallet(
+                    WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "base")
+                )
                 verKey = createdWallet.verKey!!
                 EnvironmentTestSetup.walletService.createWallet(WalletCreateDto("non_base_bpn", "non_base"))
             }
