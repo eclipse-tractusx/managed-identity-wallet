@@ -379,7 +379,7 @@ class WalletsTest {
                                 emptyList(),
                                 "base",
                                 "wallet_id_extrawallet",
-                                "lable",
+                                "label",
                                 ""
                             ),
                             "wallet_token_extrawallet"
