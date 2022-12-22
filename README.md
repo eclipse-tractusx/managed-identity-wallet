@@ -84,7 +84,7 @@ run following these steps:
 1. Clone the GitHub repository
 
     ```bash
-    git clone https://github.com/catenax-ng/product-core-managed-identity-wallets.git
+    git clone https://github.com/eclipse-tractusx/managed-identity-wallets.git
     cd product-core-managed-identity-wallets
     ```
 
