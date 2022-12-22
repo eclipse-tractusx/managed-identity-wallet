@@ -1,0 +1,102 @@
+auth:
+  realm: "CX-Central"
+  role: "add_wallets"
+  roleMappings: "create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"
+  resourceId: "Cl5-CX-Custodian"
+image:
+  name: "catenax-ng/product-core-managed-identity-wallets_service"
+  registry: "ghcr.io"
+  secret: "acr-credentials"
+allowEmptyPassword: "\"yes\""
+db:
+  jdbcDriver: "org.postgresql.Driver"
+namespace: "managed-identity-wallets"
+logging:
+  exposed: "INFO"
+wallet:
+  baseWalletBpn: "BPNL000000000000"
+revocation:
+  refreshHour: "3"
+  revocationServiceUrl: http://localhost:8086
+revocationService:
+  imageName: "registry.gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/revocation"
+  tag: "1.0.0-SNAPSHOT-quarkus-2.10.2.Final-java17"
+  port: "8086"
+  httpAccessLog: true
+  minIssueInterval: "2"
+  baseUrlForCredentialList: "https//localhost:8080/api/credentials/"
+  clientIssuanceApiUrl: "http://localhost:8080"
+acapy:
+  imageName: "bcgovimages/aries-cloudagent"
+  tag: "py36-1.16-1_0.7.4"
+  ledgerUrl: "https://idu.cloudcompass.ca"
+  label: "CatenaXIssuer"
+  logLevel: "INFO"
+  networkIdentifier: "idunion:test"
+  databaseHost: "acapypostgresql"
+  endpointPort: "8000"
+  adminPort: "11000"
+  adminUrl: "http://localhost:11000"
+  secret:
+    apikey: "0"
+    walletseed: "0"
+    dbaccount: "postgres"
+    dbadminuser: "postgres"
+    dbadminpassword: "postgres"
+    dbpassword: "postgres"
+    jwtsecret: "0"
+    walletkey: "0"
+ingress:
+  enabled: false
+acapypostgresql:
+  enabled: true
+  auth:
+    existingSecret: product-managed-identity-wallets-acapypostgresql
+  secret:
+    password: "postgres"
+    postgrespassword: "postgres"
+    user: "postgres"
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: product-managed-identity-wallets-postgresql
+  primary:
+    extraVolumeMounts:
+      - name: initdb
+        mountPath: "/docker-entrypoint-initdb.d"
+    extraVolumes:
+      - name: initdb
+        emptyDir: {}
+    initContainers:
+      - name: initdb
+        image: ghcr.io/catenax-ng/product-core-managed-identity-wallets-cd_initdb:latest
+        imagePullPolicy: Always
+        command:
+          - sh
+        args:
+          - -c
+          - |
+            echo "Copying initdb sqls..."
+            cp -R /initdb/* /docker-entrypoint-initdb.d
+        volumeMounts:
+        - name: initdb
+          mountPath: "/docker-entrypoint-initdb.d"
+  secret:
+    password: "postgres"
+    postgrespassword: "postgres"
+    user: "postgres"
+datapool:
+  grantType: "client_credentials"
+  scope: "openid"
+  refreshHour: "23"
+  url: ""
+  authUrl: ""
+managedIdentityWallets:
+  secret:
+    jdbcurl: "jdbc:postgresql://postgresql:5432/postgres?user=postgres&password=postgres"
+    authclientid: "clientid"
+    authclientsecret: "client"
+    bpdmauthclientid: "clientid"
+    bpdmauthclientsecret: "client"
+certificate:
+  host: "localhost"

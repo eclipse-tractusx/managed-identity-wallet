@@ -53,48 +53,54 @@ class BusinessPartnerDataServiceImpl(
         val listOfBPNs = if (identifier.isNullOrEmpty()) {
                 walletService.getAllBpns()
             } else listOf(walletService.getBpnFromIdentifier(identifier))
-        var accessToken = getAccessToken()
 
-        val legalAddressDataResponse = getLegalAddressResponse(listOfBPNs, accessToken.accessToken)
-        val legalAddressDataList: List<LegalAddressDto> =
-            if (legalAddressDataResponse.status == HttpStatusCode.OK) {
-                Json.decodeFromString(legalAddressDataResponse.readText())
-            } else {
-                log.error("Getting Legal Addresses of LegalEntity has thrown " +
-                        "an error with details ${legalAddressDataResponse.readText()}")
-                emptyList()
-            }
-        val legalAddressDataMap: Map<String, LegalAddressDto> = legalAddressDataList.map {
-            it.legalEntity to it
-        }.toMap()
+        // The endpoints to pull data have a limit of 5000 entities in one call
+        val chunksOfBpns = listOfBPNs.chunked(5000)
 
-        val legalEntitiesSearchResponse = getBusinessPartnerSearchResponse(listOfBPNs, accessToken.accessToken)
-        val legalEntityDataList: List<BusinessPartnerDataDto> =
-            if (legalEntitiesSearchResponse.status == HttpStatusCode.OK) {
-                Json.decodeFromString(legalEntitiesSearchResponse.readText())
-            } else {
-                log.error("Getting Business data of LegalEntity has thrown " +
-                        "an error with details ${legalEntitiesSearchResponse.readText()}")
-                emptyList()
-            }
-        val legalEntityDataMap: Map<String, BusinessPartnerDataDto> = legalEntityDataList.map {
-            it.bpn to it
-        }.toMap()
+        chunksOfBpns.forEach { chunkOfBpn ->
+            var accessToken = getAccessToken()
 
-        listOfBPNs.forEach { bpn ->
-            if (legalEntityDataMap.containsKey(bpn) || legalAddressDataMap.containsKey(bpn)) {
-                val holder = walletService.getWallet(bpn)
-                val connectionId: ConnectionDto? = if (holder.isSelfManaged) {
-                    walletService.getConnectionWithCatenaX(holder.did)
-                } else { null }
-                issueAndUpdateCatenaXCredentials(
-                    holder = holder,
-                    businessPartnerData = legalEntityDataMap.get(bpn),
-                    pulledAddressOfBpn = legalAddressDataMap.get(bpn),
-                    connection = connectionId
-                )
-            } else {
-                log.warn("There are no legalEntity or legalAddress associated to Bpn $bpn")
+            val legalAddressDataResponse = getLegalAddressResponse(listOfBPNs, accessToken.accessToken)
+            val legalAddressDataList: List<LegalAddressDto> =
+                if (legalAddressDataResponse.status == HttpStatusCode.OK) {
+                    Json.decodeFromString(legalAddressDataResponse.readText())
+                } else {
+                    log.error("Getting Legal Addresses of LegalEntity has thrown " +
+                            "an error with details ${legalAddressDataResponse.readText()}")
+                    emptyList()
+                }
+            val legalAddressDataMap: Map<String, LegalAddressDto> = legalAddressDataList.map {
+                it.legalEntity to it
+            }.toMap()
+
+            val legalEntitiesSearchResponse = getBusinessPartnerSearchResponse(listOfBPNs, accessToken.accessToken)
+            val legalEntityDataList: List<BusinessPartnerDataDto> =
+                if (legalEntitiesSearchResponse.status == HttpStatusCode.OK) {
+                    Json.decodeFromString(legalEntitiesSearchResponse.readText())
+                } else {
+                    log.error("Getting Business data of LegalEntity has thrown " +
+                            "an error with details ${legalEntitiesSearchResponse.readText()}")
+                    emptyList()
+                }
+            val legalEntityDataMap: Map<String, BusinessPartnerDataDto> = legalEntityDataList.map {
+                it.bpn to it
+            }.toMap()
+
+            chunkOfBpn.forEach { bpn ->
+                if (legalEntityDataMap.containsKey(bpn) || legalAddressDataMap.containsKey(bpn)) {
+                    val holder = walletService.getWallet(bpn)
+                    val connectionId: ConnectionDto? = if (holder.isSelfManaged) {
+                        walletService.getConnectionWithCatenaX(holder.did)
+                    } else { null }
+                    issueAndUpdateCatenaXCredentials(
+                        holder = holder,
+                        businessPartnerData = legalEntityDataMap.get(bpn),
+                        pulledAddressOfBpn = legalAddressDataMap.get(bpn),
+                        connection = connectionId
+                    )
+                } else {
+                    log.warn("There are no legalEntity or legalAddress associated to Bpn $bpn")
+                }
             }
         }
         return@async true
