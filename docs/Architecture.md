@@ -17,8 +17,16 @@
     - [Update Business Partner Data for Managed Wallet](#update-business-partner-data-for-managed-wallet)
     - [Issue Credential and Presentation for Managed Wallet](#issue-credential-and-presentation-for-managed-wallet)
     - [Register Self-Managed Wallet](#register-self-managed-wallet)
-    - [Issue Credential Flow](#issue-credential-flow)
+    - [Issue Credential from Catena-X Base Wallet to Self-Managed Wallet](#issue-credential-from-catena-x-base-wallet-to-self-managed-wallet)
+    - [Receive Externally Issued Credential to Managed Wallet](#receive-externally-issued-credential-to-managed-wallet)
     - [Permission Handling](#permission-handling)
+    - [Data Model / Schemas](#data-model--schemas)
+      - [Credential Type BpnCredential](#credential-type-bpncredential)
+      - [Credential Type MembershipCredential](#credential-type-membershipcredential)
+      - [Credential Type NameCredential](#credential-type-namecredential)
+      - [Credential Type AddressCredential](#credential-type-addresscredential)
+      - [Credential Type BankAccountCredential](#credential-type-bankaccountcredential)
+      - [Credential Type LegalFormCredential](#credential-type-legalformcredential)
 - [Deployment View](#deployment-view)
 - [Cross-cutting Concepts](#cross-cutting-concepts)
 - [Design Decisions](#design-decisions)
@@ -48,6 +56,7 @@ The basic requirements for the Managed Identity Wallet can be summarised as foll
 *   Allow other Catena-X components as well as DID owners to issue and store verifiable credentials
 *   Allow other Catena-X components as well as DID owners to create and validate verifiable credentials
 *   Issue and revoke verifiable credentials for Catena-X related data such as the BPN, membership status, business partner data (addresses, bank data etc.) according to the onboarding and change processes
+*   Allow (defined / allow-listed) external issuer wallets to connect to managed wallets and issue credentials for the managed wallet DID as the holder
 
 Quality Goals
 -------------
@@ -117,7 +126,7 @@ The API part is internally structured in different packages and classes for the 
     *   Wallet: management (CRUD) of identity wallets
 *   Services:
     *   AcaPyService: Abstraction of calls and response handling of ACA-Py
-    *   Aries Event Handler: Processing of incoming Aries DID-Comm messages
+    *   Aries Event Handler: Processing of incoming Aries DID-Comm messages (separate listeners for Base Wallet and Multi-Tenants Wallet)
     *   Business Partner Data Service: Abstraction of calls and response handling of BPDM
     *   RevocationService: Abstraction of calls and response handling of the revocation service
     *   WalletService: General wallet management and orchestration logic
@@ -161,15 +170,200 @@ _Note that for managed wallets, VCs and VPs are only generated in an ephemeral w
 
 ![](./diagrams/MIW-Sequence-Register-Self-ManagedWallet.drawio.png)
 
-### Issue Credential Flow
+### Issue Credential from Catena-X Base Wallet to Self-Managed Wallet
 
 ![](./diagrams/MIW-Sequence-Issue-Credential-Flow.drawio.png)
+
+### Receive Externally Issued Credential to Managed Wallet
+
+![](./diagrams/MIW-Sequence-Receive-External-Credential-Flow.drawio.png)
+
+The flow depicted in this sequence follows the Aries flows RFC 0023 "DID-Exchange Protocol 1.0" (https://github.com/hyperledger/aries-rfcs/blob/main/features/0023-did-exchange/README.md) with implicit invitation by public DID for the connection establishment, and RFC 0453 "Issue Credential Protocol 2.0" (https://github.com/hyperledger/aries-rfcs/tree/main/features/0453-issue-credential-v2) for the credential issuance.
 
 ### Permission Handling
 
 For the API access, technical users are authenticated based on bearer tokens (JWT) issued by the Catena-X Keycloak. Each API operation specifies, which scopes/roles are required in order to be allowed to execute this operations, additionally the BPN associated to a user (available as a claim in the JWT) is considered to restrict access to the DID or wallet of the legal entity the user belongs to.
 
 For details on the permissions see the README section on scopes ([https://github.com/eclipse-tractusx/managed-identity-wallets#scopes-](https://github.com/eclipse-tractusx/managed-identity-wallets#scopes-)) as well as the statements about permissions in the API doc ([https://managed-identity-wallets.int.demo.catena-x.net/docs](https://managed-identity-wallets.int.demo.catena-x.net/docs)).
+
+### Data Model / Schemas
+
+The Managed Identity Wallet service issues a couple of verifiable credentials with the DID of the Catena-X platform issuer related to Catena-X membership and business partner data. For the credential types and data model of those verifiable credentials, an own JSON-LD context was defined in a separate GitHub repository https://github.com/catenax-ng/product-core-schemas and referenced as raw content in the verifiable credentials context https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntityData. The schema defines the following credential types, each with a brief description and example.
+
+#### Credential Type BpnCredential
+
+Attestation of the BPNL to a particular DID
+
+```
+"credentialSubject": {
+                "type": [
+                    "BpnCredential"
+                ],
+                "bpn": "BPNL00000000XS2X",
+                "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"
+            }
+```
+
+#### Credential Type MembershipCredential
+
+Attestation of Catena-X membership
+
+```
+"credentialSubject": {
+                "type": [
+                    "MembershipCredential"
+                ],
+                "memberOf": "Catena-X",
+                "status": "Active",
+                "startTime": "2022-11-29T10:37:50Z",
+                "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"
+            }
+```
+
+#### Credential Type NameCredential
+
+Credential representation of a BPDM name element
+
+```
+"credentialSubject": {
+                "data": {
+                    "value": "Scharr-Tec GmbH & Co KG",
+                    "nameType": {
+                        "technicalKey": "LOCAL",
+                        "name": "The business partner name identifies a business partner in a given context, e.g. a country or region.",
+                        "url": ""
+                    },
+                    "language": {
+                        "technicalKey": "undefined",
+                        "name": "Undefined"
+                    }
+                },
+                "type": [
+                    "NameCredential"
+                ],
+                "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"
+            }
+```
+
+#### Credential Type AddressCredential
+
+Credential representation of a BPDM legal address element
+
+```
+"credentialSubject": {
+                "data": {
+                    "version": {
+                        "characterSet": {
+                            "technicalKey": "LATIN",
+                            "name": "Latin"
+                        },
+                        "language": {
+                            "technicalKey": "en",
+                            "name": "English"
+                        }
+                    },
+                    "contexts": [],
+                    "country": {
+                        "technicalKey": "DE",
+                        "name": "Germany"
+                    },
+                    "administrativeAreas": [],
+                    "postCodes": [
+                        {
+                            "value": "70565",
+                            "postCodeType": {
+                                "technicalKey": "OTHER",
+                                "name": "Other type",
+                                "url": ""
+                            }
+                        }
+                    ],
+                    "localities": [
+                        {
+                            "value": "Stuttgart",
+                            "localityType": {
+                                "technicalKey": "OTHER",
+                                "name": "Other",
+                                "url": ""
+                            },
+                            "language": {
+                                "technicalKey": "en",
+                                "name": "English"
+                            }
+                        }
+                    ],
+                    "thoroughfares": [
+                        {
+                            "value": "Liebknechtstr.",
+                            "number": "50",
+                            "thoroughfareType": {
+                                "technicalKey": "OTHER",
+                                "name": "Other type",
+                                "url": ""
+                            },
+                            "language": {
+                                "technicalKey": "en",
+                                "name": "English"
+                            }
+                        }
+                    ],
+                    "premises": [],
+                    "postalDeliveryPoints": [],
+                    "types": []
+                },
+                "type": [
+                    "AddressCredential"
+                ],
+                "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"
+            }
+```
+
+#### Credential Type BankAccountCredential
+
+Credential representation of a BPDM bank account element
+
+```
+"credentialSubject": {
+    "data": {
+        "internationalBankAccountIdentifier": "DE52500105172967846858",
+        "internationalBankIdentifier": "INGDDEFFXXX",
+        "currency": {
+            "technicalKey": "EUR",
+            "name": "Euro"
+        }
+    },
+    "type": [
+        "BankAccountCredential"
+    ],
+    "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"
+}
+````
+
+#### Credential Type LegalFormCredential
+
+Credential representation of the BPDM legal form information
+
+```
+"credentialSubject": {
+    "data": {
+        "technicalKey": "DE_AG",
+        "name": "Aktiengesellschaft",
+        "mainAbbreviation": "AG",
+        "language": {
+            "technicalKey": "de",
+            "name": "German"
+        },
+        "categories": [{
+            "name": "AG",
+            "url": ""
+        }]
+    },
+    "type": [
+        "LegalFormCredential"
+    ],
+    "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"
+}
+```
 
 Deployment View
 ===============
@@ -246,6 +440,7 @@ Risks and Technical Debts
 | ----- | --------------------------- | -------------- |
 | Indy DID: Lacking support in Indy SDK and thus ACA-Py, needed to use did:sov for now | The W3C compliant DID method specification for Indy ([https://hyperledger.github.io/indy-did-method/](https://hyperledger.github.io/indy-did-method/)) is still fairly new and not yet fully implemented in major clients. That is why we had to use the Sovrin DID ([https://sovrin-foundation.github.io/sovrin/spec/did-method-spec-template.html](https://sovrin-foundation.github.io/sovrin/spec/did-method-spec-template.html)) for now, which is not fully W3C compliant and does not contain a network identifier to distinguish different ledgers (e.g. testnet and mainnet) in the DID. | The implementation should be adjusted to did:indy as soon as ACA-Py releases support for this. |
 | Availability of mainnet | I it envisioned to use the IDUnion mainnet as the Indy ledger for a productive solution. This mainnet is still under construction and not yet available for public use, there is also no committed target date, expectations are towards end of 2022, which would be sufficient for the timeline of Catena-X. | Escalate to IDUnion contacts when it becomes clear that the expected date of general availability can not be met. |
+| Performance | In tests especially with the EDC, response times of the Managed Wallet Service were rather poor, taking several seconds for operations like create wallet, credential issuance, creation or validation of presentations. | Slow response times need to be analysed and optimised, special load and performance tests should be conducted for the most relevant use cases and scenarios. |
 | Lack of development resources and budget: open issues from implementation of integration with self-managed wallets | <ul><li>Interaction with a self-managed wallet must still be configured and tested in the cloud setup</li><li>Request presentation from self-managed wallets is not implemented</li><li>Issued verifiable credentials to self-managed wallets do not support revocation yet</li><li>The interaction is only possible with the Catena-X wallet (currently, there is no requirement to do that for other wallets, though)</li></ul> |
 
   
