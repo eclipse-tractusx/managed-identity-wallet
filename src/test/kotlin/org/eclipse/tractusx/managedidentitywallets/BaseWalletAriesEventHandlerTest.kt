@@ -21,13 +21,12 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
-import io.ktor.http.*
 import io.ktor.server.testing.*
-import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import okhttp3.internal.toImmutableList
 import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.InvitationRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
@@ -38,14 +37,15 @@ import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
 import org.hyperledger.acy_py.generated.model.V20CredIssue
 import org.hyperledger.aries.api.connection.ConnectionRecord
-import org.hyperledger.aries.api.connection.ConnectionState
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.webhook.TenantAwareEventHandler
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.kotlin.*
 import java.io.File
 import java.lang.RuntimeException
+import java.util.*
 import kotlin.test.*
 
 @kotlinx.serialization.ExperimentalSerializationApi
@@ -55,10 +55,10 @@ class BaseWalletAriesEventHandlerTest {
         id = 1,
         name = "CatenaX_Wallet",
         bpn = EnvironmentTestSetup.DEFAULT_BPN,
-        did = "did:sov:catenax1",
-        walletId = "walletId",
-        walletKey = "walletId",
-        walletToken = "walletId",
+        did = EnvironmentTestSetup.DEFAULT_DID,
+        walletId = null,
+        walletKey = null,
+        walletToken = null,
         revocationListName = null,
         pendingMembershipIssuance = false
     )
@@ -72,11 +72,23 @@ class BaseWalletAriesEventHandlerTest {
     private val holderWallet = WalletExtendedData(
         id = 2,
         name = "target wallet",
-        bpn = "BPNLholder",
+        bpn = "BPNL00TestManagedWallet",
         did = "did:sov:holder1",
         walletId = "walletId",
-        walletKey = "walletId",
-        walletToken = "walletId",
+        walletKey = "walletKey",
+        walletToken = "walletToken",
+        revocationListName = null,
+        pendingMembershipIssuance = true
+    )
+
+    private val selfManagedWallet = WalletExtendedData(
+        id = 3,
+        name = "target wallet",
+        bpn = "BPNL00TestSelfManagedWallet",
+        did = "did:sov:holder1",
+        walletId = null,
+        walletKey = null,
+        walletToken = null,
         revocationListName = null,
         pendingMembershipIssuance = true
     )
@@ -100,11 +112,7 @@ class BaseWalletAriesEventHandlerTest {
         connectionRepository = ConnectionRepository()
         credentialRepository = CredentialRepository()
         mockEngine = MockEngine {
-            respond(
-                content = ByteReadChannel("""{true}"""),
-                status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, "application/json")
-            )
+            respondOk("")
         }
         bpdService = BusinessPartnerDataMockedService()
         utilsService = UtilsService("")
@@ -112,9 +120,25 @@ class BaseWalletAriesEventHandlerTest {
         webhookService = WebhookServiceImpl(
             webhookRepository, HttpClient(mockEngine)
         )
-        val config = WalletAndAcaPyConfig("test", "", issuerWallet.bpn, "")
-        val walletService = IWalletService.createWithAcaPyService(
-            walletAndAcaPyConfig = config,
+        val acaPyServiceMock = mock<AcaPyService>()
+        doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+        whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+        runBlocking {
+            val connectionRecordRequest = ConnectionRecord()
+            connectionRecordRequest.connectionId = "connection-id-123"
+            connectionRecordRequest.rfc23State = Rfc23State.REQUEST_SENT.toString()
+            connectionRecordRequest.theirPublicDid = issuerWallet.did
+            whenever(acaPyServiceMock.sendConnectionRequest(any(), any(), any(), any(), any())).thenReturn(
+                connectionRecordRequest
+            )
+            val connectionRecordAccept = ConnectionRecord()
+            connectionRecordAccept.rfc23State =  Rfc23State.RESPONSE_SENT.toString()
+            whenever(acaPyServiceMock.acceptConnectionRequest(any(), anyOrNull())).thenReturn(connectionRecordAccept)
+            whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+        }
+
+        val walletService = AcaPyWalletServiceImpl(
+            acaPyService = acaPyServiceMock,
             walletRepository = walletRepo,
             credentialRepository = credentialRepository,
             utilsService = utilsService,
@@ -135,35 +159,74 @@ class BaseWalletAriesEventHandlerTest {
         )
     }
 
-    @AfterTest
-    fun clean() {
-        // remove Wallets and connection
-        transaction {
-            walletRepo.deleteWallet(issuerWallet.bpn)
-            walletRepo.deleteWallet(holderWallet.bpn)
-            connectionRepository.deleteConnections(issuerWallet.did)
-            webhookRepository.deleteWebhook(connectionThreadId)
-            webhookRepository.deleteWebhook(credentialThreadId)
-            credentialRepository.deleteCredentialByCredentialId(credentialId)
-        }
-    }
-
     @Test
-    fun testHandleAriesEvents() {
+    fun testHandleReceivedConnectionRequest() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
         }) {
             runBlocking {
                 // Setup
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                addConnection(
-                    connectionRepository, ConnectionState.REQUEST, connectionId,
-                    issuerWallet.did, holderWallet.did
-                )
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+
+                assertDoesNotThrow {
+                    runBlocking {
+                        walletServiceSpy.sendInvitation(
+                            holderWallet.did,
+                            invitationRequestDto = InvitationRequestDto(
+                                theirPublicDid = issuerWallet.did,
+                                myLabel = "testLabel",
+                                alias = "ToCatenaX"
+                            )
+                        )
+                    }
+                }
+
+                // Mock super call to tenantAwareEventHandler
+                val tenantAwareEventHandler = mock<TenantAwareEventHandler>()
+                doNothing().whenever(tenantAwareEventHandler).handleConnection(anyOrNull(), any())
+
+                val newConnectionRecord = ConnectionRecord()
+                newConnectionRecord.rfc23State = Rfc23State.REQUEST_RECEIVED.toString()
+                newConnectionRecord.connectionId = connectionId
+                newConnectionRecord.requestId = connectionThreadId
+                newConnectionRecord.theirLabel = holderWallet.bpn
+                // Test `handleConnection` for state COMPLETED
+                ariesEventHandler.handleConnection(null, newConnectionRecord)
+
+                verify(walletServiceSpy, times(1)).setEndorserMetaDataForAcapyConnection(any())
+                verify(walletServiceSpy, times(1)).acceptConnectionRequest(any(), any())
+                transaction {
+                    val updatedConnectionObj = connectionRepository.toObject(connectionRepository.getOrNull(connectionId)!!)
+                    assertEquals(Rfc23State.REQUEST_RECEIVED.toString(), updatedConnectionObj.state)
+
+                    val connections = connectionRepository.getAll()
+                    assertEquals(2, connections.size)
+                }
+
+                transaction {
+                    walletRepo.deleteWallet(issuerWallet.bpn)
+                    walletRepo.deleteWallet(holderWallet.bpn)
+                    connectionRepository.deleteConnections(issuerWallet.did)
+                    connectionRepository.deleteConnections(holderWallet.did)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testHandleAriesEventsWithManagedWallet() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+        }) {
+            runBlocking {
+                // Setup
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+                addConnection(connectionRepository, issuerWallet.did, holderWallet.did)
                 addWebhook(
                     webhookRepository, connectionThreadId,
-                    "mocked-url", ConnectionState.REQUEST.toString()
+                    "mocked-url", Rfc23State.REQUEST_SENT.toString()
                 )
                 addWebhook(
                     webhookRepository, credentialThreadId,
@@ -171,28 +234,124 @@ class BaseWalletAriesEventHandlerTest {
                 )
                 // Mock super call to tenantAwareEventHandler
                 val tenantAwareEventHandler = mock<TenantAwareEventHandler>()
-                doNothing().whenever(tenantAwareEventHandler).handleConnection(any(), any())
+                doNothing().whenever(tenantAwareEventHandler).handleConnection(anyOrNull(), any())
 
 
                 val newConnectionRecord = ConnectionRecord()
-                newConnectionRecord.state = ConnectionState.COMPLETED
+                newConnectionRecord.rfc23State = Rfc23State.COMPLETED.toString()
                 newConnectionRecord.connectionId = connectionId
                 newConnectionRecord.requestId = connectionThreadId
                 // Test `handleConnection` for state COMPLETED
-                ariesEventHandler.handleConnection(issuerWallet.bpn, newConnectionRecord)
+                ariesEventHandler.handleConnection(null, newConnectionRecord)
                 transaction {
-                    val updatedConnectionObj = connectionRepository.toObject(connectionRepository.get(connectionId))
-                    assertEquals(ConnectionState.COMPLETED.toString(), updatedConnectionObj.state)
+                    val updatedConnectionObj = connectionRepository.toObject(connectionRepository.getOrNull(connectionId)!!)
+                    assertEquals(Rfc23State.COMPLETED.toString(), updatedConnectionObj.state)
                     val updatedWebhook = webhookRepository.get(connectionThreadId)
-                    assertEquals(ConnectionState.COMPLETED.toString(), updatedWebhook.state)
+                    assertEquals(Rfc23State.COMPLETED.toString(), updatedWebhook.state)
                 }
 
                 // Test `handleCredentials`
-
-                var v20CredentialExchange = createCredentialExchange(credentialThreadId, CredentialExchangeState.DECLINED)
+                val v20CredentialExchange = createCredentialExchange(
+                    credentialThreadId,
+                    CredentialExchangeState.DECLINED
+                )
 
                 // Test state != CREDENTIAL_ISSUED
-                ariesEventHandler.handleCredentialV2(issuerWallet.bpn, v20CredentialExchange)
+                ariesEventHandler.handleCredentialV2(null, v20CredentialExchange)
+                transaction {
+                    val credentials = credentialRepository.getCredentials(
+                        null,
+                        null,
+                        null,
+                        credentialId = credentialId
+                    )
+                    assertEquals(emptyList(), credentials)
+                    val updatedWebhook = webhookRepository.get(credentialThreadId)
+                    assertEquals(CredentialExchangeState.DECLINED.toString(), updatedWebhook.state)
+                }
+
+                // Test state == CREDENTIAL_ISSUED
+                // Credentials are only stored in this step for self-managed wallets.
+                v20CredentialExchange.state = CredentialExchangeState.CREDENTIAL_ISSUED
+                ariesEventHandler.handleCredentialV2(null, v20CredentialExchange)
+                transaction {
+                    val credentials = credentialRepository.getCredentials(
+                        null,
+                        null,
+                        null,
+                        credentialId = credentialId
+                    )
+                    assertEquals(emptyList(), credentials)
+                }
+
+                v20CredentialExchange.state = CredentialExchangeState.CREDENTIAL_ISSUED
+                ariesEventHandler.handleCredentialV2(null, v20CredentialExchange)
+                transaction {
+                    val credentials = credentialRepository.getCredentials(
+                        null,
+                        null,
+                        null,
+                        credentialId = credentialId
+                    )
+                    assertEquals(emptyList(), credentials)
+                }
+
+                transaction {
+                    walletRepo.deleteWallet(issuerWallet.bpn)
+                    walletRepo.deleteWallet(holderWallet.bpn)
+                    connectionRepository.deleteConnections(issuerWallet.did)
+                    webhookRepository.deleteWebhook(connectionThreadId)
+                    webhookRepository.deleteWebhook(credentialThreadId)
+                    credentialRepository.deleteCredentialByCredentialId(credentialId)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testHandleAriesEventsWithSelfManagedWallet() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+        }) {
+            runBlocking {
+                // Setup
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, selfManagedWallet))
+                addConnection(connectionRepository, issuerWallet.did, selfManagedWallet.did)
+                addWebhook(
+                    webhookRepository, connectionThreadId,
+                    "mocked-url", Rfc23State.REQUEST_SENT.toString()
+                )
+                addWebhook(
+                    webhookRepository, credentialThreadId,
+                    "mocked-url", CredentialExchangeState.OFFER_SENT.toString()
+                )
+                // Mock super call to tenantAwareEventHandler
+                val tenantAwareEventHandler = mock<TenantAwareEventHandler>()
+                doNothing().whenever(tenantAwareEventHandler).handleConnection(anyOrNull(), any())
+
+
+                val newConnectionRecord = ConnectionRecord()
+                newConnectionRecord.rfc23State = Rfc23State.COMPLETED.toString()
+                newConnectionRecord.connectionId = connectionId
+                newConnectionRecord.requestId = connectionThreadId
+                // Test `handleConnection` for state COMPLETED
+                ariesEventHandler.handleConnection(null, newConnectionRecord)
+                transaction {
+                    val updatedConnectionObj = connectionRepository.toObject(connectionRepository.getOrNull(connectionId)!!)
+                    assertEquals(Rfc23State.COMPLETED.toString(), updatedConnectionObj.state)
+                    val updatedWebhook = webhookRepository.get(connectionThreadId)
+                    assertEquals(Rfc23State.COMPLETED.toString(), updatedWebhook.state)
+                }
+
+                // Test `handleCredentials`
+                val v20CredentialExchange = createCredentialExchange(
+                    credentialThreadId,
+                    CredentialExchangeState.DECLINED
+                )
+
+                // Test state != CREDENTIAL_ISSUED
+                ariesEventHandler.handleCredentialV2(null, v20CredentialExchange)
                 transaction {
                     val credentials = credentialRepository.getCredentials(
                         null,
@@ -208,7 +367,7 @@ class BaseWalletAriesEventHandlerTest {
                 // Test state == CREDENTIAL_ISSUED
                 v20CredentialExchange.state = CredentialExchangeState.CREDENTIAL_ISSUED
                 // Test (mocked-failed) store of credential
-                ariesEventHandler.handleCredentialV2(issuerWallet.bpn, v20CredentialExchange)
+                ariesEventHandler.handleCredentialV2(null, v20CredentialExchange)
                 transaction {
                     val credentials = credentialRepository.getCredentials(
                         null,
@@ -220,7 +379,7 @@ class BaseWalletAriesEventHandlerTest {
                 }
 
                 // Test success store credential
-                ariesEventHandler.handleCredentialV2(issuerWallet.bpn, v20CredentialExchange)
+                ariesEventHandler.handleCredentialV2(null, v20CredentialExchange)
                 transaction {
                     val credentials = credentialRepository.getCredentials(
                         null,
@@ -232,43 +391,63 @@ class BaseWalletAriesEventHandlerTest {
                     val updatedWebhook = webhookRepository.get(credentialThreadId)
                     assertEquals(CredentialExchangeState.CREDENTIAL_ISSUED.toString(), updatedWebhook.state)
                 }
+
+                transaction {
+                    walletRepo.deleteWallet(issuerWallet.bpn)
+                    walletRepo.deleteWallet(selfManagedWallet.bpn)
+                    connectionRepository.deleteConnections(issuerWallet.did)
+                    webhookRepository.deleteWebhook(connectionThreadId)
+                    webhookRepository.deleteWebhook(credentialThreadId)
+                    credentialRepository.deleteCredentialByCredentialId(credentialId)
+                }
             }
         }
     }
 
-    private fun addWallets(walletRepo: WalletRepository, wallets: List<WalletExtendedData>) {
+    private fun addWallets(walletRepo: WalletRepository, walletService: IWalletService, wallets: List<WalletExtendedData>) {
         transaction {
             wallets.forEach {
-                walletRepo.addWallet(it)
+                if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
+                    runBlocking {
+                        walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                            EnvironmentTestSetup.DEFAULT_BPN,
+                            EnvironmentTestSetup.DEFAULT_DID,
+                            EnvironmentTestSetup.DEFAULT_VERKEY,
+                            "Catena-X-Wallet"
+                        )
+                    }
+                } else {
+                    walletRepo.addWallet(it)
+                }
             }
         }
     }
 
     private fun addConnection(
         connectionRepository: ConnectionRepository,
-        state: ConnectionState,
-        connectionId: String,
         myDid: String,
         theirDid: String
     ) {
         transaction {
-            val connection = ConnectionRecord()
-            connection.state = state
-            connection.connectionId = connectionId
-            connectionRepository.add(myDid, theirDid, connection)
+            connectionRepository.add(
+                idOfConnection = connectionId,
+                connectionOwnerDid = myDid,
+                connectionTargetDid = theirDid,
+                rfc23State = Rfc23State.REQUEST_SENT.toString()
+            )
         }
     }
 
     private fun addWebhook(
         webhookRepository: WebhookRepository,
         webhookThreadId: String,
-        url: String,
+        urlToNotify: String,
         state: String
     ) {
         transaction {
             webhookRepository.add(
                 webhookThreadId = webhookThreadId,
-                url = url,
+                url = urlToNotify,
                 stateOfRequest = state
             )
         }
@@ -283,7 +462,7 @@ class BaseWalletAriesEventHandlerTest {
         val credentialTildeAttach = listOf(dataDecorator)
         val credIssue = V20CredIssue()
         credIssue.credentialsTildeAttach = credentialTildeAttach.toImmutableList()
-        var v20CredentialExchange = V20CredExRecord()
+        val v20CredentialExchange = V20CredExRecord()
         v20CredentialExchange.credIssue = credIssue
         v20CredentialExchange.state = state
         v20CredentialExchange.threadId = threadId

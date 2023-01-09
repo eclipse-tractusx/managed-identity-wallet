@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.application.*
 import io.ktor.features.*
+import kotlinx.coroutines.runBlocking
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
@@ -31,7 +32,6 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Webh
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import org.eclipse.tractusx.managedidentitywallets.services.*
-import org.jetbrains.exposed.sql.transactions.transaction
 
 import org.slf4j.LoggerFactory
 
@@ -76,14 +76,21 @@ fun Application.module(testing: Boolean = false) {
     val connectionRepository = ConnectionRepository()
     val webhookRepository = WebhookRepository()
 
+    val networkIdentifier = environment.config.property("acapy.networkIdentifier").getString()
+    val utilsService = UtilsService(networkIdentifier = networkIdentifier)
+
     val baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
     val acaPyConfig = WalletAndAcaPyConfig(
+        networkIdentifier = networkIdentifier,
+        baseWalletBpn = baseWalletBpn,
+        baseWalletDID = utilsService.getDidMethodPrefixWithNetworkIdentifier() +
+                environment.config.property("wallet.baseWalletShortDid").getString(),
+        baseWalletVerkey = environment.config.property("wallet.baseWalletVerkey").getString(),
         apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
-        networkIdentifier = environment.config.property("acapy.networkIdentifier").getString(),
         adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
-        baseWalletBpn = baseWalletBpn
+        baseWalletAdminUrl = environment.config.property("acapy.baseWalletApiAdminUrl").getString(),
+        baseWalletAdminApiKey = environment.config.property("acapy.baseWalletAdminApiKey").getString(),
     )
-    val utilsService = UtilsService(networkIdentifier = acaPyConfig.networkIdentifier)
     val revocationUrl = environment.config.property("revocation.baseUrl").getString()
     val revocationService = IRevocationService.createRevocationService(revocationUrl)
     val webhookService = IWebhookService.createWebhookService(webhookRepository)
@@ -115,22 +122,27 @@ fun Application.module(testing: Boolean = false) {
 
     configureRouting(walletService)
 
-    appRoutes(walletService, businessPartnerDataService, revocationService, utilsService)
+    appRoutes(walletService, businessPartnerDataService, revocationService, webhookService, utilsService)
     configurePersistence()
-
-    configureJobs()
-
-    val wallets = transaction {
-        walletService.getAll()
-    }
-
-    if (wallets.isNotEmpty() && wallets.stream().anyMatch{ wallet -> wallet.bpn == baseWalletBpn }) {
-        walletService.subscribeForAriesWS()
-    }
-
 }
 
+// Should be changed to https://api.ktor.io/ktor-server/ktor-server-core/io.ktor.server.application/-server-ready.html
+// when the application is updated to Ktor 2.x
 private fun onStarted(app: Application) {
+    val bpnOfBaseWallet = app.environment.config.property("wallet.baseWalletBpn").getString()
+    val didOfBaseWallet = Services.utilsService.getDidMethodPrefixWithNetworkIdentifier() +
+            app.environment.config.property("wallet.baseWalletShortDid").getString()
+    val veykeyOfBaseWallet = app.environment.config.property("wallet.baseWalletVerkey").getString()
+    val nameOfBaseWallet = app.environment.config.property("wallet.baseWalletName").getString()
+    runBlocking {
+        Services.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+            bpn = bpnOfBaseWallet,
+            did =  didOfBaseWallet,
+            verkey = veykeyOfBaseWallet,
+            name = nameOfBaseWallet
+        )
+    }
+
     // the revocation service that is triggered by the scheduler has a callback function to the application.
     app.configureJobs()
 }

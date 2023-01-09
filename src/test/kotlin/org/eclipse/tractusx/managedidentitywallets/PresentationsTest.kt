@@ -24,7 +24,6 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
@@ -60,7 +59,9 @@ class PresentationsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -71,16 +72,19 @@ class PresentationsTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                val walletDto =  EnvironmentTestSetup
-                    .walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
-                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-                SingletonTestData.baseWalletDID = walletDto.did
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
+                )
+                SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
+                SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
             }
 
-            val networkId = EnvironmentTestSetup.NETWORK_ID
             val invalidDID = SingletonTestData.baseWalletDID
                 .replace(
-                    "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}",
+                    SingletonTestData.getDidMethodPrefixWithNetworkIdentifier(),
                     "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()} WRONG"
                 )
             val verifiablePresentationRequestWithInvalidDIDs = VerifiablePresentationRequestDto(
@@ -326,7 +330,9 @@ class PresentationsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -337,10 +343,15 @@ class PresentationsTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                val walletDto =  EnvironmentTestSetup
-                    .walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
-                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-                SingletonTestData.baseWalletDID = walletDto.did
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
+                )
+                val walletDto =  EnvironmentTestSetup.walletService.getWallet(EnvironmentTestSetup.DEFAULT_BPN)
+                SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
+                SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
                 SingletonTestData.revocationListName = walletDto.revocationListName!!
                 SingletonTestData.credentialIndex = 3
             }
@@ -477,7 +488,9 @@ class PresentationsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -488,7 +501,12 @@ class PresentationsTest {
         }) {
             // programmatically add base wallet
             runBlocking {
-                EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "base"))
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
+                )
             }
             //TODO replace did:sov in all used json files when indy did method is supported by AcaPy
             val validVP = File("./src/test/resources/presentations-test-data/validVP.json").readText(Charsets.UTF_8)
@@ -616,7 +634,9 @@ class PresentationsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -627,17 +647,21 @@ class PresentationsTest {
         }) {
             // programmatically add base wallet
             runBlocking {
-                val walletDto = EnvironmentTestSetup.walletService.createWallet(
-                    WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "base")
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
                 )
-                SingletonTestData.baseWalletDID = walletDto.did
-                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
+                val wallet = EnvironmentTestSetup.walletService.getWallet(EnvironmentTestSetup.DEFAULT_DID)
+                SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
+                SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
                 SingletonTestData.credentialIndex = 3
-                SingletonTestData.revocationListName = walletDto.revocationListName!!
+                SingletonTestData.revocationListName = wallet.revocationListName!!
             }
 
             val vpWithPlaceholders = File("./src/test/resources/presentations-test-data/vpWithPlaceholders.json").readText(Charsets.UTF_8)
-            var validVp = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            val validVp = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
@@ -667,7 +691,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("The credential http://example.edu/credentials/3735 has been revoked!"))
             }
 
-            var vpWithWrongStatusType = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            val vpWithWrongStatusType = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
@@ -684,7 +708,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid credential status 'Type'"))
             }
 
-            var vpWithWrongStatusPurpose = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            val vpWithWrongStatusPurpose = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>",
                 "http://localhost:8080/api/credentials/status/${SingletonTestData.revocationListName}")
@@ -701,7 +725,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid 'statusPurpose'"))
             }
 
-            var vpWithEmptyStatusListIndex =
+            val vpWithEmptyStatusListIndex =
                 vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>",
@@ -719,7 +743,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid 'statusListIndex'"))
             }
 
-            var vpWithEmptyStatusListUrl = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
+            val vpWithEmptyStatusListUrl = vpWithPlaceholders.replace("<issuer-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)
                 .replace("<revocation-list-to-replace>", "  ")
                 .replace("<index-to-replace>", SingletonTestData.credentialIndex.toString())
@@ -735,7 +759,7 @@ class PresentationsTest {
                 assertTrue(response.content!!.contains("has invalid 'statusListCredential'"))
             }
 
-            var vpWithIssuerConflict =
+            val vpWithIssuerConflict =
                 vpWithPlaceholders.replace("<issuer-to-replace>",
                     "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}AA5EEDcn8yTfMobaTcabj9")
                 .replace("<verificationMethod-to-replace>", SingletonTestData.baseWalletDID)

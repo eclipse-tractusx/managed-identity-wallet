@@ -32,16 +32,18 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Connection
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
-import org.hyperledger.aries.api.connection.ConnectionState
+import org.hyperledger.aries.api.connection.ConnectionRecord
+import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.slf4j.LoggerFactory
 
 interface IWalletService {
 
     fun getWallet(identifier: String, withCredentials: Boolean = false): WalletDto
+
+    fun getCatenaXWallet(): WalletExtendedData
 
     fun getDidFromBpn(bpn: String): String
 
@@ -75,8 +77,6 @@ interface IWalletService {
 
     suspend fun resolveDocument(identifier: String): DidDocumentDto
 
-    suspend fun registerBaseWallet(verKey: String): Boolean
-
     suspend fun issuePresentation(
         vpRequest: VerifiablePresentationRequestDto,
         withCredentialsValidation: Boolean,
@@ -93,19 +93,15 @@ interface IWalletService {
 
     suspend fun deleteCredential(credentialId: String): Boolean
 
-    suspend fun addService(identifier: String, serviceDto: DidServiceDto): DidDocumentDto
+    suspend fun addService(identifier: String, serviceDto: DidServiceDto)
 
     suspend fun updateService(
         identifier: String,
         id: String,
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
-    ): DidDocumentDto
+    )
 
     suspend fun deleteService(identifier: String, id: String): DidDocumentDto
-
-    fun isCatenaXWallet(bpn: String): Boolean
-
-    fun getCatenaXBpn(): String
 
     suspend fun verifyVerifiablePresentation(
         vpDto: VerifiablePresentationDto,
@@ -122,13 +118,34 @@ interface IWalletService {
 
     fun setPartnerMembershipIssued(walletDto: WalletDto)
 
-    fun updateConnectionState(connectionId: String, state: ConnectionState)
+    fun updateConnectionState(connectionId: String, rfc23State: String)
 
-    fun getConnection(connectionId: String): ConnectionDto
+    fun getConnection(connectionId: String): ConnectionDto?
 
     fun getConnectionWithCatenaX(theirDid: String): ConnectionDto?
 
-    fun subscribeForAriesWS()
+    fun addConnection(
+        connectionId: String,
+        connectionTargetDid: String,
+        connectionOwnerDid: String,
+        connectionState: String
+    )
+
+    suspend fun initCatenaXWalletAndSubscribeForAriesWS(bpn: String, did: String, verkey: String, name: String)
+
+    suspend fun acceptConnectionRequest(identifier: String, connectionRecord: ConnectionRecord)
+
+    suspend fun acceptReceivedOfferVc(identifier: String, credExRecord: V20CredExRecord)
+
+    suspend fun acceptAndStoreReceivedIssuedVc(identifier: String, credExRecord: V20CredExRecord)
+
+    suspend fun setEndorserMetaDataForAcapyConnection(connectionId: String)
+
+    suspend fun setAuthorMetaData(walletId: String, connectionId: String)
+
+    suspend fun sendInvitation(identifier: String, invitationRequestDto: InvitationRequestDto)
+
+    suspend fun setCommunicationEndpointUsingEndorsement(walletId: String)
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
@@ -142,64 +159,73 @@ interface IWalletService {
             webhookService: IWebhookService,
             connectionRepository: ConnectionRepository
         ): IWalletService {
-            val acaPyService = IAcaPyService.create(
-                walletAndAcaPyConfig = walletAndAcaPyConfig,
-                utilsService = utilsService,
-                client = HttpClient {
-                    expectSuccess = true
-                    install(ResponseObserver) {
-                        onResponse { response ->
-                            log.debug("HTTP status: ${response.status.value}")
-                            log.debug("HTTP description: ${response.status.description}")
+            val httpClient = HttpClient {
+                expectSuccess = true
+                install(ResponseObserver) {
+                    onResponse { response ->
+                        log.debug("HTTP status: ${response.status.value}")
+                        log.debug("HTTP description: ${response.status.description}")
+                    }
+                }
+                HttpResponseValidator {
+                    validateResponse { response: HttpResponse ->
+                        val statusCode = response.status.value
+                        when (statusCode) {
+                            in 300..399 -> throw RedirectResponseException(response, response.status.description)
+                            in 400..499 -> throw ClientRequestException(response, response.status.description)
+                            in 500..599 -> throw ServerResponseException(response, response.status.description)
+                        }
+                        if (statusCode >= 600) {
+                            throw ResponseException(response, response.status.description)
                         }
                     }
-                    HttpResponseValidator {
-                        validateResponse { response: HttpResponse ->
-                            val statusCode = response.status.value
-                            when (statusCode) {
-                                in 300..399 -> throw RedirectResponseException(response, response.status.description)
-                                in 400..499 -> throw ClientRequestException(response, response.status.description)
-                                in 500..599 -> throw ServerResponseException(response, response.status.description)
-                            }
-                            if (statusCode >= 600) {
-                                throw ResponseException(response, response.status.description)
-                            }
-                        }
-                        handleResponseException { cause: Throwable ->
-                            when (cause) {
-                                is ClientRequestException -> {
-                                    if ("already exists." in cause.message) {
-                                        throw ConflictException("Aca-Py Error: ${cause.response.status.description}")
-                                    }
-                                    if ("Unprocessable Entity" in cause.message) {
-                                        throw UnprocessableEntityException("Aca-Py Error: ${cause.response.status.description}")
-                                    }
-                                    throw cause
+                    handleResponseException { cause: Throwable ->
+                        when (cause) {
+                            is ClientRequestException -> {
+                                if ("already exists." in cause.message) {
+                                    throw ConflictException("Aca-Py Error: ${cause.response.status.description}")
                                 }
-                                else -> throw cause
+                                if ("Unprocessable Entity" in cause.message) {
+                                    throw UnprocessableEntityException("Aca-Py Error: ${cause.response.status.description}")
+                                }
+                                throw cause
                             }
-                        }
-                    }
-                    install(HttpTimeout) {
-                        requestTimeoutMillis = 30000
-                        connectTimeoutMillis = 30000
-                        socketTimeoutMillis = 30000
-                    }
-                    install(Logging) {
-                        logger = Logger.DEFAULT
-                        level = LogLevel.BODY
-                    }
-                    install(JsonFeature) {
-                        serializer = JacksonSerializer {
-                            enable(SerializationFeature.INDENT_OUTPUT)
-                            serializationConfig.defaultPrettyPrinter
-                            setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                            else -> throw cause
                         }
                     }
                 }
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 30000
+                    connectTimeoutMillis = 30000
+                    socketTimeoutMillis = 30000
+                }
+                install(Logging) {
+                    logger = Logger.DEFAULT
+                    level = LogLevel.BODY
+                }
+                install(JsonFeature) {
+                    serializer = JacksonSerializer {
+                        enable(SerializationFeature.INDENT_OUTPUT)
+                        serializationConfig.defaultPrettyPrinter
+                        setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    }
+                }
+            }
+            val acaPyService = IAcaPyService.create(
+                walletAndAcaPyConfig = walletAndAcaPyConfig,
+                utilsService = utilsService,
+                client = httpClient
             )
-            return AcaPyWalletServiceImpl(acaPyService, walletRepository, credentialRepository,
-                utilsService, revocationService, webhookService, connectionRepository)
+            return AcaPyWalletServiceImpl(
+                acaPyService,
+                walletRepository,
+                credentialRepository,
+                utilsService,
+                revocationService,
+                webhookService,
+                connectionRepository
+            )
         }
     }
+
 }

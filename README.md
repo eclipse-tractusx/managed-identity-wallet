@@ -59,8 +59,13 @@ below. Here a few hints on how to set it up:
 | `APP_VERSION`             | String | application version, this should be in-line with the version in the deployment |
 | `ACAPY_API_ADMIN_URL`     | String | admin url of ACA-Py |
 | `ACAPY_ADMIN_API_KEY`     | String | admin api key of ACA-Py endpoints |
+| `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the catena-x endorser ACA-Py |
+| `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the catena-x endorser ACA-Py endpoints |
 | `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space |
-| `CX_BPN`                  | String | BPN of the base wallet, this wallet is the first to create |
+| `CX_BPN`                  | String | BPN of the catena-x wallet |
+| `CX_DID`                  | String | DID of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
+| `CX_VERKEY`               | String | Verification key of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
+| `CX_NAME`                 | String | Name of the catena-x base wallet |
 | `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
 | `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
 | `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint |
@@ -126,34 +131,23 @@ revocation handling)
 
 ## Advanced Development Setup
 
-With the following steps you can explore the API and create your first wallet
+With the following steps you can explore the API 
 
-1. Start Postman and add the environment and the collection from ./dev-assets/
+1. Start Postman and add the environment `Managed_Identity_Wallet_Local.postman_environment` and the collection `Managed_Identity_Wallet.postman_collection` from ./dev-assets/
     1. In the added environment make sure that the client_id and client_secret are the same as in your `dev.env` configuration.
-    2. In the body of *Create wallet in Managed Identity Wallets*, change the `bpn` value to your `CX_BPN` from your env file
 
-       ![Change the BPN name](docs/images/ChangeBpnName.png "Adjusting the BPN Name")
+    1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is temporary until the update to Ktor 2.x
 
-    3. Execute the request and note down your `did` and `verKey` from the response
-       
-       ![Create wallet response](docs/images/CreateWalletResponse.png "Wallet creation response")
+1. The two Postman collections `Cx_Base_Wallet_Acapy.postman_collection` and `Managed_Wallets_Acapy.postman_collection` are additional for debugging purposes. these collections include direct calls to the admin API of the Catena-X AcaPy instance and the Multi-tenancy AcaPy instance.
 
-1. Register public DID
-    1. Register your DID from your Wallet at https://indy-test.idu.network/ with "Register from DID"
-
-       ![Public DID registration](docs/images/PublicDIDRegister.png "Public DID registration")
-
-    2. Register your DID with Managed Identity Wallets with a POST to `/api/wallets/<CX Base Wallet BPN>/public` and as body the ver key
-       `{ "verKey": "verification key from creation" }`
-
-1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is required because the Credential can only be issued after the DID is registiered on Ledger and set to Public
+1. The Postman collection `Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` sends requests to the external AcaPy instance that simulate an external wallet or self managed wallet.
 
 1. :tada: **Second milestone reached: Your own wallet!**
 
 Now you have achieved the following:
 
 * set up the development environment to run it from source
-* created your own wallet and published your DID to the ledger
+* initialized the catena-x wallet and its revocation list
 * you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
 
 ## Setup Summary
@@ -163,8 +157,10 @@ Now you have achieved the following:
 | postgreSQL database   | port 5432 on `localhost`| within the Docker Compose setup |
 | Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `catena`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
 | revocation service    | http://localhost:8086   | within the Docker Compose setup |
-| ACA-Py                | http://localhost:10000  | within the Docker Compose setup |
+| ACA-Py for Catena-X Endorser Wallet | http://localhost:10000  | within the Docker Compose setup |
+| ACA-Py Multi-tenancy for Managed Wallets | http://localhost:10003  | within the Docker Compose setup |
 | MIW service           | http://localhost:8080/  | |
+| ACA-Py (External Wallet) | http://localhost:10001  | within the Docker Compose setup |
 
 # Administrator Documentation
 

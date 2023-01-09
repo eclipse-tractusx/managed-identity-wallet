@@ -73,11 +73,6 @@ data class WalletDtoParameter(
 )
 
 @Serializable
-data class VerKeyDto(
-    val verKey: String
-)
-
-@Serializable
 data class SelfManagedWalletResultDto(
     val name: String,
     val bpn: String,

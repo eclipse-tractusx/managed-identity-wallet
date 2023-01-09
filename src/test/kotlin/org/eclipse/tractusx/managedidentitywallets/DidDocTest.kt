@@ -22,9 +22,10 @@ package org.eclipse.tractusx.managedidentitywallets
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
+import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
-import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.plugins.*
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
@@ -42,6 +43,7 @@ class DidDocTest {
 
     @AfterTest
     fun tearDown() {
+        SingletonTestData.cleanSingletonTestData()
         server.stop(1000, 10000)
     }
 
@@ -53,7 +55,9 @@ class DidDocTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -63,10 +67,16 @@ class DidDocTest {
             Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto
             runBlocking {
-                walletDto = EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name1"))
-                EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "name_extra"))
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    bpn = EnvironmentTestSetup.DEFAULT_BPN,
+                    did = EnvironmentTestSetup.DEFAULT_DID,
+                    verkey = EnvironmentTestSetup.DEFAULT_VERKEY,
+                    name = "Catena_X_Wallet"
+                )
+                EnvironmentTestSetup.walletService.createWallet(
+                    WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "name_extra")
+                )
             }
 
             handleRequest(HttpMethod.Get, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}") {
@@ -75,7 +85,7 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.OK, response.status())
             }
 
-            handleRequest(HttpMethod.Get, "/api/didDocuments/${walletDto.did}") {
+            handleRequest(HttpMethod.Get, "/api/didDocuments/${EnvironmentTestSetup.EXTRA_TEST_BPN}") {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -102,6 +112,7 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.UnprocessableEntity, response.status())
             }
 
+            // Add new service endpoint `linked_domains`
             handleRequest(HttpMethod.Post, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -109,9 +120,10 @@ class DidDocTest {
                 setBody(
                     """{ "id": "linked_domains", "type": "linked_domains", "serviceEndpoint": "https://myhost:123"}""".trimIndent())
             }.apply {
-                assertEquals(HttpStatusCode.Created, response.status())
+                assertEquals(HttpStatusCode.Accepted, response.status())
             }
 
+            // Add new service endpoint `did-communication` that already exists
             handleRequest(HttpMethod.Post, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -122,6 +134,7 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.Conflict, response.status())
             }
 
+            // Add new service endpoint `profile`
             handleRequest(HttpMethod.Post, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -129,9 +142,10 @@ class DidDocTest {
                 setBody(
                     """{ "id": "profile", "type": "profile", "serviceEndpoint": "https://myhost:123"}""".trimIndent())
             }.apply {
-                assertEquals(HttpStatusCode.Created, response.status())
+                assertEquals(HttpStatusCode.Accepted, response.status())
             }
 
+            // Add invalid service endpoint `unknown-test`
             handleRequest(HttpMethod.Post, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -142,6 +156,7 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.NotImplemented, response.status())
             }
 
+            // Add service endpoint `linked_domains` for managed wallet
             handleRequest(HttpMethod.Post, "/api/didDocuments/${EnvironmentTestSetup.EXTRA_TEST_BPN}/services") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -149,9 +164,10 @@ class DidDocTest {
                 setBody(
                     """{ "id": "linked_domains", "type": "linked_domains", "serviceEndpoint": "https://myhost:123"}""".trimIndent())
             }.apply {
-                assertEquals(HttpStatusCode.NotImplemented, response.status())
+                assertEquals(HttpStatusCode.Accepted, response.status())
             }
 
+            // Delete service endpoint `linked_domains`
             handleRequest(HttpMethod.Delete, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services/linked_domains") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -159,6 +175,7 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.NotImplemented, response.status())
             }
 
+            // Update service endpoint `did-communication`
             handleRequest(HttpMethod.Put, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services/did-communication") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -166,10 +183,21 @@ class DidDocTest {
                 setBody(
                     """{"type": "did-communication","serviceEndpoint": "https://myhost:7712"}""".trimIndent())
             }.apply {
-                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals(HttpStatusCode.Accepted, response.status())
             }
 
-            // linked_domains service does not exists
+            // Update service endpoint `did-communication` for managed wallet
+            handleRequest(HttpMethod.Put, "/api/didDocuments/${EnvironmentTestSetup.EXTRA_TEST_BPN}/services/did-communication") {
+                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    """{"type": "did-communication","serviceEndpoint": "https://myhost:7712"}""".trimIndent())
+            }.apply {
+                assertEquals(HttpStatusCode.Accepted, response.status())
+            }
+
+            // Update service endpoint linked_domains that does not exists
             handleRequest(HttpMethod.Put, "/api/didDocuments/${EnvironmentTestSetup.DEFAULT_BPN}/services/linked_domains") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -180,7 +208,8 @@ class DidDocTest {
                 assertEquals(HttpStatusCode.NotFound, response.status())
             }
 
-            val exception = assertFailsWith<NotImplementedException> {
+            // Update service endpoint linked_domains that does not exists
+            val exception = assertFailsWith<NotFoundException> {
                 runBlocking {
                     EnvironmentTestSetup.walletService.updateService(
                         EnvironmentTestSetup.EXTRA_TEST_BPN,
@@ -192,7 +221,23 @@ class DidDocTest {
                     )
                 }
             }
-            assertTrue { exception.message!!.contains("Update Service Endpoint is not supported for the wallet ${EnvironmentTestSetup.EXTRA_TEST_BPN}") }
+            assertTrue { exception.message!!.contains("Target Service Endpoint not Found") }
+
+            SingletonTestData.didDocWithoutService = true
+            // Update service endpoint linked_domains that does not exists
+            val exceptionUpdateService = assertFailsWith<BadRequestException> {
+                runBlocking {
+                    EnvironmentTestSetup.walletService.updateService(
+                        EnvironmentTestSetup.DEFAULT_BPN,
+                        "linked_domains",
+                        DidServiceUpdateRequestDto(
+                            type = "linked_domains",
+                            serviceEndpoint = "https://test123.com"
+                        )
+                    )
+                }
+            }
+            assertTrue { exceptionUpdateService.message!!.contains("Update Service failed: DID Document has no services") }
 
             val notImplException = assertFailsWith<NotImplementedException> {
                 Services.utilsService.mapServiceTypeToEnum("UnknownType")

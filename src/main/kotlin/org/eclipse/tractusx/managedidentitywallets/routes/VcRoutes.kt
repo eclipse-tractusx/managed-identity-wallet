@@ -33,7 +33,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.eclipse.tractusx.managedidentitywallets.Services
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 
@@ -146,8 +145,10 @@ fun Route.vcRoutes(
                     )
                 ) {
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
-
-                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
+                    AuthorizationHandler.checkHasRightsToUpdateWallet(
+                        call,
+                        walletService.getCatenaXWallet().bpn
+                    )
 
                     val verifiableCredentialDto = walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
                     call.respond(HttpStatusCode.Created, verifiableCredentialDto)
@@ -181,7 +182,10 @@ fun Route.vcRoutes(
                     )
                 ) {
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialIssuanceFlowRequestDto>()
-                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, Services.walletService.getCatenaXBpn())
+                    AuthorizationHandler.checkHasRightsToUpdateWallet(
+                        call,
+                        walletService.getCatenaXWallet().bpn
+                    )
                     val vc = verifiableCredentialRequestDto.toInternalVerifiableCredentialIssuanceFlowRequest()
                     call.respond(
                         HttpStatusCode.Created,

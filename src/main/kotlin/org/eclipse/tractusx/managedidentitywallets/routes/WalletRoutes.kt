@@ -39,14 +39,13 @@ import io.ktor.routing.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
-import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 import java.time.LocalDateTime
 
-fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService: IBusinessPartnerDataService) {
+fun Route.walletRoutes(walletService: IWalletService) {
 
     route("/wallets") {
 
@@ -95,20 +94,6 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                 try {
                     val walletToCreate = call.receive<WalletCreateDto>()
                     val createdWallet = walletService.createWallet(walletToCreate)
-                    if (!walletService.isCatenaXWallet(createdWallet.bpn)) {
-                        // TODO: notify if issue credentials failed
-                        // Issue and store credentials async
-                        businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
-                            createdWallet,
-                            JsonLdTypes.BPN_TYPE,
-                            null
-                        )
-                        businessPartnerDataService.issueAndStoreCatenaXCredentialsAsync(
-                            createdWallet,
-                            JsonLdTypes.MEMBERSHIP_TYPE,
-                            null
-                        )
-                    }
                     call.respond(HttpStatusCode.Created, createdWallet)
                 } catch (e: IllegalArgumentException) {
                     throw BadRequestException(e.message)
@@ -129,7 +114,7 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                     PostInfo<Unit, SelfManagedWalletCreateDto, SelfManagedWalletResultDto>(
                         summary = "Register and Establish Initial Connection with Partners",
                         description = "Permission: " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_CREATE_WALLETS)}**\n" +
+                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
                                 "\n Register self managed wallet and establish the initial connection with CatenaX. " +
                                 "Also issue their membership and BPN credentials",
                         requestInfo = RequestInfo(
@@ -144,6 +129,7 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                     )
                 ) {
                     val selfManagedWalletCreateDto = call.receive<SelfManagedWalletCreateDto>()
+                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, selfManagedWalletCreateDto.bpn)
                     return@notarizedPost call.respond(
                         HttpStatusCode.Created,
                         walletService.registerSelfManagedWalletAndBuildConnection(selfManagedWalletCreateDto)
@@ -278,68 +264,45 @@ fun Route.walletRoutes(walletService: IWalletService,businessPartnerDataService:
                 }
             }
 
-            route("/public") {
+            route("/send-invitation") {
                 notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                     notarizedPost(
-                        PostInfo<StoreVerifiableCredentialParameter, VerKeyDto, SuccessResponse>(
-                            summary = "Register on Public Chain",
+                        PostInfo<Unit, InvitationRequestDto, Unit>(
+                            summary = "Send Connection Request",
                             description = "Permission: " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
-                                "\nRegister wallet DID on the public chain, endpoint only available for the base wallet",
-                            parameterExamples = setOf(
-                                ParameterExample("identifier", "did", "did:exp:123"),
-                                ParameterExample("identifier", "bpn", "BPN123"),
-                            ),
+                                    "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
+                                    "\n Send connection request to internal or external wallets.",
                             requestInfo = RequestInfo(
-                                description = "VerKey",
-                                examples = verKeyExample
+                                description = "The invitation request",
+                                examples = exampleInvitation
                             ),
                             responseInfo = ResponseInfo(
-                                status = HttpStatusCode.Created,
-                                description = "Success message",
-                                examples = mapOf(
-                                    "demo" to SuccessResponse(
-                                        "Wallet has been successfully registered on chain"
-                                    )
-                                )
+                                status = HttpStatusCode.Accepted,
+                                description = "The connection request has been sent to the given DID",
                             ),
-                            canThrow = setOf(semanticallyInvalidInputException, notFoundException,
-                                forbiddenException, unauthorizedException),
-                            tags = setOf("Wallets")
+                            canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                         )
                     ) {
-                        try {
-                            val identifier = call.parameters["identifier"]
-                                ?: throw BadRequestException("Missing or malformed identifier")
-
-                            AuthorizationHandler.checkHasRightsToUpdateWallet(call, null)
-
-                            val walletDto: WalletDto = walletService.getWallet(identifier)
-                            if (!walletService.isCatenaXWallet(walletDto.bpn)) {
-                                throw NotFoundException("Registering endpoint is not available for any other wallet but the base wallet")
-                            }
-                            val verKeyDto = call.receive<VerKeyDto>()
-                            if (walletService.registerBaseWallet(verKeyDto.verKey)) {
-                                call.respond(
-                                    HttpStatusCode.Created,
-                                    SuccessResponse("Wallet has been successfully registered on chain")
-                                )
-                            } else {
-                                throw Exception("Could not register base wallet on public chain, manual intervention needed!")
-                            }
-                        } catch (e: Exception) {
-                            throw e
-                        }
+                        val identifier = call.parameters["identifier"]
+                            ?: throw BadRequestException("Missing or malformed identifier")
+                        AuthorizationHandler.checkHasRightsToUpdateWallet(call, identifier)
+                        val invitationRequestDto = call.receive<InvitationRequestDto>()
+                        walletService.sendInvitation(identifier, invitationRequestDto)
+                        return@notarizedPost call.respond(HttpStatusCode.Accepted)
                     }
                 }
             }
-
         }
     }
 }
 
-val verKeyExample = mapOf(
-    "demo" to VerKeyDto("VERIFICATION_KEY_AFTER_CREATION")
+
+val exampleInvitation = mapOf(
+    "demo" to InvitationRequestDto(
+        theirPublicDid = "did:sov:example",
+        alias = "alias",
+        myLabel = "myLabel"
+    )
 )
 
 val issuedVerifiableCredentialRequestDtoExample = mapOf(

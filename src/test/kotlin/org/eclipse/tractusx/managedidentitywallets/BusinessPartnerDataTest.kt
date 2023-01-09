@@ -52,7 +52,9 @@ class BusinessPartnerDataTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
@@ -77,7 +79,9 @@ class BusinessPartnerDataTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
         }) {
             val businessPartnerDataAsJson: String = File("./src/test/resources/bpdm-test-data/legalEntity.json")
@@ -92,7 +96,7 @@ class BusinessPartnerDataTest {
 
             val address: List<LegalAddressDto> = Json.decodeFromString(legaAddressAsString)
             assertEquals(emptyList(), address[0].legalAddress.premises)
-            assertEquals("WESTERN_LATIN_STANDARD", address[0].legalAddress.version.characterSet.technicalKey.toString())
+            assertEquals("WESTERN_LATIN_STANDARD", address[0].legalAddress.version.characterSet.technicalKey)
             assertEquals(1, address[0].legalAddress.administrativeAreas.size)
             assertEquals("Münchner Straße 34", address[0].legalAddress.thoroughfares[0].value)
         }

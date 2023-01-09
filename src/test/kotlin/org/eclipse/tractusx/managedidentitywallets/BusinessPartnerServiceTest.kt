@@ -24,12 +24,11 @@ import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.*
-import junit.framework.TestFailure
 import kotlinx.coroutines.*
 import okhttp3.internal.toImmutableList
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
@@ -38,8 +37,6 @@ import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
 import org.eclipse.tractusx.managedidentitywallets.services.*
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
-import org.hyperledger.aries.api.connection.ConnectionRecord
-import org.hyperledger.aries.api.connection.ConnectionState
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
@@ -60,10 +57,23 @@ class BusinessPartnerServiceTest {
         id = 1,
         name = "CatenaX_Wallet",
         bpn = EnvironmentTestSetup.DEFAULT_BPN,
-        did = "did:sov:catenax1",
-        walletId = "walletId",
-        walletKey = "walletId",
-        walletToken = "walletId",
+        did = EnvironmentTestSetup.DEFAULT_DID,
+        walletId = null,
+        walletKey = null,
+        walletToken = null,
+        revocationListName = null,
+        pendingMembershipIssuance = false
+    )
+
+    // Is the issuer wallet Without walletKey and walletToken
+    private val catenaXWallet = WalletExtendedData(
+        id = null,
+        name = issuerWallet.name,
+        did = issuerWallet.did,
+        bpn = issuerWallet.bpn,
+        walletId = "",
+        walletKey = null,
+        walletToken = null,
         revocationListName = null,
         pendingMembershipIssuance = false
     )
@@ -74,8 +84,8 @@ class BusinessPartnerServiceTest {
         bpn = "BPNL000000000001",
         did = "did:sov:holder1",
         walletId = "walletId",
-        walletKey = "walletId",
-        walletToken = "walletId",
+        walletKey = "walletKey",
+        walletToken = "walletToken",
         revocationListName = null,
         pendingMembershipIssuance = true
     )
@@ -101,15 +111,12 @@ class BusinessPartnerServiceTest {
         scope = "test",
     )
 
-    private val walletAcapyConfig = WalletAndAcaPyConfig(
-        "test", "", issuerWallet.bpn, ""
-    )
-
     private val bpnSubject = mapOf(
         "id" to holderWallet.did,
         "type" to JsonLdTypes.NAME_TYPE,
         "bpn" to holderWallet.bpn
     )
+
     private val membershipSubject = mapOf(
         "id" to holderWallet.did,
         "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
@@ -117,6 +124,7 @@ class BusinessPartnerServiceTest {
         "status" to "Active",
         "startTime" to "currentDateAsString",
     )
+
     private val nameSubject = mapOf(
         "id" to holderWallet.did,
         "type" to JsonLdTypes.NAME_TYPE,
@@ -156,7 +164,7 @@ class BusinessPartnerServiceTest {
     private val nameResponseData = NameResponse(
         value = "German Car Company",
         shortName = "GCC",
-        type = TypeKeyNameUrlDto<String>(
+        type = TypeKeyNameUrlDto(
             technicalKey = "REGISTERED",
             name = "The main name under which a business is officially registered in a country's business register.",
             url = ""
@@ -164,7 +172,6 @@ class BusinessPartnerServiceTest {
         language = TypeKeyNameDto(
             technicalKey = "undefined",
             name = "Undefined"
-
         )
     )
 
@@ -219,24 +226,18 @@ class BusinessPartnerServiceTest {
 
     private val mockEngine = MockEngine { request ->
         if (request.url.toString().endsWith(bpdmConfig.tokenUrl)) {
-            respond(
-                content = ByteReadChannel(accessToken),
-                status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            respondOk(
+                content = accessToken
             )
         } else if (request.url.toString().endsWith("legal-addresses/search")) {
-            respond(
-                content = ByteReadChannel("""[]"""), // empty addresses
-                status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            respondOk(
+                content = """[]""" // empty addresses
             )
         } else if (request.url.toString().endsWith("legal-entities/search")) {
             val legalEntityAsString: String = File("./src/test/resources/bpdm-test-data/legalEntityOnlyName.json")
                 .readText(Charsets.UTF_8)
-            respond(
-                content = ByteReadChannel(legalEntityAsString),
-                status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            respondOk(
+                content = legalEntityAsString,
             )
         } else {
             fail("Unexpected Http request")
@@ -275,9 +276,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acapyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acapyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acapyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acapyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -286,12 +290,13 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 val walletServiceSpy = spy(walletService)
-                val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
                     client
                 )
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+                val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 val listOfCredentialIds = listOf(
                     "urn:uuid:93731387-dec1-4bf6-8087-d5210f771421",
                     "urn:uuid:93731387-dec1-4bf6-8087-d5210f771422",
@@ -365,9 +370,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -376,6 +384,7 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 val walletServiceSpy = spy(walletService)
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 val holderWalletDto = walletService.getWallet(holderWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
@@ -435,18 +444,27 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create wallets and connection, init services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, selfManagedWallet))
+
                 addConnection(
                     connectionRepository,
-                    ConnectionState.COMPLETED,
+                    Rfc23State.COMPLETED.toString(),
                     connectionId,
                     issuerWallet.did,
                     selfManagedWallet.did
                 )
                 val acapyServiceMocked = mock<AcaPyService>()
                 whenever(acapyServiceMocked.getWalletAndAcaPyConfig()).thenReturn(
-                    walletAcapyConfig
+                    EnvironmentTestSetup.walletAcapyConfig
                 )
+                doNothing().whenever(acapyServiceMocked).subscribeBaseWalletForWebSocket()
+
+                // Mock credential exchange offer
+                val threadId = "thread-id"
+                val v20CredentialExchange = createCredentialExchange(threadId)
+                whenever(acapyServiceMocked.issuanceFlowCredentialSend(anyOrNull(), any()))
+                    .doReturn(v20CredentialExchange)
+
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
                 walletService = AcaPyWalletServiceImpl(
                     acaPyService = acapyServiceMocked,
                     walletRepository = walletRepo,
@@ -457,6 +475,7 @@ class BusinessPartnerServiceTest {
                     connectionRepository = connectionRepository
                 )
                 val walletServiceSpy = spy(walletService)
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, selfManagedWallet))
                 val selfManagedWalletDto = walletService.getWallet(selfManagedWallet.did, false)
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
@@ -475,12 +494,7 @@ class BusinessPartnerServiceTest {
                     )
                 ).whenever(walletServiceSpy).issueCatenaXCredential(any())
 
-                // Mock credential exchange offer
-                val threadId = "thread-id"
-                val v20CredentialExchange = createCredentialExchange(threadId)
-                doReturn(
-                    v20CredentialExchange
-                ).whenever(acapyServiceMocked).issuanceFlowCredentialSend(any(), any())
+
 
                 // Test `issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync`
                 bpdmService.issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
@@ -508,16 +522,19 @@ class BusinessPartnerServiceTest {
     }
 
     @Test
-    fun testPullDataAndUpdateCatenaXCredentialsAsyncBpdmHttpRequest() {
+    fun testPullDataAndUpdateCatenaXCredentialsAsyncBpdmHttpRequest()  {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
         }) {
             runBlocking {
                 // Setup: Create Wallets, init Services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -527,32 +544,33 @@ class BusinessPartnerServiceTest {
                 )
                 var callCounter = 0
                 val mockEngine = MockEngine {
-                    when (callCounter) {
-                        0 -> { // access Token
-                            callCounter++
-                            respond(
-                                content = ByteReadChannel(accessToken),
-                                status = HttpStatusCode.OK,
-                                headers = headersOf(HttpHeaders.ContentType, "application/json")
-                            )
+                        when (callCounter) {
+                            0 -> { // access Token
+                                callCounter++
+                                respond(
+                                    content = ByteReadChannel(accessToken),
+                                    status = HttpStatusCode.OK,
+                                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                                )
+                            }
+                            1 -> { // get legal address
+                                callCounter++
+                                respondBadRequest()
+                            }
+                            2 -> { // get business partner data first try
+                                callCounter++
+                                respondBadRequest()
+                            }
+                            else -> {
+                                fail("Unexpected Http request")
+                            }
                         }
-                        1 -> { // get legal address
-                            callCounter++
-                            respondBadRequest()
-                        }
-                        2 -> { // get business partner data first try
-                            callCounter++
-                            respondBadRequest()
-                        }
-                        else -> {
-                            fail("Unexpected Http request")
-                        }
-                    }
                 }
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
                 }
                 val walletServiceSpy = spy(walletService)
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -594,75 +612,6 @@ class BusinessPartnerServiceTest {
     }
 
     @Test
-    fun testPullDataAndUpdateCatenaXCredentialsAsyncBigNumberOfBpns() {
-        withTestApplication({
-            EnvironmentTestSetup.setupEnvironment(environment)
-            configurePersistence()
-        }) {
-            runBlocking {
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
-                    walletRepository = walletRepo,
-                    credentialRepository = credentialRepository,
-                    utilsService = utilsService,
-                    revocationService = revocationService,
-                    webhookService = webhookService,
-                    connectionRepository = connectionRepository
-                )
-                var numberOfCalls = 0
-                val mockEngineEmptyLists = MockEngine { request ->
-                    if (request.url.toString().endsWith(bpdmConfig.tokenUrl)) {
-                        numberOfCalls++
-                        respond(
-                            content = ByteReadChannel(accessToken),
-                            status = HttpStatusCode.OK,
-                            headers = headersOf(HttpHeaders.ContentType, "application/json")
-                        )
-                    } else if (request.url.toString().endsWith("legal-addresses/search")) {
-                        numberOfCalls++
-                        respond(
-                            content = ByteReadChannel("""[]"""), // empty addresses
-                            status = HttpStatusCode.OK,
-                            headers = headersOf(HttpHeaders.ContentType, "application/json")
-                        )
-                    } else if (request.url.toString().endsWith("legal-entities/search")) {
-                        numberOfCalls++
-                        respond(
-                            content = ByteReadChannel("""[]"""),
-                            status = HttpStatusCode.OK,
-                            headers = headersOf(HttpHeaders.ContentType, "application/json")
-                        )
-                    } else {
-                        fail("Unexpected Http request")
-                    }
-                }
-                val client = HttpClient(mockEngineEmptyLists) {
-                    expectSuccess = false
-                }
-                val walletServiceSpy = spy(walletService)
-                val bigBpnsList: List<String> = (1..5001).map { "Bpn$it" }
-                doReturn(bigBpnsList).whenever(walletServiceSpy).getAllBpns()
-
-                bpdmService = BusinessPartnerDataServiceImpl(
-                    walletServiceSpy,
-                    bpdmConfig,
-                    client
-                )
-
-                assertDoesNotThrow {
-                    runBlocking {
-                        bpdmService.pullDataAndUpdateCatenaXCredentialsAsync().await()
-                        // The Bpns will be split in 2 chunks [[1..5000], [5001]]
-                        // Therefore there will be 6 requests (2 access token, 2 legal entities, 2 legal addresses)
-                        assertEquals(6, numberOfCalls)
-                    }
-
-                }
-            }
-        }
-    }
-
-    @Test
     fun testPullDataAndUpdateCatenaXCredentialsAsync() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
@@ -670,9 +619,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create Wallets, init Services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -684,6 +636,7 @@ class BusinessPartnerServiceTest {
                     expectSuccess = false
                 }
                 val walletServiceSpy = spy(walletService)
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
@@ -737,13 +690,19 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create wallet and connection, init services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, selfManagedWallet))
                 addConnection(
-                    connectionRepository, ConnectionState.COMPLETED,
-                    connectionId, issuerWallet.did, selfManagedWallet.did
+                    connectionRepository = connectionRepository,
+                    state = Rfc23State.COMPLETED.toString(),
+                    connectionId = connectionId,
+                    myDid = issuerWallet.did,
+                    theirDid = selfManagedWallet.did
                 )
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -751,12 +710,16 @@ class BusinessPartnerServiceTest {
                     webhookService = webhookService,
                     connectionRepository = connectionRepository
                 )
-                val spyWalletService = spy(walletService)
+                val walletServiceSpy = spy(walletService)
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, selfManagedWallet))
+                doReturn(
+                    catenaXWallet
+                ).whenever(walletServiceSpy).getCatenaXWallet()
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
                 }
                 bpdmService = BusinessPartnerDataServiceImpl(
-                    spyWalletService,
+                    walletServiceSpy,
                     bpdmConfig,
                     client
                 )
@@ -810,9 +773,12 @@ class BusinessPartnerServiceTest {
         }) {
             runBlocking {
                 // Setup: Create wallets, init Services and mocks
-                addWallets(walletRepo, listOf(issuerWallet, holderWallet))
-                walletService = IWalletService.createWithAcaPyService(
-                    walletAndAcaPyConfig = walletAcapyConfig,
+                val acaPyServiceMock = mock<AcaPyService>()
+                doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
+                whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
+                whenever(revocationService.registerList(any(), any())).thenReturn(UUID.randomUUID().toString())
+                walletService = AcaPyWalletServiceImpl(
+                    acaPyService = acaPyServiceMock,
                     walletRepository = walletRepo,
                     credentialRepository = credentialRepository,
                     utilsService = utilsService,
@@ -820,7 +786,8 @@ class BusinessPartnerServiceTest {
                     webhookService = webhookService,
                     connectionRepository = connectionRepository
                 )
-                var walletServiceSpy = spy(walletService)
+                val walletServiceSpy = spy(walletService)
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
                 doAnswer { null }.whenever(walletServiceSpy).revokeVerifiableCredential(any())
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
@@ -839,7 +806,7 @@ class BusinessPartnerServiceTest {
                     any(),
                 )
                 // Store mocked credential in DB. This credential is not equal to the pulled data from Bpdm
-                var credentialId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f771421"
+                val credentialId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f771421"
                 transaction {
                     // not equal to the pulled data
                     walletService.storeCredential(
@@ -853,7 +820,7 @@ class BusinessPartnerServiceTest {
                             type = listOf(JsonLdTypes.NAME_TYPE, JsonLdTypes.CREDENTIAL_TYPE),
                             issuanceDate = "2021-06-16T18:56:59Z",
                             expirationDate = "2026-06-17T18:56:59Z",
-                            issuer = "${issuerWallet.did}",
+                            issuer = issuerWallet.did,
                             credentialSubject = newNameSubject,
                             credentialStatus = null,
                             proof = LdProofDto(
@@ -871,7 +838,7 @@ class BusinessPartnerServiceTest {
                 // and existing credential to be revoked
                 bpdmServiceSpy.pullDataAndUpdateCatenaXCredentialsAsync(holderWallet.did).await()
                 transaction {
-                    var credentials = credentialRepository.getCredentials(
+                    val credentials = credentialRepository.getCredentials(
                         null, holderWallet.did, null, null
                     )
                     // The stored credential is deleted.
@@ -903,7 +870,7 @@ class BusinessPartnerServiceTest {
         type = listOf(type, JsonLdTypes.CREDENTIAL_TYPE),
         issuanceDate = "2021-06-16T18:56:59Z",
         expirationDate = "2026-06-17T18:56:59Z",
-        issuer = "$issuerDid",
+        issuer = issuerDid,
         credentialSubject = subject,
         credentialStatus = null,
         proof = LdProofDto(
@@ -924,33 +891,46 @@ class BusinessPartnerServiceTest {
         val credentialAttach = listOf(dataDecorator)
         val credOffer = V20CredOffer()
         credOffer.offersAttach = credentialAttach.toImmutableList()
-        var v20CredentialExchange = V20CredExRecord()
+        val v20CredentialExchange = V20CredExRecord()
         v20CredentialExchange.state = CredentialExchangeState.OFFER_SENT
         v20CredentialExchange.threadId = threadId
         v20CredentialExchange.credOffer = credOffer
         return v20CredentialExchange
     }
 
-    private fun addWallets(walletRepo: WalletRepository, wallets: List<WalletExtendedData>) {
+    private fun addWallets(walletRepo: WalletRepository, walletService: IWalletService, wallets: List<WalletExtendedData>) {
         transaction {
             wallets.forEach {
-                walletRepo.addWallet(it)
+                if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
+                    runBlocking {
+                        walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                            EnvironmentTestSetup.DEFAULT_BPN,
+                            EnvironmentTestSetup.DEFAULT_DID,
+                            EnvironmentTestSetup.DEFAULT_VERKEY,
+                            "Catena-X-Wallet"
+                        )
+                    }
+                } else {
+                    walletRepo.addWallet(it)
+                }
             }
         }
     }
 
     private fun addConnection(
         connectionRepository: ConnectionRepository,
-        state: ConnectionState,
+        state: String,
         connectionId: String,
         myDid: String,
         theirDid: String
     ) {
         transaction {
-            val connection = ConnectionRecord()
-            connection.state = state
-            connection.connectionId = connectionId
-            connectionRepository.add(myDid, theirDid, connection)
+            connectionRepository.add(
+                idOfConnection = connectionId,
+                connectionTargetDid = theirDid,
+                connectionOwnerDid = myDid,
+                rfc23State = state
+            )
         }
     }
 }
