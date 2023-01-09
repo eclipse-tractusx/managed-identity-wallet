@@ -19,6 +19,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.models.ssi
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.bkbn.kompendium.annotations.Field
 import io.bkbn.kompendium.annotations.Param
 import io.bkbn.kompendium.annotations.ParamType
@@ -32,7 +33,10 @@ data class DidServiceDto(
     val type: String,
     @Field(description = "The URL of the Service Endpoint as String (URI compatible)", name = "serviceEndpoint")
     val serviceEndpoint: String,
+    val accept: List<String>? = null,
+    @JsonProperty("recipient_keys")
     val recipientKeys: List<String>? = null,
+    @JsonProperty("routing_keys")
     val routingKeys: List<String>? = null,
     val priority: Int? = null
 )

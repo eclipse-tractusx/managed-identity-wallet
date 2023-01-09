@@ -1,12 +1,11 @@
 ## Interaction with self managed wallet <a id= "self-managed-wallets"></a>
 
 - Interaction with self managed wallet involves:
-  - Establish connection with self managed wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/25464a5c8f8a17b14edaa4310393df6094ace7b0/features/0023-did-exchange)
-  - Issue credential to self managed wallet as defined in [Aries RFC 0453](https://github.com/hyperledger/aries-rfcs/tree/cd27fc64aa2805f756a118043d7c880354353047/features/0453-issue-credential-v2)
-  - Request presentation from self managed wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/eace815c3e8598d4a8dd7881d8c731fdb2bcc0aa/features/0454-present-proof-v2)
+  - Establish connection with self managed wallet as defined in [ARIES RFC 0023](https://github.com/hyperledger/aries-rfcs/tree/main/features/0023-did-exchange)
+  - Issue credential to self managed wallet as defined in [Aries RFC 0453](https://github.com/hyperledger/aries-rfcs/tree/main/features/0453-issue-credential-v2)
+  - Request presentation from self managed wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2)
 
 - Current limitation:
-  - Self managed wallets can only interact with the Catena-X wallet
   - Request presentation from self managed wallet is not implemented yet
   - Credential revocation is not supported for credentials issued to self managed wallet
 
@@ -33,14 +32,14 @@ A credential can be sent to the self managed wallet by calling the `issuance-flo
 
 ### Local Test Steps:
 1. Follow the steps in `Steps for initial local deployment and wallet Creation` section in the `README.md` file
-1. Import a new postman collection `Test Acapy - Self Managed Wallet.postman_collection.json` from `./dev-asset`
-1. Run `Test-Acapy-SelfManagedWallet/Get Connections` and make sure there are no connections. If there are any please delete them using `Remove Connection`
-1. From `Custodian Sample` collection run `Register self managed wallets` 
-1. Run `Test-Acapy-SelfManagedWallet/Get Connections` and copy the `connection_Id` e.g. `716e678c-f329-4baa-be4d-3c68f004a0ef`
-1. Run `Test-Acapy-SelfManagedWallet/Accept Connection` after replacing the connection id in the path e.g. `http://localhost:11001/didexchange/716e678c-f329-4baa-be4d-3c68f004a0ef/accept-request`
+1. Import a new postman collection `Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection.json` from `./dev-asset`
+1. Run `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Get Connections` and make sure there are no connections. If there are any please delete them using `Remove Connection`
+1. From `Managed Identity Wallet` collection run `Register self managed wallets` 
+1. Run `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Get Connections` and copy the `connection_Id` e.g. `716e678c-f329-4baa-be4d-3c68f004a0ef`
+1. Run `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Accept Connection` after replacing the connection id in the path e.g. `http://localhost:11001/didexchange/716e678c-f329-4baa-be4d-3c68f004a0ef/accept-request`
 1. The Self Managed Wallet will trigger the AcaPy of MIW and the MIW will change the state of the connection to `Completed` and issue 2 Verifiable Credential Offers. Those can be verified by looking at the database
 1. To Accept the BPN Credential by the self managed wallet run `Get Records` after changing the connection Id e.g. `http://localhost:11001/issue-credential-2.0/records?connection_id=716e678c-f329-4baa-be4d-3c68f004a0ef`
 1. Search for the BPN Credential and then copy its crednetial exchange id `cred_ex-id` e.g. `e55a3a77-d0bb-43d3-a7a3-0f7003798fc0`
-1. To Accept the credential offer and send a request run `Test-Acapy-SelfManagedWallet/Send Credential Request` after replacing the cred_ex_id e.g. `http://localhost:11001/issue-credential-2.0/records/e55a3a77-d0bb-43d3-a7a3-0f7003798fc0/send-request`. This step will trigger the AcaPy of MIW to issue a signed credential.
-1. To Store the credential run `Test-Acapy-SelfManagedWallet/Store Credential` after replacing the cred_ex_id in the path and giving a unique id for the credential in the body e.g. `http://localhost:11001/issue-credential-2.0/records/e55a3a77-d0bb-43d3-a7a3-0f7003798fc0/store` with body `{"credential_id": "12345678-9999-43d3-a7a3-111111111111" }`. This will trigger AcaPy to set the credential status of DONE and MIW to send a notification to the webhook, that is given with the wallet registration.
-1. To Send another Credential Offer you can call `Custodian Sample/Issuance-flow` and repeat the steps 8 to 11
+1. To Accept the credential offer and send a request run `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Send Credential Request` after replacing the cred_ex_id e.g. `http://localhost:11001/issue-credential-2.0/records/e55a3a77-d0bb-43d3-a7a3-0f7003798fc0/send-request`. This step will trigger the AcaPy of MIW to issue a signed credential.
+1. To Store the credential run `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Store Credential` after replacing the cred_ex_id in the path and giving a unique id for the credential in the body e.g. `http://localhost:11001/issue-credential-2.0/records/e55a3a77-d0bb-43d3-a7a3-0f7003798fc0/store` with body `{"credential_id": "12345678-9999-43d3-a7a3-111111111111" }`. This will trigger AcaPy to set the credential status of DONE and MIW to send a notification to the webhook, that is given with the wallet registration.
+1. To Send another Credential Offer you can call `Managed Identity Wallet/Issuance-flow` and repeat the steps 8 to 11

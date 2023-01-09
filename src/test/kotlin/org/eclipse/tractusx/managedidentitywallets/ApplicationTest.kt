@@ -113,7 +113,9 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService, EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureJobs()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -134,7 +136,9 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
@@ -182,7 +186,9 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
@@ -221,9 +227,8 @@ class ApplicationTest {
             }
 
             // programmatically add base wallet
-            val walletVerifyKey: String?
             runBlocking {
-                walletVerifyKey = EnvironmentTestSetup.walletService.createWallet(
+                 EnvironmentTestSetup.walletService.createWallet(
                     WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name1")).verKey
             }
 
@@ -233,16 +238,6 @@ class ApplicationTest {
             }.apply {
                 assertEquals(HttpStatusCode.Forbidden, response.status())
                 assertTrue { response.content!!.contains("It has none of the sufficient role(s) delete_wallets") }
-            }
-
-            // set wallet to public
-            handleRequest(HttpMethod.Post, "/api/wallets/${EnvironmentTestSetup.DEFAULT_BPN}/public") {
-                addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN_SINGLE}")
-                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody("""{"verKey":"$walletVerifyKey" }""")
-            }.apply {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
             }
 
             // delete should not work without token
@@ -269,7 +264,9 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
             Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
@@ -641,6 +638,10 @@ class ApplicationTest {
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.EXTRA_TEST_BPN)
+                val credentials = EnvironmentTestSetup.walletService.getCredentials(
+                    null, null, null, null
+                )
+                assertEquals(0, credentials.size)
             }
 
             assertEquals(0, EnvironmentTestSetup.walletService.getAll().size)

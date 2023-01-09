@@ -60,7 +60,9 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -70,10 +72,12 @@ class CredentialsTest {
             Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto
             runBlocking {
-                walletDto =  EnvironmentTestSetup.walletService.createWallet(
-                    WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default")
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
                 )
             }
 
@@ -87,7 +91,7 @@ class CredentialsTest {
 
             //TODO replace issuerDid inside vcWithReplaceableSubjectId when did indy method is supported by AcaPy
             val vcAsString: String = File("./src/test/resources/credentials-test-data/vcWithReplaceableSubjectId.json")
-                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>", walletDto.did)
+                .readText(Charsets.UTF_8).replace("<subject-id-to-replace>", EnvironmentTestSetup.DEFAULT_DID)
             val storeVerifiableCredentialParameter = StoreVerifiableCredentialParameter(EnvironmentTestSetup.DEFAULT_BPN)
             assertEquals(EnvironmentTestSetup.DEFAULT_BPN, storeVerifiableCredentialParameter.identifier)
 
@@ -139,7 +143,9 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -150,9 +156,14 @@ class CredentialsTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                val walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
-                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-                SingletonTestData.baseWalletDID = walletDto.did
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
+                )
+                SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
+                SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
             }
             val verifiableCredentialRequest = VerifiableCredentialRequestDto(
                 context = listOf(
@@ -425,7 +436,9 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -436,9 +449,14 @@ class CredentialsTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                val walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
-                SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-                SingletonTestData.baseWalletDID = walletDto.did
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
+                )
+                SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
+                SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
             }
             val verifiableCredentialRequest = VerifiableCredentialRequestWithoutIssuerDto(
                 context = listOf(
@@ -526,7 +544,9 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -536,13 +556,17 @@ class CredentialsTest {
             Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
-            val walletDto: WalletDto
             runBlocking {
-                walletDto =  EnvironmentTestSetup.walletService.createWallet(WalletCreateDto(EnvironmentTestSetup.DEFAULT_BPN, "name_default"))
+                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.DEFAULT_BPN,
+                    EnvironmentTestSetup.DEFAULT_DID,
+                    EnvironmentTestSetup.DEFAULT_VERKEY,
+                    "Catena-X-Wallet"
+                )
             }
-
-            SingletonTestData.baseWalletVerKey = walletDto.verKey!!
-            SingletonTestData.baseWalletDID = walletDto.did
+            val walletDto = EnvironmentTestSetup.walletService.getWallet(EnvironmentTestSetup.DEFAULT_BPN)
+            SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
+            SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
             SingletonTestData.revocationListName = walletDto.revocationListName!!
             SingletonTestData.credentialIndex = 0
             val signedCred = Json.encodeToString(
@@ -830,7 +854,9 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -878,7 +904,7 @@ class CredentialsTest {
             SingletonTestData.signCredentialResponse = """{ "signed_doc": $signedCred }"""
             SingletonTestData.isValidVerifiableCredential = true
             val listCredentialRequestData = ListCredentialRequestData(
-                listId = "uuid-of-list",
+                listId = "urn:uuid:93731387-dec1-4bf6-8087-d5210f661421",
                 subject = ListCredentialSubject (
                     credentialId = "https://example.com/status/3#list",
                     credentialType = "StatusList2021",
@@ -911,7 +937,9 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
@@ -966,7 +994,9 @@ class CredentialsTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting(EnvironmentTestSetup.walletService)
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,  EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.utilsService)
+            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
+                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+                EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService

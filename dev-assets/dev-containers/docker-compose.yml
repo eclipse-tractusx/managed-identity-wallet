@@ -27,9 +27,11 @@ services:
     ports:
       - "8081:8080"
 
-  cx_acapy:
-    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4
-    container_name: cx_acapy
+  # DID: ArqouCjqi4RwBXQqjAbQrG, Verkey: 6Ng3Cu39yTViaEUg1BETpze78nXZqHpb6Q783X2rRhe6
+  # This wallet must have the endorser role
+  cx_base_acapy:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
+    container_name: cx_base_acapy
     ports:
       - "11000:11000"
       - "8000:8000"
@@ -44,30 +46,81 @@ services:
     command: [
        "-c",
        "aca-py start \
-        -e http://cx_acapy:8000/ \
+        -e http://cx_base_acapy:8000/ \
         --auto-provision \
         --inbound-transport http '0.0.0.0' 8000 \
         --outbound-transport http \
         --admin '0.0.0.0' 11000 \
-        --wallet-name catenaX \
-        --wallet-type indy \
+        --wallet-name CatenaX_Base_Wallet \
+        --wallet-type askar \
+        --wallet-key issuerKeySecret19 \
+        --wallet-storage-type postgres_storage
+        --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
+        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
+        --seed qa0d0ke80770fff0000em00117117117 \
+        --genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \
+        --label CatenaX_Base_Wallet \
+        --admin-api-key Hj23iQUsstGXdde \
+        --auto-ping-connection \
+        --jwt-secret jwtSecret19 \
+        --public-invites \
+        --endorser-protocol-role endorser \
+        --auto-endorse-transactions \
+        --log-level DEBUG"
+    ]
+
+  # The management multi-tenancy wallet must be registered on ledger 
+  cx_acapy:
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
+    container_name: cx_acapy
+    ports:
+      - "11003:11003"
+      - "8003:8003"
+    depends_on:
+      - cx_postgres
+    environment:
+      WAIT_HOSTS: "cx_postgres:5432"
+      WAIT_HOSTS_TIMEOUT: "300"
+      WAIT_SLEEP_INTERVAL: "5"
+      WAIT_HOST_CONNECT_TIMEOUT: "3"
+    entrypoint: /bin/bash
+    command: [
+       "-c",
+       "aca-py start \
+        -e http://cx_acapy:8003/ \
+        --auto-provision \
+        --inbound-transport http '0.0.0.0' 8003 \
+        --outbound-transport http \
+        --admin '0.0.0.0' 11003 \
+        --wallet-name catenaX_managed \
+        --wallet-type askar \
         --wallet-key issuerKeySecret19 \
         --wallet-storage-type postgres_storage
         --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
         --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
         --seed 00000000000000000000000111111119 \
         --genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \
-        --label CatenaXIssuer \
-        --admin-api-key Hj23iQUsstG!dde \
+        --label CatenaXManagedWallets \
+        --admin-api-key Hj23iQUsstGXdde \
         --auto-ping-connection \
         --jwt-secret jwtSecret19 \
         --multitenant \
         --multitenant-admin \
-        --log-level DEBUG",
+        --public-invites \
+        --webhook-url http://host.docker.internal:8080/webhook \
+        --endorser-protocol-role author \
+        --endorser-alias endorser \
+        --endorser-public-did ArqouCjqi4RwBXQqjAbQrG \
+        --auto-request-endorsement \
+        --auto-write-transactions \
+        --auto-promote-author-did \
+        --log-level DEBUG"
     ]
 
+  # DID: 7rB93fLvW5kgujZ4E57ZxL, Verkey: 4jUUkyPCYXje9xadw63s59qfLZiC4Ad7StqncbkkXDvK
+  # must be registered on ledger and have an endpoint service a
   test_acapy:
-    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.4
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
     container_name: test_acapy
     ports:
       - "11001:11001"
@@ -87,7 +140,7 @@ services:
         --seed 04001600008020004050050111111119 \
         --genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \
         --label TestWallet \
-        --admin-api-key Hj23iQUsstG!dde \
+        --admin-api-key Hj23iQUsstGXdde \
         --auto-ping-connection \
         --jwt-secret jwtSecret19 \
         --public-invites \
