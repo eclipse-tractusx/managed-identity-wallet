@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "6966c120-e2de-46df-8bc8-6c7ab9203ee9",
-		"name": "Custodian Sample",
+		"name": "Managed Identity Wallet",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -62,7 +62,7 @@
 			"response": []
 		},
 		{
-			"name": "Create wallet  in Custodian",
+			"name": "Create wallet  in MIW",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -78,7 +78,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"acapy_bpn222_name\",\n    \"bpn\": \"bpn222\"\n}",
+					"raw": "{\n    \"name\": \"managedWallet_777\",\n    \"bpn\": \"BPNL000000000777\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -86,9 +86,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets",
+					"raw": "{{miw_url}}/api/wallets",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -99,7 +99,7 @@
 			"response": []
 		},
 		{
-			"name": "Get wallets from Custodian ",
+			"name": "Get wallets from MIW",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -114,9 +114,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets",
+					"raw": "{{miw_url}}/api/wallets",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -142,14 +142,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/bpn222?withCredentials=true",
+					"raw": "{{miw_url}}/api/wallets/BPNL000000015PGU?withCredentials=true",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"bpn222"
+						"BPNL000000015PGU"
 					],
 					"query": [
 						{
@@ -162,7 +162,7 @@
 			"response": []
 		},
 		{
-			"name": "Delete wallet with identifier from Custodian",
+			"name": "Delete wallet with identifier from MIW",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -177,14 +177,14 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/TestX1",
+					"raw": "{{miw_url}}/api/wallets/BPNL000000015QG5",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"TestX1"
+						"BPNL000000015QG5"
 					]
 				}
 			},
@@ -206,14 +206,53 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn222",
+					"raw": "{{miw_url}}/api/didDocuments/bpn222",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
 						"didDocuments",
 						"bpn222"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Invitation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"theirPublicDid\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"alias\": \"TestX1\",\n    \"myLabel\": \"MY_LABEL\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/wallets/bpn/send-invitation",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"bpn",
+						"send-invitation"
 					]
 				}
 			},
@@ -236,7 +275,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"bpn\": \"TestX1\",\n    \"did\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"name\": \"TestX1\",\n    \"webhookUrl\": \"ME_WEB_HOOK\"\n}",
+					"raw": "{\n    \"bpn\": \"BPNL000000015QG5\",\n    \"did\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"name\": \"TestX1\",\n    \"webhookUrl\": \"ME_WEB_HOOK\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -244,9 +283,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/self-managed-wallets",
+					"raw": "{{miw_url}}/api/wallets/self-managed-wallets",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -258,7 +297,7 @@
 			"response": []
 		},
 		{
-			"name": "Issuance flow (currently available for catena X to issue creds for self managed wallets)",
+			"name": "Issuance Flow (require connections to managed/self-managed wallets)",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -274,7 +313,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n            \"https://www.w3.org/2018/credentials/v1\",\n            \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739141414\",\n    \"type\": [\n        \"BpnCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n            \"type\": [\n                \"BpnCredential\"\n            ],\n            \"bpn\": \"NEWNEWTestTest\",\n            \"id\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\"\n    },\n    \"holderIdentifier\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"isRevocable\": false\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\"\n    ],\n    \"id\": \"urn:uuid:93031387-dec1-7654-1112-71710f391111\",\n    \"type\": [\n        \"BankAccountCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"trustScores\": [\n                7,\n                7,\n                7\n            ],\n            \"internationalBankAccountIdentifier\": \"M2\",\n            \"nationalBankAccountIdentifier\": \"M2\",\n            \"internationalBankIdentifier\": \"M3\",\n            \"nationalBankIdentifier\": \"M3\",\n            \"currency\": {\n                \"technicalKey\": \"M3\",\n                \"name\": \"M2\"\n            }\n        },\n        \"type\": [\n            \"BankAccountCredential\"\n        ]\n    },\n    \"holderIdentifier\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\",\n    \"isRevocable\": false,\n    \"webhookUrl\": \"ManagedToExternal\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -282,9 +321,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/issuance-flow",
+					"raw": "{{miw_url}}/api/credentials/issuance-flow",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -312,7 +351,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3888\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"bpn111\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student5\",\n        \"degree\": {\n            \"typeeee\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\"\n    },\n    \"holderIdentifier\": \"bpn222\",\n    \"isRevocable\": true\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\"\n    ],\n    \"id\": \"http://example.edu/credentials/382121414188\",\n    \"type\": [\n        \"VerifiableCredential\",\n        \"NameCredential\"\n    ],\n    \"issuerIdentifier\": \"BPNL000000000111\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"value\": \"Test\",\n            \"nameType\": {\n                \"technicalKey\": \"LOCAL\",\n                \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                \"url\": \"http://test.de\"\n            },\n            \"language\": {\n                \"technicalKey\": \"Test\",\n                \"name\": \"Test\"\n            }\n        },\n        \"type\": \"NameCredential\"\n    },\n    \"holderIdentifier\": \"BPNL000000000222\",\n    \"isRevocable\": true\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -320,19 +359,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials?isRevocable=true",
+					"raw": "{{miw_url}}/api/credentials",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
 						"credentials"
-					],
-					"query": [
-						{
-							"key": "isRevocable",
-							"value": "true"
-						}
 					]
 				}
 			},
@@ -363,9 +396,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/issuer",
+					"raw": "{{miw_url}}/api/credentials/issuer",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -401,9 +434,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/revocations",
+					"raw": "{{miw_url}}/api/credentials/revocations",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -430,9 +463,9 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/revocations/statusListCredentialRefresh",
+					"raw": "{{miw_url}}/api/credentials/revocations/statusListCredentialRefresh",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -450,9 +483,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials/status/5c145c85-8fcb-42d4-893c-d19a55581e00",
+					"raw": "{{miw_url}}/api/credentials/status/5c145c85-8fcb-42d4-893c-d19a55581e00",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -481,7 +514,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"holderIdentifier\": \"bpn111\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/3888\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\",\n                \"https://w3id.org/vc/status-list/2021/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ\",\n            \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n            \"expirationDate\": \"2999-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student5\",\n                \"degree\": {\n                    \"typeeee\": \"Master1\",\n                    \"degreeType\": \"Undergraduate2\",\n                    \"name\": \"Master of Test11\"\n                },\n                \"college\": \"Test2\",\n                \"id\": \"did:sov:HR6kiZSiUHfcW2tkGxtDKk\"\n            },\n            \"credentialStatus\": {\n                \"id\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b#1\",\n                \"type\": \"StatusList2021Entry\",\n                \"statusPurpose\": \"revocation\",\n                \"statusListIndex\": \"1\",\n                \"statusListCredential\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-09-16T15:13:26Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..7qfg_wZPBxCF_Ua254ll7dIxmaS42sFXJgfMb95_NByCLbur6PyLbhqCGuGQttdu0lVbjawvCrkvj7YEFxGyCQ\"\n            }\n        }\n    ]\n}",
+					"raw": "{\n    \"holderIdentifier\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/382121414188\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\",\n                \"https://w3id.org/vc/status-list/2021/v1\"\n            ],\n            \"type\": [\n                \"VerifiableCredential\",\n                \"NameCredential\"\n            ],\n            \"issuer\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n            \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n            \"expirationDate\": \"2999-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"data\": {\n                    \"value\": \"Test\",\n                    \"nameType\": {\n                        \"technicalKey\": \"LOCAL\",\n                        \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                        \"url\": \"http://test.de\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"Test\",\n                        \"name\": \"Test\"\n                    }\n                },\n                \"type\": \"NameCredential\",\n                \"id\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\"\n            },\n            \"credentialStatus\": {\n                \"id\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d#1\",\n                \"type\": \"StatusList2021Entry\",\n                \"statusPurpose\": \"revocation\",\n                \"statusListIndex\": \"1\",\n                \"statusListCredential\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-12-16T10:36:09Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..mrz86u9m6w5BKvwDQDS1gibPwKdB_2ghLbPMT_fZWR_GCyIAGuzS3Tv7yhq76daGTDq1RedFX66ahDOA7YSfCg\"\n            }\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -489,9 +522,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/presentations?withCredentialsValidation=true&withCredentialsDateValidation=true&withRevocationValidation=true",
+					"raw": "{{miw_url}}/api/presentations?withCredentialsValidation=true&withCredentialsDateValidation=true&withRevocationValidation=true",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -532,7 +565,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\"\n    ],\n    \"id\": \"e74ddd4d-c6c2-49c9-83ef-826f0daa5c1e\",\n    \"type\": [\n        \"VerifiablePresentation\"\n    ],\n    \"holder\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ\",\n    \"verifiableCredential\": [\n        {\n            \"id\": \"http://example.edu/credentials/3888\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://www.w3.org/2018/credentials/examples/v1\",\n                \"https://w3id.org/vc/status-list/2021/v1\"\n            ],\n            \"type\": [\n                \"University-Degree-Credential\",\n                \"VerifiableCredential\"\n            ],\n            \"issuer\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ\",\n            \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n            \"expirationDate\": \"2999-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"givenName\": \"TestAfterQuestion\",\n                \"familyName\": \"Student5\",\n                \"degree\": {\n                    \"typeeee\": \"Master1\",\n                    \"degreeType\": \"Undergraduate2\",\n                    \"name\": \"Master of Test11\"\n                },\n                \"college\": \"Test2\",\n                \"id\": \"did:sov:HR6kiZSiUHfcW2tkGxtDKk\"\n            },\n            \"credentialStatus\": {\n                \"id\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b#1\",\n                \"type\": \"StatusList2021Entry\",\n                \"statusPurpose\": \"revocation\",\n                \"statusListIndex\": \"1\",\n                \"statusListCredential\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-09-16T15:13:26Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..7qfg_wZPBxCF_Ua254ll7dIxmaS42sFXJgfMb95_NByCLbur6PyLbhqCGuGQttdu0lVbjawvCrkvj7YEFxGyCQ\"\n            }\n        }\n    ],\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-09-16T15:15:29Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..Ev3ctb0z9des1wos3nfVUcAgGi3ek3cBsFk5BAILAV8tXt1pnK9Vp8JeYse45egnn3C_iQ2A2bD_4VLWupSLAg\"\n    }\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\"\n    ],\n    \"id\": \"urn:uuid:9b2e8c7f-c0fb-46a5-9771-272f1e70ce84\",\n    \"type\": [\n        \"VerifiablePresentation\"\n    ],\n    \"holder\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"verifiableCredential\": [\n        {\n            \"id\": \"http://example.edu/credentials/382121414188\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\",\n                \"https://w3id.org/vc/status-list/2021/v1\"\n            ],\n            \"type\": [\n                \"VerifiableCredential\",\n                \"NameCredential\"\n            ],\n            \"issuer\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n            \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n            \"expirationDate\": \"2999-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"data\": {\n                    \"value\": \"Test\",\n                    \"nameType\": {\n                        \"technicalKey\": \"LOCAL\",\n                        \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                        \"url\": \"http://test.de\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"Test\",\n                        \"name\": \"Test\"\n                    }\n                },\n                \"type\": \"NameCredential\",\n                \"id\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\"\n            },\n            \"credentialStatus\": {\n                \"id\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d#1\",\n                \"type\": \"StatusList2021Entry\",\n                \"statusPurpose\": \"revocation\",\n                \"statusListIndex\": \"1\",\n                \"statusListCredential\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-12-16T10:36:09Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..mrz86u9m6w5BKvwDQDS1gibPwKdB_2ghLbPMT_fZWR_GCyIAGuzS3Tv7yhq76daGTDq1RedFX66ahDOA7YSfCg\"\n            }\n        }\n    ],\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-12-16T10:36:23Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..TFMtnVXN18J6YB0taKca_YPUp4jTVMANyAJp8DZQu85IIEw2Xh1nQptJm8XmXxWsAIQMrKIbVgfvQZpzg9mgCw\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -540,9 +573,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/presentations/validation?withDateValidation=false&withRevocationValidation=true",
+					"raw": "{{miw_url}}/api/presentations/validation?withDateValidation=true&withRevocationValidation=true",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -552,7 +585,7 @@
 					"query": [
 						{
 							"key": "withDateValidation",
-							"value": "false"
+							"value": "true"
 						},
 						{
 							"key": "withRevocationValidation",
@@ -580,7 +613,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"id\": \"http://example.edu/credentials/3888\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\",\n        \"https://w3id.org/vc/status-list/2021/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student5\",\n        \"degree\": {\n            \"typeeee\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\",\n        \"id\": \"did:sov:HR6kiZSiUHfcW2tkGxtDKk\"\n    },\n    \"credentialStatus\": {\n        \"id\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b#1\",\n        \"type\": \"StatusList2021Entry\",\n        \"statusPurpose\": \"revocation\",\n        \"statusListIndex\": \"1\",\n        \"statusListCredential\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-09-16T15:13:26Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..7qfg_wZPBxCF_Ua254ll7dIxmaS42sFXJgfMb95_NByCLbur6PyLbhqCGuGQttdu0lVbjawvCrkvj7YEFxGyCQ\"\n    }\n}",
+					"raw": "{\n    \"id\": \"http://example.edu/credentials/382121414188\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\",\n        \"https://w3id.org/vc/status-list/2021/v1\"\n    ],\n    \"type\": [\n        \"VerifiableCredential\",\n        \"NameCredential\"\n    ],\n    \"issuer\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"value\": \"Test\",\n            \"nameType\": {\n                \"technicalKey\": \"LOCAL\",\n                \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                \"url\": \"http://test.de\"\n            },\n            \"language\": {\n                \"technicalKey\": \"Test\",\n                \"name\": \"Test\"\n            }\n        },\n        \"type\": \"NameCredential\",\n        \"id\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\"\n    },\n    \"credentialStatus\": {\n        \"id\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d#1\",\n        \"type\": \"StatusList2021Entry\",\n        \"statusPurpose\": \"revocation\",\n        \"statusListIndex\": \"1\",\n        \"statusListCredential\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-12-16T10:36:09Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..mrz86u9m6w5BKvwDQDS1gibPwKdB_2ghLbPMT_fZWR_GCyIAGuzS3Tv7yhq76daGTDq1RedFX66ahDOA7YSfCg\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -588,14 +621,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/wallets/bpn222/credentials",
+					"raw": "{{miw_url}}/api/wallets/did:sov:CXaLzgEtynxaMQcqxYtJkW/credentials",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
 						"wallets",
-						"bpn222",
+						"did:sov:CXaLzgEtynxaMQcqxYtJkW",
 						"credentials"
 					]
 				}
@@ -618,9 +651,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{custodian_url}}/api/credentials?issuerIdentifier=bpn111",
+					"raw": "{{miw_url}}/api/credentials?issuerIdentifier=bpn111",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -676,14 +709,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn111/services",
+					"raw": "{{miw_url}}/api/didDocuments/did:sov:XvBe422jiQuwUeZ7dH8VB8/services",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
 						"didDocuments",
-						"bpn111",
+						"did:sov:XvBe422jiQuwUeZ7dH8VB8",
 						"services"
 					]
 				}
@@ -715,9 +748,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn111/services/did-communication",
+					"raw": "{{miw_url}}/api/didDocuments/bpn111/services/did-communication",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -755,9 +788,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/didDocuments/bpn111/services/linked_domains",
+					"raw": "{{miw_url}}/api/didDocuments/bpn111/services/linked_domains",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -765,45 +798,6 @@
 						"bpn111",
 						"services",
 						"linked_domains"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Public created Catena-X wallet",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{access_token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"verKey\": \"<your verkey here>\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{custodian_url}}/api/wallets/bpn111/public",
-					"host": [
-						"{{custodian_url}}"
-					],
-					"path": [
-						"api",
-						"wallets",
-						"bpn111",
-						"public"
 					]
 				}
 			},
@@ -834,9 +828,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{custodian_url}}/api/businessPartnerDataRefresh",
+					"raw": "{{miw_url}}/api/businessPartnerDataRefresh?identifier=BPNL000000015QG5",
 					"host": [
-						"{{custodian_url}}"
+						"{{miw_url}}"
 					],
 					"path": [
 						"api",
@@ -845,8 +839,7 @@
 					"query": [
 						{
 							"key": "identifier",
-							"value": "BPNL00000000B540",
-							"disabled": true
+							"value": "BPNL000000015QG5"
 						}
 					]
 				}

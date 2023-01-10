@@ -74,7 +74,7 @@ fun Route.didDocRoutes(walletService: IWalletService) {
             route("/services") {
                 notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                     notarizedPost(
-                        PostInfo<DidDocumentParameters, DidServiceDto, DidDocumentDto>(
+                        PostInfo<DidDocumentParameters, DidServiceDto, Unit>(
                             summary = "Add New Service Endpoint",
                             description = "Permission: " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
@@ -88,9 +88,8 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                                 examples = didServiceDtoExample
                             ),
                             responseInfo = ResponseInfo(
-                                status = HttpStatusCode.OK,
-                                description = "The resolved DID Document after adding the new Service",
-                                examples = didDocumentDtoExample
+                                status = HttpStatusCode.Accepted,
+                                description = "Adding the Service is accepted and processing"
                             ),
                             canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
                             tags = setOf("DIDDocument")
@@ -101,7 +100,7 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                             call.parameters["identifier"] ?: throw BadRequestException("Missing or malformed identifier")
                         AuthorizationHandler.checkHasRightsToUpdateWallet(call)
                         return@notarizedPost call.respond(
-                            HttpStatusCode.Created,
+                            HttpStatusCode.Accepted,
                             walletService.addService(identifier, serviceDto)
                         )
                     }
@@ -110,7 +109,7 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                 route("/{id}") {
                     notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                         notarizedPut(
-                            PutInfo<DidDocumentServiceParameters, DidServiceUpdateRequestDto, DidDocumentDto>(
+                            PutInfo<DidDocumentServiceParameters, DidServiceUpdateRequestDto, Unit>(
                                 summary = "Update an existing Service Endpoint",
                                 description = "Permission: " +
                                     "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
@@ -125,9 +124,8 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                                     examples = didServiceUpdateRequestDtoExample
                                 ),
                                 responseInfo = ResponseInfo(
-                                    status = HttpStatusCode.OK,
-                                    description = "The resolved DID Document after the updating the Service",
-                                    examples = didDocumentDtoExample
+                                    status = HttpStatusCode.Accepted,
+                                    description = "Updating the Service is accepted and processing",
                                 ),
                                 canThrow = setOf(notFoundException, semanticallyInvalidInputException,
                                     syntacticallyInvalidInputException, forbiddenException, unauthorizedException),
@@ -143,7 +141,7 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                                 call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
                             val serviceDto = call.receive<DidServiceUpdateRequestDto>()
                             return@notarizedPut call.respond(
-                                HttpStatusCode.OK,
+                                HttpStatusCode.Accepted,
                                 walletService.updateService(
                                     identifier = identifier,
                                     id = serviceId,
@@ -153,7 +151,7 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                         }
 
                         notarizedDelete(
-                            DeleteInfo<DidDocumentServiceParameters, DidDocumentDto>(
+                            DeleteInfo<DidDocumentServiceParameters, Unit>(
                                 summary = "Remove Service Endpoint",
                                 description = "Permission: " +
                                     "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
@@ -164,9 +162,8 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                                     ParameterExample("id", "id", "did:example:123#edv")
                                 ),
                                 responseInfo = ResponseInfo(
-                                    status = HttpStatusCode.OK,
-                                    description = "The resolved DID Document after removing the service",
-                                    examples = didDocumentDtoWithoutServiceExample
+                                    status = HttpStatusCode.Accepted,
+                                    description = "Deleting the Service is accepted and processing",
                                 ),
                                 canThrow = setOf(notFoundException,semanticallyInvalidInputException,
                                     syntacticallyInvalidInputException, forbiddenException, unauthorizedException),
@@ -178,7 +175,7 @@ fun Route.didDocRoutes(walletService: IWalletService) {
                             AuthorizationHandler.checkHasRightsToUpdateWallet(call)
                             val serviceId =
                                 call.parameters["id"] ?: throw BadRequestException("Missing or malformed service id")
-                            call.respond(HttpStatusCode.OK, walletService.deleteService(identifier, serviceId))
+                            call.respond(HttpStatusCode.Accepted, walletService.deleteService(identifier, serviceId))
                         }
                     }
                 }
@@ -205,22 +202,6 @@ val didDocumentDtoExample: Map<String, DidDocumentDto> = mapOf(
                 id = "did:example:123#edv",
                 type = "ServiceEndpointProxyService",
                 serviceEndpoint = "https://myservice.com/myendpoint"
-            )
-        )
-    )
-)
-
-val didDocumentDtoWithoutServiceExample = mapOf(
-    "demo" to DidDocumentDto(
-        id = "did:example:76e12ec712ebc6f1c221ebfeb1f",
-        context = listOf("https://www.w3.org/ns/did/v1"),
-        controller = "test",
-        verificationMethods = listOf(
-            DidVerificationMethodDto(
-                id = "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
-                type = "Ed25519VerificationKey2018",
-                controller = "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                publicKeyBase58 = "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
             )
         )
     )

@@ -11,6 +11,7 @@ object SingletonTestData {
     lateinit var encodedList: String
     lateinit var connectionId: String
     lateinit var threadId: String
+    var didDocWithoutService: Boolean = false
 
     fun cleanSingletonTestData() {
         this.baseWalletDID = ""
@@ -23,6 +24,7 @@ object SingletonTestData {
         this.encodedList = EnvironmentTestSetup.NONE_REVOKED_ENCODED_LIST
         this.connectionId = ""
         this.threadId = ""
+        this.didDocWithoutService = false
     }
 
     fun getDidMethodPrefixWithNetworkIdentifier(): String {

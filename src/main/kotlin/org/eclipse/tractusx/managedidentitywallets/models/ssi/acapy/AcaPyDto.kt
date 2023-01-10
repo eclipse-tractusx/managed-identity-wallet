@@ -50,16 +50,32 @@ enum class WalletDispatchType {
     BASE { override fun toString() = "base" },
     DEFAULT { override fun toString() = "default" }
 }
+
 enum class VerificationKeyType {
     PUBLIC_KEY_BASE58 { override fun toString() = "publicKeyBase58" }
 }
 
+enum class Rfc23State {
+    START { override fun toString() = "start" },
+    INVITATION_RECEIVED { override fun toString() = "invitation-received" },
+    REQUEST_SENT { override fun toString() = "request-sent" },
+    REQUEST_RECEIVED { override fun toString() = "request-received" },
+    RESPONSE_SENT { override fun toString() = "response-sent" },
+    RESPONSE_RECEIVED { override fun toString() = "response-received" },
+    COMPLETED { override fun toString() = "completed" },
+    ABANDONED { override fun toString() = "abandoned" }
+}
+
 @Serializable
 data class WalletAndAcaPyConfig(
-    val apiAdminUrl: String,
     val networkIdentifier: String,
     val baseWalletBpn: String,
-    val adminApiKey: String
+    val baseWalletDID: String,
+    val baseWalletVerkey: String,
+    val apiAdminUrl: String,
+    val adminApiKey: String,
+    val baseWalletAdminUrl: String,
+    val baseWalletAdminApiKey: String
 )
 
 @Serializable
@@ -91,8 +107,8 @@ data class CreateSubWallet(
     @SerialName("image_url") @JsonProperty("image_url") val imageUrl: String? = "",
     @SerialName("key_management_mode") @JsonProperty("key_management_mode") val keyManagementMode: String,
     val label: String,
-    @SerialName("wallet.webhook_urls") @JsonProperty("wallet.webhook_urls") val walletWebhookUrls: List<String>,
-    @SerialName("wallet.dispatch_type") @JsonProperty("wallet.dispatch_type") val walletDispatchType: String,
+    @SerialName("wallet_webhook_urls") @JsonProperty("wallet_webhook_urls") val walletWebhookUrls: List<String>,
+    @SerialName("wallet_dispatch_type") @JsonProperty("wallet_dispatch_type") val walletDispatchType: String,
     @SerialName("wallet_key") @JsonProperty("wallet_key") val walletKey : String,
     @SerialName("wallet_name") @JsonProperty("wallet_name") val walletName: String,
     @SerialName("wallet_type") @JsonProperty("wallet_type") val walletType: String

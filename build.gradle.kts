@@ -5,6 +5,7 @@ val kompendium_version: String by project
 val exposed_version: String by project
 val version: String by project
 val coverage_excludes: String by project
+val acapy_java_library_version: String by project
 
 plugins {
     application
@@ -73,11 +74,15 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
 
     implementation("decentralized-identity:did-common-java:1.0.0")
-    implementation("network.idu.acapy:aries-client-python:0.7.29")
+    implementation("network.idu.acapy:aries-client-python:$acapy_java_library_version")
 
     // https://mvnrepository.com/artifact/com.github.kagkarlsson/db-scheduler
     implementation("com.github.kagkarlsson:db-scheduler:11.2")
 
+
+    testImplementation("org.mockito:mockito-inline:4.9.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation("io.ktor:ktor-client-mock:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation(kotlin("test"))
 

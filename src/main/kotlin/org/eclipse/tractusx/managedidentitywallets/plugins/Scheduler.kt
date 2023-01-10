@@ -45,7 +45,8 @@ fun Application.configureJobs() {
             runPullDataAndUpdateCatenaXCredentialJobPayload()
         }
 
-    val updateRevocationList: RecurringTask<Void> = Tasks.recurring("revocation-list-update",
+    val updateRevocationList: RecurringTask<Void> = Tasks.recurring(
+        "revocation-list-update",
         // Spring Scheduled tasks (second, minute, hour, day of month, month, day(s) of week)
         Schedules.cron("0 0 $createCredentialsAtHour * * *"))
         .execute { _, _ ->

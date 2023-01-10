@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.Deferred
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
@@ -29,25 +30,28 @@ import org.slf4j.LoggerFactory
 
 interface IBusinessPartnerDataService {
 
-    suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String? = null)
+    suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String? = null): Deferred<Boolean>
 
-    suspend fun<T> issueAndStoreCatenaXCredentialsAsync(
-        bpn: String,
+    suspend fun issueAndStoreCatenaXCredentialsAsync(
+        walletHolderDto: WalletDto,
         type: String,
-        data: T? = null
+        data: Any? = null
     ): Deferred<Boolean>
 
     suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
-        webhookUrl: String? = null
+        webhookUrl: String? = null,
+        type: String,
+        data: Any? = null
     ): Deferred<Boolean>
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
 
-        fun createBusinessPartnerDataService(walletService: IWalletService,
-                                             bpdmConfig: BPDMConfig
+        fun createBusinessPartnerDataService(
+            walletService: IWalletService,
+            bpdmConfig: BPDMConfig
         ): IBusinessPartnerDataService {
             return BusinessPartnerDataServiceImpl(
                 walletService,
@@ -59,6 +63,11 @@ interface IBusinessPartnerDataService {
                             log.debug("HTTP status: ${response.status.value}")
                             log.debug("HTTP description: ${response.status.description}")
                         }
+                    }
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = 30000
+                        connectTimeoutMillis = 30000
+                        socketTimeoutMillis = 30000
                     }
                     install(Logging) {
                         logger = Logger.DEFAULT

@@ -23,6 +23,7 @@ import io.ktor.client.*
 import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
@@ -31,11 +32,9 @@ interface IAcaPyService {
 
     fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig
 
-    suspend fun getWallets(): WalletList
+    suspend fun getSubWallets(): WalletList
 
     suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult
-
-    suspend fun assignDidToPublic(didIdentifier: String, token: String)
 
     suspend fun deleteSubWallet(walletData: WalletExtendedData)
 
@@ -43,31 +42,35 @@ interface IAcaPyService {
 
     suspend fun createLocalDidForWallet(didCreateDto: DidCreate, token: String): DidResult
 
-    suspend fun registerDidOnLedger(didRegistration: DidRegistration, endorserWalletToken: String): DidRegistrationResult
+    suspend fun registerDidOnLedgerUsingBaseWallet(didRegistration: DidRegistration): DidRegistrationResult
 
-    suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String): String
+    suspend fun <T> signJsonLd(signRequest: SignRequest<T>, token: String?): String
 
-    suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String): VerifyResponse
+    suspend fun <T> verifyJsonLd(verifyRequest: VerifyRequest<T>, token: String?): VerifyResponse
 
-    suspend fun resolveDidDoc(did: String, token: String): ResolutionResult
+    suspend fun resolveDidDoc(did: String, token: String?): ResolutionResult
 
-    suspend fun updateService(serviceEndPoint: DidEndpointWithType, token: String)
+    suspend fun updateServiceOfBaseWallet(serviceEndPoint: DidEndpointWithType)
 
-    fun subscribeForWebSocket(subscriberWallet: WalletExtendedData)
+    suspend fun updateServiceUsingEndorsement(serviceEndPoint: DidEndpointWithType, token: String)
 
-    suspend fun getAcapyClient(walletToken: String): AriesClient
+    fun subscribeBaseWalletForWebSocket()
 
-    suspend fun connect(
+    suspend fun getAcapyClient(walletToken: String?): AriesClient
+
+    suspend fun sendConnectionRequest(
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,
-        token: String
+        token: String?
     ): ConnectionRecord
 
     suspend fun issuanceFlowCredentialSend(
-        token: String,
+        token: String?,
         vc: VerifiableCredentialIssuanceFlowRequest
     ): V20CredExRecord
 
-    suspend fun deleteConnection(connectionId: String, token: String)
+    suspend fun deleteConnection(connectionId: String, token: String?)
+
+    suspend fun acceptConnectionRequest(connectionId: String, token: String?): ConnectionRecord
 
     companion object {
         fun create(
@@ -78,4 +81,32 @@ interface IAcaPyService {
             return AcaPyService(walletAndAcaPyConfig, utilsService, client)
         }
     }
+
+    suspend fun acceptCredentialOfferBySendingRequest(
+        holderDid: String,
+        credentialExchangeId: String,
+        token: String?
+    )
+
+    suspend fun acceptCredentialReceivedByStoringIssuedCredential(
+        credentialId: String,
+        credentialExchangeId: String,
+        token: String?
+    )
+
+    suspend fun sendConnectionRequest(
+        didOfTheirWallet: String,
+        usePublicDid: Boolean,
+        alias: String?,
+        token: String?,
+        label: String?
+    ): ConnectionRecord
+
+    suspend fun getRequestedConnectionsToBaseWallet(): List<ConnectionRecord>
+
+    suspend fun setEndorserMetaData(connectionId: String): TransactionJobs?
+
+    suspend fun setAuthorRoleAndInfoMetaData(connectionId: String, endorserDID: String, token: String)
+
+    suspend fun setDidAsPublicUsingEndorser(did: String, token: String)
 }
