@@ -188,7 +188,7 @@ For details on the permissions see the README section on scopes ([https://github
 
 ### Data Model / Schemas
 
-The Managed Identity Wallet service issues a couple of verifiable credentials with the DID of the Catena-X platform issuer related to Catena-X membership and business partner data. For the credential types and data model of those verifiable credentials, an own JSON-LD context was defined in a separate GitHub repository https://github.com/catenax-ng/product-core-schemas and referenced as raw content in the verifiable credentials context https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntityData. The schema defines the following credential types, each with a brief description and example.
+The Managed Identity Wallet service issues a couple of verifiable credentials with the DID of the Catena-X platform issuer related to Catena-X membership and business partner data. For the credential types and data model of those verifiable credentials, an own JSON-LD context was defined in a separate GitHub repository https://github.com/catenax-ng/product-core-schemas and referenced as raw content in the verifiable credentials context https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity. The schema defines the following credential types, each with a brief description and example.
 
 #### Credential Type BpnCredential
 
