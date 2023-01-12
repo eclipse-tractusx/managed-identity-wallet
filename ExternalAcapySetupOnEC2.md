@@ -182,9 +182,9 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
     * acapy_postgres: the database where the wallets are stored
     * acapy_nginx: nginx instance
 
-- To interact with agent you can use
-  *  postman collection `./dev-containers/postman/Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` after modifying the URLs and apikey.
+- To interact with the agent you can use
+  * either the postman collection `./dev-containers/postman/Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` after modifying the URLs and apikey.
   * Or using the provided swagger doc `https://cx-dev-acapy.51nodes.io/api/doc/` after replacing `https://cx-dev-acapy.51nodes.io/api/doc/` with your subdomain
-- Check ExternalWalletInteraction.md to run a
+- The files `ExternalWalletInteraction.md` and `SelfManagedWallets.md` describe how MIW can interact with an external wallet and a self managed wallet
 - To remove the containers run `docker-compose down`
 - To delete all containers with the database run `docker-compose down -v`
