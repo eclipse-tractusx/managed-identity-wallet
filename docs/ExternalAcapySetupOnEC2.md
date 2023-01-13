@@ -24,6 +24,7 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
         sudo certbot certonly --standalone -d cx-dev-acapy.51nodes.io
         ```
     - Move the generated files private.pem and fullchain.pem to `./acapy-agent`
+    - Lets Encrypt certificates expire after 90 and must be [renewed](https://www.cyberciti.biz/faq/how-to-forcefully-renew-lets-encrypt-certificate/#:~:text=Renewing%20the%20LetsEncrypt%20certificate%20using%20the%20certbot&text=Obtain%20a%20browser%2Dtrusted%20certificate,forcefully%20if%20the%20need%20arises) regularly
 - Download Docker and Docker-compose for ubuntu 22.04
 - Create `.env` file with `vi .env` and then add the environment variables to it after changing the placeholders. Also replace `cx-dev-acapy.51nodes.io` with your domain
     ```
@@ -47,7 +48,7 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
     JWT_SECRET=acapy-jwt-secret-placeholder
     ```
 
-- Create the `nginx.conf` file
+- Create the `nginx.conf` file. If the Ports of AcaPy in `.env` file are changed, then they must be changed in the `nginx.conf` file. Also the paths of the certificates should match the given paths in `docker-compose.yml` file
     ```
     events {
         worker_connections  1024;
@@ -108,7 +109,7 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
     }
     ```
 
-- Create the `docker-compose.yml` file
+- Create the `docker-compose.yml` file. The file is almost generic and you can either change the values in `.env` file or create a new enviroment file e.x. `dev.env` and then change the `env_file` property in the docker-compose.yml file. 
     ```yml
     version: '3'
 
@@ -133,17 +134,12 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
             - .env
             volumes:
             - postgres-data:/data/postgres-data
-            ports:
-            - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
 
         acapy_agent:
             image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
             container_name: acapy_agent
             env_file:
             - .env
-            ports:
-            - ${ACAPY_CONNECTION_PORT:-8000}:${ACAPY_CONNECTION_PORT:-8000}
-            - ${ACAPY_ADMIN_PORT:-11000}:${ACAPY_ADMIN_PORT:-11000}
             depends_on:
             - acapy_postgres
             entrypoint: /bin/bash
@@ -178,13 +174,13 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
 - Check the permission of the files `private.pem` and `fullchain.pem` to make sure that they are accessible by nginx
 - Now run the following command `docker-compose --env-file .env up -d` to start the agent. This command will start 3 docker containers:
     
-    * acapy-agent: the acapy instance
+    * acapy-agent: the acapy instance v0.7.5
     * acapy_postgres: the database where the wallets are stored
     * acapy_nginx: nginx instance
 
 - To interact with the agent you can use
   * either the postman collection `./dev-containers/postman/Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` after modifying the URLs and apikey.
   * Or using the provided swagger doc `https://cx-dev-acapy.51nodes.io/api/doc/` after replacing `https://cx-dev-acapy.51nodes.io/api/doc/` with your subdomain
-- The files `ExternalWalletInteraction.md` and `SelfManagedWallets.md` describe how MIW can interact with an external wallet and a self managed wallet
+- The files `./docs/ExternalWalletInteraction.md` and `./docs/SelfManagedWallets.md` describe how MIW can interact with an external wallet and a self managed wallet
 - To remove the containers run `docker-compose down`
 - To delete all containers with the database run `docker-compose down -v`
