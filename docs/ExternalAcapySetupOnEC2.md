@@ -24,7 +24,7 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
         sudo certbot certonly --standalone -d cx-dev-acapy.51nodes.io
         ```
     - Move the generated files private.pem and fullchain.pem to `./acapy-agent`
-    - Lets Encrypt certificates expire after 90 and must be [renewed](https://www.cyberciti.biz/faq/how-to-forcefully-renew-lets-encrypt-certificate/#:~:text=Renewing%20the%20LetsEncrypt%20certificate%20using%20the%20certbot&text=Obtain%20a%20browser%2Dtrusted%20certificate,forcefully%20if%20the%20need%20arises) regularly
+    - Lets Encrypt certificates expire after 90 and must be renewed. This can be done using the command `sudo certbot renew`. To verify that the certificate renewed, run `sudo certbot renew --dry-run`
 - Download Docker and Docker-compose for ubuntu 22.04
 - Create `.env` file with `vi .env` and then add the environment variables to it after changing the placeholders. Also replace `cx-dev-acapy.51nodes.io` with your domain
     ```
@@ -114,66 +114,66 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
     version: '3'
 
     services:
-        acapy_nginx:
-            image: nginx:1.23.3
-            container_name: acapy_nginx
-            depends_on:
-            - acapy_postgres
-            - acapy_agent
-            ports:
-            - 443:443
-            volumes:
-            - ./nginx.conf:/etc/nginx/nginx.conf
-            - ./fullchain.pem:/etc/letsencrypt/live/cx-dev-acapy.51nodes.io/fullchain.pem
-            - ./privkey.pem:/etc/letsencrypt/live/cx-dev-acapy.51nodes.io/privkey.pem
+      acapy_nginx:
+        image: nginx:1.23.3
+        container_name: acapy_nginx
+        depends_on:
+          - acapy_postgres
+          - acapy_agent
+        ports:
+          - 443:443
+        volumes:
+          - ./nginx.conf:/etc/nginx/nginx.conf
+          - ./fullchain.pem:/etc/letsencrypt/live/cx-dev-acapy.51nodes.io/fullchain.pem
+          - ./privkey.pem:/etc/letsencrypt/live/cx-dev-acapy.51nodes.io/privkey.pem
 
-        acapy_postgres:
-            image: postgres:14-alpine3.17
-            container_name: acapy_postgres
-            env_file:
-            - .env
-            volumes:
-            - postgres-data:/data/postgres-data
+      acapy_postgres:
+        image: postgres:14-alpine3.17
+        container_name: acapy_postgres
+        env_file:
+          - ./.env
+        volumes:
+          - postgres-data:/data/postgres-data
 
-        acapy_agent:
-            image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
-            container_name: acapy_agent
-            env_file:
-            - .env
-            depends_on:
-            - acapy_postgres
-            entrypoint: /bin/bash
-            command: [
-            "-c",
-            "aca-py start \
-                -e ${ACAPY_ENDPOINT} \
-                --auto-provision \
-                --inbound-transport http '0.0.0.0' ${ACAPY_CONNECTION_PORT:-8000} \
-                --outbound-transport http \
-                --admin '0.0.0.0' ${ACAPY_ADMIN_PORT:-11000} \
-                --wallet-name External_Wallet \
-                --wallet-type askar \
-                --wallet-key ${ACAPY_WALLET_KEY} \
-                --wallet-storage-type postgres_storage
-                --wallet-storage-config '{\"url\":\"acapy_postgres:${POSTGRES_PORT:-5432}\",\"max_connections\":5}'
-                --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"${POSTGRES_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRES_PASSWORD}\"}'
-                --seed ${ACAPY_SEED} \
-                --genesis-url ${LEDGER_URL} \
-                --label External_Wallet \
-                --admin-api-key ${ACAPY_ADMIN_KEY} \
-                --auto-ping-connection \
-                --jwt-secret ${JWT_SECRET} \
-                --public-invites \
-                --log-level DEBUG"
-            ]
+      acapy_agent:
+        image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
+        container_name: acapy_agent
+        env_file:
+          - ./.env
+        depends_on:
+          - acapy_postgres
+        entrypoint: /bin/bash
+        command: [
+          "-c",
+          "aca-py start \
+          -e ${ACAPY_ENDPOINT} \
+          --auto-provision \
+          --inbound-transport http '0.0.0.0' ${ACAPY_CONNECTION_PORT:-8000} \
+          --outbound-transport http \
+          --admin '0.0.0.0' ${ACAPY_ADMIN_PORT:-11000} \
+          --wallet-name External_Wallet \
+          --wallet-type askar \
+          --wallet-key ${ACAPY_WALLET_KEY} \
+          --wallet-storage-type postgres_storage
+          --wallet-storage-config '{\"url\":\"acapy_postgres:${POSTGRES_PORT:-5432}\",\"max_connections\":5}'
+          --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"${POSTGRES_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRES_PASSWORD}\"}'
+          --seed ${ACAPY_SEED} \
+          --genesis-url ${LEDGER_URL} \
+          --label External_Wallet \
+          --admin-api-key ${ACAPY_ADMIN_KEY} \
+          --auto-ping-connection \
+          --jwt-secret ${JWT_SECRET} \
+          --public-invites \
+          --log-level DEBUG"
+        ]
 
     volumes:
       postgres-data:
-
     ```
 - Check the permission of the files `private.pem` and `fullchain.pem` to make sure that they are accessible by nginx
-- Now run the following command `docker-compose --env-file .env up -d` to start the agent. This command will start 3 docker containers:
-    
+- You can change the used environment file by changing the property `env_file` in `docker-compose.yml`
+- Now run the following command `docker-compose up -d` to start the agent. This command will start 3 docker containers:
+
     * acapy-agent: the acapy instance v0.7.5
     * acapy_postgres: the database where the wallets are stored
     * acapy_nginx: nginx instance
