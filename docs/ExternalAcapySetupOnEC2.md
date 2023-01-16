@@ -73,8 +73,8 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
         add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload;" always;
 
         # RSA certificate
-        ssl_certificate /etc/letsencrypt/live/cx-dev-acapy.51nodes.io/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/cx-dev-acapy.51nodes.io/privkey.pem;
+        ssl_certificate /etc/certificates/fullchain.pem;
+        ssl_certificate_key /etc/certificates/privkey.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
 
 
@@ -124,8 +124,8 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
           - 443:443
         volumes:
           - ./nginx.conf:/etc/nginx/nginx.conf
-          - ./fullchain.pem:/etc/letsencrypt/live/cx-dev-acapy.51nodes.io/fullchain.pem
-          - ./privkey.pem:/etc/letsencrypt/live/cx-dev-acapy.51nodes.io/privkey.pem
+          - ./fullchain.pem:/etc/certificates/fullchain.pem
+          - ./privkey.pem:/etc/certificates/privkey.pem
 
       acapy_postgres:
         image: postgres:14-alpine3.17
