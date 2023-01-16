@@ -297,14 +297,22 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
       --from-literal=cx-auth-client-secret='<placeholder>'
 
     kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-acapy-secrets \
-      --from-literal=acapy-wallet-key='<placeholder>' \
-      --from-literal=acapy-agent-wallet-seed='<placeholder>' \
-      --from-literal=acapy-jwt-secret='<placeholder>' \
-      --from-literal=acapy-db-account='postgres' \
-      --from-literal=acapy-db-password='<placeholder>' \
-      --from-literal=acapy-db-admin='postgres' \
-      --from-literal=acapy-db-admin-password='<placeholder>' \
-      --from-literal=acapy-admin-api-key='<placeholder>'
+      --from-literal=acapy-endorser-wallet-key='<placeholder>' \
+      --from-literal=acapy-endorser-agent-wallet-seed='<placeholder>' \
+      --from-literal=acapy-endorser-jwt-secret='<placeholder>' \
+      --from-literal=acapy-endorser-db-account='postgres' \
+      --from-literal=acapy-endorser-db-password='<placeholder>' \
+      --from-literal=acapy-endorser-db-admin='postgres' \
+      --from-literal=acapy-endorser-db-admin-password='<placeholder>' \
+      --from-literal=acapy-endorser-admin-api-key='<placeholder>' \
+      --from-literal=acapy-mt-wallet-key='<placeholder>' \
+      --from-literal=acapy-mt-agent-wallet-seed='<placeholder>' \
+      --from-literal=acapy-mt-jwt-secret='<placeholder>' \
+      --from-literal=acapy-mt-db-account='postgres' \
+      --from-literal=acapy-mt-db-password='<placeholder>' \
+      --from-literal=acapy-mt-db-admin='postgres' \
+      --from-literal=acapy-mt-db-admin-password='<placeholder>' \
+      --from-literal=acapy-mt-admin-api-key='<placeholder>'
 
     kubectl -n managed-identity-wallets create secret generic postgres-acapy-secret-config \
     --from-literal=password='<placeholder>' \
