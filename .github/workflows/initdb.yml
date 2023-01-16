@@ -42,8 +42,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # Build and push KeyCloak custom images for central and shared idp instances
-      - name: 'Build images'
+      - name: 'Build and push initdb Docker image'
         uses: docker/build-push-action@v2
         with:
           context: .
