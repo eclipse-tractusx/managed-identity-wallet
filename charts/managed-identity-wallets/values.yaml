@@ -4,8 +4,9 @@ auth:
   roleMappings: "create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"
   resourceId: "Cl5-CX-Custodian"
 image:
-  name: "catenax-ng/product-core-managed-identity-wallets_service"
+  name: "catenax-ng/tx-managed-identity-wallets_service"
   registry: "ghcr.io"
+  tag: "3.0.0"
   secret: "acr-credentials"
 allowEmptyPassword: "\"yes\""
 db:
@@ -15,6 +16,9 @@ logging:
   exposed: "INFO"
 wallet:
   baseWalletBpn: "BPNL000000000000"
+  baseWalletShortDid: "MhLrwtKpZhNCzazMeofPQH"
+  baseWalletVerkey: "CHEC4PRQmP73A9UD7vQ6tnLAm9aoXLPhEtnGSMiAyVZj"
+  baseWalletName: "Catena-X"
 revocation:
   refreshHour: "3"
   revocationServiceUrl: http://localhost:8086
@@ -28,24 +32,47 @@ revocationService:
   clientIssuanceApiUrl: "http://localhost:8080"
 acapy:
   imageName: "bcgovimages/aries-cloudagent"
-  tag: "py36-1.16-1_0.7.4"
-  ledgerUrl: "https://idu.cloudcompass.ca"
-  label: "CatenaXIssuer"
-  logLevel: "INFO"
-  networkIdentifier: "idunion:test"
-  databaseHost: "acapypostgresql"
-  endpointPort: "8000"
-  adminPort: "11000"
-  adminUrl: "http://localhost:11000"
-  secret:
-    apikey: "0"
-    walletseed: "0"
-    dbaccount: "postgres"
-    dbadminuser: "postgres"
-    dbadminpassword: "postgres"
-    dbpassword: "postgres"
-    jwtsecret: "0"
-    walletkey: "0"
+  tag: "py36-1.16-1_0.7.5"
+  # AcaPy endorser instance
+  endorser:
+    ledgerUrl: "https://idu.cloudcompass.ca"
+    label: "CatenaXIssuer"
+    logLevel: "INFO"
+    networkIdentifier: "idunion:test"
+    databaseHost: "acapypostgresql"
+    endpointPort: "8000"
+    adminPort: "11000"
+    adminUrl: "http://localhost:11000"
+    secret:
+      apikey: "0"
+      walletseed: "0"
+      dbaccount: "postgres"
+      dbadminuser: "postgres"
+      dbadminpassword: "postgres"
+      dbpassword: "postgres"
+      jwtsecret: "0"
+      walletkey: "0"
+  # AcaPy multi-tenancy instance
+  mt:
+    ledgerUrl: "https://idu.cloudcompass.ca"
+    label: "CatenaXIssuer"
+    logLevel: "INFO"
+    networkIdentifier: "idunion:test"
+    databaseHost: "acapypostgresql"
+    endpointPort: "8003"
+    adminPort: "11003"
+    adminUrl: "http://localhost:11003"
+    endorserPublicDid: "MhLrwtKpZhNCzazMeofPQH"
+    webhookUrl: "http://localhost:8080/webhook"
+    secret:
+      apikey: "0"
+      walletseed: "0"
+      dbaccount: "postgres"
+      dbadminuser: "postgres"
+      dbadminpassword: "postgres"
+      dbpassword: "postgres"
+      jwtsecret: "0"
+      walletkey: "0"
 ingress:
   enabled: false
 acapypostgresql:
