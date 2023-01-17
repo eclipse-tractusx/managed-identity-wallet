@@ -96,7 +96,7 @@ postgresql:
         emptyDir: {}
     initContainers:
       - name: initdb
-        image: ghcr.io/catenax-ng/product-core-managed-identity-wallets-cd_initdb:1.0.0
+        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:1.0.0
         imagePullPolicy: Always
         command:
           - sh
