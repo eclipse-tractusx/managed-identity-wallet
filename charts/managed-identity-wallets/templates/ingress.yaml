@@ -15,7 +15,12 @@ metadata:
           location ~* /list-credential/ {
               deny all;
               return 403;
-            }
+          }
+
+          location ~* /webhook/topic/ {
+            deny all;
+            return 403;
+          }
 
     # If you encounter a redirect loop or are getting a 307 response code
     # then you need to force the nginx ingress to connect to the backend using HTTPS.
@@ -23,6 +28,26 @@ metadata:
     # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
+    - host: {{ .Values.certificate.host }}
+      http:
+        paths:
+          - path: /didcomm-base
+            pathType: Exact
+            backend:
+              service:
+                name: catenax-managed-identity-wallets-acapy-base
+                port:
+                  number: 8000
+    - host: {{ .Values.certificate.host }}
+      http:
+        paths:
+          - path: /didcomm-managed-wallets
+            pathType: Exact
+            backend:
+              service:
+                name: catenax-managed-identity-wallets-acapy-mt
+                port:
+                  number: 8003
     - host: {{ .Values.certificate.host }}
       http:
         paths:
