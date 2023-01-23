@@ -23,35 +23,35 @@ acapy:
     ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io"
     endpointUrl: "https://managed-identity-wallets.dev.demo.catena-x.net/didcomm-base"
     secret:
-      apikey: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-admin-api-key>
-      walletseed: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-agent-wallet-seed>
-      dbaccount: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-db-account>
-      dbadminuser: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-db-admin>
-      dbadminpassword: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-db-admin-password>
-      dbpassword: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-db-password>
-      jwtsecret: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-jwt-secret>
-      walletkey: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-endorser-wallet-key>
+      apikey: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-admin-api-key>
+      walletseed: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-agent-wallet-seed>
+      dbaccount: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-db-account>
+      dbadminuser: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-db-admin>
+      dbadminpassword: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-db-admin-password>
+      dbpassword: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-db-password>
+      jwtsecret: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-jwt-secret>
+      walletkey: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-endorser-wallet-key>
   mt:
     logLevel: "DEBUG"
     ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io"
     endpointUrl: "https://managed-identity-wallets.dev.demo.catena-x.net/didcomm-managed-wallets"
     endorserPublicDid: "MhLrwtKpZhNCzazMeofPQH"
     secret:
-      apikey: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-admin-api-key>
-      walletseed: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-agent-wallet-seed>
-      dbaccount: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-db-account>
-      dbadminuser: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-db-admin>
-      dbadminpassword: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-db-admin-password>
-      dbpassword: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-db-password>
-      jwtsecret: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-jwt-secret>
-      walletkey: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-acapy-secrets#acapy-mt-wallet-key>
+      apikey: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-admin-api-key>
+      walletseed: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-agent-wallet-seed>
+      dbaccount: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-db-account>
+      dbadminuser: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-db-admin>
+      dbadminpassword: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-db-admin-password>
+      dbpassword: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-db-password>
+      jwtsecret: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-jwt-secret>
+      walletkey: <path:managed-identity-wallets/data/dev/managed-identity-wallets-acapy-secrets#acapy-mt-wallet-key>
 managedIdentityWallets:
   secret:
-    jdbcurl: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-secrets#cx-db-jdbc-url>
-    authclientid: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-secrets#cx-auth-client-id>
-    authclientsecret: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-secrets#cx-auth-client-secret>
-    bpdmauthclientid: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-secrets#bpdm-auth-client-id>
-    bpdmauthclientsecret: <path:managed-identity-wallets/data/dev/catenax-managed-identity-wallets-secrets#bpdm-auth-client-secret>
+    jdbcurl: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#miw-db-jdbc-url>
+    authclientid: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#miw-auth-client-id>
+    authclientsecret: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#miw-auth-client-secret>
+    bpdmauthclientid: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#bpdm-auth-client-id>
+    bpdmauthclientsecret: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#bpdm-auth-client-secret>
 postgresql:
   secret:
     password: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#password>

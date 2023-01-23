@@ -19,10 +19,12 @@
 
 package org.eclipse.tractusx.managedidentitywallets.persistence.entities
 
-import org.jetbrains.exposed.dao.*
+import org.jetbrains.exposed.dao.Entity
+import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.javatime.*
+import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.javatime.datetime
 
 object Wallets : IntIdTable("wallets") {
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)

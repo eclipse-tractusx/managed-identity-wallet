@@ -58,13 +58,13 @@ class BaseWalletAriesEventHandler(
                     )
                     walletService.addConnection(
                         connectionId = connection.connectionId,
-                        connectionOwnerDid = walletService.getCatenaXWallet().did,
+                        connectionOwnerDid = walletService.getBaseWallet().did,
                         connectionTargetDid = theirWallet.did,
                         connectionState = connection.rfc23State
                     )
                     runBlocking {
                         walletService.setEndorserMetaDataForAcapyConnection(connection.connectionId)
-                        walletService.acceptConnectionRequest(walletService.getCatenaXWallet().did, connection)
+                        walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
                     }
                 }
             }
@@ -133,7 +133,7 @@ class BaseWalletAriesEventHandler(
             when(v20Credential.state) {
                 CredentialExchangeState.OFFER_RECEIVED -> {
                     runBlocking {
-                        walletService.acceptReceivedOfferVc(walletService.getCatenaXWallet().did, v20Credential)
+                        walletService.acceptReceivedOfferVc(walletService.getBaseWallet().did, v20Credential)
                     }
                 }
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {
@@ -166,7 +166,7 @@ class BaseWalletAriesEventHandler(
                     try {
                         transaction {
                             runBlocking {
-                                walletService.acceptAndStoreReceivedIssuedVc(walletService.getCatenaXWallet().did, v20Credential)
+                                walletService.acceptAndStoreReceivedIssuedVc(walletService.getBaseWallet().did, v20Credential)
                                 if (webhookService.getWebhookByThreadId(threadId) != null) {
                                     webhookService.updateStateOfWebhook(threadId, v20Credential.state.name)
                                 }

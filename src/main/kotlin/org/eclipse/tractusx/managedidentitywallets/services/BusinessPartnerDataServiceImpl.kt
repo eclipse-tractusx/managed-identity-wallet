@@ -25,12 +25,30 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.AccessToken
+import org.eclipse.tractusx.managedidentitywallets.models.AddressDto
+import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
+import org.eclipse.tractusx.managedidentitywallets.models.BankAccountDto
+import org.eclipse.tractusx.managedidentitywallets.models.BusinessPartnerDataDto
+import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
+import org.eclipse.tractusx.managedidentitywallets.models.LegalAddressDto
+import org.eclipse.tractusx.managedidentitywallets.models.LegalFormDto
+import org.eclipse.tractusx.managedidentitywallets.models.NameResponse
+import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.json.simple.JSONObject
 import org.slf4j.LoggerFactory
@@ -90,7 +108,7 @@ class BusinessPartnerDataServiceImpl(
                 if (legalEntityDataMap.containsKey(bpn) || legalAddressDataMap.containsKey(bpn)) {
                     val holder = walletService.getWallet(bpn)
                     val connectionId: ConnectionDto? = if (holder.isSelfManaged) {
-                        walletService.getConnectionWithCatenaX(holder.did)
+                        walletService.getConnectionWithBaseWallet(holder.did)
                     } else { null }
                     issueAndUpdateCatenaXCredentials(
                         holder = holder,
@@ -113,7 +131,7 @@ class BusinessPartnerDataServiceImpl(
     ): Deferred<Boolean> = GlobalScope.async {
         try {
             val vcToIssue = prepareCatenaXCredential(walletHolderDto.bpn, type, data)
-            val verifiableCredential: VerifiableCredentialDto = walletService.issueCatenaXCredential(vcToIssue)
+            val verifiableCredential: VerifiableCredentialDto = walletService.issueBaseWalletCredential(vcToIssue)
             val issuedVC = toIssuedVerifiableCredentialRequestDto(verifiableCredential)
             if (issuedVC != null) {
                 walletService.storeCredential(walletHolderDto.bpn, issuedVC)
@@ -135,7 +153,7 @@ class BusinessPartnerDataServiceImpl(
         data: Any?
     ): Deferred<Boolean> =
         GlobalScope.async {
-            val catenaXWalletDid = walletService.getCatenaXWallet().did
+            val catenaXWalletDid = walletService.getBaseWallet().did
             val credentialFlowRequest: VerifiableCredentialRequestWithoutIssuerDto =
                 prepareCatenaXCredential(targetWallet.bpn, type, data)
             val vCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
@@ -166,7 +184,7 @@ class BusinessPartnerDataServiceImpl(
     ): Boolean = GlobalScope.async {
         runBlocking {
             val catenaXCredentialsOfBpn = walletService.getCredentials(
-                walletService.getCatenaXWallet().bpn, holder.bpn, null, null
+                walletService.getBaseWallet().bpn, holder.bpn, null, null
             )
             if (businessPartnerData != null) {
                 // Name Credentials

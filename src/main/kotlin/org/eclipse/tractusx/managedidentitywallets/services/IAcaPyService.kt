@@ -20,9 +20,23 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import io.ktor.client.*
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateSubWallet
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateWalletTokenResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreatedSubWalletResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidCreate
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidEndpointWithType
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidRegistration
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidRegistrationResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.ResolutionResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
 import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord

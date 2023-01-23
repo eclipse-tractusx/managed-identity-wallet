@@ -19,10 +19,32 @@
 
 package org.eclipse.tractusx.managedidentitywallets
 
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
-
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidVerificationMethodDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateSubWallet
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateWalletTokenResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreatedSubWalletResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidCreate
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidEndpointWithType
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidRegistration
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidRegistrationResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidResultDetails
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.ResolutionMetaData
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.ResolutionResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletSettings
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData

@@ -22,17 +22,26 @@ package org.eclipse.tractusx.managedidentitywallets
 import io.ktor.application.*
 import io.ktor.features.*
 import kotlinx.coroutines.runBlocking
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
-
-import org.eclipse.tractusx.managedidentitywallets.plugins.*
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureJobs
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureOpenAPI
+import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureRouting
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSecurity
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSockets
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
-import org.eclipse.tractusx.managedidentitywallets.services.*
-
+import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
+import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -135,7 +144,7 @@ private fun onStarted(app: Application) {
     val veykeyOfBaseWallet = app.environment.config.property("wallet.baseWalletVerkey").getString()
     val nameOfBaseWallet = app.environment.config.property("wallet.baseWalletName").getString()
     runBlocking {
-        Services.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+        Services.walletService.initBaseWalletAndSubscribeForAriesWS(
             bpn = bpnOfBaseWallet,
             did =  didOfBaseWallet,
             verkey = veykeyOfBaseWallet,

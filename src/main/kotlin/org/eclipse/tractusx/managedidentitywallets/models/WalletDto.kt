@@ -22,11 +22,10 @@ package org.eclipse.tractusx.managedidentitywallets.models
 import io.bkbn.kompendium.annotations.Field
 import io.bkbn.kompendium.annotations.Param
 import io.bkbn.kompendium.annotations.ParamType
-import java.time.LocalDateTime
-import org.eclipse.tractusx.managedidentitywallets.plugins.*
-
 import kotlinx.serialization.Serializable
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.plugins.LocalDateTimeAsStringSerializer
+import java.time.LocalDateTime
 
 @Serializable
 data class WalletDto(

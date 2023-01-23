@@ -24,17 +24,36 @@ import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
+import org.eclipse.tractusx.managedidentitywallets.models.LegalFormDto
+import org.eclipse.tractusx.managedidentitywallets.models.NameResponse
+import org.eclipse.tractusx.managedidentitywallets.models.TypeKeyNameDto
+import org.eclipse.tractusx.managedidentitywallets.models.TypeKeyNameUrlDto
+import org.eclipse.tractusx.managedidentitywallets.models.TypeNameUrlDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
-import org.eclipse.tractusx.managedidentitywallets.services.*
+import org.eclipse.tractusx.managedidentitywallets.services.AcaPyService
+import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
+import org.eclipse.tractusx.managedidentitywallets.services.BusinessPartnerDataServiceImpl
+import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
+import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
+import org.eclipse.tractusx.managedidentitywallets.services.WebhookServiceImpl
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
@@ -43,10 +62,24 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredOffer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.kotlin.*
+import org.mockito.kotlin.MockitoKotlinException
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.io.File
 import java.util.*
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.fail
 
 @kotlinx.serialization.ExperimentalSerializationApi
 class BusinessPartnerServiceTest {
@@ -306,7 +339,7 @@ class BusinessPartnerServiceTest {
                 val credentialBpnId = listOfCredentialIds[0]
                 doReturn(
                     createVCDto(credentialBpnId, issuerWallet.did, JsonLdTypes.BPN_TYPE, bpnSubject)
-                ).whenever(walletServiceSpy).issueCatenaXCredential(any())
+                ).whenever(walletServiceSpy).issueBaseWalletCredential(any())
                 // Test create bpn credential
                 bpdmService.issueAndStoreCatenaXCredentialsAsync(
                     holderWalletDto,
@@ -323,7 +356,7 @@ class BusinessPartnerServiceTest {
                         JsonLdTypes.MEMBERSHIP_TYPE,
                         membershipSubject
                     )
-                ).whenever(walletServiceSpy).issueCatenaXCredential(any())
+                ).whenever(walletServiceSpy).issueBaseWalletCredential(any())
                 // Test create membership credential
                 bpdmService.issueAndStoreCatenaXCredentialsAsync(
                     holderWalletDto,
@@ -335,7 +368,7 @@ class BusinessPartnerServiceTest {
                 val credentialNameId = listOfCredentialIds[2]
                 doReturn(
                     createVCDto(credentialNameId, issuerWallet.did, JsonLdTypes.NAME_TYPE, nameSubject)
-                ).whenever(walletServiceSpy).issueCatenaXCredential(any())
+                ).whenever(walletServiceSpy).issueBaseWalletCredential(any())
 
                 // Test create name credential
                 bpdmService.issueAndStoreCatenaXCredentialsAsync(
@@ -403,7 +436,7 @@ class BusinessPartnerServiceTest {
                         credentialSubject = mapOf("data" to "data"),
                         issuanceDate = "now"
                     )
-                ).whenever(walletServiceSpy).issueCatenaXCredential(any())
+                ).whenever(walletServiceSpy).issueBaseWalletCredential(any())
 
                 // Test create credential
                 val resultWithException = bpdmService.issueAndStoreCatenaXCredentialsAsync(
@@ -492,7 +525,7 @@ class BusinessPartnerServiceTest {
                         JsonLdTypes.LEGAL_FORM_TYPE,
                         legalFormSubject
                     )
-                ).whenever(walletServiceSpy).issueCatenaXCredential(any())
+                ).whenever(walletServiceSpy).issueBaseWalletCredential(any())
 
 
 
@@ -714,7 +747,7 @@ class BusinessPartnerServiceTest {
                 addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, selfManagedWallet))
                 doReturn(
                     catenaXWallet
-                ).whenever(walletServiceSpy).getCatenaXWallet()
+                ).whenever(walletServiceSpy).getBaseWallet()
                 val client = HttpClient(mockEngine) {
                     expectSuccess = false
                 }
@@ -903,7 +936,7 @@ class BusinessPartnerServiceTest {
             wallets.forEach {
                 if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
                     runBlocking {
-                        walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                        walletService.initBaseWalletAndSubscribeForAriesWS(
                             EnvironmentTestSetup.DEFAULT_BPN,
                             EnvironmentTestSetup.DEFAULT_DID,
                             EnvironmentTestSetup.DEFAULT_VERKEY,

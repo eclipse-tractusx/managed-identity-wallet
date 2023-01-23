@@ -19,9 +19,13 @@
 
 package org.eclipse.tractusx.managedidentitywallets.persistence.repositories
 
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
+import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallet
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallets
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime

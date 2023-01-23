@@ -19,20 +19,30 @@
 
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
-import io.ktor.serialization.*
-import io.ktor.features.*
-import io.ktor.application.*
-
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.*
-import kotlinx.serialization.*
-import kotlinx.serialization.encoding.*
-import kotlinx.serialization.descriptors.*
-
 import io.bkbn.kompendium.oas.serialization.KompendiumSerializersModule
-
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.serialization.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.long
 import java.time.LocalDateTime
-
 import kotlin.reflect.full.memberProperties
 
 

@@ -47,25 +47,25 @@ below. Here a few hints on how to set it up:
 
 | Key                       | Type   | Description |
 |---------------------------|--------|-------------|
-| `CX_DB_JDBC_URL`          | URL    | database connection string, most commonly postgreSQL is used |
-| `CX_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
-| `CX_AUTH_JWKS_URL`        | URL    | IAM certs url |
-| `CX_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
-| `CX_AUTH_REALM`           | String | IAM realm |
-| `CX_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
-| `CX_AUTH_RESOURCE_ID`     | String | IAM resource id |
-| `CX_AUTH_CLIENT_ID`       | String | IAM client id |
-| `CX_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*catenax* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
+| `MIW_DB_JDBC_URL`          | URL    | database connection string, most commonly postgreSQL is used |
+| `MIW_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
+| `MIW_AUTH_JWKS_URL`        | URL    | IAM certs url |
+| `MIW_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
+| `MIW_AUTH_REALM`           | String | IAM realm |
+| `MIW_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
+| `MIW_AUTH_RESOURCE_ID`     | String | IAM resource id |
+| `MIW_AUTH_CLIENT_ID`       | String | IAM client id |
+| `MIW_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*catenax* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
 | `APP_VERSION`             | String | application version, this should be in-line with the version in the deployment |
 | `ACAPY_API_ADMIN_URL`     | String | admin url of ACA-Py |
 | `ACAPY_ADMIN_API_KEY`     | String | admin api key of ACA-Py endpoints |
-| `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the catena-x endorser ACA-Py |
-| `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the catena-x endorser ACA-Py endpoints |
+| `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the base endorser ACA-Py |
+| `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the base endorser ACA-Py endpoints |
 | `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space |
-| `CX_BPN`                  | String | BPN of the catena-x wallet |
-| `CX_DID`                  | String | DID of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
-| `CX_VERKEY`               | String | Verification key of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
-| `CX_NAME`                 | String | Name of the catena-x base wallet |
+| `MIW_BPN`                  | String | BPN of the base wallet |
+| `MIW_DID`                  | String | DID of the base wallet, this wallet must be registered on ledger with the endorser role |
+| `MIW_VERKEY`               | String | Verification key of the base wallet, this wallet must be registered on ledger with the endorser role |
+| `MIW_NAME`                 | String | Name of the base wallet |
 | `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
 | `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
 | `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint |
@@ -124,8 +124,8 @@ revocation handling)
 
     | Key               | Value           |
     |-------------------|-----------------|
-    | CX_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password=cx_password` |
-    | CX_DB_JDBC_DRIVER | `org.postgresql.Driver` |
+    | MIW_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/<placeholder>?user=<placeholder>&password=<placeholder>` |
+    | MIW_DB_JDBC_DRIVER | `org.postgresql.Driver` |
 
     Then restart the service via `./gradlew run`
 
@@ -138,7 +138,7 @@ With the following steps you can explore the API
 
     1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is temporary until the update to Ktor 2.x
 
-1. The two Postman collections `Cx_Base_Wallet_Acapy.postman_collection` and `Managed_Wallets_Acapy.postman_collection` are additional for debugging purposes. these collections include direct calls to the admin API of the Catena-X AcaPy instance and the Multi-tenancy AcaPy instance.
+1. The two Postman collections `Base_Wallet_Acapy.postman_collection` and `Managed_Wallets_Acapy.postman_collection` are additional for debugging purposes. these collections include direct calls to the admin API of the Base AcaPy instance and the Multi-tenancy AcaPy instance.
 
 1. The Postman collection `Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` sends requests to the external AcaPy instance that simulate an external wallet or self managed wallet.
 
@@ -147,7 +147,7 @@ With the following steps you can explore the API
 Now you have achieved the following:
 
 * set up the development environment to run it from source
-* initialized the catena-x wallet and its revocation list
+* initialized the base wallet and its revocation list
 * you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
 
 ## Setup Summary
@@ -157,7 +157,7 @@ Now you have achieved the following:
 | postgreSQL database   | port 5432 on `localhost`| within the Docker Compose setup |
 | Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `catena`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
 | revocation service    | http://localhost:8086   | within the Docker Compose setup |
-| ACA-Py for Catena-X Endorser Wallet | http://localhost:10000  | within the Docker Compose setup |
+| ACA-Py for Base Endorser Wallet | http://localhost:10000  | within the Docker Compose setup |
 | ACA-Py Multi-tenancy for Managed Wallets | http://localhost:10003  | within the Docker Compose setup |
 | MIW service           | http://localhost:8080/  | |
 | ACA-Py (External Wallet) | http://localhost:10001  | within the Docker Compose setup |
@@ -258,14 +258,14 @@ Next step is to build and tag the Docker image, replacing the
 `<VERSION>` with the app version:
 
 ```
-docker build -t catena-x/managed-identity-wallets:<VERSION> .
+docker build -t example/managed-identity-wallets:<VERSION> .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets:<VERSION>
+docker run --env-file .env.docker -p 8080:8080 example/managed-identity-wallets:<VERSION>
 ```
 
 ## Deployment on Kubernetes
@@ -283,20 +283,20 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 1. Create relevant secrets
 
     Altogether four secrets are needed
-    * catenax-managed-identity-wallets-secrets
-    * catenax-managed-identity-wallets-acapy-secrets    
+    * managed-identity-wallets-secrets
+    * managed-identity-wallets-acapy-secrets    
     * postgres-acapy-secret-config
     * postgres-managed-identity-wallets-secret-config
 
     Create these with following commands, after replacing the placeholders:
 
     ```
-    kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-secrets \
-      --from-literal=cx-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/miwdev?user=miwdevuser&password=<placeholder>' \
-      --from-literal=cx-auth-client-id='ManagedIdentityWallets' \
-      --from-literal=cx-auth-client-secret='<placeholder>'
+    kubectl -n managed-identity-wallets create secret generic managed-identity-wallets-secrets \
+      --from-literal=miw-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/miwdev?user=miwdevuser&password=<placeholder>' \
+      --from-literal=miw-auth-client-id='ManagedIdentityWallets' \
+      --from-literal=miw-auth-client-secret='<placeholder>'
 
-    kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-acapy-secrets \
+    kubectl -n managed-identity-wallets create secret generic managed-identity-wallets-acapy-secrets \
       --from-literal=acapy-endorser-wallet-key='<placeholder>' \
       --from-literal=acapy-endorser-agent-wallet-seed='<placeholder>' \
       --from-literal=acapy-endorser-jwt-secret='<placeholder>' \
@@ -346,7 +346,7 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 
     ```
     NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	                APP VERSION
-    cx-miw       	ingress-miw     	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-managed-identity-wallets-0.1.0	0.0.5      
+    miw       	ingress-miw     	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	managed-identity-wallets-0.1.0	0.0.5      
     ```
 
 # End Users
@@ -370,7 +370,7 @@ or build your own image following the steps:
 * currently tested with version `0.7.5`
 * run `git checkout 0.7.5`
 * run `docker build -t acapy:0.7.5 -f ./docker/Dockerfile.run .`
-* change the used image for `cx_acapy` in `dev-assets/dev-containers/docker-compose.yml`
+* change the used image for `local_acapy` in `dev-assets/dev-containers/docker-compose.yml`
 
 ## Integrate with an write-restricted Indy Ledger
 

@@ -23,14 +23,24 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
-import org.eclipse.tractusx.managedidentitywallets.plugins.*
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureOpenAPI
+import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureRouting
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSecurity
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @kotlinx.serialization.ExperimentalSerializationApi
 class SelfManagedInteractionTest {
@@ -73,7 +83,7 @@ class SelfManagedInteractionTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                EnvironmentTestSetup.walletService.initBaseWalletAndSubscribeForAriesWS(
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,

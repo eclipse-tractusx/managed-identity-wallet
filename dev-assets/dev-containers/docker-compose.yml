@@ -1,44 +1,44 @@
 version: '3'
 
 services:
-  cx_postgres:
+  local_postgres:
     build:
       context: .
       dockerfile: db.Dockerfile
-    container_name: cx_postgres
+    container_name: local_postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: cx_password
+      POSTGRES_PASSWORD: local_password
       PGDATA: /data/postgres-data
     volumes:
       - postgres-data:/data/postgres-data
     ports:
       - "5432:5432"
 
-  cx_keycloak:
+  local_keycloak:
     image: jboss/keycloak:16.1.1
-    container_name: cx_keycloak
+    container_name: local_keycloak
     environment:
       KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: catena
-      KEYCLOAK_IMPORT: /tmp/catenax-realm.json
+      KEYCLOAK_PASSWORD: changeme
+      KEYCLOAK_IMPORT: /tmp/local-realm.json
     volumes:
-      - ./keycloak/catenax-realm.json:/tmp/catenax-realm.json
+      - ./keycloak/local-realm.json:/tmp/local-realm.json
     ports:
       - "8081:8080"
 
   # DID: ArqouCjqi4RwBXQqjAbQrG, Verkey: 6Ng3Cu39yTViaEUg1BETpze78nXZqHpb6Q783X2rRhe6
   # This wallet must have the endorser role
-  cx_base_acapy:
+  local_base_acapy:
     image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
-    container_name: cx_base_acapy
+    container_name: local_base_acapy
     ports:
       - "11000:11000"
       - "8000:8000"
     depends_on:
-      - cx_postgres
+      - local_postgres
     environment:
-      WAIT_HOSTS: "cx_postgres:5432"
+      WAIT_HOSTS: "local_postgres:5432"
       WAIT_HOSTS_TIMEOUT: "300"
       WAIT_SLEEP_INTERVAL: "5"
       WAIT_HOST_CONNECT_TIMEOUT: "3"
@@ -46,20 +46,20 @@ services:
     command: [
        "-c",
        "aca-py start \
-        -e http://cx_base_acapy:8000/ \
+        -e http://local_base_acapy:8000/ \
         --auto-provision \
         --inbound-transport http '0.0.0.0' 8000 \
         --outbound-transport http \
         --admin '0.0.0.0' 11000 \
-        --wallet-name CatenaX_Base_Wallet \
+        --wallet-name Local_Base_Wallet \
         --wallet-type askar \
         --wallet-key issuerKeySecret19 \
         --wallet-storage-type postgres_storage
-        --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
-        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
+        --wallet-storage-config '{\"url\":\"local_postgres:5432\",\"max_connections\":5}'
+        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"local_password\",\"admin_account\":\"postgres\",\"admin_password\":\"local_password\"}'
         --seed qa0d0ke80770fff0000em00117117117 \
         --genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \
-        --label CatenaX_Base_Wallet \
+        --label Local_Base_Wallet \
         --admin-api-key Hj23iQUsstGXdde \
         --auto-ping-connection \
         --jwt-secret jwtSecret19 \
@@ -70,16 +70,16 @@ services:
     ]
 
   # The management multi-tenancy wallet must be registered on ledger 
-  cx_acapy:
+  local_acapy:
     image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.5
-    container_name: cx_acapy
+    container_name: local_acapy
     ports:
       - "11003:11003"
       - "8003:8003"
     depends_on:
-      - cx_postgres
+      - local_postgres
     environment:
-      WAIT_HOSTS: "cx_postgres:5432"
+      WAIT_HOSTS: "local_postgres:5432"
       WAIT_HOSTS_TIMEOUT: "300"
       WAIT_SLEEP_INTERVAL: "5"
       WAIT_HOST_CONNECT_TIMEOUT: "3"
@@ -87,20 +87,20 @@ services:
     command: [
        "-c",
        "aca-py start \
-        -e http://cx_acapy:8003/ \
+        -e http://local_acapy:8003/ \
         --auto-provision \
         --inbound-transport http '0.0.0.0' 8003 \
         --outbound-transport http \
         --admin '0.0.0.0' 11003 \
-        --wallet-name catenaX_managed \
+        --wallet-name local_managed \
         --wallet-type askar \
         --wallet-key issuerKeySecret19 \
         --wallet-storage-type postgres_storage
-        --wallet-storage-config '{\"url\":\"cx_postgres:5432\",\"max_connections\":5}'
-        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"cx_password\",\"admin_account\":\"postgres\",\"admin_password\":\"cx_password\"}'
+        --wallet-storage-config '{\"url\":\"local_postgres:5432\",\"max_connections\":5}'
+        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"local_password\",\"admin_account\":\"postgres\",\"admin_password\":\"local_password\"}'
         --seed 00000000000000000000000111111119 \
         --genesis-url http://dev.greenlight.bcovrin.vonx.io/genesis \
-        --label CatenaXManagedWallets \
+        --label LocalManagedWallets \
         --admin-api-key Hj23iQUsstGXdde \
         --auto-ping-connection \
         --jwt-secret jwtSecret19 \
@@ -147,21 +147,21 @@ services:
         --log-level DEBUG",
     ]
 
-  cx_revocation_service:
+  local_revocation_service:
     image: registry.gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/revocation:1.0.0-SNAPSHOT-quarkus-2.10.2.Final-java17
-    container_name: cx_revocation_service
+    container_name: local_revocation_service
     ports:
       - "8086:8086"
     depends_on:
-      - cx_postgres
+      - local_postgres
     environment:
-      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://cx_postgres:5432/postgres?user=postgres&password=cx_password
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://local_postgres:5432/postgres?user=postgres&password=local_password
       QUARKUS_HTTP_PORT: 8086
       QUARKUS_HTTP_ACCESS_LOG_ENABLED: "true"
       REVOCATION_BASE_URL: http://localhost:8080/api/credentials/
       REVOCATION_MIN_ISSUE_INTERVAL: 2
       QUARKUS_REST_CLIENT_SSI_ISSUANCE_API_URL: "${SSI_SERVICE_URL:-http://host.docker.internal:8080}"
-      WAIT_HOSTS: "cx_postgres:5432"
+      WAIT_HOSTS: "local_postgres:5432"
       WAIT_HOSTS_TIMEOUT: "300"
       WAIT_SLEEP_INTERVAL: "5"
       WAIT_HOST_CONNECT_TIMEOUT: "3"

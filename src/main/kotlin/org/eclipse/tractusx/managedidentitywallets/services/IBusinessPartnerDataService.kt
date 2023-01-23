@@ -19,11 +19,11 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import kotlinx.coroutines.Deferred
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
+import kotlinx.coroutines.Deferred
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.slf4j.LoggerFactory

@@ -19,15 +19,13 @@
 
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
-import io.ktor.application.*
-
 import io.bkbn.kompendium.core.Kompendium
 import io.bkbn.kompendium.oas.OpenApiSpec
 import io.bkbn.kompendium.oas.info.Contact
 import io.bkbn.kompendium.oas.info.Info
 import io.bkbn.kompendium.oas.info.License
 import io.bkbn.kompendium.oas.server.Server
-
+import io.ktor.application.*
 import java.net.URI
 
 fun Application.configureOpenAPI() {

@@ -22,22 +22,46 @@ package org.eclipse.tractusx.managedidentitywallets
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kotlinx.coroutines.*
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import kotlinx.coroutines.runBlocking
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
-import org.eclipse.tractusx.managedidentitywallets.plugins.*
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureOpenAPI
+import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureRouting
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSecurity
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
-import org.eclipse.tractusx.managedidentitywallets.services.*
+import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
+import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
+import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
+import org.eclipse.tractusx.managedidentitywallets.services.ManagedWalletsAriesEventHandler
+import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.io.File
 import java.util.*
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @kotlinx.serialization.ExperimentalSerializationApi
 class ManagedWalletAriesEventHandlerTest {
@@ -352,7 +376,7 @@ class ManagedWalletAriesEventHandlerTest {
             wallets.forEach {
                 if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
                     runBlocking {
-                        walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                        walletService.initBaseWalletAndSubscribeForAriesWS(
                             EnvironmentTestSetup.DEFAULT_BPN,
                             EnvironmentTestSetup.DEFAULT_DID,
                             EnvironmentTestSetup.DEFAULT_VERKEY,

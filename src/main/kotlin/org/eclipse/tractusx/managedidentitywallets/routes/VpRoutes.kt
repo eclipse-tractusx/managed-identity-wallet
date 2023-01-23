@@ -25,16 +25,23 @@ import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
-
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.eclipse.tractusx.managedidentitywallets.models.*
-
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationIssuanceParameter
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.WithDateValidation
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
+import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
 fun Route.vpRoutes(walletService: IWalletService) {

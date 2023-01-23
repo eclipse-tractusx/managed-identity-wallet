@@ -19,7 +19,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.image.secret }}
       containers:
-      - name: catenax-managed-identity-wallets
+      - name: managed-identity-wallets
         {{- if .Values.image.registry }}
         image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}
         {{- else }}
@@ -31,36 +31,36 @@ spec:
           value: {{ .Chart.AppVersion }}
         - name: ALLOW_EMPTY_PASSWORD
           value: {{ .Values.allowEmptyPassword | default "no" }}
-        - name: CX_DB_JDBC_URL
+        - name: MIW_DB_JDBC_URL
           valueFrom:
             secretKeyRef:
               name: {{ include "managed-identity-wallets.fullname" . }}-secret
-              key: cx-db-jdbc-url
-        - name: CX_DB_JDBC_DRIVER
+              key: miw-db-jdbc-url
+        - name: MIW_DB_JDBC_DRIVER
           value: {{ .Values.db.jdbcDriver }}
-        - name: CX_AUTH_JWKS_URL
+        - name: MIW_AUTH_JWKS_URL
           value: {{ .Values.auth.jwksUrl }}
-        - name: CX_AUTH_ISSUER_URL
+        - name: MIW_AUTH_ISSUER_URL
           value: {{ .Values.auth.issuerUrl }}
-        - name: CX_AUTH_REALM
+        - name: MIW_AUTH_REALM
           value: {{ .Values.auth.realm }}
-        - name: CX_AUTH_ROLE
+        - name: MIW_AUTH_ROLE
           value: {{ .Values.auth.role }}
-        - name: CX_AUTH_ROLE_MAPPINGS
+        - name: MIW_AUTH_ROLE_MAPPINGS
           value: {{ .Values.auth.roleMappings }}
-        - name: CX_AUTH_RESOURCE_ID
+        - name: MIW_AUTH_RESOURCE_ID
           value: {{ .Values.auth.resourceId }}
-        - name: CX_AUTH_CLIENT_ID
+        - name: MIW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
               name: {{ include "managed-identity-wallets.fullname" . }}-secret
-              key: cx-auth-client-id
-        - name: CX_AUTH_CLIENT_SECRET
+              key: miw-auth-client-id
+        - name: MIW_AUTH_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
               name: {{ include "managed-identity-wallets.fullname" . }}-secret
-              key: cx-auth-client-secret
-        - name: CX_AUTH_REDIRECT_URL
+              key: miw-auth-client-secret
+        - name: MIW_AUTH_REDIRECT_URL
           value: {{ .Values.auth.redirectUrl }}
         - name: BPDM_DATAPOOL_URL
           value: {{ .Values.datapool.url }}
@@ -98,13 +98,13 @@ spec:
             secretKeyRef:
               name: {{ include "managed-identity-wallets.fullname" . }}-acapy
               key: acapy-endorser-admin-api-key
-        - name: CX_BPN
+        - name: MIW_BPN
           value: {{ .Values.wallet.baseWalletBpn }}
-        - name: CX_SHORT_DID
+        - name: MIW_SHORT_DID
           value: {{ .Values.wallet.baseWalletShortDid }} 
-        - name: CX_VERKEY
+        - name: MIW_VERKEY
           value: {{ .Values.wallet.baseWalletVerkey }} 
-        - name: CX_NAME
+        - name: MIW_NAME
           value: {{ .Values.wallet.baseWalletName }} 
         - name: REVOCATION_URL
           value: {{ .Values.revocation.revocationServiceUrl }}
@@ -119,7 +119,7 @@ spec:
             memory: 256Mi
         ports:
         - containerPort: 8080
-      - name: catenax-revocation-service
+      - name: revocation-service
         image: {{ .Values.revocationService.imageName }}:{{ .Values.revocationService.tag }}
         imagePullPolicy: Always
         env:
@@ -131,7 +131,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ include "managed-identity-wallets.fullname" . }}-secret
-              key: cx-db-jdbc-url
+              key: miw-db-jdbc-url
         - name: REVOCATION_BASE_URL
           value: {{ .Values.revocationService.baseUrlForCredentialList }}
         - name: REVOCATION_MIN_ISSUE_INTERVAL
@@ -147,7 +147,7 @@ spec:
             memory: 256Mi
         ports:
         - containerPort: 8086
-      - name: catenax-endorser-acapy
+      - name: endorser-acapy
         image: {{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
         env:
         - name: WALLET_KEY
@@ -224,7 +224,7 @@ spec:
           --inbound-transport http '0.0.0.0' $(ACAPY_ENDPOINT_PORT) \
           --outbound-transport http \
           --admin '0.0.0.0' $(ACAPY_ADMIN_PORT) \
-          --wallet-name AcapyCatenaXEndorserWallet \
+          --wallet-name AcapyBaseEndorserWallet \
           --wallet-type askar \
           --wallet-key $(WALLET_KEY) \
           --wallet-storage-type postgres_storage
@@ -241,7 +241,7 @@ spec:
           --auto-endorse-transactions \
           --log-level $(LOG_LEVEL)"
         ]
-      - name: catenax-mt-acapy
+      - name: mt-acapy
         image: {{ .Values.acapy.imageName }}:{{ .Values.acapy.tag }}
         env:
         - name: WALLET_KEY
@@ -322,7 +322,7 @@ spec:
           --inbound-transport http '0.0.0.0' $(ACAPY_ENDPOINT_PORT) \
           --outbound-transport http \
           --admin '0.0.0.0' $(ACAPY_ADMIN_PORT) \
-          --wallet-name AcapyCatenaXManagedWallet \
+          --wallet-name AcapyManagedWallet \
           --wallet-type askar \
           --wallet-key $(WALLET_KEY) \
           --wallet-storage-type postgres_storage

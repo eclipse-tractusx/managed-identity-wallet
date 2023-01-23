@@ -20,7 +20,8 @@
 package org.eclipse.tractusx.managedidentitywallets.persistence.repositories
 
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Webhook
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Webhooks
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class WebhookRepository {

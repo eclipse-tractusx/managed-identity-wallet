@@ -31,15 +31,23 @@ import io.bkbn.kompendium.core.metadata.method.DeleteInfo
 import io.bkbn.kompendium.core.metadata.method.GetInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
 import io.bkbn.kompendium.core.metadata.method.PutInfo
-
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.eclipse.tractusx.managedidentitywallets.models.*
-
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
+import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.notFoundException
+import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentParameters
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentServiceParameters
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceUpdateRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidVerificationMethodDto
+import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 
 fun Route.didDocRoutes(walletService: IWalletService) {

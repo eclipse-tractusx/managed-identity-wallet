@@ -23,9 +23,15 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.AuthorizationException
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
+import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
+import org.eclipse.tractusx.managedidentitywallets.models.ExceptionResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
+import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
+import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
 
 fun Application.configureStatusPages() {
     install(StatusPages) {

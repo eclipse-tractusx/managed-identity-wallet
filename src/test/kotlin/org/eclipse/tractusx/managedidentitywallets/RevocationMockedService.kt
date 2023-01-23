@@ -19,7 +19,9 @@
 
 package org.eclipse.tractusx.managedidentitywallets
 
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import java.util.*
 

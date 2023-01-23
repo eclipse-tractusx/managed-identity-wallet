@@ -21,8 +21,12 @@ package org.eclipse.tractusx.managedidentitywallets.persistence.repositories
 
 import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
-import org.jetbrains.exposed.sql.*
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Connection
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Connections
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ConnectionRepository {

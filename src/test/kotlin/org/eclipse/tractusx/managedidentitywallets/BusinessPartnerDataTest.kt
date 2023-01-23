@@ -23,11 +23,19 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.plugins.*
+import org.eclipse.tractusx.managedidentitywallets.models.BusinessPartnerDataDto
+import org.eclipse.tractusx.managedidentitywallets.models.LegalAddressDto
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureOpenAPI
+import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureRouting
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSecurity
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
 import java.io.File
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @kotlinx.serialization.ExperimentalSerializationApi
 class BusinessPartnerDataTest {

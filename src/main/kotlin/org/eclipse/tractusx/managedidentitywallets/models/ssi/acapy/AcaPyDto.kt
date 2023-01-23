@@ -204,7 +204,7 @@ data class VerifyResponse(
 @Serializable
 data class VerifyRequest<T>(
     @JsonProperty("doc") @SerialName("doc") val signedDoc: T?,
-    val verkey: String
+    val verkey: String? = null
 )
 
 @Serializable

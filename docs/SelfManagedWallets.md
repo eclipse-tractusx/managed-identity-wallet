@@ -13,7 +13,7 @@
 A self managed wallet can be registered on the MIW by giving the `bpn`, `did`, `name`, and an optional `webhookUrl` to inform the requester when the connection reaches the state `Completed` and the Membership and BPN credentials are issued. 
 
 The following instruction will be executed when a self managed wallet is registered:
-  - Establish connection between Catena-X wallet DID and the given DID of the self managed wallet
+  - Establish connection between Base wallet DID and the given DID of the self managed wallet
   - Store the connection Id in database
   - If webhookUrl exist then store it with the request Id of the connection in database
   - Set the state of connection and webhook to `Request``
