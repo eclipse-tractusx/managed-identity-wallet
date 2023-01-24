@@ -19,10 +19,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
@@ -80,28 +77,26 @@ class BaseWalletAriesEventHandler(
                 val webhookUrl: String? = updateConnectionStateAndSendWebhook(connection)
 
                 if (walletOfConnectionTarget.pendingMembershipIssuance) {
-                    var successBpnCred = false
-                    var successMembershipCred = false
                     runBlocking {
-                        launch {
-                            successBpnCred = startCredentialExchangeFlow(
-                                walletOfConnectionTarget = walletOfConnectionTarget,
+                        val successBpnCred = businessPartnerDataService
+                            .issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
+                                targetWallet = walletOfConnectionTarget,
                                 connectionId = connection.connectionId,
                                 webhookUrl = webhookUrl,
-                                type = JsonLdTypes.BPN_TYPE
+                                type = JsonLdTypes.BPN_TYPE,
+                                data = null
                             )
-                        }
-                        launch {
-                            successMembershipCred = startCredentialExchangeFlow(
-                                walletOfConnectionTarget = walletOfConnectionTarget,
+                        val successMembershipCred  = businessPartnerDataService
+                            .issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
+                                targetWallet = walletOfConnectionTarget,
                                 connectionId = connection.connectionId,
                                 webhookUrl = webhookUrl,
                                 type = JsonLdTypes.MEMBERSHIP_TYPE,
+                                data = null
                             )
+                        if (successBpnCred.await() && successMembershipCred.await()) {
+                            transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }
                         }
-                    }
-                    if (successBpnCred && successMembershipCred) {
-                        transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }
                     }
                 }
             }
@@ -111,23 +106,6 @@ class BaseWalletAriesEventHandler(
             }
             else -> { return }
         }
-    }
-
-    private suspend fun startCredentialExchangeFlow(
-        walletOfConnectionTarget: WalletDto,
-        connectionId: String,
-        webhookUrl: String?,
-        type: String
-    ) = withContext(Dispatchers.Default) {
-        businessPartnerDataService
-            .issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
-                targetWallet = walletOfConnectionTarget,
-                connectionId = connectionId,
-                webhookUrl = webhookUrl,
-                type = type,
-                data = null
-            ).await()
-        true
     }
 
     private fun updateConnectionStateAndSendWebhook(connection: ConnectionRecord): String? {
