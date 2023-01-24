@@ -84,24 +84,22 @@ class BaseWalletAriesEventHandler(
                     var successBpnCred = false
                     var successMembershipCred = false
                     runBlocking {
-                        listOf(
-                            launch {
-                                successBpnCred = startCredentialExchangeFlow(
-                                    walletOfConnectionTarget = walletOfConnectionTarget,
-                                    connectionId = connection.connectionId,
-                                    webhookUrl = webhookUrl,
-                                    type = JsonLdTypes.BPN_TYPE
-                                )
-                            },
-                            launch {
-                                successMembershipCred = startCredentialExchangeFlow(
-                                    walletOfConnectionTarget = walletOfConnectionTarget,
-                                    connectionId = connection.connectionId,
-                                    webhookUrl = webhookUrl,
-                                    type = JsonLdTypes.MEMBERSHIP_TYPE,
-                                )
-                            }
-                        ).joinAll()
+                        launch {
+                            successBpnCred = startCredentialExchangeFlow(
+                                walletOfConnectionTarget = walletOfConnectionTarget,
+                                connectionId = connection.connectionId,
+                                webhookUrl = webhookUrl,
+                                type = JsonLdTypes.BPN_TYPE
+                            )
+                        }
+                        launch {
+                            successMembershipCred = startCredentialExchangeFlow(
+                                walletOfConnectionTarget = walletOfConnectionTarget,
+                                connectionId = connection.connectionId,
+                                webhookUrl = webhookUrl,
+                                type = JsonLdTypes.MEMBERSHIP_TYPE,
+                            )
+                        }
                     }
                     if (successBpnCred && successMembershipCred) {
                         transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }

@@ -162,7 +162,6 @@ class ApplicationTest {
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                println("TEST "  + response.content!!.toString())
                 assertTrue(response.content!!.contains("Managed Identity Wallets"))
             }
             handleRequest(HttpMethod.Post, "/").apply {
