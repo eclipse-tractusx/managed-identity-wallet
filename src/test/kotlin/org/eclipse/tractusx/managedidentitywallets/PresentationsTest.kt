@@ -92,7 +92,7 @@ class PresentationsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
                 SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
                 SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
@@ -363,7 +363,7 @@ class PresentationsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
                 val walletDto =  EnvironmentTestSetup.walletService.getWallet(EnvironmentTestSetup.DEFAULT_BPN)
                 SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
@@ -521,7 +521,7 @@ class PresentationsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
             }
             //TODO replace did:sov in all used json files when indy did method is supported by AcaPy
@@ -667,7 +667,7 @@ class PresentationsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
                 val wallet = EnvironmentTestSetup.walletService.getWallet(EnvironmentTestSetup.DEFAULT_DID)
                 SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID

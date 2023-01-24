@@ -30,15 +30,15 @@ import org.slf4j.LoggerFactory
 
 interface IBusinessPartnerDataService {
 
-    suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String? = null): Deferred<Boolean>
+    suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(identifier: String? = null): Deferred<Boolean>
 
-    suspend fun issueAndStoreCatenaXCredentialsAsync(
+    suspend fun issueAndStoreBaseWalletCredentialsAsync(
         walletHolderDto: WalletDto,
         type: String,
         data: Any? = null
     ): Deferred<Boolean>
 
-    suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+    suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
         webhookUrl: String? = null,
@@ -57,7 +57,7 @@ interface IBusinessPartnerDataService {
                 walletService,
                 bpdmConfig,
                 HttpClient {
-                    expectSuccess = false // must be set to false to handle thrown error if the access token has expired
+                    expectSuccess = false // must be false to handle thrown error if the access token has expired
                     install(ResponseObserver) {
                         onResponse { response ->
                             log.debug("HTTP status: ${response.status.value}")

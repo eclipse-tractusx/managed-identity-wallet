@@ -162,7 +162,8 @@ class ApplicationTest {
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                assertTrue(response.content!!.contains("Catena-X Core"))
+                println("TEST "  + response.content!!.toString())
+                assertTrue(response.content!!.contains("Managed Identity Wallets"))
             }
             handleRequest(HttpMethod.Post, "/").apply {
                 assertEquals(HttpStatusCode.NotFound, response.status())
@@ -337,7 +338,7 @@ class ApplicationTest {
                         "not match requestors BPN ${EnvironmentTestSetup.EXTRA_TEST_BPN}") }
             }
 
-            // request a credential by the Catena-X issuer
+            // request a credential by the base wallet issuer
             handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN_SINGLE}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -375,7 +376,7 @@ class ApplicationTest {
                 assertTrue { response.content!!.contains("Error: no verification methods") }
             }
 
-            // request a Catena-X credential using not Catena-X BPN in Token
+            // request a base wallet credential using not another BPN in Token
             handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN_SINGLE_EXTRA_BPN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())

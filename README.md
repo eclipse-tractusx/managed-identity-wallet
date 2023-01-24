@@ -1,8 +1,5 @@
 # Managed Identity Wallets <a id="introduction"></a>
 
-This repository is part of the overarching Catena-X project, and more specifically
-developed within the Catena-X Core Agile Release Train.
-
 The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI)
 readiness by providing a wallet hosting platform including a DID resolver,
 service endpoints and the company wallets itself.

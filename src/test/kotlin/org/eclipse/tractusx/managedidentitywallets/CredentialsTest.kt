@@ -93,7 +93,7 @@ class CredentialsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
             }
 
@@ -176,7 +176,7 @@ class CredentialsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
                 SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
                 SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
@@ -445,7 +445,7 @@ class CredentialsTest {
     }
 
     @Test
-    fun testIssueCredentialsByCatenaXWallet() {
+    fun testIssueCredentialsByBaseWallet() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
@@ -469,7 +469,7 @@ class CredentialsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
                 SingletonTestData.baseWalletVerKey = EnvironmentTestSetup.DEFAULT_VERKEY
                 SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID
@@ -577,7 +577,7 @@ class CredentialsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X-Wallet"
+                    "Base-Wallet"
                 )
             }
             val walletDto = EnvironmentTestSetup.walletService.getWallet(EnvironmentTestSetup.DEFAULT_BPN)

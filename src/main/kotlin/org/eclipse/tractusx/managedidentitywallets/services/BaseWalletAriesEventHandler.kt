@@ -19,9 +19,11 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
@@ -79,26 +81,30 @@ class BaseWalletAriesEventHandler(
                 val webhookUrl: String? = updateConnectionStateAndSendWebhook(connection)
 
                 if (walletOfConnectionTarget.pendingMembershipIssuance) {
-                    GlobalScope.launch {
-                        val successBpnCred = businessPartnerDataService
-                            .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
-                                targetWallet = walletOfConnectionTarget,
-                                connectionId = connection.connectionId,
-                                webhookUrl = webhookUrl,
-                                type = JsonLdTypes.BPN_TYPE,
-                                data = null
-                            ).await()
-                            val successMembershipCred = businessPartnerDataService
-                            .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
-                                targetWallet = walletOfConnectionTarget,
-                                connectionId = connection.connectionId,
-                                webhookUrl = webhookUrl,
-                                type = JsonLdTypes.MEMBERSHIP_TYPE,
-                                data = null
-                            ).await()
-                        if (successBpnCred && successMembershipCred) {
-                            transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }
-                        }
+                    var successBpnCred = false
+                    var successMembershipCred = false
+                    runBlocking {
+                        listOf(
+                            launch {
+                                successBpnCred = startCredentialExchangeFlow(
+                                    walletOfConnectionTarget = walletOfConnectionTarget,
+                                    connectionId = connection.connectionId,
+                                    webhookUrl = webhookUrl,
+                                    type = JsonLdTypes.BPN_TYPE
+                                )
+                            },
+                            launch {
+                                successMembershipCred = startCredentialExchangeFlow(
+                                    walletOfConnectionTarget = walletOfConnectionTarget,
+                                    connectionId = connection.connectionId,
+                                    webhookUrl = webhookUrl,
+                                    type = JsonLdTypes.MEMBERSHIP_TYPE,
+                                )
+                            }
+                        ).joinAll()
+                    }
+                    if (successBpnCred && successMembershipCred) {
+                        transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }
                     }
                 }
             }
@@ -108,6 +114,23 @@ class BaseWalletAriesEventHandler(
             }
             else -> { return }
         }
+    }
+
+    private suspend fun startCredentialExchangeFlow(
+        walletOfConnectionTarget: WalletDto,
+        connectionId: String,
+        webhookUrl: String?,
+        type: String
+    ) = withContext(Dispatchers.Default) {
+        businessPartnerDataService
+            .issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
+                targetWallet = walletOfConnectionTarget,
+                connectionId = connectionId,
+                webhookUrl = webhookUrl,
+                type = type,
+                data = null
+            ).await()
+        true
     }
 
     private fun updateConnectionStateAndSendWebhook(connection: ConnectionRecord): String? {

@@ -1,9 +1,9 @@
 {
     "openapi": "3.0.3",
     "info": {
-        "title": "Catena-X Core Managed Identity Wallets API",
-        "version": "3.0.0",
-        "description": "Catena-X Core Managed Identity Wallets API",
+        "title": "Managed Identity Wallets API",
+        "version": "3.1.0",
+        "description": "Managed Identity Wallets API",
         "termsOfService": "https://www.catena-x.net/",
         "contact": {
             "name": "Catena-X Core Agile Release Train",
@@ -16,18 +16,6 @@
         }
     },
     "servers": [
-        {
-            "url": "http://localhost:8080",
-            "description": "Local Dev Environment"
-        },
-        {
-            "url": "https://managed-identity-wallets.dev.demo.catena-x.net",
-            "description": "Catena-X Dev Environment"
-        },
-        {
-            "url": "https://managed-identity-wallets.int.demo.catena-x.net",
-            "description": "Catena-X Int Environment"
-        }
     ],
     "paths": {
         "/api/wallets": {
@@ -134,7 +122,7 @@
                                             "bpn": "bpn",
                                             "did": "did",
                                             "verKey": "verkey",
-                                            "createdAt": "2023-01-23T11:24:25.023037446",
+                                            "createdAt": "2023-01-24T15:27:14.322504",
                                             "vcs": [
                                             ],
                                             "pendingMembershipIssuance": false,
@@ -354,7 +342,7 @@
                                             "name": "name",
                                             "bpn": "bpn",
                                             "did": "did",
-                                            "createdAt": "2023-01-23T11:24:25.023118846",
+                                            "createdAt": "2023-01-24T15:27:14.322582",
                                             "vcs": [
                                             ],
                                             "pendingMembershipIssuance": false,

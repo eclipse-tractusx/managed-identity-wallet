@@ -29,6 +29,7 @@ import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
 import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
 import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
+import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletResultDto
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException

@@ -82,7 +82,7 @@ class DidDocTest {
                     bpn = EnvironmentTestSetup.DEFAULT_BPN,
                     did = EnvironmentTestSetup.DEFAULT_DID,
                     verkey = EnvironmentTestSetup.DEFAULT_VERKEY,
-                    name = "Catena_X_Wallet"
+                    name = "Base_Wallet"
                 )
                 EnvironmentTestSetup.walletService.createWallet(
                     WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "name_extra")

@@ -70,7 +70,7 @@ class BaseWalletAriesEventHandlerTest {
 
     private val issuerWallet = WalletExtendedData(
         id = 1,
-        name = "CatenaX_Wallet",
+        name = "Base_Wallet",
         bpn = EnvironmentTestSetup.DEFAULT_BPN,
         did = EnvironmentTestSetup.DEFAULT_DID,
         walletId = null,
@@ -193,7 +193,7 @@ class BaseWalletAriesEventHandlerTest {
                             invitationRequestDto = InvitationRequestDto(
                                 theirPublicDid = issuerWallet.did,
                                 myLabel = "testLabel",
-                                alias = "ToCatenaX"
+                                alias = "ToBaseWallet"
                             )
                         )
                     }
@@ -430,7 +430,7 @@ class BaseWalletAriesEventHandlerTest {
                             EnvironmentTestSetup.DEFAULT_BPN,
                             EnvironmentTestSetup.DEFAULT_DID,
                             EnvironmentTestSetup.DEFAULT_VERKEY,
-                            "Catena-X-Wallet"
+                            "Base-Wallet"
                         )
                     }
                 } else {

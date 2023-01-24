@@ -74,7 +74,7 @@ fun Application.configureRouting(IWalletService: IWalletService) {
                 """
 <html>
   <head>
-    <title>Catena-X Core // Managed Identity Wallets</title>
+    <title> Managed Identity Wallets </title>
     <style>
       body {
         font-family:sans-serif;

@@ -63,7 +63,7 @@ fun Route.businessPartnerDataRoutes(businessPartnerDataService: IBusinessPartner
             ) {
                 AuthorizationHandler.checkHasRightsToUpdateWallet(call, call.request.queryParameters["identifier"])
 
-                businessPartnerDataService.pullDataAndUpdateCatenaXCredentialsAsync(
+                businessPartnerDataService.pullDataAndUpdateBaseWalletCredentialsAsync(
                     call.request.queryParameters["identifier"]
                 )
                 return@notarizedPost call.respond(HttpStatusCode.Accepted)

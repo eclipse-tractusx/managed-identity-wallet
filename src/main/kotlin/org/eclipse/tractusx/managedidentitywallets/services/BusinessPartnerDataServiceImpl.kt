@@ -66,7 +66,7 @@ class BusinessPartnerDataServiceImpl(
     }
 
     // TODO: notify if issue credentials failed
-    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String?)
+    override suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(identifier: String?)
     : Deferred<Boolean> = GlobalScope.async {
         val listOfBPNs = if (identifier.isNullOrEmpty()) {
                 walletService.getAllBpns()
@@ -110,7 +110,7 @@ class BusinessPartnerDataServiceImpl(
                     val connectionId: ConnectionDto? = if (holder.isSelfManaged) {
                         walletService.getConnectionWithBaseWallet(holder.did)
                     } else { null }
-                    issueAndUpdateCatenaXCredentials(
+                    issueAndUpdateBaseWalletCredentials(
                         holder = holder,
                         businessPartnerData = legalEntityDataMap.get(bpn),
                         pulledAddressOfBpn = legalAddressDataMap.get(bpn),
@@ -124,7 +124,7 @@ class BusinessPartnerDataServiceImpl(
         return@async true
     }
 
-    override suspend fun issueAndStoreCatenaXCredentialsAsync(
+    override suspend fun issueAndStoreBaseWalletCredentialsAsync(
         walletHolderDto: WalletDto,
         type: String,
         data: Any?
@@ -145,7 +145,7 @@ class BusinessPartnerDataServiceImpl(
         }
     }
 
-    override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+    override suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
         webhookUrl: String?,
@@ -153,7 +153,7 @@ class BusinessPartnerDataServiceImpl(
         data: Any?
     ): Deferred<Boolean> =
         GlobalScope.async {
-            val catenaXWalletDid = walletService.getBaseWallet().did
+            val baseWalletDid = walletService.getBaseWallet().did
             val credentialFlowRequest: VerifiableCredentialRequestWithoutIssuerDto =
                 prepareCatenaXCredential(targetWallet.bpn, type, data)
             val vCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
@@ -161,7 +161,7 @@ class BusinessPartnerDataServiceImpl(
                 context = credentialFlowRequest.context,
                 type = credentialFlowRequest.type,
                 issuanceDate = credentialFlowRequest.issuanceDate,
-                issuerIdentifier = catenaXWalletDid,
+                issuerIdentifier = baseWalletDid,
                 expirationDate = credentialFlowRequest.expirationDate,
                 credentialSubject = credentialFlowRequest.credentialSubject,
                 credentialStatus = null,
@@ -176,20 +176,20 @@ class BusinessPartnerDataServiceImpl(
 
     // ============== Private ==============
 
-    private suspend fun issueAndUpdateCatenaXCredentials(
+    private suspend fun issueAndUpdateBaseWalletCredentials(
         holder: WalletDto,
         businessPartnerData: BusinessPartnerDataDto?,
         pulledAddressOfBpn: LegalAddressDto?,
         connection: ConnectionDto?
     ): Boolean = GlobalScope.async {
         runBlocking {
-            val catenaXCredentialsOfBpn = walletService.getCredentials(
+            val baseWalletCredentialsOfBpn = walletService.getCredentials(
                 walletService.getBaseWallet().bpn, holder.bpn, null, null
             )
             if (businessPartnerData != null) {
                 // Name Credentials
                 val existingNamesData: MutableList<Pair<NameResponse, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.NAME_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.NAME_TYPE)
                 businessPartnerData.names.forEach { name ->
                     checkExistencesAndIssueCredential(holder, existingNamesData,
                         JsonLdTypes.NAME_TYPE, name, connection)
@@ -198,7 +198,7 @@ class BusinessPartnerDataServiceImpl(
 
                 // Bank Account Credentials
                 val existingBankAccountsData: MutableList<Pair<BankAccountDto, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.BANK_ACCOUNT_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.BANK_ACCOUNT_TYPE)
                 businessPartnerData.bankAccounts.forEach { bankAccount ->
                     checkExistencesAndIssueCredential(holder, existingBankAccountsData,
                         JsonLdTypes.BANK_ACCOUNT_TYPE, bankAccount, connection)
@@ -207,7 +207,7 @@ class BusinessPartnerDataServiceImpl(
 
                 // Legal Form Credentials
                 val existingLegalFormData: MutableList<Pair<LegalFormDto, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.LEGAL_FORM_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.LEGAL_FORM_TYPE)
                 if (businessPartnerData.legalForm != null) {
                     checkExistencesAndIssueCredential(holder, existingLegalFormData,
                         JsonLdTypes.LEGAL_FORM_TYPE, businessPartnerData.legalForm, connection)
@@ -217,7 +217,7 @@ class BusinessPartnerDataServiceImpl(
             // Address Credentials
             if (pulledAddressOfBpn != null) {
                 val existingLegalAddressData : MutableList<Pair<AddressDto, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.ADDRESS_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.ADDRESS_TYPE)
                 checkExistencesAndIssueCredential(holder, existingLegalAddressData,
                     JsonLdTypes.ADDRESS_TYPE, pulledAddressOfBpn.legalAddress, connection)
                 revokeAndDeleteCredentialsAsync(existingLegalAddressData, holder.isSelfManaged).await()
@@ -238,13 +238,13 @@ class BusinessPartnerDataServiceImpl(
             existingDataFromCredential.remove(foundData)
         } else {
             if (!walletOfHolder.isSelfManaged) {
-                issueAndStoreCatenaXCredentialsAsync(
+                issueAndStoreBaseWalletCredentialsAsync(
                     walletHolderDto = walletOfHolder,
                     type = type,
                     data = data
                 ).await()
             } else if (connection != null) {
-                issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
                     walletOfHolder,
                     connectionId = connection.connectionId,
                     webhookUrl = null,

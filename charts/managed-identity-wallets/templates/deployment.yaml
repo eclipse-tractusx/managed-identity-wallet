@@ -101,11 +101,27 @@ spec:
         - name: MIW_BPN
           value: {{ .Values.wallet.baseWalletBpn }}
         - name: MIW_SHORT_DID
-          value: {{ .Values.wallet.baseWalletShortDid }} 
+          value: {{ .Values.wallet.baseWalletShortDid }}
         - name: MIW_VERKEY
-          value: {{ .Values.wallet.baseWalletVerkey }} 
+          value: {{ .Values.wallet.baseWalletVerkey }}
         - name: MIW_NAME
-          value: {{ .Values.wallet.baseWalletName }} 
+          value: {{ .Values.wallet.baseWalletName }}
+        - name: MIW_OPENAPI_TITLE
+          value: {{ .Values.openapi.title }}
+        - name: MIW_OPENAPI_DESCRIPTION
+          value: {{ .Values.openapi.description }}
+        - name: MIW_OPENAPI_TERM_OF_SERVICES_URL
+          value: {{ .Values.openapi.termsOfServiceUrl }}
+        - name: MIW_OPENAPI_CONTACT_NAME
+          value: {{ .Values.openapi.contactName }}
+        - name: MIW_OPENAPI_CONTACT_EMAIL
+          value: {{ .Values.openapi.contactEmail }}
+        - name: MIW_OPENAPI_CONTACT_URL
+          value: {{ .Values.openapi.contactUrl }}
+        - name: MIW_OPENAPI_LICENSE_NAME
+          value: {{ .Values.openapi.licenseName }}
+        - name: MIW_OPENAPI_LICENSE_URL
+          value: {{ .Values.openapi.licenseUrl }}
         - name: REVOCATION_URL
           value: {{ .Values.revocation.revocationServiceUrl }}
         - name: REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR

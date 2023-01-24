@@ -24,44 +24,37 @@ import io.bkbn.kompendium.oas.OpenApiSpec
 import io.bkbn.kompendium.oas.info.Contact
 import io.bkbn.kompendium.oas.info.Info
 import io.bkbn.kompendium.oas.info.License
-import io.bkbn.kompendium.oas.server.Server
 import io.ktor.application.*
 import java.net.URI
 
 fun Application.configureOpenAPI() {
     val version = environment.config.property("app.version").getString()
+    val title = environment.config.property("openapi.title").getString()
+    val description = environment.config.property("openapi.description").getString()
+    val termsOfServiceUrl = environment.config.property("openapi.termsOfServiceUrl").getString()
+    val contactName = environment.config.property("openapi.contactName").getString()
+    val contactEmail = environment.config.property("openapi.contactEmail").getString()
+    val contactUrl = environment.config.property("openapi.contactUrl").getString()
+    val licenseName = environment.config.property("openapi.licenseName").getString()
+    val licenseUrl = environment.config.property("openapi.licenseUrl").getString()
+
     install(Kompendium) {
       spec = OpenApiSpec(
           openapi = "3.0.3",
           info = Info(
-          title = "Catena-X Core Managed Identity Wallets API",
-          version = version,
-          description = "Catena-X Core Managed Identity Wallets API",
-          // TODO need to be adjusted
-          termsOfService = URI("https://www.catena-x.net/"),
-          contact = Contact(
-              name = "Catena-X Core Agile Release Train",
-              email = "info@catena-x.net",
-              url = URI("https://www.catena-x.net/")
-          ),
-          license = License(
-              name = "Apache 2.0",
-              url = URI("https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE")
-          )
-          ),
-          servers = mutableListOf(
-          Server(
-              url = URI("http://localhost:8080"),
-              description = "Local Dev Environment"
-          ),
-          Server(
-              url = URI("https://managed-identity-wallets.dev.demo.catena-x.net"),
-              description = "Catena-X Dev Environment"
-          ),
-          Server(
-              url = URI("https://managed-identity-wallets.int.demo.catena-x.net"),
-              description = "Catena-X Int Environment"
-          )
+              title = title,
+              version = version,
+              description = description,
+              termsOfService = URI(termsOfServiceUrl),
+              contact = Contact(
+                  name = contactName,
+                  email = contactEmail,
+                  url = URI(contactUrl)
+              ),
+              license = License(
+                  name = licenseName,
+                  url = URI(licenseUrl)
+              )
           )
       )
     }

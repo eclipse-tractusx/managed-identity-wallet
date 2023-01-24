@@ -106,7 +106,7 @@ object EnvironmentTestSetup {
 
             put("auth.jwksUrl", System.getenv("MIW_AUTH_JWKS_URL") ?: "http://localhost:18080/jwks")
             put("auth.issuerUrl", System.getenv("MIW_AUTH_ISSUER_URL") ?: JwtConfigTest.issuerUrl)
-            put("auth.realm", System.getenv("MIW_AUTH_REALM") ?: "catenax")
+            put("auth.realm", System.getenv("MIW_AUTH_REALM") ?: "localkeycloak")
             put("auth.roleMappings",
                 System.getenv("MIW_AUTH_ROLE_MAPPINGS")
                     ?: "create_wallets:create_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"
@@ -120,6 +120,15 @@ object EnvironmentTestSetup {
 
             put("bpdm.pullDataAtHour", System.getenv("BPDM_PULL_DATA_AT_HOUR") ?: "23")
             put("bpdm.datapoolUrl", System.getenv("BPDM_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
+
+            put("openapi.title", System.getenv("MIW_OPENAPI_TITLE") ?: "Title MIW-API")
+            put("openapi.description", System.getenv("MIW_OPENAPI_DESCRIPTION") ?: "Description MIW-API")
+            put("openapi.termsOfServiceUrl", System.getenv("MIW_OPENAPI_TERM_OF_SERVICES_URL") ?: "http://0.0.0.0:8080")
+            put("openapi.contactName", System.getenv("MIW_OPENAPI_CONTACT_NAME") ?: "contract name")
+            put("openapi.contactEmail", System.getenv("MIW_OPENAPI_CONTACT_EMAIL") ?: "placeholder@example.com")
+            put("openapi.contactUrl", System.getenv("MIW_OPENAPI_CONTACT_URL") ?: "http://0.0.0.0:8080")
+            put("openapi.licenseName", System.getenv("MIW_OPENAPI_LICENSE_NAME") ?: "licenseName")
+            put("openapi.licenseUrl", System.getenv("MIW_OPENAPI_LICENSE_URL") ?: "http://0.0.0.0:8080")
 
             put("revocation.baseUrl", System.getenv("REVOCATION_URL") ?: "http://0.0.0.0:8086")
             put("revocation.createStatusListCredentialAtHour", System.getenv("REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR") ?: "3")

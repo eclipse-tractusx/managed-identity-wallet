@@ -314,14 +314,14 @@ class WalletsTest {
             // clean up created wallets
             runBlocking {
                 EnvironmentTestSetup.walletService.deleteWallet("bpn4")
-                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN) // Catena-X wallet
+                EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN) // Base wallet
                 assertEquals(0, EnvironmentTestSetup.walletService.getAll().size)
             }
         }
     }
 
     @Test
-    fun testInitCatenaXWallet() {
+    fun testInitBaseWallet() {
         withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
@@ -344,7 +344,7 @@ class WalletsTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "CatenaX"
+                    "Base_Wallet"
                 )
             }
 
@@ -446,7 +446,7 @@ class WalletsTest {
                         EnvironmentTestSetup.DEFAULT_BPN,
                         EnvironmentTestSetup.DEFAULT_DID,
                         EnvironmentTestSetup.DEFAULT_VERKEY,
-                        "CatenaX"
+                        "Base_Wallet"
                     )
 
                     walletServiceSpy.createWallet(

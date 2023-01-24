@@ -6,7 +6,7 @@ auth:
 image:
   name: "catenax-ng/tx-managed-identity-wallets_service"
   registry: "ghcr.io"
-  tag: "3.0.0"
+  tag: "3.1.0"
   secret: "acr-credentials"
 allowEmptyPassword: "\"yes\""
 db:
@@ -14,6 +14,15 @@ db:
 namespace: "managed-identity-wallets"
 logging:
   exposed: "INFO"
+openapi:
+  title: "Managed Identity Wallets API"
+  description: "Managed Identity Wallets API"
+  termsOfServiceUrl: "https://www.catena-x.net/"
+  contactName: "Catena-X Core Agile Release Train"
+  contactEmail: "info@catena-x.net"
+  contactUrl: "https://www.catena-x.net/"
+  licenseName: "Apache 2.0"
+  licenseUrl: "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/main/LICENSE"
 wallet:
   baseWalletBpn: "BPNL000000000000"
   baseWalletShortDid: "MhLrwtKpZhNCzazMeofPQH"
