@@ -52,7 +52,7 @@ below. Here a few hints on how to set it up:
 | `MIW_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
 | `MIW_AUTH_RESOURCE_ID`     | String | IAM resource id |
 | `MIW_AUTH_CLIENT_ID`       | String | IAM client id |
-| `MIW_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*catenax* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
+| `MIW_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*localkeycloak* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
 | `APP_VERSION`             | String | application version, this should be in-line with the version in the deployment |
 | `ACAPY_API_ADMIN_URL`     | String | admin url of ACA-Py |
 | `ACAPY_ADMIN_API_KEY`     | String | admin api key of ACA-Py endpoints |
@@ -152,7 +152,7 @@ Now you have achieved the following:
 | Service               | URL                     | Description |
 |-----------------------|-------------------------|-------------|
 | postgreSQL database   | port 5432 on `localhost`| within the Docker Compose setup |
-| Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `catena`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
+| Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `changeme`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
 | revocation service    | http://localhost:8086   | within the Docker Compose setup |
 | ACA-Py for Base Endorser Wallet | http://localhost:10000  | within the Docker Compose setup |
 | ACA-Py Multi-tenancy for Managed Wallets | http://localhost:10003  | within the Docker Compose setup |
@@ -166,7 +166,7 @@ Now you have achieved the following:
 Within the development setup the Keycloak is initially prepared with the
 values in `./dev-assets/dev-containers/keycloak`. The realm could also be
 manually added and configured at http://localhost:8081 via the "Add realm"
-button. It can be for example named `catenax`. Also add an additional client,
+button. It can be for example named `localkeycloak`. Also add an additional client,
 e.g. named `ManagedIdentityWallets` with *valid redirect url* set to
 `http://localhost:8080/*`. The roles
  * add_wallets
@@ -351,7 +351,7 @@ docker run --env-file .env.docker -p 8080:8080 example/managed-identity-wallets:
 See OpenAPI documentation, which is automatically created from
 the source and available on each deployment at the `/docs` endpoint
 (e.g. locally at http://localhost:8080/docs). An export of the JSON
-document can be also found in [docs/openapi_v200.json](docs/openapi_v200.json).
+document can be also found in [docs/openapi_v310.json](docs/openapi_v310.json).
 
 # Further Guides
 
