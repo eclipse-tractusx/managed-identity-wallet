@@ -660,11 +660,6 @@ class AcaPyWalletServiceImpl(
         if (vpDto.proof == null) {
             throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing proof")
         }
-        val didOfVpSigner = if (vpDto.holder.isNullOrEmpty()) {
-            vpDto.proof.verificationMethod.split("#").first()
-        } else {
-            vpDto.holder
-        }
         val verifyVPReq = VerifyRequest(
             signedDoc = vpDto
         )
