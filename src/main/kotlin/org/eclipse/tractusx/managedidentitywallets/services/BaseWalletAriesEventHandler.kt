@@ -20,7 +20,6 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
