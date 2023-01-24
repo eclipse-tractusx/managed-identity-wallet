@@ -6,7 +6,7 @@ auth:
 image:
   name: "catenax-ng/tx-managed-identity-wallets_service"
   registry: "ghcr.io"
-  tag: "3.1.0"
+  tag: "3.1.0.3c3c9c7"
   secret: "acr-credentials"
 allowEmptyPassword: "\"yes\""
 db:
