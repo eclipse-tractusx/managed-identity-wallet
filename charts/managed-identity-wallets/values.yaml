@@ -17,10 +17,10 @@ logging:
 openapi:
   title: "Managed Identity Wallets API"
   description: "Managed Identity Wallets API"
-  termsOfServiceUrl: "https://www.catena-x.net/"
-  contactName: "Catena-X Core Agile Release Train"
-  contactEmail: "info@catena-x.net"
-  contactUrl: "https://www.catena-x.net/"
+  termsOfServiceUrl: "https://www.eclipse.org/legal/termsofuse.php"
+  contactName: "Eclipse Tractus-X"
+  contactEmail: "tractusx-dev@eclipse.org"
+  contactUrl: "https://projects.eclipse.org/projects/automotive.tractusx"
   licenseName: "Apache 2.0"
   licenseUrl: "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/main/LICENSE"
 wallet:
