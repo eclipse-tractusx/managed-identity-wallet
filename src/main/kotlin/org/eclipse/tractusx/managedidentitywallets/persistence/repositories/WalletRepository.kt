@@ -72,17 +72,20 @@ class WalletRepository {
         }
     }
 
+    @Throws(NotFoundException::class)
     fun deleteWallet(identifier: String): Boolean {
         getWallet(identifier).delete()
         return true
     }
 
+    @Throws(NotFoundException::class)
     fun updatePending(did: String, isPending: Boolean) {
         getWallet(did).apply {
             pendingMembershipIssuance = isPending
         }
     }
 
+    @Throws(NotFoundException::class)
     fun addRevocationList(did: String, revocationList: String) {
         getWallet(did).apply {
             revocationListName = revocationList

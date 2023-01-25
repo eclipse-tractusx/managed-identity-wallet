@@ -27,6 +27,9 @@ import java.security.SecureRandom
 import java.util.*
 import java.util.zip.GZIPInputStream
 
+/**
+ * The UtilsService provides utility functionalities that can be used by all services.
+ */
 class UtilsService(private val networkIdentifier: String) {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')

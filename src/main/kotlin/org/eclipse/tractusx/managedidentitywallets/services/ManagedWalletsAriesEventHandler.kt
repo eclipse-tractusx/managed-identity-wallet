@@ -29,6 +29,10 @@ import org.hyperledger.aries.webhook.TenantAwareEventHandler
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 
+/**
+ * The ManagedWalletsAriesEventHandler defines the logic of how to handle Aries Flow with the Base Wallet,
+ * external or internal Wallets.
+ */
 class ManagedWalletsAriesEventHandler(
     private val walletService: IWalletService,
     private val revocationService: IRevocationService,

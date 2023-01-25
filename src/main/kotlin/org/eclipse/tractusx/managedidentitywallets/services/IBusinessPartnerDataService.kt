@@ -28,16 +28,42 @@ import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.slf4j.LoggerFactory
 
+/**
+ * The IBusinessPartnerDataService interface describe the functionalities required
+ * for pulling Data from the BPDM and issuing/updating credentials.
+ */
 interface IBusinessPartnerDataService {
 
+    /**
+     * Asynchronously pulls data from BPDM, and updates the credentials stored for each legal entity.
+     * @param identifier (Optional) the identifier of a specific legal entity for which the credentials need to be updated
+     * @return A deferred boolean, which when awaited, returns true if the update was successful, else false
+     */
     suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(identifier: String? = null): Deferred<Boolean>
 
+    /**
+     * Asynchronously Issues credentials by Base wallet and store them.
+     * @param walletHolderDto the wallet of the holder
+     * @param type The type of the credential
+     * @param data The data that is required to generate the credential, it can be null if not required
+     * @return A deferred boolean, which when awaited, returns true if the issuance was successful, else false
+     */
     suspend fun issueAndStoreBaseWalletCredentialsAsync(
         walletHolderDto: WalletDto,
         type: String,
         data: Any? = null
     ): Deferred<Boolean>
 
+
+    /**
+     * Asynchronously issues credentials by Base Wallet for self-managed wallets.
+     * @param targetWallet the data of the target wallet
+     * @param connectionId the id of the connection between the Base Wallet and the target wallet
+     * @param webhookUrl the url of the webhook to be notified when the credential is issued
+     * @param type type of the credential to be issued
+     * @param data generic data that will be included in the credential to be issued
+     * @return a Deferred boolean that returns true if the operation was successful, false otherwise
+     */
     suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
@@ -48,7 +74,10 @@ interface IBusinessPartnerDataService {
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
-
+        /**
+         * Creates the Business Partner Data Service which implements the IBusinessPartnerDataService.
+         * The used HTTP client to communicate with the BPDM is configured in this method
+         */
         fun createBusinessPartnerDataService(
             walletService: IWalletService,
             bpdmConfig: BPDMConfig

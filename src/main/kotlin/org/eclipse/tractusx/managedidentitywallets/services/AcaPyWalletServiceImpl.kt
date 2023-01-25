@@ -87,6 +87,10 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
+/**
+ * AcaPyWalletServiceImpl implements the IWalletService interface.
+ * It provides the core functionalities for managing wallets, issuing Credentials using AcaPy.
+ */
 class AcaPyWalletServiceImpl(
     private val acaPyService: IAcaPyService,
     private val walletRepository: WalletRepository,

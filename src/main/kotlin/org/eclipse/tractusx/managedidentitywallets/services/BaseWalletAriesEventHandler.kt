@@ -33,6 +33,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.*
 
+/**
+ * The BaseWalletAriesEventHandler defines the logic of how to handle Aries Flow with
+ * other external or internal Wallets.
+ */
 class BaseWalletAriesEventHandler(
         private val businessPartnerDataService: IBusinessPartnerDataService,
         private val walletService: IWalletService,

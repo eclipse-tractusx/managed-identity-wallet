@@ -30,6 +30,10 @@ import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityExc
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 
+/**
+ * RevocationServiceImpl implements the IRevocationService interface.
+ * It provides functionality for managing and issuing revocation lists and status credentials.
+ */
 class RevocationServiceImpl(
         private val revocationUrl: String,
         private val client: HttpClient

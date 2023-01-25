@@ -33,6 +33,7 @@ class ConnectionRepository {
 
     fun getAll(): List<Connection> = transaction { Connection.all().toList() }
 
+    @Throws(NotFoundException::class)
     fun get(
         connectionId: String,
     ): Connection = Connection.find { Connections.connectionId eq connectionId }
@@ -58,6 +59,7 @@ class ConnectionRepository {
         }
     }
 
+    @Throws(NotFoundException::class)
     fun updateConnectionState(connectionId: String, rfc23State: String) {
         get(connectionId).apply {
             state = rfc23State
@@ -71,6 +73,7 @@ class ConnectionRepository {
         return true
     }
 
+    @Throws(NotFoundException::class)
     fun deleteConnection(connectionId: String): Boolean {
         get(connectionId).delete()
         return true

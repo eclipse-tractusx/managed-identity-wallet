@@ -69,6 +69,11 @@ import org.hyperledger.aries.api.jsonld.VerifiableCredential
 import org.hyperledger.aries.api.multitenancy.RemoveWalletRequest
 import java.util.*
 
+/**
+ * AcaPyService implements the IAcaPyService interface.
+ * It provides functionalities for interacting with the AcaPy API to perform
+ * various actions. It uses HTTP Request and the java-acapy library.
+ */
 class AcaPyService(
     private val acaPyConfig: WalletAndAcaPyConfig,
     private val utilsService: UtilsService,

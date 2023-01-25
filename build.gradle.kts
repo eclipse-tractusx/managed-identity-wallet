@@ -12,6 +12,7 @@ plugins {
     kotlin("jvm") version "1.6.10"
                 id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
     jacoco
+    id("org.jetbrains.dokka") version "1.7.20"
 }
 
 jacoco {
