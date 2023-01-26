@@ -36,17 +36,17 @@ interface IBusinessPartnerDataService {
 
     /**
      * Asynchronously pulls data from BPDM, and updates the credentials stored for each legal entity.
-     * @param identifier (Optional) the identifier of a specific legal entity for which the credentials need to be updated
-     * @return A deferred boolean, which when awaited, returns true if the update was successful, else false
+     * @param identifier the identifier of a specific legal entity for which the credentials need to be updated
+     * @return A deferred boolean. It returns (when waited) true if the update was successful, else false
      */
     suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(identifier: String? = null): Deferred<Boolean>
 
     /**
-     * Asynchronously Issues credentials by Base wallet and store them.
+     * Asynchronously issues credentials by base wallet and store them.
      * @param walletHolderDto the wallet of the holder
      * @param type The type of the credential
      * @param data The data that is required to generate the credential, it can be null if not required
-     * @return A deferred boolean, which when awaited, returns true if the issuance was successful, else false
+     * @return A deferred boolean. It returns (when waited) true if the issuance was successful, else false
      */
     suspend fun issueAndStoreBaseWalletCredentialsAsync(
         walletHolderDto: WalletDto,
@@ -56,13 +56,13 @@ interface IBusinessPartnerDataService {
 
 
     /**
-     * Asynchronously issues credentials by Base Wallet for self-managed wallets.
+     * Asynchronously issues credentials by base wallet for self-managed wallets.
      * @param targetWallet the data of the target wallet
-     * @param connectionId the id of the connection between the Base Wallet and the target wallet
+     * @param connectionId the id of the connection between the base wallet and the target wallet
      * @param webhookUrl the url of the webhook to be notified when the credential is issued
      * @param type type of the credential to be issued
      * @param data generic data that will be included in the credential to be issued
-     * @return a Deferred boolean that returns true if the operation was successful, false otherwise
+     * @return a Deferred boolean. It returns (when waited) true if the operation was successful, else false
      */
     suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
@@ -75,8 +75,8 @@ interface IBusinessPartnerDataService {
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
         /**
-         * Creates the Business Partner Data Service which implements the IBusinessPartnerDataService.
-         * The used HTTP client to communicate with the BPDM is configured in this method
+         * Creates the business partner data service which implements the IBusinessPartnerDataService.
+         * The used HTTP client to communicate with the BPDM is configured in this method.
          */
         fun createBusinessPartnerDataService(
             walletService: IWalletService,

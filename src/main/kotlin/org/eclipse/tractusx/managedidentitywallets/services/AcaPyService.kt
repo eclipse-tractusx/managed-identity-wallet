@@ -359,7 +359,6 @@ class AcaPyService(
         ariesClient.walletDidPublic(did, endorserInfoFilter)
     }
 
-
     override suspend fun sendConnectionRequest(
         didOfTheirWallet: String,
         usePublicDid: Boolean,

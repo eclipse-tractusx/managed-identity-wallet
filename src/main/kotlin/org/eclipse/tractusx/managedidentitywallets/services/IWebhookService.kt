@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory
 interface IWebhookService {
 
     /**
-     * Adds a new webhook with given threadId, url and state
+     * Adds a new webhook with given threadId, url and state.
      * @param threadId the threadId of the webhook
      * @param url the url of the webhook
      * @param state the state of the webhook
@@ -43,7 +43,7 @@ interface IWebhookService {
     fun addWebhook(threadId: String, url:String, state: String)
 
     /**
-     * Gets the webhook by threadId
+     * Retrieves the webhook by threadId.
      * @param threadId the threadId of the webhook
      * @return the [Webhook] if found, otherwise null
      */
@@ -58,7 +58,7 @@ interface IWebhookService {
     fun sendWebhookConnectionMessage(url: String, connection: ConnectionRecord): Boolean
 
     /**
-     * Sends the webhook message to given url
+     * Sends the webhook message to given url.
      * @param url the url of the webhook
      * @param v20CredExRecord the credential as message
      * @return true if the webhook message was sent successfully, otherwise false
@@ -66,10 +66,10 @@ interface IWebhookService {
     fun sendWebhookCredentialMessage(url: String, v20CredExRecord: V20CredExRecord): Boolean
 
     /**
-     * Updates the state of webhook with given threadId and state
+     * Updates the state of webhook with given threadId and state.
      * @param threadId the threadId of the webhook
      * @param state the state of the webhook
-     * @throws NotFoundException if the Webhook does not exist
+     * @throws NotFoundException if the webhook does not exist
      */
     fun updateStateOfWebhook(threadId: String, state: String)
 
@@ -77,7 +77,7 @@ interface IWebhookService {
         private val log = LoggerFactory.getLogger(this::class.java)
 
         /**
-         * Creates the Webhook Service which implements the IWebhookService.
+         * Creates the webhook service which implements the IWebhookService.
          * The used HTTP client to send webhook messages is configured in this method.
          */
         fun createWebhookService(
@@ -86,7 +86,7 @@ interface IWebhookService {
             return WebhookServiceImpl(
                 webhookRepository,
                 HttpClient {
-                    expectSuccess = false // must be set to false to handle thrown error if the access token has expired
+                    expectSuccess = false // must be false to handle thrown error if the access token has expired
                     install(ResponseObserver) {
                         onResponse { response ->
                             log.debug("HTTP status: ${response.status.value}")
