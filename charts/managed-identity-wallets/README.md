@@ -1,6 +1,6 @@
 # managed-identity-wallets
 
-![Version: 0.6.3](https://img.shields.io/badge/Version-0.6.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0](https://img.shields.io/badge/AppVersion-3.0.0-informational?style=flat-square)
+![Version: 0.6.4](https://img.shields.io/badge/Version-0.6.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
 
 Managed Identity Wallets Service
 
@@ -27,6 +27,14 @@ Managed Identity Wallets Service
 | db.jdbcDriver | string | `"org.postgresql.Driver"` | Database driver to use |
 | namespace | string | `"managed-identity-wallets"` |  |
 | logging.exposed | string | `"INFO"` |  |
+| openapi.title | string | `"Managed Identity Wallets API"` |  |
+| openapi.description | string | `"Managed Identity Wallets API"` |  |
+| openapi.termsOfServiceUrl | string | `"https://www.eclipse.org/legal/termsofuse.php"` |  |
+| openapi.contactName | string | `"Eclipse Tractus-X"` |  |
+| openapi.contactEmail | string | `"tractusx-dev@eclipse.org"` |  |
+| openapi.contactUrl | string | `"https://projects.eclipse.org/projects/automotive.tractusx"` |  |
+| openapi.licenseName | string | `"Apache 2.0"` |  |
+| openapi.licenseUrl | string | `"https://github.com/eclipse-tractusx/managed-identity-wallets/blob/main/LICENSE"` |  |
 | wallet.baseWalletBpn | string | `""` | The BPN of the base wallet |
 | wallet.baseWalletShortDid | string | `""` | The short DID of the base wallet. It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#integrate-with-an-write-restricted-indy-ledger. It should be registered on the Indy ledger with role endorser. |
 | wallet.baseWalletVerkey | string | `""` | The verkey (public key) of the base wallet |
