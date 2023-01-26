@@ -184,7 +184,7 @@ class AcaPyWalletServiceImpl(
             createdSubWalletDto.token
         )
 
-        // This can also be done using endorsement. but Base wallet can register it directly
+        // This can also be done using endorsement. but the Base Wallet can register it directly
         acaPyService.registerDidOnLedgerUsingBaseWallet(DidRegistration(
             did = createdDid.result.did,
             alias = walletCreateDto.name,
@@ -867,7 +867,7 @@ class AcaPyWalletServiceImpl(
         )
 
         val v20CredExRecord = acaPyService.issuanceFlowCredentialSend(
-            token = issuerWallet.walletToken, // null for Base wallet
+            token = issuerWallet.walletToken, // null for the Base Wallet
             vc = vcAcapyRequest
         )
 

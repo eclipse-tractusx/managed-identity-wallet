@@ -375,7 +375,7 @@ class ApplicationTest {
                 assertTrue { response.content!!.contains("Error: no verification methods") }
             }
 
-            // request a base wallet credential using not another BPN in Token
+            // request a base wallet credential using Token of another BPN
             handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN_SINGLE_EXTRA_BPN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
