@@ -1,19 +1,22 @@
-# Setup Aca-Py on EC2 Instance
+# Setup Aca-Py on a Ubuntu Server
 
-The following steps describe how to set up an Aca-Py agent with nginx on an EC2 instance
+The following steps describe how to set up an Aca-Py agent with nginx on Ubuntu 22.04.
 
-- Login in your AWS account
-- Create a new EC2 instance
-  - ubuntu 22.04
-  - name e.x. Acapy_external
-  - t2.micro with 1 cpu & 1 GiB RAM
-  - 10 GB memory
-  - enable access using ssh 
-- Create an elastic IP and assign it to the created EC2 instance
-- Create a domain e.x. `cx-dev-acapy.51nodes.io` and assign it to the elastic IP
-- Set up the inbound rules in the security groups of your EC2 instance
-   * add Port 80 and 443
-- Connect to the EC2 instance using ssh `ssh -i "AcapyExternal.pem" ubuntu@cx-dev-acapy.51nodes.io`
+## The Goal and Usage of the Agent
+This separate ACA-Py agent can be used to test the external connections and credential exchanges with the managed wallets in the [Managed-Identity-Wallet](https://github.com/eclipse-tractusx/managed-identity-wallets). 
+- To interact with the agent you can use
+  * either the Postman collection `./dev-containers/postman/Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` after modifying the URLs and apikey.
+  * Or using the provided swagger doc `https://mydomain.example.com/api/doc/` after replacing `https://mydomain.example.com/api/doc/` with your subdomain
+- The files `./docs/ExternalWalletInteraction.md` and `./docs/SelfManagedWallets.md` describe how the MIW can interact with an external (issuer) wallet and a self-managed (company) wallet
+
+## Setup Steps
+
+Requirements:
+  - 1 CPU & 1 GiB RAM
+  - 10 GB storage
+  - Static IP address with a domain that is assigned to it e.g. `mydomain.example.com`
+  - Docker and Docker-compose
+
 - Create a folder `mkdir acapy-agent`
 - Generate letsencrypt certificates
     - download certbot and get certificates. Please replace the domain in the last command
@@ -21,12 +24,12 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
         sudo snap install core; sudo snap refresh core
         sudo snap install --classic certbot
         sudo ln -s /snap/bin/certbot /usr/bin/certbot
-        sudo certbot certonly --standalone -d cx-dev-acapy.51nodes.io
+        sudo certbot certonly --standalone -d mydomain.example.com
         ```
     - Move the generated files private.pem and fullchain.pem to `./acapy-agent`
     - Lets Encrypt certificates expire after 90 and must be renewed. This can be done using the command `sudo certbot renew`. To verify that the certificate renewed, run `sudo certbot renew --dry-run`
-- Download Docker and Docker-compose for ubuntu 22.04
-- Create `.env` file with `vi .env` and then add the environment variables to it after changing the placeholders. Also replace `cx-dev-acapy.51nodes.io` with your domain
+
+- Create `.env` file with `vi .env` and then add the environment variables to it after changing the placeholders. Also replace `mydomain.example.com` with your domain
     ```
     POSTGRES_USER=postgres
     POSTGRES_PASSWORD=postgres-password-placeholder
@@ -40,7 +43,7 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
 
     ACAPY_CONNECTION_PORT=8000
     ACAPY_ADMIN_PORT=11000
-    ACAPY_ENDPOINT=https://cx-dev-acapy.51nodes.io/didcomm/
+    ACAPY_ENDPOINT=https://mydomain.example.com/didcomm/
     ACAPY_WALLET_KEY=acapy-wallet-key-placeholder
     ACAPY_SEED=acapy-seed-placeholder
     LEDGER_URL=http://dev.greenlight.bcovrin.vonx.io/genesis
@@ -178,9 +181,6 @@ The following steps describe how to set up an Aca-Py agent with nginx on an EC2 
     * acapy_postgres: the database where the wallets are stored
     * acapy_nginx: nginx instance
 
-- To interact with the agent you can use
-  * either the postman collection `./dev-containers/postman/Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` after modifying the URLs and apikey.
-  * Or using the provided swagger doc `https://cx-dev-acapy.51nodes.io/api/doc/` after replacing `https://cx-dev-acapy.51nodes.io/api/doc/` with your subdomain
-- The files `./docs/ExternalWalletInteraction.md` and `./docs/SelfManagedWallets.md` describe how MIW can interact with an external wallet and a self managed wallet
 - To remove the containers run `docker-compose down`
 - To delete all containers with the database run `docker-compose down -v`
+
