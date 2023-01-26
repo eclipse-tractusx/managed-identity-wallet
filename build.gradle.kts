@@ -61,7 +61,7 @@ dependencies {
     implementation("io.bkbn:kompendium-core:$kompendium_version")
     implementation("io.bkbn:kompendium-auth:$kompendium_version")
 
-    implementation("org.postgresql:postgresql:42.4.1")
+    implementation("org.postgresql:postgresql:42.5.1")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
 
     // for now: using kotlinx.serialization

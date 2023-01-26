@@ -36,6 +36,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: madhead/read-java-properties@latest
+        id: version
+        with:
+          file: gradle.properties
+          property: version
+          default: 0.0.1
+
+      - name: Set App Version
+        run: echo "APP_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
+
       - name: Extract Metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v3
@@ -48,5 +58,5 @@ jobs:
           context: .
           file: docker/Dockerfile.import
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:1.0.0
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}

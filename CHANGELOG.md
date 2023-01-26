@@ -6,9 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.0.1] - 2023-01-23
-- Fix regex bug in method
-- rename enviroment variables and secrets
+## [3.1.0] - 2023-01-26
+- Fix regex bug in utility method
+- Rename enviroment variables and secrets
+- Set verkey as optional in the verify credentials and presentation method
+- Re-enable BPDM scheduler
+- Make the values in OpenAPI configurable
 
 ## [3.0.0] - 2023-01-09
 - Use separate AcaPy instances for Base Endorser wallet and multi-tenant company wallets
