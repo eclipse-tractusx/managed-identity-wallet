@@ -30,7 +30,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 
 /**
- * The ManagedWalletsAriesEventHandler defines the logic of how to handle Aries Flow with the Base Wallet,
+ * The ManagedWalletsAriesEventHandler defines the logic of how to handle Aries-Flows with the base wallet,
  * external or internal Wallets.
  */
 class ManagedWalletsAriesEventHandler(

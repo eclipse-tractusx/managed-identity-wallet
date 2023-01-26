@@ -57,7 +57,7 @@ import java.util.*
 
 /**
  * BusinessPartnerDataServiceImpl implements the IBusinessPartnerDataService interface.
- * It provides functionalities for pulling Data from the BPDM and issuing/updating credentials.
+ * It provides functionalities for pulling data from the BPDM and issuing/updating credentials.
  */
 class BusinessPartnerDataServiceImpl(
     private val walletService: IWalletService,

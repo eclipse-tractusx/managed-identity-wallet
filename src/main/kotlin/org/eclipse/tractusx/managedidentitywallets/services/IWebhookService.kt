@@ -30,7 +30,7 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.slf4j.LoggerFactory
 
 /**
- * The IWebhookService interface for management and notifications of Webhooks.
+ * The IWebhookService interface for management and notifications of webhooks.
  */
 interface IWebhookService {
 

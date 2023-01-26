@@ -62,7 +62,7 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.slf4j.LoggerFactory
 
 /**
- * The IWalletService interface describes the core methods for managing wallets, issuing and verifying Credentials.
+ * The IWalletService interface describes the core methods for managing wallets, issuing and verifying credentials.
  */
 interface IWalletService {
 

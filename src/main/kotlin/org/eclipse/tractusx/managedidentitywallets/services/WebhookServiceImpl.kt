@@ -31,7 +31,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 /**
  * WebhookServiceImpl implement the IWebhookService interface.
- * it provides implementation for Webhook operations
+ * it provides implementation for webhook operations
  */
 class WebhookServiceImpl(
     private val webhookRepository: WebhookRepository,

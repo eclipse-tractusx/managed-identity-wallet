@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * The IBusinessPartnerDataService interface describe the functionalities required
- * for pulling Data from the BPDM and issuing/updating credentials.
+ * for pulling data from the BPDM and issuing/updating credentials.
  */
 interface IBusinessPartnerDataService {
 

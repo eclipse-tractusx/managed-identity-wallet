@@ -89,7 +89,7 @@ import java.util.*
 
 /**
  * AcaPyWalletServiceImpl implements the IWalletService interface.
- * It provides the core functionalities for managing wallets, issuing Credentials using AcaPy.
+ * It provides the core functionalities for managing wallets, issuing credentials using AcaPy.
  */
 class AcaPyWalletServiceImpl(
     private val acaPyService: IAcaPyService,
