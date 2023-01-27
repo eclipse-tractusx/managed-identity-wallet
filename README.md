@@ -440,11 +440,13 @@ using `withTestApplication` should also be excluded.
 
 ## Kotlin Documentation
 
-To generate the kotlin Documentation and java docs using `dokka` run 
+To generate the Kotlin documentation and java-docs using `dokka` run
+
 ```
 ./gradlew dokkaHtml
 ./gradlew dokkaJavadoc
 ```
+
 The generated files can be found under `./build/dokka/html/index.html` and `build/dokka/javadoc/index.html`
 
 Note: Currently, only the Interfaces and their methods are documented.

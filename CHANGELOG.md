@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.1] - 2023-01-27
+- Add Kotlin docs to the interfaces
+
 ## [3.1.0] - 2023-01-26
 - Fix regex bug in utility method
 - Rename enviroment variables and secrets
