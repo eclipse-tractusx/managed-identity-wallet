@@ -79,7 +79,8 @@ class AcaPyMockedService(
             apiAdminUrl = "",
             adminApiKey = "TestAdminApiKey",
             baseWalletAdminUrl = "",
-            baseWalletAdminApiKey = ""
+            baseWalletAdminApiKey = "",
+            whitelistDids = listOf()
         )
     }
 

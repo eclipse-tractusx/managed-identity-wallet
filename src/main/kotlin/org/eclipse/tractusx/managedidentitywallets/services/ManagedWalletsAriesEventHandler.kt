@@ -51,8 +51,11 @@ class ManagedWalletsAriesEventHandler(
         )
         when (connection.rfc23State) {
             Rfc23State.REQUEST_RECEIVED.toString() -> {
-                //TODO accept only from whitelisted public DIDs
                 runBlocking {
+                    walletService.validateReceivedConnectionRequest(
+                        connection = connection,
+                        toBaseWallet = false
+                    )
                     walletService.acceptConnectionRequest(walletId, connection)
                 }
             }

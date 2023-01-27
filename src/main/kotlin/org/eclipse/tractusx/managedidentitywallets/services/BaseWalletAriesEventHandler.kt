@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
@@ -52,21 +53,28 @@ class BaseWalletAriesEventHandler(
         log.debug("Connection ${connection.connectionId} is in state ${connection.rfc23State}")
         when(connection.rfc23State) {
             Rfc23State.REQUEST_RECEIVED.toString() -> {
-                //TODO accept only from whitelisted public DIDs
                 transaction {
-                    val theirWallet = walletService.getWallet(
-                        identifier = connection.theirLabel, // The BPN
-                        withCredentials = false
-                    )
-                    walletService.addConnection(
-                        connectionId = connection.connectionId,
-                        connectionOwnerDid = walletService.getBaseWallet().did,
-                        connectionTargetDid = theirWallet.did,
-                        connectionState = connection.rfc23State
-                    )
                     runBlocking {
-                        walletService.setEndorserMetaDataForAcapyConnection(connection.connectionId)
-                        walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
+                        // Accept only endorser requests from managed wallets
+                        if (!connection.theirLabel.isNullOrBlank()) {
+                            val wallet = walletService.validateReceivedConnectionRequest(
+                                connection = connection,
+                                toBaseWallet = true
+                            )
+                            walletService.addConnection(
+                                connectionId = connection.connectionId,
+                                connectionOwnerDid = walletService.getBaseWallet().did,
+                                connectionTargetDid = wallet!!.did,
+                                connectionState = connection.rfc23State
+                            )
+                            // Currently, it is always the case
+                            if (!wallet!!.isSelfManaged) {
+                                walletService.setEndorserMetaDataForAcapyConnection(connection.connectionId)
+                            }
+                            walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
+                        } else {
+                            throw ForbiddenException("Connection request has been rejected due unfulfilled conditions")
+                        }
                     }
                 }
             }

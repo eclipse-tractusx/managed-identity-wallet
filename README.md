@@ -63,6 +63,7 @@ below. Here a few hints on how to set it up:
 | `MIW_DID`                  | String | DID of the base wallet, this wallet must be registered on ledger with the endorser role |
 | `MIW_VERKEY`               | String | Verification key of the base wallet, this wallet must be registered on ledger with the endorser role |
 | `MIW_NAME`                 | String | Name of the base wallet |
+|`MIW_WHITELIST_DIDS`       | String | List of whitelisted short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request |
 | `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
 | `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
 | `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint |

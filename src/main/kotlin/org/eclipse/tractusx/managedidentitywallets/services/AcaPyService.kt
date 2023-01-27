@@ -49,6 +49,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRespon
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletKey
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
+import org.hyperledger.acy_py.generated.model.DID
 import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.acy_py.generated.model.V20CredRequestRequest
 import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
@@ -67,6 +68,7 @@ import org.hyperledger.aries.api.issue_credential_v2.V2CredentialExchangeFree
 import org.hyperledger.aries.api.jsonld.ProofType
 import org.hyperledger.aries.api.jsonld.VerifiableCredential
 import org.hyperledger.aries.api.multitenancy.RemoveWalletRequest
+import org.hyperledger.aries.api.wallet.ListWalletDidFilter
 import java.util.*
 
 /**
@@ -91,7 +93,8 @@ class AcaPyService(
             baseWalletVerkey = acaPyConfig.baseWalletVerkey,
             adminApiKey = "", // don't expose the api key outside the AcaPyService
             baseWalletAdminUrl = acaPyConfig.baseWalletAdminUrl,
-            baseWalletAdminApiKey = "" // don't expose the api key outside the AcaPyService
+            baseWalletAdminApiKey = "", // don't expose the api key outside the AcaPyService
+            whitelistDids = acaPyConfig.whitelistDids
         )
     }
 
@@ -144,6 +147,13 @@ class AcaPyService(
             contentType(ContentType.Application.Json)
             body = didCreateDto
         }
+    }
+
+    override suspend fun isDidBelongToWallet(did: String, tokenOfWallet: String?): Boolean {
+        val acapyClient = getAcapyClient(tokenOfWallet)
+        val filter = ListWalletDidFilter.builder().did(did).method(DID.MethodEnum.SOV).build()
+        val listOfDids = acapyClient.walletDid(filter)
+        return !listOfDids.isEmpty && listOfDids.get().isNotEmpty()
     }
 
     override suspend fun registerDidOnLedgerUsingBaseWallet(

@@ -27,9 +27,11 @@ import io.ktor.client.features.json.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
+import org.eclipse.tractusx.managedidentitywallets.models.AuthorizationException
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
 import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
+import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
 import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
@@ -405,6 +407,22 @@ interface IWalletService {
      * @throws NotFoundException the wallet does not exist
      */
     suspend fun setCommunicationEndpointUsingEndorsement(walletId: String)
+
+    /**
+     * Checks if a received connection request is allowed to be processed.
+     * @param connection the received connection request [ConnectionRecord]
+     * @param toBaseWallet the connection is requested to the base wallet, otherwise to managed wallets
+     * @return the stored wallet if [toBaseWallet] is true and the BPN in ConnectionRecord.theirLabel is an existing wallet
+     * and also the owner of the DID in ConnectionRecord.theirPublicDid or ConnectionRecord.theirDid.
+     * @throws ForbiddenException if [toBaseWallet] is true, and the BPN in ConnectionRecord.theirLabel is not stored wallet
+     * Also if [toBaseWallet] is false and the DID of requester is not whitelisted or belong to a stored wallet
+     * @throws AuthorizationException if [toBaseWallet] is true, and the BPN in ConnectionRecord.theirLabel is a stored wallet
+     * but not the owner of the used DID in ConnectionRecord.theirPublicDid or ConnectionRecord.theirDid.
+     */
+    suspend fun validateReceivedConnectionRequest(
+        connection: ConnectionRecord,
+        toBaseWallet: Boolean
+    ): WalletDto?
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)

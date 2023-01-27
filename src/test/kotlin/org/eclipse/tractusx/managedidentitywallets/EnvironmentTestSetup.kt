@@ -50,7 +50,8 @@ object EnvironmentTestSetup {
         baseWalletVerkey = DEFAULT_VERKEY,
         adminApiKey = "adminApiKey",
         baseWalletAdminUrl = "baseWalletAdminUrl",
-        baseWalletAdminApiKey = "baseWalletAdminApiKey"
+        baseWalletAdminApiKey = "baseWalletAdminApiKey",
+        whitelistDids = listOf()
     )
 
     const val EXTRA_TEST_BPN = "BPNL0Test"

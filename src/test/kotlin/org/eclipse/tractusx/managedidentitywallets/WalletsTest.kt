@@ -389,6 +389,7 @@ class WalletsTest {
                             "AdminApiKey",
                             "",
                             "",
+                            listOf()
                         )
                     )
                     whenever(acapyService.createSubWallet(any()))

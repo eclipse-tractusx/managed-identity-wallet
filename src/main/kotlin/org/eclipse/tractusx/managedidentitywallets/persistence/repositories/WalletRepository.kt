@@ -43,6 +43,14 @@ class WalletRepository {
         }
     }
 
+    fun getWalletOrNull(identifier: String): Wallet? {
+        return transaction {
+            Wallet.find {
+                (Wallets.did eq identifier) or (Wallets.bpn eq identifier) or (Wallets.walletId eq identifier)
+            }.firstOrNull()
+        }
+    }
+
     @Throws(ConflictException::class)
     fun checkWalletAlreadyExists(identifier: String) {
         if (!Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()) {
@@ -52,7 +60,7 @@ class WalletRepository {
 
 
     fun isWalletExists(identifier: String): Boolean {
-        return transaction{
+        return transaction {
             !Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()
         }
     }

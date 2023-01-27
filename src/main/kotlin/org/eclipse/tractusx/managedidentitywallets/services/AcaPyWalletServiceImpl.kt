@@ -24,6 +24,7 @@ import foundation.identity.jsonld.JsonLDUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.eclipse.tractusx.managedidentitywallets.models.AuthorizationException
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
 import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
@@ -217,7 +218,7 @@ class AcaPyWalletServiceImpl(
 
         acaPyService.sendConnectionRequest(
             didOfTheirWallet = getBaseWallet().did,
-            usePublicDid = false,
+            usePublicDid = false, // It has no public DID yet
             alias = "endorser",
             token = createdSubWalletDto.token,
             label = walletToCreate.bpn
@@ -1045,6 +1046,42 @@ class AcaPyWalletServiceImpl(
             did = utilsService.getIdentifierOfDid(walletExtendedData.did),
             token = walletExtendedData.walletToken!!
         )
+    }
+
+    override suspend fun validateReceivedConnectionRequest(
+        connection: ConnectionRecord,
+        toBaseWallet: Boolean
+    ): WalletDto? {
+        if (toBaseWallet) {
+            return validateConnectionRequestToBaseWallet(connection, connection.theirLabel)
+        } else {
+            if (isAllowedConnectionRequest(connection)) {
+                return null
+            }
+            throw ForbiddenException("Connection request has been rejected due unfulfilled conditions")
+        }
+    }
+
+    private fun isAllowedConnectionRequest(connection: ConnectionRecord): Boolean {
+        val whitelist = acaPyService.getWalletAndAcaPyConfig().whitelistDids
+        return whitelist.isEmpty()
+                || whitelist.contains(connection.theirPublicDid ?: connection.theirDid)
+                || walletRepository.isWalletExists(connection.theirPublicDid ?: connection.theirDid)
+    }
+
+    private suspend fun validateConnectionRequestToBaseWallet(connection: ConnectionRecord, bpn: String): WalletDto {
+        val connectionDid = connection.theirPublicDid ?: connection.theirDid
+        // It could be an internal DID (e.g. when a managed wallet is created)
+        val wallet = walletRepository.getWalletOrNull(bpn)
+        if (wallet != null) {
+            val walletData = walletRepository.toWalletCompleteDataObject(wallet)
+            return if (acaPyService.isDidBelongToWallet(connectionDid, wallet.walletToken)) {
+                getWallet(walletData.did)
+            } else {
+                throw AuthorizationException("The used did $connectionDid does not belong to the given BPN $bpn")
+            }
+        }
+        throw ForbiddenException("A connection with a not stored wallet $bpn is forbidden")
     }
 
     override suspend fun setAuthorMetaData(
