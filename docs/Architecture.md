@@ -17,7 +17,7 @@
     - [Update Business Partner Data for Managed Wallet](#update-business-partner-data-for-managed-wallet)
     - [Issue Credential and Presentation for Managed Wallet](#issue-credential-and-presentation-for-managed-wallet)
     - [Register Self-Managed Wallet](#register-self-managed-wallet)
-    - [Issue Credential from Catena-X Base Wallet to Self-Managed Wallet](#issue-credential-from-catena-x-base-wallet-to-self-managed-wallet)
+    - [Issue Credential from Base Wallet to Self-Managed Wallet](#issue-credential-from-base-wallet-to-self-managed-wallet)
     - [Receive Externally Issued Credential to Managed Wallet](#receive-externally-issued-credential-to-managed-wallet)
     - [Permission Handling](#permission-handling)
     - [Data Model / Schemas](#data-model--schemas)
@@ -42,20 +42,20 @@
 Introduction and Goals
 ======================
 
-To align the identity, authentication and data exchange of CX participants with the open and decentralized concepts within [GAIA-X](https://www.gxfs.eu/specifications/), especially self-sovereign identities, every legal entity associated to a BPNL number should have the possibility to also get a [W3C compliant DID](https://www.w3.org/TR/did-core/) (Decentralized Identifier). Due to the lack of production-ready SSI infrastructure and slow adoption on the market, this is in a first step achieved by providing a managed wallet (also called "Custodian") with a private/public key pair and related DID for a legal entity along with the onboarding to CX. This wallet can then be used via the Managed Identity Wallet API by other CX services or applications such as the Self Description Hub or the EDC to issue and retrieve [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and create verifiable presentations on behalf of a certain legal entity as part of CX processes and use cases. In later steps, the same DID and credentials can be transferred to an external wallet managed by the legal entity itself, allowing self-sovereign data management and communication. Alternatively, a company can already "bring its own DID" upon onboarding and register it as a self-managed wallet for later interactions with CX managed wallets for credential and presentation exchange.
+To align the identity, authentication and data exchange of participants with the open and decentralized concepts within [GAIA-X](https://www.gxfs.eu/specifications/), especially self-sovereign identities, every legal entity associated to a BPNL number should have the possibility to also get a [W3C compliant DID](https://www.w3.org/TR/did-core/) (Decentralized Identifier). Due to the lack of production-ready SSI infrastructure and slow adoption on the market, this is in a first step achieved by providing a managed wallet (also called "Custodian") with a private/public key pair and related DID for a legal entity along with the onboarding. This wallet can then be used via the Managed Identity Wallet API by other services or applications such as the Self Description Hub or the EDC to issue and retrieve [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and create verifiable presentations on behalf of a certain legal entity as part of governance processes and use cases. In later steps, the same DID and credentials can be transferred to an external wallet managed by the legal entity itself, allowing self-sovereign data management and communication. Alternatively, a company can already "bring its own DID" upon onboarding and register it as a self-managed wallet for later interactions with managed wallets for credential and presentation exchange.
 
 Requirements Overview
 ---------------------
 
 The basic requirements for the Managed Identity Wallet can be summarised as follows:
 
-*   Establish a Catena-X DID and associated wallet as trust anchor for issuing CX related verifiable credentials
+*   Establish a base DID and associated base wallet as trust anchor for issuing operator related verifiable credentials
 *   Link each BPNL to a unique DID distinguishing two cases
     *   managed: create and register a new DID and managed wallet, and allow the owners or administrators of the BPNL to access the related wallet and credentials via a REST API
-    *   self-managed: connect an existing DID and external wallet provided by the owner or administrator of the BPNL in order to issue CX related verifiable credentials to and request presentations from the related DID
-*   Allow other Catena-X components as well as DID owners to issue and store verifiable credentials
-*   Allow other Catena-X components as well as DID owners to create and validate verifiable credentials
-*   Issue and revoke verifiable credentials for Catena-X related data such as the BPN, membership status, business partner data (addresses, bank data etc.) according to the onboarding and change processes
+    *   self-managed: connect an existing DID and external wallet provided by the owner or administrator of the BPNL in order to issue verifiable credentials to and request presentations from the related DID
+*   Allow other service or user interface components as well as DID owners themselves to issue and store verifiable credentials
+*   Allow other service or user interface components as well as DID owners themselves to create and validate verifiable credentials
+*   Issue and revoke verifiable credentials for consortium related data such as the BPN, membership status, business partner data (addresses, bank data etc.) according to the onboarding and change processes
 *   Allow (defined / allow-listed) external issuer wallets to connect to managed wallets and issue credentials for the managed wallet DID as the holder
 
 Quality Goals
@@ -72,18 +72,18 @@ Stakeholders
 
 The key stakeholders of the component are:
 
-*   Catena-X Operating Company: to be compliant with Catena-X SSI concepts, especially for verifiable presentations in self descriptions
+*   Operating Company: to be compliant with SSI concepts, especially for verifiable presentations in GAIA-X compliant self descriptions
 *   EDC operators: to be able to use SSI based identity and access management for the communication between data consumer and provider
 
 Architecture Constraints
 ========================
 
-The architecture of the Managed Identity Wallet Service follows the general principles, guidelines and boundaries from the Catena-X project.
+The architecture of the Managed Identity Wallet Service follows the general principles, guidelines and boundaries from the Tractus-X project.
 
 System Scope and Context
 ========================
 
-The Managed Identity Wallet Service is primarily used as an internal service within other Catena-X service or related components like EDC, but can also directly connect peer-to-peer with other DID agents.
+The Managed Identity Wallet Service is primarily used as a backend service for service composition or related components like EDC, but can also directly connect peer-to-peer with other DID agents.
 
 Business Context
 ----------------
@@ -113,7 +113,7 @@ Building Block View
 Whitebox Overall System
 -----------------------
 
-The service consists of a main API implementation, connected to its own PostgreSQL database, a multi-tenancy enabled ACA-Py agent with its own PostgreSQL database, and an internal Revocation Service..
+The service consists of a main API implementation, connected to its own PostgreSQL database, two ACA-Py agents (one for base/endorser wallet and one multi-tenancy enabled for the managed wallets) with their own PostgreSQL database, and an internal Revocation Service.
 
 ![MIW Building Blocks](./diagrams/MIW-Building-Blocks.drawio.png)
 
@@ -142,11 +142,11 @@ In general, the API covers the following functionality:
 *   Create, remove and retrieve managed wallets
 *   Create or update business partner data related credentials
 *   Manage DID document of the DID of a managed wallet (currently supports only adding or updating service endpoints)
-*   Generate and store verifiable credentials issued by a particular identifier of a managed wallet or the Catena-X platform issuer
+*   Generate and store verifiable credentials issued by a particular identifier of a managed wallet or the base wallet
 *   Create a verifiable presentation for a given list of VCs and presenter (as identifier of a managed wallet)
 *   Validate a given verifiable presentation (convenience functionality, currently only supports Indy DIDs as issuers or holders)
 *   Register self-managed wallets based on an existing DID
-*   Trigger and handle the issue credential Aries flow for the Catena-X wallet as the issuer
+*   Trigger and handle the issue credential Aries flow with the base wallet as the issuer
 
 In the following, the most relevant operations are described as sequence diagrams.
 
@@ -170,7 +170,7 @@ _Note that for managed wallets, VCs and VPs are only generated in an ephemeral w
 
 ![](./diagrams/MIW-Sequence-Register-Self-ManagedWallet.drawio.png)
 
-### Issue Credential from Catena-X Base Wallet to Self-Managed Wallet
+### Issue Credential from Base Wallet to Self-Managed Wallet
 
 ![](./diagrams/MIW-Sequence-Issue-Credential-Flow.drawio.png)
 
@@ -182,13 +182,13 @@ The flow depicted in this sequence follows the Aries flows RFC 0023 "DID-Exchang
 
 ### Permission Handling
 
-For the API access, technical users are authenticated based on bearer tokens (JWT) issued by the Catena-X Keycloak. Each API operation specifies, which scopes/roles are required in order to be allowed to execute this operations, additionally the BPN associated to a user (available as a claim in the JWT) is considered to restrict access to the DID or wallet of the legal entity the user belongs to.
+For the API access, technical users are authenticated based on bearer tokens (JWT) issued by an external IAM system such as Keycloak. Each API operation specifies, which scopes/roles are required in order to be allowed to execute this operations, additionally the BPN associated to a user (available as a claim in the JWT) is considered to restrict access to the DID or wallet of the legal entity the user belongs to.
 
 For details on the permissions see the README section on scopes ([https://github.com/eclipse-tractusx/managed-identity-wallets#scopes-](https://github.com/eclipse-tractusx/managed-identity-wallets#scopes-)) as well as the statements about permissions in the API doc ([https://managed-identity-wallets.int.demo.catena-x.net/docs](https://managed-identity-wallets.int.demo.catena-x.net/docs)).
 
 ### Data Model / Schemas
 
-The Managed Identity Wallet service issues a couple of verifiable credentials with the DID of the Catena-X platform issuer related to Catena-X membership and business partner data. For the credential types and data model of those verifiable credentials, an own JSON-LD context was defined in a separate GitHub repository https://github.com/catenax-ng/product-core-schemas and referenced as raw content in the verifiable credentials context https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity. The schema defines the following credential types, each with a brief description and example.
+The Managed Identity Wallet service issues a couple of verifiable credentials with the DID of the base wallet as issuer related to membership and business partner data. For the credential types and data model of those verifiable credentials, an own JSON-LD context was defined in a separate GitHub repository https://github.com/catenax-ng/product-core-schemas and referenced as raw content in the verifiable credentials context https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity. The schema defines the following credential types, each with a brief description and example.
 
 #### Credential Type BpnCredential
 
@@ -206,7 +206,7 @@ Attestation of the BPNL to a particular DID
 
 #### Credential Type MembershipCredential
 
-Attestation of Catena-X membership
+Attestation of membership, currently used for Catena-X membership
 
 ```
 "credentialSubject": {
@@ -379,7 +379,7 @@ The following diagram provides an overview of the deployment structure in Kubern
 Cross-cutting Concepts
 ======================
 
-The main driver behind the Managed Identity Wallet Service was the compliance and compatibility with W3C SSI standards als in relation to GAIA-X principles. The solution is based on and uses a couple of standards or re-usable open-source components that can considered of overarching concern:
+The main driver behind the Managed Identity Wallet Service was the compliance and compatibility with W3C SSI standards als in relation to GAIA-X principles. The solution is based on and uses a couple of standards and re-usable open-source components that can be considered of overarching concern:
 
 *   W3C Decentralized Identifiers (DIDs) [https://www.w3.org/TR/did-core/](https://www.w3.org/TR/did-core/)
 *   W3C Verifiable Credential Data Model [https://www.w3.org/TR/vc-data-model/](https://www.w3.org/TR/vc-data-model/)
@@ -412,7 +412,7 @@ Summary: Since Hyperledger Aries based on DID-Comm seems to evolve into an indus
 Quality Requirements
 ====================
 
-The Managed Identity Wallet sticks to the Quality Gate requirements of the overall Catena-X project where relevant:
+The Managed Identity Wallet sticks to the following Quality Gate requirements where relevant and applicable:
 
 *   Documentation: Architecture
 *   Documentation: Administrator's Guide
@@ -439,9 +439,9 @@ Risks and Technical Debts
 | Topic | Description and Explanation | Recommendation |
 | ----- | --------------------------- | -------------- |
 | Indy DID: Lacking support in Indy SDK and thus ACA-Py, needed to use did:sov for now | The W3C compliant DID method specification for Indy ([https://hyperledger.github.io/indy-did-method/](https://hyperledger.github.io/indy-did-method/)) is still fairly new and not yet fully implemented in major clients. That is why we had to use the Sovrin DID ([https://sovrin-foundation.github.io/sovrin/spec/did-method-spec-template.html](https://sovrin-foundation.github.io/sovrin/spec/did-method-spec-template.html)) for now, which is not fully W3C compliant and does not contain a network identifier to distinguish different ledgers (e.g. testnet and mainnet) in the DID. | The implementation should be adjusted to did:indy as soon as ACA-Py releases support for this. |
-| Availability of mainnet | I it envisioned to use the IDUnion mainnet as the Indy ledger for a productive solution. This mainnet is still under construction and not yet available for public use, there is also no committed target date, expectations are towards end of 2022, which would be sufficient for the timeline of Catena-X. | Escalate to IDUnion contacts when it becomes clear that the expected date of general availability can not be met. |
+| Availability of mainnet | I it envisioned to use the IDUnion mainnet as the Indy ledger for a productive solution. This mainnet is still under construction and not yet available for public use, there is also no committed target date. | Escalate to IDUnion contacts when it becomes clear that the expected date of general availability can not be met. |
 | Performance | In tests especially with the EDC, response times of the Managed Wallet Service were rather poor, taking several seconds for operations like create wallet, credential issuance, creation or validation of presentations. | Slow response times need to be analysed and optimised, special load and performance tests should be conducted for the most relevant use cases and scenarios. |
-| Lack of development resources and budget: open issues from implementation of integration with self-managed wallets | <ul><li>Interaction with a self-managed wallet must still be configured and tested in the cloud setup</li><li>Request presentation from self-managed wallets is not implemented</li><li>Issued verifiable credentials to self-managed wallets do not support revocation yet</li><li>The interaction is only possible with the Catena-X wallet (currently, there is no requirement to do that for other wallets, though)</li></ul> |
+| Lack of development resources and budget: open issues from implementation of integration with self-managed wallets | <ul><li>Request presentation from self-managed wallets is not implemented</li><li>Issued verifiable credentials to self-managed wallets do not support revocation yet</li><li>The interaction is only possible with the base wallet (currently, there is no requirement to do that for other wallets, though)</li></ul> |
 
   
 
@@ -451,7 +451,7 @@ Glossary
 | Term | Description |
 | ---- | ----------- |
 | Gaia-X | Gaia-X represents the next generation of data infrastructure ecosystem: an open, transparent, and secure digital ecosystem, where data and services can be made available, collated and shared in an environment of trust. ([more](https://gaia-x.eu/what-is-gaia-x/about-gaia-x/))
-| Catena-X Portal / Onboarding Process | The portal is used for the registration/onboarding process in Catena-X and includes the login, user management and the initial registration.
+| Portal / Onboarding Process | The portal is used for the registration/onboarding process of legal entities and includes the login, user management and the initial registration and verification.
 | Decentralized Identifier (DID) | Decentralized Identifiers are a new type of identifiers that enables verifiable, decentralized digital identity. ([more](https://www.w3.org/TR/did-core/))
 | Claim, Verifiable Credential | An assertion made about a subject by an issuer. ([more](https://www.w3.org/TR/vc-data-model/))
 | Holder, Subject | Is the user that holds the verifiable credentials, usually the subject. ([more](https://www.w3.org/TR/vc-data-model/))
