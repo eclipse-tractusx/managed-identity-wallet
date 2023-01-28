@@ -10,6 +10,7 @@ wallet:
 datapool:
   url: "https://partners-pool.int.demo.catena-x.net"
   authUrl: "https://centralidp.int.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token"
+  memberOfPlatform: "Catena-X"
 revocationService:
   baseUrlForCredentialList: "https://managed-identity-wallets.int.demo.catena-x.net/api/credentials/"
   clientIssuanceApiUrl: "http://localhost:8080"

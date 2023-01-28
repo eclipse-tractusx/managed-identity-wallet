@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -39,7 +39,7 @@ class BaseWalletAriesEventHandler(
         private val webhookService: IWebhookService
 ): TenantAwareEventHandler() {
 
-    private val catenaXCredentialTypes = JsonLdTypes.getCatenaXCredentialTypes()
+    private val baseWalletCredentialTypes = JsonLdTypes.getBaseWalletCredentialTypes()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     // Connection only with registered wallets
@@ -143,7 +143,7 @@ class BaseWalletAriesEventHandler(
                             )
                         )
                         val holderWallet = walletService.getWallet(issuedCred.credentialSubject["id"] as String)
-                        if (holderWallet.isSelfManaged && issuedCred.type.any { catenaXCredentialTypes.contains(it) }) {
+                        if (holderWallet.isSelfManaged && issuedCred.type.any { baseWalletCredentialTypes.contains(it) }) {
                             transaction {
                                 walletService.storeCredential(
                                     issuedCred.credentialSubject["id"] as String,

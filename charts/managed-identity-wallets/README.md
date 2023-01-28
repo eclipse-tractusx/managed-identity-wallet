@@ -51,7 +51,7 @@ Managed Identity Wallets Service
 | acapy.imageName | string | `"bcgovimages/aries-cloudagent"` |  |
 | acapy.tag | string | `"py36-1.16-1_0.7.5"` |  |
 | acapy.endorser.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
-| acapy.endorser.label | string | `"CatenaXIssuer"` | The label of the instance |
+| acapy.endorser.label | string | `"BaseWalletIssuer"` | The label of the instance |
 | acapy.endorser.logLevel | string | `"INFO"` |  |
 | acapy.endorser.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
 | acapy.endorser.databaseHost | string | `"acapypostgresql"` | The host of the used database |
@@ -67,7 +67,7 @@ Managed Identity Wallets Service
 | acapy.endorser.secret.jwtsecret | string | `"0"` |  |
 | acapy.endorser.secret.walletkey | string | `"0"` |  |
 | acapy.mt.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
-| acapy.mt.label | string | `"CatenaXIssuer"` | The label of the instance |
+| acapy.mt.label | string | `"ManagedWallet"` | The label of the instance |
 | acapy.mt.logLevel | string | `"INFO"` |  |
 | acapy.mt.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
 | acapy.mt.databaseHost | string | `"acapypostgresql"` |  |
@@ -97,7 +97,7 @@ Managed Identity Wallets Service
 | postgresql.primary.extraVolumes[0].name | string | `"initdb"` |  |
 | postgresql.primary.extraVolumes[0].emptyDir | object | `{}` |  |
 | postgresql.primary.initContainers[0].name | string | `"initdb"` |  |
-| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.0.0"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
+| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.1.0"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
 | postgresql.primary.initContainers[0].imagePullPolicy | string | `"Always"` |  |
 | postgresql.primary.initContainers[0].command[0] | string | `"sh"` |  |
 | postgresql.primary.initContainers[0].args[0] | string | `"-c"` |  |
@@ -112,6 +112,7 @@ Managed Identity Wallets Service
 | datapool.refreshHour | string | `"23"` | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
 | datapool.url | string | `""` | Url at which the API of BPDM is reachable |
 | datapool.authUrl | string | `""` | IAM url to get the access token for BPDM data pool endpoint |
+| datapool.memberOfPlatform | string | `"Platform-A"` | The name of the platfrom in the Membership credential |
 | managedIdentityWallets.secret.jdbcurl | string | `"jdbc:postgresql://postgresql:5432/postgres?user=postgres&password=postgres"` | Database connection string to the Postgres database of MIW |
 | managedIdentityWallets.secret.authclientid | string | `"clientid"` | It can be extracted from Keycloak |
 | managedIdentityWallets.secret.authclientsecret | string | `"client"` | It can be extracted from Keycloak |

@@ -1,0 +1,850 @@
+{
+	"info": {
+		"_postman_id": "b8276abe-18a9-4bf0-9737-eb8f0cdbbd46",
+		"name": "Managed Identity Wallet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Access Token  Keycloak",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"access_token\", jsonData.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "{{client_id}}",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{client_secret}}",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "openid",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{keycloak_realm_url}}/protocol/openid-connect/token",
+					"host": [
+						"{{keycloak_realm_url}}"
+					],
+					"path": [
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create wallet  in MIW",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"managedWallet_777\",\n    \"bpn\": \"BPNL000000000777\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/wallets",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get wallets from MIW",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{miw_url}}/api/wallets",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get wallet by identifier",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{miw_url}}/api/wallets/BPNL000000015PGU?withCredentials=true",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"BPNL000000015PGU"
+					],
+					"query": [
+						{
+							"key": "withCredentials",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete wallet with identifier from MIW",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{miw_url}}/api/wallets/BPNL000000015QG5",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"BPNL000000015QG5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resolve DID Document",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{miw_url}}/api/didDocuments/bpn222",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"didDocuments",
+						"bpn222"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Invitation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"theirPublicDid\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"alias\": \"TestX1\",\n    \"myLabel\": \"MY_LABEL\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/wallets/bpn/send-invitation",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"bpn",
+						"send-invitation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register self managed wallets",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bpn\": \"BPNL000000015QG5\",\n    \"did\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\",\n    \"name\": \"TestX1\",\n    \"webhookUrl\": \"ME_WEB_HOOK\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/wallets/self-managed-wallets",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"self-managed-wallets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issuance Flow (require connections to managed/self-managed wallets)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\"\n    ],\n    \"id\": \"urn:uuid:93031387-dec1-7654-1112-71710f391626\",\n    \"type\": [\n        \"NameCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"value\": \"Test\",\n            \"nameType\": {\n                \"technicalKey\": \"LOCAL\",\n                \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                \"url\": \"http://test.de\"\n            },\n            \"language\": {\n                \"technicalKey\": \"Test\",\n                \"name\": \"Test\"\n            }\n        },\n        \"type\": \"NameCredential\"\n    },\n    \"holderIdentifier\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\",\n    \"isRevocable\": false,\n    \"webhookUrl\": \"ManagedToExternal\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/credentials/issuance-flow",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"credentials",
+						"issuance-flow"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Credential",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\"\n    ],\n    \"id\": \"http://example.edu/credentials/382121414188\",\n    \"type\": [\n        \"VerifiableCredential\",\n        \"NameCredential\"\n    ],\n    \"issuerIdentifier\": \"BPNL000000000111\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"value\": \"Test\",\n            \"nameType\": {\n                \"technicalKey\": \"LOCAL\",\n                \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                \"url\": \"http://test.de\"\n            },\n            \"language\": {\n                \"technicalKey\": \"Test\",\n                \"name\": \"Test\"\n            }\n        },\n        \"type\": \"NameCredential\"\n    },\n    \"holderIdentifier\": \"BPNL000000000222\",\n    \"isRevocable\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/credentials",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"credentials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Credential By Base Wallet",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\"\n    ],\n    \"id\": \"http://example.edu/credentials/3739\",\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"Sally\",\n        \"familyName\": \"Student\",\n        \"degree\": {\n            \"type\": \"Master\",\n            \"degreeType\": \"Undergraduate\",\n            \"name\": \"Master of Test\"\n        },\n        \"college\": \"Test\"\n    },\n    \"holderIdentifier\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ\",\n    \"isRevocable\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/credentials/issuer",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"credentials",
+						"issuer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Revoke Credential",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"http://example.edu/credentials/3888\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://www.w3.org/2018/credentials/examples/v1\",\n        \"https://w3id.org/vc/status-list/2021/v1\"\n    ],\n    \"type\": [\n        \"University-Degree-Credential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuer\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"givenName\": \"TestAfterQuestion\",\n        \"familyName\": \"Student5\",\n        \"degree\": {\n            \"typeeee\": \"Master1\",\n            \"degreeType\": \"Undergraduate2\",\n            \"name\": \"Master of Test11\"\n        },\n        \"college\": \"Test2\",\n        \"id\": \"did:sov:HR6kiZSiUHfcW2tkGxtDKk\"\n    },\n    \"credentialStatus\": {\n        \"id\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b#1\",\n        \"type\": \"StatusList2021Entry\",\n        \"statusPurpose\": \"revocation\",\n        \"statusListIndex\": \"1\",\n        \"statusListCredential\": \"http://localhost:8080/api/credentials/status/2476607d-b00b-44f8-9c43-62f3bedd621b\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-09-16T15:13:26Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:sov:MzoR91L1YAmXdPXXp97SRJ#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..7qfg_wZPBxCF_Ua254ll7dIxmaS42sFXJgfMb95_NByCLbur6PyLbhqCGuGQttdu0lVbjawvCrkvj7YEFxGyCQ\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/credentials/revocations",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"credentials",
+						"revocations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Revocation Lists",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{miw_url}}/api/credentials/revocations/statusListCredentialRefresh",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"credentials",
+						"revocations",
+						"statusListCredentialRefresh"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Status-List Credential (using revocation-list-name-of-wallet)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{miw_url}}/api/credentials/status/5c145c85-8fcb-42d4-893c-d19a55581e00",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"credentials",
+						"status",
+						"5c145c85-8fcb-42d4-893c-d19a55581e00"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Presentations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"holderIdentifier\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"verifiableCredentials\": [\n        {\n            \"id\": \"http://example.edu/credentials/382121414188\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\",\n                \"https://w3id.org/vc/status-list/2021/v1\"\n            ],\n            \"type\": [\n                \"VerifiableCredential\",\n                \"NameCredential\"\n            ],\n            \"issuer\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n            \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n            \"expirationDate\": \"2999-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"data\": {\n                    \"value\": \"Test\",\n                    \"nameType\": {\n                        \"technicalKey\": \"LOCAL\",\n                        \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                        \"url\": \"http://test.de\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"Test\",\n                        \"name\": \"Test\"\n                    }\n                },\n                \"type\": \"NameCredential\",\n                \"id\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\"\n            },\n            \"credentialStatus\": {\n                \"id\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d#1\",\n                \"type\": \"StatusList2021Entry\",\n                \"statusPurpose\": \"revocation\",\n                \"statusListIndex\": \"1\",\n                \"statusListCredential\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-12-16T10:36:09Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..mrz86u9m6w5BKvwDQDS1gibPwKdB_2ghLbPMT_fZWR_GCyIAGuzS3Tv7yhq76daGTDq1RedFX66ahDOA7YSfCg\"\n            }\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/presentations?withCredentialsValidation=true&withCredentialsDateValidation=true&withRevocationValidation=true",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"presentations"
+					],
+					"query": [
+						{
+							"key": "withCredentialsValidation",
+							"value": "true"
+						},
+						{
+							"key": "withCredentialsDateValidation",
+							"value": "true"
+						},
+						{
+							"key": "withRevocationValidation",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Presentations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\"\n    ],\n    \"id\": \"urn:uuid:9b2e8c7f-c0fb-46a5-9771-272f1e70ce84\",\n    \"type\": [\n        \"VerifiablePresentation\"\n    ],\n    \"holder\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"verifiableCredential\": [\n        {\n            \"id\": \"http://example.edu/credentials/382121414188\",\n            \"@context\": [\n                \"https://www.w3.org/2018/credentials/v1\",\n                \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\",\n                \"https://w3id.org/vc/status-list/2021/v1\"\n            ],\n            \"type\": [\n                \"VerifiableCredential\",\n                \"NameCredential\"\n            ],\n            \"issuer\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n            \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n            \"expirationDate\": \"2999-06-17T18:56:59Z\",\n            \"credentialSubject\": {\n                \"data\": {\n                    \"value\": \"Test\",\n                    \"nameType\": {\n                        \"technicalKey\": \"LOCAL\",\n                        \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                        \"url\": \"http://test.de\"\n                    },\n                    \"language\": {\n                        \"technicalKey\": \"Test\",\n                        \"name\": \"Test\"\n                    }\n                },\n                \"type\": \"NameCredential\",\n                \"id\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\"\n            },\n            \"credentialStatus\": {\n                \"id\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d#1\",\n                \"type\": \"StatusList2021Entry\",\n                \"statusPurpose\": \"revocation\",\n                \"statusListIndex\": \"1\",\n                \"statusListCredential\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d\"\n            },\n            \"proof\": {\n                \"type\": \"Ed25519Signature2018\",\n                \"created\": \"2022-12-16T10:36:09Z\",\n                \"proofPurpose\": \"assertionMethod\",\n                \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n                \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..mrz86u9m6w5BKvwDQDS1gibPwKdB_2ghLbPMT_fZWR_GCyIAGuzS3Tv7yhq76daGTDq1RedFX66ahDOA7YSfCg\"\n            }\n        }\n    ],\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-12-16T10:36:23Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..TFMtnVXN18J6YB0taKca_YPUp4jTVMANyAJp8DZQu85IIEw2Xh1nQptJm8XmXxWsAIQMrKIbVgfvQZpzg9mgCw\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/presentations/validation?withDateValidation=true&withRevocationValidation=true",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"presentations",
+						"validation"
+					],
+					"query": [
+						{
+							"key": "withDateValidation",
+							"value": "true"
+						},
+						{
+							"key": "withRevocationValidation",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store issued Credential",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"http://example.edu/credentials/382121414188\",\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\",\n        \"https://w3id.org/vc/status-list/2021/v1\"\n    ],\n    \"type\": [\n        \"VerifiableCredential\",\n        \"NameCredential\"\n    ],\n    \"issuer\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"issuanceDate\": \"2000-06-16T18:56:59Z\",\n    \"expirationDate\": \"2999-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"value\": \"Test\",\n            \"nameType\": {\n                \"technicalKey\": \"LOCAL\",\n                \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                \"url\": \"http://test.de\"\n            },\n            \"language\": {\n                \"technicalKey\": \"Test\",\n                \"name\": \"Test\"\n            }\n        },\n        \"type\": \"NameCredential\",\n        \"id\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\"\n    },\n    \"credentialStatus\": {\n        \"id\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d#1\",\n        \"type\": \"StatusList2021Entry\",\n        \"statusPurpose\": \"revocation\",\n        \"statusListIndex\": \"1\",\n        \"statusListCredential\": \"http://localhost:8080/api/credentials/status/0f21d008-9ffa-420f-8cd2-f505325fb79d\"\n    },\n    \"proof\": {\n        \"type\": \"Ed25519Signature2018\",\n        \"created\": \"2022-12-16T10:36:09Z\",\n        \"proofPurpose\": \"assertionMethod\",\n        \"verificationMethod\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8#key-1\",\n        \"jws\": \"eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..mrz86u9m6w5BKvwDQDS1gibPwKdB_2ghLbPMT_fZWR_GCyIAGuzS3Tv7yhq76daGTDq1RedFX66ahDOA7YSfCg\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/wallets/did:sov:CXaLzgEtynxaMQcqxYtJkW/credentials",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"wallets",
+						"did:sov:CXaLzgEtynxaMQcqxYtJkW",
+						"credentials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Credentials",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{miw_url}}/api/credentials?issuerIdentifier=bpn111",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"credentials"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "http://example.edu/credentials/3732",
+							"disabled": true
+						},
+						{
+							"key": "holderIdentifier",
+							"value": "did:indy:local:test:7vNK46TwmMtp3nzDxftCRG",
+							"disabled": true
+						},
+						{
+							"key": "type",
+							"value": "University-Degree-Credential",
+							"disabled": true
+						},
+						{
+							"key": "issuerIdentifier",
+							"value": "bpn111"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Service",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": \"linked_domains\",\n  \"type\": \"linked_domains\",\n  \"serviceEndpoint\": \"https://myhost:123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/didDocuments/did:sov:XvBe422jiQuwUeZ7dH8VB8/services",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"didDocuments",
+						"did:sov:XvBe422jiQuwUeZ7dH8VB8",
+						"services"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Service",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"type\": \"did-communication\",\n  \"serviceEndpoint\": \"http://local_acapy:8000/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/didDocuments/bpn111/services/did-communication",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"didDocuments",
+						"bpn111",
+						"services",
+						"did-communication"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Service",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/didDocuments/bpn111/services/linked_domains",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"didDocuments",
+						"bpn111",
+						"services",
+						"linked_domains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "businessPartnerData",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{miw_url}}/api/businessPartnerDataRefresh?identifier=BPNL000000015QG5",
+					"host": [
+						"{{miw_url}}"
+					],
+					"path": [
+						"api",
+						"businessPartnerDataRefresh"
+					],
+					"query": [
+						{
+							"key": "identifier",
+							"value": "BPNL000000015QG5"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

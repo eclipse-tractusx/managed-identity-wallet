@@ -29,7 +29,7 @@ class JsonLdTypes {
         const val ADDRESS_TYPE = "AddressCredential"
         const val LEGAL_FORM_TYPE = "LegalFormCredential"
 
-        fun getCatenaXCredentialTypes() : List<String>{
+        fun getBaseWalletCredentialTypes() : List<String>{
             return listOf(
                 MEMBERSHIP_TYPE,
                 BPN_TYPE,

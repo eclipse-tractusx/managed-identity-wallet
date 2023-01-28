@@ -70,7 +70,7 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "BaseWalletIssuer"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"
@@ -100,7 +100,7 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "ManagedWallet"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"
@@ -180,6 +180,8 @@ datapool:
   url: ""
   # -- IAM url to get the access token for BPDM data pool endpoint
   authUrl: ""
+  # -- The name of the platfrom in the Membership credential
+  memberOfPlatform: "Platform-A"
 managedIdentityWallets:
   secret:
     # -- Database connection string to the Postgres database of MIW

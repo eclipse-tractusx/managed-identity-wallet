@@ -130,7 +130,7 @@ class BusinessPartnerDataServiceImpl(
         data: Any?
     ): Deferred<Boolean> = GlobalScope.async {
         try {
-            val vcToIssue = prepareCatenaXCredential(walletHolderDto.bpn, type, data)
+            val vcToIssue = prepareBaseWalletCredential(walletHolderDto.bpn, type, data)
             val verifiableCredential: VerifiableCredentialDto = walletService.issueBaseWalletCredential(vcToIssue)
             val issuedVC = toIssuedVerifiableCredentialRequestDto(verifiableCredential)
             if (issuedVC != null) {
@@ -140,7 +140,7 @@ class BusinessPartnerDataServiceImpl(
             log.error("Error: Proof of Credential of type $type is empty")
             false
         } catch (e: Exception) {
-            log.error("Error: Issue Catena-X Credentials of type $type failed with message ${e.message}")
+            log.error("Error: Issue base wallet credentials of type $type failed with message ${e.message}")
             false
         }
     }
@@ -155,7 +155,7 @@ class BusinessPartnerDataServiceImpl(
         GlobalScope.async {
             val baseWalletDid = walletService.getBaseWallet().did
             val credentialFlowRequest: VerifiableCredentialRequestWithoutIssuerDto =
-                prepareCatenaXCredential(targetWallet.bpn, type, data)
+                prepareBaseWalletCredential(targetWallet.bpn, type, data)
             val vCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
                 id =  credentialFlowRequest.id,
                 context = credentialFlowRequest.context,
@@ -257,7 +257,7 @@ class BusinessPartnerDataServiceImpl(
         }
     }
 
-    private fun prepareCatenaXCredential(
+    private fun prepareBaseWalletCredential(
         bpn: String,
         type: String,
         data: Any?
@@ -275,7 +275,7 @@ class BusinessPartnerDataServiceImpl(
             JsonLdTypes.MEMBERSHIP_TYPE -> {
                 mutableMapOf(
                     "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-                    "memberOf" to "Catena-X",
+                    "memberOf" to bpdmConfig.memberOfPlatform,
                     "status" to "Active",
                     "startTime" to currentDateAsString
                 )
@@ -343,7 +343,7 @@ class BusinessPartnerDataServiceImpl(
             }
             return@async true
         } catch (e: Exception) {
-            log.error("Error: Revoke and delete Catena-X Credentials ${e.message}")
+            log.error("Error: Revoke and delete base wallet credentials ${e.message}")
             return@async false
         }
     }

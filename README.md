@@ -70,6 +70,7 @@ below. Here a few hints on how to set it up:
 | `BPDM_AUTH_SCOPE`         | String | openid scope for accessing the BPDM data pool endpoint |
 | `BPDM_AUTH_URL`           | String | IAM url to get the access token for BPDM data pool endpoint |
 | `BPDM_PULL_DATA_AT_HOUR`  | String | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
+| `BPDM_MEMBER_OF_PLATFORM`  | String | The name used in the Membership credential |
 | `REVOCATION_URL`          | String | URL of the revocation service |
 | `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR` | String | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
 
@@ -121,7 +122,7 @@ revocation handling)
 
     | Key               | Value           |
     |-------------------|-----------------|
-    | MIW_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/<placeholder>?user=<placeholder>&password=<placeholder>` |
+    | MIW_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/<database name>?user=<database user>&password=<database password>` |
     | MIW_DB_JDBC_DRIVER | `org.postgresql.Driver` |
 
     Then restart the service via `./gradlew run`
@@ -255,14 +256,14 @@ Next step is to build and tag the Docker image, replacing the
 `<VERSION>` with the app version:
 
 ```
-docker build -t example/managed-identity-wallets:<VERSION> .
+docker build -t managed-identity-wallets/managed-identity-wallets:<VERSION> .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 example/managed-identity-wallets:<VERSION>
+docker run --env-file .env.docker -p 8080:8080 managed-identity-wallets/managed-identity-wallets:<VERSION>
 ```
 
 ## Deployment on Kubernetes
