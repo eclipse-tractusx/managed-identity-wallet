@@ -142,7 +142,7 @@ class BusinessPartnerServiceTest {
         clientSecret = "test",
         grantType = "test",
         scope = "test",
-        memberOfPlatform = "Platform-A"
+        membershipOrganisation = "Organisation-A"
     )
 
     private val bpnSubject = mapOf(

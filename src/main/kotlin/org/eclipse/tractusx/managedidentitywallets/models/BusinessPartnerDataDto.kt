@@ -53,8 +53,7 @@ data class BPDMConfig(
     val clientId: String,
     val clientSecret: String,
     val grantType: String,
-    val scope: String,
-    val memberOfPlatform: String
+    val scope: String
 )
 
 @Serializable

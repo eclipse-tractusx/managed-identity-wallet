@@ -58,6 +58,7 @@ import java.util.*
 class BusinessPartnerDataServiceImpl(
     private val walletService: IWalletService,
     private val bpdmConfig: BPDMConfig,
+    private val membershipOrganisation: String,
     private val client: HttpClient
 ): IBusinessPartnerDataService {
 
@@ -275,7 +276,7 @@ class BusinessPartnerDataServiceImpl(
             JsonLdTypes.MEMBERSHIP_TYPE -> {
                 mutableMapOf(
                     "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-                    "memberOf" to bpdmConfig.memberOfPlatform,
+                    "memberOf" to membershipOrganisation,
                     "status" to "Active",
                     "startTime" to currentDateAsString
                 )

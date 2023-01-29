@@ -118,12 +118,14 @@ fun Application.module(testing: Boolean = false) {
         clientId = environment.config.property("bpdm.clientId").getString(),
         clientSecret = environment.config.property("bpdm.clientSecret").getString(),
         scope = environment.config.property("bpdm.scope").getString(),
-        grantType = environment.config.property("bpdm.grantType").getString(),
-        memberOfPlatform = environment.config.property("bpdm.memberOfPlatform").getString()
+        grantType = environment.config.property("bpdm.grantType").getString()
     )
+    val membershipOrganisation = environment.config.property("wallet.membershipOrganisation").getString()
     val businessPartnerDataService = IBusinessPartnerDataService.createBusinessPartnerDataService(
         walletService,
-        bpdmConfig)
+        bpdmConfig,
+        membershipOrganisation
+    )
     Services.businessPartnerDataService = businessPartnerDataService
     Services.walletService = walletService
     Services.utilsService = utilsService

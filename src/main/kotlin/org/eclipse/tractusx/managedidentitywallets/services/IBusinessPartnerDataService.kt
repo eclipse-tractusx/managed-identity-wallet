@@ -51,11 +51,13 @@ interface IBusinessPartnerDataService {
 
         fun createBusinessPartnerDataService(
             walletService: IWalletService,
-            bpdmConfig: BPDMConfig
+            bpdmConfig: BPDMConfig,
+            membershipOrganisation: String
         ): IBusinessPartnerDataService {
             return BusinessPartnerDataServiceImpl(
                 walletService,
                 bpdmConfig,
+                membershipOrganisation,
                 HttpClient {
                     expectSuccess = false // must be false to handle thrown error if the access token has expired
                     install(ResponseObserver) {
