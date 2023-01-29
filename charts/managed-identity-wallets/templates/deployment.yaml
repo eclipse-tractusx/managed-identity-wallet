@@ -82,8 +82,6 @@ spec:
           value: {{ .Values.datapool.authUrl }}
         - name: BPDM_PULL_DATA_AT_HOUR
           value: {{ .Values.datapool.refreshHour | quote }}
-        - name: BPDM_MEMBER_OF_PLATFORM
-          value: {{ .Values.datapool.memberOfPlatform }}
         - name: ACAPY_NETWORK_IDENTIFIER
           value: {{ .Values.acapy.networkIdentifier }}
         - name: ACAPY_API_ADMIN_URL
@@ -108,6 +106,8 @@ spec:
           value: {{ .Values.wallet.baseWalletVerkey }}
         - name: MIW_NAME
           value: {{ .Values.wallet.baseWalletName }}
+        - name: MIW_MEMBERSHIP_ORG
+          value: {{ .Values.wallet.membershipOrganisation }}
         - name: MIW_OPENAPI_TITLE
           value: {{ .Values.openapi.title }}
         - name: MIW_OPENAPI_DESCRIPTION

@@ -44,6 +44,8 @@ wallet:
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
+  # -- The name used in the Membership credential
+  membershipOrganisation: "Platform-A"
 # The configuration of revocation service in MIW
 revocation:
   # --  At which hour (24-hour clock) the cron job should issue/update status-list credentials
@@ -180,8 +182,6 @@ datapool:
   url: ""
   # -- IAM url to get the access token for BPDM data pool endpoint
   authUrl: ""
-  # -- The name of the platfrom in the Membership credential
-  memberOfPlatform: "Platform-A"
 managedIdentityWallets:
   secret:
     # -- Database connection string to the Postgres database of MIW
