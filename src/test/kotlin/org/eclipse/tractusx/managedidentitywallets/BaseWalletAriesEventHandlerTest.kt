@@ -35,6 +35,7 @@ import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyService
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
 import org.eclipse.tractusx.managedidentitywallets.services.BaseWalletAriesEventHandler
+import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
@@ -121,6 +122,7 @@ class BaseWalletAriesEventHandlerTest {
     private lateinit var webhookService: IWebhookService
     private lateinit var walletServiceSpy: IWalletService
     private lateinit var ariesEventHandler: BaseWalletAriesEventHandler
+    private lateinit var acaPyServiceMock: IAcaPyService
 
     @BeforeTest
     fun setup() {
@@ -137,7 +139,7 @@ class BaseWalletAriesEventHandlerTest {
         webhookService = WebhookServiceImpl(
             webhookRepository, HttpClient(mockEngine)
         )
-        val acaPyServiceMock = mock<AcaPyService>()
+        acaPyServiceMock = mock<AcaPyService>()
         doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
         whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
         runBlocking {
@@ -222,6 +224,57 @@ class BaseWalletAriesEventHandlerTest {
                     val connections = connectionRepository.getAll()
                     assertEquals(2, connections.size)
                 }
+
+                transaction {
+                    walletRepo.deleteWallet(issuerWallet.bpn)
+                    walletRepo.deleteWallet(holderWallet.bpn)
+                    connectionRepository.deleteConnections(issuerWallet.did)
+                    connectionRepository.deleteConnections(holderWallet.did)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testHandleReceivedConnectionRequestUnknownWallet() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+        }) {
+            runBlocking {
+                // Setup
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+
+                assertDoesNotThrow {
+                    runBlocking {
+                        walletServiceSpy.sendInvitation(
+                            holderWallet.did,
+                            invitationRequestDto = InvitationRequestDto(
+                                theirPublicDid = issuerWallet.did,
+                                myLabel = "testLabel",
+                                alias = "ToBaseWallet"
+                            )
+                        )
+                    }
+                }
+
+                // Mock super call to tenantAwareEventHandler
+                val tenantAwareEventHandler = mock<TenantAwareEventHandler>()
+                doNothing().whenever(tenantAwareEventHandler).handleConnection(anyOrNull(), any())
+
+                whenever(acaPyServiceMock.isDidOfWallet(any(), anyOrNull())).thenReturn(false)
+
+                val newConnectionRecord = ConnectionRecord()
+                newConnectionRecord.rfc23State = Rfc23State.REQUEST_RECEIVED.toString()
+                newConnectionRecord.connectionId = connectionId
+                newConnectionRecord.requestId = connectionThreadId
+                newConnectionRecord.theirLabel = holderWallet.bpn
+                newConnectionRecord.theirPublicDid = "did:sov:unknowwallet"
+
+                ariesEventHandler.handleConnection(null, newConnectionRecord)
+
+                verify(walletServiceSpy, times(0)).setEndorserMetaDataForConnection(any())
+                verify(walletServiceSpy, times(0)).acceptConnectionRequest(any(), any())
 
                 transaction {
                     walletRepo.deleteWallet(issuerWallet.bpn)

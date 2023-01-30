@@ -1047,7 +1047,7 @@ class AcaPyWalletServiceImpl(
         )
     }
 
-    override fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord) {
+    override fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord): Boolean {
         val allowlistDids = acaPyService.getWalletAndAcaPyConfig().allowlistDids
         val connectionDid = connection.theirPublicDid ?: connection.theirDid
         if (allowlistDids.isNotEmpty()
@@ -1056,7 +1056,9 @@ class AcaPyWalletServiceImpl(
         ) {
             log.warn("Connection request ${connection.connectionId} and DID $connectionDid " +
                     "has been rejected due to unfulfilled conditions")
+            return false
         }
+        return true
     }
 
     override suspend fun validateConnectionRequestForBaseWallet(connection: ConnectionRecord, bpn: String): WalletDto? {

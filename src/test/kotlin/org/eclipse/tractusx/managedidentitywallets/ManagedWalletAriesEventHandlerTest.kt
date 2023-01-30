@@ -25,6 +25,7 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
@@ -230,6 +231,84 @@ class ManagedWalletAriesEventHandlerTest {
                     assertEquals(1, connections.size)
                     assertEquals(connectionId, connections[0].connectionId)
                 }
+
+                // clean data
+                transaction {
+                    walletRepo.deleteWallet(issuerWallet.bpn)
+                    walletRepo.deleteWallet(holderWallet.bpn)
+                    connectionRepository.deleteConnections(holderWallet.did)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testHandleAriesEventsConnectionsWithAllowList() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+            configureSerialization()
+        }) {
+            runBlocking {
+                // Setup
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+                whenever(acaPyServiceMocked.getWalletAndAcaPyConfig()).thenReturn(
+                    WalletAndAcaPyConfig(
+                        apiAdminUrl = "apiAdminUrl",
+                        networkIdentifier = "networkIdentifier",
+                        baseWalletBpn = EnvironmentTestSetup.DEFAULT_BPN,
+                        baseWalletDID = EnvironmentTestSetup.DEFAULT_DID,
+                        baseWalletVerkey = EnvironmentTestSetup.DEFAULT_VERKEY,
+                        adminApiKey = "adminApiKey",
+                        baseWalletAdminUrl = "baseWalletAdminUrl",
+                        baseWalletAdminApiKey = "baseWalletAdminApiKey",
+                        allowlistDids = listOf("shortDid1","shortDid2","shortDid3")
+                    )
+                )
+                // Mock acceptInvitationRequest call to Acapy Service
+                val connectionRecord  = ConnectionRecord()
+                connectionRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
+                doAnswer { connectionRecord }
+                    .whenever(acaPyServiceMocked).acceptConnectionRequest(any(), anyOrNull())
+                val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
+                    walletService = walletServiceSpy,
+                    revocationService = revocationServiceMocked,
+                    webhookService = webhookServiceMocked,
+                    utilsService = utilsService
+                )
+                // Test `handleEvent` for connection with rfc23 state request-received
+                assertDoesNotThrow {
+                    managedWalletAriesEventHandler.handleEvent(
+                        holderWallet.walletId,
+                        "connections",
+                        """{"rfc23_state":"request-received", "their_public_did": "did:sov:test", "connection_id":"$connectionId"}""".trimIndent()
+                    )
+                }
+                verify(walletServiceSpy, times(0)).acceptConnectionRequest(any(), any())
+
+                whenever(acaPyServiceMocked.getWalletAndAcaPyConfig()).thenReturn(
+                    WalletAndAcaPyConfig(
+                        apiAdminUrl = "apiAdminUrl",
+                        networkIdentifier = "networkIdentifier",
+                        baseWalletBpn = EnvironmentTestSetup.DEFAULT_BPN,
+                        baseWalletDID = EnvironmentTestSetup.DEFAULT_DID,
+                        baseWalletVerkey = EnvironmentTestSetup.DEFAULT_VERKEY,
+                        adminApiKey = "adminApiKey",
+                        baseWalletAdminUrl = "baseWalletAdminUrl",
+                        baseWalletAdminApiKey = "baseWalletAdminApiKey",
+                        allowlistDids = listOf("shortDid1","did:sov:test","shortDid3")
+                    )
+                )
+
+                // Test `handleEvent` for connection with rfc23 state request-received
+                assertDoesNotThrow {
+                    managedWalletAriesEventHandler.handleEvent(
+                        holderWallet.walletId,
+                        "connections",
+                        """{"rfc23_state":"request-received", "their_public_did": "did:sov:test", "connection_id":"$connectionId"}""".trimIndent()
+                    )
+                }
+                verify(walletServiceSpy, times(1)).acceptConnectionRequest(any(), any())
 
                 // clean data
                 transaction {

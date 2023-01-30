@@ -409,8 +409,9 @@ interface IWalletService {
     /**
      * Checks if a received connection request to managed wallet is allowed to be processed.
      * @param connection the received connection request [ConnectionRecord]
+     * @return true if the connection request is allowed to be processed
      */
-    fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord)
+    fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord): Boolean
 
     /**
      * Checks if a received connection request to base wallet is allowed to be processed.
