@@ -65,7 +65,7 @@ jobs:
         with:
           sarif_file: "trivy-results1.sarif"
 
-  analyze-product-core-managed-identity-wallets-service:
+  analyze-managed-identity-wallets-service:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     permissions:
@@ -99,7 +99,7 @@ jobs:
         with:
           sarif_file: "trivy-results3.sarif"
 
-  analyze-product-core-managed-identity-wallets-service-develop:
+  analyze-managed-identity-wallets-service-develop:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
     permissions:
