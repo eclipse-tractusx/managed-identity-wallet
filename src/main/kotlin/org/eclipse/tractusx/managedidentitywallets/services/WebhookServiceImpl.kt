@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -30,8 +30,7 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.jetbrains.exposed.sql.transactions.transaction
 
 /**
- * WebhookServiceImpl implement the IWebhookService interface.
- * it provides implementation for webhook operations
+ * WebhookServiceImpl provides implementation for webhook operations.
  */
 class WebhookServiceImpl(
     private val webhookRepository: WebhookRepository,

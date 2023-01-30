@@ -28,7 +28,6 @@ import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.Services
-import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
@@ -72,8 +71,7 @@ import org.hyperledger.aries.api.wallet.ListWalletDidFilter
 import java.util.*
 
 /**
- * AcaPyService implements the IAcaPyService interface.
- * It provides functionalities for interacting with the AcaPy API to perform
+ * AcaPyService provides functionalities for interacting with the AcaPy API to perform
  * various actions. It uses HTTP requests and the acapy-java-client library.
  */
 class AcaPyService(
@@ -96,18 +94,6 @@ class AcaPyService(
             baseWalletAdminApiKey = "", // don't expose the api key outside the AcaPyService
             whitelistDids = acaPyConfig.whitelistDids
         )
-    }
-
-    override suspend fun getSubWallets(): WalletList {
-        return try {
-            client.get {
-                url("${acaPyConfig.apiAdminUrl}/multitenancy/wallets")
-                headers.append("X-API-Key", acaPyConfig.adminApiKey)
-                accept(ContentType.Application.Json)
-            }
-        } catch (e: Exception) {
-            throw BadRequestException(e.message)
-        }
     }
 
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
@@ -344,7 +330,7 @@ class AcaPyService(
     override suspend fun getAcapyClient(walletToken: String?): AriesClient {
         val ariesClient = AriesClient.builder()
         if (walletToken == null) {
-            // Catena X Wallet
+            // The base wallet
             ariesClient
                 .url(acaPyConfig.baseWalletAdminUrl)
                 .apiKey(acaPyConfig.baseWalletAdminApiKey)
@@ -454,7 +440,7 @@ class AcaPyService(
 
     private fun getAcaPyUrlAndApiKeyBasedOnToken(token: String?): Pair<String, String> {
         if (token == null) {
-            // The Catena X Wallet
+            // The base wallet
             return acaPyConfig.baseWalletAdminUrl to acaPyConfig.baseWalletAdminApiKey
         }
         // Other wallets and multi-tenancy management wallet

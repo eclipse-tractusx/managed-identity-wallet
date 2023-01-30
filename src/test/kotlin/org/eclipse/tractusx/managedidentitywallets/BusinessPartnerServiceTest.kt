@@ -27,6 +27,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
+import org.eclipse.tractusx.managedidentitywallets.EnvironmentTestSetup.MEMBERSHIP_ORG
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.eclipse.tractusx.managedidentitywallets.models.LegalFormDto
 import org.eclipse.tractusx.managedidentitywallets.models.NameResponse
@@ -141,7 +142,7 @@ class BusinessPartnerServiceTest {
         clientId = "test",
         clientSecret = "test",
         grantType = "test",
-        scope = "test",
+        scope = "test"
     )
 
     private val bpnSubject = mapOf(
@@ -153,7 +154,7 @@ class BusinessPartnerServiceTest {
     private val membershipSubject = mapOf(
         "id" to holderWallet.did,
         "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-        "memberOf" to "Catena-X",
+        "memberOf" to "Platform-A",
         "status" to "Active",
         "startTime" to "currentDateAsString",
     )
@@ -326,6 +327,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
@@ -422,6 +424,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
 
@@ -513,6 +516,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
 
@@ -607,6 +611,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val spyBpdmService = spy(bpdmService)
@@ -673,6 +678,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val spyBpdmService = spy(bpdmService)
@@ -754,6 +760,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val bpdmServiceSpy = spy(bpdmService)
@@ -828,6 +835,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val bpdmServiceSpy = spy(bpdmService)
@@ -936,7 +944,7 @@ class BusinessPartnerServiceTest {
             wallets.forEach {
                 if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
                     runBlocking {
-                        walletService.initBaseWalletAndSubscribeForAriesWS(
+                        walletService.initBaseWalletWithListeners(
                             EnvironmentTestSetup.DEFAULT_BPN,
                             EnvironmentTestSetup.DEFAULT_DID,
                             EnvironmentTestSetup.DEFAULT_VERKEY,

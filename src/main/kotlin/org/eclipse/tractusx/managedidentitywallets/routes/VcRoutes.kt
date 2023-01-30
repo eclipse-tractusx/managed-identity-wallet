@@ -135,12 +135,12 @@ fun Route.vcRoutes(
             notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedPost(
                     PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
-                        summary = "Issue a Verifiable Credential with Catena-X platform issuer",
+                        summary = "Issue a Verifiable Credential with base wallet issuer",
                         description = "Permission: " +
                             "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
                             "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
-                                "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
-                            "\nIssue a verifiable credential by Catena-X wallet",
+                                "(The BPN of base wallet must equal BPN of caller)\n" +
+                            "\nIssue a verifiable credential by base wallet",
                         requestInfo = RequestInfo(
                             description = "The verifiable credential input",
                             examples = verifiableCredentialRequestWithoutIssuerDtoExample
@@ -175,7 +175,7 @@ fun Route.vcRoutes(
                         description = "Permission: " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
-                                "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
+                                "(The BPN of base wallet must equal BPN of caller)\n" +
                                 "\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. " + 
                                 "Issuer must be a DID managed by the MIW",
                         requestInfo = RequestInfo(

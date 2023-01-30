@@ -42,6 +42,7 @@ object EnvironmentTestSetup {
     const val DEFAULT_BPN = "BPNL00000"
     const val DEFAULT_DID = "did:sov:ArqouCjqi4RwBXQqjAbQrG"
     const val DEFAULT_VERKEY = "6Ng3Cu39yTViaEUg1BETpze78nXZqHpb6Q783X2rRhe6"
+    const val MEMBERSHIP_ORG = "Organisation-A"
     val walletAcapyConfig = WalletAndAcaPyConfig(
         apiAdminUrl = "apiAdminUrl",
         networkIdentifier = "networkIdentifier",
@@ -104,6 +105,7 @@ object EnvironmentTestSetup {
             put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: "local:test")
             put("acapy.adminApiKey", System.getenv("ACAPY_ADMIN_API_KEY") ?: "Hj23iQUsstG!dde")
             put("wallet.baseWalletBpn", System.getenv("MIW_BPN") ?: DEFAULT_BPN)
+            put("wallet.membershipOrganisation", System.getenv("MIW_MEMBERSHIP_ORG") ?: MEMBERSHIP_ORG)
 
             put("auth.jwksUrl", System.getenv("MIW_AUTH_JWKS_URL") ?: "http://localhost:18080/jwks")
             put("auth.issuerUrl", System.getenv("MIW_AUTH_ISSUER_URL") ?: JwtConfigTest.issuerUrl)

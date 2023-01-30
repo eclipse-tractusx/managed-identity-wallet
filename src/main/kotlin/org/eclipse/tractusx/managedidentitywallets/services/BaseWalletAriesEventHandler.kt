@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -35,8 +35,9 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
- * The BaseWalletAriesEventHandler defines the logic of how to handle Aries-Flows with
- * other external or internal wallets.
+ * The BaseWalletAriesEventHandler triggers in MIW and AcaPy the appropriate responses
+ * on some of the aries-flow events to enable connection and exchange credentials
+ * with other external or internal wallets.
  */
 class BaseWalletAriesEventHandler(
         private val businessPartnerDataService: IBusinessPartnerDataService,
@@ -44,7 +45,7 @@ class BaseWalletAriesEventHandler(
         private val webhookService: IWebhookService
 ): TenantAwareEventHandler() {
 
-    private val catenaXCredentialTypes = JsonLdTypes.getCatenaXCredentialTypes()
+    private val baseWalletCredentialTypes = JsonLdTypes.getBaseWalletCredentialTypes()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     // Connection only with registered wallets
@@ -69,7 +70,7 @@ class BaseWalletAriesEventHandler(
                             )
                             // Currently, it is always the case
                             if (!wallet!!.isSelfManaged) {
-                                walletService.setEndorserMetaDataForAcapyConnection(connection.connectionId)
+                                walletService.setEndorserMetaDataForConnection(connection.connectionId)
                             }
                             walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
                         } else {
@@ -155,7 +156,7 @@ class BaseWalletAriesEventHandler(
                             )
                         )
                         val holderWallet = walletService.getWallet(issuedCred.credentialSubject["id"] as String)
-                        if (holderWallet.isSelfManaged && issuedCred.type.any { catenaXCredentialTypes.contains(it) }) {
+                        if (holderWallet.isSelfManaged && issuedCred.type.any { baseWalletCredentialTypes.contains(it) }) {
                             transaction {
                                 walletService.storeCredential(
                                     issuedCred.credentialSubject["id"] as String,

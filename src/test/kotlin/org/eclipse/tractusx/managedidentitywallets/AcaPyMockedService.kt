@@ -84,8 +84,6 @@ class AcaPyMockedService(
         )
     }
 
-    override suspend fun getSubWallets(): WalletList = WalletList(results = emptyList())
-
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
         return CreatedSubWalletResult(
             createdAt = "createdAt",

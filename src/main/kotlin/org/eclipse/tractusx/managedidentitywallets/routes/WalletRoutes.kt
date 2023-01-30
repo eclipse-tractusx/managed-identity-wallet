@@ -131,7 +131,7 @@ fun Route.walletRoutes(walletService: IWalletService) {
                         summary = "Register and Establish Initial Connection with Partners",
                         description = "Permission: " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
-                                "\n Register self managed wallet and establish the initial connection with CatenaX. " +
+                                "\n Register self managed wallet and establish the initial connection with base wallet. " +
                                 "Also issue their membership and BPN credentials",
                         requestInfo = RequestInfo(
                             description = "Register self managed wallet, establish a connection and issue membership and BPN credentials",

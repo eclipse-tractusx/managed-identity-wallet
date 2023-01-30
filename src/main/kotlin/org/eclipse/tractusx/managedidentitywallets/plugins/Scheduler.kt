@@ -42,7 +42,7 @@ fun Application.configureJobs() {
         // Spring Scheduled tasks (second, minute, hour, day of month, month, day(s) of week)
         Schedules.cron("0 0 $pullDataAtHour * * *"))
         .execute { _, _ ->
-            runPullDataAndUpdateCatenaXCredentialJobPayload()
+            runPullDataAndUpdateBaseWalletCredentialJobPayload()
         }
 
     val updateRevocationList: RecurringTask<Void> = Tasks.recurring(
@@ -80,7 +80,7 @@ fun initDatabase(jdbcUrl: String): DataSource {
     }
 }
 
-fun runPullDataAndUpdateCatenaXCredentialJobPayload() {
+fun runPullDataAndUpdateBaseWalletCredentialJobPayload() {
     runBlocking {
         Services.businessPartnerDataService.pullDataAndUpdateBaseWalletCredentialsAsync()
     }

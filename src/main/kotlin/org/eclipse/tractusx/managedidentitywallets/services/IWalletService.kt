@@ -70,7 +70,7 @@ interface IWalletService {
 
     /**
      * Retrieves the wallet [WalletDto] of given [identifier].
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @param withCredentials if credentials are required. Default is false
      * @return [WalletDto] the data of the wallet
      * @throws NotFoundException if the wallet does not exist
@@ -78,7 +78,7 @@ interface IWalletService {
     fun getWallet(identifier: String, withCredentials: Boolean = false): WalletDto
 
     /**
-     * Retrieves the extended wallet data [WalletExtendedData] of base wallet.
+     * Retrieves the extended wallet data [WalletExtendedData] of the base wallet.
      * @return [WalletExtendedData] the extended data of the wallet
      */
     fun getBaseWallet(): WalletExtendedData
@@ -87,7 +87,7 @@ interface IWalletService {
      * Retrieves the DID of a given [bpn].
      * @param bpn the BPN of a stored wallet
      * @return the DID as String
-     * @throws NotFoundException if the BPN does not exist
+     * @throws NotFoundException if no DID mapping for the BPN was found
      */
     fun getDidFromBpn(bpn: String): String
 
@@ -95,15 +95,15 @@ interface IWalletService {
      * Retrieves the BPN of a given [did].
      * @param did the DID of a stored wallet
      * @return the DID as String
-     * @throws NotFoundException if the BPN does not exist
+     * @throws NotFoundException if no BPN mapping for the given DID was found
      */
     fun getBpnFromDid(did: String): String
 
     /**
      * Retrieves the BPN of a given [identifier].
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @return the DID as String
-     * @throws NotFoundException if the BPN does not exist
+     * @throws NotFoundException if no BPN mapping for the given DID was found
      */
     fun getBpnFromIdentifier(identifier: String): String
 
@@ -120,17 +120,15 @@ interface IWalletService {
     fun getAllBpns(): List<String>
 
     /**
-     * Creates a managed wallet giving its BPN and name.
-     * The method create a sub-wallet with a DID, register the DID on ledger,
-     * create a revocation-list, trigger setup connection,
-     * set endpoint and exchange credential with base wallet.
+     * Creates and stores a managed wallet giving its BPN and name.
      * @param [walletCreateDto] The wallet to create
      * @return [WalletDto] the data of created wallet
      */
     suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto
 
     /**
-     * Registers a self-managed wallet, build connection and trigger credential exchange.
+     * Registers a self-managed wallet and sends an invitation request from the base wallet to the self-managed wallet.
+     * The exchange of Membership and BPN credentials with the self-managed wallet is implemented in [BaseWalletAriesEventHandler]
      * @return [SelfManagedWalletResultDto] the data of the self-managed wallet
      */
     suspend fun registerSelfManagedWalletAndBuildConnection(
@@ -139,18 +137,19 @@ interface IWalletService {
 
     /**
      * Deletes a wallet for a given identifier with its connections and credentials.
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @return true if the wallet is deleted successfully
      * @throws NotFoundException if the wallet does not exist
      */
     suspend fun deleteWallet(identifier: String): Boolean
 
     /**
-     * Stores verifiable credential for a given wallet.
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * Stores a verifiable credential issued for a given wallet.
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @param issuedCredential A signed verifiable credential
      * @return true if the verifiable credential is stored successfully
      * @throws NotFoundException if the wallet does not exist
+     * @throws ForbiddenException if the subject of the credential is not the DID of the given wallet
      */
     fun storeCredential(identifier: String, issuedCredential: IssuedVerifiableCredentialRequestDto): Boolean
 
@@ -196,7 +195,7 @@ interface IWalletService {
      * @param vpRequest a verifiable presentation to modify and sign
      * @param withCredentialsValidation to validate the verifiable credentials in the presentation.
      * If this set to false, the other validations flags are ignored
-     * @param withCredentialsDateValidation to validate the date of the verifiable credentials in the presentation
+     * @param withCredentialsDateValidation to validate the issuance and expiration dates of the verifiable credentials in the presentation
      * @param withRevocationValidation to validate if any of the verifiable credentials is revoked
      * @return [VerifiablePresentationDto] a signed verifiable presentation
      * @throws NotFoundException if the wallet of the issuer of the verifiable presentation (holder) does not exist
@@ -261,14 +260,14 @@ interface IWalletService {
      * @param identifier the BPN, DID or wallet-id of a managed wallet
      * @param id the Id of the exiting Service in the DID document
      * @return [DidDocumentDto] the DID Document
-     * @throws NotImplementedException always, because this method is not supported yet
+     * @throws NotFoundException the target service endpoint does not exist
      */
     suspend fun deleteService(identifier: String, id: String): DidDocumentDto
 
     /**
-     * Verifies a singed verifiable presentation.
+     * Verifies a verifiable presentation.
      * @param vpDto the verifiable presentation to verify
-     * @param withDateValidation validate the Date of the verifiable credentials in the presentation
+     * @param withDateValidation validate the issuance and expiration dates of the verifiable credentials in the presentation
      * @param withRevocationValidation verify if the credentials are not revoked
      * @return [VerifyResponse] the response including the presentation
      * @throws UnprocessableEntityException if the presentation is not valid or the validation failed
@@ -280,7 +279,7 @@ interface IWalletService {
     ): VerifyResponse
 
     /**
-     * Issues a status list credential using the revocation.
+     * Issues a status list credential using the revocation service.
      * @param profileName the identifier part of the DID of the wallet
      * @param listCredentialRequestData the list id and its subject
      * @return [VerifiableCredentialDto] the signed status list credential
@@ -296,7 +295,7 @@ interface IWalletService {
      * Revokes an issued verifiable credential.
      * @param vc the verifiable credential to revoke
      * @throws UnprocessableEntityException if the verifiable credential is not revocable or the properties
-     * of the credential is not valid
+     * of the credential are not valid
      */
     suspend fun revokeVerifiableCredential(vc: VerifiableCredentialDto)
 
@@ -345,17 +344,17 @@ interface IWalletService {
     )
 
     /**
-     * Creates and initialize the base wallet and subscribe to Websocket of AcaPy.
+     * Creates and initializes the base wallet and subscribes to Listeners.
      * @param bpn the BPN of the base Wallet
      * @param did the DID of the base Wallet
      * @param verkey the verkey of the base Wallet
      * @param name the name of the base Wallet
      */
-    suspend fun initBaseWalletAndSubscribeForAriesWS(bpn: String, did: String, verkey: String, name: String)
+    suspend fun initBaseWalletWithListeners(bpn: String, did: String, verkey: String, name: String)
 
     /**
      * Accepts a connection request by wallet.
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @param connectionRecord the connectionRecord. It includes the connectionId
      * @throws NotFoundException if the wallet does not exist
      */
@@ -363,7 +362,7 @@ interface IWalletService {
 
     /**
      * Accepts the received verifiable credential exchange offer.
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @param credExRecord the credential exchange record. It includes the credentialExchangeId
      * @throws NotFoundException if the wallet does not exist
      */
@@ -371,7 +370,7 @@ interface IWalletService {
 
     /**
      * Accepts and stores the received issued verifiable credential.
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @param credExRecord the credential exchange record. It includes the credentialExchangeId
      * and credExRecord.resolveLDCredential().credential
      * @throws NotFoundException if the wallet does not exist
@@ -383,7 +382,7 @@ interface IWalletService {
      * @param connectionId the connectionId
      * @throws NotFoundException the connection does not exist
      */
-    suspend fun setEndorserMetaDataForAcapyConnection(connectionId: String)
+    suspend fun setEndorserMetaDataForConnection(connectionId: String)
 
     /**
      * Sets the MetaData of the connection by managed wallet.
@@ -395,7 +394,7 @@ interface IWalletService {
 
     /**
      * Sends a did-exchange invitation.
-     * @param identifier the BPN, DID or wallet-id of the wallet
+     * @param identifier the BPN or DID of the wallet. Or the wallet id of managed wallets
      * @param invitationRequestDto the invitation request data
      * @throws NotFoundException the wallet does not exist
      */
@@ -428,8 +427,8 @@ interface IWalletService {
         private val log = LoggerFactory.getLogger(this::class.java)
 
         /**
-         * Creates the AcaPy service which implements the IWalletService.
-         * The used HTTP client to communicate with AcaPy is configured in this method
+         * Creates the AcaPyWalletServiceImpl which implements the IWalletService.
+         * The used HTTP client to communicate with AcaPy instances is configured in this method
          */
         fun createWithAcaPyService(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,

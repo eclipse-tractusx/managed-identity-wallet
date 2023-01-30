@@ -340,7 +340,7 @@ class WalletsTest {
         }) {
 
             runBlocking {
-                EnvironmentTestSetup.walletService.initBaseWalletAndSubscribeForAriesWS(
+                EnvironmentTestSetup.walletService.initBaseWalletWithListeners(
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
@@ -443,7 +443,7 @@ class WalletsTest {
                     )
                     val walletServiceSpy = spy(walletService)
 
-                    EnvironmentTestSetup.walletService.initBaseWalletAndSubscribeForAriesWS(
+                    EnvironmentTestSetup.walletService.initBaseWalletWithListeners(
                         EnvironmentTestSetup.DEFAULT_BPN,
                         EnvironmentTestSetup.DEFAULT_DID,
                         EnvironmentTestSetup.DEFAULT_VERKEY,

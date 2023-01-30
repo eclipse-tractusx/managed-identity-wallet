@@ -21,7 +21,7 @@ The following instruction will be executed when a self managed wallet is registe
     - Set the connection state to `Completed`
     - If the WebhookUrl exist then send the information to the stored url
     - Trigger the creation of the Membership and BPN credentials which sends a `Credential Offer` to the self managed wallet
-    - When the self managed wallet accepts the offer, then the two credentials will be issued by the Catena X wallet.
+    - When the self managed wallet accepts the offer, then the two credentials will be issued by the base wallet.
 
 
 ### Issue Verifiable Credential for Self Managed Wallet
