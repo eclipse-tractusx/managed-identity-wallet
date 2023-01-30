@@ -44,8 +44,8 @@ wallet:
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
-  # -- A list of whitelisted short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request
-  whitelistDids: ""
+  # -- A list of short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request to managed wallets
+  allowlistDids: ""
   # -- The name used in the Membership credential
   membershipOrganisation: "Platform-A"
 # The configuration of revocation service in MIW

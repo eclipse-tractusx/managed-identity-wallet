@@ -106,8 +106,8 @@ spec:
           value: {{ .Values.wallet.baseWalletVerkey }}
         - name: MIW_NAME
           value: {{ .Values.wallet.baseWalletName }}
-        - name: MIW_WHITELIST_DIDS
-          value: {{ .Values.wallet.whitelistDids }}
+        - name: MIW_ALLOWLIST_DIDS
+          value: {{ .Values.wallet.allowlistDids }}
         - name: MIW_MEMBERSHIP_ORG
           value: {{ .Values.wallet.membershipOrganisation }}
         - name: MIW_OPENAPI_TITLE

@@ -39,7 +39,7 @@ Managed Identity Wallets Service
 | wallet.baseWalletShortDid | string | `""` | The short DID of the base wallet. It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#integrate-with-an-write-restricted-indy-ledger. It should be registered on the Indy ledger with role endorser. |
 | wallet.baseWalletVerkey | string | `""` | The verkey (public key) of the base wallet |
 | wallet.baseWalletName | string | `""` | The name of the base wallet |
-| wallet.whitelistDids | string | `""` | A list of whitelisted short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request |
+| wallet.allowlistDids | string | `""` | A list of short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request to managed wallets |
 | wallet.membershipOrganisation | string | `"Platform-A"` | The name used in the Membership credential |
 | revocation.refreshHour | string | `"3"` | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
 | revocation.revocationServiceUrl | string | `"http://localhost:8086"` | The url of the revocation service |
