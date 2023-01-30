@@ -147,8 +147,8 @@ interface IAcaPyService {
      * Sends a connection request to another wallet.
      * @param selfManagedWalletCreateDto the data of the wallet
      * @param token the token of the wallet. null for the base wallet
-     * @return The connection record that was created
-     * @throws InternalServerErrorException If the connection request fails
+     * @return [ConnectionRecord] the connection record that was created
+     * @throws InternalServerErrorException if the connection request fails
      */
     suspend fun sendConnectionRequest(
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,

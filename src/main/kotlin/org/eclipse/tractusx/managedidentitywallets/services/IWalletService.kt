@@ -241,7 +241,7 @@ interface IWalletService {
     suspend fun addService(identifier: String, serviceDto: DidServiceDto)
 
     /**
-     * Updates a service endpoint in the DID document
+     * Updates a service endpoint in the DID document.
      * @param identifier the BPN, DID or wallet-id of a managed wallet
      * @param id the Id of the exiting service in the DID document
      * @param serviceUpdateRequestDto the Service to update
@@ -411,7 +411,7 @@ interface IWalletService {
 
         /**
          * Creates the AcaPyWalletServiceImpl which implements the IWalletService.
-         * The used HTTP client to communicate with AcaPy instances is configured in this method
+         * The used HTTP client to communicate with AcaPy instances is configured in this method.
          */
         fun createWithAcaPyService(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,
