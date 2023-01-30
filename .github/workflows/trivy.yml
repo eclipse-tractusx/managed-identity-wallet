@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Contributors to the Eclipse Foundation
+# Copyright (c) 2021-2023 Contributors to the Eclipse Foundation
 
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
@@ -87,7 +87,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           # Path to Docker image
-          image-ref: "ghcr.io/catenax-ng/product-core-managed-identity-wallets_service:latest"
+          image-ref: "ghcr.io/catenax-ng/tx-managed-identity-wallets_service:latest"
           format: "sarif"
           output: "trivy-results3.sarif"
           exit-code: "1"
@@ -121,7 +121,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           # Path to Docker image
-          image-ref: "ghcr.io/catenax-ng/product-core-managed-identity-wallets_service:latest-develop"
+          image-ref: "ghcr.io/catenax-ng/tx-managed-identity-wallets_service:latest-develop"
           format: "sarif"
           output: "trivy-results3.sarif"
           exit-code: "1"
