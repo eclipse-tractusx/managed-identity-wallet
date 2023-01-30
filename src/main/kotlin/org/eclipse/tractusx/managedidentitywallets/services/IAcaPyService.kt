@@ -250,12 +250,12 @@ interface IAcaPyService {
     suspend fun setDidAsPublicUsingEndorser(did: String, token: String)
 
     /**
-     * Checks if the DID belong to the wallet.
+     * Checks if the DID belongs to the wallet.
      * @param did the DID to check
-     * @param tokenOfWallet the token of the wallet that suppose to be the owner of the DID. null for the base wallet.
+     * @param tokenOfWallet the token of the wallet that is supposed to be the owner of the DID. null for the base wallet.
      * @return true if the DID belong to the wallet. otherwise false
      */
-    suspend fun isDidBelongToWallet(did: String, tokenOfWallet: String?): Boolean
+    suspend fun isDidOfWallet(did: String, tokenOfWallet: String?): Boolean
 
     companion object {
         /**

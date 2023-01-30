@@ -53,10 +53,7 @@ class ManagedWalletsAriesEventHandler(
         when (connection.rfc23State) {
             Rfc23State.REQUEST_RECEIVED.toString() -> {
                 runBlocking {
-                    walletService.validateReceivedConnectionRequest(
-                        connection = connection,
-                        toBaseWallet = false
-                    )
+                    walletService.validateConnectionRequestForManagedWallets(connection)
                     walletService.acceptConnectionRequest(walletId, connection)
                 }
             }

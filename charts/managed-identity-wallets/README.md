@@ -1,6 +1,6 @@
 # managed-identity-wallets
 
-![Version: 0.6.8](https://img.shields.io/badge/Version-0.6.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.2](https://img.shields.io/badge/AppVersion-3.1.2-informational?style=flat-square)
+![Version: 0.6.8](https://img.shields.io/badge/Version-0.6.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.2](https://img.shields.io/badge/AppVersion-3.1.2-informational?style=flat-square)
 
 Managed Identity Wallets Service
 
@@ -39,11 +39,8 @@ Managed Identity Wallets Service
 | wallet.baseWalletShortDid | string | `""` | The short DID of the base wallet. It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#integrate-with-an-write-restricted-indy-ledger. It should be registered on the Indy ledger with role endorser. |
 | wallet.baseWalletVerkey | string | `""` | The verkey (public key) of the base wallet |
 | wallet.baseWalletName | string | `""` | The name of the base wallet |
-<<<<<<< HEAD
-| wallet.whitelistDids | string | `""` | A list of whitelisted short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request  |
-=======
+| wallet.whitelistDids | string | `""` | A list of whitelisted short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request |
 | wallet.membershipOrganisation | string | `"Platform-A"` | The name used in the Membership credential |
->>>>>>> java-docs
 | revocation.refreshHour | string | `"3"` | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
 | revocation.revocationServiceUrl | string | `"http://localhost:8086"` | The url of the revocation service |
 | revocationService.imageName | string | `"registry.gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/revocation"` |  |
@@ -102,11 +99,7 @@ Managed Identity Wallets Service
 | postgresql.primary.extraVolumes[0].name | string | `"initdb"` |  |
 | postgresql.primary.extraVolumes[0].emptyDir | object | `{}` |  |
 | postgresql.primary.initContainers[0].name | string | `"initdb"` |  |
-<<<<<<< HEAD
 | postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.1.2"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
-=======
-| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.1.0"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
->>>>>>> java-docs
 | postgresql.primary.initContainers[0].imagePullPolicy | string | `"Always"` |  |
 | postgresql.primary.initContainers[0].command[0] | string | `"sh"` |  |
 | postgresql.primary.initContainers[0].args[0] | string | `"-c"` |  |

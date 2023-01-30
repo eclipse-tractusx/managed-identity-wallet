@@ -21,7 +21,6 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
@@ -48,7 +47,6 @@ class BaseWalletAriesEventHandler(
     private val baseWalletCredentialTypes = JsonLdTypes.getBaseWalletCredentialTypes()
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    // Connection only with registered wallets
     override fun handleConnection(walletId: String?, connection: ConnectionRecord) {
         super.handleConnection(null, connection)
         log.debug("Connection ${connection.connectionId} is in state ${connection.rfc23State}")
@@ -56,25 +54,28 @@ class BaseWalletAriesEventHandler(
             Rfc23State.REQUEST_RECEIVED.toString() -> {
                 transaction {
                     runBlocking {
-                        // Accept only endorser requests from managed wallets
+                        // Accept only requests from managed wallets where the BPN included as a label
                         if (!connection.theirLabel.isNullOrBlank()) {
-                            val wallet = walletService.validateReceivedConnectionRequest(
+                            val wallet = walletService.validateConnectionRequestForBaseWallet(
                                 connection = connection,
-                                toBaseWallet = true
+                                bpn = connection.theirLabel
                             )
-                            walletService.addConnection(
-                                connectionId = connection.connectionId,
-                                connectionOwnerDid = walletService.getBaseWallet().did,
-                                connectionTargetDid = wallet!!.did,
-                                connectionState = connection.rfc23State
-                            )
-                            // Currently, it is always the case
-                            if (!wallet!!.isSelfManaged) {
-                                walletService.setEndorserMetaDataForConnection(connection.connectionId)
+                            if (wallet != null) {
+                                walletService.addConnection(
+                                    connectionId = connection.connectionId,
+                                    connectionOwnerDid = walletService.getBaseWallet().did,
+                                    connectionTargetDid = wallet.did,
+                                    connectionState = connection.rfc23State
+                                )
+                                if (!wallet.isSelfManaged) {
+                                    walletService.setEndorserMetaDataForConnection(connection.connectionId)
+                                }
+                                walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
                             }
-                            walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
                         } else {
-                            throw ForbiddenException("Connection request has been rejected due unfulfilled conditions")
+                            log.warn("Connection request ${connection.connectionId} from " +
+                                    "${connection.theirPublicDid ?: connection.theirDid} " +
+                                    "has been rejected due to missing `theirLabel` property")
                         }
                     }
                 }

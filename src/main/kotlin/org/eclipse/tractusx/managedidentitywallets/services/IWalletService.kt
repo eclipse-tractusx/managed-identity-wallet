@@ -27,7 +27,6 @@ import io.ktor.client.features.json.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
-import org.eclipse.tractusx.managedidentitywallets.models.AuthorizationException
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
 import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
@@ -408,20 +407,18 @@ interface IWalletService {
     suspend fun setCommunicationEndpointUsingEndorsement(walletId: String)
 
     /**
-     * Checks if a received connection request is allowed to be processed.
+     * Checks if a received connection request to managed wallet is allowed to be processed.
      * @param connection the received connection request [ConnectionRecord]
-     * @param toBaseWallet the connection is requested to the base wallet, otherwise to managed wallets
-     * @return the stored wallet if [toBaseWallet] is true and the BPN in ConnectionRecord.theirLabel is an existing wallet
-     * and also the owner of the DID in ConnectionRecord.theirPublicDid or ConnectionRecord.theirDid.
-     * @throws ForbiddenException if [toBaseWallet] is true, and the BPN in ConnectionRecord.theirLabel is not stored wallet
-     * Also if [toBaseWallet] is false and the DID of requester is not whitelisted or belong to a stored wallet
-     * @throws AuthorizationException if [toBaseWallet] is true, and the BPN in ConnectionRecord.theirLabel is a stored wallet
-     * but not the owner of the used DID in ConnectionRecord.theirPublicDid or ConnectionRecord.theirDid.
      */
-    suspend fun validateReceivedConnectionRequest(
-        connection: ConnectionRecord,
-        toBaseWallet: Boolean
-    ): WalletDto?
+    fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord)
+
+    /**
+     * Checks if a received connection request to base wallet is allowed to be processed.
+     * @param connection the received connection request [ConnectionRecord]
+     * @param bpn the BPN of the requester wallet
+     * @return the stored wallet of the requester, null in case of errors
+     */
+    suspend fun validateConnectionRequestForBaseWallet(connection: ConnectionRecord, bpn: String): WalletDto?
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)

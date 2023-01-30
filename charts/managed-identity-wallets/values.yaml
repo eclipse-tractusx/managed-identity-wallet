@@ -44,7 +44,7 @@ wallet:
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
-  # -- A list of whitelisted short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request 
+  # -- A list of whitelisted short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request
   whitelistDids: ""
   # -- The name used in the Membership credential
   membershipOrganisation: "Platform-A"

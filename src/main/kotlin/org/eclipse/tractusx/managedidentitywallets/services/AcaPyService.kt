@@ -135,7 +135,7 @@ class AcaPyService(
         }
     }
 
-    override suspend fun isDidBelongToWallet(did: String, tokenOfWallet: String?): Boolean {
+    override suspend fun isDidOfWallet(did: String, tokenOfWallet: String?): Boolean {
         val acapyClient = getAcapyClient(tokenOfWallet)
         val filter = ListWalletDidFilter.builder().did(did).method(DID.MethodEnum.SOV).build()
         val listOfDids = acapyClient.walletDid(filter)
