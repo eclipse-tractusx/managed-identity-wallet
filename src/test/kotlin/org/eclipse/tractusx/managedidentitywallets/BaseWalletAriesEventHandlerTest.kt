@@ -141,6 +141,7 @@ class BaseWalletAriesEventHandlerTest {
         doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
         whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
         runBlocking {
+            whenever(acaPyServiceMock.isDidOfWallet(any(), anyOrNull())).thenReturn(true)
             val connectionRecordRequest = ConnectionRecord()
             connectionRecordRequest.connectionId = "connection-id-123"
             connectionRecordRequest.rfc23State = Rfc23State.REQUEST_SENT.toString()
@@ -208,6 +209,7 @@ class BaseWalletAriesEventHandlerTest {
                 newConnectionRecord.connectionId = connectionId
                 newConnectionRecord.requestId = connectionThreadId
                 newConnectionRecord.theirLabel = holderWallet.bpn
+                newConnectionRecord.theirPublicDid = holderWallet.did
                 // Test `handleConnection` for state COMPLETED
                 ariesEventHandler.handleConnection(null, newConnectionRecord)
 

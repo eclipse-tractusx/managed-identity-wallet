@@ -89,11 +89,11 @@ fun Application.module(testing: Boolean = false) {
     val utilsService = UtilsService(networkIdentifier = networkIdentifier)
 
     val baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
-    val whitelistDidsAsString = environment.config.property("wallet.whitelistDids").getString()
-    val whitelistDids = if (whitelistDidsAsString.isNullOrBlank()) {
+    val allowlistDidsAsString = environment.config.property("wallet.allowlistDids").getString()
+    val allowlistDids = if (allowlistDidsAsString.isNullOrBlank()) {
         emptyList()
     } else {
-        whitelistDidsAsString.split(",")
+        allowlistDidsAsString.split(",")
     }
     val acaPyConfig = WalletAndAcaPyConfig(
         networkIdentifier = networkIdentifier,
@@ -105,7 +105,7 @@ fun Application.module(testing: Boolean = false) {
         adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
         baseWalletAdminUrl = environment.config.property("acapy.baseWalletApiAdminUrl").getString(),
         baseWalletAdminApiKey = environment.config.property("acapy.baseWalletAdminApiKey").getString(),
-        whitelistDids = whitelistDids
+        allowlistDids = allowlistDids
     )
     val revocationUrl = environment.config.property("revocation.baseUrl").getString()
     val revocationService = IRevocationService.createRevocationService(revocationUrl)

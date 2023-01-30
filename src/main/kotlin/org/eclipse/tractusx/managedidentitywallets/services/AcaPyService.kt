@@ -92,7 +92,7 @@ class AcaPyService(
             adminApiKey = "", // don't expose the api key outside the AcaPyService
             baseWalletAdminUrl = acaPyConfig.baseWalletAdminUrl,
             baseWalletAdminApiKey = "", // don't expose the api key outside the AcaPyService
-            whitelistDids = acaPyConfig.whitelistDids
+            allowlistDids = acaPyConfig.allowlistDids
         )
     }
 

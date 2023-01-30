@@ -1048,10 +1048,10 @@ class AcaPyWalletServiceImpl(
     }
 
     override fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord) {
-        val whitelist = acaPyService.getWalletAndAcaPyConfig().whitelistDids
+        val allowlistDids = acaPyService.getWalletAndAcaPyConfig().allowlistDids
         val connectionDid = connection.theirPublicDid ?: connection.theirDid
-        if (whitelist.isNotEmpty()
-            && !whitelist.contains(connection.theirPublicDid ?: connection.theirDid)
+        if (allowlistDids.isNotEmpty()
+            && !allowlistDids.contains(connection.theirPublicDid ?: connection.theirDid)
             && !walletRepository.isWalletExists(connection.theirPublicDid ?: connection.theirDid)
         ) {
             log.warn("Connection request ${connection.connectionId} and DID $connectionDid " +

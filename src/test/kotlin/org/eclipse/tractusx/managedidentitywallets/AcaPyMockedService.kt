@@ -80,7 +80,7 @@ class AcaPyMockedService(
             adminApiKey = "TestAdminApiKey",
             baseWalletAdminUrl = "",
             baseWalletAdminApiKey = "",
-            whitelistDids = listOf()
+            allowlistDids = listOf()
         )
     }
 
@@ -328,6 +328,10 @@ class AcaPyMockedService(
     }
 
     override suspend fun setDidAsPublicUsingEndorser(did: String, token: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun isDidOfWallet(did: String, tokenOfWallet: String?): Boolean {
         TODO("Not yet implemented")
     }
 

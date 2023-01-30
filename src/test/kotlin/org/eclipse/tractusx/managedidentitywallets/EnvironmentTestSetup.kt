@@ -52,7 +52,7 @@ object EnvironmentTestSetup {
         adminApiKey = "adminApiKey",
         baseWalletAdminUrl = "baseWalletAdminUrl",
         baseWalletAdminApiKey = "baseWalletAdminApiKey",
-        whitelistDids = listOf()
+        allowlistDids = emptyList()
     )
 
     const val EXTRA_TEST_BPN = "BPNL0Test"
@@ -135,6 +135,8 @@ object EnvironmentTestSetup {
 
             put("revocation.baseUrl", System.getenv("REVOCATION_URL") ?: "http://0.0.0.0:8086")
             put("revocation.createStatusListCredentialAtHour", System.getenv("REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR") ?: "3")
+
+            put("wallet.allowlistDids", System.getenv("MIW_ALLOWLIST_DIDS") ?: "")
 
         }
         // just a keepAliveConnection
