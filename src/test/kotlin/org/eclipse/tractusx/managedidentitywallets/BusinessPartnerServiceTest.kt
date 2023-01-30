@@ -27,6 +27,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
+import org.eclipse.tractusx.managedidentitywallets.EnvironmentTestSetup.MEMBERSHIP_ORG
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.eclipse.tractusx.managedidentitywallets.models.LegalFormDto
 import org.eclipse.tractusx.managedidentitywallets.models.NameResponse
@@ -141,8 +142,7 @@ class BusinessPartnerServiceTest {
         clientId = "test",
         clientSecret = "test",
         grantType = "test",
-        scope = "test",
-        membershipOrganisation = "Organisation-A"
+        scope = "test"
     )
 
     private val bpnSubject = mapOf(
@@ -327,6 +327,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
@@ -423,6 +424,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
 
@@ -514,6 +516,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
 
@@ -608,6 +611,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val spyBpdmService = spy(bpdmService)
@@ -674,6 +678,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val spyBpdmService = spy(bpdmService)
@@ -755,6 +760,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val bpdmServiceSpy = spy(bpdmService)
@@ -829,6 +835,7 @@ class BusinessPartnerServiceTest {
                 bpdmService = BusinessPartnerDataServiceImpl(
                     walletServiceSpy,
                     bpdmConfig,
+                    MEMBERSHIP_ORG,
                     client
                 )
                 val bpdmServiceSpy = spy(bpdmService)
