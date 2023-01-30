@@ -44,6 +44,8 @@ wallet:
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
+  # -- The name used in the Membership credential
+  membershipOrganisation: "Platform-A"
 # The configuration of revocation service in MIW
 revocation:
   # --  At which hour (24-hour clock) the cron job should issue/update status-list credentials
@@ -70,7 +72,7 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "BaseWalletIssuer"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"
@@ -100,7 +102,7 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "ManagedWallet"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"

@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "6966c120-e2de-46df-8bc8-6c7ab9203ee9",
-		"name": "Managed Identity Wallet",
+		"_postman_id": "b8276abe-18a9-4bf0-9737-eb8f0cdbbd46",
+		"name": "Managed_Identity_Wallet",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -313,7 +313,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\"\n    ],\n    \"id\": \"urn:uuid:93031387-dec1-7654-1112-71710f391111\",\n    \"type\": [\n        \"BankAccountCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"trustScores\": [\n                7,\n                7,\n                7\n            ],\n            \"internationalBankAccountIdentifier\": \"M2\",\n            \"nationalBankAccountIdentifier\": \"M2\",\n            \"internationalBankIdentifier\": \"M3\",\n            \"nationalBankIdentifier\": \"M3\",\n            \"currency\": {\n                \"technicalKey\": \"M3\",\n                \"name\": \"M2\"\n            }\n        },\n        \"type\": [\n            \"BankAccountCredential\"\n        ]\n    },\n    \"holderIdentifier\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\",\n    \"isRevocable\": false,\n    \"webhookUrl\": \"ManagedToExternal\"\n}",
+					"raw": "{\n    \"@context\": [\n        \"https://www.w3.org/2018/credentials/v1\",\n        \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity\"\n    ],\n    \"id\": \"urn:uuid:93031387-dec1-7654-1112-71710f391626\",\n    \"type\": [\n        \"NameCredential\",\n        \"VerifiableCredential\"\n    ],\n    \"issuerIdentifier\": \"did:sov:XvBe422jiQuwUeZ7dH8VB8\",\n    \"issuanceDate\": \"2021-06-16T18:56:59Z\",\n    \"expirationDate\": \"2026-06-17T18:56:59Z\",\n    \"credentialSubject\": {\n        \"data\": {\n            \"value\": \"Test\",\n            \"nameType\": {\n                \"technicalKey\": \"LOCAL\",\n                \"name\": \"The business partner name identifies a business partner in a given context, e.g. a country or region.\",\n                \"url\": \"http://test.de\"\n            },\n            \"language\": {\n                \"technicalKey\": \"Test\",\n                \"name\": \"Test\"\n            }\n        },\n        \"type\": \"NameCredential\"\n    },\n    \"holderIdentifier\": \"did:sov:CXaLzgEtynxaMQcqxYtJkW\",\n    \"isRevocable\": false,\n    \"webhookUrl\": \"ManagedToExternal\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -372,7 +372,7 @@
 			"response": []
 		},
 		{
-			"name": "Issue Credential By CatenaX",
+			"name": "Issue Credential By Base Wallet",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -740,7 +740,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"type\": \"did-communication\",\n  \"serviceEndpoint\": \"http://cx_acapy:8000/\"\n}",
+					"raw": "{\n  \"type\": \"did-communication\",\n  \"serviceEndpoint\": \"http://local_acapy:8000/\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"

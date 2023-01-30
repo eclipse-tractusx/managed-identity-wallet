@@ -87,7 +87,7 @@ class SelfManagedInteractionTest {
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,
-                    "Catena-X"
+                    "Base-Wallet"
                 )
 
                 SingletonTestData.baseWalletDID = EnvironmentTestSetup.DEFAULT_DID

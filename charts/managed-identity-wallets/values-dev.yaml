@@ -6,7 +6,8 @@ wallet:
   baseWalletBpn: "BPNL000000000000"
   baseWalletShortDid: "MhLrwtKpZhNCzazMeofPQH"
   baseWalletVerkey: "CHEC4PRQmP73A9UD7vQ6tnLAm9aoXLPhEtnGSMiAyVZj"
-  baseWalletName: "Catena-X-Dev"   
+  baseWalletName: "Catena-X-Dev"
+  membershipOrganisation: "Catena-X"  
 datapool:
   url: "https://partners-pool.dev.demo.catena-x.net"
   authUrl: "https://centralidp.dev.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token"

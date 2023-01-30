@@ -142,6 +142,7 @@ class BusinessPartnerServiceTest {
         clientSecret = "test",
         grantType = "test",
         scope = "test",
+        membershipOrganisation = "Organisation-A"
     )
 
     private val bpnSubject = mapOf(
@@ -153,7 +154,7 @@ class BusinessPartnerServiceTest {
     private val membershipSubject = mapOf(
         "id" to holderWallet.did,
         "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-        "memberOf" to "Catena-X",
+        "memberOf" to "Platform-A",
         "status" to "Active",
         "startTime" to "currentDateAsString",
     )

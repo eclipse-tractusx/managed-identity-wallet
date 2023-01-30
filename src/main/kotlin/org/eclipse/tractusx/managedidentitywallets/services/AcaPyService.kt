@@ -334,7 +334,7 @@ class AcaPyService(
     override suspend fun getAcapyClient(walletToken: String?): AriesClient {
         val ariesClient = AriesClient.builder()
         if (walletToken == null) {
-            // Catena X Wallet
+            // The base wallet
             ariesClient
                 .url(acaPyConfig.baseWalletAdminUrl)
                 .apiKey(acaPyConfig.baseWalletAdminApiKey)
@@ -444,7 +444,7 @@ class AcaPyService(
 
     private fun getAcaPyUrlAndApiKeyBasedOnToken(token: String?): Pair<String, String> {
         if (token == null) {
-            // The Catena X Wallet
+            // The base wallet
             return acaPyConfig.baseWalletAdminUrl to acaPyConfig.baseWalletAdminApiKey
         }
         // Other wallets and multi-tenancy management wallet

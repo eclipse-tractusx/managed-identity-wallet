@@ -63,6 +63,7 @@ below. Here a few hints on how to set it up:
 | `MIW_DID`                  | String | DID of the base wallet, this wallet must be registered on ledger with the endorser role |
 | `MIW_VERKEY`               | String | Verification key of the base wallet, this wallet must be registered on ledger with the endorser role |
 | `MIW_NAME`                 | String | Name of the base wallet |
+| `MIW_MEMBERSHIP_ORG`  | String | The name used in the Membership credential |
 | `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
 | `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
 | `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint |
@@ -121,7 +122,7 @@ revocation handling)
 
     | Key               | Value           |
     |-------------------|-----------------|
-    | MIW_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/<placeholder>?user=<placeholder>&password=<placeholder>` |
+    | MIW_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/<database name>?user=<database user>&password=<database password>` |
     | MIW_DB_JDBC_DRIVER | `org.postgresql.Driver` |
 
     Then restart the service via `./gradlew run`
@@ -255,14 +256,14 @@ Next step is to build and tag the Docker image, replacing the
 `<VERSION>` with the app version:
 
 ```
-docker build -t example/managed-identity-wallets:<VERSION> .
+docker build -t managed-identity-wallets:<VERSION> .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 example/managed-identity-wallets:<VERSION>
+docker run --env-file .env.docker -p 8080:8080 managed-identity-wallets:<VERSION>
 ```
 
 ## Deployment on Kubernetes
