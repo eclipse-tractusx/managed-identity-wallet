@@ -25,14 +25,14 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
-import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 
 /**
- * RevocationServiceImpl implements the IRevocationService interface.
- * It provides functionality for managing and issuing revocation lists and status credentials.
+ * RevocationServiceImpl provides functionality for managing
+ * and issuing revocation lists and status credentials.
  */
 class RevocationServiceImpl(
         private val revocationUrl: String,
@@ -64,7 +64,7 @@ class RevocationServiceImpl(
                 contentType(ContentType.Application.Json)
             }
         } else if (httpResponse.status.value >= 300) {
-            throw UnprocessableEntityException(httpResponse.readText())
+            throw InternalServerErrorException(httpResponse.readText())
         }
         return Json.decodeFromString(httpResponse.readText())
     }
@@ -85,7 +85,7 @@ class RevocationServiceImpl(
             if (!e.message.isNullOrBlank() && e.message!!.contains("404 Not Found")) {
                 throw NotFoundException("The StatusList credential is not found!")
             }
-            throw UnprocessableEntityException("The StatusList credential is not available due to the Error: ${e.message}")
+            throw InternalServerErrorException("The StatusList credential is not available due to the Error: ${e.message}")
         }
     }
 

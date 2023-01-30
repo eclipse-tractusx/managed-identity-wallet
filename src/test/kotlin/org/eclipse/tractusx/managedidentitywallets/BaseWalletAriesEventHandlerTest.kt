@@ -211,7 +211,7 @@ class BaseWalletAriesEventHandlerTest {
                 // Test `handleConnection` for state COMPLETED
                 ariesEventHandler.handleConnection(null, newConnectionRecord)
 
-                verify(walletServiceSpy, times(1)).setEndorserMetaDataForAcapyConnection(any())
+                verify(walletServiceSpy, times(1)).setEndorserMetaDataForConnection(any())
                 verify(walletServiceSpy, times(1)).acceptConnectionRequest(any(), any())
                 transaction {
                     val updatedConnectionObj = connectionRepository.toObject(connectionRepository.getOrNull(connectionId)!!)
@@ -426,7 +426,7 @@ class BaseWalletAriesEventHandlerTest {
             wallets.forEach {
                 if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
                     runBlocking {
-                        walletService.initBaseWalletAndSubscribeForAriesWS(
+                        walletService.initBaseWalletWithListeners(
                             EnvironmentTestSetup.DEFAULT_BPN,
                             EnvironmentTestSetup.DEFAULT_DID,
                             EnvironmentTestSetup.DEFAULT_VERKEY,

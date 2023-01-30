@@ -30,8 +30,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 
 /**
- * The ManagedWalletsAriesEventHandler defines the logic of how to handle Aries-Flows with the base wallet,
- * external or internal Wallets.
+ * The ManagedWalletsAriesEventHandler triggers in MIW and AcaPy the appropriate responses
+ * on some of the aries-flow events to enable connection and exchange credentials
+ * with the base wallet, external or internal Wallets.
  */
 class ManagedWalletsAriesEventHandler(
     private val walletService: IWalletService,

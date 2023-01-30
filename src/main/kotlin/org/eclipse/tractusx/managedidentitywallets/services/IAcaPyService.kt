@@ -20,11 +20,12 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import io.ktor.client.*
-import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateSubWallet
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateWalletTokenResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreatedSubWalletResult
@@ -38,9 +39,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationDto
 import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.aries.AriesClient
 import org.hyperledger.aries.api.connection.ConnectionRecord
@@ -57,13 +55,6 @@ interface IAcaPyService {
      * @return [WalletAndAcaPyConfig] the configuration data without the secrets
      */
     fun getWalletAndAcaPyConfig(): WalletAndAcaPyConfig
-
-    /**
-     * Retrieves a list of created sub-wallets from multi-tenancy AcaPy instance.
-     * @return [WalletList] list of wallet records
-     * @throws BadRequestException if the get request failed
-     */
-    suspend fun getSubWallets(): WalletList
 
     /**
      * Creates a new sub-wallet.
@@ -260,7 +251,7 @@ interface IAcaPyService {
 
     companion object {
         /**
-         * Creates the AcapyService
+         * Creates the internal Acapy service that is used by the wallet service.
          */
         fun create(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,

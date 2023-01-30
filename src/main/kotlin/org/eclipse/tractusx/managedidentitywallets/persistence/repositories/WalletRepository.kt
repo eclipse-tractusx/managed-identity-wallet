@@ -50,7 +50,6 @@ class WalletRepository {
         }
     }
 
-
     fun isWalletExists(identifier: String): Boolean {
         return transaction{
             !Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()

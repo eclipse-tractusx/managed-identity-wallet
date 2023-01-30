@@ -34,8 +34,9 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
- * The BaseWalletAriesEventHandler defines the logic of how to handle Aries-Flows with
- * other external or internal wallets.
+ * The BaseWalletAriesEventHandler triggers in MIW and AcaPy the appropriate responses
+ * on some of the aries-flow events to enable connection and exchange credentials
+ * with other external or internal wallets.
  */
 class BaseWalletAriesEventHandler(
         private val businessPartnerDataService: IBusinessPartnerDataService,
@@ -65,7 +66,7 @@ class BaseWalletAriesEventHandler(
                         connectionState = connection.rfc23State
                     )
                     runBlocking {
-                        walletService.setEndorserMetaDataForAcapyConnection(connection.connectionId)
+                        walletService.setEndorserMetaDataForConnection(connection.connectionId)
                         walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
                     }
                 }

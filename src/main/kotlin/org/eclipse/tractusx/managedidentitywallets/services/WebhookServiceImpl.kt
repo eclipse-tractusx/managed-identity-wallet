@@ -30,8 +30,7 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.jetbrains.exposed.sql.transactions.transaction
 
 /**
- * WebhookServiceImpl implement the IWebhookService interface.
- * it provides implementation for webhook operations
+ * WebhookServiceImpl provides implementation for webhook operations.
  */
 class WebhookServiceImpl(
     private val webhookRepository: WebhookRepository,

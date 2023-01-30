@@ -29,8 +29,8 @@ import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.slf4j.LoggerFactory
 
 /**
- * The IBusinessPartnerDataService interface describe the functionalities required
- * for pulling data from the BPDM and issuing/updating credentials.
+ * The IBusinessPartnerDataService interface describes the functionalities required
+ * for pulling data from the Business Partner Data Pool (BPDM) and issuing/updating credentials.
  */
 interface IBusinessPartnerDataService {
 
@@ -42,7 +42,7 @@ interface IBusinessPartnerDataService {
     suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(identifier: String? = null): Deferred<Boolean>
 
     /**
-     * Asynchronously issues credentials by base wallet and store them.
+     * Asynchronously issues credentials by base wallet and stores them.
      * @param walletHolderDto the wallet of the holder
      * @param type The type of the credential
      * @param data The data that is required to generate the credential, it can be null if not required
@@ -56,12 +56,12 @@ interface IBusinessPartnerDataService {
 
 
     /**
-     * Asynchronously issues credentials by base wallet for self-managed wallets.
+     * Asynchronously issues credentials from the base wallet to self-managed wallets.
      * @param targetWallet the data of the target wallet
      * @param connectionId the id of the connection between the base wallet and the target wallet
      * @param webhookUrl the url of the webhook to be notified when the credential is issued
      * @param type type of the credential to be issued
-     * @param data generic data that will be included in the credential to be issued
+     * @param data generic data that will be included as nested object in the credential subject in the `data` property
      * @return a Deferred boolean. It returns (when waited) true if the operation was successful, else false
      */
     suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
@@ -76,7 +76,7 @@ interface IBusinessPartnerDataService {
         private val log = LoggerFactory.getLogger(this::class.java)
         /**
          * Creates the business partner data service which implements the IBusinessPartnerDataService.
-         * The used HTTP client to communicate with the BPDM is configured in this method.
+         * The used HTTP client to communicate with the Business Partner Data Pool (BPDM) is configured in this method.
          */
         fun createBusinessPartnerDataService(
             walletService: IWalletService,

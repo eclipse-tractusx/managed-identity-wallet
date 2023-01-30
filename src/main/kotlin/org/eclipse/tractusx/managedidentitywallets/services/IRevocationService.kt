@@ -26,15 +26,15 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
+import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
+import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
-import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
-import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
 import org.slf4j.LoggerFactory
 
 /**
- * The IRevocationService interface describes the functionalities
- * for managing and issuing revocation lists and status credentials.
+ * The IRevocationService interface describes the functionalities for managing
+ * and issuing revocation lists and status credentials.
  */
 interface IRevocationService {
 
@@ -42,7 +42,7 @@ interface IRevocationService {
      * Registers a new revocation list with the given profile name.
      * @param profileName the name of the profile for the revocation list
      * @param issueCredential a flag indicating whether to issue a verifiable credential directly for the list
-     * @return the response a string
+     * @return the created list name a string
      */
     suspend fun registerList(profileName: String, issueCredential: Boolean): String
 
@@ -51,7 +51,7 @@ interface IRevocationService {
      * @param profileName the name of the profile for the revocation list
      * @return [CredentialStatus] the status of the added entry
      * @throws NotFoundException if the list does not exist
-     * @throws UnprocessableEntityException if adding the status entry failed
+     * @throws InternalServerErrorException if adding the status entry failed in the revocation service
      */
     suspend fun addStatusEntry(profileName: String): CredentialStatus
 
@@ -59,8 +59,8 @@ interface IRevocationService {
      * Retrieves the status list credential for a given managed wallet using its listName.
      * @param listName the name of the revocation list
      * @return [VerifiableCredentialDto] the status list verifiable credential
-     * @throws NotFoundException if the credential is not found
-     * @throws UnprocessableEntityException if the credential could not be retrieved
+     * @throws NotFoundException if the credential with given listName does not exist
+     * @throws InternalServerErrorException if the credential could not be retrieved from the revocation service
      */
     suspend fun getStatusListCredentialOfManagedWallet(listName: String): VerifiableCredentialDto
 
@@ -68,8 +68,8 @@ interface IRevocationService {
      * Retrieves the status list credential from a given url.
      * @param statusListUrl the url for the status list credential
      * @return [VerifiableCredentialDto] the status list verifiable credential
-     * @throws NotFoundException if the credential is not found
-     * @throws UnprocessableEntityException if the credential could not be retrieved
+     * @throws NotFoundException if the credential with given statusListUrl does not exist
+     * @throws InternalServerErrorException if the credential could not be retrieved from the revocation service
      */
     suspend fun getStatusListCredentialOfUrl(statusListUrl: String): VerifiableCredentialDto
 
@@ -92,7 +92,7 @@ interface IRevocationService {
 
         /**
          * Creates the revocation Service which implements the IRevocationService.
-         * The used HTTP client to communicate with AcaPy is configured in this method
+         * The used HTTP client to communicate with the revocation service is configured in this method.
          */
         fun createRevocationService(revocationUrl: String): IRevocationService {
             return RevocationServiceImpl(

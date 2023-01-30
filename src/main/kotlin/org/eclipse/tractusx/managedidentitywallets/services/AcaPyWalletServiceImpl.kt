@@ -88,8 +88,8 @@ import java.time.Instant
 import java.util.*
 
 /**
- * AcaPyWalletServiceImpl implements the IWalletService interface.
- * It provides the core functionalities for managing wallets, issuing credentials using AcaPy.
+ * AcaPyWalletServiceImpl provides the core functionalities for managing wallets,
+ * issuing credentials using AcaPy.
  */
 class AcaPyWalletServiceImpl(
     private val acaPyService: IAcaPyService,
@@ -966,7 +966,7 @@ class AcaPyWalletServiceImpl(
         )
     }
 
-    override suspend fun initBaseWalletAndSubscribeForAriesWS(
+    override suspend fun initBaseWalletWithListeners(
         bpn: String,
         did: String,
         verkey: String,
@@ -1078,7 +1078,7 @@ class AcaPyWalletServiceImpl(
         }
     }
 
-    override suspend fun setEndorserMetaDataForAcapyConnection(connectionId: String) {
+    override suspend fun setEndorserMetaDataForConnection(connectionId: String) {
         acaPyService.setEndorserMetaData(connectionId)
     }
 

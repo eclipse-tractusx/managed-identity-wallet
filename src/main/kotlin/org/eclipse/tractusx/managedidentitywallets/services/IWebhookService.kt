@@ -50,7 +50,7 @@ interface IWebhookService {
     fun getWebhookByThreadId(threadId: String?): Webhook?
 
     /**
-     * Sends the webhook message to given url
+     * Sends the webhook message of type connection [ConnectionRecord] to given url
      * @param url the url of the webhook
      * @param connection the connection record as message
      * @return true if the webhook message was sent successfully, otherwise false
@@ -58,7 +58,7 @@ interface IWebhookService {
     fun sendWebhookConnectionMessage(url: String, connection: ConnectionRecord): Boolean
 
     /**
-     * Sends the webhook message to given url.
+     * Sends the webhook message of type credential [V20CredExRecord] to given url.
      * @param url the url of the webhook
      * @param v20CredExRecord the credential as message
      * @return true if the webhook message was sent successfully, otherwise false

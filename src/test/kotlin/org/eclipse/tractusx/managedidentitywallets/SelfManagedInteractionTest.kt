@@ -83,7 +83,7 @@ class SelfManagedInteractionTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                EnvironmentTestSetup.walletService.initBaseWalletAndSubscribeForAriesWS(
+                EnvironmentTestSetup.walletService.initBaseWalletWithListeners(
                     EnvironmentTestSetup.DEFAULT_BPN,
                     EnvironmentTestSetup.DEFAULT_DID,
                     EnvironmentTestSetup.DEFAULT_VERKEY,

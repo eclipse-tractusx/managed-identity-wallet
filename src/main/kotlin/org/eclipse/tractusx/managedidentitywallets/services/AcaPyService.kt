@@ -28,7 +28,6 @@ import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.Services
-import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
@@ -48,7 +47,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyReques
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletKey
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
 import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.acy_py.generated.model.V20CredRequestRequest
 import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
@@ -70,8 +68,7 @@ import org.hyperledger.aries.api.multitenancy.RemoveWalletRequest
 import java.util.*
 
 /**
- * AcaPyService implements the IAcaPyService interface.
- * It provides functionalities for interacting with the AcaPy API to perform
+ * AcaPyService provides functionalities for interacting with the AcaPy API to perform
  * various actions. It uses HTTP requests and the acapy-java-client library.
  */
 class AcaPyService(
@@ -93,18 +90,6 @@ class AcaPyService(
             baseWalletAdminUrl = acaPyConfig.baseWalletAdminUrl,
             baseWalletAdminApiKey = "" // don't expose the api key outside the AcaPyService
         )
-    }
-
-    override suspend fun getSubWallets(): WalletList {
-        return try {
-            client.get {
-                url("${acaPyConfig.apiAdminUrl}/multitenancy/wallets")
-                headers.append("X-API-Key", acaPyConfig.adminApiKey)
-                accept(ContentType.Application.Json)
-            }
-        } catch (e: Exception) {
-            throw BadRequestException(e.message)
-        }
     }
 
     override suspend fun createSubWallet(subWallet: CreateSubWallet): CreatedSubWalletResult {
