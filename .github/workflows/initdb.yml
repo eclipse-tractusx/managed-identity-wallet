@@ -36,18 +36,27 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: madhead/read-java-properties@latest
+        id: version
+        with:
+          file: gradle.properties
+          property: version
+          default: 0.0.1
+
+      - name: Set App Version
+        run: echo "APP_VERSION=${{ steps.version.outputs.value }}" >> $GITHUB_ENV
+
       - name: Extract Metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # Build and push KeyCloak custom images for central and shared idp instances
-      - name: 'Build images'
+      - name: 'Build and push initdb Docker image'
         uses: docker/build-push-action@v2
         with:
           context: .
           file: docker/Dockerfile.import
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}

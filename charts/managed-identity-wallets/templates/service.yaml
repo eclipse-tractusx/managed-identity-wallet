@@ -9,3 +9,25 @@ spec:
   - port: 8080
   selector:
     {{- include "managed-identity-wallets.selectorLabels" . | nindent 6 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catenax-managed-identity-wallets-acapy-base
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000  
+  selector:
+    {{- include "managed-identity-wallets.selectorLabels" . | nindent 6 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catenax-managed-identity-wallets-acapy-mt
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8003
+  selector:
+    {{- include "managed-identity-wallets.selectorLabels" . | nindent 6 }}

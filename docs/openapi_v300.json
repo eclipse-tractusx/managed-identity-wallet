@@ -2,7 +2,7 @@
     "openapi": "3.0.3",
     "info": {
         "title": "Catena-X Core Managed Identity Wallets API",
-        "version": "2.0.0",
+        "version": "3.0.0",
         "description": "Catena-X Core Managed Identity Wallets API",
         "termsOfService": "https://www.catena-x.net/",
         "contact": {
@@ -12,13 +12,21 @@
         },
         "license": {
             "name": "Apache 2.0",
-            "url": "https://github.com/catenax-ng/product-core-managed-identity-wallets/blob/develop/LICENSE"
+            "url": "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE"
         }
     },
     "servers": [
         {
             "url": "http://localhost:8080",
             "description": "Local Dev Environment"
+        },
+        {
+            "url": "https://managed-identity-wallets.dev.demo.catena-x.net",
+            "description": "Catena-X Dev Environment"
+        },
+        {
+            "url": "https://managed-identity-wallets.int.demo.catena-x.net",
+            "description": "Catena-X Int Environment"
         }
     ],
     "paths": {
@@ -29,7 +37,8 @@
                 ],
                 "summary": "List of wallets",
                 "description": "Permission: **view_wallets**\n\nRetrieve list of registered wallets",
-                "parameters": [],
+                "parameters": [
+                ],
                 "responses": {
                     "200": {
                         "description": "List of wallets",
@@ -39,7 +48,6 @@
                                     "items": {
                                         "$ref": "#/components/schemas/WalletDto"
                                     },
-                                    "maxItems": 999,
                                     "type": "array"
                                 }
                             }
@@ -80,16 +88,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -100,7 +98,8 @@
                 ],
                 "summary": "Create wallet",
                 "description": "Permission: **add_wallets**\n\nCreate a wallet and store it ",
-                "parameters": [],
+                "parameters": [
+                ],
                 "requestBody": {
                     "description": "wallet to create",
                     "content": {
@@ -135,8 +134,11 @@
                                             "bpn": "bpn",
                                             "did": "did",
                                             "verKey": "verkey",
-                                            "createdAt": "2022-09-17T14:31:47.056108748",
-                                            "vcs": []
+                                            "createdAt": "2023-01-23T11:24:25.023037446",
+                                            "vcs": [
+                                            ],
+                                            "pendingMembershipIssuance": false,
+                                            "isSelfManaged": false
                                         }
                                     }
                                 }
@@ -214,15 +216,84 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/wallets/self-managed-wallets": {
+            "post": {
+                "tags": [
+                ],
+                "summary": "Register and Establish Initial Connection with Partners",
+                "description": "Permission: **update_wallets**\n\n Register self managed wallet and establish the initial connection with CatenaX. Also issue their membership and BPN credentials",
+                "parameters": [
+                ],
+                "requestBody": {
+                    "description": "Register self managed wallet, establish a connection and issue membership and BPN credentials",
+                    "content": {
+                        "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
+                                "$ref": "#/components/schemas/SelfManagedWalletCreateDto"
+                            },
+                            "examples": {
+                                "demo": {
+                                    "value": {
+                                        "bpn": "bpn",
+                                        "name": "name",
+                                        "did": "did"
+                                    }
+                                }
                             }
-                          }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The request was able send a connection request to the DID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SelfManagedWalletResultDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The required entity does not exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The input does not comply to the syntax requirements",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -283,8 +354,11 @@
                                             "name": "name",
                                             "bpn": "bpn",
                                             "did": "did",
-                                            "createdAt": "2022-09-17T14:31:47.056263746",
-                                            "vcs": []
+                                            "createdAt": "2023-01-23T11:24:25.023118846",
+                                            "vcs": [
+                                            ],
+                                            "pendingMembershipIssuance": false,
+                                            "isSelfManaged": false
                                         }
                                     }
                                 }
@@ -362,16 +436,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -382,7 +446,8 @@
                 ],
                 "summary": "Remove wallet",
                 "description": "Permission: **delete_wallets**\n\nRemove hosted wallet",
-                "parameters": [],
+                "parameters": [
+                ],
                 "responses": {
                     "200": {
                         "description": "Wallet successfully removed!",
@@ -471,16 +536,6 @@
                                     }
                                 }
                             }
-                        }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
                         }
                     }
                 },
@@ -647,58 +702,32 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
             }
         },
-        "/api/wallets/{identifier}/public": {
+        "/api/wallets/{identifier}/send-invitation": {
             "post": {
                 "tags": [
-                    "Wallets"
                 ],
-                "summary": "Register on Public Chain",
-                "description": "Permission: **update_wallets**\n\nRegister wallet DID on the public chain, endpoint only available for the base wallet",
+                "summary": "Send Connection Request",
+                "description": "Permission: **update_wallets**\n\n Send connection request to internal or external wallets.",
                 "parameters": [
-                    {
-                        "name": "identifier",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "deprecated": false,
-                        "examples": {
-                            "did": {
-                                "value": "did:exp:123"
-                            },
-                            "bpn": {
-                                "value": "BPN123"
-                            }
-                        }
-                    }
                 ],
                 "requestBody": {
-                    "description": "VerKey",
+                    "description": "The invitation request",
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/VerKeyDto"
+                                "$ref": "#/components/schemas/InvitationRequestDto"
                             },
                             "examples": {
                                 "demo": {
                                     "value": {
-                                        "verKey": "VERIFICATION_KEY_AFTER_CREATION"
+                                        "theirPublicDid": "did:sov:example",
+                                        "alias": "alias",
+                                        "myLabel": "myLabel"
                                     }
                                 }
                             }
@@ -707,40 +736,8 @@
                     "required": true
                 },
                 "responses": {
-                    "201": {
-                        "description": "Success message",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SuccessResponse"
-                                },
-                                "examples": {
-                                    "demo": {
-                                        "value": {
-                                            "message": "Wallet has been successfully registered on chain"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "The input can not be processed due to semantic mismatches",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ExceptionResponse"
-                                },
-                                "examples": {
-                                    "demo": {
-                                        "value": {
-                                            "message": "reason",
-                                            "error": true
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    "202": {
+                        "description": "The connection request has been sent to the given DID"
                     },
                     "404": {
                         "description": "The required entity does not exists",
@@ -760,8 +757,8 @@
                             }
                         }
                     },
-                    "403": {
-                        "description": "The request could not be completed due to a forbidden access.",
+                    "400": {
+                        "description": "The input does not comply to the syntax requirements",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -776,34 +773,6 @@
                                     }
                                 }
                             }
-                        }
-                    },
-                    "401": {
-                        "description": "The request could not be completed due to a failed authorization.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ExceptionResponse"
-                                },
-                                "examples": {
-                                    "demo": {
-                                        "value": {
-                                            "message": "reason",
-                                            "error": true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
                         }
                     }
                 },
@@ -989,16 +958,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -1051,44 +1010,8 @@
                     "required": true
                 },
                 "responses": {
-                    "200": {
-                        "description": "The resolved DID Document after adding the new Service",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DidDocumentDto"
-                                },
-                                "examples": {
-                                    "demo": {
-                                        "value": {
-                                            "id": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                            "@context": [
-                                                "https://www.w3.org/ns/did/v1"
-                                            ],
-                                            "controller": [
-                                                "123",
-                                                "1231"
-                                            ],
-                                            "verificationMethod": [
-                                                {
-                                                    "id": "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
-                                                    "type": "Ed25519VerificationKey2018",
-                                                    "controller": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                                    "publicKeyBase58": "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                                                }
-                                            ],
-                                            "service": [
-                                                {
-                                                    "id": "did:example:123#edv",
-                                                    "type": "ServiceEndpointProxyService",
-                                                    "serviceEndpoint": "https://myservice.com/myendpoint"
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    "202": {
+                        "description": "Adding the Service is accepted and processing"
                     },
                     "404": {
                         "description": "The required entity does not exists",
@@ -1124,16 +1047,6 @@
                                     }
                                 }
                             }
-                        }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
                         }
                     }
                 },
@@ -1200,44 +1113,8 @@
                     "required": true
                 },
                 "responses": {
-                    "200": {
-                        "description": "The resolved DID Document after the updating the Service",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DidDocumentDto"
-                                },
-                                "examples": {
-                                    "demo": {
-                                        "value": {
-                                            "id": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                            "@context": [
-                                                "https://www.w3.org/ns/did/v1"
-                                            ],
-                                            "controller": [
-                                                "123",
-                                                "1231"
-                                            ],
-                                            "verificationMethod": [
-                                                {
-                                                    "id": "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
-                                                    "type": "Ed25519VerificationKey2018",
-                                                    "controller": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                                    "publicKeyBase58": "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                                                }
-                                            ],
-                                            "service": [
-                                                {
-                                                    "id": "did:example:123#edv",
-                                                    "type": "ServiceEndpointProxyService",
-                                                    "serviceEndpoint": "https://myservice.com/myendpoint"
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    "202": {
+                        "description": "Updating the Service is accepted and processing"
                     },
                     "404": {
                         "description": "The required entity does not exists",
@@ -1327,16 +1204,6 @@
                                     }
                                 }
                             }
-                        }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
                         }
                     }
                 },
@@ -1382,34 +1249,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "The resolved DID Document after removing the service",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DidDocumentDto"
-                                },
-                                "examples": {
-                                    "demo": {
-                                        "value": {
-                                            "id": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                            "@context": [
-                                                "https://www.w3.org/ns/did/v1"
-                                            ],
-                                            "controller": "test",
-                                            "verificationMethod": [
-                                                {
-                                                    "id": "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
-                                                    "type": "Ed25519VerificationKey2018",
-                                                    "controller": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                                    "publicKeyBase58": "FyfKP2HvTKqDZQzvyL38yXH7bExmwofxHf2NR5BrcGf1"
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    "202": {
+                        "description": "Deleting the Service is accepted and processing"
                     },
                     "404": {
                         "description": "The required entity does not exists",
@@ -1499,16 +1340,6 @@
                                     }
                                 }
                             }
-                        }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
                         }
                     }
                 },
@@ -1578,7 +1409,6 @@
                             "items": {
                                 "type": "string"
                             },
-                            "maxItems": 999,
                             "type": "array"
                         },
                         "required": true,
@@ -1599,7 +1429,6 @@
                                     "items": {
                                         "$ref": "#/components/schemas/VerifiableCredentialDto"
                                     },
-                                    "maxItems": 999,
                                     "type": "array"
                                 }
                             }
@@ -1640,16 +1469,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -1660,7 +1479,8 @@
                 ],
                 "summary": "Issue Verifiable Credential",
                 "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\n\nIssue a verifiable credential with a given issuer DID",
-                "parameters": [],
+                "parameters": [
+                ],
                 "requestBody": {
                     "description": "The verifiable credential input data",
                     "content": {
@@ -1810,16 +1630,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -1832,7 +1642,8 @@
                 ],
                 "summary": "Issue a Verifiable Credential with Catena-X platform issuer",
                 "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of Catena-X wallet must equal BPN of caller)\n\nIssue a verifiable credential by Catena-X wallet",
-                "parameters": [],
+                "parameters": [
+                ],
                 "requestBody": {
                     "description": "The verifiable credential input",
                     "content": {
@@ -1981,15 +1792,143 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/credentials/issuance-flow": {
+            "post": {
+                "tags": [
+                    "VerifiableCredentials"
+                ],
+                "summary": "Issue credential flow according to Aries RFC 0453",
+                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of Catena-X wallet must equal BPN of caller)\n\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. Issuer must be a DID managed by the MIW",
+                "parameters": [
+                ],
+                "requestBody": {
+                    "description": "The verifiable credential input",
+                    "content": {
+                        "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
+                                "$ref": "#/components/schemas/VerifiableCredentialIssuanceFlowRequestDto"
+                            },
+                            "examples": {
+                                "demo": {
+                                    "value": {
+                                        "id": "http://example.edu/credentials/3732",
+                                        "@context": [
+                                            "https://www.w3.org/2018/credentials/v1",
+                                            "https://www.w3.org/2018/credentials/examples/v1"
+                                        ],
+                                        "type": [
+                                            "University-Degree-Credential, VerifiableCredential"
+                                        ],
+                                        "issuerIdentifier": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                        "issuanceDate": "2019-06-16T18:56:59Z",
+                                        "expirationDate": "2019-06-17T18:56:59Z",
+                                        "credentialSubject": {
+                                            "college": "Test-University"
+                                        },
+                                        "holderIdentifier": "did:example:492edf208",
+                                        "isRevocable": true,
+                                        "webhookUrl": "http://example.com/webhooks"
+                                    }
+                                }
                             }
-                          }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The credential Offer as String",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CredentialOfferResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "credential_offer": "{\"credential\": {\"@context\": [\"https://www.w3.org/2018/credentials/v1\", \"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData\"], \"type\": [\"BpnCredential\", \"VerifiableCredential\"], \"issuer\": \"did:sov:HsfwvUFcZkAcxDa2kASMr7\", \"issuanceDate\": \"2021-06-16T18:56:59Z\", \"credentialSubject\": {\"type\": [\"BpnCredential\"], \"bpn\": \"NEWNEWTestTest\", \"id\": \"did:sov:7rB93fLvW5kgujZ4E57ZxL\"}}, \"options\": {\"proofType\": \"Ed25519Signature2018\"}}",
+                                            "threadId": "2ewqe-qwe24-eqweqwrqwr-rwqrqwr"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "The input can not be processed due to semantic mismatches",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The input does not comply to the syntax requirements",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The request could not be completed due to a forbidden access.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request could not be completed due to a failed authorization.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -2003,7 +1942,8 @@
                 ],
                 "summary": "Revoke issued Verifiable Credential",
                 "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\n\nRevoke issued Verifiable Credential by issuer",
-                "parameters": [],
+                "parameters": [
+                ],
                 "requestBody": {
                     "description": "The signed verifiable credential",
                     "content": {
@@ -2131,16 +2071,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -2263,16 +2193,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -2340,16 +2260,6 @@
                                     }
                                 }
                             }
-                        }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
                         }
                     }
                 },
@@ -2561,16 +2471,6 @@
                                     }
                                 }
                             }
-                        }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
                         }
                     }
                 },
@@ -2803,16 +2703,6 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
-                            }
-                          }
-                        }
                     }
                 },
                 "deprecated": false
@@ -2825,7 +2715,8 @@
                 ],
                 "summary": "Issue a List Status credential",
                 "description": "This endpoint is called by the revocation service to issue a list status credential for a given profileName",
-                "parameters": [],
+                "parameters": [
+                ],
                 "requestBody": {
                     "description": "The subject of the status list credential",
                     "content": {
@@ -2836,7 +2727,7 @@
                             "examples": {
                                 "demo": {
                                     "value": {
-                                        "id": "uuid-of-list",
+                                        "id": "urn:uuid:93731387-dec1-4bf6-8087-d5210f661422",
                                         "subject": {
                                             "id": "https://example.com/status/3#list",
                                             "type": "StatusList2021",
@@ -2901,15 +2792,40 @@
                                 }
                             }
                         }
-                    },
-                    "default": {
-                        "description": "Unexpected error",
-                        "content": {
-                          "application/json": {
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/webhook/topic/{topic}/": {
+            "post": {
+                "tags": [
+                    "Webhook"
+                ],
+                "summary": "Webhook to receive messages from Acapy",
+                "description": "",
+                "parameters": [
+                ],
+                "requestBody": {
+                    "description": "the object related to the topic",
+                    "content": {
+                        "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/ExceptionResponse"
+                                "$ref": "#/components/schemas/Any"
                             }
-                          }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "The webhook endpoint is triggered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 },
@@ -2930,8 +2846,14 @@
                     "did": {
                         "type": "string"
                     },
+                    "isSelfManaged": {
+                        "type": "boolean"
+                    },
                     "name": {
                         "type": "string"
+                    },
+                    "pendingMembershipIssuance": {
+                        "type": "boolean"
                     },
                     "revocationListName": {
                         "type": "string",
@@ -2941,7 +2863,6 @@
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "verKey": {
@@ -2954,7 +2875,8 @@
                     "bpn",
                     "did",
                     "createdAt",
-                    "vcs"
+                    "vcs",
+                    "pendingMembershipIssuance"
                 ],
                 "type": "object"
             },
@@ -2985,7 +2907,8 @@
                 "type": "object"
             },
             "Short": {
-                "properties": {},
+                "properties": {
+                },
                 "type": "object"
             },
             "LocalTime": {
@@ -3007,7 +2930,8 @@
                 "type": "object"
             },
             "Byte": {
-                "properties": {},
+                "properties": {
+                },
                 "type": "object"
             },
             "VerifiableCredentialDto": {
@@ -3016,7 +2940,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "credentialStatus": {
@@ -3049,7 +2972,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3088,7 +3010,8 @@
                 "type": "object"
             },
             "Any": {
-                "properties": {},
+                "properties": {
+                },
                 "type": "object"
             },
             "LdProofDto": {
@@ -3167,6 +3090,52 @@
                 ],
                 "type": "object"
             },
+            "SelfManagedWalletCreateDto": {
+                "properties": {
+                    "bpn": {
+                        "type": "string"
+                    },
+                    "did": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "webhookUrl": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "bpn",
+                    "name",
+                    "did"
+                ],
+                "type": "object"
+            },
+            "SelfManagedWalletResultDto": {
+                "properties": {
+                    "bpn": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "$ref": "#/components/schemas/LocalDateTime"
+                    },
+                    "did": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name",
+                    "bpn",
+                    "did",
+                    "createdAt"
+                ],
+                "type": "object"
+            },
             "SuccessResponse": {
                 "properties": {
                     "message": {
@@ -3184,7 +3153,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "CredentialStatus": {
@@ -3217,7 +3185,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3227,19 +3194,28 @@
                     "issuer",
                     "issuanceDate",
                     "credentialSubject",
-                    "CredentialStatus",
                     "proof"
                 ],
                 "type": "object"
             },
-            "VerKeyDto": {
+            "InvitationRequestDto": {
                 "properties": {
-                    "verKey": {
+                    "alias": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "myLabel": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "theirPublicDid": {
                         "type": "string"
                     }
                 },
                 "required": [
-                    "verKey"
+                    "theirPublicDid",
+                    "alias",
+                    "myLabel"
                 ],
                 "type": "object"
             },
@@ -3253,35 +3229,30 @@
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "authenticationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "capabilityDelegationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "capabilityInvocationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "context": {
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "controller": {
@@ -3294,21 +3265,18 @@
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "services": {
                         "items": {
                             "$ref": "#/components/schemas/DidServiceDto"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "verificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/DidVerificationMethodDto"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3320,6 +3288,13 @@
             },
             "DidServiceDto": {
                 "properties": {
+                    "accept": {
+                        "items": {
+                            "type": "string",
+                            "nullable": true
+                        },
+                        "type": "array"
+                    },
                     "id": {
                         "type": "string"
                     },
@@ -3333,7 +3308,6 @@
                             "type": "string",
                             "nullable": true
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "routingKeys": {
@@ -3341,7 +3315,6 @@
                             "type": "string",
                             "nullable": true
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "serviceEndpoint": {
@@ -3421,7 +3394,6 @@
                             "type": "string",
                             "nullable": true
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "kid": {
@@ -3470,7 +3442,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "credentialSubject": {
@@ -3505,7 +3476,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3524,7 +3494,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "credentialSubject": {
@@ -3555,7 +3524,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3568,6 +3536,77 @@
                 ],
                 "type": "object"
             },
+            "VerifiableCredentialIssuanceFlowRequestDto": {
+                "properties": {
+                    "@context": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "credentialSubject": {
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/Any"
+                        },
+                        "type": "object"
+                    },
+                    "expirationDate": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "holderIdentifier": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "isRevocable": {
+                        "type": "boolean"
+                    },
+                    "issuanceDate": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "issuerIdentifier": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "webhookUrl": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "@context",
+                    "type",
+                    "issuerIdentifier",
+                    "issuanceDate",
+                    "credentialSubject"
+                ],
+                "type": "object"
+            },
+            "CredentialOfferResponse": {
+                "properties": {
+                    "credentialOffer": {
+                        "type": "string"
+                    },
+                    "threadId": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "credentialOffer",
+                    "threadId"
+                ],
+                "type": "object"
+            },
             "VerifiablePresentationRequestDto": {
                 "properties": {
                     "holderIdentifier": {
@@ -3577,7 +3616,6 @@
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3593,7 +3631,6 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "holder": {
@@ -3611,14 +3648,12 @@
                         "items": {
                             "type": "string"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     },
                     "verifiableCredential": {
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
-                        "maxItems": 999,
                         "type": "array"
                     }
                 },
@@ -3692,9 +3727,7 @@
         }
     },
     "security": [
-        {
-            "Bearer": [ "auth-token" ]
-        }
     ],
-    "tags": []
+    "tags": [
+    ]
 }
