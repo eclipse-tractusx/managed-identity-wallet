@@ -85,12 +85,19 @@ run following these steps:
     git clone https://github.com/eclipse-tractusx/managed-identity-wallets.git
     cd managed-identity-wallets
     ```
+1. Generate and register 2 DIDs as described in section [Integrate_Indy_ledger](##Integrate-with-an-write-restricted-Indy-Ledger)
 
 1. Copy over the `.env.example` to `dev.env`
 
 
     ```bash
     cp .env.example dev.env
+    ```
+
+1. Replace the placeholders in `dev.env` and then run
+
+    ```bash
+    set -a; source dev.env; set +a
     ```
 
 1. Start the supporting containers for postgreSQL (database), keycloak (identity
@@ -108,7 +115,6 @@ revocation handling)
 
     ```bash
     cd ../../
-    set -a; source dev.env; set +a
     ./gradlew run
     ```
 
