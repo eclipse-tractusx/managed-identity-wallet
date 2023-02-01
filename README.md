@@ -85,7 +85,7 @@ run following these steps:
     git clone https://github.com/eclipse-tractusx/managed-identity-wallets.git
     cd managed-identity-wallets
     ```
-1. Generate and register 2 DIDs as described in section [Integrate_Indy_ledger](##Integrate-with-an-write-restricted-Indy-Ledger)
+1. Generate 3 DIDs as described in section [Integrate_Indy_ledger](##Integrate-with-an-write-restricted-Indy-Ledger) and register them on ledger as Endorser
 
 1. Copy over the `.env.example` to `dev.env`
 

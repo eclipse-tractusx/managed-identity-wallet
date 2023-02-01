@@ -52,7 +52,7 @@ services:
         --seed ${ACAPY_ENDORSER_SEED} \
         --genesis-url ${ACAPY_ENDORSER_LEDGER_URL} \
         --label Local_Base_Wallet \
-        --admin-api-key ${ACAPY_ENDORSER_ADMIN_KEY} \
+        --admin-api-key ${ACAPY_BASE_WALLET_ADMIN_API_KEY} \
         --auto-ping-connection \
         --jwt-secret ${ACAPY_ENDORSER_JWT_SECRET} \
         --public-invites \
@@ -90,7 +90,7 @@ services:
         --seed ${ACAPY_MT_SEED}  \
         --genesis-url ${ACAPY_MT_LEDGER_URL} \
         --label LocalManagedWallets \
-        --admin-api-key ${ACAPY_MT_ADMIN_KEY} \
+        --admin-api-key ${ACAPY_ADMIN_API_KEY} \
         --auto-ping-connection \
         --jwt-secret ${ACAPY_MT_JWT_SECRET} \
         --multitenant \
@@ -99,7 +99,7 @@ services:
         --webhook-url http://host.docker.internal:8080/webhook \
         --endorser-protocol-role author \
         --endorser-alias endorser \
-        --endorser-public-did ${ACAPY_MT_PUBLIC_ENDORSER_DID} \
+        --endorser-public-did ${MIW_SHORT_DID} \
         --auto-request-endorsement \
         --auto-write-transactions \
         --auto-promote-author-did \
