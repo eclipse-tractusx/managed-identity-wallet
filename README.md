@@ -100,6 +100,8 @@ run following these steps:
     set -a; source dev.env; set +a
     ```
 
+    Note that this command needs to be run again after changing any value in `dev.env`.
+
 1. Start the supporting containers for postgreSQL (database), keycloak (identity
 management), ACA-Py (ledger communication) and revocation service (credential
 revocation handling)
@@ -364,11 +366,11 @@ or build your own image following the steps:
 * currently tested with version `0.7.5`
 * run `git checkout 0.7.5`
 * run `docker build -t acapy:0.7.5 -f ./docker/Dockerfile.run .`
-* change the used image for `local_acapy` in `dev-assets/dev-containers/docker-compose.yml`
+* change the used image for `local_base_acapy` and `local_mt_acapy` in `dev-assets/dev-containers/docker-compose.yml`
 
 ## Integrate with Indy Ledger
 
-In Indy ledger `Write Access` is usually restricted to endorsers or higher roles.Therefore, the DID and its VerKey must be registered
+In Indy ledger `Write Access` is usually restricted to endorsers or higher roles. Therefore, the DID and its verkey must be registered
 manually before starting ACA-Py.
 
 The [Indy CLI](https://hyperledger-indy.readthedocs.io/projects/sdk/en/latest/docs/design/001-cli/README.html)

@@ -740,7 +740,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"type\": \"did-communication\",\n  \"serviceEndpoint\": \"http://local_acapy:8000/\"\n}",
+					"raw": "{\n  \"type\": \"did-communication\",\n  \"serviceEndpoint\": \"http://local_mt_acapy:8003/\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
