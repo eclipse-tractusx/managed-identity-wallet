@@ -1,8 +1,5 @@
 # Managed Identity Wallets <a id="introduction"></a>
 
-This repository is part of the overarching Catena-X project, and more specifically
-developed within the Catena-X Core Agile Release Train.
-
 The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI)
 readiness by providing a wallet hosting platform including a DID resolver,
 service endpoints and the company wallets itself.
@@ -47,25 +44,27 @@ below. Here a few hints on how to set it up:
 
 | Key                       | Type   | Description |
 |---------------------------|--------|-------------|
-| `CX_DB_JDBC_URL`          | URL    | database connection string, most commonly postgreSQL is used |
-| `CX_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
-| `CX_AUTH_JWKS_URL`        | URL    | IAM certs url |
-| `CX_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
-| `CX_AUTH_REALM`           | String | IAM realm |
-| `CX_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
-| `CX_AUTH_RESOURCE_ID`     | String | IAM resource id |
-| `CX_AUTH_CLIENT_ID`       | String | IAM client id |
-| `CX_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*catenax* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
+| `MIW_DB_JDBC_URL`          | URL    | database connection string, most commonly postgreSQL is used |
+| `MIW_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
+| `MIW_AUTH_JWKS_URL`        | URL    | IAM certs url |
+| `MIW_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
+| `MIW_AUTH_REDIRECT_URL`    | URL    | IAM redirect url to the MIW |
+| `MIW_AUTH_REALM`           | String | IAM realm |
+| `MIW_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
+| `MIW_AUTH_RESOURCE_ID`     | String | IAM resource id |
+| `MIW_AUTH_CLIENT_ID`       | String | IAM client id |
+| `MIW_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*localkeycloak* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
 | `APP_VERSION`             | String | application version, this should be in-line with the version in the deployment |
 | `ACAPY_API_ADMIN_URL`     | String | admin url of ACA-Py |
 | `ACAPY_ADMIN_API_KEY`     | String | admin api key of ACA-Py endpoints |
-| `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the catena-x endorser ACA-Py |
-| `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the catena-x endorser ACA-Py endpoints |
+| `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the base endorser ACA-Py |
+| `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the base endorser ACA-Py endpoints |
 | `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space |
-| `CX_BPN`                  | String | BPN of the catena-x wallet |
-| `CX_DID`                  | String | DID of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
-| `CX_VERKEY`               | String | Verification key of the catena-x wallet, this wallet must be registered on ledger with the endorser role |
-| `CX_NAME`                 | String | Name of the catena-x base wallet |
+| `MIW_BPN`                  | String | BPN of the base wallet |
+| `MIW_DID`                  | String | DID of the base wallet, this wallet must be registered on ledger with the endorser role |
+| `MIW_VERKEY`               | String | Verification key of the base wallet, this wallet must be registered on ledger with the endorser role |
+| `MIW_NAME`                 | String | Name of the base wallet |
+| `MIW_MEMBERSHIP_ORG`  | String | The name used in the Membership credential |
 | `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
 | `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
 | `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint |
@@ -88,12 +87,21 @@ run following these steps:
     cd managed-identity-wallets
     ```
 
-1. Copy over the `.env.example` to `dev.env`
+1. The setup requires 3 DIDs. The first DID will be the DID of the base wallet. The second DID is used in the management wallet of the multi-tenancy instance. The third DID is optional and needed only when the external/self-managed instance is used. To generate the required DIDs follow the steps in section [Integrate with Indy Ledger](##Integrate-with-Indy-Ledger)
 
+1. Copy over the `.env.example` to `dev.env`
 
     ```bash
     cp .env.example dev.env
     ```
+
+1. Replace the placeholders in `dev.env` and then run
+
+    ```bash
+    set -a; source dev.env; set +a
+    ```
+
+    Note that this command needs to be run again after changing any value in `dev.env`.
 
 1. Start the supporting containers for postgreSQL (database), keycloak (identity
 management), ACA-Py (ledger communication) and revocation service (credential
@@ -110,7 +118,6 @@ revocation handling)
 
     ```bash
     cd ../../
-    set -a; source dev.env; set +a
     ./gradlew run
     ```
 
@@ -118,16 +125,6 @@ revocation handling)
 
 1. :tada: **First milestone reached the MIW service is up and running!**
 
-    Suggested next step is to use the postgreSQL database to have persistent storage
-    across starts, this can be done via changing following variables in `dev.env`
-    (assuming the standard port for postgreSQL 5432 is available).
-
-    | Key               | Value           |
-    |-------------------|-----------------|
-    | CX_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/miwdev?user=miwdevuser&password=cx_password` |
-    | CX_DB_JDBC_DRIVER | `org.postgresql.Driver` |
-
-    Then restart the service via `./gradlew run`
 
 ## Advanced Development Setup
 
@@ -138,7 +135,7 @@ With the following steps you can explore the API
 
     1. Issue Status-List Credential by sending a POST request to `/api/credentials/revocations/statusListCredentialRefresh`. This step is temporary until the update to Ktor 2.x
 
-1. The two Postman collections `Cx_Base_Wallet_Acapy.postman_collection` and `Managed_Wallets_Acapy.postman_collection` are additional for debugging purposes. these collections include direct calls to the admin API of the Catena-X AcaPy instance and the Multi-tenancy AcaPy instance.
+1. The two Postman collections `Base_Wallet_Acapy.postman_collection` and `Managed_Wallets_Acapy.postman_collection` are additional for debugging purposes. these collections include direct calls to the admin API of the Base AcaPy instance and the Multi-tenancy AcaPy instance.
 
 1. The Postman collection `Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection` sends requests to the external AcaPy instance that simulate an external wallet or self managed wallet.
 
@@ -147,7 +144,7 @@ With the following steps you can explore the API
 Now you have achieved the following:
 
 * set up the development environment to run it from source
-* initialized the catena-x wallet and its revocation list
+* initialized the base wallet and its revocation list
 * you can retrieve the list of wallets in Postman via the *Get wallets from Managed Identity Wallets*
 
 ## Setup Summary
@@ -155,9 +152,9 @@ Now you have achieved the following:
 | Service               | URL                     | Description |
 |-----------------------|-------------------------|-------------|
 | postgreSQL database   | port 5432 on `localhost`| within the Docker Compose setup |
-| Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `catena`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
+| Keycloak              | http://localhost:8081/  | within the Docker Compose setup, username: `admin` and password: `changeme`, client id: `ManagedIdentityWallets` and client secret can be found under the Clients &gt; ManagedIdentityWallets &gt; Credentials |
 | revocation service    | http://localhost:8086   | within the Docker Compose setup |
-| ACA-Py for Catena-X Endorser Wallet | http://localhost:10000  | within the Docker Compose setup |
+| ACA-Py for Base Endorser Wallet | http://localhost:10000  | within the Docker Compose setup |
 | ACA-Py Multi-tenancy for Managed Wallets | http://localhost:10003  | within the Docker Compose setup |
 | MIW service           | http://localhost:8080/  | |
 | ACA-Py (External Wallet) | http://localhost:10001  | within the Docker Compose setup |
@@ -169,7 +166,7 @@ Now you have achieved the following:
 Within the development setup the Keycloak is initially prepared with the
 values in `./dev-assets/dev-containers/keycloak`. The realm could also be
 manually added and configured at http://localhost:8081 via the "Add realm"
-button. It can be for example named `catenax`. Also add an additional client,
+button. It can be for example named `localkeycloak`. Also add an additional client,
 e.g. named `ManagedIdentityWallets` with *valid redirect url* set to
 `http://localhost:8080/*`. The roles
  * add_wallets
@@ -258,14 +255,14 @@ Next step is to build and tag the Docker image, replacing the
 `<VERSION>` with the app version:
 
 ```
-docker build -t catena-x/managed-identity-wallets:<VERSION> .
+docker build -t managed-identity-wallets:<VERSION> .
 ```
 
 Finally, start the image (please make sure that there are no quotes around the
 values in the env file):
 
 ```
-docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets:<VERSION>
+docker run --env-file .env.docker -p 8080:8080 managed-identity-wallets:<VERSION>
 ```
 
 ## Deployment on Kubernetes
@@ -283,20 +280,20 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 1. Create relevant secrets
 
     Altogether four secrets are needed
-    * catenax-managed-identity-wallets-secrets
-    * catenax-managed-identity-wallets-acapy-secrets    
+    * managed-identity-wallets-secrets
+    * managed-identity-wallets-acapy-secrets    
     * postgres-acapy-secret-config
     * postgres-managed-identity-wallets-secret-config
 
     Create these with following commands, after replacing the placeholders:
 
     ```
-    kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-secrets \
-      --from-literal=cx-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/miwdev?user=miwdevuser&password=<placeholder>' \
-      --from-literal=cx-auth-client-id='ManagedIdentityWallets' \
-      --from-literal=cx-auth-client-secret='<placeholder>'
+    kubectl -n managed-identity-wallets create secret generic managed-identity-wallets-secrets \
+      --from-literal=miw-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/<database name>?user=<database user>&password=<<database password>>' \
+      --from-literal=miw-auth-client-id='ManagedIdentityWallets' \
+      --from-literal=miw-auth-client-secret='<placeholder>'
 
-    kubectl -n managed-identity-wallets create secret generic catenax-managed-identity-wallets-acapy-secrets \
+    kubectl -n managed-identity-wallets create secret generic managed-identity-wallets-acapy-secrets \
       --from-literal=acapy-endorser-wallet-key='<placeholder>' \
       --from-literal=acapy-endorser-agent-wallet-seed='<placeholder>' \
       --from-literal=acapy-endorser-jwt-secret='<placeholder>' \
@@ -346,7 +343,7 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 
     ```
     NAME         	NAMESPACE        	REVISION	UPDATED                                	STATUS  	CHART                  	                APP VERSION
-    cx-miw       	ingress-miw     	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	catenax-managed-identity-wallets-0.1.0	0.0.5      
+    miw       	ingress-miw     	1       	2022-02-24 08:51:39.864930557 +0000 UTC	deployed	managed-identity-wallets-0.1.0	0.0.5      
     ```
 
 # End Users
@@ -354,7 +351,7 @@ docker run --env-file .env.docker -p 8080:8080 catena-x/managed-identity-wallets
 See OpenAPI documentation, which is automatically created from
 the source and available on each deployment at the `/docs` endpoint
 (e.g. locally at http://localhost:8080/docs). An export of the JSON
-document can be also found in [docs/openapi_v200.json](docs/openapi_v200.json).
+document can be also found in [docs/openapi_v310.json](docs/openapi_v310.json).
 
 # Further Guides
 
@@ -370,12 +367,11 @@ or build your own image following the steps:
 * currently tested with version `0.7.5`
 * run `git checkout 0.7.5`
 * run `docker build -t acapy:0.7.5 -f ./docker/Dockerfile.run .`
-* change the used image for `cx_acapy` in `dev-assets/dev-containers/docker-compose.yml`
+* change the used image for `local_base_acapy` and `local_mt_acapy` in `dev-assets/dev-containers/docker-compose.yml`
 
-## Integrate with an write-restricted Indy Ledger
+## Integrate with Indy Ledger
 
-If the used Indy ledger (see parameter `--genesis-url https://indy-test.idu.network/genesis`)
-is write-restricted to endorsers or higher roles, the DID and its VerKey must be registered
+In Indy ledger `Write Access` is usually restricted to endorsers or higher roles. Therefore, the DID and its verkey must be registered
 manually before starting ACA-Py.
 
 The [Indy CLI](https://hyperledger-indy.readthedocs.io/projects/sdk/en/latest/docs/design/001-cli/README.html)
@@ -399,7 +395,8 @@ Therefore, the easiest way to generate a DID is currently to start ACA-Py with a
     2022-08-12 08:08:13,888 indy.did DEBUG get_my_did_with_meta: <<< res: '{"did":"HW2eFhr3KcZw5JcRW45KNc","verkey":"aEErMofs7DcJT636pocN2RiEHgTLoF4Mpj6heFXwtb3q","tempVerkey":null,"metadata":null}'
     ```
   * If the script did not stop the container, the command `docker compose down -v` can stop and delete it manually
-
+  * Register the DID and verkey with role endorser. This step depends on the used Indy ledger and the defined roles. As an example: On `GreenLight Dev Ledger` the DID and verkey can be registered using the ledger explorer on `http://dev.greenlight.bcovrin.vonx.io/` > `Register from DID`
+ 
 ## Testing GitHub actions locally <a id= "testingGitHubActionsLocally"></a>
 
 Using [act](https://github.com/nektos/act) it is possible to test GitHub actions

@@ -20,21 +20,21 @@ acapy:
   endpointUrl: "https://managed-identity-wallets-pen.dev.demo.catena-x.net:8000/"
   databaseHost: "product-managed-identity-wallets-pen-acapypostgresql"
   secret:
-    apikey: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-admin-api-key>
-    walletseed: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-agent-wallet-seed>
-    dbaccount: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-db-account>
-    dbadminuser: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-db-admin>
-    dbadminpassword: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-db-admin-password>
-    dbpassword: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-db-password>
-    jwtsecret: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-jwt-secret>
-    walletkey: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-acapy-secrets#acapy-wallet-key>
+    apikey: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-admin-api-key>
+    walletseed: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-agent-wallet-seed>
+    dbaccount: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-db-account>
+    dbadminuser: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-db-admin>
+    dbadminpassword: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-db-admin-password>
+    dbpassword: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-db-password>
+    jwtsecret: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-jwt-secret>
+    walletkey: <path:managed-identity-wallets/data/pen/managed-identity-wallets-acapy-secrets#acapy-wallet-key>
 managedIdentityWallets:
   secret:
-    jdbcurl: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-secrets#cx-db-jdbc-url>
-    authclientid: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-secrets#cx-auth-client-id>
-    authclientsecret: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-secrets#cx-auth-client-secret>
-    bpdmauthclientid: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-secrets#bpdm-auth-client-id>
-    bpdmauthclientsecret: <path:managed-identity-wallets/data/pen/catenax-managed-identity-wallets-secrets#bpdm-auth-client-secret>
+    jdbcurl: <path:managed-identity-wallets/data/pen/managed-identity-wallets-secrets#miw-db-jdbc-url>
+    authclientid: <path:managed-identity-wallets/data/pen/managed-identity-wallets-secrets#miw-auth-client-id>
+    authclientsecret: <path:managed-identity-wallets/data/pen/managed-identity-wallets-secrets#miw-auth-client-secret>
+    bpdmauthclientid: <path:managed-identity-wallets/data/pen/managed-identity-wallets-secrets#bpdm-auth-client-id>
+    bpdmauthclientsecret: <path:managed-identity-wallets/data/pen/managed-identity-wallets-secrets#bpdm-auth-client-secret>
 postgresql:
   secret:
     password: <path:managed-identity-wallets/data/pen/postgres-managed-identity-wallets-secret-config#password>

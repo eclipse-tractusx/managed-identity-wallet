@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,8 +19,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
@@ -41,7 +39,7 @@ class BaseWalletAriesEventHandler(
         private val webhookService: IWebhookService
 ): TenantAwareEventHandler() {
 
-    private val catenaXCredentialTypes = JsonLdTypes.getCatenaXCredentialTypes()
+    private val baseWalletCredentialTypes = JsonLdTypes.getBaseWalletCredentialTypes()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     // Connection only with registered wallets
@@ -58,13 +56,13 @@ class BaseWalletAriesEventHandler(
                     )
                     walletService.addConnection(
                         connectionId = connection.connectionId,
-                        connectionOwnerDid = walletService.getCatenaXWallet().did,
+                        connectionOwnerDid = walletService.getBaseWallet().did,
                         connectionTargetDid = theirWallet.did,
                         connectionState = connection.rfc23State
                     )
                     runBlocking {
                         walletService.setEndorserMetaDataForAcapyConnection(connection.connectionId)
-                        walletService.acceptConnectionRequest(walletService.getCatenaXWallet().did, connection)
+                        walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
                     }
                 }
             }
@@ -79,24 +77,24 @@ class BaseWalletAriesEventHandler(
                 val webhookUrl: String? = updateConnectionStateAndSendWebhook(connection)
 
                 if (walletOfConnectionTarget.pendingMembershipIssuance) {
-                    GlobalScope.launch {
+                    runBlocking {
                         val successBpnCred = businessPartnerDataService
-                            .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                            .issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
                                 targetWallet = walletOfConnectionTarget,
                                 connectionId = connection.connectionId,
                                 webhookUrl = webhookUrl,
                                 type = JsonLdTypes.BPN_TYPE,
                                 data = null
-                            ).await()
-                            val successMembershipCred = businessPartnerDataService
-                            .issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                            )
+                        val successMembershipCred  = businessPartnerDataService
+                            .issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
                                 targetWallet = walletOfConnectionTarget,
                                 connectionId = connection.connectionId,
                                 webhookUrl = webhookUrl,
                                 type = JsonLdTypes.MEMBERSHIP_TYPE,
                                 data = null
-                            ).await()
-                        if (successBpnCred && successMembershipCred) {
+                            )
+                        if (successBpnCred.await() && successMembershipCred.await()) {
                             transaction { walletService.setPartnerMembershipIssued(walletOfConnectionTarget) }
                         }
                     }
@@ -133,7 +131,7 @@ class BaseWalletAriesEventHandler(
             when(v20Credential.state) {
                 CredentialExchangeState.OFFER_RECEIVED -> {
                     runBlocking {
-                        walletService.acceptReceivedOfferVc(walletService.getCatenaXWallet().did, v20Credential)
+                        walletService.acceptReceivedOfferVc(walletService.getBaseWallet().did, v20Credential)
                     }
                 }
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {
@@ -145,7 +143,7 @@ class BaseWalletAriesEventHandler(
                             )
                         )
                         val holderWallet = walletService.getWallet(issuedCred.credentialSubject["id"] as String)
-                        if (holderWallet.isSelfManaged && issuedCred.type.any { catenaXCredentialTypes.contains(it) }) {
+                        if (holderWallet.isSelfManaged && issuedCred.type.any { baseWalletCredentialTypes.contains(it) }) {
                             transaction {
                                 walletService.storeCredential(
                                     issuedCred.credentialSubject["id"] as String,
@@ -166,7 +164,7 @@ class BaseWalletAriesEventHandler(
                     try {
                         transaction {
                             runBlocking {
-                                walletService.acceptAndStoreReceivedIssuedVc(walletService.getCatenaXWallet().did, v20Credential)
+                                walletService.acceptAndStoreReceivedIssuedVc(walletService.getBaseWallet().did, v20Credential)
                                 if (webhookService.getWebhookByThreadId(threadId) != null) {
                                     webhookService.updateStateOfWebhook(threadId, v20Credential.state.name)
                                 }

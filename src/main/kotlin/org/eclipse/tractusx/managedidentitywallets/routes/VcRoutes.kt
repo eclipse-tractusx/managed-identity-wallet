@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -27,18 +27,29 @@ import io.bkbn.kompendium.core.metadata.RequestInfo
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.GetInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
-
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.eclipse.tractusx.managedidentitywallets.models.*
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
-
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialRequestData
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialSubject
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListNameParameter
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.StatusListRefreshParameters
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialParameters
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
+import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
@@ -124,12 +135,12 @@ fun Route.vcRoutes(
             notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedPost(
                     PostInfo<Unit, VerifiableCredentialRequestWithoutIssuerDto, VerifiableCredentialDto>(
-                        summary = "Issue a Verifiable Credential with Catena-X platform issuer",
+                        summary = "Issue a Verifiable Credential with base wallet issuer",
                         description = "Permission: " +
                             "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
                             "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
-                                "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
-                            "\nIssue a verifiable credential by Catena-X wallet",
+                                "(The BPN of base wallet must equal BPN of caller)\n" +
+                            "\nIssue a verifiable credential by base wallet",
                         requestInfo = RequestInfo(
                             description = "The verifiable credential input",
                             examples = verifiableCredentialRequestWithoutIssuerDtoExample
@@ -147,10 +158,10 @@ fun Route.vcRoutes(
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
                     AuthorizationHandler.checkHasRightsToUpdateWallet(
                         call,
-                        walletService.getCatenaXWallet().bpn
+                        walletService.getBaseWallet().bpn
                     )
 
-                    val verifiableCredentialDto = walletService.issueCatenaXCredential(verifiableCredentialRequestDto)
+                    val verifiableCredentialDto = walletService.issueBaseWalletCredential(verifiableCredentialRequestDto)
                     call.respond(HttpStatusCode.Created, verifiableCredentialDto)
                 }
             }
@@ -164,7 +175,7 @@ fun Route.vcRoutes(
                         description = "Permission: " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
-                                "(The BPN of Catena-X wallet must equal BPN of caller)\n" +
+                                "(The BPN of base wallet must equal BPN of caller)\n" +
                                 "\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. " + 
                                 "Issuer must be a DID managed by the MIW",
                         requestInfo = RequestInfo(
@@ -184,7 +195,7 @@ fun Route.vcRoutes(
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialIssuanceFlowRequestDto>()
                     AuthorizationHandler.checkHasRightsToUpdateWallet(
                         call,
-                        walletService.getCatenaXWallet().bpn
+                        walletService.getBaseWallet().bpn
                     )
                     val vc = verifiableCredentialRequestDto.toInternalVerifiableCredentialIssuanceFlowRequest()
                     call.respond(

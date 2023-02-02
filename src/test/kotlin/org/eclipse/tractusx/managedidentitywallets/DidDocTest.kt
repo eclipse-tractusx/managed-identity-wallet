@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -26,10 +26,20 @@ import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
-import org.eclipse.tractusx.managedidentitywallets.plugins.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceUpdateRequestDto
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureOpenAPI
+import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureRouting
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSecurity
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 @kotlinx.serialization.ExperimentalSerializationApi
 class DidDocTest {
@@ -68,11 +78,11 @@ class DidDocTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                EnvironmentTestSetup.walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                EnvironmentTestSetup.walletService.initBaseWalletAndSubscribeForAriesWS(
                     bpn = EnvironmentTestSetup.DEFAULT_BPN,
                     did = EnvironmentTestSetup.DEFAULT_DID,
                     verkey = EnvironmentTestSetup.DEFAULT_VERKEY,
-                    name = "Catena_X_Wallet"
+                    name = "Base_Wallet"
                 )
                 EnvironmentTestSetup.walletService.createWallet(
                     WalletCreateDto(EnvironmentTestSetup.EXTRA_TEST_BPN, "name_extra")

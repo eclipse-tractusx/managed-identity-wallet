@@ -6,9 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2023-01-26
+- Fix regex bug in utility method
+- Rename enviroment variables and secrets
+- Set verkey as optional in the verify credentials and presentation method
+- Re-enable BPDM scheduler
+- Make the values in OpenAPI configurable
+
 ## [3.0.0] - 2023-01-09
-- Use separate AcaPy instances for Catena-X Endorser wallet and multi-tenant company wallets
-- Support endorsement by Catena-X wallet for setting did-communication service endpoints for company wallet
+- Use separate AcaPy instances for Base Endorser wallet and multi-tenant company wallets
+- Support endorsement by Base wallet for setting did-communication service endpoints for company wallet
 - Support acceptance and reception of connection requests and credential issuance from external issuers by company wallets
 
 ## [2.2.0] - 2022-12-20

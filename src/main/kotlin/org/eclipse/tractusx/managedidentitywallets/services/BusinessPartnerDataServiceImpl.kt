@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,12 +25,30 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.AccessToken
+import org.eclipse.tractusx.managedidentitywallets.models.AddressDto
+import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
+import org.eclipse.tractusx.managedidentitywallets.models.BankAccountDto
+import org.eclipse.tractusx.managedidentitywallets.models.BusinessPartnerDataDto
+import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
+import org.eclipse.tractusx.managedidentitywallets.models.LegalAddressDto
+import org.eclipse.tractusx.managedidentitywallets.models.LegalFormDto
+import org.eclipse.tractusx.managedidentitywallets.models.NameResponse
+import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.json.simple.JSONObject
 import org.slf4j.LoggerFactory
@@ -40,6 +58,7 @@ import java.util.*
 class BusinessPartnerDataServiceImpl(
     private val walletService: IWalletService,
     private val bpdmConfig: BPDMConfig,
+    private val membershipOrganisation: String,
     private val client: HttpClient
 ): IBusinessPartnerDataService {
 
@@ -48,7 +67,7 @@ class BusinessPartnerDataServiceImpl(
     }
 
     // TODO: notify if issue credentials failed
-    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String?)
+    override suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(identifier: String?)
     : Deferred<Boolean> = GlobalScope.async {
         val listOfBPNs = if (identifier.isNullOrEmpty()) {
                 walletService.getAllBpns()
@@ -90,9 +109,9 @@ class BusinessPartnerDataServiceImpl(
                 if (legalEntityDataMap.containsKey(bpn) || legalAddressDataMap.containsKey(bpn)) {
                     val holder = walletService.getWallet(bpn)
                     val connectionId: ConnectionDto? = if (holder.isSelfManaged) {
-                        walletService.getConnectionWithCatenaX(holder.did)
+                        walletService.getConnectionWithBaseWallet(holder.did)
                     } else { null }
-                    issueAndUpdateCatenaXCredentials(
+                    issueAndUpdateBaseWalletCredentials(
                         holder = holder,
                         businessPartnerData = legalEntityDataMap.get(bpn),
                         pulledAddressOfBpn = legalAddressDataMap.get(bpn),
@@ -106,14 +125,14 @@ class BusinessPartnerDataServiceImpl(
         return@async true
     }
 
-    override suspend fun issueAndStoreCatenaXCredentialsAsync(
+    override suspend fun issueAndStoreBaseWalletCredentialsAsync(
         walletHolderDto: WalletDto,
         type: String,
         data: Any?
     ): Deferred<Boolean> = GlobalScope.async {
         try {
-            val vcToIssue = prepareCatenaXCredential(walletHolderDto.bpn, type, data)
-            val verifiableCredential: VerifiableCredentialDto = walletService.issueCatenaXCredential(vcToIssue)
+            val vcToIssue = prepareBaseWalletCredential(walletHolderDto.bpn, type, data)
+            val verifiableCredential: VerifiableCredentialDto = walletService.issueBaseWalletCredential(vcToIssue)
             val issuedVC = toIssuedVerifiableCredentialRequestDto(verifiableCredential)
             if (issuedVC != null) {
                 walletService.storeCredential(walletHolderDto.bpn, issuedVC)
@@ -122,12 +141,12 @@ class BusinessPartnerDataServiceImpl(
             log.error("Error: Proof of Credential of type $type is empty")
             false
         } catch (e: Exception) {
-            log.error("Error: Issue Catena-X Credentials of type $type failed with message ${e.message}")
+            log.error("Error: Issue base wallet credentials of type $type failed with message ${e.message}")
             false
         }
     }
 
-    override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+    override suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
         webhookUrl: String?,
@@ -135,15 +154,15 @@ class BusinessPartnerDataServiceImpl(
         data: Any?
     ): Deferred<Boolean> =
         GlobalScope.async {
-            val catenaXWalletDid = walletService.getCatenaXWallet().did
+            val baseWalletDid = walletService.getBaseWallet().did
             val credentialFlowRequest: VerifiableCredentialRequestWithoutIssuerDto =
-                prepareCatenaXCredential(targetWallet.bpn, type, data)
+                prepareBaseWalletCredential(targetWallet.bpn, type, data)
             val vCIssuanceFlowRequest = VerifiableCredentialIssuanceFlowRequest(
                 id =  credentialFlowRequest.id,
                 context = credentialFlowRequest.context,
                 type = credentialFlowRequest.type,
                 issuanceDate = credentialFlowRequest.issuanceDate,
-                issuerIdentifier = catenaXWalletDid,
+                issuerIdentifier = baseWalletDid,
                 expirationDate = credentialFlowRequest.expirationDate,
                 credentialSubject = credentialFlowRequest.credentialSubject,
                 credentialStatus = null,
@@ -158,20 +177,20 @@ class BusinessPartnerDataServiceImpl(
 
     // ============== Private ==============
 
-    private suspend fun issueAndUpdateCatenaXCredentials(
+    private suspend fun issueAndUpdateBaseWalletCredentials(
         holder: WalletDto,
         businessPartnerData: BusinessPartnerDataDto?,
         pulledAddressOfBpn: LegalAddressDto?,
         connection: ConnectionDto?
     ): Boolean = GlobalScope.async {
         runBlocking {
-            val catenaXCredentialsOfBpn = walletService.getCredentials(
-                walletService.getCatenaXWallet().bpn, holder.bpn, null, null
+            val baseWalletCredentialsOfBpn = walletService.getCredentials(
+                walletService.getBaseWallet().bpn, holder.bpn, null, null
             )
             if (businessPartnerData != null) {
                 // Name Credentials
                 val existingNamesData: MutableList<Pair<NameResponse, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.NAME_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.NAME_TYPE)
                 businessPartnerData.names.forEach { name ->
                     checkExistencesAndIssueCredential(holder, existingNamesData,
                         JsonLdTypes.NAME_TYPE, name, connection)
@@ -180,7 +199,7 @@ class BusinessPartnerDataServiceImpl(
 
                 // Bank Account Credentials
                 val existingBankAccountsData: MutableList<Pair<BankAccountDto, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.BANK_ACCOUNT_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.BANK_ACCOUNT_TYPE)
                 businessPartnerData.bankAccounts.forEach { bankAccount ->
                     checkExistencesAndIssueCredential(holder, existingBankAccountsData,
                         JsonLdTypes.BANK_ACCOUNT_TYPE, bankAccount, connection)
@@ -189,7 +208,7 @@ class BusinessPartnerDataServiceImpl(
 
                 // Legal Form Credentials
                 val existingLegalFormData: MutableList<Pair<LegalFormDto, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.LEGAL_FORM_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.LEGAL_FORM_TYPE)
                 if (businessPartnerData.legalForm != null) {
                     checkExistencesAndIssueCredential(holder, existingLegalFormData,
                         JsonLdTypes.LEGAL_FORM_TYPE, businessPartnerData.legalForm, connection)
@@ -199,7 +218,7 @@ class BusinessPartnerDataServiceImpl(
             // Address Credentials
             if (pulledAddressOfBpn != null) {
                 val existingLegalAddressData : MutableList<Pair<AddressDto, VerifiableCredentialDto>> =
-                    extractDataFromCredentials(catenaXCredentialsOfBpn, JsonLdTypes.ADDRESS_TYPE)
+                    extractDataFromCredentials(baseWalletCredentialsOfBpn, JsonLdTypes.ADDRESS_TYPE)
                 checkExistencesAndIssueCredential(holder, existingLegalAddressData,
                     JsonLdTypes.ADDRESS_TYPE, pulledAddressOfBpn.legalAddress, connection)
                 revokeAndDeleteCredentialsAsync(existingLegalAddressData, holder.isSelfManaged).await()
@@ -220,13 +239,13 @@ class BusinessPartnerDataServiceImpl(
             existingDataFromCredential.remove(foundData)
         } else {
             if (!walletOfHolder.isSelfManaged) {
-                issueAndStoreCatenaXCredentialsAsync(
+                issueAndStoreBaseWalletCredentialsAsync(
                     walletHolderDto = walletOfHolder,
                     type = type,
                     data = data
                 ).await()
             } else if (connection != null) {
-                issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+                issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
                     walletOfHolder,
                     connectionId = connection.connectionId,
                     webhookUrl = null,
@@ -239,7 +258,7 @@ class BusinessPartnerDataServiceImpl(
         }
     }
 
-    private fun prepareCatenaXCredential(
+    private fun prepareBaseWalletCredential(
         bpn: String,
         type: String,
         data: Any?
@@ -257,7 +276,7 @@ class BusinessPartnerDataServiceImpl(
             JsonLdTypes.MEMBERSHIP_TYPE -> {
                 mutableMapOf(
                     "type" to listOf(JsonLdTypes.MEMBERSHIP_TYPE),
-                    "memberOf" to "Catena-X",
+                    "memberOf" to membershipOrganisation,
                     "status" to "Active",
                     "startTime" to currentDateAsString
                 )
@@ -325,7 +344,7 @@ class BusinessPartnerDataServiceImpl(
             }
             return@async true
         } catch (e: Exception) {
-            log.error("Error: Revoke and delete Catena-X Credentials ${e.message}")
+            log.error("Error: Revoke and delete base wallet credentials ${e.message}")
             return@async false
         }
     }

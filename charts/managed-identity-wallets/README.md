@@ -1,6 +1,6 @@
 # managed-identity-wallets
 
-![Version: 0.6.3](https://img.shields.io/badge/Version-0.6.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0](https://img.shields.io/badge/AppVersion-3.0.0-informational?style=flat-square)
+![Version: 0.6.6](https://img.shields.io/badge/Version-0.6.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
 
 Managed Identity Wallets Service
 
@@ -19,6 +19,9 @@ Managed Identity Wallets Service
 | auth.role | string | `"add_wallets"` | The main role in MIW |
 | auth.roleMappings | string | `"create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"` | The role mapping in MIW |
 | auth.resourceId | string | `"Cl5-CX-Custodian"` | The resource Id in Keycloak |
+| auth.jwksUrl | string | `"https://localhost:8081"` | IAM certs url |
+| auth.issuerUrl | string | `"https://localhost:8081"` | IAM token issuer url |
+| auth.redirectUrl | string | `"https:/localhost:8080/callback"` | IAM redirect url to the MIW |
 | image.name | string | `"catenax-ng/tx-managed-identity-wallets_service"` |  |
 | image.registry | string | `"ghcr.io"` |  |
 | image.tag | string | `""` | Overrides the image tag whose default is the chart appVersion |
@@ -27,10 +30,19 @@ Managed Identity Wallets Service
 | db.jdbcDriver | string | `"org.postgresql.Driver"` | Database driver to use |
 | namespace | string | `"managed-identity-wallets"` |  |
 | logging.exposed | string | `"INFO"` |  |
+| openapi.title | string | `"Managed Identity Wallets API"` |  |
+| openapi.description | string | `"Managed Identity Wallets API"` |  |
+| openapi.termsOfServiceUrl | string | `"https://www.eclipse.org/legal/termsofuse.php"` |  |
+| openapi.contactName | string | `"Eclipse Tractus-X"` |  |
+| openapi.contactEmail | string | `"tractusx-dev@eclipse.org"` |  |
+| openapi.contactUrl | string | `"https://projects.eclipse.org/projects/automotive.tractusx"` |  |
+| openapi.licenseName | string | `"Apache 2.0"` |  |
+| openapi.licenseUrl | string | `"https://github.com/eclipse-tractusx/managed-identity-wallets/blob/main/LICENSE"` |  |
 | wallet.baseWalletBpn | string | `""` | The BPN of the base wallet |
-| wallet.baseWalletShortDid | string | `""` | The short DID of the base wallet. It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#integrate-with-an-write-restricted-indy-ledger. It should be registered on the Indy ledger with role endorser. |
+| wallet.baseWalletShortDid | string | `""` | The short DID of the base wallet. It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#Integrate-with-Indy-Ledger. It should be registered on the Indy ledger with role endorser. |
 | wallet.baseWalletVerkey | string | `""` | The verkey (public key) of the base wallet |
 | wallet.baseWalletName | string | `""` | The name of the base wallet |
+| wallet.membershipOrganisation | string | `"Platform-A"` | The name used in the Membership credential |
 | revocation.refreshHour | string | `"3"` | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
 | revocation.revocationServiceUrl | string | `"http://localhost:8086"` | The url of the revocation service |
 | revocationService.imageName | string | `"registry.gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/revocation"` |  |
@@ -43,9 +55,10 @@ Managed Identity Wallets Service
 | acapy.imageName | string | `"bcgovimages/aries-cloudagent"` |  |
 | acapy.tag | string | `"py36-1.16-1_0.7.5"` |  |
 | acapy.endorser.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
-| acapy.endorser.label | string | `"CatenaXIssuer"` | The label of the instance |
+| acapy.endorser.label | string | `"BaseWalletIssuer"` | The label of the instance |
 | acapy.endorser.logLevel | string | `"INFO"` |  |
 | acapy.endorser.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
+| acapy.endorser.endpointUrl | string | `"https://localhost:8000"` | The endpoint url in the DID document |
 | acapy.endorser.databaseHost | string | `"acapypostgresql"` | The host of the used database |
 | acapy.endorser.endpointPort | string | `"8000"` | The port at which the wallet is reachable |
 | acapy.endorser.adminPort | string | `"11000"` | The port at which the admin API is reachable |
@@ -59,10 +72,11 @@ Managed Identity Wallets Service
 | acapy.endorser.secret.jwtsecret | string | `"0"` |  |
 | acapy.endorser.secret.walletkey | string | `"0"` |  |
 | acapy.mt.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
-| acapy.mt.label | string | `"CatenaXIssuer"` | The label of the instance |
+| acapy.mt.label | string | `"ManagedWallet"` | The label of the instance |
 | acapy.mt.logLevel | string | `"INFO"` |  |
 | acapy.mt.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
-| acapy.mt.databaseHost | string | `"acapypostgresql"` |  |
+| acapy.mt.endpointUrl | string | `"https://localhost:8003"` | The endpoint url in the DID document |
+| acapy.mt.databaseHost | string | `"acapypostgresql"` | The host of the used database |
 | acapy.mt.endpointPort | string | `"8003"` | The port at which the sub-wallets are reachable |
 | acapy.mt.adminPort | string | `"11003"` | The port at which the admin API is reachable |
 | acapy.mt.adminUrl | string | `"http://localhost:11003"` | The url of the admin API |
@@ -89,7 +103,7 @@ Managed Identity Wallets Service
 | postgresql.primary.extraVolumes[0].name | string | `"initdb"` |  |
 | postgresql.primary.extraVolumes[0].emptyDir | object | `{}` |  |
 | postgresql.primary.initContainers[0].name | string | `"initdb"` |  |
-| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.0.0"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
+| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.1.0"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
 | postgresql.primary.initContainers[0].imagePullPolicy | string | `"Always"` |  |
 | postgresql.primary.initContainers[0].command[0] | string | `"sh"` |  |
 | postgresql.primary.initContainers[0].args[0] | string | `"-c"` |  |

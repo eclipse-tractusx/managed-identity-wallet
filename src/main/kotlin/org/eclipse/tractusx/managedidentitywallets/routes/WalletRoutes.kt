@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -29,20 +29,36 @@ import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.DeleteInfo
 import io.bkbn.kompendium.core.metadata.method.GetInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
-
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
+import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
+import org.eclipse.tractusx.managedidentitywallets.models.ExceptionResponse
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletResultDto
+import org.eclipse.tractusx.managedidentitywallets.models.StoreVerifiableCredentialParameter
+import org.eclipse.tractusx.managedidentitywallets.models.SuccessResponse
+import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
+import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDtoParameter
+import org.eclipse.tractusx.managedidentitywallets.models.conflictException
+import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.notFoundException
+import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.InvitationRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
+import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
-
 import org.jetbrains.exposed.exceptions.ExposedSQLException
-
 import java.time.LocalDateTime
 
 fun Route.walletRoutes(walletService: IWalletService) {
@@ -115,7 +131,7 @@ fun Route.walletRoutes(walletService: IWalletService) {
                         summary = "Register and Establish Initial Connection with Partners",
                         description = "Permission: " +
                                 "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
-                                "\n Register self managed wallet and establish the initial connection with CatenaX. " +
+                                "\n Register self managed wallet and establish the initial connection with base wallet. " +
                                 "Also issue their membership and BPN credentials",
                         requestInfo = RequestInfo(
                             description = "Register self managed wallet, establish a connection and issue membership and BPN credentials",

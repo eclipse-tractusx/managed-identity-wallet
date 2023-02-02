@@ -1,13 +1,19 @@
 # The IAM configuration
 auth:
-  # -- (string) The realm name in Keycloak
+  # -- The realm name in Keycloak
   realm: "CX-Central"
-  # -- (string) The main role in MIW
+  # -- The main role in MIW
   role: "add_wallets"
-  # -- (string) The role mapping in MIW
+  # -- The role mapping in MIW
   roleMappings: "create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"
   # -- (string) The resource Id in Keycloak
   resourceId: "Cl5-CX-Custodian"
+  # -- IAM certs url
+  jwksUrl: "https://localhost:8081"
+  # -- IAM token issuer url
+  issuerUrl: "https://localhost:8081"
+  # -- IAM redirect url to the MIW
+  redirectUrl: "https:/localhost:8080/callback"
 # The image of the Managed Identity Wallets
 image:
   name: "catenax-ng/tx-managed-identity-wallets_service"
@@ -22,18 +28,30 @@ db:
 namespace: "managed-identity-wallets"
 logging:
   exposed: "INFO"
+# The OpenAPI configuration in MIW
+openapi:
+  title: "Managed Identity Wallets API"
+  description: "Managed Identity Wallets API"
+  termsOfServiceUrl: "https://www.eclipse.org/legal/termsofuse.php"
+  contactName: "Eclipse Tractus-X"
+  contactEmail: "tractusx-dev@eclipse.org"
+  contactUrl: "https://projects.eclipse.org/projects/automotive.tractusx"
+  licenseName: "Apache 2.0"
+  licenseUrl: "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/main/LICENSE"
 # The base wallet configuration in MIW
 wallet:
   # -- The BPN of the base wallet
   baseWalletBpn: ""
   # -- The short DID of the base wallet.
-  # It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#integrate-with-an-write-restricted-indy-ledger.
+  # It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#Integrate-with-Indy-Ledger.
   # It should be registered on the Indy ledger with role endorser.
   baseWalletShortDid: ""
   # -- The verkey (public key) of the base wallet
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
+  # -- The name used in the Membership credential
+  membershipOrganisation: "Platform-A"
 # The configuration of revocation service in MIW
 revocation:
   # --  At which hour (24-hour clock) the cron job should issue/update status-list credentials
@@ -60,10 +78,12 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "BaseWalletIssuer"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"
+    # -- The endpoint url in the DID document
+    endpointUrl: "https://localhost:8000"
     # -- The host of the used database
     databaseHost: "acapypostgresql"
     # -- The port at which the wallet is reachable
@@ -90,10 +110,13 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "ManagedWallet"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"
+    # -- The endpoint url in the DID document
+    endpointUrl: "https://localhost:8003"
+    # -- The host of the used database
     databaseHost: "acapypostgresql"
     # -- The port at which the sub-wallets are reachable
     endpointPort: "8003"
@@ -144,7 +167,7 @@ postgresql:
     initContainers:
       - name: initdb
         # -- The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml
-        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.0.0
+        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.1.0
         imagePullPolicy: Always
         command:
           - sh

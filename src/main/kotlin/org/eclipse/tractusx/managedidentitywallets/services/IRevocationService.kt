@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,9 +24,9 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
-import io.ktor.client.features.logging.*
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.slf4j.LoggerFactory
 

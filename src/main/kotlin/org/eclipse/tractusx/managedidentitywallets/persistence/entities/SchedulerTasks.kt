@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,7 +20,7 @@
 package org.eclipse.tractusx.managedidentitywallets.persistence.entities
 
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.javatime.*
+import org.jetbrains.exposed.sql.javatime.timestamp
 
 object SchedulerTasks : Table("scheduled_tasks") {
     val taskName = text("task_name")

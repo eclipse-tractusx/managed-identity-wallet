@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,26 +19,26 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import kotlinx.coroutines.Deferred
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
+import kotlinx.coroutines.Deferred
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.slf4j.LoggerFactory
 
 interface IBusinessPartnerDataService {
 
-    suspend fun pullDataAndUpdateCatenaXCredentialsAsync(identifier: String? = null): Deferred<Boolean>
+    suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(identifier: String? = null): Deferred<Boolean>
 
-    suspend fun issueAndStoreCatenaXCredentialsAsync(
+    suspend fun issueAndStoreBaseWalletCredentialsAsync(
         walletHolderDto: WalletDto,
         type: String,
         data: Any? = null
     ): Deferred<Boolean>
 
-    suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+    suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
         webhookUrl: String? = null,
@@ -51,13 +51,15 @@ interface IBusinessPartnerDataService {
 
         fun createBusinessPartnerDataService(
             walletService: IWalletService,
-            bpdmConfig: BPDMConfig
+            bpdmConfig: BPDMConfig,
+            membershipOrganisation: String
         ): IBusinessPartnerDataService {
             return BusinessPartnerDataServiceImpl(
                 walletService,
                 bpdmConfig,
+                membershipOrganisation,
                 HttpClient {
-                    expectSuccess = false // must be set to false to handle thrown error if the access token has expired
+                    expectSuccess = false // must be false to handle thrown error if the access token has expired
                     install(ResponseObserver) {
                         onResponse { response ->
                             log.debug("HTTP status: ${response.status.value}")

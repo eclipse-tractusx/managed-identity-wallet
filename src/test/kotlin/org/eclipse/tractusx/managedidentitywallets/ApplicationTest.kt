@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,13 +21,27 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.http.*
 import io.ktor.server.testing.*
-
-import kotlinx.coroutines.*
-import kotlin.test.*
-
-import org.eclipse.tractusx.managedidentitywallets.plugins.*
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.routes.*
+import kotlinx.coroutines.runBlocking
+import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.plugins.BusinessPartnerInfo
+import org.eclipse.tractusx.managedidentitywallets.plugins.UserSession
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureJobs
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureOpenAPI
+import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureRouting
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSecurity
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureSockets
+import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
+import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
+import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 @kotlinx.serialization.ExperimentalSerializationApi
 class ApplicationTest {
@@ -148,7 +162,7 @@ class ApplicationTest {
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                assertTrue(response.content!!.contains("Catena-X Core"))
+                assertTrue(response.content!!.contains("Managed Identity Wallets"))
             }
             handleRequest(HttpMethod.Post, "/").apply {
                 assertEquals(HttpStatusCode.NotFound, response.status())
@@ -323,7 +337,7 @@ class ApplicationTest {
                         "not match requestors BPN ${EnvironmentTestSetup.EXTRA_TEST_BPN}") }
             }
 
-            // request a credential by the Catena-X issuer
+            // request a credential by the base wallet issuer
             handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN_SINGLE}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -361,7 +375,7 @@ class ApplicationTest {
                 assertTrue { response.content!!.contains("Error: no verification methods") }
             }
 
-            // request a Catena-X credential using not Catena-X BPN in Token
+            // request a base wallet credential using Token of another BPN
             handleRequest(HttpMethod.Post, "/api/credentials/issuer") {
                 addHeader(HttpHeaders.Authorization, "Bearer ${EnvironmentTestSetup.UPDATE_TOKEN_SINGLE_EXTRA_BPN}")
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())

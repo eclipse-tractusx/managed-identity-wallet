@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the CatenaX (ng) GitHub Organisation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,7 +19,9 @@
 
 package org.eclipse.tractusx.managedidentitywallets
 
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import java.util.*
 

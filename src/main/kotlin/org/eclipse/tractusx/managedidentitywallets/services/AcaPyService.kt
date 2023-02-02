@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -28,9 +28,27 @@ import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.Services
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
+import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateSubWallet
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateWalletTokenResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreatedSubWalletResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidCreate
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidEndpointWithType
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidRegistration
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidRegistrationResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.ResolutionResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletKey
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
 import org.hyperledger.acy_py.generated.model.TransactionJobs
 import org.hyperledger.acy_py.generated.model.V20CredRequestRequest
 import org.hyperledger.acy_py.generated.model.V20CredStoreRequest
@@ -311,7 +329,7 @@ class AcaPyService(
     override suspend fun getAcapyClient(walletToken: String?): AriesClient {
         val ariesClient = AriesClient.builder()
         if (walletToken == null) {
-            // Catena X Wallet
+            // The base wallet
             ariesClient
                 .url(acaPyConfig.baseWalletAdminUrl)
                 .apiKey(acaPyConfig.baseWalletAdminApiKey)
@@ -422,7 +440,7 @@ class AcaPyService(
 
     private fun getAcaPyUrlAndApiKeyBasedOnToken(token: String?): Pair<String, String> {
         if (token == null) {
-            // The Catena X Wallet
+            // The base wallet
             return acaPyConfig.baseWalletAdminUrl to acaPyConfig.baseWalletAdminApiKey
         }
         // Other wallets and multi-tenancy management wallet

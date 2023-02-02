@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,9 +24,57 @@ import foundation.identity.jsonld.JsonLDUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.*
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.*
+import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
+import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
+import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
+import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
+import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
+import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletResultDto
+import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
+import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceUpdateRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidVerificationMethodDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.InvitationRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialRequestData
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialSubject
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CreateSubWallet
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidCreate
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidCreateOptions
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidEndpointWithType
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidMethod
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.DidRegistration
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.KeyManagementMode
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.KeyType
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.ResolutionResult
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignCredentialResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignDoc
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignOptions
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignPresentationResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerificationKeyType
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRequest
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletDispatchType
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletType
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallet
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
@@ -85,7 +133,7 @@ class AcaPyWalletServiceImpl(
         }
     }
 
-    override fun getCatenaXWallet(): WalletExtendedData {
+    override fun getBaseWallet(): WalletExtendedData {
         return WalletExtendedData(
             id = null,
             name = "", // currently, not needed anywhere
@@ -136,7 +184,7 @@ class AcaPyWalletServiceImpl(
             createdSubWalletDto.token
         )
 
-        // This can also be done using endorsement. but catena-X wallet can register it directly
+        // This can also be done using endorsement. but the Base Wallet can register it directly
         acaPyService.registerDidOnLedgerUsingBaseWallet(DidRegistration(
             did = createdDid.result.did,
             alias = walletCreateDto.name,
@@ -164,7 +212,7 @@ class AcaPyWalletServiceImpl(
         }
 
         acaPyService.sendConnectionRequest(
-            didOfTheirWallet = getCatenaXWallet().did,
+            didOfTheirWallet = getBaseWallet().did,
             usePublicDid = false,
             alias = "endorser",
             token = createdSubWalletDto.token,
@@ -211,7 +259,7 @@ class AcaPyWalletServiceImpl(
             val createdWalletData = walletRepository.addWallet(walletToCreate)
             connectionRepository.add(
                 idOfConnection = connectionRecord.connectionId,
-                connectionOwnerDid = getCatenaXWallet().did,
+                connectionOwnerDid = getBaseWallet().did,
                 connectionTargetDid = selfManagedWalletCreateDto.did,
                 rfc23State =  connectionRecord.rfc23State
             )
@@ -251,7 +299,7 @@ class AcaPyWalletServiceImpl(
             connectionRepository.deleteConnections(walletData.did)
             walletRepository.deleteWallet(identifier)
         }
-        if (!isSelfManagedWallet && !isCatenaXWallet(walletData.bpn)) {
+        if (!isSelfManagedWallet && !isBaseWallet(walletData.bpn)) {
             acaPyService.deleteSubWallet(walletData)
         }
         return true
@@ -289,19 +337,19 @@ class AcaPyWalletServiceImpl(
         return credentialRepository.deleteCredentialByCredentialId(credentialId)
     }
 
-    override suspend fun issueCatenaXCredential(
-        vcCatenaXRequest: VerifiableCredentialRequestWithoutIssuerDto
+    override suspend fun issueBaseWalletCredential(
+        vcBaseWalletRequest: VerifiableCredentialRequestWithoutIssuerDto
     ): VerifiableCredentialDto {
         val verifiableCredentialRequestDto = VerifiableCredentialRequestDto(
-            id = vcCatenaXRequest.id,
-            context = vcCatenaXRequest.context,
-            type = vcCatenaXRequest.type,
+            id = vcBaseWalletRequest.id,
+            context = vcBaseWalletRequest.context,
+            type = vcBaseWalletRequest.type,
             issuerIdentifier = baseWalletBpn,
-            issuanceDate = vcCatenaXRequest.issuanceDate,
-            expirationDate = vcCatenaXRequest.expirationDate,
-            credentialSubject = vcCatenaXRequest.credentialSubject,
-            holderIdentifier = vcCatenaXRequest.holderIdentifier,
-            isRevocable = vcCatenaXRequest.isRevocable
+            issuanceDate = vcBaseWalletRequest.issuanceDate,
+            expirationDate = vcBaseWalletRequest.expirationDate,
+            credentialSubject = vcBaseWalletRequest.credentialSubject,
+            holderIdentifier = vcBaseWalletRequest.holderIdentifier,
+            isRevocable = vcBaseWalletRequest.isRevocable
         )
         return issueCredential(verifiableCredentialRequestDto)
     }
@@ -440,7 +488,7 @@ class AcaPyWalletServiceImpl(
             }
         }
 
-        if (isCatenaXWallet(walletData.bpn)) {
+        if (isBaseWallet(walletData.bpn)) {
             acaPyService.updateServiceOfBaseWallet(
                 DidEndpointWithType(
                     didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
@@ -474,7 +522,7 @@ class AcaPyWalletServiceImpl(
             didDoc.services.filter {
                 it.id.split("#")[1] == id
             }.map {
-                if (isCatenaXWallet(walletData.bpn)) {
+                if (isBaseWallet(walletData.bpn)) {
                     acaPyService.updateServiceOfBaseWallet(
                         DidEndpointWithType(
                             didIdentifier = utilsService.getIdentifierOfDid(walletData.did),
@@ -525,7 +573,7 @@ class AcaPyWalletServiceImpl(
         return credentialRepository.getCredentials(issuerDid, holderDid, type, credentialId)
     }
 
-    private fun isCatenaXWallet(bpn: String): Boolean = bpn == baseWalletBpn
+    private fun isBaseWallet(bpn: String): Boolean = bpn == baseWalletBpn
 
     override suspend fun verifyVerifiablePresentation(
         vpDto: VerifiablePresentationDto,
@@ -566,6 +614,7 @@ class AcaPyWalletServiceImpl(
         withRevocationCheck: Boolean,
         walletToken: String?
     ) {
+        utilsService.checkIndyDid(vc.issuer)
         if (withDateValidation) {
             val currentDatetime: Date = Date.from(Instant.now())
             if (currentDatetime.before(JsonLDUtils.stringToDate(vc.issuanceDate))) {
@@ -585,8 +634,7 @@ class AcaPyWalletServiceImpl(
             validateRevocation(vc, walletToken)
         }
         val verifyReq = VerifyRequest(
-            signedDoc = vc,
-            verkey = getVerKeyOfVerificationMethodId(vc.issuer, vc.proof.verificationMethod)
+            signedDoc = vc
         )
         var isValid = true
         var message = ""
@@ -612,14 +660,8 @@ class AcaPyWalletServiceImpl(
         if (vpDto.proof == null) {
             throw UnprocessableEntityException("Cannot verify verifiable presentation due to missing proof")
         }
-        val didOfVpSigner = if (vpDto.holder.isNullOrEmpty()) {
-            vpDto.proof.verificationMethod.split("#").first()
-        } else {
-            vpDto.holder
-        }
         val verifyVPReq = VerifyRequest(
-            signedDoc = vpDto,
-            verkey = getVerKeyOfVerificationMethodId(didOfVpSigner, vpDto.proof.verificationMethod)
+            signedDoc = vpDto
         )
         var isValid = true
         var message = ""
@@ -636,18 +678,6 @@ class AcaPyWalletServiceImpl(
         if (!isValid) {
             throw UnprocessableEntityException("Verifiable presentation is not valid.$message")
         }
-    }
-
-    private suspend fun getVerKeyOfVerificationMethodId(did: String, verificationMethodId: String): String {
-        val didDocumentDto = resolveDocument(did)
-        if (didDocumentDto.verificationMethods.isNullOrEmpty()) {
-            throw UnprocessableEntityException("The DID Doc has no verification methods")
-        }
-        val verificationMethod = didDocumentDto.verificationMethods.find {
-                method -> method.id == verificationMethodId
-        } ?: throw UnprocessableEntityException("Verification method with given Id " +
-                "$verificationMethodId does not exist")
-        return getVerificationKey(verificationMethod, VerificationKeyType.PUBLIC_KEY_BASE58.toString())
     }
 
     private fun getWalletExtendedInformation(identifier: String): WalletExtendedData {
@@ -789,8 +819,8 @@ class AcaPyWalletServiceImpl(
         }
     }
 
-    override fun getConnectionWithCatenaX(theirDid: String): ConnectionDto? {
-        return getConnections(getCatenaXWallet().did, theirDid).firstOrNull()
+    override fun getConnectionWithBaseWallet(theirDid: String): ConnectionDto? {
+        return getConnections(getBaseWallet().did, theirDid).firstOrNull()
     }
 
     override suspend fun triggerCredentialIssuanceFlow(
@@ -837,7 +867,7 @@ class AcaPyWalletServiceImpl(
         )
 
         val v20CredExRecord = acaPyService.issuanceFlowCredentialSend(
-            token = issuerWallet.walletToken, // null for catenaX wallet
+            token = issuerWallet.walletToken, // null for the Base Wallet
             vc = vcAcapyRequest
         )
 
@@ -932,7 +962,7 @@ class AcaPyWalletServiceImpl(
         )
     }
 
-    override suspend fun initCatenaXWalletAndSubscribeForAriesWS(
+    override suspend fun initBaseWalletAndSubscribeForAriesWS(
         bpn: String,
         did: String,
         verkey: String,
@@ -1020,7 +1050,7 @@ class AcaPyWalletServiceImpl(
         val extendedData = getWalletExtendedInformation(walletId)
         acaPyService.setAuthorRoleAndInfoMetaData(
             connectionId,
-            utilsService.getIdentifierOfDid(getCatenaXWallet().did),
+            utilsService.getIdentifierOfDid(getBaseWallet().did),
             extendedData.walletToken!!
         )
     }
