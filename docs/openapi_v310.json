@@ -1,14 +1,14 @@
 {
     "openapi": "3.0.3",
     "info": {
-        "title": "Catena-X Core Managed Identity Wallets API",
-        "version": "3.0.0",
-        "description": "Catena-X Core Managed Identity Wallets API",
-        "termsOfService": "https://www.catena-x.net/",
+        "title": "Managed Identity Wallets API",
+        "version": "3.1.0",
+        "description": "Managed Identity Wallets API",
+        "termsOfService": "https://www.eclipse.org/legal/termsofuse.php",
         "contact": {
-            "name": "Catena-X Core Agile Release Train",
-            "url": "https://www.catena-x.net/",
-            "email": "info@catena-x.net"
+            "name": "Eclipse Tractus-X",
+            "url": "https://projects.eclipse.org/projects/automotive.tractusx",
+            "email": "tractusx-dev@eclipse.org"
         },
         "license": {
             "name": "Apache 2.0",
@@ -16,18 +16,6 @@
         }
     },
     "servers": [
-        {
-            "url": "http://localhost:8080",
-            "description": "Local Dev Environment"
-        },
-        {
-            "url": "https://managed-identity-wallets.dev.demo.catena-x.net",
-            "description": "Catena-X Dev Environment"
-        },
-        {
-            "url": "https://managed-identity-wallets.int.demo.catena-x.net",
-            "description": "Catena-X Int Environment"
-        }
     ],
     "paths": {
         "/api/wallets": {
@@ -134,7 +122,7 @@
                                             "bpn": "bpn",
                                             "did": "did",
                                             "verKey": "verkey",
-                                            "createdAt": "2023-01-23T11:24:25.023037446",
+                                            "createdAt": "2023-01-28T17:35:12.815638",
                                             "vcs": [
                                             ],
                                             "pendingMembershipIssuance": false,
@@ -226,7 +214,7 @@
                 "tags": [
                 ],
                 "summary": "Register and Establish Initial Connection with Partners",
-                "description": "Permission: **update_wallets**\n\n Register self managed wallet and establish the initial connection with CatenaX. Also issue their membership and BPN credentials",
+                "description": "Permission: **update_wallets**\n\n Register self managed wallet and establish the initial connection with base wallet. Also issue their membership and BPN credentials",
                 "parameters": [
                 ],
                 "requestBody": {
@@ -354,7 +342,7 @@
                                             "name": "name",
                                             "bpn": "bpn",
                                             "did": "did",
-                                            "createdAt": "2023-01-23T11:24:25.023118846",
+                                            "createdAt": "2023-01-28T17:35:12.815728",
                                             "vcs": [
                                             ],
                                             "pendingMembershipIssuance": false,
@@ -1640,8 +1628,8 @@
                 "tags": [
                     "VerifiableCredentials"
                 ],
-                "summary": "Issue a Verifiable Credential with Catena-X platform issuer",
-                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of Catena-X wallet must equal BPN of caller)\n\nIssue a verifiable credential by Catena-X wallet",
+                "summary": "Issue a Verifiable Credential with base wallet issuer",
+                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\nIssue a verifiable credential by base wallet",
                 "parameters": [
                 ],
                 "requestBody": {
@@ -1803,7 +1791,7 @@
                     "VerifiableCredentials"
                 ],
                 "summary": "Issue credential flow according to Aries RFC 0453",
-                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of Catena-X wallet must equal BPN of caller)\n\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. Issuer must be a DID managed by the MIW",
+                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. Issuer must be a DID managed by the MIW",
                 "parameters": [
                 ],
                 "requestBody": {

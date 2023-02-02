@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -26,13 +26,13 @@ import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerData
 
 class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
 
-    override suspend fun pullDataAndUpdateCatenaXCredentialsAsync(
+    override suspend fun pullDataAndUpdateBaseWalletCredentialsAsync(
         identifier: String?
     ): Deferred<Boolean> {
         return CompletableDeferred(true)
     }
 
-    override suspend fun issueAndStoreCatenaXCredentialsAsync(
+    override suspend fun issueAndStoreBaseWalletCredentialsAsync(
         walletHolderDto: WalletDto,
         type: String,
         data: Any?
@@ -40,7 +40,7 @@ class BusinessPartnerDataMockedService: IBusinessPartnerDataService {
         return CompletableDeferred(true)
     }
 
-    override suspend fun issueAndSendCatenaXCredentialsForSelfManagedWalletsAsync(
+    override suspend fun issueAndSendBaseWalletCredentialsForSelfManagedWalletsAsync(
         targetWallet: WalletDto,
         connectionId: String,
         webhookUrl: String?,

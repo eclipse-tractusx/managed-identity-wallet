@@ -22,6 +22,16 @@ db:
 namespace: "managed-identity-wallets"
 logging:
   exposed: "INFO"
+# The OpenAPI configuration in MIW
+openapi:
+  title: "Managed Identity Wallets API"
+  description: "Managed Identity Wallets API"
+  termsOfServiceUrl: "https://www.eclipse.org/legal/termsofuse.php"
+  contactName: "Eclipse Tractus-X"
+  contactEmail: "tractusx-dev@eclipse.org"
+  contactUrl: "https://projects.eclipse.org/projects/automotive.tractusx"
+  licenseName: "Apache 2.0"
+  licenseUrl: "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/main/LICENSE"
 # The base wallet configuration in MIW
 wallet:
   # -- The BPN of the base wallet
@@ -34,6 +44,8 @@ wallet:
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
+  # -- The name used in the Membership credential
+  membershipOrganisation: "Platform-A"
 # The configuration of revocation service in MIW
 revocation:
   # --  At which hour (24-hour clock) the cron job should issue/update status-list credentials
@@ -60,7 +72,7 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "BaseWalletIssuer"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"
@@ -90,7 +102,7 @@ acapy:
     # -- The url of the used Indy ledger
     ledgerUrl: "https://idu.cloudcompass.ca"
     # -- The label of the instance
-    label: "CatenaXIssuer"
+    label: "ManagedWallet"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
     networkIdentifier: "idunion:test"
@@ -144,7 +156,7 @@ postgresql:
     initContainers:
       - name: initdb
         # -- The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml
-        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.0.0
+        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.1.0
         imagePullPolicy: Always
         command:
           - sh

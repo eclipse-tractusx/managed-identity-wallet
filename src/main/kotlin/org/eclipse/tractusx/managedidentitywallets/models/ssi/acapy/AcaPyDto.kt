@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -204,7 +204,7 @@ data class VerifyResponse(
 @Serializable
 data class VerifyRequest<T>(
     @JsonProperty("doc") @SerialName("doc") val signedDoc: T?,
-    val verkey: String
+    val verkey: String? = null
 )
 
 @Serializable

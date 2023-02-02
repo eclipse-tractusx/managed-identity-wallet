@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,13 +24,13 @@ import io.bkbn.kompendium.core.Notarized.notarizedPost
 import io.bkbn.kompendium.core.metadata.ParameterExample
 import io.bkbn.kompendium.core.metadata.ResponseInfo
 import io.bkbn.kompendium.core.metadata.method.PostInfo
-
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
-
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.BusinessPartnerDataRefreshParameters
+import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
+import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
 
 fun Route.businessPartnerDataRoutes(businessPartnerDataService: IBusinessPartnerDataService) {
@@ -63,7 +63,7 @@ fun Route.businessPartnerDataRoutes(businessPartnerDataService: IBusinessPartner
             ) {
                 AuthorizationHandler.checkHasRightsToUpdateWallet(call, call.request.queryParameters["identifier"])
 
-                businessPartnerDataService.pullDataAndUpdateCatenaXCredentialsAsync(
+                businessPartnerDataService.pullDataAndUpdateBaseWalletCredentialsAsync(
                     call.request.queryParameters["identifier"]
                 )
                 return@notarizedPost call.respond(HttpStatusCode.Accepted)

@@ -3,7 +3,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: catenax-managed-identity-wallets-ingress
+  name: managed-identity-wallets-ingress
   namespace: {{ .Values.Namespace }}
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -35,7 +35,7 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: catenax-managed-identity-wallets-acapy-base
+                name: managed-identity-wallets-acapy-base
                 port:
                   number: 8000
     - host: {{ .Values.certificate.host }}
@@ -45,7 +45,7 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: catenax-managed-identity-wallets-acapy-mt
+                name: managed-identity-wallets-acapy-mt
                 port:
                   number: 8003
     - host: {{ .Values.certificate.host }}
@@ -55,7 +55,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: catenax-managed-identity-wallets
+                name: managed-identity-wallets
                 port:
                   number: 8080
   tls:

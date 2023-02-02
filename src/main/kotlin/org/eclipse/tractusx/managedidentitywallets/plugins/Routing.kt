@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,34 +19,26 @@
 
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
-import io.ktor.http.*
-
-import io.ktor.routing.*
+import io.bkbn.kompendium.core.routes.redoc
 import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.http.content.*
-import io.ktor.auth.authenticate
-import io.ktor.auth.authentication
-import io.ktor.auth.OAuthAccessTokenResponse
-import io.ktor.sessions.*
-
+import io.ktor.auth.*
+import io.ktor.client.*
 import io.ktor.client.engine.apache.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.client.features.*
-import io.ktor.client.*
-
-import java.io.File
-import java.io.IOException
-
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.sessions.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.*
-
-import io.bkbn.kompendium.core.routes.redoc
-
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import kotlinx.serialization.json.Json
+import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
+import java.io.File
+import java.io.IOException
 
 suspend fun retrieveBusinessPartnerInfo(bpdmDatapoolUrl: String, bpn: String, token: String): String {
 
@@ -82,7 +74,7 @@ fun Application.configureRouting(IWalletService: IWalletService) {
                 """
 <html>
   <head>
-    <title>Catena-X Core // Managed Identity Wallets</title>
+    <title> Managed Identity Wallets </title>
     <style>
       body {
         font-family:sans-serif;

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -42,7 +42,7 @@ fun Application.configureJobs() {
         // Spring Scheduled tasks (second, minute, hour, day of month, month, day(s) of week)
         Schedules.cron("0 0 $pullDataAtHour * * *"))
         .execute { _, _ ->
-            runPullDataAndUpdateCatenaXCredentialJobPayload()
+            runPullDataAndUpdateBaseWalletCredentialJobPayload()
         }
 
     val updateRevocationList: RecurringTask<Void> = Tasks.recurring(
@@ -55,9 +55,7 @@ fun Application.configureJobs() {
 
     val scheduler: Scheduler = Scheduler
         .create(initDatabase(jdbcUrl))
-        //TODO: replace after fixing the Business Partner Data requests
-        //.startTasks(bpdmUpdate, updateRevocationList)
-        .startTasks(updateRevocationList)
+        .startTasks(bpdmUpdate, updateRevocationList)
         .pollingInterval(Duration.ofHours(1))
         .registerShutdownHook()
         .threads(3)
@@ -82,9 +80,9 @@ fun initDatabase(jdbcUrl: String): DataSource {
     }
 }
 
-fun runPullDataAndUpdateCatenaXCredentialJobPayload() {
+fun runPullDataAndUpdateBaseWalletCredentialJobPayload() {
     runBlocking {
-        Services.businessPartnerDataService.pullDataAndUpdateCatenaXCredentialsAsync()
+        Services.businessPartnerDataService.pullDataAndUpdateBaseWalletCredentialsAsync()
     }
 }
 

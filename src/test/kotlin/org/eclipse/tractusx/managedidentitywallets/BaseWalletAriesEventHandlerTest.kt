@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,9 +22,9 @@ package org.eclipse.tractusx.managedidentitywallets
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.server.testing.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
-import org.eclipse.tractusx.managedidentitywallets.models.*
+import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.InvitationRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
@@ -32,7 +32,15 @@ import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.Cred
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
-import org.eclipse.tractusx.managedidentitywallets.services.*
+import org.eclipse.tractusx.managedidentitywallets.services.AcaPyService
+import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
+import org.eclipse.tractusx.managedidentitywallets.services.BaseWalletAriesEventHandler
+import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
+import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
+import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
+import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
+import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
+import org.eclipse.tractusx.managedidentitywallets.services.WebhookServiceImpl
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
 import org.hyperledger.acy_py.generated.model.V20CredIssue
@@ -42,18 +50,27 @@ import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.hyperledger.aries.webhook.TenantAwareEventHandler
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.io.File
-import java.lang.RuntimeException
 import java.util.*
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @kotlinx.serialization.ExperimentalSerializationApi
 class BaseWalletAriesEventHandlerTest {
 
     private val issuerWallet = WalletExtendedData(
         id = 1,
-        name = "CatenaX_Wallet",
+        name = "Base_Wallet",
         bpn = EnvironmentTestSetup.DEFAULT_BPN,
         did = EnvironmentTestSetup.DEFAULT_DID,
         walletId = null,
@@ -176,7 +193,7 @@ class BaseWalletAriesEventHandlerTest {
                             invitationRequestDto = InvitationRequestDto(
                                 theirPublicDid = issuerWallet.did,
                                 myLabel = "testLabel",
-                                alias = "ToCatenaX"
+                                alias = "ToBaseWallet"
                             )
                         )
                     }
@@ -409,11 +426,11 @@ class BaseWalletAriesEventHandlerTest {
             wallets.forEach {
                 if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
                     runBlocking {
-                        walletService.initCatenaXWalletAndSubscribeForAriesWS(
+                        walletService.initBaseWalletAndSubscribeForAriesWS(
                             EnvironmentTestSetup.DEFAULT_BPN,
                             EnvironmentTestSetup.DEFAULT_DID,
                             EnvironmentTestSetup.DEFAULT_VERKEY,
-                            "Catena-X-Wallet"
+                            "Base-Wallet"
                         )
                     }
                 } else {

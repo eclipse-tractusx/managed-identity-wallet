@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -42,6 +42,7 @@ object EnvironmentTestSetup {
     const val DEFAULT_BPN = "BPNL00000"
     const val DEFAULT_DID = "did:sov:ArqouCjqi4RwBXQqjAbQrG"
     const val DEFAULT_VERKEY = "6Ng3Cu39yTViaEUg1BETpze78nXZqHpb6Q783X2rRhe6"
+    const val MEMBERSHIP_ORG = "Organisation-A"
     val walletAcapyConfig = WalletAndAcaPyConfig(
         apiAdminUrl = "apiAdminUrl",
         networkIdentifier = "networkIdentifier",
@@ -94,32 +95,41 @@ object EnvironmentTestSetup {
     )
 
     fun setupEnvironment(environment: ApplicationEnvironment) {
-        val jdbcUrl = System.getenv("CX_DB_JDBC_URL") ?: "jdbc:sqlite:file:test?mode=memory&cache=shared"
+        val jdbcUrl = System.getenv("MIW_DB_JDBC_URL") ?: "jdbc:sqlite:file:test?mode=memory&cache=shared"
         (environment.config as MapApplicationConfig).apply {
             put("app.version", System.getenv("APP_VERSION") ?: "0.0.7")
             put("db.jdbcUrl", jdbcUrl)
-            put("db.jdbcDriver", System.getenv("CX_DB_JDBC_DRIVER") ?: "org.sqlite.JDBC")
+            put("db.jdbcDriver", System.getenv("MIW_DB_JDBC_DRIVER") ?: "org.sqlite.JDBC")
             put("acapy.apiAdminUrl", System.getenv("ACAPY_API_ADMIN_URL") ?: "http://localhost:11000")
             put("acapy.networkIdentifier", System.getenv("ACAPY_NETWORK_IDENTIFIER") ?: "local:test")
             put("acapy.adminApiKey", System.getenv("ACAPY_ADMIN_API_KEY") ?: "Hj23iQUsstG!dde")
-            put("wallet.baseWalletBpn", System.getenv("CX_BPN") ?: DEFAULT_BPN)
-
-            put("auth.jwksUrl", System.getenv("CX_AUTH_JWKS_URL") ?: "http://localhost:18080/jwks")
-            put("auth.issuerUrl", System.getenv("CX_AUTH_ISSUER_URL") ?: JwtConfigTest.issuerUrl)
-            put("auth.realm", System.getenv("CX_AUTH_REALM") ?: "catenax")
+            put("wallet.baseWalletBpn", System.getenv("MIW_BPN") ?: DEFAULT_BPN)
+            put("wallet.membershipOrganisation", System.getenv("MIW_MEMBERSHIP_ORG") ?: MEMBERSHIP_ORG)
+            put("auth.jwksUrl", System.getenv("MIW_AUTH_JWKS_URL") ?: "http://localhost:18080/jwks")
+            put("auth.issuerUrl", System.getenv("MIW_AUTH_ISSUER_URL") ?: JwtConfigTest.issuerUrl)
+            put("auth.realm", System.getenv("MIW_AUTH_REALM") ?: "localkeycloak")
             put("auth.roleMappings",
-                System.getenv("CX_AUTH_ROLE_MAPPINGS")
+                System.getenv("MIW_AUTH_ROLE_MAPPINGS")
                     ?: "create_wallets:create_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"
             )
-            put("auth.resourceId", System.getenv("CX_AUTH_RESOURCE_ID") ?: JwtConfigTest.resourceId)
+            put("auth.resourceId", System.getenv("MIW_AUTH_RESOURCE_ID") ?: JwtConfigTest.resourceId)
 
             // unused yet, just for completeness
-            put("auth.clientId", System.getenv("CX_AUTH_CLIENT_ID") ?: "clientId")
-            put("auth.clientSecret", System.getenv("CX_AUTH_CLIENT_SECRET") ?: "clientSecret")
-            put("auth.redirectUrl", System.getenv("CX_AUTH_REDIRECT_URL") ?: "http://localhost:8080/callback")
+            put("auth.clientId", System.getenv("MIW_AUTH_CLIENT_ID") ?: "clientId")
+            put("auth.clientSecret", System.getenv("MIW_AUTH_CLIENT_SECRET") ?: "clientSecret")
+            put("auth.redirectUrl", System.getenv("MIW_AUTH_REDIRECT_URL") ?: "http://localhost:8080/callback")
 
             put("bpdm.pullDataAtHour", System.getenv("BPDM_PULL_DATA_AT_HOUR") ?: "23")
             put("bpdm.datapoolUrl", System.getenv("BPDM_DATAPOOL_URL") ?: "http://0.0.0.0:8080")
+
+            put("openapi.title", System.getenv("MIW_OPENAPI_TITLE") ?: "Title MIW-API")
+            put("openapi.description", System.getenv("MIW_OPENAPI_DESCRIPTION") ?: "Description MIW-API")
+            put("openapi.termsOfServiceUrl", System.getenv("MIW_OPENAPI_TERM_OF_SERVICES_URL") ?: "http://0.0.0.0:8080")
+            put("openapi.contactName", System.getenv("MIW_OPENAPI_CONTACT_NAME") ?: "contract name")
+            put("openapi.contactEmail", System.getenv("MIW_OPENAPI_CONTACT_EMAIL") ?: "placeholder@example.com")
+            put("openapi.contactUrl", System.getenv("MIW_OPENAPI_CONTACT_URL") ?: "http://0.0.0.0:8080")
+            put("openapi.licenseName", System.getenv("MIW_OPENAPI_LICENSE_NAME") ?: "licenseName")
+            put("openapi.licenseUrl", System.getenv("MIW_OPENAPI_LICENSE_URL") ?: "http://0.0.0.0:8080")
 
             put("revocation.baseUrl", System.getenv("REVOCATION_URL") ?: "http://0.0.0.0:8086")
             put("revocation.createStatusListCredentialAtHour", System.getenv("REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR") ?: "3")
@@ -142,7 +152,7 @@ object EnvironmentTestSetup {
         setupEnvironment(environment)
         (environment.config as MapApplicationConfig).apply {
             put(
-                "auth.roleMappings", value = System.getenv("CX_AUTH_ROLE_MAPPINGS")
+                "auth.roleMappings", value = System.getenv("MIW_AUTH_ROLE_MAPPINGS")
                     ?: ("no_create_wallets:create_wallets,no_view_wallets:view_wallets," +
                             "no_update_wallets:update_wallets,no_delete_wallets:delete_wallets," +
                             "view_wallet:view_wallet,update_wallet:update_wallet")
@@ -154,7 +164,7 @@ object EnvironmentTestSetup {
         setupEnvironment(environment)
         (environment.config as MapApplicationConfig).apply {
             put(
-                "auth.roleMappings", value = System.getenv("CX_AUTH_ROLE_MAPPINGS") ?: roleMapping
+                "auth.roleMappings", value = System.getenv("MIW_AUTH_ROLE_MAPPINGS") ?: roleMapping
             )
         }
     }

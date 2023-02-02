@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bad3c89c-922d-46d0-a112-b91b5a32990c",
+		"_postman_id": "32df21d1-a851-4154-b4b0-ce4ad85f3dc1",
 		"name": "Managed_Wallets_Acapy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -472,7 +472,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:11003/transactions/4dd5e1f3-e6d1-4150-b87d-2a42e3b64a95/set-endorser-info?endorser_did=ArqouCjqi4RwBXQqjAbQrG&endorser_name=catena-x",
+					"raw": "http://localhost:11003/transactions/4dd5e1f3-e6d1-4150-b87d-2a42e3b64a95/set-endorser-info?endorser_did=ArqouCjqi4RwBXQqjAbQrG&endorser_name=base wallet",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -490,7 +490,7 @@
 						},
 						{
 							"key": "endorser_name",
-							"value": "catena-x"
+							"value": "base wallet"
 						}
 					]
 				}

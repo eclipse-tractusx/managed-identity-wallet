@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,11 +19,10 @@
 
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
-import io.ktor.http.cio.websocket.*
-import io.ktor.websocket.*
 import io.ktor.application.*
+import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
-
+import io.ktor.websocket.*
 import java.time.Duration
 
 fun Application.configureSockets() {

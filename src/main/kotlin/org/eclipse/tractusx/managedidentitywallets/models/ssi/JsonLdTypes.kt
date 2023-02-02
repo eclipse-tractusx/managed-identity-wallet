@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -29,7 +29,7 @@ class JsonLdTypes {
         const val ADDRESS_TYPE = "AddressCredential"
         const val LEGAL_FORM_TYPE = "LegalFormCredential"
 
-        fun getCatenaXCredentialTypes() : List<String>{
+        fun getBaseWalletCredentialTypes() : List<String>{
             return listOf(
                 MEMBERSHIP_TYPE,
                 BPN_TYPE,

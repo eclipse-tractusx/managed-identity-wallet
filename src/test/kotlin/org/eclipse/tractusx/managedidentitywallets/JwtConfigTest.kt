@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -33,7 +33,7 @@ import java.util.*
 
 object JwtConfigTest {
 
-    const val issuerUrl = "http://localhost:8081/auth/realms/catenax"
+    const val issuerUrl = "http://localhost:8081/auth/realms/localkeycloak"
     const val resourceId = "ManagedIdentityWallets"
     private const val validityInMs = 36_000_00 * 10 // 10 hours
     val kp: KeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair()!!
