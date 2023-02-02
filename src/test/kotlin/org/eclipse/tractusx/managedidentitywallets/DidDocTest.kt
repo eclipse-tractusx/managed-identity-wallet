@@ -78,7 +78,7 @@ class DidDocTest {
         }) {
             // programmatically add a wallet
             runBlocking {
-                EnvironmentTestSetup.walletService.initBaseWalletAndSubscribeForAriesWS(
+                EnvironmentTestSetup.walletService.initBaseWalletWithListeners(
                     bpn = EnvironmentTestSetup.DEFAULT_BPN,
                     did = EnvironmentTestSetup.DEFAULT_DID,
                     verkey = EnvironmentTestSetup.DEFAULT_VERKEY,

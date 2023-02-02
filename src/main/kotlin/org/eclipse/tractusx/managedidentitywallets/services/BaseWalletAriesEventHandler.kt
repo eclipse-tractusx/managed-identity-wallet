@@ -33,6 +33,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.*
 
+/**
+ * The BaseWalletAriesEventHandler triggers appropriate responses
+ * to some of the Aries-Flow events to enable connection and exchange of credentials
+ * with other external or internal wallets.
+ */
 class BaseWalletAriesEventHandler(
         private val businessPartnerDataService: IBusinessPartnerDataService,
         private val walletService: IWalletService,
@@ -61,7 +66,7 @@ class BaseWalletAriesEventHandler(
                         connectionState = connection.rfc23State
                     )
                     runBlocking {
-                        walletService.setEndorserMetaDataForAcapyConnection(connection.connectionId)
+                        walletService.setEndorserMetaDataForConnection(connection.connectionId)
                         walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
                     }
                 }

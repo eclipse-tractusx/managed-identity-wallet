@@ -29,6 +29,9 @@ import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 import org.jetbrains.exposed.sql.transactions.transaction
 
+/**
+ * WebhookServiceImpl provides implementation for webhook operations.
+ */
 class WebhookServiceImpl(
     private val webhookRepository: WebhookRepository,
     private val client: HttpClient
@@ -62,12 +65,6 @@ class WebhookServiceImpl(
     override fun sendWebhookCredentialMessage(url: String, v20CredExRecord: V20CredExRecord): Boolean {
         return runBlocking {
             sendWebhookMessage(url, v20CredExRecord)
-        }
-    }
-
-    override fun sendWebhookPresentationMessage(url: String): Boolean {
-        return runBlocking {
-            sendWebhookMessage(url, "empty")
         }
     }
 

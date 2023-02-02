@@ -50,7 +50,6 @@ class WalletRepository {
         }
     }
 
-
     fun isWalletExists(identifier: String): Boolean {
         return transaction{
             !Wallet.find { (Wallets.did eq identifier) or (Wallets.bpn eq identifier) }.empty()
@@ -72,17 +71,20 @@ class WalletRepository {
         }
     }
 
+    @Throws(NotFoundException::class)
     fun deleteWallet(identifier: String): Boolean {
         getWallet(identifier).delete()
         return true
     }
 
+    @Throws(NotFoundException::class)
     fun updatePending(did: String, isPending: Boolean) {
         getWallet(did).apply {
             pendingMembershipIssuance = isPending
         }
     }
 
+    @Throws(NotFoundException::class)
     fun addRevocationList(did: String, revocationList: String) {
         getWallet(did).apply {
             revocationListName = revocationList
