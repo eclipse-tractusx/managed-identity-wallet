@@ -19,6 +19,9 @@ Managed Identity Wallets Service
 | auth.role | string | `"add_wallets"` | The main role in MIW |
 | auth.roleMappings | string | `"create_wallets:add_wallets,view_wallets:view_wallets,update_wallets:update_wallets,delete_wallets:delete_wallets,view_wallet:view_wallet,update_wallet:update_wallet"` | The role mapping in MIW |
 | auth.resourceId | string | `"Cl5-CX-Custodian"` | The resource Id in Keycloak |
+| auth.jwksUrl | string | `"https://localhost:8081"` | IAM certs url |
+| auth.issuerUrl | string | `"https://localhost:8081"` | IAM token issuer url |
+| auth.redirectUrl | string | `"https:/localhost:8080/callback"` | IAM redirect url to the MIW |
 | image.name | string | `"catenax-ng/tx-managed-identity-wallets_service"` |  |
 | image.registry | string | `"ghcr.io"` |  |
 | image.tag | string | `""` | Overrides the image tag whose default is the chart appVersion |
@@ -36,7 +39,7 @@ Managed Identity Wallets Service
 | openapi.licenseName | string | `"Apache 2.0"` |  |
 | openapi.licenseUrl | string | `"https://github.com/eclipse-tractusx/managed-identity-wallets/blob/main/LICENSE"` |  |
 | wallet.baseWalletBpn | string | `""` | The BPN of the base wallet |
-| wallet.baseWalletShortDid | string | `""` | The short DID of the base wallet. It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#integrate-with-an-write-restricted-indy-ledger. It should be registered on the Indy ledger with role endorser. |
+| wallet.baseWalletShortDid | string | `""` | The short DID of the base wallet. It can be created with its verkey as described in https://github.com/eclipse-tractusx/managed-identity-wallets#Integrate-with-Indy-Ledger. It should be registered on the Indy ledger with role endorser. |
 | wallet.baseWalletVerkey | string | `""` | The verkey (public key) of the base wallet |
 | wallet.baseWalletName | string | `""` | The name of the base wallet |
 | wallet.membershipOrganisation | string | `"Platform-A"` | The name used in the Membership credential |
@@ -55,6 +58,7 @@ Managed Identity Wallets Service
 | acapy.endorser.label | string | `"BaseWalletIssuer"` | The label of the instance |
 | acapy.endorser.logLevel | string | `"INFO"` |  |
 | acapy.endorser.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
+| acapy.endorser.endpointUrl | string | `"https://localhost:8000"` | The endpoint url in the DID document |
 | acapy.endorser.databaseHost | string | `"acapypostgresql"` | The host of the used database |
 | acapy.endorser.endpointPort | string | `"8000"` | The port at which the wallet is reachable |
 | acapy.endorser.adminPort | string | `"11000"` | The port at which the admin API is reachable |
@@ -71,7 +75,8 @@ Managed Identity Wallets Service
 | acapy.mt.label | string | `"ManagedWallet"` | The label of the instance |
 | acapy.mt.logLevel | string | `"INFO"` |  |
 | acapy.mt.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
-| acapy.mt.databaseHost | string | `"acapypostgresql"` |  |
+| acapy.mt.endpointUrl | string | `"https://localhost:8003"` | The endpoint url in the DID document |
+| acapy.mt.databaseHost | string | `"acapypostgresql"` | The host of the used database |
 | acapy.mt.endpointPort | string | `"8003"` | The port at which the sub-wallets are reachable |
 | acapy.mt.adminPort | string | `"11003"` | The port at which the admin API is reachable |
 | acapy.mt.adminUrl | string | `"http://localhost:11003"` | The url of the admin API |

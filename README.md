@@ -48,6 +48,7 @@ below. Here a few hints on how to set it up:
 | `MIW_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
 | `MIW_AUTH_JWKS_URL`        | URL    | IAM certs url |
 | `MIW_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
+| `MIW_AUTH_REDIRECT_URL`    | URL    | IAM redirect url to the MIW |
 | `MIW_AUTH_REALM`           | String | IAM realm |
 | `MIW_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
 | `MIW_AUTH_RESOURCE_ID`     | String | IAM resource id |
