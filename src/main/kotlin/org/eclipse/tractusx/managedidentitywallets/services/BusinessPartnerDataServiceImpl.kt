@@ -55,6 +55,10 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
+/**
+ * BusinessPartnerDataServiceImpl provides functionalities for 
+ * pulling data from the Business Partner Data Pool (BPDM) and issuing/updating credentials.
+ */
 class BusinessPartnerDataServiceImpl(
     private val walletService: IWalletService,
     private val bpdmConfig: BPDMConfig,

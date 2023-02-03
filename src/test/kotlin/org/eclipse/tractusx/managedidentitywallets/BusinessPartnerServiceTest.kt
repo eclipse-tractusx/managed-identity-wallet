@@ -944,7 +944,7 @@ class BusinessPartnerServiceTest {
             wallets.forEach {
                 if (it.did == EnvironmentTestSetup.DEFAULT_DID) {
                     runBlocking {
-                        walletService.initBaseWalletAndSubscribeForAriesWS(
+                        walletService.initBaseWalletWithListeners(
                             EnvironmentTestSetup.DEFAULT_BPN,
                             EnvironmentTestSetup.DEFAULT_DID,
                             EnvironmentTestSetup.DEFAULT_VERKEY,

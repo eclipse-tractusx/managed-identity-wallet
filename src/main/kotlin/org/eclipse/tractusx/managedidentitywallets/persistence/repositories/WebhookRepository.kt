@@ -28,6 +28,7 @@ class WebhookRepository {
 
     fun getAll(): List<Webhook> = transaction { Webhook.all().toList() }
 
+    @Throws(NotFoundException::class)
     fun get(
         threadId: String,
     ): Webhook = Webhook.find { Webhooks.threadId eq threadId }
@@ -38,6 +39,7 @@ class WebhookRepository {
         threadId: String,
     ): Webhook?  = Webhook.find { Webhooks.threadId eq threadId }.firstOrNull()
 
+    @Throws(NotFoundException::class)
     fun deleteWebhook(threadId: String): Boolean {
         get(threadId).delete()
         return true
@@ -55,6 +57,7 @@ class WebhookRepository {
         }
     }
 
+    @Throws(NotFoundException::class)
     fun updateStateOfWebhook(webhookThreadId: String, stateOfRequest: String) {
         get(webhookThreadId).apply {
             state = stateOfRequest

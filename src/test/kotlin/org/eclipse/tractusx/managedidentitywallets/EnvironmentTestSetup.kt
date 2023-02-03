@@ -105,6 +105,7 @@ object EnvironmentTestSetup {
             put("acapy.adminApiKey", System.getenv("ACAPY_ADMIN_API_KEY") ?: "Hj23iQUsstG!dde")
             put("wallet.baseWalletBpn", System.getenv("MIW_BPN") ?: DEFAULT_BPN)
             put("wallet.membershipOrganisation", System.getenv("MIW_MEMBERSHIP_ORG") ?: MEMBERSHIP_ORG)
+
             put("auth.jwksUrl", System.getenv("MIW_AUTH_JWKS_URL") ?: "http://localhost:18080/jwks")
             put("auth.issuerUrl", System.getenv("MIW_AUTH_ISSUER_URL") ?: JwtConfigTest.issuerUrl)
             put("auth.realm", System.getenv("MIW_AUTH_REALM") ?: "localkeycloak")
