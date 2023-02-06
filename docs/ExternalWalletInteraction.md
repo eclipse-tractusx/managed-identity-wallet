@@ -10,6 +10,7 @@
   - The managed wallets can issue credentials only to other managed or registered self-managed wallets after a connection is established
   - The issuer must be an Indy DID on the same ledger as the MIW
   - Credential revocation is not supported for credentials issued using the flows
+  - Extensible credentials with extra properties are not supported https://www.w3.org/TR/vc-data-model/#extensibility. The only exception is the property `provenanceProof` which is a list of any type
 
 - Note
   - Each wallet uses the same endpoint, so to the outside world, it is not obvious [multiple tenants](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md#general-concept) are using the same agent. The message routing from the base wallet to sub-wallets is described in this [docs](https://github.com/hyperledger/aries-cloudagent-python/blob/main/Multitenancy.md#message-routing)

@@ -8,6 +8,7 @@
 - Current limitation:
   - Request presentation from self managed wallet is not implemented yet
   - Credential revocation is not supported for credentials issued to self managed wallet
+  - Extensible credentials with extra properties are not supported https://www.w3.org/TR/vc-data-model/#extensibility. The only exception is the property `provenanceProof` which is a list of any type
 
 ### Register, Establish Connection and Issue Membership and Bpn Credential
 A self managed wallet can be registered on the MIW by giving the `bpn`, `did`, `name`, and an optional `webhookUrl` to inform the requester when the connection reaches the state `Completed` and the Membership and BPN credentials are issued. 
