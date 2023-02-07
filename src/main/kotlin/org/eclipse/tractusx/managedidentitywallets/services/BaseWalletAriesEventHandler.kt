@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
- * The BaseWalletAriesEventHandler triggers in MIW and AcaPy the appropriate responses
- * on some of the aries-flow events to enable connection and exchange credentials
+ * The BaseWalletAriesEventHandler triggers appropriate responses
+ * to some of the Aries-Flow events to enable connection and exchange of credentials
  * with other external or internal wallets.
  */
 class BaseWalletAriesEventHandler(

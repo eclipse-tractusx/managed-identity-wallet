@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -147,8 +147,8 @@ interface IAcaPyService {
      * Sends a connection request to another wallet.
      * @param selfManagedWalletCreateDto the data of the wallet
      * @param token the token of the wallet. null for the base wallet
-     * @return The connection record that was created
-     * @throws InternalServerErrorException If the connection request fails
+     * @return [ConnectionRecord] the connection record that was created
+     * @throws InternalServerErrorException if the connection request fails
      */
     suspend fun sendConnectionRequest(
         selfManagedWalletCreateDto: SelfManagedWalletCreateDto,

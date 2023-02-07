@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -241,7 +241,7 @@ interface IWalletService {
     suspend fun addService(identifier: String, serviceDto: DidServiceDto)
 
     /**
-     * Updates a service endpoint in the DID document
+     * Updates a service endpoint in the DID document.
      * @param identifier the BPN, DID or wallet-id of a managed wallet
      * @param id the Id of the exiting service in the DID document
      * @param serviceUpdateRequestDto the Service to update
@@ -426,7 +426,7 @@ interface IWalletService {
 
         /**
          * Creates the AcaPyWalletServiceImpl which implements the IWalletService.
-         * The used HTTP client to communicate with AcaPy instances is configured in this method
+         * The used HTTP client to communicate with AcaPy instances is configured in this method.
          */
         fun createWithAcaPyService(
             walletAndAcaPyConfig: WalletAndAcaPyConfig,

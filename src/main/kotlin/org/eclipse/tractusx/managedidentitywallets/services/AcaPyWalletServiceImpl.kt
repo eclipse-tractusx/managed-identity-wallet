@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -939,12 +939,17 @@ class AcaPyWalletServiceImpl(
                 } else {
                     extractedWallet.did
                 }
-
+                // workaround https://github.com/hyperledger-labs/acapy-java-client/issues/82
+                // The better way would be credExRecord.resolveLDCredential().credential
+                val credentialAsJson = String(
+                    Base64.getDecoder().decode(credExRecord.credIssue.credentialsTildeAttach[0].data.base64),
+                    Charsets.UTF_8
+                )
                 credentialRepository.storeCredential(
                     issuedCredentialId = credentialId,
                     issuerOfCredential = verifiableCredential.issuer!!,
                     holderOfCredential = idOfSubject,
-                    credentialAsJson = gson.toJson(credExRecord.resolveLDCredential().credential),
+                    credentialAsJson = credentialAsJson,
                     typesAsString = types,
                     holderWallet = extractedWallet
                 )

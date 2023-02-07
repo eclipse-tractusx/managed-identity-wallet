@@ -48,6 +48,7 @@ below. Here a few hints on how to set it up:
 | `MIW_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
 | `MIW_AUTH_JWKS_URL`        | URL    | IAM certs url |
 | `MIW_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
+| `MIW_AUTH_REDIRECT_URL`    | URL    | IAM redirect url to the MIW |
 | `MIW_AUTH_REALM`           | String | IAM realm |
 | `MIW_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
 | `MIW_AUTH_RESOURCE_ID`     | String | IAM resource id |
@@ -87,12 +88,21 @@ run following these steps:
     cd managed-identity-wallets
     ```
 
-1. Copy over the `.env.example` to `dev.env`
+1. The setup requires 3 DIDs. The first DID will be the DID of the base wallet. The second DID is used in the management wallet of the multi-tenancy instance. The third DID is optional and needed only when the external/self-managed instance is used. To generate the required DIDs follow the steps in section [Integrate with Indy Ledger](##Integrate-with-Indy-Ledger)
 
+1. Copy over the `.env.example` to `dev.env`
 
     ```bash
     cp .env.example dev.env
     ```
+
+1. Replace the placeholders in `dev.env` and then run
+
+    ```bash
+    set -a; source dev.env; set +a
+    ```
+
+    Note that this command needs to be run again after changing any value in `dev.env`.
 
 1. Start the supporting containers for postgreSQL (database), keycloak (identity
 management), ACA-Py (ledger communication) and revocation service (credential
@@ -109,7 +119,6 @@ revocation handling)
 
     ```bash
     cd ../../
-    set -a; source dev.env; set +a
     ./gradlew run
     ```
 
@@ -117,16 +126,6 @@ revocation handling)
 
 1. :tada: **First milestone reached the MIW service is up and running!**
 
-    Suggested next step is to use the postgreSQL database to have persistent storage
-    across starts, this can be done via changing following variables in `dev.env`
-    (assuming the standard port for postgreSQL 5432 is available).
-
-    | Key               | Value           |
-    |-------------------|-----------------|
-    | MIW_DB_JDBC_URL    | `jdbc:postgresql://localhost:5432/<database name>?user=<database user>&password=<database password>` |
-    | MIW_DB_JDBC_DRIVER | `org.postgresql.Driver` |
-
-    Then restart the service via `./gradlew run`
 
 ## Advanced Development Setup
 
@@ -291,7 +290,7 @@ docker run --env-file .env.docker -p 8080:8080 managed-identity-wallets:<VERSION
 
     ```
     kubectl -n managed-identity-wallets create secret generic managed-identity-wallets-secrets \
-      --from-literal=miw-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/miwdev?user=miwdevuser&password=<placeholder>' \
+      --from-literal=miw-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/<database name>?user=<database user>&password=<<database password>>' \
       --from-literal=miw-auth-client-id='ManagedIdentityWallets' \
       --from-literal=miw-auth-client-secret='<placeholder>'
 
@@ -369,12 +368,11 @@ or build your own image following the steps:
 * currently tested with version `0.7.5`
 * run `git checkout 0.7.5`
 * run `docker build -t acapy:0.7.5 -f ./docker/Dockerfile.run .`
-* change the used image for `local_acapy` in `dev-assets/dev-containers/docker-compose.yml`
+* change the used image for `local_base_acapy` and `local_mt_acapy` in `dev-assets/dev-containers/docker-compose.yml`
 
-## Integrate with an write-restricted Indy Ledger
+## Integrate with Indy Ledger
 
-If the used Indy ledger (see parameter `--genesis-url https://indy-test.idu.network/genesis`)
-is write-restricted to endorsers or higher roles, the DID and its VerKey must be registered
+In Indy ledger `Write Access` is usually restricted to endorsers or higher roles. Therefore, the DID and its verkey must be registered
 manually before starting ACA-Py.
 
 The [Indy CLI](https://hyperledger-indy.readthedocs.io/projects/sdk/en/latest/docs/design/001-cli/README.html)
@@ -398,7 +396,8 @@ Therefore, the easiest way to generate a DID is currently to start ACA-Py with a
     2022-08-12 08:08:13,888 indy.did DEBUG get_my_did_with_meta: <<< res: '{"did":"HW2eFhr3KcZw5JcRW45KNc","verkey":"aEErMofs7DcJT636pocN2RiEHgTLoF4Mpj6heFXwtb3q","tempVerkey":null,"metadata":null}'
     ```
   * If the script did not stop the container, the command `docker compose down -v` can stop and delete it manually
-
+  * Register the DID and verkey with role endorser. This step depends on the used Indy ledger and the defined roles. As an example: On `GreenLight Dev Ledger` the DID and verkey can be registered using the ledger explorer on `http://dev.greenlight.bcovrin.vonx.io/` > `Register from DID`
+ 
 ## Testing GitHub actions locally <a id= "testingGitHubActionsLocally"></a>
 
 Using [act](https://github.com/nektos/act) it is possible to test GitHub actions

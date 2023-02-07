@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021,2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -50,7 +50,7 @@ interface IWebhookService {
     fun getWebhookByThreadId(threadId: String?): Webhook?
 
     /**
-     * Sends the webhook message of type connection [ConnectionRecord] to given url
+     * Sends the webhook message of type connection [ConnectionRecord] to given url.
      * @param url the url of the webhook
      * @param connection the connection record as message
      * @return true if the webhook message was sent successfully, otherwise false
