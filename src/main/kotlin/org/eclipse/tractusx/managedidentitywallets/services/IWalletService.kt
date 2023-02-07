@@ -416,7 +416,7 @@ interface IWalletService {
     /**
      * Checks if a received connection request to base wallet is allowed to be processed.
      * @param connection the received connection request [ConnectionRecord]
-     * @param bpn the BPN of the requester wallet
+     * @param bpn the allegedly BPN of the requester wallet. It must be verified
      * @return the stored wallet of the requester, null in case of errors
      */
     suspend fun validateConnectionRequestForBaseWallet(connection: ConnectionRecord, bpn: String): WalletDto?

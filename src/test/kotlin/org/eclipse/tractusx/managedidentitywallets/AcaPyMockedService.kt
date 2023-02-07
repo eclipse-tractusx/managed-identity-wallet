@@ -43,7 +43,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletSettings
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import org.hyperledger.acy_py.generated.model.AttachDecorator

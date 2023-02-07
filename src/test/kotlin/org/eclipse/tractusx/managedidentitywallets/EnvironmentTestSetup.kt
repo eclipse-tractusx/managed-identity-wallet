@@ -65,7 +65,7 @@ object EnvironmentTestSetup {
     val webhookRepository = WebhookRepository()
 
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
-    val revocationMockedService = RevocationMockedService(NETWORK_ID)
+    val revocationMockedService = RevocationMockedService()
     val webhookService = IWebhookService.createWebhookService(webhookRepository)
     val utilsService = UtilsService(NETWORK_ID)
 

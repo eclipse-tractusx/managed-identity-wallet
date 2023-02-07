@@ -90,7 +90,7 @@ fun Application.module(testing: Boolean = false) {
 
     val baseWalletBpn = environment.config.property("wallet.baseWalletBpn").getString()
     val allowlistDidsAsString = environment.config.property("wallet.allowlistDids").getString()
-    val allowlistDids = if (allowlistDidsAsString.isNullOrBlank()) {
+    val allowlistDids = if (allowlistDidsAsString.isBlank()) {
         emptyList()
     } else {
         allowlistDidsAsString.split(",")

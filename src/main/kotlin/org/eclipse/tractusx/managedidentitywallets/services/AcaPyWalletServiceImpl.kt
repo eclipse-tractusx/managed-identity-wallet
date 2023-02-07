@@ -19,7 +19,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import com.google.gson.GsonBuilder
 import foundation.identity.jsonld.JsonLDUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
@@ -106,7 +105,6 @@ class AcaPyWalletServiceImpl(
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
-        private val gson = GsonBuilder().create()
     }
 
     override fun getWallet(identifier: String, withCredentials: Boolean): WalletDto {
@@ -1066,7 +1064,10 @@ class AcaPyWalletServiceImpl(
         return true
     }
 
-    override suspend fun validateConnectionRequestForBaseWallet(connection: ConnectionRecord, bpn: String): WalletDto? {
+    override suspend fun validateConnectionRequestForBaseWallet(
+        connection: ConnectionRecord,
+        bpn: String
+    ): WalletDto? {
         val connectionDid = connection.theirPublicDid ?: connection.theirDid
         val wallet = walletRepository.getWalletOrNull(bpn)
         if (wallet != null) {
