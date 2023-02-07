@@ -6,7 +6,7 @@
   - Send a presentation to external wallet as defined in [Aries RFC 0454](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2)
 
 - Current limitation:
-  - The managed wallets can accept invitations and credentials from other stored wallets and allowed DIDs. Currently, allowed DIDs are given in the configuration using the environment property `MIW_WHITELIST_DIDS`. This restriction can be deactivated by keeping the `MIW_WHITELIST_DIDS` empty
+  - The managed wallets can accept invitations and credentials from other stored wallets and allowed DIDs. Currently, allowed DIDs are given in the configuration using the environment property `MIW_ALLOWLIST_DIDS`. This restriction can be deactivated by keeping the `MIW_ALLOWLIST_DIDS` empty
   - The managed wallets can issue credentials only to other managed or registered self-managed wallets after a connection is established
   - The base wallet accepts connections from stored wallets
   - The issuer must be an Indy DID on the same ledger as the MIW
@@ -33,7 +33,7 @@ A Credential-Offer is sent from the external wallet using the established connec
   not implemented yet!
 
 ### Local Test Steps:
-1. Follow the steps in `Steps for initial local deployment and wallet Creation` section in the `README.md` file. Make sure that either `MIW_WHITELIST_DIDS` is empty, or it includes the short DID of the external wallet
+1. Follow the steps in `Steps for initial local deployment and wallet Creation` section in the `README.md` file. Make sure that either `MIW_ALLOWLIST_DIDS` is empty, or it includes the short DID of the external wallet
 1. Import a new postman collection `Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection.json` from `./dev-asset`
 1. Run `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Get Connections` and make sure there are no connections. If there are any please delete them using `Remove Connection`
 1. From `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Send Connection Request` using the public DID of the managed wallet
