@@ -26,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.InvitationRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.AriesLdFormats
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
@@ -44,6 +45,7 @@ import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 import org.eclipse.tractusx.managedidentitywallets.services.WebhookServiceImpl
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
+import org.hyperledger.acy_py.generated.model.V20CredFormat
 import org.hyperledger.acy_py.generated.model.V20CredIssue
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
@@ -533,6 +535,9 @@ class BaseWalletAriesEventHandlerTest {
         dataDecorator.data = data
         val credentialTildeAttach = listOf(dataDecorator)
         val credIssue = V20CredIssue()
+        val format  = V20CredFormat()
+        format.format = AriesLdFormats.ARIES_LD_PROOF_VC_V_1_0
+        credIssue.formats = listOf(format)
         credIssue.credentialsTildeAttach = credentialTildeAttach.toImmutableList()
         val v20CredentialExchange = V20CredExRecord()
         v20CredentialExchange.credIssue = credIssue

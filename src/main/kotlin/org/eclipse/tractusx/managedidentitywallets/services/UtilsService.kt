@@ -81,7 +81,7 @@ class UtilsService(private val networkIdentifier: String) {
      * @param id the Id of the service to be checked
      * @throws NotImplementedException if the given id is not supported
      */
-    fun checkSupportedId(id: String) {
+    fun checkSupportedServiceId(id: String) {
         if (!arrayOfSupportedIds.contains(id)) {
             throw NotImplementedException("The Id $id of the service is not supported")
         }
@@ -172,8 +172,10 @@ class UtilsService(private val networkIdentifier: String) {
      * @param did the DID as string
      * @return a full DID if the input is a short DID, the input otherwise
      */
-    fun convertIfShortDid(did: String): String {
-        return if (!did.startsWith("did:")) {
+    fun convertToFullDidIfShort(did: String): String {
+        return if (!did.startsWith(getOldDidMethodPrefixWithNetworkIdentifier())
+            && !did.startsWith(getDidMethodPrefixWithNetworkIdentifier())
+        ) {
             getDidMethodPrefixWithNetworkIdentifier() + did
         } else {
             did

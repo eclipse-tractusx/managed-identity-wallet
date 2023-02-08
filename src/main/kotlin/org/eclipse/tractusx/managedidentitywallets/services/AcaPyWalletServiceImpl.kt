@@ -214,7 +214,7 @@ class AcaPyWalletServiceImpl(
         }
 
         acaPyService.sendConnectionRequest(
-            didOfTheirWallet = getBaseWallet().did,
+            didOfTheirWallet = utilsService.getIdentifierOfDid(getBaseWallet().did),
             usePublicDid = false, // It has no public DID yet
             alias = "endorser",
             token = createdSubWalletDto.token,
@@ -479,7 +479,7 @@ class AcaPyWalletServiceImpl(
 
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto) {
         log.debug("Add Service Endpoint for $identifier")
-        utilsService.checkSupportedId(serviceDto.id)
+        utilsService.checkSupportedServiceId(serviceDto.id)
         val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
@@ -516,7 +516,7 @@ class AcaPyWalletServiceImpl(
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
     ) {
         log.debug("Update Service Endpoint for $identifier")
-        utilsService.checkSupportedId(id)
+        utilsService.checkSupportedServiceId(id)
         val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
@@ -1052,13 +1052,22 @@ class AcaPyWalletServiceImpl(
 
     override fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord): Boolean {
         val allowlistDids = acaPyService.getWalletAndAcaPyConfig().allowlistDids
-        val connectionDid = connection.theirPublicDid ?: connection.theirDid
+        val filteredAllowlistShortDids = allowlistDids.filter {
+                it.startsWith(utilsService.getOldDidMethodPrefixWithNetworkIdentifier())
+                        || it.startsWith(utilsService.getDidMethodPrefixWithNetworkIdentifier())
+            }
+            .map { did -> utilsService.getIdentifierOfDid(did) }
+        val connectionDid = utilsService.getIdentifierOfDid(
+            did = connection.theirPublicDid ?: connection.theirDid
+        )
         if (allowlistDids.isNotEmpty()
-            && !allowlistDids.contains(connection.theirPublicDid ?: connection.theirDid)
-            && !walletRepository.isWalletExists(connection.theirPublicDid ?: connection.theirDid)
+            && !filteredAllowlistShortDids.contains(connectionDid)
+            && !walletRepository.isWalletExists(utilsService.convertToFullDidIfShort(connectionDid))
         ) {
-            log.warn("Connection request ${connection.connectionId} and DID $connectionDid " +
-                    "has been rejected due to unfulfilled conditions")
+            log.warn(
+                "Connection request ${connection.connectionId} and DID $connectionDid " +
+                        "has been rejected due to unfulfilled conditions"
+            )
             return false
         }
         return true
@@ -1068,7 +1077,9 @@ class AcaPyWalletServiceImpl(
         connection: ConnectionRecord,
         bpn: String
     ): WalletDto? {
-        val connectionDid = connection.theirPublicDid ?: connection.theirDid
+        val connectionDid = utilsService.getIdentifierOfDid(
+            did = connection.theirPublicDid ?: connection.theirDid
+        )
         val wallet = walletRepository.getWalletOrNull(bpn)
         if (wallet != null) {
             val walletData = walletRepository.toWalletCompleteDataObject(wallet)

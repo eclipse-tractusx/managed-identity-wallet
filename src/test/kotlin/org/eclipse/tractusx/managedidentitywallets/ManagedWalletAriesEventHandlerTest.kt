@@ -132,6 +132,7 @@ class ManagedWalletAriesEventHandlerTest {
         runBlocking {
             val connectionRecord = ConnectionRecord()
             connectionRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
+            connectionRecord.theirDid = "shortDID123"
             whenever(acaPyServiceMocked.acceptConnectionRequest(any(), any()))
                 .thenAnswer { connectionRecord }
         }
@@ -193,6 +194,7 @@ class ManagedWalletAriesEventHandlerTest {
                 // Mock acceptInvitationRequest call to Acapy Service
                 val connectionRecord  = ConnectionRecord()
                 connectionRecord.rfc23State = Rfc23State.RESPONSE_SENT.toString()
+                connectionRecord.theirDid = "shortdid123"
                 doAnswer { connectionRecord }
                     .whenever(acaPyServiceMocked).acceptConnectionRequest(any(), anyOrNull())
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
@@ -206,7 +208,7 @@ class ManagedWalletAriesEventHandlerTest {
                     managedWalletAriesEventHandler.handleEvent(
                         holderWallet.walletId,
                         "connections",
-                        """{"rfc23_state":"request-received", "connection_id":"$connectionId"}""".trimIndent()
+                        """{"rfc23_state":"request-received", "connection_id":"$connectionId", "their_did":"shortdid123"}""".trimIndent()
                     )
                 }
                 verify(walletServiceSpy, times(1)).acceptConnectionRequest(any(), any())
@@ -262,7 +264,7 @@ class ManagedWalletAriesEventHandlerTest {
                         adminApiKey = "adminApiKey",
                         baseWalletAdminUrl = "baseWalletAdminUrl",
                         baseWalletAdminApiKey = "baseWalletAdminApiKey",
-                        allowlistDids = listOf("shortDid1","shortDid2","shortDid3")
+                        allowlistDids = listOf("did:sov:Did1","did:sov:Did2","did:sov:Did3")
                     )
                 )
                 // Mock acceptInvitationRequest call to Acapy Service

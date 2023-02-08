@@ -20,6 +20,7 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import kotlinx.coroutines.runBlocking
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.AriesLdFormats
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.connection.ConnectionTheirRole
@@ -61,7 +62,7 @@ class ManagedWalletsAriesEventHandler(
             Rfc23State.COMPLETED.toString() -> {
                 runBlocking {
                     val theirDid =
-                        utilsService.convertIfShortDid(
+                        utilsService.convertToFullDidIfShort(
                             did = connection.theirPublicDid ?: connection.theirDid
                         )
                     transaction {
@@ -104,12 +105,22 @@ class ManagedWalletsAriesEventHandler(
             when (v20Credential.state) {
                 CredentialExchangeState.OFFER_RECEIVED -> {
                     runBlocking {
-                        walletService.acceptReceivedOfferVc(walletId!!, v20Credential)
+                        if (v20Credential.credOffer.formats[0].format == AriesLdFormats.ARIES_LD_PROOF_VC_DETAIL_V_1_0) {
+                            walletService.acceptReceivedOfferVc(walletId!!, v20Credential)
+                        } else {
+                            log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                    "${v20Credential.credOffer.formats[0].format}")
+                        }
                     }
                 }
                 CredentialExchangeState.CREDENTIAL_RECEIVED -> {
                     runBlocking {
-                        walletService.acceptAndStoreReceivedIssuedVc(walletId!!, v20Credential)
+                        if (v20Credential.credIssue.formats[0].format == AriesLdFormats.ARIES_LD_PROOF_VC_V_1_0) {
+                            walletService.acceptAndStoreReceivedIssuedVc(walletId!!, v20Credential)
+                        } else {
+                            log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                    "${v20Credential.credIssue.formats[0].format}")
+                        }
                     }
                 }
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {

@@ -24,6 +24,7 @@ import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.AriesLdFormats
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
@@ -145,10 +146,20 @@ class BaseWalletAriesEventHandler(
             when(v20Credential.state) {
                 CredentialExchangeState.OFFER_RECEIVED -> {
                     runBlocking {
-                        walletService.acceptReceivedOfferVc(walletService.getBaseWallet().did, v20Credential)
+                        if (v20Credential.credOffer.formats[0].format == AriesLdFormats.ARIES_LD_PROOF_VC_DETAIL_V_1_0) {
+                            walletService.acceptReceivedOfferVc(walletService.getBaseWallet().did, v20Credential)
+                        } else {
+                            log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                    "${v20Credential.credOffer.formats[0].format}")
+                        }
                     }
                 }
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {
+                    if (v20Credential.credIssue.formats[0].format != AriesLdFormats.ARIES_LD_PROOF_VC_V_1_0) {
+                        log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                "${v20Credential.credIssue.formats[0].format}")
+                        return
+                    }
                     try {
                         val issuedCred: IssuedVerifiableCredentialRequestDto = Json.decodeFromString(
                             IssuedVerifiableCredentialRequestDto.serializer(),

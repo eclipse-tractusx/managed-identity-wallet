@@ -50,7 +50,7 @@ wallet:
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
-  # -- A list of short DIDs seperated by comma ",". Those DIDs are allowed to send a connection request to managed wallets
+  # -- A list of full DIDs seperated by comma ",". Those DIDs are allowed to send a connection request to managed wallets. Empty for public invitation allowance
   allowlistDids: ""
   # -- The name used in the Membership credential
   membershipOrganisation: "Platform-A"
