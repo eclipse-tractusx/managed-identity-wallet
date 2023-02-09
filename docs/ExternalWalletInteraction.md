@@ -33,7 +33,7 @@ A Credential-Offer is sent from the external wallet using the established connec
   not implemented yet!
 
 ### Local Test Steps:
-1. Follow the steps in `Steps for initial local deployment and wallet Creation` section in the `README.md` file. Make sure that either `MIW_ALLOWLIST_DIDS` is empty, or it includes the short DID of the external wallet
+1. Follow the steps in `Steps for initial local deployment and wallet Creation` section in the `README.md` file. Make sure that either `MIW_ALLOWLIST_DIDS` is empty, or it includes the full DID of the external wallet
 1. Import a new postman collection `Test-Acapy-SelfManagedWallet-Or-ExternalWallet.postman_collection.json` from `./dev-asset`
 1. Run `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Get Connections` and make sure there are no connections. If there are any please delete them using `Remove Connection`
 1. From `Test-Acapy-SelfManagedWallet-Or-ExternalWallet/Send Connection Request` using the public DID of the managed wallet
