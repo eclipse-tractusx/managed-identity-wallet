@@ -457,7 +457,7 @@ class BusinessPartnerServiceTest {
                 assertEquals(false, resultWithException)
                 assertEquals(false, resultWithEmptyProofForIssuedCred)
 
-                // Test no credentials are created and stored due mocked exceptions
+                // Test no credentials are created and stored due to mocked exceptions
                 transaction {
                     val extractedWallet = walletServiceSpy.getWallet(holderWallet.did, true)
                     assertEquals(0, extractedWallet.vcs.size)
@@ -617,7 +617,7 @@ class BusinessPartnerServiceTest {
                 val spyBpdmService = spy(bpdmService)
 
                 // Test `pullDataAndUpdateBaseWalletCredentialsAsync` for a created Wallet
-                // no credentials will be created because The HTTP.OK state is never reached due the mockEngine
+                // no credentials will be created because The HTTP.OK state is never reached due to the mockEngine
                 assertDoesNotThrow {
                     runBlocking {
                         spyBpdmService.pullDataAndUpdateBaseWalletCredentialsAsync(holderWallet.did).await()

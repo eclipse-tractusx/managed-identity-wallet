@@ -43,7 +43,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.SignRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletList
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletSettings
 import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import org.hyperledger.acy_py.generated.model.AttachDecorator
@@ -79,7 +78,8 @@ class AcaPyMockedService(
             apiAdminUrl = "",
             adminApiKey = "TestAdminApiKey",
             baseWalletAdminUrl = "",
-            baseWalletAdminApiKey = ""
+            baseWalletAdminApiKey = "",
+            allowlistDids = listOf()
         )
     }
 
@@ -327,6 +327,10 @@ class AcaPyMockedService(
     }
 
     override suspend fun setDidAsPublicUsingEndorser(did: String, token: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun isDidOfWallet(did: String, tokenOfWallet: String?): Boolean {
         TODO("Not yet implemented")
     }
 

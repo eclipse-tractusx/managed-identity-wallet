@@ -25,7 +25,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredenti
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import java.util.*
 
-class RevocationMockedService(private val networkIdentifier: String): IRevocationService {
+class RevocationMockedService(): IRevocationService {
 
     override suspend fun registerList(profileName: String, issueCredential: Boolean) = UUID.randomUUID().toString()
 

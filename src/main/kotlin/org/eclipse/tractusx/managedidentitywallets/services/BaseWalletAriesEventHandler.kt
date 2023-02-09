@@ -24,6 +24,7 @@ import kotlinx.serialization.json.Json
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdTypes
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.AriesLdFormats
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
@@ -47,27 +48,36 @@ class BaseWalletAriesEventHandler(
     private val baseWalletCredentialTypes = JsonLdTypes.getBaseWalletCredentialTypes()
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    // Connection only with registered wallets
     override fun handleConnection(walletId: String?, connection: ConnectionRecord) {
         super.handleConnection(null, connection)
         log.debug("Connection ${connection.connectionId} is in state ${connection.rfc23State}")
         when(connection.rfc23State) {
             Rfc23State.REQUEST_RECEIVED.toString() -> {
-                //TODO accept only from whitelisted public DIDs
                 transaction {
-                    val theirWallet = walletService.getWallet(
-                        identifier = connection.theirLabel, // The BPN
-                        withCredentials = false
-                    )
-                    walletService.addConnection(
-                        connectionId = connection.connectionId,
-                        connectionOwnerDid = walletService.getBaseWallet().did,
-                        connectionTargetDid = theirWallet.did,
-                        connectionState = connection.rfc23State
-                    )
                     runBlocking {
-                        walletService.setEndorserMetaDataForConnection(connection.connectionId)
-                        walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
+                        // Accept only requests from managed wallets where the BPN included as a label
+                        if (!connection.theirLabel.isNullOrBlank()) {
+                            val wallet = walletService.validateConnectionRequestForBaseWallet(
+                                connection = connection,
+                                bpn = connection.theirLabel
+                            )
+                            if (wallet != null) {
+                                walletService.addConnection(
+                                    connectionId = connection.connectionId,
+                                    connectionOwnerDid = walletService.getBaseWallet().did,
+                                    connectionTargetDid = wallet.did,
+                                    connectionState = connection.rfc23State
+                                )
+                                if (!wallet.isSelfManaged) {
+                                    walletService.setEndorserMetaDataForConnection(connection.connectionId)
+                                }
+                                walletService.acceptConnectionRequest(walletService.getBaseWallet().did, connection)
+                            }
+                        } else {
+                            log.warn("Connection request ${connection.connectionId} from " +
+                                    "${connection.theirPublicDid ?: connection.theirDid} " +
+                                    "has been rejected due to missing `theirLabel` property")
+                        }
                     }
                 }
             }
@@ -136,10 +146,20 @@ class BaseWalletAriesEventHandler(
             when(v20Credential.state) {
                 CredentialExchangeState.OFFER_RECEIVED -> {
                     runBlocking {
-                        walletService.acceptReceivedOfferVc(walletService.getBaseWallet().did, v20Credential)
+                        if (v20Credential.credOffer.formats[0].format == AriesLdFormats.ARIES_LD_PROOF_VC_DETAIL_V_1_0) {
+                            walletService.acceptReceivedOfferVc(walletService.getBaseWallet().did, v20Credential)
+                        } else {
+                            log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                    "${v20Credential.credOffer.formats[0].format}")
+                        }
                     }
                 }
                 CredentialExchangeState.CREDENTIAL_ISSUED -> {
+                    if (v20Credential.credIssue.formats[0].format != AriesLdFormats.ARIES_LD_PROOF_VC_V_1_0) {
+                        log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                "${v20Credential.credIssue.formats[0].format}")
+                        return
+                    }
                     try {
                         val issuedCred: IssuedVerifiableCredentialRequestDto = Json.decodeFromString(
                             IssuedVerifiableCredentialRequestDto.serializer(),

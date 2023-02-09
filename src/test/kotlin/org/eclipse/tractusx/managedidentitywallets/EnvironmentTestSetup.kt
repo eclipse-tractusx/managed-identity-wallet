@@ -51,7 +51,8 @@ object EnvironmentTestSetup {
         baseWalletVerkey = DEFAULT_VERKEY,
         adminApiKey = "adminApiKey",
         baseWalletAdminUrl = "baseWalletAdminUrl",
-        baseWalletAdminApiKey = "baseWalletAdminApiKey"
+        baseWalletAdminApiKey = "baseWalletAdminApiKey",
+        allowlistDids = emptyList()
     )
 
     const val EXTRA_TEST_BPN = "BPNL0Test"
@@ -64,7 +65,7 @@ object EnvironmentTestSetup {
     val webhookRepository = WebhookRepository()
 
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
-    val revocationMockedService = RevocationMockedService(NETWORK_ID)
+    val revocationMockedService = RevocationMockedService()
     val webhookService = IWebhookService.createWebhookService(webhookRepository)
     val utilsService = UtilsService(NETWORK_ID)
 
@@ -134,6 +135,8 @@ object EnvironmentTestSetup {
 
             put("revocation.baseUrl", System.getenv("REVOCATION_URL") ?: "http://0.0.0.0:8086")
             put("revocation.createStatusListCredentialAtHour", System.getenv("REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR") ?: "3")
+
+            put("wallet.allowlistDids", System.getenv("MIW_ALLOWLIST_DIDS") ?: "")
 
         }
         // just a keepAliveConnection

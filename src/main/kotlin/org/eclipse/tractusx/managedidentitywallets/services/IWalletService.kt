@@ -406,6 +406,21 @@ interface IWalletService {
      */
     suspend fun setCommunicationEndpointUsingEndorsement(walletId: String)
 
+    /**
+     * Checks if a received connection request to managed wallet is allowed to be processed.
+     * @param connection the received connection request [ConnectionRecord]
+     * @return true if the connection request is allowed to be processed
+     */
+    fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord): Boolean
+
+    /**
+     * Checks if a received connection request to base wallet is allowed to be processed.
+     * @param connection the received connection request [ConnectionRecord]
+     * @param bpn the allegedly BPN of the requester wallet. It must be verified
+     * @return the stored wallet of the requester, null in case of errors
+     */
+    suspend fun validateConnectionRequestForBaseWallet(connection: ConnectionRecord, bpn: String): WalletDto?
+
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
 

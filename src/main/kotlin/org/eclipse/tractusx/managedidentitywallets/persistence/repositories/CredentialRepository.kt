@@ -51,7 +51,7 @@ class CredentialRepository {
             query.andWhere { VerifiableCredentials.holderDid eq it }
         }
         type?.let {
-            query.andWhere { VerifiableCredentials.type eq it }
+            query.andWhere { VerifiableCredentials.type like "%$it%" }
         }
         credentialId?.let {
             query.andWhere { VerifiableCredentials.credentialId eq it }
