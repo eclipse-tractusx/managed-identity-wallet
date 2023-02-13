@@ -155,7 +155,7 @@ class ManagedWalletAriesEventHandlerTest {
             configurePersistence()
             configureSecurity()
             configureOpenAPI()
-            configureRouting(EnvironmentTestSetup.walletService)
+            configureRouting()
             appRoutes(
                 walletServiceSpy,
                 bpdServiceMocked,

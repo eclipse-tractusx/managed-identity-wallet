@@ -144,20 +144,20 @@ data class VerifiableCredentialRequestWithoutIssuerDto(
 
 @Serializable
 data class CredentialStatus (
-    @Field(description = "The ID of the credential status", name = "id")
     @SerialName("id") @JsonProperty("id")
+    @Field(description = "The ID of the credential status", name = "id")
     var statusId: String,
-    @Field(description = "The type of credential the credential list", name = "type")
     @SerialName("type") @JsonProperty("type")
+    @Field(description = "The type of credential the credential list", name = "type")
     var credentialType: String = "StatusList2021Entry",
-    @Field(description = "The purpose of the list", name = "statusPurpose")
     @SerialName("statusPurpose") @JsonProperty("statusPurpose")
+    @Field(description = "The purpose of the list", name = "statusPurpose")
     var statusPurpose: String = "revocation",
-    @Field(description = "The index of the credential", name = "statusListIndex")
     @SerialName("statusListIndex") @JsonProperty("statusListIndex")
+    @Field(description = "The index of the credential", name = "statusListIndex")
     var index: String,
-    @Field(description = "The url to the status list credential", name = "statusListCredential")
     @SerialName("statusListCredential") @JsonProperty("statusListCredential")
+    @Field(description = "The url to the status list credential", name = "statusListCredential")
     var listUrl: String,
 ) {
     companion object {
@@ -174,10 +174,12 @@ data class ListCredentialRequestData (
 
 @Serializable
 data class ListCredentialSubject (
+    @SerialName("id") @JsonProperty("id")
     @Field(name = "id")
-    @SerialName("id") @JsonProperty("id") var credentialId: String,
+    var credentialId: String,
+    @SerialName("type") @JsonProperty("type")
     @Field(name = "type")
-    @SerialName("type") @JsonProperty("type") var credentialType: String = "StatusList2021",
+    var credentialType: String = "StatusList2021",
     var statusPurpose: String = "revocation",
     var encodedList: String
 ) {

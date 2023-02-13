@@ -139,7 +139,7 @@ fun Application.module(testing: Boolean = false) {
     Services.revocationService = revocationService
     Services.webhookService = webhookService
 
-    configureRouting(walletService)
+    configureRouting()
 
     appRoutes(walletService, businessPartnerDataService, revocationService, webhookService, utilsService)
     configurePersistence()

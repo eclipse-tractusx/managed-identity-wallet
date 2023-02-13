@@ -21,49 +21,15 @@ package org.eclipse.tractusx.managedidentitywallets.plugins
 
 import io.bkbn.kompendium.core.routes.redoc
 import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.client.*
-import io.ktor.client.engine.apache.*
-import io.ktor.client.features.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.sessions.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
-import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
-import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
-import java.io.File
-import java.io.IOException
-
-suspend fun retrieveBusinessPartnerInfo(bpdmDatapoolUrl: String, bpn: String, token: String): String {
-
-    var stringBody = ""
-    HttpClient(Apache).use { client ->
-        val httpResponse: HttpResponse = client.get("$bpdmDatapoolUrl/$bpn") {
-            headers {
-                append(HttpHeaders.Accept, ContentType.Application.Json.toString())
-                append(HttpHeaders.Authorization, "Bearer $token")
-            }
-        }
-        stringBody = httpResponse.readText()
-    }
-
-    return stringBody
-}
 
 @Serializable
 data class BusinessPartnerInfo(val bpn: String)
 
-private val json = Json { ignoreUnknownKeys = true }
-
-fun Application.configureRouting(IWalletService: IWalletService) {
-
-    val bpdmDatapoolUrl = environment.config.property("bpdm.datapoolUrl").getString()
+fun Application.configureRouting() {
 
     routing {
 
@@ -152,94 +118,11 @@ fun Application.configureRouting(IWalletService: IWalletService) {
     </h1>
     <p>The Managed Identity Wallets service implements the Self-Sovereign-Identity (SSI) readiness by providing a wallet hosting platform including a DID resolver, service endpoints and the company wallets itself.</p>
     <p>&gt; <a href="/docs">API documentation</a></p>
-    <p>&gt; <a href="/ui/">Admin UI</a></p>
     <p>&gt; <a href="https://github.com/eclipse-tractusx/managed-identity-wallets/">Code repository</a></p>
   </body>
 </html>
-""", ContentType.Text.Html)
-        }
-
-        authenticate("auth-ui") {
-            get("/login") {
-                // triggers automatically the login
-            }
-            route("/callback") {
-                // This handler will be executed after making a request to a provider's token URL.
-                handle {
-                    val principal = call.authentication.principal<OAuthAccessTokenResponse>()
-                    if (principal != null) {
-                        val response = principal as OAuthAccessTokenResponse.OAuth2
-                        // put token directly into the session, without decoding it
-                        call.sessions.set(UserSession(response.accessToken))
-                        call.respondRedirect("/ui/")
-                    } else {
-                        call.respondRedirect("/login")
-                    }
-                }
-            }
-        }
-
-        route("/ui") {
-
-            authenticate("auth-ui-session") {
-                static("/") {
-                    staticRootFolder = File("/app/static")
-                    files(".")
-                    default("index.html")
-                }
-
-                route("/wallets") {
-                    handle {
-
-                        val userSession = call.sessions.get<UserSession>()
-                        if (userSession != null) {
-                            // could be used later
-                        }
-
-                        call.respond(IWalletService.getAll())
-                    }
-                }
-
-                route("/wallets/{did}/full") {
-                    handle {
-                        val userSession = call.sessions.get<UserSession>()
-                        var token = ""
-                        if (userSession != null) {
-                            token = userSession.token
-                        }
-
-                        val did = call.parameters["did"]
-                        if (did != null) {
-                            try {
-                                val stringBody = retrieveBusinessPartnerInfo(bpdmDatapoolUrl, did, token)
-                                json.decodeFromString(
-                                    BusinessPartnerInfo.serializer(),
-                                    stringBody
-                                )
-                                call.respondText(stringBody, ContentType.Application.Json, HttpStatusCode.OK)
-                            } catch (e: RedirectResponseException) {
-                                log.warn("RedirectResponseException: " + e.message)
-                                throw BadRequestException("Could not retrieve business partner details!")
-                            } catch (e: ClientRequestException) {
-                                log.warn("ClientRequestException: " + e.message)
-                                throw BadRequestException("Could not retrieve business partner details!")
-                            } catch (e: ServerResponseException) {
-                                log.warn("ServerResponseException: " + e.message)
-                                throw BadRequestException("Could not retrieve business partner details!")
-                            } catch (e: SerializationException) {
-                                log.warn("SerializationException: " + e.message)
-                                throw BadRequestException(e.message)
-                            } catch (e: IOException) {
-                                log.warn("IOException: $bpdmDatapoolUrl " + e.message)
-                                throw BadRequestException(e.message)
-                            }
-                        } else {
-                            throw BadRequestException("No DID given!")
-                        }
-                    }
-                }
-            }
+""", ContentType.Text.Html
+            )
         }
     }
-
 }
