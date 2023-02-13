@@ -144,11 +144,21 @@ data class VerifiableCredentialRequestWithoutIssuerDto(
 
 @Serializable
 data class CredentialStatus (
-    @SerialName("id") @JsonProperty("id") var statusId: String,
-    @SerialName("type") @JsonProperty("type")  var credentialType: String = "StatusList2021Entry",
-    @SerialName("statusPurpose") @JsonProperty("statusPurpose") var statusPurpose: String = "revocation",
-    @SerialName("statusListIndex") @JsonProperty("statusListIndex") var index: String,
-    @SerialName("statusListCredential") @JsonProperty("statusListCredential") var listUrl: String,
+    @Field(description = "The ID of the credential status", name = "id")
+    @SerialName("id") @JsonProperty("id")
+    var statusId: String,
+    @Field(description = "The type of credential the credential list", name = "type")
+    @SerialName("type") @JsonProperty("type")
+    var credentialType: String = "StatusList2021Entry",
+    @Field(description = "The purpose of the list", name = "statusPurpose")
+    @SerialName("statusPurpose") @JsonProperty("statusPurpose")
+    var statusPurpose: String = "revocation",
+    @Field(description = "The index of the credential", name = "statusListIndex")
+    @SerialName("statusListIndex") @JsonProperty("statusListIndex")
+    var index: String,
+    @Field(description = "The url to the status list credential", name = "statusListCredential")
+    @SerialName("statusListCredential") @JsonProperty("statusListCredential")
+    var listUrl: String,
 ) {
     companion object {
         const val CREDENTIAL_TYPE = "StatusList2021Entry"
@@ -164,7 +174,9 @@ data class ListCredentialRequestData (
 
 @Serializable
 data class ListCredentialSubject (
+    @Field(name = "id")
     @SerialName("id") @JsonProperty("id") var credentialId: String,
+    @Field(name = "type")
     @SerialName("type") @JsonProperty("type") var credentialType: String = "StatusList2021",
     var statusPurpose: String = "revocation",
     var encodedList: String

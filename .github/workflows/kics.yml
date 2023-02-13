@@ -63,7 +63,7 @@ jobs:
           # GITHUB_TOKEN enables this github action to access github API and post comments in a pull request
           # token: ${{ secrets.GITHUB_TOKEN }}
           # enable_comments: true
-          exclude_paths: "docs/openapi_v310.json"
+          exclude_paths: "docs/openapi_v330.json"
 
       # Upload findings to GitHub Advanced Security Dashboard
       - name: Upload SARIF file for GitHub Advanced Security Dashboard

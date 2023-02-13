@@ -62,12 +62,6 @@ jobs:
         with:
           arguments: installDist
 
-      - name: setup nodejs
-        uses: actions/setup-node@master
-
-      - name: build admin ui
-        run: cd ui-src && yarn && yarn build && cp -r dist/* ../static
-
       - name: Build and push staging images
         uses: docker/build-push-action@v2
         with:
