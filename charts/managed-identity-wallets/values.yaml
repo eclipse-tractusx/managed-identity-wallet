@@ -50,6 +50,8 @@ wallet:
   baseWalletVerkey: ""
   # -- The name of the base wallet
   baseWalletName: ""
+  # -- A list of full DIDs seperated by comma ",". Those DIDs are allowed to send a connection request to managed wallets. Empty for public invitation allowance
+  allowlistDids: ""
   # -- The name used in the Membership credential
   membershipOrganisation: "Platform-A"
 # The configuration of revocation service in MIW
@@ -167,7 +169,7 @@ postgresql:
     initContainers:
       - name: initdb
         # -- The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml
-        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.1.2
+        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.2.0
         imagePullPolicy: Always
         command:
           - sh

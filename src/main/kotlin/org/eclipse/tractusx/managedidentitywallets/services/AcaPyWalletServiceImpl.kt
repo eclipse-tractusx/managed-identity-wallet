@@ -19,7 +19,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import com.google.gson.GsonBuilder
 import foundation.identity.jsonld.JsonLDUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
@@ -106,7 +105,6 @@ class AcaPyWalletServiceImpl(
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
-        private val gson = GsonBuilder().create()
     }
 
     override fun getWallet(identifier: String, withCredentials: Boolean): WalletDto {
@@ -216,8 +214,8 @@ class AcaPyWalletServiceImpl(
         }
 
         acaPyService.sendConnectionRequest(
-            didOfTheirWallet = getBaseWallet().did,
-            usePublicDid = false,
+            didOfTheirWallet = utilsService.getIdentifierOfDid(getBaseWallet().did),
+            usePublicDid = false, // It has no public DID yet
             alias = "endorser",
             token = createdSubWalletDto.token,
             label = walletToCreate.bpn
@@ -481,7 +479,7 @@ class AcaPyWalletServiceImpl(
 
     override suspend fun addService(identifier: String, serviceDto: DidServiceDto) {
         log.debug("Add Service Endpoint for $identifier")
-        utilsService.checkSupportedId(serviceDto.id)
+        utilsService.checkSupportedServiceId(serviceDto.id)
         val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
@@ -518,7 +516,7 @@ class AcaPyWalletServiceImpl(
         serviceUpdateRequestDto: DidServiceUpdateRequestDto
     ) {
         log.debug("Update Service Endpoint for $identifier")
-        utilsService.checkSupportedId(id)
+        utilsService.checkSupportedServiceId(id)
         val walletData = getWalletExtendedInformation(identifier)
         val didDoc = resolveDocument(walletData.did)
         if (!didDoc.services.isNullOrEmpty()) {
@@ -1050,6 +1048,52 @@ class AcaPyWalletServiceImpl(
             did = utilsService.getIdentifierOfDid(walletExtendedData.did),
             token = walletExtendedData.walletToken!!
         )
+    }
+
+    override fun validateConnectionRequestForManagedWallets(connection: ConnectionRecord): Boolean {
+        val allowlistDids = acaPyService.getWalletAndAcaPyConfig().allowlistDids
+        val filteredAllowlistShortDids = allowlistDids.filter {
+                it.startsWith(utilsService.getOldDidMethodPrefixWithNetworkIdentifier())
+                        || it.startsWith(utilsService.getDidMethodPrefixWithNetworkIdentifier())
+            }
+            .map { did -> utilsService.getIdentifierOfDid(did) }
+        val connectionDid = utilsService.getIdentifierOfDid(
+            did = connection.theirPublicDid ?: connection.theirDid
+        )
+        if (allowlistDids.isNotEmpty()
+            && !filteredAllowlistShortDids.contains(connectionDid)
+            && !walletRepository.isWalletExists(utilsService.convertToFullDidIfShort(connectionDid))
+        ) {
+            log.warn(
+                "Connection request ${connection.connectionId} and DID $connectionDid " +
+                        "has been rejected due to unfulfilled conditions"
+            )
+            return false
+        }
+        return true
+    }
+
+    override suspend fun validateConnectionRequestForBaseWallet(
+        connection: ConnectionRecord,
+        bpn: String
+    ): WalletDto? {
+        val connectionDid = utilsService.getIdentifierOfDid(
+            did = connection.theirPublicDid ?: connection.theirDid
+        )
+        val wallet = walletRepository.getWalletOrNull(bpn)
+        if (wallet != null) {
+            val walletData = walletRepository.toWalletCompleteDataObject(wallet)
+            // It could be an internal AcaPy DID (e.g. when a managed wallet is created)
+            return if (acaPyService.isDidOfWallet(connectionDid, wallet.walletToken)) {
+                getWallet(walletData.did)
+            } else {
+                log.warn("The used did $connectionDid in connection ${connection.connectionId} " +
+                        "does not belong to the given BPN $bpn")
+                null
+            }
+        }
+        log.warn("A connection ${connection.connectionId} from a not stored wallet $bpn is forbidden")
+        return null
     }
 
     override suspend fun setAuthorMetaData(

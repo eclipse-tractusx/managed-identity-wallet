@@ -26,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.InvitationRequestDto
+import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.AriesLdFormats
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.Rfc23State
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
@@ -35,6 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyService
 import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
 import org.eclipse.tractusx.managedidentitywallets.services.BaseWalletAriesEventHandler
+import org.eclipse.tractusx.managedidentitywallets.services.IAcaPyService
 import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
@@ -43,6 +45,7 @@ import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 import org.eclipse.tractusx.managedidentitywallets.services.WebhookServiceImpl
 import org.hyperledger.acy_py.generated.model.AttachDecorator
 import org.hyperledger.acy_py.generated.model.AttachDecoratorData
+import org.hyperledger.acy_py.generated.model.V20CredFormat
 import org.hyperledger.acy_py.generated.model.V20CredIssue
 import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v1.CredentialExchangeState
@@ -121,6 +124,7 @@ class BaseWalletAriesEventHandlerTest {
     private lateinit var webhookService: IWebhookService
     private lateinit var walletServiceSpy: IWalletService
     private lateinit var ariesEventHandler: BaseWalletAriesEventHandler
+    private lateinit var acaPyServiceMock: IAcaPyService
 
     @BeforeTest
     fun setup() {
@@ -137,10 +141,11 @@ class BaseWalletAriesEventHandlerTest {
         webhookService = WebhookServiceImpl(
             webhookRepository, HttpClient(mockEngine)
         )
-        val acaPyServiceMock = mock<AcaPyService>()
+        acaPyServiceMock = mock<AcaPyService>()
         doNothing().whenever(acaPyServiceMock).subscribeBaseWalletForWebSocket()
         whenever(acaPyServiceMock.getWalletAndAcaPyConfig()).thenReturn(EnvironmentTestSetup.walletAcapyConfig)
         runBlocking {
+            whenever(acaPyServiceMock.isDidOfWallet(any(), anyOrNull())).thenReturn(true)
             val connectionRecordRequest = ConnectionRecord()
             connectionRecordRequest.connectionId = "connection-id-123"
             connectionRecordRequest.rfc23State = Rfc23State.REQUEST_SENT.toString()
@@ -208,6 +213,7 @@ class BaseWalletAriesEventHandlerTest {
                 newConnectionRecord.connectionId = connectionId
                 newConnectionRecord.requestId = connectionThreadId
                 newConnectionRecord.theirLabel = holderWallet.bpn
+                newConnectionRecord.theirPublicDid = holderWallet.did
                 // Test `handleConnection` for state COMPLETED
                 ariesEventHandler.handleConnection(null, newConnectionRecord)
 
@@ -220,6 +226,57 @@ class BaseWalletAriesEventHandlerTest {
                     val connections = connectionRepository.getAll()
                     assertEquals(2, connections.size)
                 }
+
+                transaction {
+                    walletRepo.deleteWallet(issuerWallet.bpn)
+                    walletRepo.deleteWallet(holderWallet.bpn)
+                    connectionRepository.deleteConnections(issuerWallet.did)
+                    connectionRepository.deleteConnections(holderWallet.did)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testHandleReceivedConnectionRequestUnknownWallet() {
+        withTestApplication({
+            EnvironmentTestSetup.setupEnvironment(environment)
+            configurePersistence()
+        }) {
+            runBlocking {
+                // Setup
+                addWallets(walletRepo, walletServiceSpy, listOf(issuerWallet, holderWallet))
+
+                assertDoesNotThrow {
+                    runBlocking {
+                        walletServiceSpy.sendInvitation(
+                            holderWallet.did,
+                            invitationRequestDto = InvitationRequestDto(
+                                theirPublicDid = issuerWallet.did,
+                                myLabel = "testLabel",
+                                alias = "ToBaseWallet"
+                            )
+                        )
+                    }
+                }
+
+                // Mock super call to tenantAwareEventHandler
+                val tenantAwareEventHandler = mock<TenantAwareEventHandler>()
+                doNothing().whenever(tenantAwareEventHandler).handleConnection(anyOrNull(), any())
+
+                whenever(acaPyServiceMock.isDidOfWallet(any(), anyOrNull())).thenReturn(false)
+
+                val newConnectionRecord = ConnectionRecord()
+                newConnectionRecord.rfc23State = Rfc23State.REQUEST_RECEIVED.toString()
+                newConnectionRecord.connectionId = connectionId
+                newConnectionRecord.requestId = connectionThreadId
+                newConnectionRecord.theirLabel = holderWallet.bpn
+                newConnectionRecord.theirPublicDid = "did:sov:unknowwallet"
+
+                ariesEventHandler.handleConnection(null, newConnectionRecord)
+
+                verify(walletServiceSpy, times(0)).setEndorserMetaDataForConnection(any())
+                verify(walletServiceSpy, times(0)).acceptConnectionRequest(any(), any())
 
                 transaction {
                     walletRepo.deleteWallet(issuerWallet.bpn)
@@ -478,6 +535,9 @@ class BaseWalletAriesEventHandlerTest {
         dataDecorator.data = data
         val credentialTildeAttach = listOf(dataDecorator)
         val credIssue = V20CredIssue()
+        val format  = V20CredFormat()
+        format.format = AriesLdFormats.ARIES_LD_PROOF_VC_V_1_0
+        credIssue.formats = listOf(format)
         credIssue.credentialsTildeAttach = credentialTildeAttach.toImmutableList()
         val v20CredentialExchange = V20CredExRecord()
         v20CredentialExchange.credIssue = credIssue

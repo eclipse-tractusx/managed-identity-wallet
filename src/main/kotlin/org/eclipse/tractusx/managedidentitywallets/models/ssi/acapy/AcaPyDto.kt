@@ -75,7 +75,8 @@ data class WalletAndAcaPyConfig(
     val apiAdminUrl: String,
     val adminApiKey: String,
     val baseWalletAdminUrl: String,
-    val baseWalletAdminApiKey: String
+    val baseWalletAdminApiKey: String,
+    val allowlistDids: List<String>
 )
 
 @Serializable
