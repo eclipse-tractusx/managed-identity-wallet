@@ -148,13 +148,13 @@ data class CredentialStatus (
     @Field(description = "The ID of the credential status", name = "id")
     var statusId: String,
     @SerialName("type") @JsonProperty("type")
-    @Field(description = "The type of credential the credential list", name = "type")
+    @Field(description = "The type of the credential status", name = "type")
     var credentialType: String = "StatusList2021Entry",
     @SerialName("statusPurpose") @JsonProperty("statusPurpose")
-    @Field(description = "The purpose of the list", name = "statusPurpose")
+    @Field(description = "The purpose of the status list", name = "statusPurpose")
     var statusPurpose: String = "revocation",
     @SerialName("statusListIndex") @JsonProperty("statusListIndex")
-    @Field(description = "The index of the credential", name = "statusListIndex")
+    @Field(description = "The index of the credential in the status list", name = "statusListIndex")
     var index: String,
     @SerialName("statusListCredential") @JsonProperty("statusListCredential")
     @Field(description = "The url to the status list credential", name = "statusListCredential")
