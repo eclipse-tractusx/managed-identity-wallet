@@ -2,7 +2,7 @@
     "openapi": "3.0.3",
     "info": {
         "title": "Managed Identity Wallets API",
-        "version": "3.1.0",
+        "version": "3.3.0",
         "description": "Managed Identity Wallets API",
         "termsOfService": "https://www.eclipse.org/legal/termsofuse.php",
         "contact": {
@@ -122,7 +122,7 @@
                                             "bpn": "bpn",
                                             "did": "did",
                                             "verKey": "verkey",
-                                            "createdAt": "2023-01-28T17:35:12.815638",
+                                            "createdAt": "2023-02-13T15:06:06.539270",
                                             "vcs": [
                                             ],
                                             "pendingMembershipIssuance": false,
@@ -342,7 +342,7 @@
                                             "name": "name",
                                             "bpn": "bpn",
                                             "did": "did",
-                                            "createdAt": "2023-01-28T17:35:12.815728",
+                                            "createdAt": "2023-02-13T15:06:06.539342",
                                             "vcs": [
                                             ],
                                             "pendingMembershipIssuance": false,
@@ -2956,6 +2956,12 @@
                     "proof": {
                         "$ref": "#/components/schemas/LdProofDto"
                     },
+                    "provenanceProof": {
+                        "items": {
+                            "$ref": "#/components/schemas/Any"
+                        },
+                        "type": "array"
+                    },
                     "type": {
                         "items": {
                             "type": "string"
@@ -2974,16 +2980,16 @@
             },
             "CredentialStatus": {
                 "properties": {
-                    "credentialType": {
+                    "type": {
                         "type": "string"
                     },
-                    "index": {
+                    "statusListIndex": {
                         "type": "string"
                     },
-                    "listUrl": {
+                    "statusListCredential": {
                         "type": "string"
                     },
-                    "statusId": {
+                    "id": {
                         "type": "string"
                     },
                     "statusPurpose": {
@@ -2991,9 +2997,9 @@
                     }
                 },
                 "required": [
-                    "statusId",
-                    "index",
-                    "listUrl"
+                    "id",
+                    "statusListIndex",
+                    "statusListCredential"
                 ],
                 "type": "object"
             },
@@ -3686,10 +3692,10 @@
             },
             "ListCredentialSubject": {
                 "properties": {
-                    "credentialId": {
+                    "id": {
                         "type": "string"
                     },
-                    "credentialType": {
+                    "type": {
                         "type": "string"
                     },
                     "encodedList": {
@@ -3700,7 +3706,7 @@
                     }
                 },
                 "required": [
-                    "credentialId",
+                    "id",
                     "encodedList"
                 ],
                 "type": "object"
