@@ -74,7 +74,7 @@ class PresentationsTest {
             configurePersistence()
             configureOpenAPI()
             configureSecurity()
-            configureRouting(EnvironmentTestSetup.walletService)
+            configureRouting()
             appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
                 EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
                 EnvironmentTestSetup.utilsService)
@@ -345,7 +345,7 @@ class PresentationsTest {
             configurePersistence()
             configureOpenAPI()
             configureSecurity()
-            configureRouting(EnvironmentTestSetup.walletService)
+            configureRouting()
             appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
                 EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
                 EnvironmentTestSetup.utilsService)
@@ -503,7 +503,7 @@ class PresentationsTest {
             configurePersistence()
             configureOpenAPI()
             configureSecurity()
-            configureRouting(EnvironmentTestSetup.walletService)
+            configureRouting()
             appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
                 EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
                 EnvironmentTestSetup.utilsService)
@@ -649,7 +649,7 @@ class PresentationsTest {
             configurePersistence()
             configureOpenAPI()
             configureSecurity()
-            configureRouting(EnvironmentTestSetup.walletService)
+            configureRouting()
             appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
                 EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
                 EnvironmentTestSetup.utilsService)

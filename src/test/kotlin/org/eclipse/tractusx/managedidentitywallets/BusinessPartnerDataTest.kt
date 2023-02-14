@@ -59,7 +59,7 @@ class BusinessPartnerDataTest {
             configurePersistence()
             configureOpenAPI()
             configureSecurity()
-            configureRouting(EnvironmentTestSetup.walletService)
+            configureRouting()
             appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
                 EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
                 EnvironmentTestSetup.utilsService)
@@ -86,7 +86,7 @@ class BusinessPartnerDataTest {
             configurePersistence()
             configureOpenAPI()
             configureSecurity()
-            configureRouting(EnvironmentTestSetup.walletService)
+            configureRouting()
             appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
                 EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
                 EnvironmentTestSetup.utilsService)

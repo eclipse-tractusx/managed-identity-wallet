@@ -460,29 +460,3 @@ To regenerate the README.md after updating `values.yaml` or `Chart.yaml` run
 ```
 helm-docs --sort-values-order file
 ```
-
-## Dashboard <a id="dashboard"></a>
-
-Within `ui-src` a simple Vue based dashboard application is available
-which currently only shows the existing companies as well as is able
-to retrieve the full BPN information from the CX data pool API on a
-click on the BPN.
-
-It can be developed with
-
-```
-cd ui-src
-yarn serve
-```
-
-In each release the files in `/static` are updated but within the deployment
-pipeline the application is built and copied over to the `/static` directory.
-
-The steps to build the static files are like following:
-
-```
-cd ui-src
-yarn build
-rm -rf ../static/*
-cp -r dist/* ../static
-```

@@ -144,11 +144,21 @@ data class VerifiableCredentialRequestWithoutIssuerDto(
 
 @Serializable
 data class CredentialStatus (
-    @SerialName("id") @JsonProperty("id") var statusId: String,
-    @SerialName("type") @JsonProperty("type")  var credentialType: String = "StatusList2021Entry",
-    @SerialName("statusPurpose") @JsonProperty("statusPurpose") var statusPurpose: String = "revocation",
-    @SerialName("statusListIndex") @JsonProperty("statusListIndex") var index: String,
-    @SerialName("statusListCredential") @JsonProperty("statusListCredential") var listUrl: String,
+    @SerialName("id") @JsonProperty("id")
+    @Field(description = "The ID of the credential status", name = "id")
+    var statusId: String,
+    @SerialName("type") @JsonProperty("type")
+    @Field(description = "The type of the credential status", name = "type")
+    var credentialType: String = "StatusList2021Entry",
+    @SerialName("statusPurpose") @JsonProperty("statusPurpose")
+    @Field(description = "The purpose of the status list", name = "statusPurpose")
+    var statusPurpose: String = "revocation",
+    @SerialName("statusListIndex") @JsonProperty("statusListIndex")
+    @Field(description = "The index of the credential in the status list", name = "statusListIndex")
+    var index: String,
+    @SerialName("statusListCredential") @JsonProperty("statusListCredential")
+    @Field(description = "The url to the status list credential", name = "statusListCredential")
+    var listUrl: String,
 ) {
     companion object {
         const val CREDENTIAL_TYPE = "StatusList2021Entry"
@@ -164,8 +174,12 @@ data class ListCredentialRequestData (
 
 @Serializable
 data class ListCredentialSubject (
-    @SerialName("id") @JsonProperty("id") var credentialId: String,
-    @SerialName("type") @JsonProperty("type") var credentialType: String = "StatusList2021",
+    @SerialName("id") @JsonProperty("id")
+    @Field(name = "id")
+    var credentialId: String,
+    @SerialName("type") @JsonProperty("type")
+    @Field(name = "type")
+    var credentialType: String = "StatusList2021",
     var statusPurpose: String = "revocation",
     var encodedList: String
 ) {
