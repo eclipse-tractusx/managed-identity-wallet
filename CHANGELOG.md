@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.0] - 2023-02-14
+- Remove unused UI
+- Fix credential status description in OpenApi
+
+## [3.2.0] - 2023-02-13
+- Add an allowlist for requested connections based on the DID of the requester
+
 ## [3.1.1] - 2023-01-27
 - Add Kotlin docs to the interfaces
 
