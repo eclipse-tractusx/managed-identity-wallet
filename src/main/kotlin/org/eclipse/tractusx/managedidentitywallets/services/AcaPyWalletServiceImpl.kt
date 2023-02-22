@@ -219,7 +219,10 @@ class AcaPyWalletServiceImpl(
                 force = true
             )
         } catch (e: Exception) {
-            log.error("Error while issuing status list credential. ${e.message}")
+            log.error(
+                "Error while issuing status list credential for DID ${createdDid.result.did}" +
+                        "with message ${e.message}"
+            )
         }
 
         acaPyService.sendConnectionRequest(
