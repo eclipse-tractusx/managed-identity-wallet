@@ -23,6 +23,7 @@ import io.ktor.application.*
 import io.ktor.features.*
 import kotlinx.coroutines.runBlocking
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
+import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
@@ -107,9 +108,37 @@ fun Application.module(testing: Boolean = false) {
         baseWalletAdminApiKey = environment.config.property("acapy.baseWalletAdminApiKey").getString(),
         allowlistDids = allowlistDids
     )
+
+    val servicesHttpClientLogLevel = environment.config.property("logging.logLevelServicesCalls").getString()
+    val httpClientWalletServiceConfig = ServicesHttpClientConfig(
+        servicesHttpClientLogLevel,
+        environment.config.property("httpTimeout.walletServiceRequestTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.walletServiceConnectTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.walletServiceSocketTimeoutMillis").getString().toLong()
+    )
+    val httpClientBPDServiceConfig = ServicesHttpClientConfig(
+        servicesHttpClientLogLevel,
+        environment.config.property("httpTimeout.bpdServiceRequestTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.bpdServiceConnectTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.bpdServiceSocketTimeoutMillis").getString().toLong()
+    )
+    val httpClientRevocationServiceConfig = ServicesHttpClientConfig(
+        servicesHttpClientLogLevel,
+        environment.config.property("httpTimeout.revocationServiceRequestTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.revocationServiceConnectTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.revocationServiceSocketTimeoutMillis").getString().toLong()
+    )
+
+    val httpClientWebhookServiceConfig = ServicesHttpClientConfig(
+        servicesHttpClientLogLevel,
+        environment.config.property("httpTimeout.webhookServiceRequestTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.webhookServiceConnectTimeoutMillis").getString().toLong(),
+        environment.config.property("httpTimeout.webhookServiceSocketTimeoutMillis").getString().toLong()
+    )
+
     val revocationUrl = environment.config.property("revocation.baseUrl").getString()
-    val revocationService = IRevocationService.createRevocationService(revocationUrl)
-    val webhookService = IWebhookService.createWebhookService(webhookRepository)
+    val revocationService = IRevocationService.createRevocationService(revocationUrl, httpClientRevocationServiceConfig)
+    val webhookService = IWebhookService.createWebhookService(webhookRepository, httpClientWebhookServiceConfig)
     val walletService = IWalletService.createWithAcaPyService(
         acaPyConfig,
         walletRepository,
@@ -117,7 +146,8 @@ fun Application.module(testing: Boolean = false) {
         utilsService,
         revocationService,
         webhookService,
-        connectionRepository
+        connectionRepository,
+        httpClientWalletServiceConfig
     )
     val bpdmConfig = BPDMConfig(
         url = environment.config.property("bpdm.datapoolUrl").getString(),
@@ -131,7 +161,8 @@ fun Application.module(testing: Boolean = false) {
     val businessPartnerDataService = IBusinessPartnerDataService.createBusinessPartnerDataService(
         walletService,
         bpdmConfig,
-        membershipOrganisation
+        membershipOrganisation,
+        httpClientBPDServiceConfig
     )
     Services.businessPartnerDataService = businessPartnerDataService
     Services.walletService = walletService

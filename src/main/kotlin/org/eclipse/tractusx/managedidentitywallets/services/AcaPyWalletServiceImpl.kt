@@ -166,7 +166,7 @@ class AcaPyWalletServiceImpl(
     }
 
     override suspend fun createWallet(walletCreateDto: WalletCreateDto): WalletDto {
-        log.debug("Add a new Wallet with bpn ${walletCreateDto.bpn}")
+        log.info("Add a new Wallet with bpn ${walletCreateDto.bpn}")
         // Check if wallet already exists
         transaction { walletRepository.checkWalletAlreadyExists(walletCreateDto.bpn) }
         // Create Sub Wallet in Aca-Py

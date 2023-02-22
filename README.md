@@ -42,39 +42,56 @@ Following tools the MIW development team used successfully:
 Please see the file `.env.example` for the environment examples that are used
 below. Here a few hints on how to set it up:
 
-| Key                       | Type   | Description |
-|---------------------------|--------|-------------|
-| `MIW_DB_JDBC_URL`          | URL    | database connection string, most commonly postgreSQL is used |
-| `MIW_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used |
-| `MIW_AUTH_JWKS_URL`        | URL    | IAM certs url |
-| `MIW_AUTH_ISSUER_URL`      | URL    | IAM token issuer url |
-| `MIW_AUTH_REDIRECT_URL`    | URL    | IAM redirect url to the MIW |
-| `MIW_AUTH_REALM`           | String | IAM realm |
-| `MIW_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping |
-| `MIW_AUTH_RESOURCE_ID`     | String | IAM resource id |
-| `MIW_AUTH_CLIENT_ID`       | String | IAM client id |
-| `MIW_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*localkeycloak* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials* |
-| `APP_VERSION`             | String | application version, this should be in-line with the version in the deployment |
-| `ACAPY_API_ADMIN_URL`     | String | admin url of ACA-Py |
-| `ACAPY_ADMIN_API_KEY`     | String | admin api key of ACA-Py endpoints |
-| `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the base endorser ACA-Py |
-| `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the base endorser ACA-Py endpoints |
-| `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space |
-| `MIW_BPN`                  | String | BPN of the base wallet |
-| `MIW_DID`                  | String | DID of the base wallet, this wallet must be registered on ledger with the endorser role |
-| `MIW_VERKEY`               | String | Verification key of the base wallet, this wallet must be registered on ledger with the endorser role |
-| `MIW_NAME`                 | String | Name of the base wallet |
+| Key                       | Type   | Description                                                                                                                                             |
+|---------------------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `MIW_DB_JDBC_URL`          | URL    | database connection string, most commonly postgreSQL is used                                                                                            |
+| `MIW_DB_JDBC_DRIVER`       | URL    | database driver to use, most commonly postgreSQL is used                                                                                                |
+| `MIW_AUTH_JWKS_URL`        | URL    | IAM certs url                                                                                                                                           |
+| `MIW_AUTH_ISSUER_URL`      | URL    | IAM token issuer url                                                                                                                                    |
+| `MIW_AUTH_REDIRECT_URL`    | URL    | IAM redirect url to the MIW                                                                                                                             |
+| `MIW_AUTH_REALM`           | String | IAM realm                                                                                                                                               |
+| `MIW_AUTH_ROLE_MAPPINGS`   | String | IAM role mapping                                                                                                                                        |
+| `MIW_AUTH_RESOURCE_ID`     | String | IAM resource id                                                                                                                                         |
+| `MIW_AUTH_CLIENT_ID`       | String | IAM client id                                                                                                                                           |
+| `MIW_AUTH_CLIENT_SECRET`   | String | It can be extracted from keycloak under *realms* &gt;*localkeycloak* &gt; *clients* &gt; *ManagedIdentityWallets* &gt; *credentials*                    |
+| `APP_VERSION`             | String | application version, this should be in-line with the version in the deployment                                                                          |
+| `ACAPY_API_ADMIN_URL`     | String | admin url of ACA-Py                                                                                                                                     |
+| `ACAPY_ADMIN_API_KEY`     | String | admin api key of ACA-Py endpoints                                                                                                                       |
+| `ACAPY_BASE_WALLET_API_ADMIN_URL`     | String | admin url of the base endorser ACA-Py                                                                                                                   |
+| `ACAPY_BASE_WALLET_ADMIN_API_KEY`     | String | admin api key of the base endorser ACA-Py endpoints                                                                                                     |
+| `LOG_LEVEL_KTOR_ROOT`     | String | the log level of Ktor                                                                                                                                   |
+| `LOG_LEVEL_NETTY`     | String | the log level of used netty server                                                                                                                      |
+| `LOG_LEVEL_ECLIPSE_JETTY`     | String | the log level of used eclipse jetty                                                                                                                     |
+| `LOG_LEVEL_EXPOSED`     | String | the log level of used exposed framework                                                                                                                 |
+| `LOG_LEVEL_SERVICES_CALLS`     | String | the log level of http client used in internal services. OPTIONS: ALL, HEADERS, BODY, INFO, NONE                                                         |
+| `WALLET_SERVICE_REQUEST_TIMEOUT`     | String | the timeout of request in http client of the wallet service in milli seconds                                                                            |
+| `WALLET_SERVICE_CONNECT_TIMEOUT`     | String | the timeout of connect in http client of the wallet service in milli seconds                                                                            |
+| `WALLET_SERVICE_SOCKET_TIMEOUT`     | String | the timeout of socket in http client of the wallet service in milli seconds                                                                             |
+| `BPD_SERVICE_REQUEST_TIMEOUT`     | String | the timeout of request in http client of the BPD service in milli seconds                                                                               |
+| `BPD_SERVICE_CONNECT_TIMEOUT`     | String | the timeout of connect in http client of the BPD service in milli seconds                                                                               |
+| `BPD_SERVICE_SOCKET_TIMEOUT`     | String | the timeout of socket in http client of the BPD service in milli seconds                                                                                |
+| `REVOCATION_SERVICE_REQUEST_TIMEOUT`     | String | the timeout of request in http client of the revocation service in milli seconds                                                                        |
+| `REVOCATION_SERVICE_CONNECT_TIMEOUT`     | String | the timeout of connect in http client of the revocation service in milli seconds                                                                        |
+| `REVOCATION_SERVICE_SOCKET_TIMEOUT`     | String | the timeout of socket in http client of the revocation service in milli seconds                                                                         |
+| `WEBHOOK_SERVICE_REQUEST_TIMEOUT`     | String | the timeout of request in http client of the webhook service in milli seconds                                                                        |
+| `WEBHOOK_SERVICE_CONNECT_TIMEOUT`     | String | the timeout of connect in http client of the webhook service in milli seconds                                                                        |
+| `WEBHOOK_SERVICE_SOCKET_TIMEOUT`     | String | the timeout of socket in http client of the webhook service in milli seconds                                                                            |
+| `ACAPY_NETWORK_IDENTIFIER`| String | Hyperledger Indy name space                                                                                                                             |
+| `MIW_BPN`                  | String | BPN of the base wallet                                                                                                                                  |
+| `MIW_DID`                  | String | DID of the base wallet, this wallet must be registered on ledger with the endorser role                                                                 |
+| `MIW_VERKEY`               | String | Verification key of the base wallet, this wallet must be registered on ledger with the endorser role                                                    |
+| `MIW_NAME`                 | String | Name of the base wallet                                                                                                                                 |
 |`MIW_ALLOWLIST_DIDS`       | String | List of full DIDs seperated by comma ",". Those DIDs are allowed to send a connection request to managed wallets. Empty for public invitation allowance |
-| `MIW_MEMBERSHIP_ORG`  | String | The name used in the Membership credential |
-| `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint |
-| `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_GRANT_TYPE`    | String | grant type for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_SCOPE`         | String | openid scope for accessing the BPDM data pool endpoint |
-| `BPDM_AUTH_URL`           | String | IAM url to get the access token for BPDM data pool endpoint |
-| `BPDM_PULL_DATA_AT_HOUR`  | String | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
-| `REVOCATION_URL`          | String | URL of the revocation service |
-| `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR` | String | At which hour (24-hour clock) the cron job should issue/update status-list credentials |
+| `MIW_MEMBERSHIP_ORG`  | String | The name used in the Membership credential                                                                                                              |
+| `BPDM_DATAPOOL_URL`       | String | BPDM data pool API endpoint                                                                                                                             |
+| `BPDM_AUTH_CLIENT_ID`     | String | client id for accessing the BPDM data pool endpoint                                                                                                     |
+| `BPDM_AUTH_CLIENT_SECRET` | String | client secret for accessing the BPDM data pool endpoint                                                                                                 |
+| `BPDM_AUTH_GRANT_TYPE`    | String | grant type for accessing the BPDM data pool endpoint                                                                                                    |
+| `BPDM_AUTH_SCOPE`         | String | openid scope for accessing the BPDM data pool endpoint                                                                                                  |
+| `BPDM_AUTH_URL`           | String | IAM url to get the access token for BPDM data pool endpoint                                                                                             |
+| `BPDM_PULL_DATA_AT_HOUR`  | String | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool                                                                 |
+| `REVOCATION_URL`          | String | URL of the revocation service                                                                                                                           |
+| `REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR` | String | At which hour (24-hour clock) the cron job should issue/update status-list credentials                                                                  |
 
 ## Local Development Setup
 

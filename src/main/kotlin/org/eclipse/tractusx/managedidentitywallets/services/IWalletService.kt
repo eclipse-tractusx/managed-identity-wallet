@@ -36,6 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletResultDto
+import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
@@ -435,7 +436,8 @@ interface IWalletService {
             utilsService: UtilsService,
             revocationService: IRevocationService,
             webhookService: IWebhookService,
-            connectionRepository: ConnectionRepository
+            connectionRepository: ConnectionRepository,
+            httpClientConfig: ServicesHttpClientConfig
         ): IWalletService {
             val httpClient = HttpClient {
                 expectSuccess = true
@@ -473,13 +475,13 @@ interface IWalletService {
                     }
                 }
                 install(HttpTimeout) {
-                    requestTimeoutMillis = 30000
-                    connectTimeoutMillis = 30000
-                    socketTimeoutMillis = 30000
+                    requestTimeoutMillis = httpClientConfig.requestTimeoutMillis
+                    connectTimeoutMillis = httpClientConfig.connectTimeoutMillis
+                    socketTimeoutMillis = httpClientConfig.socketTimeoutMillis
                 }
                 install(Logging) {
                     logger = Logger.DEFAULT
-                    level = LogLevel.BODY
+                    level = LogLevel.valueOf(httpClientConfig.logLevel)
                 }
                 install(JsonFeature) {
                     serializer = JacksonSerializer {

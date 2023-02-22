@@ -4,11 +4,11 @@
             <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="trace">
+    <root level="${LOG_LEVEL_KTOR_ROOT}">
         <appender-ref ref="STDOUT"/>
     </root>
     <!-- Exposed logger can be set to OFF in production -->
     <logger name="Exposed" level="${LOG_LEVEL_EXPOSED}"> </logger>
-    <logger name="org.eclipse.jetty" level="INFO"/>
-    <logger name="io.netty" level="INFO"/>
+    <logger name="org.eclipse.jetty" level="${LOG_LEVEL_ECLIPSE_JETTY}"/>
+    <logger name="io.netty" level="${LOG_LEVEL_NETTY}"/>
 </configuration>
