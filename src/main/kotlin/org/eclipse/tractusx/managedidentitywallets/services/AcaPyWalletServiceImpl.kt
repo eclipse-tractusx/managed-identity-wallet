@@ -213,6 +213,15 @@ class AcaPyWalletServiceImpl(
             walletRepository.toObject(createdWalletData)
         }
 
+        try {
+            revocationService.issueStatusListCredentials(
+                profileName = utilsService.getIdentifierOfDid(createdDid.result.did),
+                force = true
+            )
+        } catch (e: Exception) {
+            log.error("Error while issuing status list credential. ${e.message}")
+        }
+
         acaPyService.sendConnectionRequest(
             didOfTheirWallet = utilsService.getIdentifierOfDid(getBaseWallet().did),
             usePublicDid = false, // It has no public DID yet

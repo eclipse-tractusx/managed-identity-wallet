@@ -199,7 +199,6 @@ class ManagedWalletAriesEventHandlerTest {
                     .whenever(acaPyServiceMocked).acceptConnectionRequest(any(), anyOrNull())
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
                     walletService = walletServiceSpy,
-                    revocationService = revocationServiceMocked,
                     webhookService = webhookServiceMocked,
                     utilsService = utilsService
                 )
@@ -274,7 +273,6 @@ class ManagedWalletAriesEventHandlerTest {
                     .whenever(acaPyServiceMocked).acceptConnectionRequest(any(), anyOrNull())
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
                     walletService = walletServiceSpy,
-                    revocationService = revocationServiceMocked,
                     webhookService = webhookServiceMocked,
                     utilsService = utilsService
                 )
@@ -335,7 +333,6 @@ class ManagedWalletAriesEventHandlerTest {
 
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
                     walletService = walletServiceSpy,
-                    revocationService = revocationServiceMocked,
                     webhookService = webhookServiceMocked,
                     utilsService = utilsService
                 )
@@ -402,7 +399,6 @@ class ManagedWalletAriesEventHandlerTest {
 
                 val managedWalletAriesEventHandler = ManagedWalletsAriesEventHandler(
                     walletService = walletServiceSpy,
-                    revocationService = revocationServiceMocked,
                     webhookService = webhookServiceMocked,
                     utilsService = utilsService
                 )
