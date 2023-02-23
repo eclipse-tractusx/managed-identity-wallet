@@ -26,8 +26,28 @@ db:
   # -- Database driver to use
   jdbcDriver: "org.postgresql.Driver"
 namespace: "managed-identity-wallets"
+# -- The logging configurations
 logging:
   exposed: "INFO"
+  ktorRoot: "INFO"
+  jetty: "INFO"
+  netty: "INFO"
+  # -- Options: ALL, HEADERS, BODY, INFO, NONE
+  servicesCalls: "INFO"
+# -- The timeout (milliseconds) configuration of http client in each service.
+httpClientTimeout:
+  walletServiceRequest: "30000"
+  walletServiceConnect: "30000"
+  walletServiceSocket: "30000"
+  bpdServiceRequest: "30000"
+  bpdServiceConnect: "30000"
+  bpdServiceSocket: "30000"
+  revocationServiceRequest: "30000"
+  revocationServiceConnect: "30000"
+  revocationServiceSocket: "30000"
+  webhookServiceRequest: "30000"
+  webhookServiceConnect: "30000"
+  webhookServiceSocket: "30000"
 # The OpenAPI configuration in MIW
 openapi:
   title: "Managed Identity Wallets API"
@@ -211,3 +231,33 @@ certificate:
   host: "localhost"
 # -- Deployment on Kubernetes on local device
 isLocal: false
+# -- used resources for each componenet
+resources:
+  managedIdentityWallets:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  revocationService:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  endorserAcapy:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  mtAcapy:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"

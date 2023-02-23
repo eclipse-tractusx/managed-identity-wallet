@@ -59,3 +59,32 @@ acapypostgresql:
     password: <path:managed-identity-wallets/data/int/postgres-acapy-secret-config#password>
     postgrespassword: <path:managed-identity-wallets/data/int/postgres-acapy-secret-config#postgres-password>
     user: <path:managed-identity-wallets/data/int/postgres-acapy-secret-config#user>
+resources:
+  managedIdentityWallets:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+  revocationService:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+  endorserAcapy:          
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+  mtAcapy:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"

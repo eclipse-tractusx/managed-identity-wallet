@@ -7,7 +7,7 @@ wallet:
   baseWalletShortDid: "MhLrwtKpZhNCzazMeofPQH"
   baseWalletVerkey: "CHEC4PRQmP73A9UD7vQ6tnLAm9aoXLPhEtnGSMiAyVZj"
   baseWalletName: "Catena-X-Dev"
-  membershipOrganisation: "Catena-X"  
+  membershipOrganisation: "Catena-X"
 datapool:
   url: "https://partners-pool.dev.demo.catena-x.net"
   authUrl: "https://centralidp.dev.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/token"
@@ -63,3 +63,32 @@ acapypostgresql:
     password: <path:managed-identity-wallets/data/dev/postgres-acapy-secret-config#password>
     postgrespassword: <path:managed-identity-wallets/data/dev/postgres-acapy-secret-config#postgres-password>
     user: <path:managed-identity-wallets/data/dev/postgres-acapy-secret-config#user>
+resources:
+  managedIdentityWallets:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+  revocationService:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+  endorserAcapy:          
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+  mtAcapy:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
