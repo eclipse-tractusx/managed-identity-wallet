@@ -118,7 +118,6 @@ fun Application.appRoutes(
                 val topic = call.parameters["topic"] ?: throw BadRequestException("Missing or malformed topic")
                 val managedWalletHandler = ManagedWalletsAriesEventHandler(
                     walletService,
-                    revocationService,
                     webhookService,
                     utilsService
                 )

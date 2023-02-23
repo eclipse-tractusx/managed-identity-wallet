@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory
  */
 class ManagedWalletsAriesEventHandler(
     private val walletService: IWalletService,
-    private val revocationService: IRevocationService,
     private val webhookService: IWebhookService,
     private val utilsService: UtilsService
 ) : TenantAwareEventHandler() {
@@ -81,10 +80,6 @@ class ManagedWalletsAriesEventHandler(
                     if (connection.theirRole == ConnectionTheirRole.INVITER && connection.alias == "endorser") {
                         walletService.setAuthorMetaData(walletId, connection.connectionId)
                         walletService.setCommunicationEndpointUsingEndorsement(walletId)
-                        revocationService.issueStatusListCredentials(
-                            profileName = utilsService.getIdentifierOfDid(wallet.did),
-                            force = true
-                        )
                     }
                 }
             }
@@ -108,8 +103,10 @@ class ManagedWalletsAriesEventHandler(
                         if (v20Credential.credOffer.formats[0].format == AriesLdFormats.ARIES_LD_PROOF_VC_DETAIL_V_1_0) {
                             walletService.acceptReceivedOfferVc(walletId!!, v20Credential)
                         } else {
-                            log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
-                                    "${v20Credential.credOffer.formats[0].format}")
+                            log.warn(
+                                "CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                        v20Credential.credOffer.formats[0].format
+                            )
                         }
                     }
                 }
@@ -118,8 +115,10 @@ class ManagedWalletsAriesEventHandler(
                         if (v20Credential.credIssue.formats[0].format == AriesLdFormats.ARIES_LD_PROOF_VC_V_1_0) {
                             walletService.acceptAndStoreReceivedIssuedVc(walletId!!, v20Credential)
                         } else {
-                            log.warn("CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
-                                    "${v20Credential.credIssue.formats[0].format}")
+                            log.warn(
+                                "CredExRecord ${v20Credential.credentialExchangeId} has unsupported format " +
+                                        v20Credential.credIssue.formats[0].format
+                            )
                         }
                     }
                 }

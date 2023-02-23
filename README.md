@@ -292,7 +292,9 @@ docker run --env-file .env.docker -p 8080:8080 managed-identity-wallets:<VERSION
     kubectl -n managed-identity-wallets create secret generic managed-identity-wallets-secrets \
       --from-literal=miw-db-jdbc-url='jdbc:postgresql://<placeholder>:5432/<database name>?user=<database user>&password=<<database password>>' \
       --from-literal=miw-auth-client-id='ManagedIdentityWallets' \
-      --from-literal=miw-auth-client-secret='<placeholder>'
+      --from-literal=miw-auth-client-secret='<placeholder>' \
+      --from-literal=bpdm-auth-client-id='<placeholder>' \
+      --from-literal=bpdm-auth-client-secret='<placeholder>'
 
     kubectl -n managed-identity-wallets create secret generic managed-identity-wallets-acapy-secrets \
       --from-literal=acapy-endorser-wallet-key='<placeholder>' \
