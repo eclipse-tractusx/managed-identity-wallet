@@ -31,7 +31,7 @@ Managed Identity Wallets Service
 | namespace | string | `"managed-identity-wallets"` |  |
 | logging | object | `{"exposed":"INFO","jetty":"INFO","ktorRoot":"INFO","netty":"INFO","servicesCalls":"INFO"}` | The logging configurations |
 | logging.servicesCalls | string | `"INFO"` | Options: ALL, HEADERS, BODY, INFO, NONE |
-| httpClientTimeout | object | `{"bpdServiceConnect":"30000","bpdServiceRequest":"30000","bpdServiceSocket":"30000","revocationServiceConnect":"30000","revocationServiceRequest":"30000","revocationServiceSocket":"30000","walletServiceConnect":"30000","walletServiceRequest":"30000","walletServiceSocket":"30000","webhookServiceConnect":"30000","webhookServiceRequest":"30000","webhookServiceSocket":"30000"}` | The timeout (milliseconds) configuration of http client in each service. |
+| httpClientTimeout | object | `{"bpdServiceConnect":"25000","bpdServiceRequest":"25000","bpdServiceSocket":"25000","revocationServiceConnect":"25000","revocationServiceRequest":"25000","revocationServiceSocket":"25000","walletServiceConnect":"25000","walletServiceRequest":"25000","walletServiceSocket":"25000","webhookServiceConnect":"25000","webhookServiceRequest":"25000","webhookServiceSocket":"25000"}` | The timeout (milliseconds) configuration of http client in each service. |
 | openapi.title | string | `"Managed Identity Wallets API"` |  |
 | openapi.description | string | `"Managed Identity Wallets API"` |  |
 | openapi.termsOfServiceUrl | string | `"https://www.eclipse.org/legal/termsofuse.php"` |  |
@@ -57,7 +57,7 @@ Managed Identity Wallets Service
 | revocationService.clientIssuanceApiUrl | string | `"http://localhost:8080"` | The url at which the MIW is reachable |
 | acapy.imageName | string | `"bcgovimages/aries-cloudagent"` |  |
 | acapy.tag | string | `"py36-1.16-1_0.7.5"` |  |
-| acapy.endorser.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
+| acapy.endorser.ledgerUrl | string | `"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"` | The url of the used Indy ledger |
 | acapy.endorser.label | string | `"BaseWalletIssuer"` | The label of the instance |
 | acapy.endorser.logLevel | string | `"INFO"` |  |
 | acapy.endorser.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
@@ -74,7 +74,7 @@ Managed Identity Wallets Service
 | acapy.endorser.secret.dbpassword | string | `"postgres"` |  |
 | acapy.endorser.secret.jwtsecret | string | `"0"` |  |
 | acapy.endorser.secret.walletkey | string | `"0"` |  |
-| acapy.mt.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
+| acapy.mt.ledgerUrl | string | `"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"` | The url of the used Indy ledger |
 | acapy.mt.label | string | `"ManagedWallet"` | The label of the instance |
 | acapy.mt.logLevel | string | `"INFO"` |  |
 | acapy.mt.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
@@ -106,7 +106,7 @@ Managed Identity Wallets Service
 | postgresql.primary.extraVolumes[0].name | string | `"initdb"` |  |
 | postgresql.primary.extraVolumes[0].emptyDir | object | `{}` |  |
 | postgresql.primary.initContainers[0].name | string | `"initdb"` |  |
-| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.4.0"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
+| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.3.2"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
 | postgresql.primary.initContainers[0].imagePullPolicy | string | `"Always"` |  |
 | postgresql.primary.initContainers[0].command[0] | string | `"sh"` |  |
 | postgresql.primary.initContainers[0].args[0] | string | `"-c"` |  |

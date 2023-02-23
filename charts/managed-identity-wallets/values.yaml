@@ -98,7 +98,7 @@ acapy:
   # The configuration of the AcaPy endorser instance
   endorser:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://github.com/IDunion/IDunion_TestNet_Genesis/blob/master/pool_transactions_genesis"
+    ledgerUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
     # -- The label of the instance
     label: "BaseWalletIssuer"
     logLevel: "INFO"
@@ -130,7 +130,7 @@ acapy:
   # AcaPy multi-tenancy instance
   mt:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://github.com/IDunion/IDunion_TestNet_Genesis/blob/master/pool_transactions_genesis"
+    ledgerUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
     # -- The label of the instance
     label: "ManagedWallet"
     logLevel: "INFO"
