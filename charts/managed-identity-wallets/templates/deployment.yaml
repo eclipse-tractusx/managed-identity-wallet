@@ -285,7 +285,7 @@ spec:
           --wallet-storage-config '{\"url\":\"$(DB_HOST):5432\",\"max_connections\":5}'
           --wallet-storage-creds '{\"account\":\"$(DB_ACCOUNT)\",\"password\":\"$(DB_PASSWORD)\",\"admin_account\":\"$(DB_ADMIN_USER)\",\"admin_password\":\"$(DB_ADMIN_PASSWORD)\"}'
           --seed $(AGENT_WALLET_SEED) \
-          --genesis-url $(LEDGER_URL)/genesis \
+          --genesis-url $(LEDGER_URL) \
           --label $(LABEL) \
           --admin-api-key $(ACAPY_ADMIN_API_KEY) \
           --auto-ping-connection \
@@ -383,7 +383,7 @@ spec:
           --wallet-storage-config '{\"url\":\"$(DB_HOST):5432\",\"max_connections\":5}'
           --wallet-storage-creds '{\"account\":\"$(DB_ACCOUNT)\",\"password\":\"$(DB_PASSWORD)\",\"admin_account\":\"$(DB_ADMIN_USER)\",\"admin_password\":\"$(DB_ADMIN_PASSWORD)\"}'
           --seed $(AGENT_WALLET_SEED) \
-          --genesis-url $(LEDGER_URL)/genesis \
+          --genesis-url $(LEDGER_URL) \
           --label $(LABEL) \
           --admin-api-key $(ACAPY_ADMIN_API_KEY) \
           --auto-ping-connection \

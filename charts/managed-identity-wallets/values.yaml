@@ -36,18 +36,18 @@ logging:
   servicesCalls: "INFO"
 # -- The timeout (milliseconds) configuration of http client in each service.
 httpClientTimeout:
-  walletServiceRequest: "30000"
-  walletServiceConnect: "30000"
-  walletServiceSocket: "30000"
-  bpdServiceRequest: "30000"
-  bpdServiceConnect: "30000"
-  bpdServiceSocket: "30000"
-  revocationServiceRequest: "30000"
-  revocationServiceConnect: "30000"
-  revocationServiceSocket: "30000"
-  webhookServiceRequest: "30000"
-  webhookServiceConnect: "30000"
-  webhookServiceSocket: "30000"
+  walletServiceRequest: "25000"
+  walletServiceConnect: "25000"
+  walletServiceSocket: "25000"
+  bpdServiceRequest: "25000"
+  bpdServiceConnect: "25000"
+  bpdServiceSocket: "25000"
+  revocationServiceRequest: "25000"
+  revocationServiceConnect: "25000"
+  revocationServiceSocket: "25000"
+  webhookServiceRequest: "25000"
+  webhookServiceConnect: "25000"
+  webhookServiceSocket: "25000"
 # The OpenAPI configuration in MIW
 openapi:
   title: "Managed Identity Wallets API"
@@ -98,7 +98,7 @@ acapy:
   # The configuration of the AcaPy endorser instance
   endorser:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://idu.cloudcompass.ca"
+    ledgerUrl: "https://github.com/IDunion/IDunion_TestNet_Genesis/blob/master/pool_transactions_genesis"
     # -- The label of the instance
     label: "BaseWalletIssuer"
     logLevel: "INFO"
@@ -130,7 +130,7 @@ acapy:
   # AcaPy multi-tenancy instance
   mt:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://idu.cloudcompass.ca"
+    ledgerUrl: "https://github.com/IDunion/IDunion_TestNet_Genesis/blob/master/pool_transactions_genesis"
     # -- The label of the instance
     label: "ManagedWallet"
     logLevel: "INFO"

@@ -17,20 +17,6 @@ revocationService:
 # -- The logging configurations
 logging:
   exposed: "OFF"
-# -- The timeout (milliseconds) configuration of http client in each service.
-httpClientTimeout:
-  walletServiceRequest: "60000"
-  walletServiceConnect: "60000"
-  walletServiceSocket: "60000"
-  bpdServiceRequest: "60000"
-  bpdServiceConnect: "60000"
-  bpdServiceSocket: "60000"
-  revocationServiceRequest: "60000"
-  revocationServiceConnect: "60000"
-  revocationServiceSocket: "60000"
-  webhookServiceRequest: "60000"
-  webhookServiceConnect: "60000"
-  webhookServiceSocket: "60000"
 ingress:
   enabled: true
 certificate:
