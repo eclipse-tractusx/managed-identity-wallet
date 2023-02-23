@@ -1,6 +1,6 @@
 # managed-identity-wallets
 
-![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.4.0](https://img.shields.io/badge/AppVersion-3.4.0-informational?style=flat-square)
+![Version: 0.7.2](https://img.shields.io/badge/Version-0.7.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.2](https://img.shields.io/badge/AppVersion-3.3.2-informational?style=flat-square)
 
 Managed Identity Wallets Service
 
@@ -29,9 +29,9 @@ Managed Identity Wallets Service
 | allowEmptyPassword | string | `"\"yes\""` |  |
 | db.jdbcDriver | string | `"org.postgresql.Driver"` | Database driver to use |
 | namespace | string | `"managed-identity-wallets"` |  |
-| logging | object | `{"exposed":"INFO","jetty":"INFO","ktorRoot":"INFO","netty":"INFO","servicesCalls":"INFO"}` | the logging configurations |
+| logging | object | `{"exposed":"INFO","jetty":"INFO","ktorRoot":"INFO","netty":"INFO","servicesCalls":"INFO"}` | The logging configurations |
 | logging.servicesCalls | string | `"INFO"` | Options: ALL, HEADERS, BODY, INFO, NONE |
-| httpClientTimeout | object | `{"bpdServiceConnect":30000,"bpdServiceRequest":30000,"bpdServiceSocket":30000,"revocationServiceConnect":30000,"revocationServiceRequest":30000,"revocationServiceSocket":30000,"walletServiceConnect":30000,"walletServiceRequest":30000,"walletServiceSocket":30000,"webhookServiceConnect":30000,"webhookServiceRequest":30000,"webhookServiceSocket":30000}` | the timeout configuration of http client in each service. In milli seconds |
+| httpClientTimeout | object | `{"bpdServiceConnect":"30000","bpdServiceRequest":"30000","bpdServiceSocket":"30000","revocationServiceConnect":"30000","revocationServiceRequest":"30000","revocationServiceSocket":"30000","walletServiceConnect":"30000","walletServiceRequest":"30000","walletServiceSocket":"30000","webhookServiceConnect":"30000","webhookServiceRequest":"30000","webhookServiceSocket":"30000"}` | The timeout (milliseconds) configuration of http client in each service. |
 | openapi.title | string | `"Managed Identity Wallets API"` |  |
 | openapi.description | string | `"Managed Identity Wallets API"` |  |
 | openapi.termsOfServiceUrl | string | `"https://www.eclipse.org/legal/termsofuse.php"` |  |
@@ -106,7 +106,7 @@ Managed Identity Wallets Service
 | postgresql.primary.extraVolumes[0].name | string | `"initdb"` |  |
 | postgresql.primary.extraVolumes[0].emptyDir | object | `{}` |  |
 | postgresql.primary.initContainers[0].name | string | `"initdb"` |  |
-| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.3.1"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
+| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.4.0"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
 | postgresql.primary.initContainers[0].imagePullPolicy | string | `"Always"` |  |
 | postgresql.primary.initContainers[0].command[0] | string | `"sh"` |  |
 | postgresql.primary.initContainers[0].args[0] | string | `"-c"` |  |
