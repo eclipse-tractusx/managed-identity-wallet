@@ -130,13 +130,47 @@ spec:
           value: {{ .Values.revocation.revocationServiceUrl }}
         - name: REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR
           value: {{ .Values.revocation.refreshHour | quote }}
+        - name: LOG_LEVEL_KTOR_ROOT
+          value: {{ .Values.logging.ktorRoot }}
+        - name: LOG_LEVEL_EXPOSED
+          value: {{ .Values.logging.exposed }}
+        - name: LOG_LEVEL_ECLIPSE_JETTY
+          value: {{ .Values.logging.jetty }}
+        - name: LOG_LEVEL_NETTY
+          value: {{ .Values.logging.netty }}
+        - name: LOG_LEVEL_SERVICES_CALLS
+          value: {{ .Values.logging.servicesCalls }}
+        - name: WALLET_SERVICE_REQUEST_TIMEOUT
+          value: {{ .Values.httpClientTimeout.walletServiceRequest | quote }}
+        - name: WALLET_SERVICE_CONNECT_TIMEOUT
+          value: {{ .Values.httpClientTimeout.walletServiceConnect | quote }}
+        - name: WALLET_SERVICE_SOCKET_TIMEOUT
+          value: {{ .Values.httpClientTimeout.walletServiceSocket | quote }}
+        - name: BPD_SERVICE_REQUEST_TIMEOUT
+          value: {{ .Values.httpClientTimeout.bpdServiceRequest | quote }}
+        - name: BPD_SERVICE_CONNECT_TIMEOUT
+          value: {{ .Values.httpClientTimeout.bpdServiceConnect | quote }}
+        - name: BPD_SERVICE_SOCKET_TIMEOUT
+          value: {{ .Values.httpClientTimeout.bpdServiceSocket | quote }}
+        - name: REVOCATION_SERVICE_REQUEST_TIMEOUT
+          value: {{ .Values.httpClientTimeout.revocationServiceRequest | quote }}
+        - name: REVOCATION_SERVICE_CONNECT_TIMEOUT
+          value: {{ .Values.httpClientTimeout.revocationServiceConnect | quote }}
+        - name: REVOCATION_SERVICE_SOCKET_TIMEOUT
+          value: {{ .Values.httpClientTimeout.revocationServiceSocket | quote }}
+        - name: WEBHOOK_SERVICE_REQUEST_TIMEOUT
+          value: {{ .Values.httpClientTimeout.webhookServiceRequest | quote }}
+        - name: WEBHOOK_SERVICE_CONNECT_TIMEOUT
+          value: {{ .Values.httpClientTimeout.webhookServiceConnect | quote }}
+        - name: WEBHOOK_SERVICE_SOCKET_TIMEOUT
+          value: {{ .Values.httpClientTimeout.webhookServiceSocket | quote }}
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.resources.managedIdentityWallets.requests.cpu }}
+            memory: {{ .Values.resources.managedIdentityWallets.requests.memory }}
           limits:
-            cpu: 250m
-            memory: 256Mi
+            cpu: {{ .Values.resources.managedIdentityWallets.limits.cpu }}
+            memory: {{ .Values.resources.managedIdentityWallets.limits.memory }}
         ports:
         - containerPort: 8080
       - name: revocation-service
@@ -160,11 +194,11 @@ spec:
           value: {{ .Values.revocationService.clientIssuanceApiUrl }}
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.resources.revocationService.requests.cpu }}
+            memory: {{ .Values.resources.revocationService.requests.memory }}
           limits:
-            cpu: 250m
-            memory: 256Mi
+            cpu: {{ .Values.resources.revocationService.limits.cpu }}
+            memory: {{ .Values.resources.revocationService.limits.memory }}
         ports:
         - containerPort: 8086
       - name: endorser-acapy
@@ -230,11 +264,11 @@ spec:
               key: acapy-endorser-db-admin-password
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.resources.endorserAcapy.requests.cpu }}
+            memory: {{ .Values.resources.endorserAcapy.requests.memory }}
           limits:
-            cpu: 250m
-            memory: 256Mi
+            cpu: {{ .Values.resources.endorserAcapy.limits.cpu }}
+            memory: {{ .Values.resources.endorserAcapy.limits.memory }}
         ports:
         - containerPort: 8000
         command: ["/bin/bash"]
@@ -251,7 +285,7 @@ spec:
           --wallet-storage-config '{\"url\":\"$(DB_HOST):5432\",\"max_connections\":5}'
           --wallet-storage-creds '{\"account\":\"$(DB_ACCOUNT)\",\"password\":\"$(DB_PASSWORD)\",\"admin_account\":\"$(DB_ADMIN_USER)\",\"admin_password\":\"$(DB_ADMIN_PASSWORD)\"}'
           --seed $(AGENT_WALLET_SEED) \
-          --genesis-url $(LEDGER_URL)/genesis \
+          --genesis-url $(LEDGER_URL) \
           --label $(LABEL) \
           --admin-api-key $(ACAPY_ADMIN_API_KEY) \
           --auto-ping-connection \
@@ -328,11 +362,11 @@ spec:
           value: {{ .Values.acapy.mt.webhookUrl }}  
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.resources.mtAcapy.requests.cpu }}
+            memory: {{ .Values.resources.mtAcapy.requests.memory }}
           limits:
-            cpu: 250m
-            memory: 256Mi
+            cpu: {{ .Values.resources.mtAcapy.limits.cpu }}
+            memory: {{ .Values.resources.mtAcapy.limits.memory }}
         ports:
         - containerPort: 8003   
         command: ["/bin/bash"]
@@ -349,7 +383,7 @@ spec:
           --wallet-storage-config '{\"url\":\"$(DB_HOST):5432\",\"max_connections\":5}'
           --wallet-storage-creds '{\"account\":\"$(DB_ACCOUNT)\",\"password\":\"$(DB_PASSWORD)\",\"admin_account\":\"$(DB_ADMIN_USER)\",\"admin_password\":\"$(DB_ADMIN_PASSWORD)\"}'
           --seed $(AGENT_WALLET_SEED) \
-          --genesis-url $(LEDGER_URL)/genesis \
+          --genesis-url $(LEDGER_URL) \
           --label $(LABEL) \
           --admin-api-key $(ACAPY_ADMIN_API_KEY) \
           --auto-ping-connection \

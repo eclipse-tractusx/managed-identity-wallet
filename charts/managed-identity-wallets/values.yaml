@@ -26,8 +26,28 @@ db:
   # -- Database driver to use
   jdbcDriver: "org.postgresql.Driver"
 namespace: "managed-identity-wallets"
+# -- The logging configurations
 logging:
   exposed: "INFO"
+  ktorRoot: "INFO"
+  jetty: "INFO"
+  netty: "INFO"
+  # -- Options: ALL, HEADERS, BODY, INFO, NONE
+  servicesCalls: "INFO"
+# -- The timeout (milliseconds) configuration of http client in each service.
+httpClientTimeout:
+  walletServiceRequest: "25000"
+  walletServiceConnect: "25000"
+  walletServiceSocket: "25000"
+  bpdServiceRequest: "25000"
+  bpdServiceConnect: "25000"
+  bpdServiceSocket: "25000"
+  revocationServiceRequest: "25000"
+  revocationServiceConnect: "25000"
+  revocationServiceSocket: "25000"
+  webhookServiceRequest: "25000"
+  webhookServiceConnect: "25000"
+  webhookServiceSocket: "25000"
 # The OpenAPI configuration in MIW
 openapi:
   title: "Managed Identity Wallets API"
@@ -78,12 +98,12 @@ acapy:
   # The configuration of the AcaPy endorser instance
   endorser:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://idu.cloudcompass.ca"
+    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "BaseWalletIssuer"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
-    networkIdentifier: "idunion:test"
+    networkIdentifier: "greenlight:dev"
     # -- The endpoint url in the DID document
     endpointUrl: "https://localhost:8000"
     # -- The host of the used database
@@ -110,12 +130,12 @@ acapy:
   # AcaPy multi-tenancy instance
   mt:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://idu.cloudcompass.ca"
+    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "ManagedWallet"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
-    networkIdentifier: "idunion:test"
+    networkIdentifier: "greenlight:dev"
     # -- The endpoint url in the DID document
     endpointUrl: "https://localhost:8003"
     # -- The host of the used database
@@ -169,7 +189,7 @@ postgresql:
     initContainers:
       - name: initdb
         # -- The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml
-        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.3.1
+        image: ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.3.2
         imagePullPolicy: Always
         command:
           - sh
@@ -211,3 +231,33 @@ certificate:
   host: "localhost"
 # -- Deployment on Kubernetes on local device
 isLocal: false
+# -- used resources for each componenet
+resources:
+  managedIdentityWallets:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  revocationService:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  endorserAcapy:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  mtAcapy:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"

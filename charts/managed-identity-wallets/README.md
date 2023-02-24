@@ -1,6 +1,6 @@
 # managed-identity-wallets
 
-![Version: 0.7.1](https://img.shields.io/badge/Version-0.7.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.1](https://img.shields.io/badge/AppVersion-3.3.1-informational?style=flat-square)
+![Version: 0.7.2](https://img.shields.io/badge/Version-0.7.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.2](https://img.shields.io/badge/AppVersion-3.3.2-informational?style=flat-square)
 
 Managed Identity Wallets Service
 
@@ -29,7 +29,9 @@ Managed Identity Wallets Service
 | allowEmptyPassword | string | `"\"yes\""` |  |
 | db.jdbcDriver | string | `"org.postgresql.Driver"` | Database driver to use |
 | namespace | string | `"managed-identity-wallets"` |  |
-| logging.exposed | string | `"INFO"` |  |
+| logging | object | `{"exposed":"INFO","jetty":"INFO","ktorRoot":"INFO","netty":"INFO","servicesCalls":"INFO"}` | The logging configurations |
+| logging.servicesCalls | string | `"INFO"` | Options: ALL, HEADERS, BODY, INFO, NONE |
+| httpClientTimeout | object | `{"bpdServiceConnect":"25000","bpdServiceRequest":"25000","bpdServiceSocket":"25000","revocationServiceConnect":"25000","revocationServiceRequest":"25000","revocationServiceSocket":"25000","walletServiceConnect":"25000","walletServiceRequest":"25000","walletServiceSocket":"25000","webhookServiceConnect":"25000","webhookServiceRequest":"25000","webhookServiceSocket":"25000"}` | The timeout (milliseconds) configuration of http client in each service. |
 | openapi.title | string | `"Managed Identity Wallets API"` |  |
 | openapi.description | string | `"Managed Identity Wallets API"` |  |
 | openapi.termsOfServiceUrl | string | `"https://www.eclipse.org/legal/termsofuse.php"` |  |
@@ -55,7 +57,7 @@ Managed Identity Wallets Service
 | revocationService.clientIssuanceApiUrl | string | `"http://localhost:8080"` | The url at which the MIW is reachable |
 | acapy.imageName | string | `"bcgovimages/aries-cloudagent"` |  |
 | acapy.tag | string | `"py36-1.16-1_0.7.5"` |  |
-| acapy.endorser.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
+| acapy.endorser.ledgerUrl | string | `"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"` | The url of the used Indy ledger |
 | acapy.endorser.label | string | `"BaseWalletIssuer"` | The label of the instance |
 | acapy.endorser.logLevel | string | `"INFO"` |  |
 | acapy.endorser.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
@@ -72,7 +74,7 @@ Managed Identity Wallets Service
 | acapy.endorser.secret.dbpassword | string | `"postgres"` |  |
 | acapy.endorser.secret.jwtsecret | string | `"0"` |  |
 | acapy.endorser.secret.walletkey | string | `"0"` |  |
-| acapy.mt.ledgerUrl | string | `"https://idu.cloudcompass.ca"` | The url of the used Indy ledger |
+| acapy.mt.ledgerUrl | string | `"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"` | The url of the used Indy ledger |
 | acapy.mt.label | string | `"ManagedWallet"` | The label of the instance |
 | acapy.mt.logLevel | string | `"INFO"` |  |
 | acapy.mt.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
@@ -104,7 +106,7 @@ Managed Identity Wallets Service
 | postgresql.primary.extraVolumes[0].name | string | `"initdb"` |  |
 | postgresql.primary.extraVolumes[0].emptyDir | object | `{}` |  |
 | postgresql.primary.initContainers[0].name | string | `"initdb"` |  |
-| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.3.1"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
+| postgresql.primary.initContainers[0].image | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_initdb:3.3.2"` | The image is built and used to initialize the database of MIW. The tag must equal the appVersion in Chart.yaml |
 | postgresql.primary.initContainers[0].imagePullPolicy | string | `"Always"` |  |
 | postgresql.primary.initContainers[0].command[0] | string | `"sh"` |  |
 | postgresql.primary.initContainers[0].args[0] | string | `"-c"` |  |
@@ -126,6 +128,7 @@ Managed Identity Wallets Service
 | managedIdentityWallets.secret.bpdmauthclientsecret | string | `"client"` | client secret for accessing the BPDM data pool endpoint |
 | certificate.host | string | `"localhost"` |  |
 | isLocal | bool | `false` | Deployment on Kubernetes on local device |
+| resources | object | `{"endorserAcapy":{"limits":{"cpu":"250m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"managedIdentityWallets":{"limits":{"cpu":"250m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"mtAcapy":{"limits":{"cpu":"250m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"revocationService":{"limits":{"cpu":"250m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | used resources for each componenet |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
