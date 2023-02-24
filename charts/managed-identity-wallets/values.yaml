@@ -98,12 +98,12 @@ acapy:
   # The configuration of the AcaPy endorser instance
   endorser:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
+    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "BaseWalletIssuer"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
-    networkIdentifier: "idunion:test"
+    networkIdentifier: "greenlight:dev"
     # -- The endpoint url in the DID document
     endpointUrl: "https://localhost:8000"
     # -- The host of the used database
@@ -130,12 +130,12 @@ acapy:
   # AcaPy multi-tenancy instance
   mt:
     # -- The url of the used Indy ledger
-    ledgerUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
+    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "ManagedWallet"
     logLevel: "INFO"
     # -- The network identifier of the used Indy ledger
-    networkIdentifier: "idunion:test"
+    networkIdentifier: "greenlight:dev"
     # -- The endpoint url in the DID document
     endpointUrl: "https://localhost:8003"
     # -- The host of the used database
