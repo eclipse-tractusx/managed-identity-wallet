@@ -14,9 +14,6 @@ datapool:
 revocationService:
   baseUrlForCredentialList: "https://managed-identity-wallets.int.demo.catena-x.net/api/credentials/"
   clientIssuanceApiUrl: "http://localhost:8080"
-# -- The logging configurations
-logging:
-  exposed: "OFF"
 ingress:
   enabled: true
 certificate:
