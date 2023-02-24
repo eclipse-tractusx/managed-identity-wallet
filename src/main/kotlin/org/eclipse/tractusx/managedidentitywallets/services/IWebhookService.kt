@@ -20,9 +20,11 @@
 package org.eclipse.tractusx.managedidentitywallets.services
 
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
+import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Webhook
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 import org.hyperledger.aries.api.connection.ConnectionRecord
@@ -81,7 +83,8 @@ interface IWebhookService {
          * The used HTTP client to send webhook messages is configured in this method.
          */
         fun createWebhookService(
-            webhookRepository: WebhookRepository
+            webhookRepository: WebhookRepository,
+            httpClientConfig: ServicesHttpClientConfig
         ): IWebhookService {
             return WebhookServiceImpl(
                 webhookRepository,
@@ -93,9 +96,14 @@ interface IWebhookService {
                             log.debug("HTTP description: ${response.status.description}")
                         }
                     }
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = httpClientConfig.requestTimeoutMillis
+                        connectTimeoutMillis = httpClientConfig.connectTimeoutMillis
+                        socketTimeoutMillis = httpClientConfig.socketTimeoutMillis
+                    }
                     install(Logging) {
                         logger = Logger.DEFAULT
-                        level = LogLevel.BODY
+                        level = LogLevel.valueOf(httpClientConfig.logLevel)
                     }
                 }
             )

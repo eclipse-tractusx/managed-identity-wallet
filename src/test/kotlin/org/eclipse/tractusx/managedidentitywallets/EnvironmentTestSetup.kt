@@ -21,6 +21,7 @@ package org.eclipse.tractusx.managedidentitywallets
 
 import io.ktor.application.*
 import io.ktor.config.*
+import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
@@ -64,9 +65,13 @@ object EnvironmentTestSetup {
     val connectionRepository = ConnectionRepository()
     val webhookRepository = WebhookRepository()
 
+    val httpClientConfig = ServicesHttpClientConfig(
+            "INFO", 30000, 30000, 30000
+    )
+
     private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
     val revocationMockedService = RevocationMockedService()
-    val webhookService = IWebhookService.createWebhookService(webhookRepository)
+    val webhookService = IWebhookService.createWebhookService(webhookRepository, httpClientConfig)
     val utilsService = UtilsService(NETWORK_ID)
 
     val walletService = AcaPyWalletServiceImpl(

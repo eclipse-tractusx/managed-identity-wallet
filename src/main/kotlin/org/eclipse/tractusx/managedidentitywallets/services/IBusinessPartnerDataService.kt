@@ -25,6 +25,7 @@ import io.ktor.client.features.logging.*
 import io.ktor.client.features.observer.*
 import kotlinx.coroutines.Deferred
 import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
+import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
 import org.slf4j.LoggerFactory
 
@@ -81,7 +82,8 @@ interface IBusinessPartnerDataService {
         fun createBusinessPartnerDataService(
             walletService: IWalletService,
             bpdmConfig: BPDMConfig,
-            membershipOrganisation: String
+            membershipOrganisation: String,
+            httpClientConfig: ServicesHttpClientConfig
         ): IBusinessPartnerDataService {
             return BusinessPartnerDataServiceImpl(
                 walletService,
@@ -96,13 +98,13 @@ interface IBusinessPartnerDataService {
                         }
                     }
                     install(HttpTimeout) {
-                        requestTimeoutMillis = 30000
-                        connectTimeoutMillis = 30000
-                        socketTimeoutMillis = 30000
+                        requestTimeoutMillis = httpClientConfig.requestTimeoutMillis
+                        connectTimeoutMillis = httpClientConfig.connectTimeoutMillis
+                        socketTimeoutMillis = httpClientConfig.socketTimeoutMillis
                     }
                     install(Logging) {
                         logger = Logger.DEFAULT
-                        level = LogLevel.BODY
+                        level = LogLevel.valueOf(httpClientConfig.logLevel)
                     }
                 })
         }
