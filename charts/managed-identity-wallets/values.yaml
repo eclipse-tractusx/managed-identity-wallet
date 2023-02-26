@@ -98,7 +98,7 @@ acapy:
   # The configuration of the AcaPy endorser instance
   endorser:
     # -- The url of the used Indy ledger
-    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
+    genesisUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "BaseWalletIssuer"
     logLevel: "INFO"
@@ -118,7 +118,7 @@ acapy:
       # -- The API key of the admin endpoints. It must be a random and secure string
       apikey: "0"
       # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers)
-      walletseed: "0"
+      walletseed: "RandomSeedPlaceHolder0x135791113"
       dbaccount: "postgres"
       dbadminuser: "postgres"
       dbadminpassword: "postgres"
@@ -130,7 +130,7 @@ acapy:
   # AcaPy multi-tenancy instance
   mt:
     # -- The url of the used Indy ledger
-    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
+    genesisUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "ManagedWallet"
     logLevel: "INFO"
@@ -154,7 +154,7 @@ acapy:
       # -- The API-Key of the admin endpoints. It must be a random and secure string
       apikey: "0"
       # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers)
-      walletseed: "0"
+      walletseed: "RandomSeedPlaceHolder0x246810120"
       dbaccount: "postgres"
       dbadminuser: "postgres"
       dbadminpassword: "postgres"
@@ -218,7 +218,7 @@ datapool:
 managedIdentityWallets:
   secret:
     # -- Database connection string to the Postgres database of MIW
-    jdbcurl: "jdbc:postgresql://postgresql:5432/postgres?user=postgres&password=postgres"
+    jdbcurl: "jdbc:postgresql://managed-identity-wallets-postgresql:5432/postgres?user=postgres&password=postgres"
     # -- It can be extracted from Keycloak
     authclientid: "clientid"
     # -- It can be extracted from Keycloak

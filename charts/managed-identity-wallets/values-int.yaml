@@ -20,7 +20,7 @@ certificate:
   host: "managed-identity-wallets.int.demo.catena-x.net"
 acapy:
   endorser:
-    ledgerUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
+    genesisUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
     endpointUrl: "https://managed-identity-wallets.int.demo.catena-x.net/didcomm-base"
     networkIdentifier: "idunion:test"
     secret:
@@ -33,7 +33,7 @@ acapy:
       jwtsecret: <path:managed-identity-wallets/data/int/managed-identity-wallets-acapy-secrets#acapy-endorser-jwt-secret>
       walletkey: <path:managed-identity-wallets/data/int/managed-identity-wallets-acapy-secrets#acapy-endorser-wallet-key>
   mt:
-    ledgerUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
+    genesisUrl: "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"
     endpointUrl: "https://managed-identity-wallets.int.demo.catena-x.net/didcomm-managed-wallets"
     endorserPublicDid: "2xcjN7LjnHGaPdZbbGqju5"
     networkIdentifier: "idunion:test"

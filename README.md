@@ -350,7 +350,7 @@ docker run --env-file .env.docker -p 8080:8080 managed-identity-wallets:<VERSION
     Run following command to use the base values as well as the predefined values for local deployment:
 
     ```
-    helm install managed-identity-wallets ./helm/managed-identity-wallets/ -n managed-identity-wallets -f ./helm/managed-identity-wallets/values.yaml -f ./helm/managed-identity-wallets/values-local.yaml
+    helm install managed-identity-wallets ./charts/managed-identity-wallets/ -n managed-identity-wallets -f ./charts/managed-identity-wallets/values.yaml -f ./charts/managed-identity-wallets/values-local.yaml
     ```
 
 4. Expose via loadbalancer

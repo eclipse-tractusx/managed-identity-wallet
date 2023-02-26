@@ -215,7 +215,7 @@ spec:
               name: {{ include "managed-identity-wallets.fullname" . }}-acapy
               key: acapy-endorser-agent-wallet-seed
         - name: LEDGER_URL
-          value: {{ .Values.acapy.endorser.ledgerUrl }}
+          value: {{ .Values.acapy.endorser.genesisUrl }}
         - name: LABEL
           value: {{ .Values.acapy.endorser.label }}
         - name: JWT_SECRET
@@ -309,7 +309,7 @@ spec:
               name: {{ include "managed-identity-wallets.fullname" . }}-acapy
               key: acapy-mt-agent-wallet-seed
         - name: LEDGER_URL
-          value: {{ .Values.acapy.mt.ledgerUrl }}
+          value: {{ .Values.acapy.mt.genesisUrl }}
         - name: LABEL
           value: {{ .Values.acapy.mt.label }}
         - name: JWT_SECRET
