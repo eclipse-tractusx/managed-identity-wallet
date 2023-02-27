@@ -99,6 +99,7 @@ Managed Identity Wallets Service
 | acapypostgresql.secret.password | string | `"postgres"` |  |
 | acapypostgresql.secret.postgrespassword | string | `"postgres"` |  |
 | acapypostgresql.secret.user | string | `"postgres"` |  |
+| postgresql.useDefaultJdbcUrl | bool | `true` | use the default jdbc url `jdbc:postgresql://%s-postgresql:5432/postgres?user=%s&password=%s` instead of the value in managedIdentityWallets.secrets.jdbcUrl |
 | postgresql.enabled | bool | `true` |  |
 | postgresql.auth.existingSecret | string | `"product-managed-identity-wallets-postgresql"` |  |
 | postgresql.primary.extraVolumeMounts[0].name | string | `"initdb"` |  |
@@ -121,7 +122,7 @@ Managed Identity Wallets Service
 | datapool.refreshHour | string | `"23"` | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
 | datapool.url | string | `""` | Url at which the API of BPDM is reachable |
 | datapool.authUrl | string | `""` | IAM url to get the access token for BPDM data pool endpoint |
-| managedIdentityWallets.secret.jdbcurl | string | `"jdbc:postgresql://postgresql:5432/postgres?user=postgres&password=postgres"` | Database connection string to the Postgres database of MIW |
+| managedIdentityWallets.secret.jdbcurl | string | `"jdbc:postgresql://managed-identity-wallets-postgresql:5432/postgres?user=postgres&password=postgres"` | Database connection string to the Postgres database of MIW |
 | managedIdentityWallets.secret.authclientid | string | `"clientid"` | It can be extracted from Keycloak |
 | managedIdentityWallets.secret.authclientsecret | string | `"client"` | It can be extracted from Keycloak |
 | managedIdentityWallets.secret.bpdmauthclientid | string | `"clientid"` | client id for accessing the BPDM data pool endpoint |

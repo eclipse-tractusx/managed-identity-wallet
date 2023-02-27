@@ -176,6 +176,7 @@ acapypostgresql:
     user: "postgres"
 # The configuration and secrets of the database that is used by the MIW
 postgresql:
+  # -- use the default jdbc url `jdbc:postgresql://%s-postgresql:5432/postgres?user=%s&password=%s` instead of the value in managedIdentityWallets.secrets.jdbcUrl
   useDefaultJdbcUrl: true
   enabled: true
   auth:
