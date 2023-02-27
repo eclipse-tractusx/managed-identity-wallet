@@ -176,6 +176,7 @@ acapypostgresql:
     user: "postgres"
 # The configuration and secrets of the database that is used by the MIW
 postgresql:
+  useDefaultJdbcUrl: true
   enabled: true
   auth:
     existingSecret: product-managed-identity-wallets-postgresql

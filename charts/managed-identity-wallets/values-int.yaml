@@ -54,6 +54,7 @@ managedIdentityWallets:
     bpdmauthclientid: <path:managed-identity-wallets/data/int/managed-identity-wallets-secrets#bpdm-auth-client-id>
     bpdmauthclientsecret: <path:managed-identity-wallets/data/int/managed-identity-wallets-secrets#bpdm-auth-client-secret>
 postgresql:
+  useDefaultJdbcUrl: false
   secret:
     password: <path:managed-identity-wallets/data/int/postgres-managed-identity-wallets-secret-config#password>
     postgrespassword: <path:managed-identity-wallets/data/int/postgres-managed-identity-wallets-secret-config#postgres-password>
