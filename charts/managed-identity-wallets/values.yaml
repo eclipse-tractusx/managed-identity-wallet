@@ -219,8 +219,8 @@ datapool:
   authUrl: ""
 managedIdentityWallets:
   secret:
-    # -- Database connection string to the Postgres database of MIW
-    jdbcurl: "jdbc:postgresql://managed-identity-wallets-postgresql:5432/postgres?user=postgres&password=postgres"
+    # -- Database connection string to the Postgres database of MIW. Used when postgresql.useDefaultJdbcUrl is false
+    jdbcurl: "jdbc:postgresql://<host>:<port>/<db-name>?user=<user>&password=<password>"
     # -- It can be extracted from Keycloak
     authclientid: "clientid"
     # -- It can be extracted from Keycloak

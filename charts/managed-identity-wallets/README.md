@@ -122,7 +122,7 @@ Managed Identity Wallets Service
 | datapool.refreshHour | string | `"23"` | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
 | datapool.url | string | `""` | Url at which the API of BPDM is reachable |
 | datapool.authUrl | string | `""` | IAM url to get the access token for BPDM data pool endpoint |
-| managedIdentityWallets.secret.jdbcurl | string | `"jdbc:postgresql://managed-identity-wallets-postgresql:5432/postgres?user=postgres&password=postgres"` | Database connection string to the Postgres database of MIW |
+| managedIdentityWallets.secret.jdbcurl | string | `"jdbc:postgresql://<host>:<port>/<db-name>?user=<user>&password=<password>"` | Database connection string to the Postgres database of MIW. Used when postgresql.useDefaultJdbcUrl is false |
 | managedIdentityWallets.secret.authclientid | string | `"clientid"` | It can be extracted from Keycloak |
 | managedIdentityWallets.secret.authclientsecret | string | `"client"` | It can be extracted from Keycloak |
 | managedIdentityWallets.secret.bpdmauthclientid | string | `"clientid"` | client id for accessing the BPDM data pool endpoint |
