@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.2] - 2023-02-24
+### Fixed
+- Configurable log level settings with default to INFO
+- Configurable timeouts for HTTP client calls with lower default value
+
+## [3.3.1] - 2023-02-23
+### Fixed
+- Fix blocking issue upon status list creation
+
 ## [3.3.0] - 2023-02-14
 - Remove unused UI
 - Fix credential status description in OpenApi
