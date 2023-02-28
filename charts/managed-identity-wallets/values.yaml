@@ -117,7 +117,7 @@ acapy:
     secret:
       # -- The API key of the admin endpoints. It must be a random and secure string
       apikey: "0"
-      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers)
+      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser.
       walletseed: "RandomSeedPlaceHolder0x135791113"
       dbaccount: "postgres"
       dbadminuser: "postgres"
@@ -153,7 +153,7 @@ acapy:
     secret:
       # -- The API-Key of the admin endpoints. It must be a random and secure string
       apikey: "0"
-      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers)
+      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser.
       walletseed: "RandomSeedPlaceHolder0x246810120"
       dbaccount: "postgres"
       dbadminuser: "postgres"

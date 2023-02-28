@@ -1,6 +1,6 @@
 # managed-identity-wallets
 
-![Version: 0.7.4](https://img.shields.io/badge/Version-0.7.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.2](https://img.shields.io/badge/AppVersion-3.3.2-informational?style=flat-square)
+![Version: 0.7.5](https://img.shields.io/badge/Version-0.7.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.2](https://img.shields.io/badge/AppVersion-3.3.2-informational?style=flat-square)
 
 Managed Identity Wallets Service
 
@@ -67,7 +67,7 @@ Managed Identity Wallets Service
 | acapy.endorser.adminPort | string | `"11000"` | The port at which the admin API is reachable |
 | acapy.endorser.adminUrl | string | `"http://localhost:11000"` | The url of the admin API |
 | acapy.endorser.secret.apikey | string | `"0"` | The API key of the admin endpoints. It must be a random and secure string |
-| acapy.endorser.secret.walletseed | string | `"RandomSeedPlaceHolder0x135791113"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers) |
+| acapy.endorser.secret.walletseed | string | `"RandomSeedPlaceHolder0x135791113"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser. |
 | acapy.endorser.secret.dbaccount | string | `"postgres"` |  |
 | acapy.endorser.secret.dbadminuser | string | `"postgres"` |  |
 | acapy.endorser.secret.dbadminpassword | string | `"postgres"` |  |
@@ -86,7 +86,7 @@ Managed Identity Wallets Service
 | acapy.mt.endorserPublicDid | string | `"ShortDIDPlaceholderX"` | The short DID of the base wallet |
 | acapy.mt.webhookUrl | string | `"http://localhost:8080/webhook"` | The url at which events are sent. It should be the webhook endpoint in MIW |
 | acapy.mt.secret.apikey | string | `"0"` | The API-Key of the admin endpoints. It must be a random and secure string |
-| acapy.mt.secret.walletseed | string | `"RandomSeedPlaceHolder0x246810120"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers) |
+| acapy.mt.secret.walletseed | string | `"RandomSeedPlaceHolder0x246810120"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser. |
 | acapy.mt.secret.dbaccount | string | `"postgres"` |  |
 | acapy.mt.secret.dbadminuser | string | `"postgres"` |  |
 | acapy.mt.secret.dbadminpassword | string | `"postgres"` |  |
