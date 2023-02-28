@@ -186,10 +186,14 @@ spec:
         - name: QUARKUS_HTTP_ACCESS_LOG_ENABLED
           value: {{ .Values.revocationService.httpAccessLog | quote | default "false" }}
         - name: QUARKUS_DATASOURCE_JDBC_URL
+          {{- if .Values.postgresql.useDefaultJdbcUrl }}
+          value: {{ include "managed-identity-wallets.jdbcUrl" . }}
+          {{- else }}
           valueFrom:
             secretKeyRef:
               name: {{ include "managed-identity-wallets.fullname" . }}-secret
               key: miw-db-jdbc-url
+          {{- end }}
         - name: REVOCATION_BASE_URL
           value: {{ .Values.revocationService.baseUrlForCredentialList }}
         - name: REVOCATION_MIN_ISSUE_INTERVAL
