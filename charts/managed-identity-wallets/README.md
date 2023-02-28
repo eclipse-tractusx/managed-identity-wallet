@@ -1,6 +1,6 @@
 # managed-identity-wallets
 
-![Version: 0.7.2](https://img.shields.io/badge/Version-0.7.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.2](https://img.shields.io/badge/AppVersion-3.3.2-informational?style=flat-square)
+![Version: 0.7.5](https://img.shields.io/badge/Version-0.7.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.2](https://img.shields.io/badge/AppVersion-3.3.2-informational?style=flat-square)
 
 Managed Identity Wallets Service
 
@@ -57,27 +57,27 @@ Managed Identity Wallets Service
 | revocationService.clientIssuanceApiUrl | string | `"http://localhost:8080"` | The url at which the MIW is reachable |
 | acapy.imageName | string | `"bcgovimages/aries-cloudagent"` |  |
 | acapy.tag | string | `"py36-1.16-1_0.7.5"` |  |
-| acapy.endorser.ledgerUrl | string | `"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"` | The url of the used Indy ledger |
+| acapy.endorser.genesisUrl | string | `"http://dev.greenlight.bcovrin.vonx.io/genesis"` | The url of the used Indy ledger |
 | acapy.endorser.label | string | `"BaseWalletIssuer"` | The label of the instance |
 | acapy.endorser.logLevel | string | `"INFO"` |  |
-| acapy.endorser.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
+| acapy.endorser.networkIdentifier | string | `"greenlight:dev"` | The network identifier of the used Indy ledger |
 | acapy.endorser.endpointUrl | string | `"https://localhost:8000"` | The endpoint url in the DID document |
 | acapy.endorser.databaseHost | string | `"acapypostgresql"` | The host of the used database |
 | acapy.endorser.endpointPort | string | `"8000"` | The port at which the wallet is reachable |
 | acapy.endorser.adminPort | string | `"11000"` | The port at which the admin API is reachable |
 | acapy.endorser.adminUrl | string | `"http://localhost:11000"` | The url of the admin API |
 | acapy.endorser.secret.apikey | string | `"0"` | The API key of the admin endpoints. It must be a random and secure string |
-| acapy.endorser.secret.walletseed | string | `"0"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers) |
+| acapy.endorser.secret.walletseed | string | `"RandomSeedPlaceHolder0x135791113"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser. |
 | acapy.endorser.secret.dbaccount | string | `"postgres"` |  |
 | acapy.endorser.secret.dbadminuser | string | `"postgres"` |  |
 | acapy.endorser.secret.dbadminpassword | string | `"postgres"` |  |
 | acapy.endorser.secret.dbpassword | string | `"postgres"` |  |
 | acapy.endorser.secret.jwtsecret | string | `"0"` |  |
 | acapy.endorser.secret.walletkey | string | `"0"` |  |
-| acapy.mt.ledgerUrl | string | `"https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/genesis"` | The url of the used Indy ledger |
+| acapy.mt.genesisUrl | string | `"http://dev.greenlight.bcovrin.vonx.io/genesis"` | The url of the used Indy ledger |
 | acapy.mt.label | string | `"ManagedWallet"` | The label of the instance |
 | acapy.mt.logLevel | string | `"INFO"` |  |
-| acapy.mt.networkIdentifier | string | `"idunion:test"` | The network identifier of the used Indy ledger |
+| acapy.mt.networkIdentifier | string | `"greenlight:dev"` | The network identifier of the used Indy ledger |
 | acapy.mt.endpointUrl | string | `"https://localhost:8003"` | The endpoint url in the DID document |
 | acapy.mt.databaseHost | string | `"acapypostgresql"` | The host of the used database |
 | acapy.mt.endpointPort | string | `"8003"` | The port at which the sub-wallets are reachable |
@@ -86,7 +86,7 @@ Managed Identity Wallets Service
 | acapy.mt.endorserPublicDid | string | `"ShortDIDPlaceholderX"` | The short DID of the base wallet |
 | acapy.mt.webhookUrl | string | `"http://localhost:8080/webhook"` | The url at which events are sent. It should be the webhook endpoint in MIW |
 | acapy.mt.secret.apikey | string | `"0"` | The API-Key of the admin endpoints. It must be a random and secure string |
-| acapy.mt.secret.walletseed | string | `"0"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers) |
+| acapy.mt.secret.walletseed | string | `"RandomSeedPlaceHolder0x246810120"` | The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser. |
 | acapy.mt.secret.dbaccount | string | `"postgres"` |  |
 | acapy.mt.secret.dbadminuser | string | `"postgres"` |  |
 | acapy.mt.secret.dbadminpassword | string | `"postgres"` |  |
@@ -99,6 +99,7 @@ Managed Identity Wallets Service
 | acapypostgresql.secret.password | string | `"postgres"` |  |
 | acapypostgresql.secret.postgrespassword | string | `"postgres"` |  |
 | acapypostgresql.secret.user | string | `"postgres"` |  |
+| postgresql.useDefaultJdbcUrl | bool | `true` | use the default jdbc url `jdbc:postgresql://%s-postgresql:5432/postgres?user=%s&password=%s` instead of the value in managedIdentityWallets.secrets.jdbcUrl |
 | postgresql.enabled | bool | `true` |  |
 | postgresql.auth.existingSecret | string | `"product-managed-identity-wallets-postgresql"` |  |
 | postgresql.primary.extraVolumeMounts[0].name | string | `"initdb"` |  |
@@ -121,7 +122,7 @@ Managed Identity Wallets Service
 | datapool.refreshHour | string | `"23"` | At which hour (24-hour clock) the cron job should pull the data from the BPDM data pool |
 | datapool.url | string | `""` | Url at which the API of BPDM is reachable |
 | datapool.authUrl | string | `""` | IAM url to get the access token for BPDM data pool endpoint |
-| managedIdentityWallets.secret.jdbcurl | string | `"jdbc:postgresql://postgresql:5432/postgres?user=postgres&password=postgres"` | Database connection string to the Postgres database of MIW |
+| managedIdentityWallets.secret.jdbcurl | string | `"jdbc:postgresql://<host>:<port>/<db-name>?user=<user>&password=<password>"` | Database connection string to the Postgres database of MIW. Used when postgresql.useDefaultJdbcUrl is false |
 | managedIdentityWallets.secret.authclientid | string | `"clientid"` | It can be extracted from Keycloak |
 | managedIdentityWallets.secret.authclientsecret | string | `"client"` | It can be extracted from Keycloak |
 | managedIdentityWallets.secret.bpdmauthclientid | string | `"clientid"` | client id for accessing the BPDM data pool endpoint |

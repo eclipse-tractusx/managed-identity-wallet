@@ -71,6 +71,13 @@ Usage: include "postgresContext" (list $ "your_include_function_here")
 {{- end }}
 
 {{/*
+Create the default JDBC url
+*/}}
+{{- define "managed-identity-wallets.jdbcUrl" -}}
+{{- printf "jdbc:postgresql://%s-postgresql:5432/postgres?user=%s&password=%s" .Release.Name .Values.postgresql.secret.user .Values.postgresql.secret.postgrespassword }}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "managed-identity-wallets.serviceAccountName" -}}

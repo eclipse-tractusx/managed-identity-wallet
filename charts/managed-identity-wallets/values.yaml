@@ -98,7 +98,7 @@ acapy:
   # The configuration of the AcaPy endorser instance
   endorser:
     # -- The url of the used Indy ledger
-    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
+    genesisUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "BaseWalletIssuer"
     logLevel: "INFO"
@@ -117,8 +117,8 @@ acapy:
     secret:
       # -- The API key of the admin endpoints. It must be a random and secure string
       apikey: "0"
-      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers)
-      walletseed: "0"
+      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser.
+      walletseed: "RandomSeedPlaceHolder0x135791113"
       dbaccount: "postgres"
       dbadminuser: "postgres"
       dbadminpassword: "postgres"
@@ -130,7 +130,7 @@ acapy:
   # AcaPy multi-tenancy instance
   mt:
     # -- The url of the used Indy ledger
-    ledgerUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
+    genesisUrl: "http://dev.greenlight.bcovrin.vonx.io/genesis"
     # -- The label of the instance
     label: "ManagedWallet"
     logLevel: "INFO"
@@ -153,8 +153,8 @@ acapy:
     secret:
       # -- The API-Key of the admin endpoints. It must be a random and secure string
       apikey: "0"
-      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers)
-      walletseed: "0"
+      # -- The seed of the wallet. It must be random and secure (no patterns or use of dictionary words, the use of uppercase and lowercase letters - as well as numbers and allowed symbols, no personal preferences like names or phone numbers). It must be registired on the used ledger as endorser.
+      walletseed: "RandomSeedPlaceHolder0x246810120"
       dbaccount: "postgres"
       dbadminuser: "postgres"
       dbadminpassword: "postgres"
@@ -176,6 +176,8 @@ acapypostgresql:
     user: "postgres"
 # The configuration and secrets of the database that is used by the MIW
 postgresql:
+  # -- use the default jdbc url `jdbc:postgresql://%s-postgresql:5432/postgres?user=%s&password=%s` instead of the value in managedIdentityWallets.secrets.jdbcUrl
+  useDefaultJdbcUrl: true
   enabled: true
   auth:
     existingSecret: product-managed-identity-wallets-postgresql
@@ -217,8 +219,8 @@ datapool:
   authUrl: ""
 managedIdentityWallets:
   secret:
-    # -- Database connection string to the Postgres database of MIW
-    jdbcurl: "jdbc:postgresql://postgresql:5432/postgres?user=postgres&password=postgres"
+    # -- Database connection string to the Postgres database of MIW. Used when postgresql.useDefaultJdbcUrl is false
+    jdbcurl: "jdbc:postgresql://<host>:<port>/<db-name>?user=<user>&password=<password>"
     # -- It can be extracted from Keycloak
     authclientid: "clientid"
     # -- It can be extracted from Keycloak
