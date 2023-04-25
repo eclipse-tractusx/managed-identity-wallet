@@ -38,11 +38,7 @@ import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerializatio
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureSockets
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
-import org.eclipse.tractusx.managedidentitywallets.services.IBusinessPartnerDataService
-import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
-import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
-import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
-import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
+import org.eclipse.tractusx.managedidentitywallets.services.*
 import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -96,18 +92,6 @@ fun Application.module(testing: Boolean = false) {
     } else {
         allowlistDidsAsString.split(",")
     }
-    val acaPyConfig = WalletAndAcaPyConfig(
-        networkIdentifier = networkIdentifier,
-        baseWalletBpn = baseWalletBpn,
-        baseWalletDID = utilsService.getDidMethodPrefixWithNetworkIdentifier() +
-                environment.config.property("wallet.baseWalletShortDid").getString(),
-        baseWalletVerkey = environment.config.property("wallet.baseWalletVerkey").getString(),
-        apiAdminUrl = environment.config.property("acapy.apiAdminUrl").getString(),
-        adminApiKey = environment.config.property("acapy.adminApiKey").getString(),
-        baseWalletAdminUrl = environment.config.property("acapy.baseWalletApiAdminUrl").getString(),
-        baseWalletAdminApiKey = environment.config.property("acapy.baseWalletAdminApiKey").getString(),
-        allowlistDids = allowlistDids
-    )
 
     val servicesHttpClientLogLevel = environment.config.property("logging.logLevelServicesCalls").getString()
     val httpClientWalletServiceConfig = ServicesHttpClientConfig(
@@ -139,16 +123,7 @@ fun Application.module(testing: Boolean = false) {
     val revocationUrl = environment.config.property("revocation.baseUrl").getString()
     val revocationService = IRevocationService.createRevocationService(revocationUrl, httpClientRevocationServiceConfig)
     val webhookService = IWebhookService.createWebhookService(webhookRepository, httpClientWebhookServiceConfig)
-    val walletService = IWalletService.createWithAcaPyService(
-        acaPyConfig,
-        walletRepository,
-        credRepository,
-        utilsService,
-        revocationService,
-        webhookService,
-        connectionRepository,
-        httpClientWalletServiceConfig
-    )
+    val walletService = AgentWalletServiceImpl() //TODO
     val bpdmConfig = BPDMConfig(
         url = environment.config.property("bpdm.datapoolUrl").getString(),
         tokenUrl = environment.config.property("bpdm.authUrl").getString(),
