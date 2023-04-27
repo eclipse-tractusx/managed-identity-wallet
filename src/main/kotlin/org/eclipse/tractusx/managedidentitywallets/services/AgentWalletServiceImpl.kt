@@ -151,6 +151,8 @@ class AgentWalletServiceImpl:IWalletService {
     }
 
     override suspend fun initBaseWalletWithListeners(bpn: String, did: String, verkey: String, name: String) {
+
+        return
         TODO("Not yet implemented")
     }
 

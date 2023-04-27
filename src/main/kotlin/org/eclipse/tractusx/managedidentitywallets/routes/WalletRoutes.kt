@@ -64,7 +64,66 @@ import java.time.LocalDateTime
 fun Route.walletRoutes(walletService: IWalletService) {
 
     route("/wallets") {
+        notarizedGet(
+            GetInfo<Unit, List<WalletDto>>(
+                summary = "List of wallets",
+                description = "Permission: " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_VIEW_WALLETS)}**\n" +
+                        "\nRetrieve list of registered wallets",
+                responseInfo = ResponseInfo(
+                    status = HttpStatusCode.OK,
+                    description = "List of wallets",
+                ),
+                canThrow = setOf(forbiddenException, unauthorizedException),
+                tags = setOf("Wallets")
+            )
+        ) {
+            AuthorizationHandler.checkHasRightsToViewWallet(call)
+            call.respond(walletService.getAll())
+        }
 
+        notarizedPost(
+            PostInfo<Unit, WalletCreateDto, WalletDto>(
+                summary = "Create wallet",
+                description = "Permission: " +
+                        "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_CREATE_WALLETS)}**\n" +
+                        "\nCreate a wallet and store it ",
+                requestInfo = RequestInfo(
+                    description = "wallet to create",
+                    examples = walletCreateDtoExample
+                ),
+                responseInfo = ResponseInfo(
+                    status = HttpStatusCode.Created,
+                    description = "Wallet was successfully created",
+                    examples = walletDtoWithVerKeyExample
+                ),
+                canThrow = setOf(
+                    syntacticallyInvalidInputException, conflictException,
+                    forbiddenException, unauthorizedException
+                ),
+                tags = setOf("Wallets")
+            )
+        ) {
+            AuthorizationHandler.checkHasRightToCreateWallets(call)
+            try {
+                val walletToCreate = call.receive<WalletCreateDto>()
+                val createdWallet = walletService.createWallet(walletToCreate)
+                call.respond(HttpStatusCode.Created, createdWallet)
+            } catch (e: IllegalArgumentException) {
+                throw BadRequestException(e.message)
+            } catch (e: ExposedSQLException) {
+                val isUniqueConstraintError = e.sqlState == "23505"
+                if (isUniqueConstraintError) {
+                    throw ConflictException("Wallet with given BPN already exists!")
+                } else {
+                    throw UnprocessableEntityException(e.message)
+                }
+            }
+        }
+    }
+
+
+        route("/wallets12") {
         notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
             notarizedGet(
                 GetInfo<Unit, List<WalletDto>>(
