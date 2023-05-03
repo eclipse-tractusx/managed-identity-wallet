@@ -1,21 +1,18 @@
 ## Authority Wallet Table
 - id: integer (Primary Key)
 - did: string (Unique)
-- private_key: string
+- private_key: string -> Reference to Vault Identitfier for Private Key
+- public_key: string
+- algorithm: string
 
 ## Tenant Wallet Table
 - id: integer (Primary Key)
 - uuid: string (Unique) -> bpn
+- algorithm: string
 - did: string (Unique)
 - subdomain: string
 - did_document: string
 - authority_wallet_id: integer (Foreign Key)
-
-## External Wallet Table
-- id: integer (Primary Key)
-- uuid: string (Unique) -> bpn
-- did: string (Unique)
-- did_document: string
 
 ## Private Key Table
 - id: integer (Primary Key)
@@ -28,3 +25,13 @@
 - tenant_wallet_id: integer (Foreign Key)
 - external_wallet_id: integer(Foreign Key)
 - authority_wallet_id: integer (Foreign Key)
+
+
+
+
+###TBD
+## External Wallet Table
+- id: integer (Primary Key)
+- uuid: string (Unique) -> bpn
+- did: string (Unique)
+- did_document: string
