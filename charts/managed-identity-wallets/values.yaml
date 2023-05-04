@@ -1,3 +1,6 @@
+###
+### DEPRECATED
+###
 # The IAM configuration
 auth:
   # -- The realm name in Keycloak

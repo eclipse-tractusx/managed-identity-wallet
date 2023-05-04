@@ -1,3 +1,5 @@
+# !!! DEPRECATED !!!
+
 # Managed Identity Wallets <a id="introduction"></a>
 
 The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI)

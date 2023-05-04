@@ -23,22 +23,5 @@ services:
     ports:
       - "8081:8080"
 
-  local_revocation_service:
-    image: registry.gitlab.com/gaia-x/data-infrastructure-federation-services/not/notarization-service/revocation:1.0.0-SNAPSHOT-quarkus-2.10.2.Final-java17
-    container_name: local_revocation_service
-    ports:
-      - "8086:8086"
-    depends_on:
-      - local_postgres
-    env_file:
-      - ../../dev.env  
-    environment:
-      QUARKUS_DATASOURCE_JDBC_URL: ${QUARKUS_DATASOURCE_JDBC_URL}
-      QUARKUS_HTTP_PORT: 8086
-      QUARKUS_HTTP_ACCESS_LOG_ENABLED: "true"
-      REVOCATION_BASE_URL: http://localhost:8080/api/credentials/
-      REVOCATION_MIN_ISSUE_INTERVAL: 2
-      QUARKUS_REST_CLIENT_SSI_ISSUANCE_API_URL: "${SSI_SERVICE_URL:-http://host.docker.internal:8080}"
-
 volumes:
   postgres-data:

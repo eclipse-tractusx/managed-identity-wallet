@@ -22,9 +22,7 @@ package org.eclipse.tractusx.managedidentitywallets
 import io.ktor.application.*
 import io.ktor.features.*
 import kotlinx.coroutines.runBlocking
-import org.eclipse.tractusx.managedidentitywallets.models.BPDMConfig
 import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
@@ -44,11 +42,9 @@ import org.slf4j.LoggerFactory
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 object Services {
-    lateinit var businessPartnerDataService: IBusinessPartnerDataService
     lateinit var walletService: IWalletService
     lateinit var utilsService: UtilsService
     lateinit var revocationService: IRevocationService
-    lateinit var webhookService: IWebhookService
 }
 
 fun Application.module(testing: Boolean = false) {
@@ -122,32 +118,16 @@ fun Application.module(testing: Boolean = false) {
 
     val revocationUrl = environment.config.property("revocation.baseUrl").getString()
     val revocationService = IRevocationService.createRevocationService(revocationUrl, httpClientRevocationServiceConfig)
-    val webhookService = IWebhookService.createWebhookService(webhookRepository, httpClientWebhookServiceConfig)
     val walletService = AgentWalletServiceImpl() //TODO
-    val bpdmConfig = BPDMConfig(
-        url = environment.config.property("bpdm.datapoolUrl").getString(),
-        tokenUrl = environment.config.property("bpdm.authUrl").getString(),
-        clientId = environment.config.property("bpdm.clientId").getString(),
-        clientSecret = environment.config.property("bpdm.clientSecret").getString(),
-        scope = environment.config.property("bpdm.scope").getString(),
-        grantType = environment.config.property("bpdm.grantType").getString()
-    )
     val membershipOrganisation = environment.config.property("wallet.membershipOrganisation").getString()
-    val businessPartnerDataService = IBusinessPartnerDataService.createBusinessPartnerDataService(
-        walletService,
-        bpdmConfig,
-        membershipOrganisation,
-        httpClientBPDServiceConfig
-    )
-    Services.businessPartnerDataService = businessPartnerDataService
+
     Services.walletService = walletService
     Services.utilsService = utilsService
     Services.revocationService = revocationService
-    Services.webhookService = webhookService
 
     configureRouting()
 
-    appRoutes(walletService, businessPartnerDataService, revocationService, webhookService, utilsService)
+    appRoutes(walletService, revocationService, utilsService)
     configurePersistence()
 }
 
@@ -155,15 +135,10 @@ fun Application.module(testing: Boolean = false) {
 // when the application is updated to Ktor 2.x
 private fun onStarted(app: Application) {
     val bpnOfBaseWallet = app.environment.config.property("wallet.baseWalletBpn").getString()
-    val didOfBaseWallet = Services.utilsService.getDidMethodPrefixWithNetworkIdentifier() +
-            app.environment.config.property("wallet.baseWalletShortDid").getString()
-    val veykeyOfBaseWallet = app.environment.config.property("wallet.baseWalletVerkey").getString()
     val nameOfBaseWallet = app.environment.config.property("wallet.baseWalletName").getString()
     runBlocking {
-        Services.walletService.initBaseWalletWithListeners(
+        Services.walletService.onInitAddAuthorityWallet(
             bpn = bpnOfBaseWallet,
-            did =  didOfBaseWallet,
-            verkey = veykeyOfBaseWallet,
             name = nameOfBaseWallet
         )
     }

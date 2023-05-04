@@ -38,24 +38,17 @@ fun Application.configureJobs() {
     val pullDataAtHour = environment.config.property("bpdm.pullDataAtHour").getString().toInt()
     val createCredentialsAtHour = environment.config.property("revocation.createStatusListCredentialAtHour").getString().toInt()
 
-    val bpdmUpdate: RecurringTask<Void> = Tasks.recurring("bpdm-update",
-        // Spring Scheduled tasks (second, minute, hour, day of month, month, day(s) of week)
-        Schedules.cron("0 0 $pullDataAtHour * * *"))
-        .execute { _, _ ->
-            runPullDataAndUpdateBaseWalletCredentialJobPayload()
-        }
-
-    val updateRevocationList: RecurringTask<Void> = Tasks.recurring(
+    /*val updateRevocationList: RecurringTask<Void> = Tasks.recurring(
         "revocation-list-update",
         // Spring Scheduled tasks (second, minute, hour, day of month, month, day(s) of week)
         Schedules.cron("0 0 $createCredentialsAtHour * * *"))
         .execute { _, _ ->
             runIssueStatusListCredentialsJobPayload()
-        }
+        }*/
 
     val scheduler: Scheduler = Scheduler
         .create(initDatabase(jdbcUrl))
-        .startTasks(bpdmUpdate, updateRevocationList)
+        //.startTask(updateRevocationList)
         .pollingInterval(Duration.ofHours(1))
         .registerShutdownHook()
         .threads(3)
@@ -80,14 +73,9 @@ fun initDatabase(jdbcUrl: String): DataSource {
     }
 }
 
-fun runPullDataAndUpdateBaseWalletCredentialJobPayload() {
-    runBlocking {
-        Services.businessPartnerDataService.pullDataAndUpdateBaseWalletCredentialsAsync()
-    }
-}
-
+/*
 fun runIssueStatusListCredentialsJobPayload() {
     runBlocking {
         Services.revocationService.issueStatusListCredentials()
     }
-}
+}*/

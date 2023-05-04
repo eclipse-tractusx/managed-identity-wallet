@@ -39,7 +39,6 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresenta
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationIssuanceParameter
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.WithDateValidation
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.VerifyResponse
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IWalletService
@@ -98,23 +97,19 @@ fun Route.vpRoutes(walletService: IWalletService) {
                     call.request.queryParameters["withCredentialsDateValidation"].toBoolean()
                 } else { true }
 
-                val withRevocationValidation = if (call.request.queryParameters["withRevocationValidation"] != null) {
-                    call.request.queryParameters["withRevocationValidation"].toBoolean()
-                } else { true }
-
                 call.respond(
                     HttpStatusCode.Created,
                     walletService.issuePresentation(
                         verifiableCredentialDto,
                         withCredentialsValidation,
                         withCredentialsDateValidation,
-                        withRevocationValidation
+                        false
                     )
                 )
             }
         }
 
-        route("/validation") {
+        /*route("/validation") {
             notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
                 notarizedPost(
                     PostInfo<WithDateValidation, VerifiablePresentationDto, VerifyResponse>(
@@ -161,7 +156,7 @@ fun Route.vpRoutes(walletService: IWalletService) {
                     call.respond(HttpStatusCode.OK, verifyResponse)
                 }
             }
-        }
+        }*/
     }
 }
 

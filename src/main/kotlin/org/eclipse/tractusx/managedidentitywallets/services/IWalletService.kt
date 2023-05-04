@@ -19,24 +19,11 @@
 
 package org.eclipse.tractusx.managedidentitywallets.services
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.SerializationFeature
-import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.logging.*
-import io.ktor.client.features.observer.*
-import io.ktor.client.statement.*
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
-import org.eclipse.tractusx.managedidentitywallets.models.ConnectionDto
 import org.eclipse.tractusx.managedidentitywallets.models.ForbiddenException
-import org.eclipse.tractusx.managedidentitywallets.models.InternalServerErrorException
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
-import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
-import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletResultDto
-import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.WalletDto
@@ -44,26 +31,23 @@ import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidDocumentDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.DidServiceUpdateRequestDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.InvitationRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.IssuedVerifiableCredentialRequestDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialRequestData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequest
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiablePresentationRequestDto
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
-import org.hyperledger.aries.api.connection.ConnectionRecord
-import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
-import org.slf4j.LoggerFactory
 
 /**
  * The IWalletService interface describes the core methods for managing wallets, issuing and verifying credentials.
  */
 interface IWalletService {
+
+    /***
+     * Initial call on startup, creates Authority wallet with
+     * setup variable if not exists
+     */
+    fun onInitAddAuthorityWallet(bpn: String, name: String)
 
     /**
      * Retrieves the wallet [WalletDto] of given [identifier].
@@ -173,7 +157,6 @@ interface IWalletService {
      * @param withCredentialsValidation to validate the verifiable credentials in the presentation.
      * If this set to false, the other validations flags are ignored
      * @param withCredentialsDateValidation to validate the issuance and expiration dates of the verifiable credentials in the presentation
-     * @param withRevocationValidation to validate if any of the verifiable credentials is revoked
      * @return [VerifiablePresentationDto] a signed verifiable presentation
      * @throws NotFoundException if the wallet of the issuer of the verifiable presentation (holder) does not exist
      * @throws UnprocessableEntityException if the verifiable credential
@@ -183,7 +166,6 @@ interface IWalletService {
         vpRequest: VerifiablePresentationRequestDto,
         withCredentialsValidation: Boolean,
         withCredentialsDateValidation: Boolean,
-        withRevocationValidation: Boolean,
         asJwt: Boolean
     ): VerifiablePresentationDto
 

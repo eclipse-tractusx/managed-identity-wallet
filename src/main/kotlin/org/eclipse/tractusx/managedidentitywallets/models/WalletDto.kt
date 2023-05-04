@@ -32,14 +32,9 @@ data class WalletDto(
     val name: String,
     val bpn: String,
     val did: String,
-    val verKey: String? = null,
     @Serializable(with = LocalDateTimeAsStringSerializer::class) val createdAt: LocalDateTime,
-    val vcs: List<VerifiableCredentialDto>,
-    val revocationListName: String? = null,
-    val pendingMembershipIssuance: Boolean,
-    val isSelfManaged: Boolean = false
+    val vcs: List<VerifiableCredentialDto>
 ) {
-
     init {
         require(did.isNotBlank()) { "Field 'did' is required not to be blank, but it was blank" }
         require(bpn.isNotBlank()) { "Field 'bpn' is required not to be blank, but it was blank" }
@@ -69,20 +64,4 @@ data class WalletDtoParameter(
         name = "withCredentials"
     )
     val withCredentials: Boolean
-)
-
-@Serializable
-data class SelfManagedWalletResultDto(
-    val name: String,
-    val bpn: String,
-    val did: String,
-    @Serializable(with = LocalDateTimeAsStringSerializer::class) val createdAt: LocalDateTime,
-)
-
-@Serializable
-data class ConnectionDto(
-    val connectionId: String,
-    val theirDid: String,
-    val myDid: String,
-    val state: String
 )
