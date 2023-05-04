@@ -37,7 +37,6 @@ import io.ktor.routing.*
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
 import org.eclipse.tractusx.managedidentitywallets.models.ExceptionResponse
-import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletResultDto
 import org.eclipse.tractusx.managedidentitywallets.models.StoreVerifiableCredentialParameter
 import org.eclipse.tractusx.managedidentitywallets.models.SuccessResponse
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
@@ -354,10 +353,8 @@ val walletDtoWithVerKeyExample = mapOf(
         "name",
         "bpn",
         "did",
-        "verkey",
         LocalDateTime.now(),
-        vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
-        pendingMembershipIssuance = false
+        vcs = emptyList<VerifiableCredentialDto>().toMutableList()
     )
 )
 
@@ -366,10 +363,8 @@ val walletDtoExample = mapOf(
         "name",
         "bpn",
         "did",
-        null,
         LocalDateTime.now(),
-        vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
-        pendingMembershipIssuance = false
+        vcs = emptyList<VerifiableCredentialDto>().toMutableList()
     )
 )
 
