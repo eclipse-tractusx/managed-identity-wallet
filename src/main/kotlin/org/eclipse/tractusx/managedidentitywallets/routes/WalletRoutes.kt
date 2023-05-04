@@ -37,7 +37,6 @@ import io.ktor.routing.*
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.ConflictException
 import org.eclipse.tractusx.managedidentitywallets.models.ExceptionResponse
-import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.models.SelfManagedWalletResultDto
 import org.eclipse.tractusx.managedidentitywallets.models.StoreVerifiableCredentialParameter
 import org.eclipse.tractusx.managedidentitywallets.models.SuccessResponse
@@ -78,7 +77,6 @@ fun Route.walletRoutes(walletService: IWalletService) {
                 tags = setOf("Wallets")
             )
         ) {
-            AuthorizationHandler.checkHasRightsToViewWallet(call)
             call.respond(walletService.getAll())
         }
 
@@ -179,36 +177,6 @@ fun Route.walletRoutes(walletService: IWalletService) {
                     } else {
                         throw UnprocessableEntityException(e.message)
                     }
-                }
-            }
-        }
-
-        route("/self-managed-wallets") {
-            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
-                notarizedPost(
-                    PostInfo<Unit, SelfManagedWalletCreateDto, SelfManagedWalletResultDto>(
-                        summary = "Register and Establish Initial Connection with Partners",
-                        description = "Permission: " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
-                                "\n Register self managed wallet and establish the initial connection with base wallet. " +
-                                "Also issue their membership and BPN credentials",
-                        requestInfo = RequestInfo(
-                            description = "Register self managed wallet, establish a connection and issue membership and BPN credentials",
-                            examples = selfManagedWalletCreateDtoExample
-                        ),
-                        responseInfo = ResponseInfo(
-                            status = HttpStatusCode.Created,
-                            description = "The request was able send a connection request to the DID",
-                        ),
-                        canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
-                    )
-                ) {
-                    val selfManagedWalletCreateDto = call.receive<SelfManagedWalletCreateDto>()
-                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, selfManagedWalletCreateDto.bpn)
-                    return@notarizedPost call.respond(
-                        HttpStatusCode.Created,
-                        walletService.registerSelfManagedWalletAndBuildConnection(selfManagedWalletCreateDto)
-                    )
                 }
             }
         }
@@ -339,34 +307,6 @@ fun Route.walletRoutes(walletService: IWalletService) {
                 }
             }
 
-            route("/send-invitation") {
-                notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
-                    notarizedPost(
-                        PostInfo<Unit, InvitationRequestDto, Unit>(
-                            summary = "Send Connection Request",
-                            description = "Permission: " +
-                                    "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}**\n" +
-                                    "\n Send connection request to internal or external wallets.",
-                            requestInfo = RequestInfo(
-                                description = "The invitation request",
-                                examples = exampleInvitation
-                            ),
-                            responseInfo = ResponseInfo(
-                                status = HttpStatusCode.Accepted,
-                                description = "The connection request has been sent to the given DID",
-                            ),
-                            canThrow = setOf(notFoundException, syntacticallyInvalidInputException),
-                        )
-                    ) {
-                        val identifier = call.parameters["identifier"]
-                            ?: throw BadRequestException("Missing or malformed identifier")
-                        AuthorizationHandler.checkHasRightsToUpdateWallet(call, identifier)
-                        val invitationRequestDto = call.receive<InvitationRequestDto>()
-                        walletService.sendInvitation(identifier, invitationRequestDto)
-                        return@notarizedPost call.respond(HttpStatusCode.Accepted)
-                    }
-                }
-            }
         }
     }
 }
@@ -437,13 +377,5 @@ val walletCreateDtoExample = mapOf(
     "demo" to WalletCreateDto(
         "name",
         "bpn"
-    )
-)
-
-val selfManagedWalletCreateDtoExample = mapOf(
-    "demo" to SelfManagedWalletCreateDto(
-        name ="name",
-        bpn = "bpn",
-        did = "did",
     )
 )

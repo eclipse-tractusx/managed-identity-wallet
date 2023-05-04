@@ -1,3 +1,6 @@
+###
+### DEPRECATED
+###
 auth:
   jwksUrl: "https://centralidp.int.demo.catena-x.net/auth/realms/CX-Central/protocol/openid-connect/certs"
   issuerUrl: "https://centralidp.int.demo.catena-x.net/auth/realms/CX-Central"

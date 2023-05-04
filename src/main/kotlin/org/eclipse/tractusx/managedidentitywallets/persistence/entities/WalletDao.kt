@@ -29,33 +29,32 @@ import org.jetbrains.exposed.sql.javatime.datetime
 object Wallets : IntIdTable("wallets") {
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val modifiedAt = datetime("modified_at").defaultExpression(CurrentDateTime)
+    val modifiedFrom = varchar("modified_from", 36)
 
     val name = varchar("name", 127)
     var bpn = varchar("bpn", 36).uniqueIndex("bpn")
-    val did = varchar("did", 4096).uniqueIndex("did")
+    val did = varchar("did", 2096).uniqueIndex("did")
+    val didDocument = varchar("did_document", 4096)
 
-    val walletId = varchar("wallet_id", 4096).nullable()
-    val walletKey = varchar("wallet_key", 4096).nullable()
-    val walletToken = varchar("wallet_token", 4096).nullable()
+    val active = bool("is_active").default(true)
+    val authority = bool("is_authority").default(false)
 
-    val revocationListName = varchar("revocation_list_name", 4096).nullable()
-    val pendingMembershipIssuance = bool("pending_membership_issuance").default(false)
+    val algorithm = varchar("algorithm", 32)
 }
 
 class Wallet(id: EntityID<Int>) : Entity<Int>(id) {
     companion object : EntityClass<Int, Wallet>(Wallets)
     var createdAt by Wallets.createdAt
     var modifiedAt by Wallets.modifiedAt
+    var modifiedFrom by Wallets.modifiedFrom
 
     var name by Wallets.name
     var bpn by Wallets.bpn
     var did by Wallets.did
+    var didDocument by Wallets.didDocument
 
-    var walletId by Wallets.walletId
-    var walletKey by Wallets.walletKey
-    var walletToken by Wallets.walletToken
+    var active by Wallets.active
+    var authority by Wallets.authority
 
-    var revocationListName by Wallets.revocationListName
-
-    var pendingMembershipIssuance by Wallets.pendingMembershipIssuance
+    var algorithm by Wallets.algorithm
 }

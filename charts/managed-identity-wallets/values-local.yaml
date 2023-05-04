@@ -1,3 +1,6 @@
+###
+### DEPRECATED
+###
 auth:
   jwksUrl: "http://192.168.205.1:8081/auth/realms/catenax/protocol/openid-connect/certs"
   issuerUrl: "http://192.168.205.1:8081/auth/realms/catenax"
