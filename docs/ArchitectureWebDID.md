@@ -1,6 +1,7 @@
 ## Authority Wallet Table
 - id: integer (Primary Key)
 - did: string (Unique)
+- bpn: string (Unique)
 - private_key: string -> Reference to Vault Identitfier for Private Key
 - public_key: string
 - algorithm: string
@@ -8,7 +9,7 @@
 ## Tenant Wallet Table
 - id: integer (Primary Key)
 - bpn: string (Unique) -> bpn
-- algorithm: string
+- algorithm: string --> ED25519
 - did: string (Unique)
 - did_document: string
 - authority_wallet_id: integer (Foreign Key)
@@ -23,12 +24,4 @@
 - type: string
 - credential_data: string
 - tenant_wallet_id: integer (Foreign Key)
-- external_wallet_id: integer(Foreign Key)
 - authority_wallet_id: integer (Foreign Key)
-
-###TBD
-## External Wallet Table
-- id: integer (Primary Key)
-- uuid: string (Unique) -> bpn
-- did: string (Unique)
-- did_document: string
