@@ -7,10 +7,9 @@
 
 ## Tenant Wallet Table
 - id: integer (Primary Key)
-- uuid: string (Unique) -> bpn
+- bpn: string (Unique) -> bpn
 - algorithm: string
 - did: string (Unique)
-- subdomain: string
 - did_document: string
 - authority_wallet_id: integer (Foreign Key)
 
@@ -21,13 +20,11 @@
 
 ## Credential Table
 - id: integer (Primary Key)
+- type: string
 - credential_data: string
 - tenant_wallet_id: integer (Foreign Key)
 - external_wallet_id: integer(Foreign Key)
 - authority_wallet_id: integer (Foreign Key)
-
-
-
 
 ###TBD
 ## External Wallet Table
