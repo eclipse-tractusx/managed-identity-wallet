@@ -32,6 +32,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConf
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.slf4j.LoggerFactory
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 /**
  * The IRevocationService interface describes the functionalities for managing
@@ -98,8 +99,9 @@ interface IRevocationService {
         fun createRevocationService(
             revocationUrl: String,
             httpClientConfig: ServicesHttpClientConfig
-        ): IRevocationService {
-            return RevocationServiceImpl(
+        ){ //: IRevocationService {
+            return
+            /*return RevocationServiceImpl(
                 revocationUrl,
                 HttpClient {
                     expectSuccess = true
@@ -125,7 +127,7 @@ interface IRevocationService {
                             setSerializationInclusion(JsonInclude.Include.NON_NULL)
                         }
                     }
-                })
+                })*/
         }
     }
 }

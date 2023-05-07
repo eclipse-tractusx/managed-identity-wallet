@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.sanityTests
 
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
@@ -44,7 +44,9 @@ class RevocationMockedService(): IRevocationService {
     }
 
     override suspend fun getStatusListCredentialOfUrl(statusListUrl: String): VerifiableCredentialDto {
-        val didOfIssuer = "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(SingletonTestData.baseWalletDID)}"
+        val didOfIssuer = "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(
+            SingletonTestData.baseWalletDID
+        )}"
         return VerifiableCredentialDto(
             id = "https://example.com/api/credentials/status/${SingletonTestData.revocationListName}",
             context = listOf( "https://www.w3.org/2018/credentials/v1","https://w3id.org/vc/status-list/2021/v1"),
@@ -61,7 +63,9 @@ class RevocationMockedService(): IRevocationService {
                 type= "Ed25519Signature2018",
                 created = "2022-09-01T11:59:01Z",
                 proofPurpose = "assertionMethod",
-                verificationMethod = "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(SingletonTestData.baseWalletDID)}#key-1",
+                verificationMethod = "${SingletonTestData.getDidMethodPrefixWithNetworkIdentifier()}${getIdentifierOfDid(
+                    SingletonTestData.baseWalletDID
+                )}#key-1",
                 jws ="eyJhbGciOiAiRWREU0EiLCAiYjY0IjogZmFsc2UsICJjcml0IjogWyJiNjQiXX0..DwNECMRBYRbnyGrqL16O97rGdLuuZCsDf9Qc6_RLiValwMdRsD9WcrBnWuBAHDIK_EQ8copXgCEWSZLj-RR9DQ"
             )
         )

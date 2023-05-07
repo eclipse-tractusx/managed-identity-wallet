@@ -32,7 +32,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.forbiddenException
 import org.eclipse.tractusx.managedidentitywallets.models.semanticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.CredentialStatus
@@ -40,14 +39,11 @@ import org.eclipse.tractusx.managedidentitywallets.models.ssi.JsonLdContexts
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.LdProofDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialRequestData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListCredentialSubject
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.ListNameParameter
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.StatusListRefreshParameters
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialIssuanceFlowRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialParameters
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestDto
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialRequestWithoutIssuerDto
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.CredentialOfferResponse
 import org.eclipse.tractusx.managedidentitywallets.models.syntacticallyInvalidInputException
 import org.eclipse.tractusx.managedidentitywallets.models.unauthorizedException
 import org.eclipse.tractusx.managedidentitywallets.services.IRevocationService
@@ -56,7 +52,6 @@ import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 
 fun Route.vcRoutes(
     walletService: IWalletService,
-    revocationService: IRevocationService,
     utilsService: UtilsService
 ) {
 
@@ -158,148 +153,12 @@ fun Route.vcRoutes(
                     val verifiableCredentialRequestDto = call.receive<VerifiableCredentialRequestWithoutIssuerDto>()
                     AuthorizationHandler.checkHasRightsToUpdateWallet(
                         call,
-                        walletService.getBaseWallet().bpn
+                        null//walletService.getBaseWallet().bpn
                     )
 
-                    val verifiableCredentialDto = walletService.issueBaseWalletCredential(verifiableCredentialRequestDto)
-                    call.respond(HttpStatusCode.Created, verifiableCredentialDto)
+                    val verifiableCredentialDto = null //walletService.issueBaseWalletCredential(verifiableCredentialRequestDto)
+                    call.respond(HttpStatusCode.Created, "null")//verifiableCredentialDto)
                 }
-            }
-        }
-
-        route("/issuance-flow") {
-            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
-                notarizedPost(
-                    PostInfo<Unit, VerifiableCredentialIssuanceFlowRequestDto, CredentialOfferResponse>(
-                        summary = "Issue credential flow according to Aries RFC 0453",
-                        description = "Permission: " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
-                                "(The BPN of base wallet must equal BPN of caller)\n" +
-                                "\nTrigger an issue credential flow according to Aries RFC 0453 from the issuer to the holder. " + 
-                                "Issuer must be a DID managed by the MIW",
-                        requestInfo = RequestInfo(
-                            description = "The verifiable credential input",
-                            examples = verifiableCredentialIssuanceFlowRequestDtoExample
-                        ),
-                        responseInfo = ResponseInfo(
-                            status = HttpStatusCode.Created,
-                            description = "The credential Offer as String",
-                            examples = credentialOfferResponseExample
-                        ),
-                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
-                            forbiddenException, unauthorizedException),
-                        tags = setOf("VerifiableCredentials")
-                    )
-                ) {
-                    val verifiableCredentialRequestDto = call.receive<VerifiableCredentialIssuanceFlowRequestDto>()
-                    AuthorizationHandler.checkHasRightsToUpdateWallet(
-                        call,
-                        walletService.getBaseWallet().bpn
-                    )
-                    val vc = verifiableCredentialRequestDto.toInternalVerifiableCredentialIssuanceFlowRequest()
-                    call.respond(
-                        HttpStatusCode.Created,
-                        walletService.triggerCredentialIssuanceFlow(vc)
-                    )
-                }
-            }
-        }
-
-        route("/revocations") {
-            notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
-                notarizedPost(
-                    PostInfo<Unit, VerifiableCredentialDto, String>(
-                        summary = "Revoke issued Verifiable Credential",
-                        description = "Permission: " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR " +
-                                "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
-                                "(The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\n" +
-                                "\nRevoke issued Verifiable Credential by issuer",
-                        requestInfo = RequestInfo(
-                            description = "The signed verifiable credential",
-                            examples = signedVerifiableCredentialDtoExample
-                        ),
-                        responseInfo = ResponseInfo(
-                            status = HttpStatusCode.Accepted,
-                            description = "Empty response body"
-                        ),
-                        canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
-                            forbiddenException, unauthorizedException),
-                        tags = setOf("VerifiableCredentials")
-                    )
-                ) {
-                    val verifiableCredentialDto = call.receive<VerifiableCredentialDto>()
-                    AuthorizationHandler.checkHasRightsToUpdateWallet(call, verifiableCredentialDto.issuer)
-                    walletService.revokeVerifiableCredential(verifiableCredentialDto)
-                    call.respond(HttpStatusCode.Accepted)
-                }
-            }
-
-            route("/statusListCredentialRefresh") {
-                notarizedAuthenticate(AuthorizationHandler.JWT_AUTH_TOKEN) {
-                    notarizedPost(
-                        PostInfo<StatusListRefreshParameters, Unit, String>(
-                            summary = "Re-issue the Status-List Credential for all or given wallet",
-                            description = "Permission: " +
-                                    "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLETS)}** OR" +
-                                    "**${AuthorizationHandler.getPermissionOfRole(AuthorizationHandler.ROLE_UPDATE_WALLET)}** " +
-                                    "(The BPN of wallet to update must equal BPN of caller) \n" +
-                                    "\nRe-issue the Status-List Credential for all registered wallet",
-                            parameterExamples = setOf(
-                                ParameterExample("identifier", "identifier", "BPN0001")
-                            ),
-                            requestInfo = null,
-                            responseInfo = ResponseInfo(
-                                status = HttpStatusCode.Accepted,
-                                description = "Empty response body",
-                            ),
-                            canThrow = setOf(semanticallyInvalidInputException, syntacticallyInvalidInputException,
-                                forbiddenException, unauthorizedException),
-                            tags = setOf("VerifiableCredentials")
-                        )
-                    ) {
-                        val identifier = call.request.queryParameters["identifier"]
-                        AuthorizationHandler.checkHasRightsToUpdateWallet(call, identifier)
-
-                        val force: Boolean = if (!call.request.queryParameters["force"].isNullOrBlank()) {
-                            call.request.queryParameters["force"].toBoolean()
-                        } else { false }
-
-                        if (identifier.isNullOrBlank()) {
-                            revocationService.issueStatusListCredentials()
-                        } else {
-                            val wallet = walletService.getWallet(identifier, false)
-                            revocationService.issueStatusListCredentials(
-                                profileName = utilsService.getIdentifierOfDid(did = wallet.did),
-                                force = force
-                            )
-                        }
-                        call.respond(HttpStatusCode.Accepted)
-                    }
-                }
-            }
-        }
-
-        // Public endpoint to get Status-List Credential
-        route("/status/{listName}") {
-            notarizedGet(
-                GetInfo<ListNameParameter, VerifiableCredentialDto>(
-                    summary = "Query Status-List Credentials",
-                    description =  "Get the Status-List Credential for a given listName",
-                    parameterExamples = setOf(
-                        ParameterExample("listName", "listName", "5cb9ce19-9a10-48fe-bfa6-384632b89dc3"),
-                    ),
-                    responseInfo = ResponseInfo(
-                        status = HttpStatusCode.OK,
-                        description = "The Verifiable Credential",
-                        examples = statusListCredentialExample
-                    ),
-                    tags = setOf("VerifiableCredentials"),
-                )
-            ) {
-                val listName = call.parameters["listName"] ?: throw BadRequestException("Missing or malformed listName")
-                call.respond(HttpStatusCode.OK, revocationService.getStatusListCredentialOfManagedWallet(listName))
             }
         }
     }
@@ -421,10 +280,3 @@ val verifiableCredentialIssuanceFlowRequestDtoExample = mapOf(
 val credentialOfferAsString = """
 {"credential": {"@context": ["https://www.w3.org/2018/credentials/v1", "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData"], "type": ["BpnCredential", "VerifiableCredential"], "issuer": "did:sov:HsfwvUFcZkAcxDa2kASMr7", "issuanceDate": "2021-06-16T18:56:59Z", "credentialSubject": {"type": ["BpnCredential"], "bpn": "NEWNEWTestTest", "id": "did:sov:7rB93fLvW5kgujZ4E57ZxL"}}, "options": {"proofType": "Ed25519Signature2018"}}
 """.trimIndent()
-
-val credentialOfferResponseExample = mapOf(
-    "demo" to CredentialOfferResponse(
-        credentialOffer = credentialOfferAsString,
-        threadId = "2ewqe-qwe24-eqweqwrqwr-rwqrqwr"
-    )
-)

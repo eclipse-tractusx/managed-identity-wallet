@@ -23,10 +23,8 @@ import io.ktor.application.*
 import io.ktor.features.*
 import kotlinx.coroutines.runBlocking
 import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureJobs
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureOpenAPI
 import org.eclipse.tractusx.managedidentitywallets.plugins.configurePersistence
@@ -75,8 +73,6 @@ fun Application.module(testing: Boolean = false) {
 
     val walletRepository = WalletRepository()
     val credRepository = CredentialRepository()
-    val connectionRepository = ConnectionRepository()
-    val webhookRepository = WebhookRepository()
 
     val networkIdentifier = environment.config.property("acapy.networkIdentifier").getString()
     val utilsService = UtilsService(networkIdentifier = networkIdentifier)
@@ -123,11 +119,10 @@ fun Application.module(testing: Boolean = false) {
 
     Services.walletService = walletService
     Services.utilsService = utilsService
-    Services.revocationService = revocationService
 
     configureRouting()
 
-    appRoutes(walletService, revocationService, utilsService)
+    appRoutes(walletService, utilsService)
     configurePersistence()
 }
 

@@ -1,4 +1,5 @@
 val ktor_version: String by project
+val mockkVersion: String by project
 val kotlin_version: String by project
 val logback_version: String by project
 val kompendium_version: String by project
@@ -9,8 +10,8 @@ val acapy_java_library_version: String by project
 
 plugins {
     application
-    kotlin("jvm") version "1.6.10"
-                id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
+    kotlin("jvm") version "1.8.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
     jacoco
     id("org.jetbrains.dokka") version "1.7.20"
 }
@@ -81,11 +82,14 @@ dependencies {
     implementation("com.github.kagkarlsson:db-scheduler:11.2")
 
 
+    testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.mockito:mockito-inline:4.9.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
     testImplementation("io.ktor:ktor-client-mock:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation(kotlin("test"))
+    testImplementation("com.h2database:h2:2.1.214")
+
 
 }
 

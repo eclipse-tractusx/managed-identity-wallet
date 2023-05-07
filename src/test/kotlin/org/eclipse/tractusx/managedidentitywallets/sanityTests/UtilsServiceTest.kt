@@ -17,12 +17,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.sanityTests
 
 import io.ktor.server.testing.*
+import org.eclipse.tractusx.managedidentitywallets.Services
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.utils.TestServer
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.utils.EnvironmentTestSetup
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.AfterTest
@@ -51,11 +54,7 @@ class UtilsServiceTest {
             EnvironmentTestSetup.setupEnvironment(environment)
             configureSerialization()
             configureStatusPages()
-            Services.walletService = EnvironmentTestSetup.walletService
-            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
-            Services.revocationService = EnvironmentTestSetup.revocationMockedService
-            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             assertDoesNotThrow {

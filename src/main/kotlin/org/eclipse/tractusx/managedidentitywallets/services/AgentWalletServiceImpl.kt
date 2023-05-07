@@ -6,6 +6,10 @@ import org.hyperledger.aries.api.connection.ConnectionRecord
 import org.hyperledger.aries.api.issue_credential_v2.V20CredExRecord
 
 class AgentWalletServiceImpl:IWalletService {
+    override fun onInitAddAuthorityWallet(bpn: String, name: String) {
+        TODO("Not yet implemented")
+    }
+
     override fun getWallet(identifier: String, withCredentials: Boolean): WalletDto {
         TODO("Not yet implemented")
     }
@@ -62,7 +66,6 @@ class AgentWalletServiceImpl:IWalletService {
         vpRequest: VerifiablePresentationRequestDto,
         withCredentialsValidation: Boolean,
         withCredentialsDateValidation: Boolean,
-        withRevocationValidation: Boolean,
         asJwt: Boolean
     ): VerifiablePresentationDto {
         TODO("Not yet implemented")

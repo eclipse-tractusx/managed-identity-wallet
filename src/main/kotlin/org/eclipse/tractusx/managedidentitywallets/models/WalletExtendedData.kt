@@ -26,10 +26,5 @@ data class WalletExtendedData(
     val id: Int? = null,
     val name: String,
     val bpn: String,
-    val did: String,
-    var walletId: String?,
-    var walletKey: String?,
-    var walletToken: String?,
-    var revocationListName: String?,
-    var pendingMembershipIssuance: Boolean
+    val did: String
 )

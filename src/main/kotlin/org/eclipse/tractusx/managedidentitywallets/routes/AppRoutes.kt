@@ -27,7 +27,6 @@ import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 
 fun Application.appRoutes(
     walletService: IWalletService,
-    revocationService: IRevocationService,
     utilsService: UtilsService
 ) {
 
@@ -35,7 +34,7 @@ fun Application.appRoutes(
         route("/api") {
             walletRoutes(walletService)
             didDocRoutes(walletService)
-            vcRoutes(walletService, revocationService, utilsService)
+            vcRoutes(walletService, utilsService)
             vpRoutes(walletService)
         }
     }

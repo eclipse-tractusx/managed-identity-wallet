@@ -17,20 +17,19 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.sanityTests.utils
 
 import io.ktor.application.*
 import io.ktor.config.*
+import org.eclipse.tractusx.managedidentitywallets.*
 import org.eclipse.tractusx.managedidentitywallets.models.ServicesHttpClientConfig
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.WalletAndAcaPyConfig
 
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.ConnectionRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.CredentialRepository
 import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WalletRepository
-import org.eclipse.tractusx.managedidentitywallets.persistence.repositories.WebhookRepository
 import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
-import org.eclipse.tractusx.managedidentitywallets.services.AcaPyWalletServiceImpl
-import org.eclipse.tractusx.managedidentitywallets.services.IWebhookService
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.JwtConfigTest
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.RevocationMockedService
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.SingletonTestData
 import org.eclipse.tractusx.managedidentitywallets.services.UtilsService
 
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -44,7 +43,7 @@ object EnvironmentTestSetup {
     const val DEFAULT_DID = "did:sov:ArqouCjqi4RwBXQqjAbQrG"
     const val DEFAULT_VERKEY = "6Ng3Cu39yTViaEUg1BETpze78nXZqHpb6Q783X2rRhe6"
     const val MEMBERSHIP_ORG = "Organisation-A"
-    val walletAcapyConfig = WalletAndAcaPyConfig(
+    /*val walletAcapyConfig = WalletAndAcaPyConfig(
         apiAdminUrl = "apiAdminUrl",
         networkIdentifier = "networkIdentifier",
         baseWalletBpn = DEFAULT_BPN,
@@ -54,7 +53,7 @@ object EnvironmentTestSetup {
         baseWalletAdminUrl = "baseWalletAdminUrl",
         baseWalletAdminApiKey = "baseWalletAdminApiKey",
         allowlistDids = emptyList()
-    )
+    )*/
 
     const val EXTRA_TEST_BPN = "BPNL0Test"
     const val NETWORK_ID = "local:test"
@@ -62,24 +61,19 @@ object EnvironmentTestSetup {
     const val ZERO_THIRD_REVOKED_ENCODED_LIST ="H4sIAAAAAAAAAO3BIQEAAAACIKv/DzvDAjQAAAAAAAAAAAAAAAAAAADA2wBHo2oBAEAAAA=="
     private val walletRepository = WalletRepository()
     private val credentialRepository = CredentialRepository()
-    val connectionRepository = ConnectionRepository()
-    val webhookRepository = WebhookRepository()
 
     val httpClientConfig = ServicesHttpClientConfig(
             "INFO", 30000, 30000, 30000
     )
 
-    private val acaPyMockedService = AcaPyMockedService(DEFAULT_BPN, NETWORK_ID)
     val revocationMockedService = RevocationMockedService()
-    val webhookService = IWebhookService.createWebhookService(webhookRepository, httpClientConfig)
     val utilsService = UtilsService(NETWORK_ID)
 
-    val walletService = AcaPyWalletServiceImpl(
+    val walletService = null/*AcaPyWalletServiceImpl(
         acaPyMockedService, walletRepository,
         credentialRepository, utilsService, revocationMockedService,
         webhookService, connectionRepository
-    )
-    val bpdService = BusinessPartnerDataMockedService()
+    )*/
 
     val EMPTY_ROLES_TOKEN = JwtConfigTest.makeToken(listOf())
     val CREATE_TOKEN = JwtConfigTest.makeToken(listOf(AuthorizationHandler.ROLE_CREATE_WALLETS))
