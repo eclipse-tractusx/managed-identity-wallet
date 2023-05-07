@@ -17,13 +17,14 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.sanityTests.utils
 
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.JwtConfigTest
 
 class TestServer {
     fun initServer(): NettyApplicationEngine {

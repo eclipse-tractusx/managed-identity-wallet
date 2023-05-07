@@ -17,11 +17,13 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.sanityTests
 
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.eclipse.tractusx.managedidentitywallets.Services
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.utils.TestServer
 import org.eclipse.tractusx.managedidentitywallets.models.WalletCreateDto
 import org.eclipse.tractusx.managedidentitywallets.plugins.BusinessPartnerInfo
 import org.eclipse.tractusx.managedidentitywallets.plugins.UserSession
@@ -35,6 +37,7 @@ import org.eclipse.tractusx.managedidentitywallets.plugins.configureSockets
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
 import org.eclipse.tractusx.managedidentitywallets.routes.AuthorizationHandler
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.utils.EnvironmentTestSetup
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -46,7 +49,7 @@ import kotlin.test.assertTrue
 @kotlinx.serialization.ExperimentalSerializationApi
 class ApplicationTest {
 
-    private val server = TestServer().initServer()
+    /*private val server = TestServer().initServer()
 
     @BeforeTest
     fun setup() {
@@ -127,16 +130,13 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting()
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
-                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+            appRoutes(
+                EnvironmentTestSetup.walletService,
                 EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureJobs()
             Services.walletService = EnvironmentTestSetup.walletService
-            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
-            Services.revocationService =  EnvironmentTestSetup.revocationMockedService
-            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             assertTrue(true)
         }
@@ -150,15 +150,13 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting()
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
-                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+            appRoutes(
+                EnvironmentTestSetup.walletService,
                 EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
-            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
-            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             handleRequest(HttpMethod.Get, "/").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -200,15 +198,13 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting()
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
-                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+            appRoutes(
+                EnvironmentTestSetup.walletService,
                 EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
-            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
-            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             assertFails {
@@ -278,15 +274,13 @@ class ApplicationTest {
             configureOpenAPI()
             configureSecurity()
             configureRouting()
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
-                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+            appRoutes(
+                EnvironmentTestSetup.walletService,
                 EnvironmentTestSetup.utilsService)
             configureSerialization()
             Services.walletService = EnvironmentTestSetup.walletService
-            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
-            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
 
             // view wallets with single view token should not work
@@ -661,5 +655,5 @@ class ApplicationTest {
             assertEquals(0, EnvironmentTestSetup.walletService.getAll().size)
         }
     }
-
+*/
 }

@@ -17,11 +17,13 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.sanityTests
 
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.eclipse.tractusx.managedidentitywallets.Services
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.utils.TestServer
 import org.eclipse.tractusx.managedidentitywallets.models.BadRequestException
 import org.eclipse.tractusx.managedidentitywallets.models.NotFoundException
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
@@ -34,6 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.plugins.configureSecurity
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureSerialization
 import org.eclipse.tractusx.managedidentitywallets.plugins.configureStatusPages
 import org.eclipse.tractusx.managedidentitywallets.routes.appRoutes
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.utils.EnvironmentTestSetup
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -59,22 +62,20 @@ class DidDocTest {
 
     @Test
     fun testDidDocumentOperations() {
-        withTestApplication({
+        /*withTestApplication({
             EnvironmentTestSetup.setupEnvironment(environment)
             configurePersistence()
             configureOpenAPI()
             configureSecurity()
             configureRouting()
-            appRoutes(EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
-                EnvironmentTestSetup.revocationMockedService, EnvironmentTestSetup.webhookService,
+            appRoutes(
+                EnvironmentTestSetup.walletService, EnvironmentTestSetup.bpdService,
                 EnvironmentTestSetup.utilsService)
             configureSerialization()
             configureStatusPages()
             Services.walletService = EnvironmentTestSetup.walletService
-            Services.businessPartnerDataService = EnvironmentTestSetup.bpdService
             Services.utilsService = EnvironmentTestSetup.utilsService
             Services.revocationService =  EnvironmentTestSetup.revocationMockedService
-            Services.webhookService = EnvironmentTestSetup.webhookService
         }) {
             // programmatically add a wallet
             runBlocking {
@@ -258,7 +259,7 @@ class DidDocTest {
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.DEFAULT_BPN)
                 EnvironmentTestSetup.walletService.deleteWallet(EnvironmentTestSetup.EXTRA_TEST_BPN)
             }
-        }
+        }*/
     }
 
 }

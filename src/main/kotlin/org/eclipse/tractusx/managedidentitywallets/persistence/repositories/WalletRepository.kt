@@ -26,6 +26,7 @@ import org.eclipse.tractusx.managedidentitywallets.models.WalletExtendedData
 import org.eclipse.tractusx.managedidentitywallets.models.ssi.VerifiableCredentialDto
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallet
 import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallets
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
@@ -35,18 +36,18 @@ class WalletRepository {
     fun getAll(): List<Wallet> = transaction { Wallet.all().toList() }
 
     @Throws(NotFoundException::class)
-    fun getWallet(identifier: String): Wallet {
+    fun getWallet(bpn: String): Wallet {
         return transaction {
             Wallet.find {
-                (Wallets.did eq identifier) or (Wallets.bpn eq identifier) or (Wallets.walletId eq identifier)
-            }.firstOrNull() ?: throw NotFoundException("Wallet with given identifier not found")
+                (Wallets.bpn eq bpn)
+            }.firstOrNull() ?: throw NotFoundException("Wallet with given bpn not found")
         }
     }
 
-    fun getWalletOrNull(identifier: String): Wallet? {
+    fun getWalletOrNull(bpn: String): Wallet? {
         return transaction {
             Wallet.find {
-                (Wallets.did eq identifier) or (Wallets.bpn eq identifier) or (Wallets.walletId eq identifier)
+                (Wallets.bpn eq bpn)
             }.firstOrNull()
         }
     }
@@ -70,33 +71,20 @@ class WalletRepository {
             bpn = wallet.bpn
             name = wallet.name
             did = wallet.did
-            walletId = wallet.walletId
-            walletKey = wallet.walletKey
-            walletToken = wallet.walletToken
             createdAt = LocalDateTime.now()
-            revocationListName = wallet.revocationListName
-            pendingMembershipIssuance = wallet.pendingMembershipIssuance
+            modifiedAt = LocalDateTime.now()
+            modifiedFrom = wallet.bpn
+            didDocument = ""
+            active = true
+            authority = false
+            algorithm = "ED25519"
         }
     }
 
     @Throws(NotFoundException::class)
-    fun deleteWallet(identifier: String): Boolean {
-        getWallet(identifier).delete()
+    fun deleteWallet(bpn: String): Boolean {
+        getWallet(bpn).delete()
         return true
-    }
-
-    @Throws(NotFoundException::class)
-    fun updatePending(did: String, isPending: Boolean) {
-        getWallet(did).apply {
-            pendingMembershipIssuance = isPending
-        }
-    }
-
-    @Throws(NotFoundException::class)
-    fun addRevocationList(did: String, revocationList: String) {
-        getWallet(did).apply {
-            revocationListName = revocationList
-        }
     }
 
     fun toObject(entity: Wallet): WalletDto = entity.run {
@@ -104,12 +92,8 @@ class WalletRepository {
             name = name,
             bpn = bpn,
             did = did,
-            verKey = null,
             createdAt = createdAt,
-            vcs = emptyList<VerifiableCredentialDto>().toMutableList(),
-            revocationListName = revocationListName,
-            pendingMembershipIssuance = pendingMembershipIssuance,
-            isSelfManaged = entity.walletId.isNullOrEmpty() && entity.revocationListName.isNullOrEmpty()
+            vcs = emptyList<VerifiableCredentialDto>().toMutableList()
         )
     }
 
@@ -118,12 +102,7 @@ class WalletRepository {
             id.value,
             name,
             bpn,
-            did,
-            walletId,
-            walletKey,
-            walletToken,
-            revocationListName,
-            pendingMembershipIssuance
+            did
         )
     }
 }

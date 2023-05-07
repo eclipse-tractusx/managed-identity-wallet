@@ -1,4 +1,6 @@
-package org.eclipse.tractusx.managedidentitywallets
+package org.eclipse.tractusx.managedidentitywallets.sanityTests
+
+import org.eclipse.tractusx.managedidentitywallets.sanityTests.utils.EnvironmentTestSetup
 
 object SingletonTestData {
     lateinit var baseWalletDID: String
@@ -14,17 +16,17 @@ object SingletonTestData {
     var didDocWithoutService: Boolean = false
 
     fun cleanSingletonTestData() {
-        this.baseWalletDID = ""
-        this.baseWalletVerKey = ""
-        this.signCredentialResponse = ""
-        this.isValidVerifiableCredential = true
-        this.isValidVerifiablePresentation = true
-        this.revocationListName = ""
-        this.credentialIndex = 0
-        this.encodedList = EnvironmentTestSetup.NONE_REVOKED_ENCODED_LIST
-        this.connectionId = ""
-        this.threadId = ""
-        this.didDocWithoutService = false
+        baseWalletDID = ""
+        baseWalletVerKey = ""
+        signCredentialResponse = ""
+        isValidVerifiableCredential = true
+        isValidVerifiablePresentation = true
+        revocationListName = ""
+        credentialIndex = 0
+        encodedList = EnvironmentTestSetup.NONE_REVOKED_ENCODED_LIST
+        connectionId = ""
+        threadId = ""
+        didDocWithoutService = false
     }
 
     fun getDidMethodPrefixWithNetworkIdentifier(): String {

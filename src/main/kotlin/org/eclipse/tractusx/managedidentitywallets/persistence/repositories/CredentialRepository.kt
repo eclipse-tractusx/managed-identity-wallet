@@ -34,7 +34,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class CredentialRepository {
 
     fun deleteCredentialsOfWallet(walletId: Int) {
-        VerifiableCredentials.deleteWhere { VerifiableCredentials.walletId eq walletId }
+        //TODO To be implemented
+        //VerifiableCredentials.deleteWhere { VerifiableCredentials.credentialId eq walletId }
     }
 
     fun getCredentials(
@@ -73,7 +74,6 @@ class CredentialRepository {
             issuerDid = issuedCredential.issuer
             holderDid = issuedCredential.credentialSubject["id"] as String
             type = typesAsString
-            wallet = holderWallet
         }
     }
 
@@ -91,7 +91,6 @@ class CredentialRepository {
             holderDid = holderOfCredential
             content = credentialAsJson
             type = typesAsString
-            wallet = holderWallet
         }
     }
 

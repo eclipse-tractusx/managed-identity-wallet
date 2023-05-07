@@ -21,7 +21,6 @@ package org.eclipse.tractusx.managedidentitywallets.services
 
 import org.eclipse.tractusx.managedidentitywallets.models.NotImplementedException
 import org.eclipse.tractusx.managedidentitywallets.models.UnprocessableEntityException
-import org.eclipse.tractusx.managedidentitywallets.models.ssi.acapy.EndPointType
 import java.io.ByteArrayInputStream
 import java.security.SecureRandom
 import java.util.*
@@ -61,19 +60,6 @@ class UtilsService(private val networkIdentifier: String) {
     fun getIdentifierOfDid(did: String): String {
         val elementsOfDid: List<String> = did.split(":")
         return elementsOfDid[elementsOfDid.size - 1]
-    }
-
-    /**
-     * Maps the given service type to its corresponding enum [EndPointType] name.
-     * @param type the service type as string
-     * @return the enum name of the given service type
-     * @throws NotImplementedException if the given service type is not supported
-     */
-    fun mapServiceTypeToEnum(type: String): String = when (type) {
-        "did-communication" -> EndPointType.Endpoint.name
-        "linked_domains" -> EndPointType.LinkedDomains.name
-        "profile" -> EndPointType.Profile.name
-        else -> throw NotImplementedException("Service type $type is not supported")
     }
 
     /**
