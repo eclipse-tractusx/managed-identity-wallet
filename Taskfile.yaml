@@ -1,0 +1,11 @@
+version: 3
+
+dotenv:
+  - 'dev.env'
+
+tasks:
+  runDevEnv:
+    desc: Spin up local Docker environment
+    dir: dev-assets/dev-containers
+    cmds:
+      - docker-compose up
