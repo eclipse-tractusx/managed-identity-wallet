@@ -2,9 +2,7 @@ version: '3'
 
 services:
   local_postgres:
-    build:
-      context: .
-      dockerfile: db.Dockerfile
+    image: postgres:14.2-alpine
     container_name: local_postgres
     env_file:
       - ../../dev.env
