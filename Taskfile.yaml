@@ -9,3 +9,9 @@ tasks:
     dir: dev-assets/dev-containers
     cmds:
       - docker-compose up
+
+  unittest:
+    desc: Executes helm unittests
+    dir: charts/managed-identity-wallets
+    cmds:
+      - helm unittest .
