@@ -1,0 +1,14 @@
+suite: test default deployment
+chart:
+  version: 9.9.9+test
+  appVersion: 9.9.9
+tests:
+  - it: should have correct metadata
+    template: templates/deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isAPIVersion:
+          of: apps/v1
+      - isKind:
+          of: Deployment
