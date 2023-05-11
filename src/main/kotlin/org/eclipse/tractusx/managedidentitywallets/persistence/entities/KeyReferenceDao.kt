@@ -29,7 +29,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 object KeyReferences : IntIdTable("key_references") {
     val bpn = reference("bpn", Wallets.bpn)
     val vaultAccestoken = varchar("vault_accestoken", 4096)
-    val referenceKey = varchar("reference_key", 36).uniqueIndex("bpn")
+    val referenceKey = varchar("reference_key", 36).uniqueIndex("reference_key_IX")
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val modifiedAt = datetime("modified_at").defaultExpression(CurrentDateTime)
     val modifiedFrom = varchar("modified_from", 36)
