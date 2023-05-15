@@ -2,9 +2,7 @@ version: '3'
 
 services:
   local_postgres:
-    build:
-      context: .
-      dockerfile: db.Dockerfile
+    image: postgres:14.2-alpine
     container_name: local_postgres
     env_file:
       - ../../dev.env
@@ -14,12 +12,15 @@ services:
       - "5432:5432"
 
   local_keycloak:
-    image: jboss/keycloak:16.1.1
+    image: quay.io/keycloak/keycloak:21.1
     container_name: local_keycloak
+    command:
+      - start-dev
+      - --import-realm
     env_file:
       - ../../dev.env
     volumes:
-      - ./keycloak/local-realm.json:/tmp/local-realm.json
+      - ./keycloak/local-realm.json:/opt/keycloak/data/import/local-realm.json
     ports:
       - "8081:8080"
 
