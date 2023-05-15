@@ -20,7 +20,9 @@
 package org.eclipse.tractusx.managedidentitywallets.plugins
 
 import io.ktor.application.*
-import org.eclipse.tractusx.managedidentitywallets.persistence.entities.*
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.KeyReferences
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.VerifiableCredentials
+import org.eclipse.tractusx.managedidentitywallets.persistence.entities.Wallets
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -30,6 +32,8 @@ fun Application.configurePersistence() {
     val jdbcDriver = environment.config.property("db.jdbcDriver").getString()
     Database.connect(jdbcUrl, driver = jdbcDriver)
     transaction {
+        // addLogger(StdOutSqlLogger)
+
         // Create missing tables
         SchemaUtils.createMissingTablesAndColumns(
             Wallets,
@@ -37,5 +41,5 @@ fun Application.configurePersistence() {
             KeyReferences
         )
         commit()
-    } 
+    }
 }

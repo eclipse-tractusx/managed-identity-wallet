@@ -32,8 +32,8 @@ object Wallets : IntIdTable("wallets") {
     val modifiedFrom = varchar("modified_from", 36)
 
     val name = varchar("name", 127)
-    var bpn = varchar("bpn", 36).uniqueIndex("bpn")
-    val did = varchar("did", 2096).uniqueIndex("did")
+    var bpn = varchar("bpn", 36).uniqueIndex("bpn_IX")
+    val did = varchar("did", 2096).uniqueIndex("did_IX")
     val didDocument = varchar("did_document", 4096)
 
     val active = bool("is_active").default(true)
