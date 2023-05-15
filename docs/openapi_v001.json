@@ -120,11 +120,8 @@
                                             "name": "name",
                                             "bpn": "bpn",
                                             "did": "did",
-                                            "verKey": "verkey",
                                             "createdAt": "2023-02-13T15:06:06.539270",
-                                            "vcs": [],
-                                            "pendingMembershipIssuance": false,
-                                            "isSelfManaged": false
+                                            "vcs": []
                                         }
                                     }
                                 }
@@ -935,8 +932,7 @@
                                         "credentialSubject": {
                                             "college": "Test-University"
                                         },
-                                        "holderIdentifier": "did:example:492edf208",
-                                        "isRevocable": true
+                                        "holderIdentifier": "did:example:492edf208"
                                     }
                                 }
                             }
@@ -981,6 +977,149 @@
                                                 "created": "2021-11-17T22:20:27Z",
                                                 "proofPurpose": "assertionMethod",
                                                 "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
+                                                "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "The input can not be processed due to semantic mismatches",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The input does not comply to the syntax requirements",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The request could not be completed due to a forbidden access.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request could not be completed due to a failed authorization.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExceptionResponse"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "message": "reason",
+                                            "error": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/credentials/issuer/membership": {
+            "post": {
+                "tags": [
+                    "VerifiableCredentials"
+                ],
+                "summary": "Issue a Membership Verifiable Credential with base wallet issuer",
+                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\nIssue a verifiable credential by base wallet",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The bpn of the holders wallet",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateMembershipVCDto"
+                            },
+                            "examples": {
+                                "demo": {
+                                    "value": {
+                                        "bpn": "bpn"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The created Verifiable Credential",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifiableCredentialDto"
+                                },
+                                "examples": {
+                                    "demo": {
+                                        "value": {
+                                            "id": "http://example.edu/credentials/3732",
+                                            "@context": [
+                                                "https://www.w3.org/2018/credentials/v1",
+                                                "https://www.w3.org/2018/credentials/examples/v1"
+                                            ],
+                                            "type": [
+                                                "MembershipCredential, VerifiableCredential"
+                                            ],
+                                            "issuer": "did:web:miw.de/bpn0000000000",
+                                            "issuanceDate": "2021-06-16T18:56:59Z",
+                                            "credentialSubject": {
+                                                "type":"MembershipCredential",
+                                                "memberOf": "Catena-X",
+                                                "status":"Active",
+                                                "startTime":"2021-06-16T18:56:59Z"
+                                            },
+                                            "holderIdentifier": "bpn",
+                                            "proof": {
+                                                "type": "Ed25519Signature2018",
+                                                "created": "2021-11-17T22:20:27Z",
+                                                "proofPurpose": "assertionMethod",
+                                                "verificationMethod": "did:web:miw.de/bpn0000000000#key-0",
                                                 "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
                                             }
                                         }
@@ -1951,6 +2090,17 @@
                 "required": [
                     "bpn",
                     "name"
+                ],
+                "type": "object"
+            },
+            "CreateMembershipVCDto": {
+                "properties": {
+                    "bpn": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "bpn"
                 ],
                 "type": "object"
             },

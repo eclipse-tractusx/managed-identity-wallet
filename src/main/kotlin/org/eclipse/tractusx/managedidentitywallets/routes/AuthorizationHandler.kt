@@ -131,5 +131,4 @@ object AuthorizationHandler {
         val authContext = attributes[authContextKey as AttributeKey<AuthenticationContext>]
         return authContext.principal as MIWPrincipal
     }
-
 }
