@@ -1,1 +1,40 @@
+server:
+  port: ${APPLICATION_PORT:8087}
+  shutdown: graceful
+  compression:
+    enabled: true
+spring:
+  profiles:
+    active: ${APPLICATION_ENVIRONMENT:dev}
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.xml
+  application:
+    name: ${APPLICATION_NAME:miw}
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:miw}?useSSL=${USE_SSL:false}
+    username: ${DB_USER_NAME:root}
+    password: ${DB_PASSWORD:smart}
+    initialization-mode: always
+    hikari:
+      maximumPoolSize: ${DB_POOL_SIZE:10}
+  jpa:
+    show-sql: false
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8090}
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*, pre-stop'
+  health:
+    db:
+      enabled: true
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
 
