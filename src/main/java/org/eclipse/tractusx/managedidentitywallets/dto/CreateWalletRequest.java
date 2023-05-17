@@ -19,24 +19,28 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
 
 /**
- * The type Managed identity wallets application.
+ * The type Create wallet request.
  */
-@SpringBootApplication
-public class ManagedIdentityWalletsApplication {
+@Getter
+@Setter
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+public class CreateWalletRequest {
 
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
+    @NotBlank
+    @Size(min = 5, max = 255)
+    private String bpn;
 
+    @NotBlank
+    @Size(min = 5, max = 255)
+    private String name;
 }
