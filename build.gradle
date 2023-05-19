@@ -1,12 +1,13 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.0.6'
-	id 'io.spring.dependency-management' version '1.1.0'
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyVersion}"
+	id "jacoco"
 }
 
-group = 'org.eclipse.tractusx'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+group = "${groupName}"
+version = "${applicationVersion}"
+sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
 	compileOnly {
@@ -19,7 +20,7 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2022.0.2")
+
 }
 
 dependencies {
@@ -29,19 +30,45 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.liquibase:liquibase-core'
+	//implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.3'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation "org.testcontainers:testcontainers"
+	testImplementation "org.testcontainers:postgresql"
+	testImplementation "org.testcontainers:junit-jupiter"
+
 }
 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		mavenBom("org.testcontainers:testcontainers-bom:${testContainerVersion}")
 	}
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+test {
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test
+}
+
+jacoco {
+	toolVersion = "${jacocoVersion}"
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		csv.required = false
+		html.required = true
+	}
 }

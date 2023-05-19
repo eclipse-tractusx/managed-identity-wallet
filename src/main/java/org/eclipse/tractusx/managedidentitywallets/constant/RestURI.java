@@ -19,24 +19,15 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package org.eclipse.tractusx.managedidentitywallets.constant;
 
 /**
- * The type Managed identity wallets application.
+ * The type Rest uri.
  */
-@SpringBootApplication
-public class ManagedIdentityWalletsApplication {
+public class RestURI {
 
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
-
+    /**
+     * The constant WALLET.
+     */
+    public static final String WALLET = "/wallet";
 }

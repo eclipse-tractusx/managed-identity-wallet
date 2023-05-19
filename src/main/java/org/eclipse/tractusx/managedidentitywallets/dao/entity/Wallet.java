@@ -19,24 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import jakarta.persistence.*;
+import lombok.*;
 
 /**
- * The type Managed identity wallets application.
+ * The type Wallet.
  */
-@SpringBootApplication
-public class ManagedIdentityWalletsApplication {
+@Getter
+@Setter
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Wallet extends BaseEntity{
 
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String did;
+
+    @Column(nullable = false, unique = true)
+    private String bpn;
+
+    @Column(nullable = false)
+    private String algorithm;
+
+    @Column(nullable = false)
+    private Boolean active;
+
+    @Column(nullable = false)
+    private Boolean authority;
+
+    @Column(nullable = false)
+    private String didDocument;
 
 }
