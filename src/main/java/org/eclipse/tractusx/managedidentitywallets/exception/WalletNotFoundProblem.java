@@ -19,18 +19,23 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
-/**
- * The type Rest uri.
- */
+import org.zalando.problem.AbstractThrowableProblem;
+import org.zalando.problem.Status;
 
-public class RestURI {
+public class WalletNotFoundProblem extends AbstractThrowableProblem {
 
     /**
-     * The constant WALLET.
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param bpn the bpn
      */
-    public static final String WALLET = "/wallet";
-
-    public static final String WALLET_BY_BPN = "/wallet/{bpn}";
+    public WalletNotFoundProblem(String bpn) {
+        super(
+                null,
+                "Wallet not found",
+                Status.NOT_FOUND,
+                String.format("Wallet not found with bpn '%s'", bpn));
+    }
 }
