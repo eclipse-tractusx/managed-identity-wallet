@@ -19,26 +19,15 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zalando.problem.spring.web.advice.ProblemHandling;
 
 /**
- * The type Managed identity wallets application.
+ * The type Exception handling.
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-public class ManagedIdentityWalletsApplication {
-
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
+@RestControllerAdvice
+public class ExceptionHandling implements ProblemHandling {
 
 }

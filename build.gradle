@@ -16,7 +16,15 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
+	maven {
+		url = uri("https://maven.pkg.github.com/catenax-ng/product-lab-ssi")
+		credentials {
+			username = 'nitin-vavdiya'
+			password = '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'
+		}
+	}
 }
 
 ext {
@@ -30,7 +38,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.liquibase:liquibase-core'
-	//implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.3'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.3'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-agent-lib:0.0.3'
+	implementation group: 'org.zalando', name: 'problem-spring-web', version: '0.29.1'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

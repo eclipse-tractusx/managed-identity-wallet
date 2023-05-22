@@ -19,26 +19,27 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.zalando.problem.AbstractThrowableProblem;
+import org.zalando.problem.Status;
 
 /**
- * The type Managed identity wallets application.
+ * The type Duplicate wallet problem.
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-public class ManagedIdentityWalletsApplication {
+public class DuplicateWalletProblem extends AbstractThrowableProblem {
 
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param bpn the bpn
+     */
+    public DuplicateWalletProblem(String bpn) {
+        super(
+                null,
+                "Duplicate wallet",
+                Status.CONFLICT,
+                String.format("Wallet is already created with bpn '%s'", bpn));
+    }
 
 }
