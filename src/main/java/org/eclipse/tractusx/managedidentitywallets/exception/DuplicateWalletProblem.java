@@ -21,25 +21,43 @@
 
 package org.eclipse.tractusx.managedidentitywallets.exception;
 
-import org.zalando.problem.AbstractThrowableProblem;
-import org.zalando.problem.Status;
-
 /**
  * The type Duplicate wallet problem.
  */
-public class DuplicateWalletProblem extends AbstractThrowableProblem {
+public class DuplicateWalletProblem extends RuntimeException {
+
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     */
+    public DuplicateWalletProblem() {
+    }
 
     /**
      * Instantiates a new Duplicate wallet problem.
      *
-     * @param bpn the bpn
+     * @param message the message
      */
-    public DuplicateWalletProblem(String bpn) {
-        super(
-                null,
-                "Duplicate wallet",
-                Status.CONFLICT,
-                String.format("Wallet is already created with bpn '%s'", bpn));
+    public DuplicateWalletProblem(String message) {
+        super(message);
+    }
+
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public DuplicateWalletProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param cause the cause
+     */
+    public DuplicateWalletProblem(Throwable cause) {
+        super(cause);
     }
 
 }

@@ -1,7 +1,5 @@
 server:
   port: ${APPLICATION_PORT:8087}
-  error:
-    include-stacktrace: never
   shutdown: graceful
   compression:
     enabled: true

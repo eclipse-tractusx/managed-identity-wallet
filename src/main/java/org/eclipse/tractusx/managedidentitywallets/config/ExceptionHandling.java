@@ -21,13 +21,33 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.zalando.problem.spring.web.advice.ProblemHandling;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
 
 /**
  * The type Exception handling.
  */
 @RestControllerAdvice
-public class ExceptionHandling implements ProblemHandling {
+public class ExceptionHandling extends ResponseEntityExceptionHandler {
+    @ExceptionHandler(WalletNotFoundProblem.class)
+    ProblemDetail handleWalletNotFoundProblem(WalletNotFoundProblem e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty("timestamp", System.currentTimeMillis());
+        return problemDetail;
+    }
 
+    @ExceptionHandler(DuplicateWalletProblem.class)
+    ProblemDetail handleDuplicateWalletProblem(DuplicateWalletProblem e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty("timestamp", System.currentTimeMillis());
+        return problemDetail;
+    }
 }

@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,6 +38,7 @@ import lombok.*;
 public class Wallet extends BaseEntity{
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
     private Long id;
