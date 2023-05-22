@@ -30,9 +30,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * The type Wallet controller.
@@ -52,5 +50,16 @@ public class WalletController {
     @PostMapping(path = RestURI.WALLET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createWallet(request));
+    }
+
+    /**
+     * Gets wallet by bpn.
+     *
+     * @param bpn the bpn
+     * @return the wallet by bpn
+     */
+    @GetMapping(path = RestURI.WALLET_BY_BPN, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Wallet> getWalletByBpn(@PathVariable(name = "bpn") String bpn){
+        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByBpn(bpn));
     }
 }

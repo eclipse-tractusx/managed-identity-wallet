@@ -33,6 +33,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepos
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.agent.lib.DidDocumentBuilder;
 import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519KeySet;
@@ -66,6 +67,20 @@ public class WalletService {
 
     private final WalletKeyRepository walletKeyRepository;
 
+
+    /**
+     * Gets wallet by bpn.
+     *
+     * @param bpn the bpn
+     * @return the wallet by bpn
+     */
+    public Wallet getWalletByBpn(String bpn) {
+        Wallet wallet = walletRepository.getByBpn(bpn);
+        if(wallet == null){
+            throw new WalletNotFoundProblem(bpn);
+        }
+        return wallet;
+    }
 
     /**
      * Create wallet.

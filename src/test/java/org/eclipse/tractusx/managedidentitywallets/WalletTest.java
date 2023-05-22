@@ -40,6 +40,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.UUID;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
@@ -94,5 +96,22 @@ class WalletTest {
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
         ResponseEntity<Wallet> response = this.restTemplate.exchange(RestURI.WALLET, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), response.getStatusCode().value());
+    }
+
+    @Test
+    @Order(3)
+    void getWalletByBpnTest200(){
+        ResponseEntity<Wallet> response = this.restTemplate.getForEntity(RestURI.WALLET_BY_BPN, Wallet.class, bpn);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+        Wallet body = response.getBody();
+        Assertions.assertEquals(body.getBpn(), bpn);
+    }
+
+    @Test
+    @Order(4)
+    void getWalletInvalidBpn404(){
+        ResponseEntity<Wallet> response = this.restTemplate.getForEntity(RestURI.WALLET_BY_BPN, Wallet.class, UUID.randomUUID().toString());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
     }
 }
