@@ -18,13 +18,13 @@ configurations {
 repositories {
 	mavenLocal()
 	mavenCentral()
-	maven {
+	/*maven {
 		url = uri("https://maven.pkg.github.com/catenax-ng/product-lab-ssi")
 		credentials {
-			username = 'nitin-vavdiya'
-			password = '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'
+			username = 'name'
+			password = 'token'
 		}
-	}
+	}*/
 }
 
 ext {
