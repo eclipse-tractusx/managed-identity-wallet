@@ -30,6 +30,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
+
     /**
      * Gets by bpn.
      *
