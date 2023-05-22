@@ -21,21 +21,42 @@
 
 package org.eclipse.tractusx.managedidentitywallets.exception;
 
-import org.zalando.problem.AbstractThrowableProblem;
-import org.zalando.problem.Status;
-
-public class WalletNotFoundProblem extends AbstractThrowableProblem {
+/**
+ * The type Wallet not found problem.
+ */
+public class WalletNotFoundProblem extends RuntimeException {
 
     /**
-     * Instantiates a new Duplicate wallet problem.
-     *
-     * @param bpn the bpn
+     * Instantiates a new Wallet not found problem.
      */
-    public WalletNotFoundProblem(String bpn) {
-        super(
-                null,
-                "Wallet not found",
-                Status.NOT_FOUND,
-                String.format("Wallet not found with bpn '%s'", bpn));
+    public WalletNotFoundProblem() {
+    }
+
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
+     */
+    public WalletNotFoundProblem(String message) {
+        super(message);
+    }
+
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public WalletNotFoundProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param cause the cause
+     */
+    public WalletNotFoundProblem(Throwable cause) {
+        super(cause);
     }
 }

@@ -77,7 +77,7 @@ public class WalletService {
     public Wallet getWalletByBpn(String bpn) {
         Wallet wallet = walletRepository.getByBpn(bpn);
         if(wallet == null){
-            throw new WalletNotFoundProblem(bpn);
+            throw new WalletNotFoundProblem("Wallet not found for bpn "+bpn);
         }
         return wallet;
     }
@@ -128,7 +128,7 @@ public class WalletService {
     private void validateCreateWallet(CreateWalletRequest request){
         boolean exist = walletRepository.existsByBpn(request.getBpn());
         if(exist){
-            throw  new DuplicateWalletProblem(request.getBpn());
+            throw  new DuplicateWalletProblem("Wallet is already exists for bpn "+request.getBpn());
         }
 
     }
