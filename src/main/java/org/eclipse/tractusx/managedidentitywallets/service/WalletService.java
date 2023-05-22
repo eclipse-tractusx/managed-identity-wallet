@@ -21,12 +21,32 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.util.io.pem.PemReader;
+import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
+import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
+import org.eclipse.tractusx.ssi.agent.lib.DidDocumentBuilder;
+import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519KeySet;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.FileSystemUtils;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 /**
  * The type Wallet service.
@@ -38,6 +58,14 @@ public class WalletService {
 
     private final WalletRepository walletRepository;
 
+    private final ObjectMapper objectMapper;
+
+    private final MIWSettings miwSettings;
+
+    private final EncryptionUtils encryptionUtils;
+
+    private final WalletKeyRepository walletKeyRepository;
+
 
     /**
      * Create wallet.
@@ -45,25 +73,91 @@ public class WalletService {
      * @param request the request
      * @return the wallet
      */
+    @SneakyThrows
     public Wallet createWallet(CreateWalletRequest request){
         validateCreateWallet(request);
 
         //create private key pair
+        Ed25519KeySet keyPair = createKeyPair();
 
         //create did json
+        Did did = DidWebFactory.fromHostname(miwSettings.host()+":"+request.getBpn());
+        DidDocument didDocument = new DidDocumentBuilder()
+                .withDid(did)
+                .withEd25519PublicKey(keyPair.getPublicKey())
+                .build();
+        log.debug("did document created for bpn ->{}", request.getBpn());
 
-        //create wallet amd save key
+        //Save wallet
+        Wallet wallet = walletRepository.save(Wallet.builder()
+                .didDocument("did document")  //TODO remove once we have solution in lib  didDocument.toString or didDocument.toJson
+                .bpn(request.getBpn())
+                .did(did.toString())
+                .active(true)
+                .authority(true)
+                .algorithm("ED25519")
+                .build());
 
+        //Save key
+        walletKeyRepository.save(WalletKey.builder()
+                .walletId(wallet.getId())
+                .referenceKey("dummy ref key")  //TODO removed once vault setup is ready
+                .vaultAccessToken("dummy vault access token") ////TODO removed once vault setup is ready
+                .publicKey(encryptionUtils.encrypt(new String(keyPair.getPrivateKey())))
+                .privateKey(encryptionUtils.encrypt(new String(keyPair.getPublicKey())))
+                .build());
         log.debug("Wallet created for bpn ->{}", request.getBpn());
-        return new Wallet();
+       return  wallet;
     }
 
     private void validateCreateWallet(CreateWalletRequest request){
-        //TODO validations
+        boolean exist = walletRepository.existsByBpn(request.getBpn());
+        if(exist){
+            throw  new DuplicateWalletProblem(request.getBpn());
+        }
 
-        //check duplicate BPN
+    }
 
-        //check if wallet is already created
+    @SneakyThrows
+    private Ed25519KeySet createKeyPair(){
 
+        String keyLocation = "/tmp/"+ UUID.randomUUID();
+        Files.createDirectories(Paths.get(keyLocation));
+
+        File privateKey = new File(keyLocation+"/private.pem");
+        File publicKey = new File(keyLocation+"/public.pem");
+        try{
+            //private key
+            if(!privateKey.exists()){
+                privateKey.createNewFile();
+            }
+            Process privateKeyProcess = Runtime.getRuntime().exec("openssl genpkey -algorithm ed25519");
+           try( BufferedReader privateKeyReader = new BufferedReader(new InputStreamReader(privateKeyProcess.getInputStream()));
+                BufferedWriter privateKeyWriter = new BufferedWriter(new FileWriter(privateKey))){
+               FileCopyUtils.copy(privateKeyReader, privateKeyWriter);
+           }
+
+            //public key
+            if(!publicKey.exists()){
+                publicKey.createNewFile();
+            }
+            Process publicKeyProcess = Runtime.getRuntime().exec("openssl pkey -in "+privateKey.getAbsolutePath()+" -pubout");
+            try(BufferedReader publicKeyReader = new BufferedReader(new InputStreamReader(publicKeyProcess.getInputStream()));
+                BufferedWriter publicKeyWriter = new BufferedWriter(new FileWriter(publicKey))){
+                FileCopyUtils.copy(publicKeyReader, publicKeyWriter);
+            }
+
+            byte[] privateKeyBytes =  readPEMFile(privateKey.getAbsolutePath());
+            byte[] publicKeyBytes =  readPEMFile(publicKey.getAbsolutePath());
+            return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
+        }finally {
+            FileSystemUtils.deleteRecursively(Paths.get(keyLocation));
+        }
+    }
+
+
+    private byte[] readPEMFile(String path) throws IOException {
+        PemReader pemReader = new PemReader(new FileReader(path));
+        return pemReader.readPemObject().getContent();
     }
 }

@@ -47,3 +47,7 @@ CREATE TABLE public.credential (
   CONSTRAINT holder_wallet_fk FOREIGN KEY (holder) REFERENCES public.wallet(id),
   CONSTRAINT issuer_wallet_fk FOREIGN KEY (issuer) REFERENCES public.wallet(id)
 );
+
+--changeset nitin:2
+ALTER TABLE public.wallet_key ADD private_key text NOT NULL;
+ALTER TABLE public.wallet_key ADD public_key text NOT NULL;

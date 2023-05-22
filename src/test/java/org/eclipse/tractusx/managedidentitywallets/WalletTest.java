@@ -24,12 +24,12 @@ package org.eclipse.tractusx.managedidentitywallets;
 import org.eclipse.tractusx.managedidentitywallets.config.PostgresSQLContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -45,7 +45,8 @@ import org.springframework.test.context.ContextConfiguration;
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {PostgresSQLContextInitializer.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class WalletTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class WalletTest {
 
     private final String bpn = "123456789";
 
@@ -55,13 +56,43 @@ public class WalletTest {
     private WalletRepository walletRepository;
 
     @Autowired
+    private WalletKeyRepository walletKeyRepository;
+
+    @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private EncryptionUtils encryptionUtils;
+
+
     @Test
-    public void createWalletTest201(){
+    void encryptionTest(){
+        String originalMassage = "Dummy test message";
+        String encrypt = encryptionUtils.encrypt(originalMassage);
+        String decrypt = encryptionUtils.decrypt(encrypt);
+        Assertions.assertEquals(originalMassage, decrypt);
+    }
+
+    @Test
+    @Order(1)
+    void createWalletTest201(){
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+
         ResponseEntity<Wallet> response = this.restTemplate.exchange(RestURI.WALLET, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
+
+        Wallet wallet =  walletRepository.getByBpn(bpn);
+        Assertions.assertNotNull(wallet);
+        WalletKey walletKey = walletKeyRepository.getByWalletId(wallet.getId());
+        Assertions.assertNotNull(walletKey);
+    }
+
+    @Test
+    @Order(2)
+    void createWalletWithDuplicateBpn409(){
+        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+        ResponseEntity<Wallet> response = this.restTemplate.exchange(RestURI.WALLET, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), response.getStatusCode().value());
     }
 }
