@@ -19,26 +19,13 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * The type Managed identity wallets application.
+ * The type Miw settings.
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-public class ManagedIdentityWalletsApplication {
-
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
-
+@ConfigurationProperties(prefix = "miw")
+public record MIWSettings (String host, String encryptionKey){
 }

@@ -1,5 +1,7 @@
 server:
   port: ${APPLICATION_PORT:8087}
+  error:
+    include-stacktrace: never
   shutdown: graceful
   compression:
     enabled: true
@@ -38,3 +40,6 @@ management:
     readinessState:
       enabled: true
 
+miw:
+  host: ${HOST_NAME:localhost}
+  encryptionKey: ${ENCRYPTION_KEY:Woh9waid4Ei5eez0aitieghoow9so4oe}

@@ -24,6 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.constant;
 /**
  * The type Rest uri.
  */
+
 public class RestURI {
 
     /**
