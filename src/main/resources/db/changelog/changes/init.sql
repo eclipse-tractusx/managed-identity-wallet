@@ -3,11 +3,10 @@
 --changeset nitin:1
 CREATE TABLE public.wallet (
   id bigserial NOT NULL,
+  name varchar(255) NOT NULL,
   did varchar(255) NOT NULL,
   bpn varchar(255) NOT NULL,
   algorithm varchar(255) NOT NULL DEFAULT 'ED25519'::character varying,
-  active bool NOT NULL,
-  authority bool NOT NULL,
   did_document text NOT NULL,
   created_at timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   modified_at timestamp(6) NULL,
@@ -24,6 +23,8 @@ CREATE TABLE public.wallet_key (
   wallet_id bigserial NOT NULL,
   vault_access_token varchar(1000) NOT NULL,
   reference_key varchar(255) NOT NULL,
+  private_key text NOT NULL,
+  public_key text NOT NULL,
   created_at timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   modified_at timestamp(6) NULL,
   modified_from varchar(255) NULL,

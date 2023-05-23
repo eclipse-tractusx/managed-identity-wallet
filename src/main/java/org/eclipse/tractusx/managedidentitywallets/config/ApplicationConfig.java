@@ -21,22 +21,30 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-public class PostgresSQLContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:15.2");
-
-    @Override
-    public void initialize(ConfigurableApplicationContext applicationContext) {
-        this.postgreSQLContainer.start();
-        TestPropertyValues.of(
-                "spring.datasource.url=" + this.postgreSQLContainer.getJdbcUrl(),
-                "spring.datasource.username=" + this.postgreSQLContainer.getUsername(),
-                "spring.datasource.password=" + this.postgreSQLContainer.getPassword()
-        ).applyTo(applicationContext.getEnvironment());
+/**
+ * The type Application config.
+ */
+@Configuration
+public class ApplicationConfig {
+    /**
+     * Object mapper object mapper.
+     *
+     * @return ObjectMapper object mapper
+     */
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, false)
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return objectMapper;
     }
 }
