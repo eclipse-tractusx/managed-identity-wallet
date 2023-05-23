@@ -19,26 +19,22 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
- * The type Managed identity wallets application.
+ * The interface Wallet key repository.
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-public class ManagedIdentityWalletsApplication {
-
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
-
+@Repository
+public interface WalletKeyRepository extends JpaRepository<WalletKey, Long> {
+    /**
+     * Gets by wallet id.
+     *
+     * @param id the id
+     * @return the by wallet id
+     */
+    WalletKey getByWalletId(Long id);
 }

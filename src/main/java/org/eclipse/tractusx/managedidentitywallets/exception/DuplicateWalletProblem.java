@@ -19,26 +19,45 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Managed identity wallets application.
+ * The type Duplicate wallet problem.
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-public class ManagedIdentityWalletsApplication {
+public class DuplicateWalletProblem extends RuntimeException {
 
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     */
+    public DuplicateWalletProblem() {
+    }
+
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param message the message
+     */
+    public DuplicateWalletProblem(String message) {
+        super(message);
+    }
+
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public DuplicateWalletProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param cause the cause
+     */
+    public DuplicateWalletProblem(Throwable cause) {
+        super(cause);
+    }
 
 }
