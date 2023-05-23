@@ -30,7 +30,7 @@ public class RestURI {
     /**
      * The constant WALLET.
      */
-    public static final String WALLET = "/wallet";
+    public static final String WALLETS = "/wallets";
 
-    public static final String WALLET_BY_BPN = "/wallet/{bpn}";
+    public static final String WALLETS_BY_BPN = "/wallets/{bpn}";
 }
