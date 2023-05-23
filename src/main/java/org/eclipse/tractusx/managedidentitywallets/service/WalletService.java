@@ -47,6 +47,7 @@ import org.springframework.util.FileSystemUtils;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -76,10 +77,15 @@ public class WalletService {
      */
     public Wallet getWalletByBpn(String bpn) {
         Wallet wallet = walletRepository.getByBpn(bpn);
-        if(wallet == null){
-            throw new WalletNotFoundProblem("Wallet not found for bpn "+bpn);
+        if (wallet == null) {
+            throw new WalletNotFoundProblem("Wallet not found for bpn " + bpn);
         }
         return wallet;
+    }
+
+    public List<Wallet> getWallets() {
+        List<Wallet> wallets = walletRepository.findAll();
+        return wallets;
     }
 
     /**
@@ -89,7 +95,7 @@ public class WalletService {
      * @return the wallet
      */
     @SneakyThrows
-    public Wallet createWallet(CreateWalletRequest request){
+    public Wallet createWallet(CreateWalletRequest request) {
         validateCreateWallet(request);
 
         //create private key pair

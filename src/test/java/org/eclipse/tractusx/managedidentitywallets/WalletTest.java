@@ -33,6 +33,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -80,7 +82,7 @@ class WalletTest {
     void createWalletTest201(){
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
 
-        ResponseEntity<Wallet> response = this.restTemplate.exchange(RestURI.WALLET, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
 
@@ -94,14 +96,14 @@ class WalletTest {
     @Order(2)
     void createWalletWithDuplicateBpn409(){
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
-        ResponseEntity<Wallet> response = this.restTemplate.exchange(RestURI.WALLET, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), response.getStatusCode().value());
     }
 
     @Test
     @Order(3)
     void getWalletByBpnTest200(){
-        ResponseEntity<Wallet> response = this.restTemplate.getForEntity(RestURI.WALLET_BY_BPN, Wallet.class, bpn);
+        ResponseEntity<Wallet> response = restTemplate.getForEntity(RestURI.WALLETS_BY_BPN, Wallet.class, bpn);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
         Wallet body = response.getBody();
@@ -110,8 +112,18 @@ class WalletTest {
 
     @Test
     @Order(4)
-    void getWalletInvalidBpn404(){
-        ResponseEntity<Wallet> response = this.restTemplate.getForEntity(RestURI.WALLET_BY_BPN, Wallet.class, UUID.randomUUID().toString());
+    void getWalletInvalidBpn404() {
+        ResponseEntity<Wallet> response = restTemplate.getForEntity(RestURI.WALLETS_BY_BPN, Wallet.class, UUID.randomUUID().toString());
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
+    }
+
+    @Test
+    @Order(5)
+    void getWallets200() {
+        ResponseEntity<List<Wallet>> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.GET, null,
+                new ParameterizedTypeReference<>() {
+                });
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertTrue(response.getBody().size() == 1);
     }
 }
