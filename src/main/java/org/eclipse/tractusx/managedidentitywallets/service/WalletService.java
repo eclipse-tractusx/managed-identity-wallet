@@ -24,7 +24,14 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.util.io.pem.PemReader;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
+import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
+import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
+import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -40,14 +47,12 @@ import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.FileSystemUtils;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.StringWriter;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * The type Wallet service.
@@ -99,7 +104,7 @@ public class WalletService {
         Ed25519KeySet keyPair = createKeyPair();
 
         //create did json
-        Did did = DidWebFactory.fromHostname(miwSettings.host()+":"+request.getBpn());
+        Did did = DidWebFactory.fromHostname(URLDecoder.decode(miwSettings.host() + ":" + request.getBpn(), Charset.defaultCharset()));
         DidDocument didDocument = new DidDocumentBuilder()
                 .withDid(did)
                 .withEd25519PublicKey(keyPair.getPublicKey())
@@ -110,9 +115,8 @@ public class WalletService {
         Wallet wallet = walletRepository.save(Wallet.builder()
                 .didDocument("did document")  //TODO remove once we have solution in lib  didDocument.toString or didDocument.toJson
                 .bpn(request.getBpn())
+                .name(request.getName())
                 .did(did.toString())
-                .active(true)
-                .authority(true)
                 .algorithm("ED25519")
                 .build());
 
@@ -121,8 +125,8 @@ public class WalletService {
                 .walletId(wallet.getId())
                 .referenceKey("dummy ref key")  //TODO removed once vault setup is ready
                 .vaultAccessToken("dummy vault access token") ////TODO removed once vault setup is ready
-                .publicKey(encryptionUtils.encrypt(new String(keyPair.getPrivateKey())))
-                .privateKey(encryptionUtils.encrypt(new String(keyPair.getPublicKey())))
+                .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey())))
+                .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey())))
                 .build());
         log.debug("Wallet created for bpn ->{}", request.getBpn());
        return  wallet;
@@ -137,41 +141,37 @@ public class WalletService {
     }
 
     @SneakyThrows
-    private Ed25519KeySet createKeyPair(){
+    private Ed25519KeySet createKeyPair() {
+        SecureRandom secureRandom = new SecureRandom();
 
-        String keyLocation = "/tmp/"+ UUID.randomUUID();
-        Files.createDirectories(Paths.get(keyLocation));
+        Ed25519KeyPairGenerator keyPairGenerator = new Ed25519KeyPairGenerator();
+        keyPairGenerator.init(new Ed25519KeyGenerationParameters(secureRandom));
+        
+        AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
+        Ed25519PrivateKeyParameters privateKey = (Ed25519PrivateKeyParameters) keyPair.getPrivate();
+        Ed25519PublicKeyParameters publicKey = (Ed25519PublicKeyParameters) keyPair.getPublic();
 
-        File privateKey = new File(keyLocation+"/private.pem");
-        File publicKey = new File(keyLocation+"/public.pem");
-        try{
-            //private key
-            if(!privateKey.exists()){
-                privateKey.createNewFile();
-            }
-            Process privateKeyProcess = Runtime.getRuntime().exec("openssl genpkey -algorithm ed25519");
-           try( BufferedReader privateKeyReader = new BufferedReader(new InputStreamReader(privateKeyProcess.getInputStream()));
-                BufferedWriter privateKeyWriter = new BufferedWriter(new FileWriter(privateKey))){
-               FileCopyUtils.copy(privateKeyReader, privateKeyWriter);
-           }
-
-            //public key
-            if(!publicKey.exists()){
-                publicKey.createNewFile();
-            }
-            Process publicKeyProcess = Runtime.getRuntime().exec("openssl pkey -in "+privateKey.getAbsolutePath()+" -pubout");
-            try(BufferedReader publicKeyReader = new BufferedReader(new InputStreamReader(publicKeyProcess.getInputStream()));
-                BufferedWriter publicKeyWriter = new BufferedWriter(new FileWriter(publicKey))){
-                FileCopyUtils.copy(publicKeyReader, publicKeyWriter);
-            }
-            return new Ed25519KeySet(readPEMFile(privateKey.getAbsolutePath()), readPEMFile(publicKey.getAbsolutePath()));
-        }finally {
-            FileSystemUtils.deleteRecursively(Paths.get(keyLocation));
-        }
+        byte[] privateKeyBytes = privateKey.getEncoded();
+        byte[] publicKeyBytes = publicKey.getEncoded();
+        return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
     }
 
-    private byte[] readPEMFile(String path) throws IOException {
-        PemReader pemReader = new PemReader(new FileReader(path));
-        return pemReader.readPemObject().getContent();
+
+    @SneakyThrows
+    private String getPrivateKeyString(byte[] privateKeyBytes) {
+        StringWriter stringWriter = new StringWriter();
+        JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+        pemWriter.writeObject(PrivateKeyInfoFactory.createPrivateKeyInfo(new Ed25519PrivateKeyParameters(privateKeyBytes, 0)));
+        pemWriter.close();
+        return stringWriter.toString();
+    }
+
+    @SneakyThrows
+    private String getPublicKeyString(byte[] publicKeyBytes) {
+        StringWriter stringWriter = new StringWriter();
+        JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+        pemWriter.writeObject(SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(new Ed25519PublicKeyParameters(publicKeyBytes, 0)));
+        pemWriter.close();
+        return stringWriter.toString();
     }
 }

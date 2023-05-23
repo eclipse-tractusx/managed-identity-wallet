@@ -71,7 +71,7 @@ class WalletTest {
 
 
     @Test
-    void encryptionTest(){
+    void encryptionTest() {
         String originalMassage = "Dummy test message";
         String encrypt = encryptionUtils.encrypt(originalMassage);
         String decrypt = encryptionUtils.decrypt(encrypt);
@@ -80,17 +80,25 @@ class WalletTest {
 
     @Test
     @Order(1)
-    void createWalletTest201(){
+    void createWalletTest201() {
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
 
         ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
 
-        Wallet wallet =  walletRepository.getByBpn(bpn);
+        Assertions.assertEquals(response.getBody().getBpn(), bpn);
+        Assertions.assertEquals(response.getBody().getName(), name);
+
+        Wallet wallet = walletRepository.getByBpn(bpn);
+        Assertions.assertEquals(wallet.getBpn(), bpn);
+        Assertions.assertEquals(wallet.getName(), name);
         Assertions.assertNotNull(wallet);
         WalletKey walletKey = walletKeyRepository.getByWalletId(wallet.getId());
         Assertions.assertNotNull(walletKey);
+
+        Assertions.assertEquals(wallet.getBpn(), bpn);
+
     }
 
     @Test

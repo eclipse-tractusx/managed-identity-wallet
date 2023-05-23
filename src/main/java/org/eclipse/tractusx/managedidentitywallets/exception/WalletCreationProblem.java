@@ -19,43 +19,43 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.entity;
-
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Wallet.
+ * The type Wallet creation problem.
  */
-@Getter
-@Setter
-@Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class Wallet extends BaseEntity {
+public class WalletCreationProblem extends RuntimeException {
+    /**
+     * Instantiates a new Wallet creation problem.
+     */
+    public WalletCreationProblem() {
+    }
 
-    @Id
-    @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
-    private Long id;
+    /**
+     * Instantiates a new Wallet creation problem.
+     *
+     * @param message the message
+     */
+    public WalletCreationProblem(String message) {
+        super(message);
+    }
 
-    @Column(nullable = false)
-    private String name;
+    /**
+     * Instantiates a new Wallet creation problem.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public WalletCreationProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    @Column(nullable = false, unique = true)
-    private String did;
-
-    @Column(nullable = false, unique = true)
-    private String bpn;
-
-    @Column(nullable = false)
-    private String algorithm;
-    
-    @Column(nullable = false)
-    private String didDocument;
-
+    /**
+     * Instantiates a new Wallet creation problem.
+     *
+     * @param cause the cause
+     */
+    public WalletCreationProblem(Throwable cause) {
+        super(cause);
+    }
 }
