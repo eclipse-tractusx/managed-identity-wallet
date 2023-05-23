@@ -68,16 +68,49 @@ test {
 
 jacocoTestReport {
 	dependsOn test
-}
 
-jacoco {
-	toolVersion = "${jacocoVersion}"
-}
-
-jacocoTestReport {
 	reports {
 		xml.required = false
 		csv.required = false
 		html.required = true
 	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"org/eclipse/tractusx/managedidentitywallets/dto/*",
+					"org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
+					"org/eclipse/tractusx/managedidentitywallets/constant/*",
+					"org/eclipse/tractusx/managedidentitywallets/exception/*"
+			])
+		}))
+	}
 }
+
+jacoco {
+	toolVersion = "${jacocoVersion}"
+
+}
+
+
+jacocoTestCoverageVerification {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"org/eclipse/tractusx/managedidentitywallets/dto/*",
+					"org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
+					"org/eclipse/tractusx/managedidentitywallets/constant/*",
+					"org/eclipse/tractusx/managedidentitywallets/exception/*"
+			])
+		}))
+	}
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.80
+			}
+		}
+	}
+}
+
+check.dependsOn jacocoTestCoverageVerification

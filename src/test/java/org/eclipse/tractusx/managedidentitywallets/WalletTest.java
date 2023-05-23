@@ -42,6 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -124,6 +125,6 @@ class WalletTest {
                 new ParameterizedTypeReference<>() {
                 });
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertTrue(response.getBody().size() == 1);
+        Assertions.assertEquals(1, Objects.requireNonNull(response.getBody()).size());
     }
 }

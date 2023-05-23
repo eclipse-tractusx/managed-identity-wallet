@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -59,8 +58,6 @@ import java.util.UUID;
 public class WalletService {
 
     private final WalletRepository walletRepository;
-
-    private final ObjectMapper objectMapper;
 
     private final MIWSettings miwSettings;
 
@@ -167,15 +164,11 @@ public class WalletService {
                 BufferedWriter publicKeyWriter = new BufferedWriter(new FileWriter(publicKey))){
                 FileCopyUtils.copy(publicKeyReader, publicKeyWriter);
             }
-
-            byte[] privateKeyBytes =  readPEMFile(privateKey.getAbsolutePath());
-            byte[] publicKeyBytes =  readPEMFile(publicKey.getAbsolutePath());
-            return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
+            return new Ed25519KeySet(readPEMFile(privateKey.getAbsolutePath()), readPEMFile(publicKey.getAbsolutePath()));
         }finally {
             FileSystemUtils.deleteRecursively(Paths.get(keyLocation));
         }
     }
-
 
     private byte[] readPEMFile(String path) throws IOException {
         PemReader pemReader = new PemReader(new FileReader(path));
