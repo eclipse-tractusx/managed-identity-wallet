@@ -16,7 +16,15 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
+	/*maven {
+		url = uri("https://maven.pkg.github.com/catenax-ng/product-lab-ssi")
+		credentials {
+			username = 'name'
+			password = 'token'
+		}
+	}*/
 }
 
 ext {
@@ -30,7 +38,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.liquibase:liquibase-core'
-	//implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.3'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.3'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-agent-lib:0.0.3'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -59,16 +68,49 @@ test {
 
 jacocoTestReport {
 	dependsOn test
-}
 
-jacoco {
-	toolVersion = "${jacocoVersion}"
-}
-
-jacocoTestReport {
 	reports {
 		xml.required = false
 		csv.required = false
 		html.required = true
 	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"org/eclipse/tractusx/managedidentitywallets/dto/*",
+					"org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
+					"org/eclipse/tractusx/managedidentitywallets/constant/*",
+					"org/eclipse/tractusx/managedidentitywallets/exception/*"
+			])
+		}))
+	}
 }
+
+jacoco {
+	toolVersion = "${jacocoVersion}"
+
+}
+
+
+jacocoTestCoverageVerification {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"org/eclipse/tractusx/managedidentitywallets/dto/*",
+					"org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
+					"org/eclipse/tractusx/managedidentitywallets/constant/*",
+					"org/eclipse/tractusx/managedidentitywallets/exception/*"
+			])
+		}))
+	}
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.80
+			}
+		}
+	}
+}
+
+check.dependsOn jacocoTestCoverageVerification

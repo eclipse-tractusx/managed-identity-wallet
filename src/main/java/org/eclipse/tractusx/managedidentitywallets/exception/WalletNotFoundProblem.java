@@ -19,26 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Managed identity wallets application.
+ * The type Wallet not found problem.
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-public class ManagedIdentityWalletsApplication {
+public class WalletNotFoundProblem extends RuntimeException {
 
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
+    /**
+     * Instantiates a new Wallet not found problem.
+     */
+    public WalletNotFoundProblem() {
+    }
 
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
+     */
+    public WalletNotFoundProblem(String message) {
+        super(message);
+    }
+
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public WalletNotFoundProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param cause the cause
+     */
+    public WalletNotFoundProblem(Throwable cause) {
+        super(cause);
+    }
 }
