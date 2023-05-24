@@ -19,33 +19,28 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.exception.DidDocumentsNotFoundProblem;
+import org.springframework.stereotype.Service;
 
-/**
- * The interface Wallet repository.
- */
-@Repository
-public interface WalletRepository extends JpaRepository<Wallet, Long> {
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class DidDocumentService {
 
-    /**
-     * Gets by bpn.
-     *
-     * @param bpn the bpn
-     * @return the by bpn
-     */
-    Wallet getByBpn(String bpn);
+    private final WalletRepository walletRepository;
 
-    /**
-     * Exists by bpn boolean.
-     *
-     * @param bpn the bpn
-     * @return the boolean
-     */
-    boolean existsByBpn(String bpn);
+    public String getDidDocument(String identifier) {
+        Wallet wallet = identifier.contains(":") ? walletRepository.getByDid(identifier) : walletRepository.getByBpn(identifier);
+        if (wallet == null || wallet.getDidDocument() == null) {
+            throw new DidDocumentsNotFoundProblem("DidDocument not found for identifier " + identifier);
+        }
+        return wallet.getDidDocument();
+    }
 
-    Wallet getByDid(String did);
 }

@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import org.eclipse.tractusx.managedidentitywallets.exception.DidDocumentsNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,14 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DuplicateWalletProblem.class)
     ProblemDetail handleDuplicateWalletProblem(DuplicateWalletProblem e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty("timestamp", System.currentTimeMillis());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(DidDocumentsNotFoundProblem.class)
+    ProblemDetail handleDidDocumentNotFoundProblem(DidDocumentsNotFoundProblem e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
         problemDetail.setTitle(e.getMessage());
         problemDetail.setProperty("timestamp", System.currentTimeMillis());
         return problemDetail;
