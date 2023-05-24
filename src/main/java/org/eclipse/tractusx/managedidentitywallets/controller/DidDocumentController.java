@@ -31,11 +31,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The type Did document controller.
+ */
 @RestController
 @RequiredArgsConstructor
 public class DidDocumentController {
     private final DidDocumentService service;
 
+    /**
+     * Gets did document.
+     *
+     * @param identifier the identifier
+     * @return the did document
+     */
     @GetMapping(path = RestURI.DID_DOCUMENTS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getDidDocument(@PathVariable(name = "identifier") String identifier) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(identifier));

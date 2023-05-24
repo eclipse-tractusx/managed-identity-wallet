@@ -24,15 +24,23 @@ package org.eclipse.tractusx.managedidentitywallets.constant;
 /**
  * The type Rest uri.
  */
-
 public class RestURI {
 
+    private RestURI() {
+        throw new IllegalStateException("constant class");
+    }
+
     /**
-     * The constant WALLET.
+     * The constant WALLETS.
      */
-    public static final String WALLETS = "/wallets";
+    public static final String WALLETS = "/api/wallets";
+    /**
+     * The constant DID_DOCUMENTS.
+     */
+    public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
+    /**
+     * The constant WALLETS_BY_BPN.
+     */
+    public static final String WALLETS_BY_BPN = "/api/wallets/{bpn}";
 
-    public static final String WALLETS_BY_BPN = "/wallets/{bpn}";
-
-    public static final String DID_DOCUMENTS = "/didDocuments/{identifier}";
 }
