@@ -19,20 +19,43 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Rest uri.
+ * The type Did documents not found problem.
  */
-
-public class RestURI {
+public class DidDocumentsNotFoundProblem extends RuntimeException {
+    /**
+     * Instantiates a new Did documents not found problem.
+     */
+    public DidDocumentsNotFoundProblem() {
+    }
 
     /**
-     * The constant WALLET.
+     * Instantiates a new Did documents not found problem.
+     *
+     * @param message the message
      */
-    public static final String WALLETS = "/wallets";
+    public DidDocumentsNotFoundProblem(String message) {
+        super(message);
+    }
 
-    public static final String WALLETS_BY_BPN = "/wallets/{bpn}";
+    /**
+     * Instantiates a new Did documents not found problem.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public DidDocumentsNotFoundProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    public static final String DID_DOCUMENTS = "/didDocuments/{identifier}";
+    /**
+     * Instantiates a new Did documents not found problem.
+     *
+     * @param cause the cause
+     */
+    public DidDocumentsNotFoundProblem(Throwable cause) {
+        super(cause);
+    }
 }
