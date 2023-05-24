@@ -47,5 +47,11 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      */
     boolean existsByBpn(String bpn);
 
+    /**
+     * Gets by did.
+     *
+     * @param did the did
+     * @return the by did
+     */
     Wallet getByDid(String did);
 }

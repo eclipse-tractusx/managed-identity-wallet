@@ -36,27 +36,51 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 @RestControllerAdvice
 public class ExceptionHandling extends ResponseEntityExceptionHandler {
+
+    /**
+     * The constant TIMESTAMP.
+     */
+    public static final String TIMESTAMP = "timestamp";
+
+    /**
+     * Handle wallet not found problem problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
     @ExceptionHandler(WalletNotFoundProblem.class)
     ProblemDetail handleWalletNotFoundProblem(WalletNotFoundProblem e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
         problemDetail.setTitle(e.getMessage());
-        problemDetail.setProperty("timestamp", System.currentTimeMillis());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         return problemDetail;
     }
 
+    /**
+     * Handle duplicate wallet problem problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
     @ExceptionHandler(DuplicateWalletProblem.class)
     ProblemDetail handleDuplicateWalletProblem(DuplicateWalletProblem e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
         problemDetail.setTitle(e.getMessage());
-        problemDetail.setProperty("timestamp", System.currentTimeMillis());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         return problemDetail;
     }
 
+    /**
+     * Handle did document not found problem problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
     @ExceptionHandler(DidDocumentsNotFoundProblem.class)
     ProblemDetail handleDidDocumentNotFoundProblem(DidDocumentsNotFoundProblem e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
         problemDetail.setTitle(e.getMessage());
-        problemDetail.setProperty("timestamp", System.currentTimeMillis());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         return problemDetail;
     }
 }

@@ -1,0 +1,9 @@
+spring:
+
+miw:
+  host: localhost
+  encryptionKey: ohb7echohNe3zoo1so0eiC2phue4liux
+  security:
+    enabled: true
+    realm: miw_test
+    clientId: miw_private_client
