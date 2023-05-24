@@ -25,14 +25,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * The type Application config.
  */
 @Configuration
-public class ApplicationConfig {
+@Slf4j
+@RequiredArgsConstructor
+public class ApplicationConfig implements WebMvcConfigurer {
+
+    private final SwaggerUiConfigProperties properties;
+
     /**
      * Object mapper object mapper.
      *
@@ -46,5 +56,12 @@ public class ApplicationConfig {
                 .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, false)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return objectMapper;
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        String redirectUri = properties.getPath();
+        log.info("Set landing page to path {}", redirectUri);
+        registry.addRedirectViewController("/", redirectUri);
     }
 }

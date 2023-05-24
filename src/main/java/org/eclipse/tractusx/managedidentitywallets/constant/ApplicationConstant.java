@@ -19,13 +19,40 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
+package org.eclipse.tractusx.managedidentitywallets.constant;
 
 /**
- * The type Miw settings.
+ * The type Application constant.
  */
-@ConfigurationProperties(prefix = "miw")
-public record MIWSettings(String host, String encryptionKey) {
+public class ApplicationConstant {
+
+    private ApplicationConstant() {
+        throw new IllegalStateException("Constant class");
+    }
+
+    /**
+     * The constant ROLE_VIEW_WALLETS.
+     */
+    public static final String ROLE_VIEW_WALLETS = "view_wallets";
+    /**
+     * The constant ROLE_VIEW_WALLET.
+     */
+    public static final String ROLE_VIEW_WALLET = "view_wallet";
+
+    /**
+     * The constant ROLE_ADD_WALLETS.
+     */
+    public static final String ROLE_ADD_WALLETS = "add_wallets";
+
+    /**
+     * The constant ROLE_UPDATE_WALLETS.
+     */
+    public static final String ROLE_UPDATE_WALLETS = "update_wallets";
+
+    /**
+     * The constant ROLE_UPDATE_WALLET.
+     */
+    public static final String ROLE_UPDATE_WALLET = "update_wallet";
+
+
 }

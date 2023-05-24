@@ -28,6 +28,9 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletReposito
 import org.eclipse.tractusx.managedidentitywallets.exception.DidDocumentsNotFoundProblem;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Did document service.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,9 +38,15 @@ public class DidDocumentService {
 
     private final WalletRepository walletRepository;
 
+    /**
+     * Gets did document.
+     *
+     * @param identifier the identifier
+     * @return the did document
+     */
     public String getDidDocument(String identifier) {
-        Wallet wallet = identifier.contains(":") ? walletRepository.getByDid(identifier) : walletRepository.getByBpn(identifier);
-        if (wallet == null || wallet.getDidDocument() == null) {
+        Wallet wallet = identifier.startsWith("did:") ? walletRepository.getByDid(identifier) : walletRepository.getByBpn(identifier);
+        if (wallet == null) {
             throw new DidDocumentsNotFoundProblem("DidDocument not found for identifier " + identifier);
         }
         return wallet.getDidDocument();

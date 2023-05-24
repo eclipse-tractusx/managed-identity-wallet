@@ -19,6 +19,27 @@ spring:
       maximumPoolSize: ${DB_POOL_SIZE:10}
   jpa:
     show-sql: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          #Issuer-uri indicates the iss claims from jwt token
+          issuer-uri: ${miw.security.auth-server-url}/realms/${miw.security.realm}
+          jwk-set-uri: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/certs
+
+## only needed if you want to enable API doc
+springdoc:
+  swagger-ui:
+    oauth:
+      clientId: ${KEYCLOAK_MIW_PUBLIC_CLIENT:miw_public} #It should be public client created in keycloak
+    disable-swagger-default-url: true
+    path: /ui/swagger-ui
+    show-common-extensions: true
+    csrf:
+      enabled: true
+  api-docs:
+    path: /docs/api-docs
+
 management:
   server:
     port: ${MANAGEMENT_PORT:8090}
@@ -41,3 +62,11 @@ management:
 miw:
   host: ${HOST_NAME:localhost}
   encryptionKey: ${ENCRYPTION_KEY:Woh9waid4Ei5eez0aitieghoow9so4oe}
+  security:
+    enabled: true
+    realm: ${KEYCLOAK_REALM:miw}
+    clientId: ${KEYCLOAK_CLIENT_ID:miw}
+    auth-server-url: ${AUTH_SERVER_URL:https://localhost}
+    auth-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/auth
+    token-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/token
+    refresh-token-url: ${miw.security.token-url}
