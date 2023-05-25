@@ -19,45 +19,20 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.entity;
+package org.eclipse.tractusx.managedidentitywallets.utils;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
-import org.eclipse.tractusx.managedidentitywallets.utils.StringToDidDocumentConverter;
+import jakarta.persistence.AttributeConverter;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 
-/**
- * The type Wallet.
- */
-@Getter
-@Setter
-@Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class Wallet extends BaseEntity {
+public class StringToDidDocumentConverter implements AttributeConverter<DidDocument, String> {
 
-    @Id
-    @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
-    private Long id;
+    @Override
+    public String convertToDatabaseColumn(DidDocument didDocument) {
+        return didDocument.toJson();
+    }
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false, unique = true)
-    private String did;
-
-    @Column(nullable = false, unique = true)
-    private String bpn;
-
-    @Column(nullable = false)
-    private String algorithm;
-
-    @Column(nullable = false)
-    @Convert(converter = StringToDidDocumentConverter.class)
-    private DidDocument didDocument;
+    @Override
+    public DidDocument convertToEntityAttribute(String string) {
+        return DidDocument.fromJson(string);
+    }
 }

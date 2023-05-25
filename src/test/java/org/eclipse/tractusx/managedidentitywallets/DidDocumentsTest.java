@@ -25,6 +25,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,10 +62,26 @@ public class DidDocumentsTest {
     @Test
     @Order(2)
     void getDidDocumentWithBpn200() {
+
+        String didDocument = """
+                {
+                  "id": "did:web:localhost%3Abpn123124",
+                  "verificationMethod": [
+                    {
+                      "publicKeyMultibase": "z9mo3TUPvEntiBQtHYVXXy5DfxLGgaHa84ZT6Er2qWs4y",
+                      "controller": "did:web:localhost%3Abpn123124",
+                      "id": "did:web:localhost%3Abpn123124#key-1",
+                      "type": "Ed25519VerificationKey2020"
+                    }
+                  ],
+                  "@context": "https://www.w3.org/ns/did/v1"
+                }
+                """;
+
         Wallet wallet = Wallet.builder()
                 .bpn(bpn)
                 .did(did)
-                .didDocument("{\"@context\":[\"https://w3id.org/did/v1\"],\"id\":\"did:web:localhost%3A8080\",\"verificationMethod\":[{\"id\":\"did:web:localhost%3A8080#key-1\",\"type\":\"Ed25519VerificationKey2020\",\"controller\":\"did:web:localhost%3A8080\",\"publicKeyMultibase\":\"zc37wdjQ4VsLEmX2AoKMHjQNxTtQBdouKbhhwEXLhB1fNJqwFDDaWkqRQ2GTWEhvubaNp8v2ox5dK6B4Efk8n2xMR4so6Ybsgck1BVs3i8WfXNsPNj4Gyz2YSS9rqLpdDv8sfMYdemQa4eq3EmrrkSLNukQrdXvGEtr9cV49CM6cYC6MSXc3S8hxuKh32AbKGURrGDnT9b5j4gj59a7Z4d66EWR1FoLHTZqh8YC96qNboYJyPSCEA6ZgXzRqeKKVwpeSxKXWSD4sa3xEHNeSpLrL4ojXNP3LyNbaHZ2nYqNaQ5pxdnUJCUqKYmiSbyRxbCrZCHSY36xab9XRjpQqQPuDtzrUCJQhpspjg5rd14EABDYzX1x54ZDtiYS9y9j2Pkora3phAyW6EBVBK2u2jo2krLeUgYSWzDTfgsWUJgtT9Pwx6aXvAf68tPQTWJtNoCSsSTBUzAZagosQnGLLTqya3Kgqg9VH1H2KuRfRQVTH29LnfuEa3e9Q2vn8sa6tS74oX2b7tKacndbnbw2CSVmbcuc9qZG8GZEc8ikK1Vvw3ukxTr\"}]}")
+                .didDocument(DidDocument.fromJson(didDocument))
                 .algorithm("ED25519")
                 .name(bpn)
                 .build();

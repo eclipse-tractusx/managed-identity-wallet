@@ -41,17 +41,19 @@ import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.ssi.agent.lib.DidDocumentBuilder;
+import org.eclipse.tractusx.ssi.lib.base.MultibaseFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519KeySet;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.did.Did;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
+import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -109,15 +111,32 @@ public class WalletService {
 
         //create did json
         Did did = DidWebFactory.fromHostname(URLDecoder.decode(miwSettings.host() + ":" + request.getBpn(), Charset.defaultCharset()));
-        DidDocument didDocument = new DidDocumentBuilder()
-                .withDid(did)
-                .withEd25519PublicKey(keyPair.getPublicKey())
-                .build();
+
+        //Extracting keys 
+        Ed25519KeySet keySet = new Ed25519KeySet(keyPair.getPrivateKey(), keyPair.getPublicKey());
+        MultibaseString publicKeyBase = MultibaseFactory.create(keySet.getPublicKey());
+
+        //Building Verification Methods:
+        List<VerificationMethod> verificationMethods = new ArrayList<>();
+        Ed25519VerificationKey2020Builder builder = new Ed25519VerificationKey2020Builder();
+        Ed25519VerificationKey2020 key =
+                builder
+                        .id(URI.create(did.toUri() + "#key-" + 1))
+                        .controller(did.toUri())
+                        .publicKeyMultiBase(publicKeyBase)
+                        .build();
+        verificationMethods.add(key);
+
+        DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
+        didDocumentBuilder.id(did.toUri());
+        didDocumentBuilder.verificationMethods(verificationMethods);
+        DidDocument didDocument = didDocumentBuilder.build();
+
         log.debug("did document created for bpn ->{}", request.getBpn());
 
         //Save wallet
         Wallet wallet = walletRepository.save(Wallet.builder()
-                .didDocument("did document")  //TODO remove once we have solution in lib  didDocument.toString or didDocument.toJson
+                .didDocument(didDocument)
                 .bpn(request.getBpn())
                 .name(request.getName())
                 .did(did.toString())
