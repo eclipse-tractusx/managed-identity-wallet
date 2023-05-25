@@ -21,22 +21,38 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-public class PostgresSQLContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:15.2");
 
+    private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer().withRealmImportFile("miw-test-realm.json");
+
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
-        this.postgreSQLContainer.start();
+        postgreSQLContainer.start();
+        KEYCLOAK_CONTAINER.start();
+        String authServerUrl = KEYCLOAK_CONTAINER.getAuthServerUrl();
+
         TestPropertyValues.of(
-                "spring.datasource.url=" + this.postgreSQLContainer.getJdbcUrl(),
-                "spring.datasource.username=" + this.postgreSQLContainer.getUsername(),
-                "spring.datasource.password=" + this.postgreSQLContainer.getPassword()
+                "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
+                "spring.datasource.username=" + postgreSQLContainer.getUsername(),
+                "spring.datasource.password=" + postgreSQLContainer.getPassword(),
+                "miw.security.auth-server-url=" + authServerUrl,
+                "miw.security.auth-url=${miw.security.auth-server-url}realms/${miw.security.realm}/protocol/openid-connect/auth",
+                "miw.security.token-url=${miw.security.auth-server-url}realms/${miw.security.realm}/protocol/openid-connect/token",
+                "miw.security.refresh-token-url=${miw.security.token-url}",
+                "spring.security.oauth2.resourceserver.jwt.issuer-uri=${miw.security.auth-server-url}realms/${miw.security.realm}",
+                "spring.security.oauth2.resourceserver.jwk-set-uri=${miw.security.auth-server-url}realms/${miw.security.realm}/protocol/openid-connect/certs"
         ).applyTo(applicationContext.getEnvironment());
+    }
+
+    public static String getAuthServerUrl() {
+        return KEYCLOAK_CONTAINER.getAuthServerUrl();
     }
 }

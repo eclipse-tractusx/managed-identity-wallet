@@ -85,9 +85,13 @@ public class WalletService {
         return wallet;
     }
 
+    /**
+     * Gets wallets.
+     *
+     * @return the wallets
+     */
     public List<Wallet> getWallets() {
-        List<Wallet> wallets = walletRepository.findAll();
-        return wallets;
+        return walletRepository.findAll();
     }
 
     /**
@@ -146,7 +150,7 @@ public class WalletService {
 
         Ed25519KeyPairGenerator keyPairGenerator = new Ed25519KeyPairGenerator();
         keyPairGenerator.init(new Ed25519KeyGenerationParameters(secureRandom));
-        
+
         AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
         Ed25519PrivateKeyParameters privateKey = (Ed25519PrivateKeyParameters) keyPair.getPrivate();
         Ed25519PublicKeyParameters publicKey = (Ed25519PublicKeyParameters) keyPair.getPublic();
