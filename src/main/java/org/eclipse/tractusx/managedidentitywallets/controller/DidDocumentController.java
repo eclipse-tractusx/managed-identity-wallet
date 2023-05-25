@@ -24,6 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.controller;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.DidDocumentService;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class DidDocumentController {
      * @return the did document
      */
     @GetMapping(path = RestURI.DID_DOCUMENTS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getDidDocument(@PathVariable(name = "identifier") String identifier) {
+    public ResponseEntity<DidDocument> getDidDocument(@PathVariable(name = "identifier") String identifier) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(identifier));
     }
 }

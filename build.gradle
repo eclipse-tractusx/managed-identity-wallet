@@ -43,8 +43,7 @@ dependencies {
 	implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
 	implementation 'org.liquibase:liquibase-core'
-	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.3'
-	implementation 'org.eclipse.tractusx.ssi:cx-ssi-agent-lib:0.0.3'
+	implementation 'org.eclipse.tractusx.ssi.lib:cx-ssi-lib:0.0.4'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
