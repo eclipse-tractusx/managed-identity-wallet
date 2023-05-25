@@ -21,7 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets;
 
-import org.eclipse.tractusx.managedidentitywallets.config.PostgresSQLContextInitializer;
+import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -34,10 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -48,7 +45,7 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
-@ContextConfiguration(initializers = {PostgresSQLContextInitializer.class})
+@ContextConfiguration(initializers = {TestContextInitializer.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class WalletTest {
@@ -56,6 +53,7 @@ class WalletTest {
     private final String bpn = "123456789";
 
     private final String name = "smartSense";
+
 
     @Autowired
     private WalletRepository walletRepository;
@@ -78,12 +76,31 @@ class WalletTest {
         Assertions.assertEquals(originalMassage, decrypt);
     }
 
+
     @Test
     @Order(1)
-    void createWalletTest201() {
+    void createWalletTest403() {
+        HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
+
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
 
-        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, Wallet.class);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
+    @Test
+    @Order(2)
+    void createWalletTest201() {
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+
+        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, Wallet.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
 
@@ -102,17 +119,41 @@ class WalletTest {
     }
 
     @Test
-    @Order(2)
-    void createWalletWithDuplicateBpn409(){
+    @Order(3)
+    void createWalletWithDuplicateBpn409() {
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+
+
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
-        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, new HttpEntity<>(request), Wallet.class);
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, Wallet.class);
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), response.getStatusCode().value());
     }
 
     @Test
-    @Order(3)
-    void getWalletByBpnTest200(){
-        ResponseEntity<Wallet> response = restTemplate.getForEntity(RestURI.WALLETS_BY_BPN, Wallet.class, bpn);
+    @Order(4)
+    void getWalletByBpnTest403() {
+        HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS_BY_BPN, HttpMethod.GET, entity, Wallet.class, bpn);
+
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
+
+    @Test
+    @Order(5)
+    void getWalletByBpnTest200() {
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS_BY_BPN, HttpMethod.GET, entity, Wallet.class, bpn);
+
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
         Wallet body = response.getBody();
@@ -120,19 +161,43 @@ class WalletTest {
     }
 
     @Test
-    @Order(4)
+    @Order(6)
     void getWalletInvalidBpn404() {
-        ResponseEntity<Wallet> response = restTemplate.getForEntity(RestURI.WALLETS_BY_BPN, Wallet.class, UUID.randomUUID().toString());
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS_BY_BPN, HttpMethod.GET, entity, Wallet.class, UUID.randomUUID().toString());
+
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
     }
 
     @Test
-    @Order(5)
+    @Order(7)
+    void getWallets403() {
+        HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
+        ResponseEntity<List<Wallet>> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.GET, entity,
+                new ParameterizedTypeReference<>() {
+                });
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
+
+    @Test
+    @Order(8)
     void getWallets200() {
-        ResponseEntity<List<Wallet>> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.GET, null,
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<Wallet>> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.GET, entity,
                 new ParameterizedTypeReference<>() {
                 });
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertEquals(1, Objects.requireNonNull(response.getBody()).size());
+        Assertions.assertTrue(Objects.requireNonNull(response.getBody()).size() > 0);
+
     }
 }

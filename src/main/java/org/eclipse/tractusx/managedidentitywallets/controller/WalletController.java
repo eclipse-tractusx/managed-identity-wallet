@@ -65,6 +65,11 @@ public class WalletController {
         return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByBpn(bpn));
     }
 
+    /**
+     * Gets wallets.
+     *
+     * @return the wallets
+     */
     @GetMapping(path = RestURI.WALLETS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Wallet>> getWallets() {
         return ResponseEntity.status(HttpStatus.OK).body(service.getWallets());

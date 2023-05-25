@@ -19,39 +19,43 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
-
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The interface Wallet repository.
+ * The type Did documents not found problem.
  */
-@Repository
-public interface WalletRepository extends JpaRepository<Wallet, Long> {
+public class DidDocumentsNotFoundProblem extends RuntimeException {
+    /**
+     * Instantiates a new Did documents not found problem.
+     */
+    public DidDocumentsNotFoundProblem() {
+    }
 
     /**
-     * Gets by bpn.
+     * Instantiates a new Did documents not found problem.
      *
-     * @param bpn the bpn
-     * @return the by bpn
+     * @param message the message
      */
-    Wallet getByBpn(String bpn);
+    public DidDocumentsNotFoundProblem(String message) {
+        super(message);
+    }
 
     /**
-     * Exists by bpn boolean.
+     * Instantiates a new Did documents not found problem.
      *
-     * @param bpn the bpn
-     * @return the boolean
+     * @param message the message
+     * @param cause   the cause
      */
-    boolean existsByBpn(String bpn);
+    public DidDocumentsNotFoundProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
 
     /**
-     * Gets by did.
+     * Instantiates a new Did documents not found problem.
      *
-     * @param did the did
-     * @return the by did
+     * @param cause the cause
      */
-    Wallet getByDid(String did);
+    public DidDocumentsNotFoundProblem(Throwable cause) {
+        super(cause);
+    }
 }

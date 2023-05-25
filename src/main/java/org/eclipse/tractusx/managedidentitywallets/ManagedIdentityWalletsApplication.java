@@ -32,13 +32,13 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ConfigurationPropertiesScan
 public class ManagedIdentityWalletsApplication {
 
-	/**
-	 * The entry point of application.
-	 *
-	 * @param args the input arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-	}
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
+    }
 
 }

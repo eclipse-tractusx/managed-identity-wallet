@@ -19,13 +19,17 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.config;
+package org.eclipse.tractusx.managedidentitywallets.config.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * The type Miw settings.
+ * The type Security config properties.
  */
-@ConfigurationProperties(prefix = "miw")
-public record MIWSettings(String host, String encryptionKey) {
+@ConfigurationProperties("miw.security")
+public record SecurityConfigProperties(Boolean enabled,
+                                       String clientId,
+                                       String authUrl,
+                                       String tokenUrl,
+                                       String refreshTokenUrl) {
 }
