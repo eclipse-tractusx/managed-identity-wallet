@@ -36,7 +36,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-oauth2-resource-server'
+	implementation 'org.springframework.security:spring-security-oauth2-jose'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.3'
 	implementation 'org.eclipse.tractusx.ssi:cx-ssi-agent-lib:0.0.3'
@@ -48,6 +53,8 @@ dependencies {
 	testImplementation "org.testcontainers:testcontainers"
 	testImplementation "org.testcontainers:postgresql"
 	testImplementation "org.testcontainers:junit-jupiter"
+	testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
+
 
 }
 

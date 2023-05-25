@@ -19,39 +19,37 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.exception.DidDocumentsNotFoundProblem;
+import org.springframework.stereotype.Service;
 
 /**
- * The interface Wallet repository.
+ * The type Did document service.
  */
-@Repository
-public interface WalletRepository extends JpaRepository<Wallet, Long> {
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class DidDocumentService {
+
+    private final WalletRepository walletRepository;
 
     /**
-     * Gets by bpn.
+     * Gets did document.
      *
-     * @param bpn the bpn
-     * @return the by bpn
+     * @param identifier the identifier
+     * @return the did document
      */
-    Wallet getByBpn(String bpn);
+    public String getDidDocument(String identifier) {
+        Wallet wallet = identifier.startsWith("did:") ? walletRepository.getByDid(identifier) : walletRepository.getByBpn(identifier);
+        if (wallet == null) {
+            throw new DidDocumentsNotFoundProblem("DidDocument not found for identifier " + identifier);
+        }
+        return wallet.getDidDocument();
+    }
 
-    /**
-     * Exists by bpn boolean.
-     *
-     * @param bpn the bpn
-     * @return the boolean
-     */
-    boolean existsByBpn(String bpn);
-
-    /**
-     * Gets by did.
-     *
-     * @param did the did
-     * @return the by did
-     */
-    Wallet getByDid(String did);
 }
