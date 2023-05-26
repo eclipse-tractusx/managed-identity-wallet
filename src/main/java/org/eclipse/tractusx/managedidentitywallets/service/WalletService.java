@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -44,6 +46,7 @@ import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
+import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.base.MultibaseFactory;
@@ -89,15 +92,15 @@ public class WalletService {
      * @param bpn  the bpn
      * @return the map
      */
-    public Map<String, String> storeCredential(Map<String, Object> data, String bpn) {
+    public Map<String, String> storeCredential(Map<String, Object> data, String identifier) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
-        Wallet wallet = walletRepository.getByBpn(bpn);
-        Validate.isNull(wallet).launch(new WalletNotFoundProblem("Can not find wallet with bpn " + bpn));
+        Wallet wallet = getWalletByIdentifier(identifier);
+        Validate.isNull(wallet).launch(new WalletNotFoundProblem("Can not find wallet with identifier " + identifier));
         String did = wallet.getDid();
         String holderDid = verifiableCredential.getCredentialSubject().get(0).get("id").toString();
 
         //check ownership of credentials
-        Validate.isFalse(did.equals(holderDid)).launch(new ForbiddenException(String.format("The target wallet %s is not holder of provided credentials", bpn)));
+        Validate.isFalse(did.equals(holderDid)).launch(new ForbiddenException(String.format("The target wallet %s is not holder of provided credentials", identifier)));
 
         //check type
         Validate.isTrue(verifiableCredential.getTypes().isEmpty()).launch(new BadDataException("Invalid types provided in credentials"));
@@ -114,17 +117,36 @@ public class WalletService {
         return Map.of("message", String.format("Credential with id %s has been successfully stored", verifiableCredential.getId()));
     }
 
+
     /**
-     * Gets wallet by bpn.
+     * Gets wallet by identifier.
      *
-     * @param bpn the bpn
-     * @return the wallet by bpn
+     * @param identifier      the identifier
+     * @param withCredentials the with credentials
+     * @return the wallet by identifier
      */
-    public Wallet getWalletByBpn(String bpn) {
-        Wallet wallet = walletRepository.getByBpn(bpn);
-        if (wallet == null) {
-            throw new WalletNotFoundProblem("Wallet not found for bpn " + bpn);
+    public Wallet getWalletByIdentifier(String identifier, boolean withCredentials) {
+        Wallet wallet = getWalletByIdentifier(identifier);
+        if (withCredentials) {
+            wallet.setVerifiableCredentials(credentialRepository.getCredentialsByHolder(wallet.getId()));
         }
+        return wallet;
+    }
+
+    /**
+     * Gets wallet by identifier.
+     *
+     * @param identifier the identifier
+     * @return the wallet by identifier
+     */
+    public Wallet getWalletByIdentifier(String identifier) {
+        Wallet wallet;
+        if (CommonUtils.getIdentifierType(identifier).equals(ApplicationConstant.BPN)) {
+            wallet = walletRepository.getByBpn(identifier);
+        } else {
+            wallet = walletRepository.getByDid(identifier);
+        }
+        Validate.isNull(wallet).launch(new WalletNotFoundProblem("Wallet not found for identifier " + identifier));
         return wallet;
     }
 
@@ -151,7 +173,7 @@ public class WalletService {
         Ed25519KeySet keyPair = createKeyPair();
 
         //create did json
-        Did did = DidWebFactory.fromHostname(URLDecoder.decode(miwSettings.host() + ":" + request.getBpn(), Charset.defaultCharset()));
+        Did did = DidWebFactory.fromHostname(miwSettings.host() + ":" + request.getBpn());
 
         //Extracting keys 
         Ed25519KeySet keySet = new Ed25519KeySet(keyPair.getPrivateKey(), keyPair.getPublicKey());
@@ -180,7 +202,7 @@ public class WalletService {
                 .didDocument(didDocument)
                 .bpn(request.getBpn())
                 .name(request.getName())
-                .did(did.toString())
+                .did(URLDecoder.decode(did.toUri().toString(), Charset.defaultCharset()))
                 .algorithm("ED25519")
                 .build());
 
@@ -193,13 +215,28 @@ public class WalletService {
                 .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey())))
                 .build());
         log.debug("Wallet created for bpn ->{}", request.getBpn());
-       return  wallet;
+        return wallet;
     }
 
-    private void validateCreateWallet(CreateWalletRequest request){
+    @PostConstruct
+    public void createAuthorityWallet() {
+        boolean exist = walletRepository.existsByBpn(miwSettings.authorityWalletBpn());
+        if (!exist) {
+            CreateWalletRequest request = CreateWalletRequest.builder()
+                    .name(miwSettings.authorityWalletName())
+                    .bpn(miwSettings.authorityWalletBpn())
+                    .build();
+            createWallet(request);
+            log.info("Authority wallet created with bpn {}", miwSettings.authorityWalletBpn());
+        } else {
+            log.info("Authority wallet exists with bpn {}", miwSettings.authorityWalletBpn());
+        }
+    }
+
+    private void validateCreateWallet(CreateWalletRequest request) {
         boolean exist = walletRepository.existsByBpn(request.getBpn());
-        if(exist){
-            throw  new DuplicateWalletProblem("Wallet is already exists for bpn "+request.getBpn());
+        if (exist) {
+            throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBpn());
         }
 
     }

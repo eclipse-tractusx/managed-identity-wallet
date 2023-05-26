@@ -72,8 +72,8 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher(RestURI.DID_DOCUMENTS, GET.name())).permitAll() //Get did document
                 .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, POST.name())).hasRole(ApplicationConstant.ROLE_ADD_WALLETS) //Create wallet
                 .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLETS) //Get all wallet
-                .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS_BY_BPN, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get wallet by BPN
-                .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS_BY_BPN_CREDENTIALS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //Store credential
+                .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get wallet by BPN
+                .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //Store credential
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get credentials
                 .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 .and().oauth2ResourceServer()

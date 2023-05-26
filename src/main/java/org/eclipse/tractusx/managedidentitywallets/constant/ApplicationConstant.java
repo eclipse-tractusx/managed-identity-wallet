@@ -55,4 +55,9 @@ public class ApplicationConstant {
     public static final String ROLE_UPDATE_WALLET = "update_wallet";
 
 
+    public static final String DID = "did";
+
+    public static final String BPN = "bpn";
+
+
 }

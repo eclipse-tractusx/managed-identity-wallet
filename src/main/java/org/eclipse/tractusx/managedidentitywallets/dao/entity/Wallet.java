@@ -27,6 +27,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.utils.StringToDidDocumentConverter;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  * The type Wallet.
@@ -60,4 +65,12 @@ public class Wallet extends BaseEntity {
     @Column(nullable = false)
     @Convert(converter = StringToDidDocumentConverter.class)
     private DidDocument didDocument;
+
+
+    @Transient
+    private List<VerifiableCredential> verifiableCredentials;
+
+    public void setDid(String did) {
+        this.did = URLDecoder.decode(did, Charset.defaultCharset());
+    }
 }
