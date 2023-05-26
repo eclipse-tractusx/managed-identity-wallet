@@ -21,32 +21,20 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
-import jakarta.persistence.AttributeConverter;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 
-public class StringTOStringSetConverter implements AttributeConverter<Set<String>, String> {
+public class Test {
 
-    private static final String SPLIT_CHAR = ",";
+    public static void main(String[] args) {
 
-    @Override
-    public String convertToDatabaseColumn(Set<String> attribute) {
-        if (CollectionUtils.isEmpty(attribute)) {
-            return org.apache.commons.lang3.StringUtils.EMPTY;
-        }
-        return StringUtils.collectionToDelimitedString(attribute, SPLIT_CHAR);
-    }
+        Did did = DidWebFactory.fromHostname("localhost:1123" );
 
-    @Override
-    public Set<String> convertToEntityAttribute(String dbData) {
-        if (!StringUtils.hasLength(dbData)) {
-            return Collections.emptySet();
-        }
-        return Arrays.stream(dbData.split(SPLIT_CHAR)).map(String::trim).collect(Collectors.toSet());
+
+        System.out.println(URLDecoder.decode(did.toUri().toString(), Charset.defaultCharset()));
+
     }
 }

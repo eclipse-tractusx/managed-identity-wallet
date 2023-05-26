@@ -27,5 +27,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * The type Miw settings.
  */
 @ConfigurationProperties(prefix = "miw")
-public record MIWSettings(String host, String encryptionKey) {
+public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletName) {
 }

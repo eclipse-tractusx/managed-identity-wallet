@@ -22,7 +22,6 @@
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 public class Validate<T> {
     private T value;
@@ -98,22 +97,6 @@ public class Validate<T> {
         return new Validate<>(value).isNotNull();
     }
 
-    /**
-     * In length validate.
-     *
-     * @param min the min
-     * @param max the max
-     * @return the validate
-     */
-    public Validate<T> inLength(int min, int max) {
-        if (Objects.isNull(value)) {
-            return this;
-        }
-        if (match || value.toString().length() < min && value.toString().length() > max) {
-            match = true;
-        }
-        return this;
-    }
 
     /**
      * Is not empty validate.
@@ -152,32 +135,6 @@ public class Validate<T> {
     }
 
     /**
-     * Check validate.
-     *
-     * @param checkFunction the check function
-     * @return the validate
-     */
-    public Validate<T> check(Function<T, Boolean> checkFunction) {
-        if (match || checkFunction.apply(value)) {
-            match = true;
-        }
-        return this;
-    }
-
-    /**
-     * Check not validate.
-     *
-     * @param checkFunction the check function
-     * @return the validate
-     */
-    public Validate<T> checkNot(Function<T, Boolean> checkFunction) {
-        if (match || !checkFunction.apply(value)) {
-            match = true;
-        }
-        return this;
-    }
-
-    /**
      * Throw passed exception if expression is match
      *
      * @param e exception to throw
@@ -188,14 +145,5 @@ public class Validate<T> {
             throw e;
         }
         return value;
-    }
-
-    /**
-     * Calculate all of the conditions are true or not
-     *
-     * @return true if any of condition are true
-     */
-    public boolean calculate() {
-        return match;
     }
 }
