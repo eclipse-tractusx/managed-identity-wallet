@@ -67,21 +67,21 @@ public class WalletController {
      * @return the response entity
      */
     @Operation(summary = "Store Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier")
-    @PostMapping(path = RestURI.WALLETS_BY_BPN_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data, @PathVariable(name = "bpn") String bpn) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, bpn));
+    @PostMapping(path = RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data, @PathVariable(name = "identifier") String identifier) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier));
     }
 
     /**
      * Gets wallet by bpn.
      *
-     * @param bpn the bpn
+     * @param identifier the identifier
      * @return the wallet by bpn
      */
     @Operation(summary = "Retrieve wallet by identifier", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller) \n\n Retrieve single wallet by identifier, with or without its credentials")
-    @GetMapping(path = RestURI.WALLETS_BY_BPN, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> getWalletByBpn(@PathVariable(name = "bpn") String bpn) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByBpn(bpn));
+    @GetMapping(path = RestURI.API_WALLETS_IDENTIFIER, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Wallet> getWalletByIdentifier(@PathVariable(name = "identifier") String identifier, @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials));
     }
 
     /**

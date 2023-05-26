@@ -19,43 +19,26 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.exception;
+package org.eclipse.tractusx.managedidentitywallets.utils;
+
+import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
 
 /**
- * The type Did documents not found problem.
+ * The type Common utils.
  */
-public class DidDocumentsNotFoundProblem extends RuntimeException {
-    /**
-     * Instantiates a new Did documents not found problem.
-     */
-    public DidDocumentsNotFoundProblem() {
-    }
+public class CommonUtils {
 
     /**
-     * Instantiates a new Did documents not found problem.
+     * Gets identifier type.
      *
-     * @param message the message
+     * @param identifier the identifier
+     * @return the identifier type
      */
-    public DidDocumentsNotFoundProblem(String message) {
-        super(message);
-    }
-
-    /**
-     * Instantiates a new Did documents not found problem.
-     *
-     * @param message the message
-     * @param cause   the cause
-     */
-    public DidDocumentsNotFoundProblem(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Instantiates a new Did documents not found problem.
-     *
-     * @param cause the cause
-     */
-    public DidDocumentsNotFoundProblem(Throwable cause) {
-        super(cause);
+    public static String getIdentifierType(String identifier) {
+        if (identifier.startsWith("did:web")) {
+            return ApplicationConstant.DID;
+        } else {
+            return ApplicationConstant.BPN;
+        }
     }
 }
