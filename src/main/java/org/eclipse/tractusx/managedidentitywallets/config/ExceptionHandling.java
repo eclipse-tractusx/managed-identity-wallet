@@ -21,9 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
-import org.eclipse.tractusx.managedidentitywallets.exception.DidDocumentsNotFoundProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -83,4 +81,33 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         return problemDetail;
     }
+
+    /**
+     * Handle forbidden exception problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
+    @ExceptionHandler(ForbiddenException.class)
+    ProblemDetail handleForbiddenException(ForbiddenException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
+    /**
+     * Handle bad data exception problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
+    @ExceptionHandler(BadDataException.class)
+    ProblemDetail handleBadDataException(BadDataException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
 }

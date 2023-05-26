@@ -21,6 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
@@ -33,12 +35,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type Wallet controller.
  */
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Wallets")
 public class WalletController {
 
     private final WalletService service;
@@ -49,9 +53,23 @@ public class WalletController {
      * @param request the request
      * @return the response entity
      */
+    @Operation(summary = "Create Wallet", description = "Permission: **add_wallets** \n\n Create a wallet and store it")
     @PostMapping(path = RestURI.WALLETS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request){
+    public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createWallet(request));
+    }
+
+    /**
+     * Store credential response entity.
+     *
+     * @param data the data
+     * @param bpn  the bpn
+     * @return the response entity
+     */
+    @Operation(summary = "Store Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier")
+    @PostMapping(path = RestURI.WALLETS_BY_BPN_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data, @PathVariable(name = "bpn") String bpn) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, bpn));
     }
 
     /**
@@ -60,6 +78,7 @@ public class WalletController {
      * @param bpn the bpn
      * @return the wallet by bpn
      */
+    @Operation(summary = "Retrieve wallet by identifier", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller) \n\n Retrieve single wallet by identifier, with or without its credentials")
     @GetMapping(path = RestURI.WALLETS_BY_BPN, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Wallet> getWalletByBpn(@PathVariable(name = "bpn") String bpn) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByBpn(bpn));
@@ -70,6 +89,7 @@ public class WalletController {
      *
      * @return the wallets
      */
+    @Operation(summary = "List of wallets", description = "Permission: **view_wallets** \n\n Retrieve list of registered wallets")
     @GetMapping(path = RestURI.WALLETS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Wallet>> getWallets() {
         return ResponseEntity.status(HttpStatus.OK).body(service.getWallets());
