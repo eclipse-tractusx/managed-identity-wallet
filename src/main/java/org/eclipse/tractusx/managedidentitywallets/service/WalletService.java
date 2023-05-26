@@ -33,19 +33,25 @@ import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
+import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.base.MultibaseFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519KeySet;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
@@ -55,6 +61,7 @@ import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type Wallet service.
@@ -72,6 +79,40 @@ public class WalletService {
 
     private final WalletKeyRepository walletKeyRepository;
 
+    private final CredentialRepository credentialRepository;
+
+
+    /**
+     * Store credential map.
+     *
+     * @param data the data
+     * @param bpn  the bpn
+     * @return the map
+     */
+    public Map<String, String> storeCredential(Map<String, Object> data, String bpn) {
+        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+        Wallet wallet = walletRepository.getByBpn(bpn);
+        Validate.isNull(wallet).launch(new WalletNotFoundProblem("Can not find wallet with bpn " + bpn));
+        String did = wallet.getDid();
+        String holderDid = verifiableCredential.getCredentialSubject().get(0).get("id").toString();
+
+        //check ownership of credentials
+        Validate.isFalse(did.equals(holderDid)).launch(new ForbiddenException(String.format("The target wallet %s is not holder of provided credentials", bpn)));
+
+        //check type
+        Validate.isTrue(verifiableCredential.getTypes().isEmpty()).launch(new BadDataException("Invalid types provided in credentials"));
+
+        if (verifiableCredential.getTypes().size() > 1) {
+            verifiableCredential.getTypes().remove("VerifiableCredential");
+        }
+        credentialRepository.save(Credential.builder()
+                .holder(wallet.getId())
+                .issuer(wallet.getId())   //TODO need to discuss if we want allow credentials issued by wallet that are not in our system?
+                .type(verifiableCredential.getTypes().get(0))
+                .data(verifiableCredential.toString())
+                .build());
+        return Map.of("message", String.format("Credential with id %s has been successfully stored", verifiableCredential.getId()));
+    }
 
     /**
      * Gets wallet by bpn.

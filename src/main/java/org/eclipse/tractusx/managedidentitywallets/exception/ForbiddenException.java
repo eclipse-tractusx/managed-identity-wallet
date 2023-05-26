@@ -19,31 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Rest uri.
+ * The type Forbidden exception.
  */
-public class RestURI {
+public class ForbiddenException extends RuntimeException {
 
-    private RestURI() {
-        throw new IllegalStateException("constant class");
+    /**
+     * Instantiates a new Forbidden exception.
+     */
+    public ForbiddenException() {
     }
 
     /**
-     * The constant WALLETS.
+     * Instantiates a new Forbidden exception.
+     *
+     * @param message the message
      */
-    public static final String WALLETS = "/api/wallets";
+    public ForbiddenException(String message) {
+        super(message);
+    }
+
     /**
-     * The constant DID_DOCUMENTS.
+     * Instantiates a new Forbidden exception.
+     *
+     * @param message the message
+     * @param cause   the cause
      */
-    public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
+    public ForbiddenException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     /**
-     * The constant WALLETS_BY_BPN.
+     * Instantiates a new Forbidden exception.
+     *
+     * @param cause the cause
      */
-    public static final String WALLETS_BY_BPN = "/api/wallets/{bpn}";
-
-    public static final String WALLETS_BY_BPN_CREDENTIALS = "/api/wallets/{bpn}/credentials";
-
-
+    public ForbiddenException(Throwable cause) {
+        super(cause);
+    }
 }

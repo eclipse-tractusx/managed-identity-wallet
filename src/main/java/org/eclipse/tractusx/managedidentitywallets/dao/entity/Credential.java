@@ -19,31 +19,37 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
-/**
- * The type Rest uri.
- */
-public class RestURI {
-
-    private RestURI() {
-        throw new IllegalStateException("constant class");
-    }
-
-    /**
-     * The constant WALLETS.
-     */
-    public static final String WALLETS = "/api/wallets";
-    /**
-     * The constant DID_DOCUMENTS.
-     */
-    public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
-    /**
-     * The constant WALLETS_BY_BPN.
-     */
-    public static final String WALLETS_BY_BPN = "/api/wallets/{bpn}";
-
-    public static final String WALLETS_BY_BPN_CREDENTIALS = "/api/wallets/{bpn}/credentials";
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
 
 
+@Getter
+@Setter
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Credential extends BaseEntity {
+
+
+    @Id
+    @JsonIgnore
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
+    private Long id;
+
+    @Column(nullable = false)
+    private Long holder;
+
+    @Column(nullable = false)
+    private Long issuer;
+
+    @Column(nullable = false)
+    private String type;
+
+    @Column(nullable = false)
+    private String data;
 }
