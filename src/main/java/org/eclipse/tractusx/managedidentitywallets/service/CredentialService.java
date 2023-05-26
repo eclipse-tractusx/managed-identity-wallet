@@ -19,31 +19,24 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.service;
 
-/**
- * The type Rest uri.
- */
-public class RestURI {
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.springframework.stereotype.Service;
 
-    private RestURI() {
-        throw new IllegalStateException("constant class");
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class CredentialService {
+
+    private final CredentialRepository credentialRepositrory;
+
+    public List<Credential> getCredentials(String holderIdentifier, String id, String issuerIdentifier, List<String> type) {
+        return credentialRepositrory.findAll();//TODO with params
     }
-
-    /**
-     * The constant WALLETS.
-     */
-    public static final String WALLETS = "/api/wallets";
-    /**
-     * The constant DID_DOCUMENTS.
-     */
-    public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
-    /**
-     * The constant WALLETS_BY_BPN.
-     */
-    public static final String WALLETS_BY_BPN = "/api/wallets/{bpn}";
-
-    public static final String WALLETS_BY_BPN_CREDENTIALS = "/api/wallets/{bpn}/credentials";
-    public static final String CREDENTIALS = "/api/credentials";
-
 }

@@ -19,40 +19,33 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.entity;
+package org.eclipse.tractusx.managedidentitywallets.utils;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
-import org.eclipse.tractusx.managedidentitywallets.utils.StringToCredentialConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
-
-@Getter
-@Setter
-@Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class Credential extends BaseEntity {
+import java.util.Map;
 
 
-    @Id
-    @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
-    private Long id;
+public class StringToCredentialConverter implements AttributeConverter<VerifiableCredential, String> {
 
-    @Column(nullable = false)
-    private Long holder;
+    private final ObjectMapper objectMapper;
 
-    @Column(nullable = false)
-    private Long issuer;
+    public StringToCredentialConverter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
-    @Column(nullable = false)
-    private String type;
+    @Override
+    public String convertToDatabaseColumn(VerifiableCredential verifiableCredential) {
+        return verifiableCredential.toJson();
+    }
 
-    @Column(nullable = false)
-    @Convert(converter = StringToCredentialConverter.class)
-    private VerifiableCredential data;
+    @SneakyThrows
+    @Override
+    public VerifiableCredential convertToEntityAttribute(String string) {
+        Map<String, Object> map = objectMapper.readValue(string, Map.class);
+        return new VerifiableCredential(map);
+    }
 }

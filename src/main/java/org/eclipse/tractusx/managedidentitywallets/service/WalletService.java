@@ -109,7 +109,7 @@ public class WalletService {
                 .holder(wallet.getId())
                 .issuer(wallet.getId())   //TODO need to discuss if we want allow credentials issued by wallet that are not in our system?
                 .type(verifiableCredential.getTypes().get(0))
-                .data(verifiableCredential.toString())
+                .data(verifiableCredential)
                 .build());
         return Map.of("message", String.format("Credential with id %s has been successfully stored", verifiableCredential.getId()));
     }
