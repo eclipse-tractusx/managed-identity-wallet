@@ -62,6 +62,8 @@ management:
 miw:
   host: ${HOST_NAME:localhost}
   encryptionKey: ${ENCRYPTION_KEY:Woh9waid4Ei5eez0aitieghoow9so4oe}
+  authorityWalletBpn: ${AUTHORITY_WALLET_BPN:BPNL000000000000}
+  authorityWalletName: ${AUTHORITY_WALLET_NAME:Catena-X}
   security:
     enabled: true
     realm: ${KEYCLOAK_REALM:miw}
