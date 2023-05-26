@@ -19,31 +19,10 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
-/**
- * The type Rest uri.
- */
-public class RestURI {
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-    private RestURI() {
-        throw new IllegalStateException("constant class");
-    }
-
-    /**
-     * The constant WALLETS.
-     */
-    public static final String WALLETS = "/api/wallets";
-    /**
-     * The constant DID_DOCUMENTS.
-     */
-    public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
-    /**
-     * The constant WALLETS_BY_BPN.
-     */
-    public static final String WALLETS_BY_BPN = "/api/wallets/{bpn}";
-
-    public static final String WALLETS_BY_BPN_CREDENTIALS = "/api/wallets/{bpn}/credentials";
-
-
+public interface CredentialRepository extends JpaRepository<Credential, Long> {
 }

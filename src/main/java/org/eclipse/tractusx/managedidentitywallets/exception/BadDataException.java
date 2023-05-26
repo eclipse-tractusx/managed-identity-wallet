@@ -19,31 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Rest uri.
+ * The type Bad data exception.
  */
-public class RestURI {
+public class BadDataException extends RuntimeException {
 
-    private RestURI() {
-        throw new IllegalStateException("constant class");
+    /**
+     * Instantiates a new Bad data exception.
+     */
+    public BadDataException() {
     }
 
     /**
-     * The constant WALLETS.
+     * Instantiates a new Bad data exception.
+     *
+     * @param message the message
      */
-    public static final String WALLETS = "/api/wallets";
+    public BadDataException(String message) {
+        super(message);
+    }
+
     /**
-     * The constant DID_DOCUMENTS.
+     * Instantiates a new Bad data exception.
+     *
+     * @param message the message
+     * @param cause   the cause
      */
-    public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
+    public BadDataException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     /**
-     * The constant WALLETS_BY_BPN.
+     * Instantiates a new Bad data exception.
+     *
+     * @param cause the cause
      */
-    public static final String WALLETS_BY_BPN = "/api/wallets/{bpn}";
-
-    public static final String WALLETS_BY_BPN_CREDENTIALS = "/api/wallets/{bpn}/credentials";
-
-
+    public BadDataException(Throwable cause) {
+        super(cause);
+    }
 }

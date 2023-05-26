@@ -44,6 +44,7 @@ dependencies {
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'org.eclipse.tractusx.ssi.lib:cx-ssi-lib:0.0.4'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-agent-lib:0.0.3'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -53,8 +54,7 @@ dependencies {
 	testImplementation "org.testcontainers:postgresql"
 	testImplementation "org.testcontainers:junit-jupiter"
 	testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
-
-
+	testImplementation group: 'org.json', name: 'json', version: '20230227'
 }
 
 dependencyManagement {
