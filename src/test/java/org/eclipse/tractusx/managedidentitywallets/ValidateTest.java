@@ -40,7 +40,6 @@ public class ValidateTest {
 
         Assertions.assertThrows(RuntimeException.class, () -> Validate.value("").isNotEmpty().launch(new RuntimeException()));
 
-
         Assertions.assertDoesNotThrow(() -> Validate.isFalse(true).launch(new RuntimeException()));
 
         Assertions.assertDoesNotThrow(() -> Validate.isTrue(false).launch(new RuntimeException()));
