@@ -16,15 +16,18 @@ configurations {
 }
 
 repositories {
-	mavenLocal()
 	mavenCentral()
-	/*maven {
+	maven {
+		url = uri("https://repo.danubetech.com/repository/maven-public")
+	}
+	maven { url 'https://jitpack.io' }
+	maven {
 		url = uri("https://maven.pkg.github.com/catenax-ng/product-lab-ssi")
 		credentials {
-			username = 'name'
-			password = 'token'
+			username = "${githubUserName}"
+			password = "${githubToken}"
 		}
-	}*/
+	}
 }
 
 ext {
@@ -44,7 +47,6 @@ dependencies {
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'org.eclipse.tractusx.ssi.lib:cx-ssi-lib:0.0.4'
-	implementation 'org.eclipse.tractusx.ssi:cx-ssi-agent-lib:0.0.3'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
