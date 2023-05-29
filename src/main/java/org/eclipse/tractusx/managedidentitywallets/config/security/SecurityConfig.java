@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get wallet by BPN
                 .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //Store credential
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get credentials
+                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //issue Membership Credential
                 .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 .and().oauth2ResourceServer()
                 .jwt()

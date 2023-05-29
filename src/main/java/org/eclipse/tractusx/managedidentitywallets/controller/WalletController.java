@@ -62,8 +62,8 @@ public class WalletController {
     /**
      * Store credential response entity.
      *
-     * @param data the data
-     * @param bpn  the bpn
+     * @param data       the data
+     * @param identifier the identifier
      * @return the response entity
      */
     @Operation(summary = "Store Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier")
@@ -75,7 +75,8 @@ public class WalletController {
     /**
      * Gets wallet by bpn.
      *
-     * @param identifier the identifier
+     * @param identifier      the identifier
+     * @param withCredentials the with credentials
      * @return the wallet by bpn
      */
     @Operation(summary = "Retrieve wallet by identifier", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller) \n\n Retrieve single wallet by identifier, with or without its credentials")

@@ -70,6 +70,11 @@ public class Wallet extends BaseEntity {
     @Transient
     private List<VerifiableCredential> verifiableCredentials;
 
+    /**
+     * Sets did.
+     *
+     * @param did the did
+     */
     public void setDid(String did) {
         this.did = URLDecoder.decode(did, Charset.defaultCharset());
     }

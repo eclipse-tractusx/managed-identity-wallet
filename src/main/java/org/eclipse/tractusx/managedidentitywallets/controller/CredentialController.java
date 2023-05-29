@@ -23,19 +23,23 @@ package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.CredentialService;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Credential controller.
+ */
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "VerifiableCredentials")
@@ -43,9 +47,30 @@ public class CredentialController {
 
     private final CredentialService service;
 
+    /**
+     * Gets credentials.
+     *
+     * @param holderIdentifier the holder identifier
+     * @param id               the id
+     * @param issuerIdentifier the issuer identifier
+     * @param type             the type
+     * @return the credentials
+     */
     @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Credential>> getCredentials(@RequestParam(required = false) String holderIdentifier, @RequestParam(required = false) String id, @RequestParam(required = false) String issuerIdentifier, @RequestParam(required = false) List<String> type) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(holderIdentifier, id, issuerIdentifier, type));
+    }
+
+    /**
+     * Issue membership credential response entity.
+     *
+     * @param issueMembershipCredentialRequest the issue membership credential request
+     * @return the response entity
+     */
+    @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
+    @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueMembershipCredential(issueMembershipCredentialRequest));
     }
 }

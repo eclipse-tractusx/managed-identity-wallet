@@ -29,9 +29,42 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+/**
+ * The interface Credential repository.
+ */
 public interface CredentialRepository extends JpaRepository<Credential, Long> {
+    /**
+     * Gets by holder.
+     *
+     * @param id the id
+     * @return the by holder
+     */
     List<Credential> getByHolder(Long id);
 
+    /**
+     * Gets credentials by holder.
+     *
+     * @param holder the holder
+     * @return the credentials by holder
+     */
     @Query("select data from Credential where holder=:holder")
     List<VerifiableCredential> getCredentialsByHolder(@Param("holder") Long holder);
+
+    /**
+     * Gets by holder and type.
+     *
+     * @param holderWalletId the holder wallet id
+     * @param type           the type
+     * @return the by holder and type
+     */
+    Credential getByHolderAndType(Long holderWalletId, String type);
+
+    /**
+     * Exists by holder and type boolean.
+     *
+     * @param holderWalletId the holder wallet id
+     * @param type           the type
+     * @return the boolean
+     */
+    boolean existsByHolderAndType(Long holderWalletId, String type);
 }

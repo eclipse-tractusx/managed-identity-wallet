@@ -88,8 +88,8 @@ public class WalletService {
     /**
      * Store credential map.
      *
-     * @param data the data
-     * @param bpn  the bpn
+     * @param data       the data
+     * @param identifier the identifier
      * @return the map
      */
     public Map<String, String> storeCredential(Map<String, Object> data, String identifier) {
@@ -218,6 +218,9 @@ public class WalletService {
         return wallet;
     }
 
+    /**
+     * Create authority wallet.
+     */
     @PostConstruct
     public void createAuthorityWallet() {
         boolean exist = walletRepository.existsByBpn(miwSettings.authorityWalletBpn());
