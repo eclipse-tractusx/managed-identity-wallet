@@ -28,6 +28,9 @@ import org.eclipse.tractusx.managedidentitywallets.utils.StringToCredentialConve
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
 
+/**
+ * The type Credential.
+ */
 @Getter
 @Setter
 @Entity

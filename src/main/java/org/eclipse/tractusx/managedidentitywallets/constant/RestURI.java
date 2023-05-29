@@ -44,7 +44,17 @@ public class RestURI {
      */
     public static final String API_WALLETS_IDENTIFIER = "/api/wallets/{identifier}";
 
+    /**
+     * The constant API_WALLETS_IDENTIFIER_CREDENTIALS.
+     */
     public static final String API_WALLETS_IDENTIFIER_CREDENTIALS = "/api/wallets/{identifier}/credentials";
+    /**
+     * The constant CREDENTIALS.
+     */
     public static final String CREDENTIALS = "/api/credentials";
+    /**
+     * The constant CREDENTIALS_ISSUER_MEMBERSHIP.
+     */
+    public static final String CREDENTIALS_ISSUER_MEMBERSHIP = "/api/credentials/issuer/membership";
 
 }

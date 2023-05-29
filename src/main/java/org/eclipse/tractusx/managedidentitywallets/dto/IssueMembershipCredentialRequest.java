@@ -19,23 +19,24 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.utils;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import jakarta.persistence.AttributeConverter;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 /**
- * The type String to did document converter.
+ * The type Issue membership credential request.
  */
-public class StringToDidDocumentConverter implements AttributeConverter<DidDocument, String> {
+@Getter
+@Setter
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+public class IssueMembershipCredentialRequest {
 
-    @Override
-    public String convertToDatabaseColumn(DidDocument didDocument) {
-        return didDocument.toJson();
-    }
-
-    @Override
-    public DidDocument convertToEntityAttribute(String string) {
-        return DidDocument.fromJson(string);
-    }
+    @NotBlank
+    @Size(min = 5, max = 255)
+    private String bpn;
 }
+

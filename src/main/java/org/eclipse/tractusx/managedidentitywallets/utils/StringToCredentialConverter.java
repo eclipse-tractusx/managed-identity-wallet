@@ -29,10 +29,18 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import java.util.Map;
 
 
+/**
+ * The type String to credential converter.
+ */
 public class StringToCredentialConverter implements AttributeConverter<VerifiableCredential, String> {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Instantiates a new String to credential converter.
+     *
+     * @param objectMapper the object mapper
+     */
     public StringToCredentialConverter(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
