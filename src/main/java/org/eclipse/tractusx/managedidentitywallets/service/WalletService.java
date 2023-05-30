@@ -35,6 +35,7 @@ import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
+import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -83,6 +84,8 @@ public class WalletService {
     private final WalletKeyRepository walletKeyRepository;
 
     private final CredentialRepository credentialRepository;
+
+    private final CredentialService credentialService;
 
 
     /**
@@ -215,6 +218,18 @@ public class WalletService {
                 .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey())))
                 .build());
         log.debug("Wallet created for bpn ->{}", request.getBpn());
+
+        // Fetch Issuer Wallet
+        Wallet baseWallet = getWalletByIdentifier(miwSettings.authorityWalletBpn());
+        byte[] privateKeyBytes = credentialService.getPrivateKeyById(baseWallet.getId());
+
+        Credential credential = credentialService.getCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
+                "id", wallet.getDid(),
+                "bpn", wallet.getBpn()), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX, baseWallet, privateKeyBytes, wallet);
+
+        //Store Credential
+        credentialRepository.save(credential);
+
         return wallet;
     }
 
