@@ -21,9 +21,9 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
+import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,39 +32,39 @@ import java.util.List;
 /**
  * The interface Credential repository.
  */
-public interface CredentialRepository extends JpaRepository<Credential, Long> {
+public interface CredentialRepository extends BaseRepository<Credential, Long> {
     /**
-     * Gets by holder.
+     * Gets by holder did.
      *
-     * @param id the id
-     * @return the by holder
+     * @param holderDid the holder did
+     * @return the by holder did
      */
-    List<Credential> getByHolder(Long id);
+    List<Credential> getByHolderDid(String holderDid);
 
     /**
      * Gets credentials by holder.
      *
-     * @param holder the holder
+     * @param holderDid the holder did
      * @return the credentials by holder
      */
-    @Query("select data from Credential where holder=:holder")
-    List<VerifiableCredential> getCredentialsByHolder(@Param("holder") Long holder);
+    @Query("select data from Credential where holderDid=:holderDid")
+    List<VerifiableCredential> getCredentialsByHolder(@Param("holderDid") String holderDid);
 
     /**
-     * Gets by holder and type.
+     * Gets by holder did and type.
      *
-     * @param holderWalletId the holder wallet id
-     * @param type           the type
-     * @return the by holder and type
+     * @param holderDid the holder did
+     * @param type      the type
+     * @return the by holder did and type
      */
-    Credential getByHolderAndType(Long holderWalletId, String type);
+    Credential getByHolderDidAndType(String holderDid, String type);
 
     /**
-     * Exists by holder and type boolean.
+     * Exists by holder did and type boolean.
      *
-     * @param holderWalletId the holder wallet id
-     * @param type           the type
+     * @param holderDid the holder did
+     * @param type      the type
      * @return the boolean
      */
-    boolean existsByHolderAndType(Long holderWalletId, String type);
+    boolean existsByHolderDidAndType(String holderDid, String type);
 }

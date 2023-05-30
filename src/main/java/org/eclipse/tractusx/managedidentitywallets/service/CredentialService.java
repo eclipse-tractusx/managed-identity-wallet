@@ -21,6 +21,13 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.smartsensesolutions.java.commons.FilterRequest;
+import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
+import com.smartsensesolutions.java.commons.base.service.BaseService;
+import com.smartsensesolutions.java.commons.operator.Operator;
+import com.smartsensesolutions.java.commons.sort.Sort;
+import com.smartsensesolutions.java.commons.sort.SortType;
+import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -44,7 +51,10 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.StringReader;
 import java.net.URI;
@@ -58,7 +68,7 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
-public class CredentialService {
+public class CredentialService extends BaseService<Credential, Long> {
 
     private final CredentialRepository credentialRepository;
     private final MIWSettings miwSettings;
@@ -66,12 +76,26 @@ public class CredentialService {
     private final EncryptionUtils encryptionUtils;
     private final WalletService walletService;
 
-    public CredentialService(CredentialRepository credentialRepository, MIWSettings miwSettings, WalletKeyRepository walletKeyRepository, EncryptionUtils encryptionUtils, @Lazy WalletService walletService) {
+    private final SpecificationUtil<Credential> credentialSpecificationUtil;
+
+    public CredentialService(CredentialRepository credentialRepository, MIWSettings miwSettings, WalletKeyRepository walletKeyRepository, EncryptionUtils encryptionUtils, @Lazy WalletService walletService, SpecificationUtil<Credential> credentialSpecificationUtil) {
         this.credentialRepository = credentialRepository;
         this.miwSettings = miwSettings;
         this.walletKeyRepository = walletKeyRepository;
         this.encryptionUtils = encryptionUtils;
         this.walletService = walletService;
+        this.credentialSpecificationUtil = credentialSpecificationUtil;
+    }
+
+
+    @Override
+    protected BaseRepository<Credential, Long> getRepository() {
+        return credentialRepository;
+    }
+
+    @Override
+    protected SpecificationUtil<Credential> getSpecificationUtil() {
+        return credentialSpecificationUtil;
     }
 
     /**
@@ -83,8 +107,29 @@ public class CredentialService {
      * @param type             the type
      * @return the credentials
      */
-    public List<Credential> getCredentials(String holderIdentifier, String id, String issuerIdentifier, List<String> type) {
-        return credentialRepository.findAll();//TODO with params
+    public Page<Credential> getCredentials(String holderIdentifier, String id, String issuerIdentifier, List<String> type, int pageNumber, int size, String sortColumn, String sortType) {
+        FilterRequest filterRequest = new FilterRequest();
+        filterRequest.setPage(pageNumber);
+        filterRequest.setSize(size);
+        if (StringUtils.hasText(holderIdentifier)) {
+            Wallet holderWallet = walletService.getWalletByIdentifier(holderIdentifier);
+            filterRequest.appendNewCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
+        }
+
+        if (StringUtils.hasText(issuerIdentifier)) {
+            Wallet issuerWallet = walletService.getWalletByIdentifier(issuerIdentifier);
+            filterRequest.appendNewCriteria("issuerDid", Operator.EQUALS, issuerWallet.getDid());
+        }
+
+        if (!CollectionUtils.isEmpty(type)) {
+            filterRequest.appendNewCriteria("type", Operator.IN, type);
+        }
+
+        Sort sort = new Sort();
+        sort.setColumn(sortColumn);
+        sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
+        filterRequest.setSort(sort);
+        return filter(filterRequest);
     }
 
     /**
@@ -96,7 +141,7 @@ public class CredentialService {
     public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request) {
         //Fetch Holder Wallet
         Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
-        
+
         // Fetch Issuer Wallet
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
         byte[] privateKeyBytes = getPrivateKeyById(baseWallet.getId());
@@ -109,7 +154,7 @@ public class CredentialService {
         Credential credential = getCredential(subject, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX, baseWallet, privateKeyBytes, holderWallet);
 
         //Store Credential
-        credentialRepository.save(credential);
+        credential = create(credential);
 
         // Return VC
         return credential.getData();
@@ -127,7 +172,7 @@ public class CredentialService {
         Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
 
         //check duplicate
-        isCredentialExit(holderWallet.getId(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
 
         // Fetch Issuer Wallet
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
@@ -141,7 +186,7 @@ public class CredentialService {
         Credential credential = getCredential(subject, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, baseWallet, privateKeyBytes, holderWallet);
 
         //Store Credential
-        credentialRepository.save(credential);
+        credential = create(credential);
 
         // Return VC
         return credential.getData();
@@ -160,7 +205,7 @@ public class CredentialService {
         Wallet holderWallet = walletService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
 
         //check duplicate
-        isCredentialExit(holderWallet.getId(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
 
         // Fetch Issuer Wallet
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
@@ -175,7 +220,7 @@ public class CredentialService {
                 "startTime", Instant.now().toString()), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, baseWallet, privateKeyBytes, holderWallet);
 
         //Store Credential
-        credentialRepository.save(credential);
+        credential = create(credential);
 
         // Return VC
         return credential.getData();
@@ -219,8 +264,8 @@ public class CredentialService {
 
         // Create Credential
         return Credential.builder()
-                .holder(holderWallet.getId())
-                .issuer(baseWallet.getId())
+                .holderDid(holderWallet.getDid())
+                .issuerDid(baseWallet.getDid())
                 .type(type)
                 .data(verifiableCredential)
                 .build();
@@ -234,7 +279,8 @@ public class CredentialService {
         return new PemReader(new StringReader(privateKey)).readPemObject().getContent();
     }
 
-    private void isCredentialExit(Long holderId, String credentialType) {
-        Validate.isTrue(credentialRepository.existsByHolderAndType(holderId, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
+    private void isCredentialExit(String holderDid, String credentialType) {
+        Validate.isTrue(credentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
     }
+
 }

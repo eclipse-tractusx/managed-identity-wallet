@@ -143,9 +143,10 @@ class WalletTest {
         Assertions.assertEquals(body.getVerifiableCredentials().size(), 1);
         VerifiableCredential verifiableCredential = body.getVerifiableCredentials().get(0);
 
-        verifiableCredential.getCredentialSubject().get(0).get("id").equals(wallet.getDid());
-        verifiableCredential.getCredentialSubject().get(0).get("bpn").equals(wallet.getBpn());
-        verifiableCredential.getCredentialSubject().get(0).get("type").equals(MIWVerifiableCredentialType.BPN_CREDENTIAL);
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("id"), wallet.getDid());
+
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("bpn"), wallet.getBpn());
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("type"), MIWVerifiableCredentialType.BPN_CREDENTIAL);
 
     }
 
@@ -159,9 +160,10 @@ class WalletTest {
         String did = "did:web:localhost:" + miwSettings.authorityWalletBpn();
 
         ResponseEntity<Map> response = storeCredential(miwSettings.authorityWalletBpn(), did);
+
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         Wallet byBpn = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-        List<Credential> byHolder = credentialRepository.getByHolder(byBpn.getId());
+        List<Credential> byHolder = credentialRepository.getByHolderDid(byBpn.getDid());
         Assertions.assertEquals(2, byHolder.size());
 
     }
@@ -320,8 +322,6 @@ class WalletTest {
 
     private Wallet getWalletFromString(String body) throws JsonProcessingException {
         JSONObject jsonObject = new JSONObject(body);
-        LOGGER.info("-----------String body  ->{}", body);
-        LOGGER.info("--------Json --->{}", jsonObject);
         //convert DidDocument
         JSONObject didDocument = jsonObject.getJSONObject("didDocument");
         jsonObject.remove("didDocument");
@@ -415,7 +415,8 @@ class WalletTest {
 
     private List<Wallet> getWalletsFromString(String body) throws JsonProcessingException {
         List<Wallet> walletList = new ArrayList<>();
-        JSONArray array = new JSONArray(body);
+
+        JSONArray array = new JSONArray(new JSONObject(body).getJSONArray("content"));
         if (array.length() == 0) {
             return walletList;
         }

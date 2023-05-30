@@ -21,6 +21,12 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.smartsensesolutions.java.commons.FilterRequest;
+import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
+import com.smartsensesolutions.java.commons.base.service.BaseService;
+import com.smartsensesolutions.java.commons.sort.Sort;
+import com.smartsensesolutions.java.commons.sort.SortType;
+import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -56,6 +62,7 @@ import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
@@ -73,7 +80,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class WalletService {
+public class WalletService extends BaseService<Wallet, Long> {
 
     private final WalletRepository walletRepository;
 
@@ -87,6 +94,17 @@ public class WalletService {
 
     private final CredentialService credentialService;
 
+    private final SpecificationUtil<Wallet> walletSpecificationUtil;
+
+    @Override
+    protected BaseRepository<Wallet, Long> getRepository() {
+        return walletRepository;
+    }
+
+    @Override
+    protected SpecificationUtil<Wallet> getSpecificationUtil() {
+        return walletSpecificationUtil;
+    }
 
     /**
      * Store credential map.
@@ -112,8 +130,8 @@ public class WalletService {
             verifiableCredential.getTypes().remove("VerifiableCredential");
         }
         credentialRepository.save(Credential.builder()
-                .holder(wallet.getId())
-                .issuer(wallet.getId())   //TODO need to discuss if we want allow credentials issued by wallet that are not in our system?
+                .holderDid(wallet.getDid())
+                .issuerDid(URLDecoder.decode(verifiableCredential.getIssuer().toString(), Charset.defaultCharset()))
                 .type(verifiableCredential.getTypes().get(0))
                 .data(verifiableCredential)
                 .build());
@@ -131,7 +149,7 @@ public class WalletService {
     public Wallet getWalletByIdentifier(String identifier, boolean withCredentials) {
         Wallet wallet = getWalletByIdentifier(identifier);
         if (withCredentials) {
-            wallet.setVerifiableCredentials(credentialRepository.getCredentialsByHolder(wallet.getId()));
+            wallet.setVerifiableCredentials(credentialRepository.getCredentialsByHolder(wallet.getDid()));
         }
         return wallet;
     }
@@ -158,8 +176,16 @@ public class WalletService {
      *
      * @return the wallets
      */
-    public List<Wallet> getWallets() {
-        return walletRepository.findAll();
+    public Page<Wallet> getWallets(int pageNumber, int size, String sortColumn, String sortType) {
+        FilterRequest filterRequest = new FilterRequest();
+        filterRequest.setSize(size);
+        filterRequest.setPage(pageNumber);
+
+        Sort sort = new Sort();
+        sort.setColumn(sortColumn);
+        sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
+        filterRequest.setSort(sort);
+        return filter(filterRequest);
     }
 
     /**
@@ -201,7 +227,7 @@ public class WalletService {
         log.debug("did document created for bpn ->{}", request.getBpn());
 
         //Save wallet
-        Wallet wallet = walletRepository.save(Wallet.builder()
+        Wallet wallet = create(Wallet.builder()
                 .didDocument(didDocument)
                 .bpn(request.getBpn())
                 .name(request.getName())
@@ -293,4 +319,5 @@ public class WalletService {
         pemWriter.close();
         return stringWriter.toString();
     }
+
 }

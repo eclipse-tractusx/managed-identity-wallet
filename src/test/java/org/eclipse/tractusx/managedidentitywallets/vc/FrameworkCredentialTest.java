@@ -245,7 +245,7 @@ public class FrameworkCredentialTest {
         Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("value").equals(value));
         Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("id").equals(wallet.getDid()));
 
-        Credential credential = credentialRepository.getByHolderAndType(wallet.getId(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
         Assertions.assertNotNull(credential);
 
         VerifiableCredential vcFromDB = credential.getData();
