@@ -19,14 +19,18 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.did;
 
+import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -40,29 +44,39 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DidDocumentsTest {
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private WalletKeyRepository walletKeyRepository;
+
+    @Autowired
+    private CredentialRepository credentialRepository;
+
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private final String bpn = UUID.randomUUID().toString();
-
-    private final String did = "did:web:localhost" + bpn;
 
     @Test
-    @Order(1)
     void getDidDocumentInvalidBpn404() {
         ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, UUID.randomUUID().toString());
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
     }
 
     @Test
-    @Order(2)
     void getDidDocumentWithBpn200() {
 
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        createWallet(bpn, did);
+        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, bpn);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+    }
+
+    private Wallet createWallet(String bpn, String did) {
         String didDocument = """
                 {
                   "id": "did:web:localhost%3Abpn123124",
@@ -85,15 +99,15 @@ public class DidDocumentsTest {
                 .algorithm("ED25519")
                 .name(bpn)
                 .build();
-        walletRepository.save(wallet);
-        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, bpn);
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertNotNull(response.getBody());
+        return walletRepository.save(wallet);
     }
 
     @Test
-    @Order(3)
     void getDidDocumentWithDid200() {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        createWallet(bpn, did);
         ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, did);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());

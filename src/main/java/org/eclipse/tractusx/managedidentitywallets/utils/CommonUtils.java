@@ -28,6 +28,10 @@ import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
  */
 public class CommonUtils {
 
+    private CommonUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * Gets identifier type.
      *

@@ -19,24 +19,22 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dto;
+package org.eclipse.tractusx.managedidentitywallets.constant;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 
 /**
- * The type Issue membership credential request.
+ * The type Miw verifiable credential type.
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
-public class IssueMembershipCredentialRequest {
+public class MIWVerifiableCredentialType extends VerifiableCredentialType {
 
-    @NotBlank(message = "Please provide BPN")
-    @Size(min = 5, max = 255, message = "Please provide valid BPN")
-    private String bpn;
+    /**
+     * The constant DISMANTLER_CREDENTIAL_CX.
+     */
+    public static final String DISMANTLER_CREDENTIAL_CX = "DismantlerCredentialCX";
+
+    /**
+     * The constant USE_CASE_FRAMEWORK_CONDITION_CX.
+     */
+    public static final String USE_CASE_FRAMEWORK_CONDITION_CX = "UseCaseFrameworkConditionCX";
 }
-

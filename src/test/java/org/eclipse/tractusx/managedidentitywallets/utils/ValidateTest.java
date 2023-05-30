@@ -19,9 +19,8 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.utils;
 
-import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

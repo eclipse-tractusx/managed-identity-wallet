@@ -32,15 +32,15 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
+@Builder
 public class CreateWalletRequest {
 
-    @NotBlank
-    @Size(min = 5, max = 255)
+    @NotBlank(message = "Please provide BPN")
+    @Size(min = 5, max = 255, message = "Please provide valid BPN")
     private String bpn;
 
-    @NotBlank
-    @Size(min = 5, max = 255)
+    @NotBlank(message = "Please provide name")
+    @Size(min = 1, max = 255, message = "Please provide valid name")
     private String name;
 }
