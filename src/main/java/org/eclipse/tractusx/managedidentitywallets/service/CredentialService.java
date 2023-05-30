@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -44,6 +43,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
@@ -57,7 +57,6 @@ import java.util.UUID;
  * The type Credential service.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class CredentialService {
 
@@ -65,8 +64,15 @@ public class CredentialService {
     private final MIWSettings miwSettings;
     private final WalletKeyRepository walletKeyRepository;
     private final EncryptionUtils encryptionUtils;
-
     private final WalletService walletService;
+
+    public CredentialService(CredentialRepository credentialRepository, MIWSettings miwSettings, WalletKeyRepository walletKeyRepository, EncryptionUtils encryptionUtils, @Lazy WalletService walletService) {
+        this.credentialRepository = credentialRepository;
+        this.miwSettings = miwSettings;
+        this.walletKeyRepository = walletKeyRepository;
+        this.encryptionUtils = encryptionUtils;
+        this.walletService = walletService;
+    }
 
     /**
      * Gets credentials.
@@ -127,7 +133,7 @@ public class CredentialService {
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
         byte[] privateKeyBytes = getPrivateKeyById(baseWallet.getId());
 
-        Map<String, Object> subject = Map.of("type", MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX,
+        Map<String, Object> subject = Map.of("type", MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL,
                 "id", holderWallet.getDid(),
                 "holderIdentifier", holderWallet.getBpn(),
                 "activityType", request.getActivityType(),
@@ -154,19 +160,19 @@ public class CredentialService {
         Wallet holderWallet = walletService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
 
         //check duplicate
-        isCredentialExit(holderWallet.getId(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
+        isCredentialExit(holderWallet.getId(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
 
         // Fetch Issuer Wallet
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
         byte[] privateKeyBytes = getPrivateKeyById(baseWallet.getId());
 
         //VC Subject
-        Credential credential = getCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
+        Credential credential = getCredential(Map.of("type", MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
                 "id", holderWallet.getDid(),
                 "holderIdentifier", holderWallet.getBpn(),
                 "memberOf", baseWallet.getName(),
                 "status", "Active",
-                "startTime", Instant.now().toString()), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL, baseWallet, privateKeyBytes, holderWallet);
+                "startTime", Instant.now().toString()), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, baseWallet, privateKeyBytes, holderWallet);
 
         //Store Credential
         credentialRepository.save(credential);
@@ -200,7 +206,7 @@ public class CredentialService {
     }
 
 
-    private Credential getCredential(Map<String, Object> subject, String type, Wallet baseWallet, byte[] privateKeyBytes, Wallet holderWallet) {
+    public Credential getCredential(Map<String, Object> subject, String type, Wallet baseWallet, byte[] privateKeyBytes, Wallet holderWallet) {
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
                 new VerifiableCredentialSubject(subject);
@@ -222,7 +228,7 @@ public class CredentialService {
 
 
     @SneakyThrows
-    private byte[] getPrivateKeyById(Long id) {
+    public byte[] getPrivateKeyById(Long id) {
         WalletKey baseWalletKey = walletKeyRepository.getByWalletId(id);
         String privateKey = encryptionUtils.decrypt(baseWalletKey.getPrivateKey());
         return new PemReader(new StringReader(privateKey)).readPemObject().getContent();
