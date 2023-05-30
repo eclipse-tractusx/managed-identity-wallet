@@ -26,11 +26,14 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
@@ -79,6 +82,66 @@ public class CredentialService {
     }
 
     /**
+     * Issue framework credential verifiable credential.
+     *
+     * @param request the request
+     * @return the verifiable credential
+     */
+    public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request) {
+        //Fetch Holder Wallet
+        Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
+        
+        // Fetch Issuer Wallet
+        Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
+        byte[] privateKeyBytes = getPrivateKeyById(baseWallet.getId());
+
+        Map<String, Object> subject = Map.of("type", request.getType(),
+                "id", holderWallet.getDid(),
+                "value", request.getValue(),
+                "contract-template", request.getContractTemplate(),
+                "contract-version", request.getContractVersion());
+        Credential credential = getCredential(subject, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX, baseWallet, privateKeyBytes, holderWallet);
+
+        //Store Credential
+        credentialRepository.save(credential);
+
+        // Return VC
+        return credential.getData();
+    }
+
+    /**
+     * Issue dismantler credential verifiable credential.
+     *
+     * @param request the request
+     * @return the verifiable credential
+     */
+    public VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request) {
+
+        //Fetch Holder Wallet
+        Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
+
+        //check duplicate
+        isCredentialExit(holderWallet.getId(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+
+        // Fetch Issuer Wallet
+        Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
+        byte[] privateKeyBytes = getPrivateKeyById(baseWallet.getId());
+
+        Map<String, Object> subject = Map.of("type", MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX,
+                "id", holderWallet.getDid(),
+                "holderIdentifier", holderWallet.getBpn(),
+                "activityType", request.getActivityType(),
+                "allowedVehicleBrands", request.getAllowedVehicleBrands());
+        Credential credential = getCredential(subject, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, baseWallet, privateKeyBytes, holderWallet);
+
+        //Store Credential
+        credentialRepository.save(credential);
+
+        // Return VC
+        return credential.getData();
+    }
+
+    /**
      * Issue membership credential verifiable credential.
      *
      * @param issueMembershipCredentialRequest the issue membership credential request
@@ -98,26 +161,12 @@ public class CredentialService {
         byte[] privateKeyBytes = getPrivateKeyById(baseWallet.getId());
 
         //VC Subject
-        VerifiableCredentialSubject verifiableCredentialSubject =
-                new VerifiableCredentialSubject(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
-                        "holderIdentifier", holderWallet.getBpn(),
-                        "memberOf", baseWallet.getName(),
-                        "status", "Active",
-                        "startTime", Instant.now().toString()));
-
-        // VC Type
-        List<String> verifiableCredentialType = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
-
-        // Create VC
-        VerifiableCredential verifiableCredential = createVerifiableCredential(baseWallet.getDid(), verifiableCredentialType, verifiableCredentialSubject, privateKeyBytes);
-
-        // Create Credential
-        Credential credential = Credential.builder()
-                .holder(holderWallet.getId())
-                .issuer(baseWallet.getId())
-                .type(VerifiableCredentialType.MEMBERSHIP_CREDENTIAL)
-                .data(verifiableCredential)
-                .build();
+        Credential credential = getCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
+                "id", holderWallet.getDid(),
+                "holderIdentifier", holderWallet.getBpn(),
+                "memberOf", baseWallet.getName(),
+                "status", "Active",
+                "startTime", Instant.now().toString()), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL, baseWallet, privateKeyBytes, holderWallet);
 
         //Store Credential
         credentialRepository.save(credential);
@@ -127,21 +176,21 @@ public class CredentialService {
     }
 
     private VerifiableCredential createVerifiableCredential(String issuerDid, List<String> verifiableCredentialType, VerifiableCredentialSubject verifiableCredentialSubject, byte[] privateKey) {
-        List<String> context = List.of("https://www.w3.org/2018/credentials/v1", "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData");
         //VC Builder
         VerifiableCredentialBuilder builder =
                 new VerifiableCredentialBuilder()
-                        .context(context)
+                        .context(miwSettings.vcContexts())
                         .id(URI.create(UUID.randomUUID().toString()))
                         .type(verifiableCredentialType)
                         .issuer(URI.create(issuerDid))
-                        .expirationDate(Instant.now().plusSeconds(365 * 86400)) //TODO need to verify expiry time
+                        .expirationDate(miwSettings.vcExpiryDate().toInstant())
                         .issuanceDate(Instant.now())
                         .credentialSubject(verifiableCredentialSubject);
 
+
         //Ed25519 Proof Builder
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.create();
-        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), URI.create(issuerDid + "#key-1"), privateKey);
+        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), URI.create(issuerDid), privateKey);
 
         //Adding Proof to VC
         builder.proof(proof);
@@ -149,6 +198,28 @@ public class CredentialService {
         //Create Credential
         return builder.build();
     }
+
+
+    private Credential getCredential(Map<String, Object> subject, String type, Wallet baseWallet, byte[] privateKeyBytes, Wallet holderWallet) {
+        //VC Subject
+        VerifiableCredentialSubject verifiableCredentialSubject =
+                new VerifiableCredentialSubject(subject);
+
+        // VC Type
+        List<String> verifiableCredentialType = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type);
+
+        // Create VC
+        VerifiableCredential verifiableCredential = createVerifiableCredential(baseWallet.getDid(), verifiableCredentialType, verifiableCredentialSubject, privateKeyBytes);
+
+        // Create Credential
+        return Credential.builder()
+                .holder(holderWallet.getId())
+                .issuer(baseWallet.getId())
+                .type(type)
+                .data(verifiableCredential)
+                .build();
+    }
+
 
     @SneakyThrows
     private byte[] getPrivateKeyById(Long id) {

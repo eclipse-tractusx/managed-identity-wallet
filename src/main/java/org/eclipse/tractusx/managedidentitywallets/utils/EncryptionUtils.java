@@ -36,7 +36,6 @@ import java.util.Base64;
 @Component
 public class EncryptionUtils {
 
-    private final Cipher cipher;
     private final Key aesKey;
 
     /**
@@ -47,8 +46,6 @@ public class EncryptionUtils {
     @SneakyThrows
     public EncryptionUtils(MIWSettings miwSettings) {
         aesKey = new SecretKeySpec(miwSettings.encryptionKey().getBytes(), "AES");
-        cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
 
     }
 
@@ -60,8 +57,10 @@ public class EncryptionUtils {
      */
     @SneakyThrows
     public String encrypt(String text){
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
         byte[] encrypted = cipher.doFinal(text.getBytes());
-        return  Base64.getEncoder().encodeToString(encrypted);
+        return Base64.getEncoder().encodeToString(encrypted);
     }
 
     /**
@@ -72,6 +71,7 @@ public class EncryptionUtils {
      */
     @SneakyThrows
     public String decrypt(String text){
+        Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, aesKey);
         return new String(cipher.doFinal(Base64.getDecoder().decode(text)));
     }

@@ -19,22 +19,27 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
+import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.json.JSONException;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -48,23 +53,27 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MembershipCredentialTest {
     @Autowired
     private CredentialRepository credentialRepository;
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private WalletKeyRepository walletKeyRepository;
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private final String bpn = UUID.randomUUID().toString();
+    @Autowired
+    private MIWSettings miwSettings;
 
-    private final String did = "did:web:localhost" + bpn;
 
     @Test
-    @Order(1)
     void issueMembershipCredentialTest403() {
+        String bpn = UUID.randomUUID().toString();
+
+        String did = "did:web:localhost:" + bpn;
+
         HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
 
         IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
@@ -75,61 +84,64 @@ public class MembershipCredentialTest {
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
+
     @Test
-    @Order(2)
     void issueMembershipCredentialTest201() throws JsonProcessingException, JSONException {
 
-        String didDocument = """
-                {
-                  "id": "did:web:localhost%3Abpn123124",
-                  "verificationMethod": [
-                    {
-                      "publicKeyMultibase": "z9mo3TUPvEntiBQtHYVXXy5DfxLGgaHa84ZT6Er2qWs4y",
-                      "controller": "did:web:localhost%3Abpn123124",
-                      "id": "did:web:localhost%3Abpn123124#key-1",
-                      "type": "Ed25519VerificationKey2020"
-                    }
-                  ],
-                  "@context": "https://www.w3.org/ns/did/v1"
-                }
-                """;
+        String bpn = UUID.randomUUID().toString();
 
-        Wallet wallet = Wallet.builder()
-                .bpn(bpn)
-                .did(did)
-                .didDocument(DidDocument.fromJson(didDocument))
-                .algorithm("ED25519")
-                .name(bpn)
-                .build();
-        wallet = walletRepository.save(wallet);
+        String did = "did:web:localhost:" + bpn;
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
-        IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
-        HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
+        //save wallet
+        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = issueMembershipVC(bpn, did);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
+
+        TestUtils.checkVC(verifiableCredential, miwSettings);
+
         Assertions.assertTrue(verifiableCredential.getTypes().contains(VerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("holderIdentifier"), bpn);
 
         Credential credential = credentialRepository.getByHolderAndType(wallet.getId(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         Assertions.assertNotNull(credential);
+        TestUtils.checkVC(credential.getData(), miwSettings);
 
     }
 
     @Test
-    @Order(3)
     void issueMembershipCredentialWithDuplicateBpn409() {
+
+        String bpn = UUID.randomUUID().toString();
+
+        String did = "did:web:localhost:" + bpn;
+
+        //save wallet
+        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+
+        ResponseEntity<String> response = issueMembershipVC(bpn, did);
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
+
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
         IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
         HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CONFLICT.value(), response.getStatusCode().value());
+        ResponseEntity<String> duplicateResponse = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), duplicateResponse.getStatusCode().value());
     }
+
+    private ResponseEntity<String> issueMembershipVC(String bpn, String did) {
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
+        HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
+
+        return restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
+    }
+
 
 }
