@@ -32,6 +32,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.CredentialService;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,8 +61,14 @@ public class CredentialController {
      */
     @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Credential>> getCredentials(@RequestParam(required = false) String holderIdentifier, @RequestParam(required = false) String id, @RequestParam(required = false) String issuerIdentifier, @RequestParam(required = false) List<String> type) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(holderIdentifier, id, issuerIdentifier, type));
+    public ResponseEntity<Page<Credential>> getCredentials(@RequestParam(required = false) String holderIdentifier, @RequestParam(required = false) String id,
+                                                           @RequestParam(required = false) String issuerIdentifier,
+                                                           @RequestParam(required = false) List<String> type,
+                                                           @RequestParam(required = false, defaultValue = "0") int pageNumber,
+                                                           @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
+                                                           @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
+                                                           @RequestParam(required = false, defaultValue = "desc") String sortTpe) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(holderIdentifier, id, issuerIdentifier, type, pageNumber, size, sortColumn, sortTpe));
     }
 
     /**

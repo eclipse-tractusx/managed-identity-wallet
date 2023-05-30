@@ -34,7 +34,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WalletKey extends BaseEntity{
+public class WalletKey extends MIWBaseEntity {
 
     @Id
     @JsonIgnore

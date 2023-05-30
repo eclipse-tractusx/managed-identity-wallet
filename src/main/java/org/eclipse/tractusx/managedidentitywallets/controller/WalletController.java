@@ -31,12 +31,12 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -129,7 +129,10 @@ public class WalletController {
      */
     @Operation(summary = "List of wallets", description = "Permission: **view_wallets** \n\n Retrieve list of registered wallets")
     @GetMapping(path = RestURI.WALLETS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Wallet>> getWallets() {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getWallets());
+    public ResponseEntity<Page<Wallet>> getWallets(@RequestParam(required = false, defaultValue = "0") int pageNumber,
+                                                   @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
+                                                   @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
+                                                   @RequestParam(required = false, defaultValue = "desc") String sortTpe) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getWallets(pageNumber, size, sortColumn, sortTpe));
     }
 }
