@@ -22,21 +22,30 @@
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.Set;
+
 /**
- * The type Issue membership credential request.
+ * The type Issue dismantler credential request.
  */
 @Getter
 @Setter
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
-public class IssueMembershipCredentialRequest {
+@Builder
+public class IssueDismantlerCredentialRequest {
 
     @NotBlank(message = "Please provide BPN")
     @Size(min = 5, max = 255, message = "Please provide valid BPN")
     private String bpn;
-}
 
+    @NotBlank(message = "Please provide activity type")
+    @Size(min = 1, message = "Please provide valid activity type")
+    private String activityType;
+
+    @NotEmpty(message = "Please provide allowed vehicle brands")
+    private Set<String> allowedVehicleBrands;
+}

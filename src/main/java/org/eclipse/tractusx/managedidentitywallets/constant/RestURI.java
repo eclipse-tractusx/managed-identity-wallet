@@ -57,4 +57,14 @@ public class RestURI {
      */
     public static final String CREDENTIALS_ISSUER_MEMBERSHIP = "/api/credentials/issuer/membership";
 
+    /**
+     * The constant CREDENTIALS_ISSUER_DISMANTLER.
+     */
+    public static final String CREDENTIALS_ISSUER_DISMANTLER = "/api/credentials/issuer/dismantler";
+
+    /**
+     * The constant API_CREDENTIALS_ISSUER_FRAMEWORK.
+     */
+    public static final String API_CREDENTIALS_ISSUER_FRAMEWORK = "/api/credentials/issuer/framework";
+
 }
