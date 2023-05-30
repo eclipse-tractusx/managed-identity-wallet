@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smartsensesolutions.java.commons.base.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
@@ -43,7 +44,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseEntity {
+public class MIWBaseEntity implements BaseEntity {
 
     @JsonIgnore
     @CreationTimestamp

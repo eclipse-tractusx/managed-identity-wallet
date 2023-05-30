@@ -37,7 +37,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Credential extends BaseEntity {
+public class Credential extends MIWBaseEntity {
 
 
     @Id
@@ -47,10 +47,10 @@ public class Credential extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Long holder;
+    private String holderDid;
 
     @Column(nullable = false)
-    private Long issuer;
+    private String issuerDid;
 
     @Column(nullable = false)
     private String type;

@@ -107,7 +107,7 @@ public class DismantlerCredentialTest {
 
         Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("activityType").toString().equals("vehicleDismantle"));
 
-        Credential credential = credentialRepository.getByHolderAndType(wallet.getId(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
         Assertions.assertNotNull(credential);
         TestUtils.checkVC(credential.getData(), miwSettings);
 
@@ -153,5 +153,4 @@ public class DismantlerCredentialTest {
 
         return  restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_DISMANTLER, HttpMethod.POST, entity, String.class);
     }
-
 }

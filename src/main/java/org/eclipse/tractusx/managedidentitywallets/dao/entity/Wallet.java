@@ -42,7 +42,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Wallet extends BaseEntity {
+public class Wallet extends MIWBaseEntity {
 
     @Id
     @JsonIgnore

@@ -107,7 +107,7 @@ public class MembershipCredentialTest {
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("holderIdentifier"), bpn);
 
-        Credential credential = credentialRepository.getByHolderAndType(wallet.getId(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         Assertions.assertNotNull(credential);
         TestUtils.checkVC(credential.getData(), miwSettings);
 
