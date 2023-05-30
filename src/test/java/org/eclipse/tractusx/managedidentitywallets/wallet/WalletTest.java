@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
+import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -131,6 +132,21 @@ class WalletTest {
 
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
 
+        //check if BPN credentials is issued
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "true");
+
+        Wallet body = getWalletFromString(getWalletResponse.getBody());
+        Assertions.assertEquals(body.getVerifiableCredentials().size(), 1);
+        VerifiableCredential verifiableCredential = body.getVerifiableCredentials().get(0);
+
+        verifiableCredential.getCredentialSubject().get(0).get("id").equals(wallet.getDid());
+        verifiableCredential.getCredentialSubject().get(0).get("bpn").equals(wallet.getBpn());
+        verifiableCredential.getCredentialSubject().get(0).get("type").equals(MIWVerifiableCredentialType.BPN_CREDENTIAL);
+
     }
 
 
@@ -146,7 +162,7 @@ class WalletTest {
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         Wallet byBpn = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
         List<Credential> byHolder = credentialRepository.getByHolder(byBpn.getId());
-        Assertions.assertEquals(1, byHolder.size());
+        Assertions.assertEquals(2, byHolder.size());
 
     }
 
@@ -235,7 +251,7 @@ class WalletTest {
         Wallet body = getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
         Assertions.assertNotNull(getWalletResponse.getBody());
-        Assertions.assertEquals(1, body.getVerifiableCredentials().size());
+        Assertions.assertEquals(2, body.getVerifiableCredentials().size());
         Assertions.assertEquals(body.getBpn(), bpn);
     }
 
