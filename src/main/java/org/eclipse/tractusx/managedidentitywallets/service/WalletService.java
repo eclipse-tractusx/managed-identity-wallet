@@ -68,7 +68,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.StringWriter;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
@@ -215,7 +214,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         Ed25519VerificationKey2020Builder builder = new Ed25519VerificationKey2020Builder();
         Ed25519VerificationKey2020 key =
                 builder
-                        .id(URI.create(did.toUri() + "#key-" + 1))
+                        .id(did.toUri())
                         .controller(did.toUri())
                         .publicKeyMultiBase(publicKeyBase)
                         .build();
