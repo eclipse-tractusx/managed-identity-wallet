@@ -22,7 +22,7 @@ jobs:
 
       - name: Add Helm repos
         run: |
-          cd charts/managed-identity-wallets
+          cd charts/managed-identity-wallet
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency update
 
@@ -53,5 +53,5 @@ jobs:
       # install the chart to the kind cluster and run helm test
       # define charts to test with the --charts parameter
       - name: Run chart-testing (install)
-        run: ct install --charts charts/managed-identity-wallets --config charts/chart-testing-config.yaml
+        run: ct install --charts charts/managed-identity-wallet --config charts/chart-testing-config.yaml
         if: steps.list-changed.outputs.changed == 'true'
