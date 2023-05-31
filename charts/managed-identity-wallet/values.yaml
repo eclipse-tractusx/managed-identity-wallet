@@ -1,0 +1,90 @@
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: Always
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+secret:
+  # -- Database connection string to the Postgres database of MIW. Used when postgresql.useDefaultJdbcUrl is false
+  jdbcurl: "jdbc:postgresql://<host>:<port>/<db-name>?user=<user>&password=<password>"
+  # -- It can be extracted from Keycloak
+  authclientid: "clientid"
+  # -- It can be extracted from Keycloak
+  authclientsecret: "client"
+  # -- client id for accessing the BPDM data pool endpoint
+  bpdmauthclientid: "clientid"
+  # -- client secret for accessing the BPDM data pool endpoint
+  bpdmauthclientsecret: "client"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location ~* /list-credential/ {
+          deny all;
+          return 403;
+      }
+      
+      location ~* /webhook/topic/ {
+        deny all;
+        return 403;
+      }
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /(.*)
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+# provide only the numbers without suffix (Mi or m will be added in template)
+resources:
+  memory: 256
+  cpu: 250
+
+nodeSelector:
+  "kubernetes.io/os": linux
+
+tolerations: []
+
+affinity: {}
+
+podAnnotations: {}
+
+postgresql:
+  secret:
+    password: "postgres"
+    postgrespassword: "postgres"
+    user: "postgres"
