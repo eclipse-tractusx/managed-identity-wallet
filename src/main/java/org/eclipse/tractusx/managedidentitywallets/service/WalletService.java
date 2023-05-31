@@ -46,7 +46,6 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
@@ -64,6 +63,9 @@ import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.StringWriter;
 import java.net.URI;
@@ -78,8 +80,8 @@ import java.util.Map;
  * The type Wallet service.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class WalletService extends BaseService<Wallet, Long> {
 
     private final WalletRepository walletRepository;
@@ -88,11 +90,9 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final EncryptionUtils encryptionUtils;
 
-    private final WalletKeyRepository walletKeyRepository;
+    private final WalletKeyService walletKeyService;
 
     private final CredentialRepository credentialRepository;
-
-    private final CredentialService credentialService;
 
     private final SpecificationUtil<Wallet> walletSpecificationUtil;
 
@@ -195,8 +195,10 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the wallet
      */
     @SneakyThrows
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public Wallet createWallet(CreateWalletRequest request) {
         validateCreateWallet(request);
+
 
         //create private key pair
         Ed25519KeySet keyPair = createKeyPair();
@@ -236,7 +238,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .build());
 
         //Save key
-        walletKeyRepository.save(WalletKey.builder()
+        walletKeyService.getRepository().save(WalletKey.builder()
                 .walletId(wallet.getId())
                 .referenceKey("dummy ref key")  //TODO removed once vault setup is ready
                 .vaultAccessToken("dummy vault access token") ////TODO removed once vault setup is ready
@@ -245,27 +247,28 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .build());
         log.debug("Wallet created for bpn ->{}", request.getBpn());
 
-        // Fetch Issuer Wallet
+        //issue BPN credentials``
         Wallet baseWallet = getWalletByIdentifier(miwSettings.authorityWalletBpn());
-        byte[] privateKeyBytes = credentialService.getPrivateKeyById(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(baseWallet.getId());
 
-        Credential credential = credentialService.getCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
+        Credential credential = CommonUtils.getCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 "id", wallet.getDid(),
-                "bpn", wallet.getBpn()), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX, baseWallet, privateKeyBytes, wallet);
+                "bpn", wallet.getBpn()), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX, miwSettings.authorityWalletDid(), privateKeyBytes, wallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
         //Store Credential
         credentialRepository.save(credential);
+        log.debug("BPN credential issued for bpn -{}", request.getBpn());
 
         return wallet;
     }
 
     /**
-     * Create authority wallet.
+     * Create authority wallet on application start up, skip if already created.
      */
     @PostConstruct
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public void createAuthorityWallet() {
-        boolean exist = walletRepository.existsByBpn(miwSettings.authorityWalletBpn());
-        if (!exist) {
+        if (!walletRepository.existsByBpn(miwSettings.authorityWalletBpn())) {
             CreateWalletRequest request = CreateWalletRequest.builder()
                     .name(miwSettings.authorityWalletName())
                     .bpn(miwSettings.authorityWalletBpn())

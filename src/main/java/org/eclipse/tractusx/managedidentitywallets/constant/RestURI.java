@@ -67,4 +67,6 @@ public class RestURI {
      */
     public static final String API_CREDENTIALS_ISSUER_FRAMEWORK = "/api/credentials/issuer/framework";
 
+    public static final String API_PRESENTATIONS = "/api/presentations";
+
 }
