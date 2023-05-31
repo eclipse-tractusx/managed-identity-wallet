@@ -62,11 +62,16 @@ management:
 miw:
   host: ${HOST_NAME:localhost}
   encryptionKey: ${ENCRYPTION_KEY:Woh9waid4Ei5eez0aitieghoow9so4oe}
+  authorityWalletBpn: ${AUTHORITY_WALLET_BPN:BPNL000000000000}
+  authorityWalletName: ${AUTHORITY_WALLET_NAME:Catena-X}
+  authorityWalletDid: ${AUTHORITY_WALLET_DID:did:web:localhost:BPNL000000000000}
+  vcContexts: ${VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData}
+  vcExpiryDate: ${VC_EXPIRY_DATE:01-01-2025} #dd-MM-yyyy ie.  01-01-2025 expiry date will be 2024-12-31T18:30:00Z in VC
   security:
     enabled: true
-    realm: ${KEYCLOAK_REALM:miw}
-    clientId: ${KEYCLOAK_CLIENT_ID:miw}
-    auth-server-url: ${AUTH_SERVER_URL:https://localhost}
+    realm: ${KEYCLOAK_REALM:miw_test}
+    clientId: ${KEYCLOAK_CLIENT_ID:miw_private_client}
+    auth-server-url: ${AUTH_SERVER_URL:https://dev-auth.keenlyco.com}
     auth-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/auth
     token-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/token
     refresh-token-url: ${miw.security.token-url}

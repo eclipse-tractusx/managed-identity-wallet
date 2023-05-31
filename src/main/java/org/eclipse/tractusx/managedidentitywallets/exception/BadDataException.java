@@ -19,19 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
-import java.util.List;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Miw settings.
+ * The type Bad data exception.
  */
-@ConfigurationProperties(prefix = "miw")
-public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
-                          String authorityWalletName,
-                          List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate) {
+public class BadDataException extends RuntimeException {
+
+    /**
+     * Instantiates a new Bad data exception.
+     */
+    public BadDataException() {
+    }
+
+    /**
+     * Instantiates a new Bad data exception.
+     *
+     * @param message the message
+     */
+    public BadDataException(String message) {
+        super(message);
+    }
+
+    /**
+     * Instantiates a new Bad data exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public BadDataException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Instantiates a new Bad data exception.
+     *
+     * @param cause the cause
+     */
+    public BadDataException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -19,19 +19,23 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.config;
+package org.eclipse.tractusx.managedidentitywallets.utils;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
-import java.util.List;
+import jakarta.persistence.AttributeConverter;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 
 /**
- * The type Miw settings.
+ * The type String to did document converter.
  */
-@ConfigurationProperties(prefix = "miw")
-public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
-                          String authorityWalletName,
-                          List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate) {
+public class StringToDidDocumentConverter implements AttributeConverter<DidDocument, String> {
+
+    @Override
+    public String convertToDatabaseColumn(DidDocument didDocument) {
+        return didDocument.toJson();
+    }
+
+    @Override
+    public DidDocument convertToEntityAttribute(String string) {
+        return DidDocument.fromJson(string);
+    }
 }

@@ -22,38 +22,42 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
+import com.smartsensesolutions.java.commons.base.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.util.Date;
 
 /**
- * The type Wallet key.
+ * The type Base entity.
  */
+@MappedSuperclass
 @Getter
 @Setter
-@Entity
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class WalletKey extends MIWBaseEntity {
+@AllArgsConstructor
+public class MIWBaseEntity implements BaseEntity {
 
-    @Id
     @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
-    private Long id;
-
+    @CreationTimestamp
+    @Temporal(value = TemporalType.TIMESTAMP)
     @Column(nullable = false)
-    private Long walletId;
+    private Date createdAt;
 
-    @Column(nullable = false)
-    private String vaultAccessToken;
+    @JsonIgnore
+    @UpdateTimestamp
+    @Temporal(value = TemporalType.TIMESTAMP)
+    private Date modifiedAt;
 
-    @Column(nullable = false)
-    private String referenceKey;
+    @JsonIgnore
+    private String modifiedFrom;
 
-    @Column(nullable = false)
-    private String privateKey;
-
-    @Column(nullable = false)
-    private String publicKey;
 }
