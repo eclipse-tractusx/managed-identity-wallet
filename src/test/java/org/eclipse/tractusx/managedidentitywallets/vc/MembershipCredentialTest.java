@@ -95,7 +95,7 @@ public class MembershipCredentialTest {
         //save wallet
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
-        ResponseEntity<String> response = issueMembershipVC(bpn, did);
+        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -123,20 +123,12 @@ public class MembershipCredentialTest {
         //save wallet
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
-        ResponseEntity<String> response = issueMembershipVC(bpn, did);
+        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        ResponseEntity<String> duplicateResponse = issueMembershipVC(bpn, did);
+        ResponseEntity<String> duplicateResponse = TestUtils.issueMembershipVC(restTemplate, bpn);
 
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), duplicateResponse.getStatusCode().value());
-    }
-
-    private ResponseEntity<String> issueMembershipVC(String bpn, String did) {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
-        IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
-        HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
-
-        return restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
     }
 
 
