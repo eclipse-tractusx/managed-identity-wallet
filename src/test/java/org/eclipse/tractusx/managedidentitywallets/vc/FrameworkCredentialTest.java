@@ -95,7 +95,7 @@ public class FrameworkCredentialTest {
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
 
-        IssueFrameworkCredentialRequest twinRequest = getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -117,7 +117,7 @@ public class FrameworkCredentialTest {
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
 
-        IssueFrameworkCredentialRequest twinRequest = getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -138,7 +138,7 @@ public class FrameworkCredentialTest {
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
 
-        IssueFrameworkCredentialRequest twinRequest = getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -159,7 +159,7 @@ public class FrameworkCredentialTest {
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
 
-        IssueFrameworkCredentialRequest twinRequest = getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -180,7 +180,7 @@ public class FrameworkCredentialTest {
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
 
-        IssueFrameworkCredentialRequest twinRequest = getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -202,7 +202,7 @@ public class FrameworkCredentialTest {
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
 
-        IssueFrameworkCredentialRequest twinRequest = getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -224,7 +224,7 @@ public class FrameworkCredentialTest {
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
 
-        IssueFrameworkCredentialRequest twinRequest = getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -256,14 +256,5 @@ public class FrameworkCredentialTest {
         Assertions.assertTrue(vcFromDB.getCredentialSubject().get(0).get("id").equals(wallet.getDid()));
     }
 
-    private static IssueFrameworkCredentialRequest getIssueFrameworkCredentialRequest(String bpn, String type, String value) {
-        IssueFrameworkCredentialRequest twinRequest = IssueFrameworkCredentialRequest.builder()
-                .contractTemplate("http://localhost")
-                .contractVersion("v1")
-                .type(type)
-                .value(value)
-                .bpn(bpn)
-                .build();
-        return twinRequest;
-    }
+
 }
