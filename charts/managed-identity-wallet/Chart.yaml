@@ -1,0 +1,14 @@
+apiVersion: v2
+name: managed-identity-wallet
+description: Managed Identity Wallets Service
+
+type: application
+
+version: 1.0.0
+appVersion: 4.0.0
+
+dependencies:
+  - name: postgresql
+    version: 11.9.13
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
