@@ -12,6 +12,6 @@ tasks:
 
   unittest:
     desc: Executes helm unittests
-    dir: charts/managed-identity-wallets
+    dir: charts/managed-identity-wallet
     cmds:
       - helm unittest .
