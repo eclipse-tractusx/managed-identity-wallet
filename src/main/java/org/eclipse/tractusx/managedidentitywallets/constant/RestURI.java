@@ -34,6 +34,7 @@ public class RestURI {
      * The constant WALLETS.
      */
     public static final String WALLETS = "/api/wallets";
+
     /**
      * The constant DID_DOCUMENTS.
      */
@@ -41,6 +42,31 @@ public class RestURI {
     /**
      * The constant WALLETS_BY_BPN.
      */
-    public static final String WALLETS_BY_BPN = "/api/wallets/{bpn}";
+    public static final String API_WALLETS_IDENTIFIER = "/api/wallets/{identifier}";
+
+    /**
+     * The constant API_WALLETS_IDENTIFIER_CREDENTIALS.
+     */
+    public static final String API_WALLETS_IDENTIFIER_CREDENTIALS = "/api/wallets/{identifier}/credentials";
+    /**
+     * The constant CREDENTIALS.
+     */
+    public static final String CREDENTIALS = "/api/credentials";
+    /**
+     * The constant CREDENTIALS_ISSUER_MEMBERSHIP.
+     */
+    public static final String CREDENTIALS_ISSUER_MEMBERSHIP = "/api/credentials/issuer/membership";
+
+    /**
+     * The constant CREDENTIALS_ISSUER_DISMANTLER.
+     */
+    public static final String CREDENTIALS_ISSUER_DISMANTLER = "/api/credentials/issuer/dismantler";
+
+    /**
+     * The constant API_CREDENTIALS_ISSUER_FRAMEWORK.
+     */
+    public static final String API_CREDENTIALS_ISSUER_FRAMEWORK = "/api/credentials/issuer/framework";
+
+    public static final String API_PRESENTATIONS = "/api/presentations";
 
 }

@@ -22,40 +22,41 @@
 package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Did documents not found problem.
+ * The type Forbidden exception.
  */
-public class DidDocumentsNotFoundProblem extends RuntimeException {
+public class ForbiddenException extends RuntimeException {
+
     /**
-     * Instantiates a new Did documents not found problem.
+     * Instantiates a new Forbidden exception.
      */
-    public DidDocumentsNotFoundProblem() {
+    public ForbiddenException() {
     }
 
     /**
-     * Instantiates a new Did documents not found problem.
+     * Instantiates a new Forbidden exception.
      *
      * @param message the message
      */
-    public DidDocumentsNotFoundProblem(String message) {
+    public ForbiddenException(String message) {
         super(message);
     }
 
     /**
-     * Instantiates a new Did documents not found problem.
+     * Instantiates a new Forbidden exception.
      *
      * @param message the message
      * @param cause   the cause
      */
-    public DidDocumentsNotFoundProblem(String message, Throwable cause) {
+    public ForbiddenException(String message, Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Instantiates a new Did documents not found problem.
+     * Instantiates a new Forbidden exception.
      *
      * @param cause the cause
      */
-    public DidDocumentsNotFoundProblem(Throwable cause) {
+    public ForbiddenException(Throwable cause) {
         super(cause);
     }
 }

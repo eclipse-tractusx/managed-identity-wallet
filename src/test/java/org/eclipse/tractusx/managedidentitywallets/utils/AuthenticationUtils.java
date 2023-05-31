@@ -19,7 +19,7 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.jetbrains.annotations.NotNull;
@@ -55,20 +55,6 @@ public class AuthenticationUtils {
         return UUID.randomUUID().toString();
     }
 
-    private static String getJwtToken(String username){
-        Keycloak keycloakAdminClient = KeycloakBuilder.builder()
-                .serverUrl(TestContextInitializer.getAuthServerUrl())
-                .realm(REALM)
-                .clientId(CLIENT_ID)
-                .clientSecret(CLIENT_SECRET)
-                .username(username)
-                .password(USER_PASSWORD)
-                .build();
-        String access_token = keycloakAdminClient.tokenManager().getAccessToken().getToken();
-
-        return "Bearer " + access_token;
-    }
-
     @NotNull
     public static HttpHeaders getInvalidUserHttpHeaders() {
         String token = AuthenticationUtils.getInvalidUserToken();
@@ -84,6 +70,21 @@ public class AuthenticationUtils {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, token);
         return headers;
+    }
+
+
+    private static String getJwtToken(String username) {
+        Keycloak keycloakAdminClient = KeycloakBuilder.builder()
+                .serverUrl(TestContextInitializer.getAuthServerUrl())
+                .realm(REALM)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .username(username)
+                .password(USER_PASSWORD)
+                .build();
+        String access_token = keycloakAdminClient.tokenManager().getAccessToken().getToken();
+
+        return "Bearer " + access_token;
     }
 
 }

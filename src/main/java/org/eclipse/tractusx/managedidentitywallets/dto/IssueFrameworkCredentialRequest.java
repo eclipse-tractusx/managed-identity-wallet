@@ -21,26 +21,40 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 
 /**
- * The type Create wallet request.
+ * The type Issue framework credential request.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateWalletRequest {
+public class IssueFrameworkCredentialRequest {
 
     @NotBlank(message = "Please provide BPN")
     @Size(min = 5, max = 255, message = "Please provide valid BPN")
     private String bpn;
 
-    @NotBlank(message = "Please provide name")
-    @Size(min = 1, max = 255, message = "Please provide valid name")
-    private String name;
+    @NotBlank(message = "Please provide value")
+    @Pattern(regexp = "Behavior Twin|PCF|Quality|Resiliency|Sustainability|ID_3.0_Trace", message = "Invalid value, possible values are Behavior Twin, PCF, Quality, Resiliency, Sustainability, ID_3.0_Trace")
+    private String value;
+
+    @NotBlank(message = "Please provide type")
+    @Pattern(regexp = "cx-behavior-twin|cx-pcf|cx-quality|cx-resiliency|cx-sustainability|cx-traceability", message = "Invalid type, possible values are cx-behavior-twin, cx-pcf, cx-quality, cx-resiliency, cx-sustainability, cx-traceability")
+    private String type;
+
+    @NotBlank(message = "Please provide contract-template")
+    @JsonProperty("contract-template")
+    private String contractTemplate;
+
+    @NotBlank(message = "Please provide contract-template")
+    @JsonProperty("contract-version")
+    private String contractVersion;
 }

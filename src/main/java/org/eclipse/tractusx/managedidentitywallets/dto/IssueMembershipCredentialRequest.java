@@ -19,19 +19,24 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.config;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
-import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 /**
- * The type Miw settings.
+ * The type Issue membership credential request.
  */
-@ConfigurationProperties(prefix = "miw")
-public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
-                          String authorityWalletName,
-                          List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate) {
+@Getter
+@Setter
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+public class IssueMembershipCredentialRequest {
+
+    @NotBlank(message = "Please provide BPN")
+    @Size(min = 5, max = 255, message = "Please provide valid BPN")
+    private String bpn;
 }
+

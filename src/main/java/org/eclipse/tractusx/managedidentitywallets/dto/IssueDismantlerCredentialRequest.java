@@ -19,44 +19,33 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.entity;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
-import java.util.Date;
+import java.util.Set;
 
 /**
- * The type Base entity.
+ * The type Issue dismantler credential request.
  */
-@MappedSuperclass
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseEntity {
+@Builder
+public class IssueDismantlerCredentialRequest {
 
-    @JsonIgnore
-    @CreationTimestamp
-    @Temporal(value = TemporalType.TIMESTAMP)
-    @Column(nullable = false)
-    private Date createdAt;
+    @NotBlank(message = "Please provide BPN")
+    @Size(min = 5, max = 255, message = "Please provide valid BPN")
+    private String bpn;
 
-    @JsonIgnore
-    @UpdateTimestamp
-    @Temporal(value = TemporalType.TIMESTAMP)
-    private Date modifiedAt;
+    @NotBlank(message = "Please provide activity type")
+    @Size(min = 1, message = "Please provide valid activity type")
+    private String activityType;
 
-    @JsonIgnore
-    private String modifiedFrom;
-
+    @NotEmpty(message = "Please provide allowed vehicle brands")
+    private Set<String> allowedVehicleBrands;
 }
