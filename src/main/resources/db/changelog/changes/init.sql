@@ -36,8 +36,8 @@ CREATE TABLE public.wallet_key (
 
 CREATE TABLE public.credential (
   id bigserial NOT NULL,
-  holder bigserial NOT NULL,
-  issuer bigserial NOT NULL,
+  holder_did varchar(255) NOT NULL,
+  issuer_did varchar(255) NOT NULL,
   "data" text NOT NULL,
   "type" varchar(255) NULL,
   created_at timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -45,6 +45,5 @@ CREATE TABLE public.credential (
   modified_from varchar(255) NULL,
   CONSTRAINT credential_pkey PRIMARY KEY (id),
   CONSTRAINT credential_fk FOREIGN KEY (modified_from) REFERENCES public.wallet(bpn),
-  CONSTRAINT holder_wallet_fk FOREIGN KEY (holder) REFERENCES public.wallet(id),
-  CONSTRAINT issuer_wallet_fk FOREIGN KEY (issuer) REFERENCES public.wallet(id)
+  CONSTRAINT holder_wallet_fk FOREIGN KEY (holder_did) REFERENCES public.wallet(did)
 );

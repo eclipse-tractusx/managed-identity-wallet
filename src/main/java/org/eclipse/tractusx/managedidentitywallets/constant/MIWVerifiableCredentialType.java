@@ -19,19 +19,29 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.config;
+package org.eclipse.tractusx.managedidentitywallets.constant;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
-import java.util.List;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 
 /**
- * The type Miw settings.
+ * The type Miw verifiable credential type.
  */
-@ConfigurationProperties(prefix = "miw")
-public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
-                          String authorityWalletName,
-                          List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate) {
+public class MIWVerifiableCredentialType extends VerifiableCredentialType {
+
+    /**
+     * The constant DISMANTLER_CREDENTIAL_CX.
+     */
+    public static final String DISMANTLER_CREDENTIAL_CX = "DismantlerCredentialCX";
+    public static final String DISMANTLER_CREDENTIAL = "DismantlerCredential";
+
+    /**
+     * The constant USE_CASE_FRAMEWORK_CONDITION_CX.
+     */
+    public static final String USE_CASE_FRAMEWORK_CONDITION_CX = "UseCaseFrameworkConditionCX";
+
+    public static final String BPN_CREDENTIAL = "BpnCredential";
+
+    public static final String BPN_CREDENTIAL_CX = "BpnCredentialCX";
+
+    public static final String MEMBERSHIP_CREDENTIAL_CX = "MembershipCredentialCX";
 }

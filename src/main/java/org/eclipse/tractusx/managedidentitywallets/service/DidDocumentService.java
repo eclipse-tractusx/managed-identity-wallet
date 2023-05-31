@@ -23,9 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
-import org.eclipse.tractusx.managedidentitywallets.exception.DidDocumentsNotFoundProblem;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,8 +33,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class DidDocumentService {
-
-    private final WalletRepository walletRepository;
+    
+    private final WalletService walletService;
 
     /**
      * Gets did document.
@@ -44,12 +42,8 @@ public class DidDocumentService {
      * @param identifier the identifier
      * @return the did document
      */
-    public String getDidDocument(String identifier) {
-        Wallet wallet = identifier.startsWith("did:") ? walletRepository.getByDid(identifier) : walletRepository.getByBpn(identifier);
-        if (wallet == null) {
-            throw new DidDocumentsNotFoundProblem("DidDocument not found for identifier " + identifier);
-        }
-        return wallet.getDidDocument();
+    public DidDocument getDidDocument(String identifier) {
+        return walletService.getWalletByIdentifier(identifier).getDidDocument();
     }
 
 }

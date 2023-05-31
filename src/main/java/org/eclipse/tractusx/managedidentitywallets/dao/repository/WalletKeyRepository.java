@@ -21,15 +21,15 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
+import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * The interface Wallet key repository.
  */
 @Repository
-public interface WalletKeyRepository extends JpaRepository<WalletKey, Long> {
+public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
     /**
      * Gets by wallet id.
      *

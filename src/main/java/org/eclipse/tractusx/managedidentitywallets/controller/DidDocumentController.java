@@ -21,9 +21,12 @@
 
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.DidDocumentService;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "DIDDocument")
 public class DidDocumentController {
     private final DidDocumentService service;
 
@@ -45,8 +49,9 @@ public class DidDocumentController {
      * @param identifier the identifier
      * @return the did document
      */
+    @Operation(description = "Resolve the DID document for a given DID or BPN", summary = "Resolve DID Document")
     @GetMapping(path = RestURI.DID_DOCUMENTS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getDidDocument(@PathVariable(name = "identifier") String identifier) {
+    public ResponseEntity<DidDocument> getDidDocument(@PathVariable(name = "identifier") String identifier) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(identifier));
     }
 }

@@ -21,9 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
-import org.eclipse.tractusx.managedidentitywallets.exception.DidDocumentsNotFoundProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -71,16 +69,45 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handle did document not found problem problem detail.
+     * Handle forbidden exception problem detail.
      *
      * @param e the e
      * @return the problem detail
      */
-    @ExceptionHandler(DidDocumentsNotFoundProblem.class)
-    ProblemDetail handleDidDocumentNotFoundProblem(DidDocumentsNotFoundProblem e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+    @ExceptionHandler(ForbiddenException.class)
+    ProblemDetail handleForbiddenException(ForbiddenException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
         problemDetail.setTitle(e.getMessage());
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         return problemDetail;
     }
+
+    /**
+     * Handle bad data exception problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
+    @ExceptionHandler(BadDataException.class)
+    ProblemDetail handleBadDataException(BadDataException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
+    /**
+     * Handle duplicate credential problem problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
+    @ExceptionHandler(DuplicateCredentialProblem.class)
+    ProblemDetail handleDuplicateCredentialProblem(DuplicateCredentialProblem e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
 }

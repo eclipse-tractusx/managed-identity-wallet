@@ -25,6 +25,13 @@ package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.eclipse.tractusx.managedidentitywallets.utils.StringToDidDocumentConverter;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  * The type Wallet.
@@ -35,7 +42,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Wallet extends BaseEntity {
+public class Wallet extends MIWBaseEntity {
 
     @Id
     @JsonIgnore
@@ -54,8 +61,21 @@ public class Wallet extends BaseEntity {
 
     @Column(nullable = false)
     private String algorithm;
-    
-    @Column(nullable = false)
-    private String didDocument;
 
+    @Column(nullable = false)
+    @Convert(converter = StringToDidDocumentConverter.class)
+    private DidDocument didDocument;
+
+
+    @Transient
+    private List<VerifiableCredential> verifiableCredentials;
+
+    /**
+     * Sets did.
+     *
+     * @param did the did
+     */
+    public void setDid(String did) {
+        this.did = URLDecoder.decode(did, Charset.defaultCharset());
+    }
 }
