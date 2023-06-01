@@ -29,126 +29,22 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          {{- if .Values.image.registry }}
-          image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
-          {{- else }}
-          image: "{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
-          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if or .Values.envs .Values.secrets }}
           env:
-            - name: APP_VERSION
-              value: {{ .Chart.AppVersion }}
-            - name: MIW_DB_JDBC_URL
-                {{- if .Values.postgresql.useDefaultJdbcUrl }}
-              value: {{ include "managed-identity-wallet.jdbcUrl" . }}
-                {{- else }}
+          {{- range $key, $val := .Values.envs }}
+            - name: {{ $key }}
+              value: {{ $val }}
+          {{- end}}
+          {{- range $key, $val := .Values.secrets }}
+            - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "managed-identity-wallet.fullname" . }}-secret
-                  key: miw-db-jdbc-url
-                {{- end }}
-            - name: MIW_DB_JDBC_DRIVER
-              value: {{ .Values.db.jdbcDriver }}
-            - name: MIW_AUTH_JWKS_URL
-              value: {{ .Values.auth.jwksUrl }}
-            - name: MIW_AUTH_ISSUER_URL
-              value: {{ .Values.auth.issuerUrl }}
-            - name: MIW_AUTH_REALM
-              value: {{ .Values.auth.realm }}
-            - name: MIW_AUTH_ROLE
-              value: {{ .Values.auth.role }}
-            - name: MIW_AUTH_ROLE_MAPPINGS
-              value: {{ .Values.auth.roleMappings }}
-            - name: MIW_AUTH_RESOURCE_ID
-              value: {{ .Values.auth.resourceId }}
-            - name: MIW_AUTH_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "managed-identity-wallets.fullname" . }}-secret
-                  key: miw-auth-client-id
-            - name: MIW_AUTH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "managed-identity-wallets.fullname" . }}-secret
-                  key: miw-auth-client-secret
-            - name: MIW_AUTH_REDIRECT_URL
-              value: {{ .Values.auth.redirectUrl }}
-            - name: BPDM_DATAPOOL_URL
-              value: {{ .Values.datapool.url }}
-            - name: BPDM_AUTH_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "managed-identity-wallets.fullname" . }}-secret
-                  key: bpdm-auth-client-id
-            - name: BPDM_AUTH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "managed-identity-wallets.fullname" . }}-secret
-                  key: bpdm-auth-client-secret
-            - name: BPDM_AUTH_GRANT_TYPE
-              value: {{ .Values.datapool.grantType }}
-            - name: BPDM_AUTH_SCOPE
-              value: {{ .Values.datapool.scope }}
-            - name: BPDM_AUTH_URL
-              value: {{ .Values.datapool.authUrl }}
-            - name: BPDM_PULL_DATA_AT_HOUR
-              value: {{ .Values.datapool.refreshHour | quote }}
-            - name: MIW_BPN
-              value: {{ .Values.wallet.baseWalletBpn }}
-            - name: MIW_SHORT_DID
-              value: {{ .Values.wallet.baseWalletShortDid }}
-            - name: MIW_VERKEY
-              value: {{ .Values.wallet.baseWalletVerkey }}
-            - name: MIW_NAME
-              value: {{ .Values.wallet.baseWalletName }}
-            - name: MIW_ALLOWLIST_DIDS
-              value: {{ .Values.wallet.allowlistDids }}
-            - name: MIW_MEMBERSHIP_ORG
-              value: {{ .Values.wallet.membershipOrganisation }}
-            - name: MIW_OPENAPI_TITLE
-              value: {{ .Values.openapi.title }}
-            - name: MIW_OPENAPI_DESCRIPTION
-              value: {{ .Values.openapi.description }}
-            - name: MIW_OPENAPI_TERM_OF_SERVICES_URL
-              value: {{ .Values.openapi.termsOfServiceUrl }}
-            - name: MIW_OPENAPI_CONTACT_NAME
-              value: {{ .Values.openapi.contactName }}
-            - name: MIW_OPENAPI_CONTACT_EMAIL
-              value: {{ .Values.openapi.contactEmail }}
-            - name: MIW_OPENAPI_CONTACT_URL
-              value: {{ .Values.openapi.contactUrl }}
-            - name: MIW_OPENAPI_LICENSE_NAME
-              value: {{ .Values.openapi.licenseName }}
-            - name: MIW_OPENAPI_LICENSE_URL
-              value: {{ .Values.openapi.licenseUrl }}
-            - name: REVOCATION_URL
-              value: {{ .Values.revocation.revocationServiceUrl }}
-            - name: REVOCATION_CREATE_STATUS_LIST_CREDENTIAL_AT_HOUR
-              value: {{ .Values.revocation.refreshHour | quote }}
-            - name: WALLET_SERVICE_REQUEST_TIMEOUT
-              value: {{ .Values.httpClientTimeout.walletServiceRequest | quote }}
-            - name: WALLET_SERVICE_CONNECT_TIMEOUT
-              value: {{ .Values.httpClientTimeout.walletServiceConnect | quote }}
-            - name: WALLET_SERVICE_SOCKET_TIMEOUT
-              value: {{ .Values.httpClientTimeout.walletServiceSocket | quote }}
-            - name: BPD_SERVICE_REQUEST_TIMEOUT
-              value: {{ .Values.httpClientTimeout.bpdServiceRequest | quote }}
-            - name: BPD_SERVICE_CONNECT_TIMEOUT
-              value: {{ .Values.httpClientTimeout.bpdServiceConnect | quote }}
-            - name: BPD_SERVICE_SOCKET_TIMEOUT
-              value: {{ .Values.httpClientTimeout.bpdServiceSocket | quote }}
-            - name: REVOCATION_SERVICE_REQUEST_TIMEOUT
-              value: {{ .Values.httpClientTimeout.revocationServiceRequest | quote }}
-            - name: REVOCATION_SERVICE_CONNECT_TIMEOUT
-              value: {{ .Values.httpClientTimeout.revocationServiceConnect | quote }}
-            - name: REVOCATION_SERVICE_SOCKET_TIMEOUT
-              value: {{ .Values.httpClientTimeout.revocationServiceSocket | quote }}
-            - name: WEBHOOK_SERVICE_REQUEST_TIMEOUT
-              value: {{ .Values.httpClientTimeout.webhookServiceRequest | quote }}
-            - name: WEBHOOK_SERVICE_CONNECT_TIMEOUT
-              value: {{ .Values.httpClientTimeout.webhookServiceConnect | quote }}
-            - name: WEBHOOK_SERVICE_SOCKET_TIMEOUT
-              value: {{ .Values.httpClientTimeout.webhookServiceSocket | quote }}
+                  name: {{ include "managed-identity-wallet.fullname" $ }}
+                  key: {{ $key }}
+          {{- end}}
+          {{- end }}
           ports:
             - name: http
               containerPort: 8080
