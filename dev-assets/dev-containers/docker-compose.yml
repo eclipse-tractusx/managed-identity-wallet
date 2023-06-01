@@ -1,6 +1,18 @@
 version: '3'
 
 services:
+  local_miw_app:
+    image: local-miw:latest
+    container_name: local_miw_app
+    env_file:
+      - ../../dev.env
+    ports:
+      - "8087:8087"
+    environment:
+      DB_HOST: local_postgres
+    networks:
+      - miw-net
+
   local_postgres:
     image: postgres:14.2-alpine
     container_name: local_postgres
@@ -10,6 +22,8 @@ services:
       - postgres-data:/data/postgres-data
     ports:
       - "5432:5432"
+    networks:
+      - miw-net
 
   local_keycloak:
     image: quay.io/keycloak/keycloak:21.1
@@ -23,6 +37,12 @@ services:
       - ./keycloak/local-realm.json:/opt/keycloak/data/import/local-realm.json
     ports:
       - "8081:8080"
+    networks:
+      - miw-net
 
 volumes:
   postgres-data:
+
+networks:
+  miw-net:
+    name: miw-net
