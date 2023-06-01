@@ -22,11 +22,19 @@
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 public class TestUtils {
 
@@ -65,5 +73,24 @@ public class TestUtils {
 
         //check expiry date
         Assertions.assertEquals(verifiableCredential.getExpirationDate().compareTo(miwSettings.vcExpiryDate().toInstant()), 0);
+    }
+
+    public static ResponseEntity<String> issueMembershipVC(TestRestTemplate restTemplate, String bpn) {
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
+        HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
+
+        return restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
+    }
+
+    public static IssueFrameworkCredentialRequest getIssueFrameworkCredentialRequest(String bpn, String type, String value) {
+        IssueFrameworkCredentialRequest twinRequest = IssueFrameworkCredentialRequest.builder()
+                .contractTemplate("http://localhost")
+                .contractVersion("v1")
+                .type(type)
+                .value(value)
+                .bpn(bpn)
+                .build();
+        return twinRequest;
     }
 }

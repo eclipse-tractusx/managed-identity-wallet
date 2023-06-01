@@ -88,8 +88,6 @@ public class CredentialService extends BaseService<Credential, Long> {
      * @param id               the id
      * @param issuerIdentifier the issuer identifier
      * @param type             the type
-     * @param pageNumber       the page number
-     * @param size             the size
      * @param sortColumn       the sort column
      * @param sortType         the sort type
      * @return the credentials
