@@ -92,6 +92,7 @@ public class CommonUtils {
                 .holderDid(holderDid)
                 .issuerDid(issuerDoc.getId().toString())
                 .type(type)
+                .credentialId(verifiableCredential.getId().toString())
                 .data(verifiableCredential)
                 .build();
     }
