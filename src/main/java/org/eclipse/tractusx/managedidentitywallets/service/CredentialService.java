@@ -93,7 +93,7 @@ public class CredentialService extends BaseService<Credential, Long> {
     /**
      * Gets credentials.
      *
-     * @param id               the id
+     * @param credentialId     the credentialId
      * @param issuerIdentifier the issuer identifier
      * @param type             the type
      * @param sortColumn       the sort column
@@ -101,7 +101,7 @@ public class CredentialService extends BaseService<Credential, Long> {
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public List<VerifiableCredential> getCredentials(String id, String issuerIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
+    public List<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
 
 
@@ -113,6 +113,10 @@ public class CredentialService extends BaseService<Credential, Long> {
             filterRequest.appendNewCriteria("issuerDid", Operator.EQUALS, issuerWallet.getDid());
         }
 
+        if (StringUtils.hasText(credentialId)) {
+            filterRequest.appendNewCriteria("credentialId", Operator.EQUALS, credentialId);
+        }
+        
         if (!CollectionUtils.isEmpty(type)) {
             filterRequest.appendNewCriteria("type", Operator.IN, type);
         }

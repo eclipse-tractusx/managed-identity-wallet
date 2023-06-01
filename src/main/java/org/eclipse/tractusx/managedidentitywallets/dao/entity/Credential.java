@@ -58,4 +58,7 @@ public class Credential extends MIWBaseEntity {
     @Column(nullable = false)
     @Convert(converter = StringToCredentialConverter.class)
     private VerifiableCredential data;
+
+    @Column(nullable = false)
+    private String credentialId;
 }
