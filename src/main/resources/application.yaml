@@ -1,17 +1,17 @@
 server:
-  port: ${APPLICATION_PORT:8087}
+  port: ${APPLICATION_PORT:8080}
   shutdown: graceful
   compression:
     enabled: true
 spring:
   profiles:
-    active: ${APPLICATION_ENVIRONMENT:dev}
+    active: ${APPLICATION_ENVIRONMENT:local}
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
   application:
-    name: ${APPLICATION_NAME:miw}
+    name: miw
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:miw}?useSSL=${USE_SSL:false}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:miw}?useSSL=${USE_SSL:false}
     username: ${DB_USER_NAME:root}
     password: ${DB_PASSWORD:smart}
     initialization-mode: always
@@ -60,7 +60,7 @@ management:
       enabled: true
 
 miw:
-  host: ${HOST_NAME:localhost}
+  host: ${MIW_HOST_NAME:localhost}
   encryptionKey: ${ENCRYPTION_KEY:Woh9waid4Ei5eez0aitieghoow9so4oe}
   authorityWalletBpn: ${AUTHORITY_WALLET_BPN:BPNL000000000000}
   authorityWalletName: ${AUTHORITY_WALLET_NAME:Catena-X}
