@@ -25,8 +25,13 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.jetbrains.annotations.NotNull;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpHeaders;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class AuthenticationUtils {
@@ -43,15 +48,19 @@ public class AuthenticationUtils {
 
     private static final String INVALID_USER_NAME = "invalid_user";
 
-    private static String getValidUserToken(){
+    private static String getValidUserToken() {
         return getJwtToken(VALID_USER_NAME);
     }
 
-    private static String getInvalidUserToken(){
+    private static String getValidUserToken(String bpn) {
+        return getJwtToken(VALID_USER_NAME, bpn);
+    }
+
+    private static String getInvalidUserToken() {
         return getJwtToken(INVALID_USER_NAME);
     }
 
-    public static String getInvalidToken(){
+    public static String getInvalidToken() {
         return UUID.randomUUID().toString();
     }
 
@@ -63,6 +72,13 @@ public class AuthenticationUtils {
         return headers;
     }
 
+    @NotNull
+    public static HttpHeaders getValidUserHttpHeaders(String bpn) {
+        String token = AuthenticationUtils.getValidUserToken(bpn);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, token);
+        return headers;
+    }
 
     @NotNull
     public static HttpHeaders getValidUserHttpHeaders() {
@@ -73,7 +89,30 @@ public class AuthenticationUtils {
     }
 
 
+    private static String getJwtToken(String username, String bpn) {
+        Keycloak keycloak = KeycloakBuilder.builder()
+                .serverUrl(TestContextInitializer.getAuthServerUrl())
+                .realm(REALM)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .grantType("client_credentials")
+                .scope("openid")
+                .build();
+
+        RealmResource realmResource = keycloak.realm(REALM);
+
+        List<UserRepresentation> userRepresentations = realmResource.users().search(username, true);
+        UserRepresentation userRepresentation = userRepresentations.get(0);
+        UserResource userResource = realmResource.users().get(userRepresentations.get(0).getId());
+        userRepresentation.setEmailVerified(true);
+        userRepresentation.setEnabled(true);
+        userRepresentation.setAttributes(Map.of("BPN", List.of(bpn)));
+        userResource.update(userRepresentation);
+        return getJwtToken(username);
+    }
+
     private static String getJwtToken(String username) {
+
         Keycloak keycloakAdminClient = KeycloakBuilder.builder()
                 .serverUrl(TestContextInitializer.getAuthServerUrl())
                 .realm(REALM)
@@ -86,5 +125,4 @@ public class AuthenticationUtils {
 
         return "Bearer " + access_token;
     }
-
 }

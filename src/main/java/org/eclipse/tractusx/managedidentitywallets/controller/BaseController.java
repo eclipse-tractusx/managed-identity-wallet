@@ -19,29 +19,23 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.utils;
+package org.eclipse.tractusx.managedidentitywallets.controller;
 
-import jakarta.persistence.AttributeConverter;
-import lombok.SneakyThrows;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 
-/**
- * The type String to did document converter.
- */
-public class StringToDidDocumentConverter implements AttributeConverter<DidDocument, String> {
+public class BaseController {
 
-    @SneakyThrows
-    @Override
-    public String convertToDatabaseColumn(DidDocument didDocument) {
-        return URLDecoder.decode(didDocument.toJson(), StandardCharsets.UTF_8);
-    }
+    public String getBPNFromToken(Principal principal) {
+        Object principal1 = ((JwtAuthenticationToken) principal).getPrincipal();
+        Jwt jwt = (Jwt) principal1;
 
-    @Override
-    public DidDocument convertToEntityAttribute(String string) {
+        Validate.isFalse(jwt.getClaims().containsKey("BPN")).launch(new ForbiddenException("Invalid token, BPN not found"));
 
-        return DidDocument.fromJson(string);
+        return jwt.getClaims().get("BPN").toString();
     }
 }

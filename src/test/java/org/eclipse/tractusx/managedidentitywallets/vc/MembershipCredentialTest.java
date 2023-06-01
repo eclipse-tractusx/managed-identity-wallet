@@ -53,7 +53,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class MembershipCredentialTest {
+class MembershipCredentialTest {
     @Autowired
     private CredentialRepository credentialRepository;
     @Autowired
@@ -95,7 +95,7 @@ public class MembershipCredentialTest {
         //save wallet
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
-        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn);
+        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -113,6 +113,24 @@ public class MembershipCredentialTest {
 
     }
 
+
+    @Test
+    void issueMembershipCredentialWithInvalidBpnAccess409() {
+        String bpn = UUID.randomUUID().toString();
+
+        String did = "did:web:localhost:" + bpn;
+
+        //save wallet
+        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+        IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
+        HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
     @Test
     void issueMembershipCredentialWithDuplicateBpn409() {
 
@@ -123,13 +141,12 @@ public class MembershipCredentialTest {
         //save wallet
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
-        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn);
+        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        ResponseEntity<String> duplicateResponse = TestUtils.issueMembershipVC(restTemplate, bpn);
+        ResponseEntity<String> duplicateResponse = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
 
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), duplicateResponse.getStatusCode().value());
     }
-
 
 }

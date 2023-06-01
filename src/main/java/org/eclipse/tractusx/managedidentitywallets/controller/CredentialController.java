@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -44,27 +45,30 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "VerifiableCredentials")
-public class CredentialController {
+public class CredentialController extends BaseController {
 
     private final CredentialService service;
+
 
     /**
      * Gets credentials.
      *
-     * @param holderIdentifier the holder identifier
      * @param id               the id
      * @param issuerIdentifier the issuer identifier
      * @param type             the type
+     * @param sortColumn       the sort column
+     * @param sortTpe          the sort tpe
+     * @param principal        the principal
      * @return the credentials
      */
     @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<VerifiableCredential>> getCredentials(@RequestParam(required = false) String holderIdentifier, @RequestParam(required = false) String id,
+    public ResponseEntity<List<VerifiableCredential>> getCredentials(@RequestParam(required = false) String id,
                                                                      @RequestParam(required = false) String issuerIdentifier,
                                                                      @RequestParam(required = false) List<String> type,
                                                                      @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
-                                                                     @RequestParam(required = false, defaultValue = "desc") String sortTpe) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(holderIdentifier, id, issuerIdentifier, type, sortColumn, sortTpe));
+                                                                     @RequestParam(required = false, defaultValue = "desc") String sortTpe, Principal principal) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(id, issuerIdentifier, type, sortColumn, sortTpe, getBPNFromToken(principal)));
     }
 
     /**
@@ -75,31 +79,33 @@ public class CredentialController {
      */
     @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueMembershipCredential(issueMembershipCredentialRequest));
+    public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueMembershipCredential(issueMembershipCredentialRequest, getBPNFromToken(principal)));
     }
 
     /**
      * Issue dismantler credential response entity.
      *
-     * @param request the request
+     * @param request   the request
+     * @param principal the principal
      * @return the response entity
      */
     @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_DISMANTLER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerifiableCredential> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueDismantlerCredential(request));
+    public ResponseEntity<VerifiableCredential> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueDismantlerCredential(request, getBPNFromToken(principal)));
     }
 
     /**
      * Issue framework credential response entity.
      *
-     * @param request the request
+     * @param request   the request
+     * @param principal the principal
      * @return the response entity
      */
     @Operation(summary = "Issue a Use Case Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueFrameworkCredential(request));
+    public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueFrameworkCredential(request, getBPNFromToken(principal)));
     }
 }
