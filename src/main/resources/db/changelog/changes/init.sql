@@ -38,6 +38,7 @@ CREATE TABLE public.credential (
   id bigserial NOT NULL,
   holder_did varchar(255) NOT NULL,
   issuer_did varchar(255) NOT NULL,
+  credential_id varchar(255) NOT NULL,
   "data" text NOT NULL,
   "type" varchar(255) NULL,
   created_at timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
