@@ -24,7 +24,7 @@ jobs:
         id: version
         with:
           file: gradle.properties
-          property: version
+          property: applicationVersion
           default: 0.0.1
 
       - name: Set App Version
@@ -69,12 +69,12 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
         with:
-          arguments: build
+          arguments: build -PgithubToken=${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create dist
-        uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
-        with:
-          arguments: installDist
+#      - name: Create dist
+#        uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
+#        with:
+#          arguments: installDist
 
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.1
@@ -82,10 +82,10 @@ jobs:
         with:
           appname: 'project-managed-identity-wallets'
           createprofile: false
-          filepath: 'build/install/org.eclipse.tractusx.managedidentitywallets/lib/*' # add filepath for upload
+          filepath: 'build/libs/*' # add filepath for upload
           vid: '${{ secrets.ORG_VERACODE_API_ID }}' # reference to API ID, which is set as github org. secret
           vkey: '${{ secrets.ORG_VERACODE_API_KEY }}' #reference to API Key in github, which is set as github or. secret
-          include: 'build/install/org.eclipse.tractusx.managedidentitywallets/lib/org.eclipse.tractusx.managedidentitywallets-*jar'
+          include: 'build/libs/miw-latest.jar'
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
