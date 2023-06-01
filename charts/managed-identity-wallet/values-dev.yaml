@@ -1,0 +1,9 @@
+secrets:
+  DB_USER_NAME: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#user>
+  DB_PASSWORD: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#password>
+
+postgresql:
+  auth:
+    password: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#password>
+    postgresPassword: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#postgres-password>
+    username: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#user>
