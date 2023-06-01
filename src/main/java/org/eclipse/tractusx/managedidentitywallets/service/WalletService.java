@@ -110,14 +110,17 @@ public class WalletService extends BaseService<Wallet, Long> {
      *
      * @param data       the data
      * @param identifier the identifier
+     * @param callerBpn  the caller bpn
      * @return the map
      */
-    public Map<String, String> storeCredential(Map<String, Object> data, String identifier) {
+    public Map<String, String> storeCredential(Map<String, Object> data, String identifier, String callerBpn) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet wallet = getWalletByIdentifier(identifier);
-        Validate.isNull(wallet).launch(new WalletNotFoundProblem("Can not find wallet with identifier " + identifier));
         String did = wallet.getDid();
         String holderDid = verifiableCredential.getCredentialSubject().get(0).get("id").toString();
+
+        //validate BPN access
+        Validate.isFalse(callerBpn.equalsIgnoreCase(wallet.getBpn())).launch(new ForbiddenException("Wallet BPN is not matching with request BPN(from the token)"));
 
         //check ownership of credentials
         Validate.isFalse(did.equals(holderDid)).launch(new ForbiddenException(String.format("The target wallet %s is not holder of provided credentials", identifier)));
@@ -143,10 +146,15 @@ public class WalletService extends BaseService<Wallet, Long> {
      *
      * @param identifier      the identifier
      * @param withCredentials the with credentials
+     * @param callerBpn       the caller bpn
      * @return the wallet by identifier
      */
-    public Wallet getWalletByIdentifier(String identifier, boolean withCredentials) {
+    public Wallet getWalletByIdentifier(String identifier, boolean withCredentials, String callerBpn) {
         Wallet wallet = getWalletByIdentifier(identifier);
+
+        //validate BPN access
+        Validate.isFalse(callerBpn.equalsIgnoreCase(wallet.getBpn())).launch(new ForbiddenException("Wallet BPN is not matching with request BPN(from the token)"));
+
         if (withCredentials) {
             wallet.setVerifiableCredentials(credentialRepository.getCredentialsByHolder(wallet.getDid()));
         }
@@ -173,6 +181,10 @@ public class WalletService extends BaseService<Wallet, Long> {
     /**
      * Gets wallets.
      *
+     * @param pageNumber the page number
+     * @param size       the size
+     * @param sortColumn the sort column
+     * @param sortType   the sort type
      * @return the wallets
      */
     public Page<Wallet> getWallets(int pageNumber, int size, String sortColumn, String sortType) {

@@ -40,9 +40,11 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredential
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -61,6 +63,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CredentialService extends BaseService<Credential, Long> {
 
+    public static final String BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN = "Base wallet BPN is not matching with request BPN(from token)";
     private final CredentialRepository credentialRepository;
     private final MIWSettings miwSettings;
     private final WalletService walletService;
@@ -84,20 +87,20 @@ public class CredentialService extends BaseService<Credential, Long> {
     /**
      * Gets credentials.
      *
-     * @param holderIdentifier the holder identifier
      * @param id               the id
      * @param issuerIdentifier the issuer identifier
      * @param type             the type
      * @param sortColumn       the sort column
      * @param sortType         the sort type
+     * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public List<VerifiableCredential> getCredentials(String holderIdentifier, String id, String issuerIdentifier, List<String> type, String sortColumn, String sortType) {
+    public List<VerifiableCredential> getCredentials(String id, String issuerIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
-        if (StringUtils.hasText(holderIdentifier)) {
-            Wallet holderWallet = walletService.getWalletByIdentifier(holderIdentifier);
-            filterRequest.appendNewCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
-        }
+
+
+        Wallet holderWallet = walletService.getWalletByIdentifier(callerBPN);
+        filterRequest.appendNewCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
 
         if (StringUtils.hasText(issuerIdentifier)) {
             Wallet issuerWallet = walletService.getWalletByIdentifier(issuerIdentifier);
@@ -126,15 +129,18 @@ public class CredentialService extends BaseService<Credential, Long> {
     /**
      * Issue framework credential verifiable credential.
      *
-     * @param request the request
+     * @param request   the request
+     * @param callerBPN the caller bpn
      * @return the verifiable credential
      */
-    public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request) {
+    public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
         //Fetch Holder Wallet
         Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
 
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
 
+        //validate BPN access
+        Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // get Key
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(baseWallet.getId());
@@ -156,16 +162,20 @@ public class CredentialService extends BaseService<Credential, Long> {
     /**
      * Issue dismantler credential verifiable credential.
      *
-     * @param request the request
+     * @param request   the request
+     * @param callerBPN the caller bpn
      * @return the verifiable credential
      */
-    public VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request) {
+    public VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
 
         // Fetch Issuer Wallet
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
+
+        //check BPN access
+        Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         //check duplicate
         isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
@@ -190,10 +200,11 @@ public class CredentialService extends BaseService<Credential, Long> {
      * Issue membership credential verifiable credential.
      *
      * @param issueMembershipCredentialRequest the issue membership credential request
+     * @param callerBPN                        the caller bpn
      * @return the verifiable credential
      */
     @SneakyThrows
-    public VerifiableCredential issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest) {
+    public VerifiableCredential issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = walletService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
@@ -203,10 +214,14 @@ public class CredentialService extends BaseService<Credential, Long> {
 
         // Fetch Issuer Wallet
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
+
+        //validate BPN access
+        Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(baseWallet.getId());
 
         //VC Subject
-        Credential credential = CommonUtils.getCredential(Map.of("type", MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
+        Credential credential = CommonUtils.getCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
                 "id", holderWallet.getDid(),
                 "holderIdentifier", holderWallet.getBpn(),
                 "memberOf", baseWallet.getName(),

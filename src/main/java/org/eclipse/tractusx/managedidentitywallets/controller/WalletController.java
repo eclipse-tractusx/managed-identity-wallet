@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 /**
@@ -45,7 +46,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Wallets")
-public class WalletController {
+public class WalletController extends BaseController {
 
     private final WalletService service;
 
@@ -105,8 +106,8 @@ public class WalletController {
                                  }
                     """))
     })
-    public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data, @PathVariable(name = "identifier") String identifier) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier));
+    public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data, @PathVariable(name = "identifier") String identifier, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier, getBPNFromToken(principal)));
     }
 
     /**
@@ -118,8 +119,11 @@ public class WalletController {
      */
     @Operation(summary = "Retrieve wallet by identifier", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller) \n\n Retrieve single wallet by identifier, with or without its credentials")
     @GetMapping(path = RestURI.API_WALLETS_IDENTIFIER, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> getWalletByIdentifier(@PathVariable(name = "identifier") String identifier, @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials));
+    public ResponseEntity<Wallet> getWalletByIdentifier(@PathVariable(name = "identifier") String identifier,
+                                                        @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials,
+                                                        Principal principal) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials, getBPNFromToken(principal)));
     }
 
     /**

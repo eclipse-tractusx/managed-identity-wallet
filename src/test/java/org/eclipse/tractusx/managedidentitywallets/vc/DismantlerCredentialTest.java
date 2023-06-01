@@ -55,7 +55,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class DismantlerCredentialTest {
+class DismantlerCredentialTest {
     @Autowired
     private CredentialRepository credentialRepository;
     @Autowired
@@ -105,7 +105,7 @@ public class DismantlerCredentialTest {
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
 
-        Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("activityType").toString().equals("vehicleDismantle"));
+        Assertions.assertEquals("vehicleDismantle", verifiableCredential.getCredentialSubject().get(0).get("activityType").toString());
 
         Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
         Assertions.assertNotNull(credential);
@@ -114,7 +114,32 @@ public class DismantlerCredentialTest {
 
         VerifiableCredential data = credential.getData();
 
-        Assertions.assertTrue(data.getCredentialSubject().get(0).get("activityType").toString().equals("vehicleDismantle"));
+        Assertions.assertEquals("vehicleDismantle", data.getCredentialSubject().get(0).get("activityType").toString());
+
+    }
+
+    @Test
+    void issueDismantlerCredentialWithInvalidBpnAccess409() {
+        String bpn = UUID.randomUUID().toString();
+
+        String did = "did:web:localhost:" + bpn;
+
+        //create entry
+        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn); //token must contain base wallet BPN
+
+        IssueDismantlerCredentialRequest request = IssueDismantlerCredentialRequest.builder()
+                .activityType("vehicleDismantle")
+                .bpn(bpn)
+                .allowedVehicleBrands(Set.of("BMW"))
+                .build();
+
+
+        HttpEntity<IssueDismantlerCredentialRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_DISMANTLER, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
 
     }
 
@@ -140,7 +165,7 @@ public class DismantlerCredentialTest {
     private ResponseEntity<String> issueDismantlerCredential(String bpn, String did){
 
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()); //token must contain base wallet BPN
 
         IssueDismantlerCredentialRequest request = IssueDismantlerCredentialRequest.builder()
                 .activityType("vehicleDismantle")

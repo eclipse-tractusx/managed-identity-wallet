@@ -24,7 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ValidateTest {
+class ValidateTest {
 
 
     @Test
