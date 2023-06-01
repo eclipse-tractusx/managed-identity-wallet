@@ -4,15 +4,14 @@ on:
   push:
     branches: [ develop, main ]
   workflow_dispatch:
-    branches: [ develop, main ]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}_service
+  IMAGE_NAME: ${{ github.repository }}_MIW_service
 
 jobs:
   build-and-push-image:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
