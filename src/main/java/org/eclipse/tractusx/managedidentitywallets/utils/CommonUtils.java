@@ -24,11 +24,15 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.ssi.lib.model.Ed25519Signature2020;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
+import org.eclipse.tractusx.ssi.lib.proof.hash.LinkedDataHasher;
+import org.eclipse.tractusx.ssi.lib.proof.transform.LinkedDataTransformer;
+import org.eclipse.tractusx.ssi.lib.proof.verify.LinkedDataSigner;
 
 import java.net.URI;
 import java.time.Instant;
@@ -66,12 +70,12 @@ public class CommonUtils {
      *
      * @param subject         the subject
      * @param type            the type
-     * @param issuerDid       the issuer did
+     * @param issuerDoc       the issuer doc
      * @param privateKeyBytes the private key bytes
      * @param holderDid       the holder did
      * @return the credential
      */
-    public static Credential getCredential(Map<String, Object> subject, String type, String issuerDid, byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate) {
+    public static Credential getCredential(Map<String, Object> subject, String type, DidDocument issuerDoc, byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate) {
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
                 new VerifiableCredentialSubject(subject);
@@ -80,34 +84,40 @@ public class CommonUtils {
         List<String> verifiableCredentialType = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type);
 
         // Create VC
-        VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDid, verifiableCredentialType, verifiableCredentialSubject, privateKeyBytes, contexts, expiryDate);
+        VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, verifiableCredentialType,
+                verifiableCredentialSubject, privateKeyBytes, contexts, expiryDate);
 
         // Create Credential
         return Credential.builder()
                 .holderDid(holderDid)
-                .issuerDid(issuerDid)
+                .issuerDid(issuerDoc.getId().toString())
                 .type(type)
                 .data(verifiableCredential)
                 .build();
     }
 
 
-    private static VerifiableCredential createVerifiableCredential(String issuerDid, List<String> verifiableCredentialType, VerifiableCredentialSubject verifiableCredentialSubject, byte[] privateKey, List<String> contexts, Date expiryDate) {
+    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
+                                                                   VerifiableCredentialSubject verifiableCredentialSubject,
+                                                                   byte[] privateKey, List<String> contexts, Date expiryDate) {
         //VC Builder
         VerifiableCredentialBuilder builder =
                 new VerifiableCredentialBuilder()
                         .context(contexts)
                         .id(URI.create(UUID.randomUUID().toString()))
                         .type(verifiableCredentialType)
-                        .issuer(URI.create(issuerDid))
+                        .issuer(issuerDoc.getId())
                         .expirationDate(expiryDate.toInstant())
                         .issuanceDate(Instant.now())
                         .credentialSubject(verifiableCredentialSubject);
 
 
         //Ed25519 Proof Builder
-        LinkedDataProofGenerator generator = LinkedDataProofGenerator.create();
-        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), URI.create(issuerDid), privateKey);
+        LinkedDataProofGenerator generator = new LinkedDataProofGenerator(
+                new LinkedDataHasher(), new LinkedDataTransformer(), new LinkedDataSigner());
+        URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
+        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), verificationMethod,
+                privateKey);
 
         //Adding Proof to VC
         builder.proof(proof);

@@ -54,4 +54,10 @@ public class DidDocumentController {
     public ResponseEntity<DidDocument> getDidDocument(@PathVariable(name = "identifier") String identifier) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(identifier));
     }
+
+    @Operation(description = "Resolve the DID document for a given BPN", summary = "Resolve DID Document")
+    @GetMapping(path = RestURI.DID_RESOLVE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DidDocument> getDidResolve(@PathVariable(name = "bpn") String bpn) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(bpn));
+    }
 }
