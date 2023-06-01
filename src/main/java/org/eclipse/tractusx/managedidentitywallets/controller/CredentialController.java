@@ -22,6 +22,8 @@
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type Credential controller.
@@ -107,5 +110,39 @@ public class CredentialController extends BaseController {
     @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.issueFrameworkCredential(request, getBPNFromToken(principal)));
+    }
+
+    @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials")
+    @PostMapping(path = RestURI.CREDENTIALS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(examples = @ExampleObject("""
+                                {
+                                      "id": "http://example.edu/credentials/333",
+                                      "@context": [
+                                        "https://www.w3.org/2018/credentials/v1",
+                                        "https://www.w3.org/2018/credentials/examples/v1"
+                                      ],
+                                      "type": [
+                                        "University-Degree-Credential, VerifiableCredential"
+                                      ],
+                                      "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                      "issuanceDate": "2019-06-16T18:56:59Z",
+                                      "expirationDate": "2019-06-17T18:56:59Z",
+                                      "credentialSubject": {
+                                        "college": "Test-University"
+                                      },
+                                      "proof": {
+                                        "type": "Ed25519Signature2018",
+                                        "created": "2021-11-17T22:20:27Z",
+                                        "proofPurpose": "assertionMethod",
+                                        "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+                                        "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                      }
+                                }
+                    """))
+    })
+    public ResponseEntity<Map<String, Object>> createPresentation(@RequestBody Map<String, Object> data) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.credentialsValidation(data));
     }
 }
