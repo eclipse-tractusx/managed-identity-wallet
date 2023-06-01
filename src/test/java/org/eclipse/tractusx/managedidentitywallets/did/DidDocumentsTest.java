@@ -76,6 +76,35 @@ class DidDocumentsTest {
         Assertions.assertNotNull(response.getBody());
     }
 
+    @Test
+    void getDidDocumentWithDid200() {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        createWallet(bpn, did);
+        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, did);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+    }
+
+    @Test
+    void getDidResolveInvalidBpn404() {
+        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_RESOLVE, String.class, UUID.randomUUID().toString());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
+    }
+
+    @Test
+    void getDidResolveWithBpn200() {
+
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        createWallet(bpn, did);
+        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_RESOLVE, String.class, bpn);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+    }
+
     private Wallet createWallet(String bpn, String did) {
         String didDocument = """
                 {
@@ -101,16 +130,4 @@ class DidDocumentsTest {
                 .build();
         return walletRepository.save(wallet);
     }
-
-    @Test
-    void getDidDocumentWithDid200() {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-
-        createWallet(bpn, did);
-        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, did);
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertNotNull(response.getBody());
-    }
-    
 }

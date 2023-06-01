@@ -43,15 +43,21 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredential
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
+import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
+import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
+import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.net.http.HttpClient;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -150,7 +156,7 @@ public class CredentialService extends BaseService<Credential, Long> {
                 "value", request.getValue(),
                 "contract-template", request.getContractTemplate(),
                 "contract-version", request.getContractVersion());
-        Credential credential = CommonUtils.getCredential(subject, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX, miwSettings.authorityWalletDid(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
+        Credential credential = CommonUtils.getCredential(subject, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
         //Store Credential
         credential = create(credential);
@@ -187,7 +193,7 @@ public class CredentialService extends BaseService<Credential, Long> {
                 "holderIdentifier", holderWallet.getBpn(),
                 "activityType", request.getActivityType(),
                 "allowedVehicleBrands", request.getAllowedVehicleBrands());
-        Credential credential = CommonUtils.getCredential(subject, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, miwSettings.authorityWalletDid(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
+        Credential credential = CommonUtils.getCredential(subject, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
         //Store Credential
         credential = create(credential);
@@ -226,7 +232,7 @@ public class CredentialService extends BaseService<Credential, Long> {
                 "holderIdentifier", holderWallet.getBpn(),
                 "memberOf", baseWallet.getName(),
                 "status", "Active",
-                "startTime", Instant.now().toString()), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, miwSettings.authorityWalletDid(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
+                "startTime", Instant.now().toString()), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
         //Store Credential
         credential = create(credential);
@@ -236,10 +242,27 @@ public class CredentialService extends BaseService<Credential, Long> {
     }
 
 
-
-
     private void isCredentialExit(String holderDid, String credentialType) {
         Validate.isTrue(credentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
     }
 
+    public Map<String, Object> credentialsValidation(Map<String, Object> data) {
+        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+        // DID Resolver Constracture params
+        DidWebParser didParser = new DidWebParser();
+        var httpClient = HttpClient.newHttpClient();
+        var enforceHttps = true;
+
+        var didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
+        didDocumentResolverRegistry.register(
+                new DidWebDocumentResolver(httpClient, didParser, enforceHttps));
+
+        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
+        Boolean valid = proofValidation.checkProof(verifiableCredential); // TODO getting InvalidKeyException
+        Map<String, Object> response = new HashMap<>();
+        response.put("valid", valid);
+        response.put("vp", verifiableCredential);
+
+        return response;
+    }
 }
