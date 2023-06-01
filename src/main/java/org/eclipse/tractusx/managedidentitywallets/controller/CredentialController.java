@@ -63,12 +63,12 @@ public class CredentialController extends BaseController {
      */
     @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<VerifiableCredential>> getCredentials(@RequestParam(required = false) String id,
+    public ResponseEntity<List<VerifiableCredential>> getCredentials(@RequestParam(required = false) String credentialId,
                                                                      @RequestParam(required = false) String issuerIdentifier,
                                                                      @RequestParam(required = false) List<String> type,
                                                                      @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
                                                                      @RequestParam(required = false, defaultValue = "desc") String sortTpe, Principal principal) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(id, issuerIdentifier, type, sortColumn, sortTpe, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(credentialId, issuerIdentifier, type, sortColumn, sortTpe, getBPNFromToken(principal)));
     }
 
     /**

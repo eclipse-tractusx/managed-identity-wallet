@@ -136,6 +136,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .issuerDid(URLDecoder.decode(verifiableCredential.getIssuer().toString(), Charset.defaultCharset()))
                 .type(verifiableCredential.getTypes().get(0))
                 .data(verifiableCredential)
+                .credentialId(verifiableCredential.getId().toString())
                 .build());
         return Map.of("message", String.format("Credential with id %s has been successfully stored", verifiableCredential.getId()));
     }

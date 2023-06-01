@@ -46,12 +46,10 @@ import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationF
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The type Presentation service.
@@ -127,8 +125,8 @@ public class PresentationService extends BaseService<Credential, Long> {
             //Build JWT
             SignedJWT presentation = presentationFactory.createPresentation(
                     issuerDid, verifiableCredentials, audience, walletKeyService.getEd25519Key(holderWallet.getId()));
-
-            response.put("vp", presentation);
+            
+            response.put("vp", presentation.serialize());
         } else {
             VerifiablePresentationBuilder verifiablePresentationBuilder =
                     new VerifiablePresentationBuilder();
@@ -136,7 +134,7 @@ public class PresentationService extends BaseService<Credential, Long> {
             // Build VP
             VerifiablePresentation verifiablePresentation =
                     verifiablePresentationBuilder
-                            .id(issuerDid.toUri())
+                            .id(URI.create(UUID.randomUUID().toString()))
                             .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
                             .verifiableCredentials(verifiableCredentials)
                             .build();
