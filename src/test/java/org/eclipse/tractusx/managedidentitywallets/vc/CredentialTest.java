@@ -44,14 +44,13 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class CredentialTest {
+class CredentialTest {
 
     @Autowired
     private CredentialRepository credentialRepository;
@@ -78,15 +77,16 @@ public class CredentialTest {
     }
 
     @Test
-    void getCredentials200() throws JsonProcessingException, com.fasterxml.jackson.core.JsonProcessingException {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+    void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
+
 
         String baseDID = miwSettings.authorityWalletDid();
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         //save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
-        TestUtils.issueMembershipVC(restTemplate, bpn);
+        TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         String vcList = """
                 [
                 {"type":"cx-traceability","value":"ID_3.0_Trace"},
@@ -101,38 +101,27 @@ public class CredentialTest {
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn, jsonObject.get("type").toString(), jsonObject.get("value").toString());
-            HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request, headers);
+            HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); //ony base wallet can issue VC
             ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
             Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
         }
 
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?bpn={bpn}"
-                , HttpMethod.GET, entity, String.class, bpn);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}"
+                , HttpMethod.GET, entity, String.class, baseDID);
         List<VerifiableCredential> credentialList = getCredentialsFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertTrue(Objects.requireNonNull(credentialList).size() == 7);
-
-        response = restTemplate.exchange(RestURI.CREDENTIALS + "?holderIdentifier={did}"
-                , HttpMethod.GET, entity, String.class, did);
-        credentialList = getCredentialsFromString(response.getBody());
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertTrue(Objects.requireNonNull(credentialList).size() == 6);
-
-        response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}"
-                , HttpMethod.GET, entity, String.class, baseDID);
-        credentialList = getCredentialsFromString(response.getBody());
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertTrue(Objects.requireNonNull(credentialList).size() == 7);
+        Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size());
 
         List<String> list = new ArrayList<>();
-        list.add(MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
                 , HttpMethod.GET, entity, String.class, String.join(",", list));
         credentialList = getCredentialsFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertTrue(Objects.requireNonNull(credentialList).size() == 1);
+        Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
     }
 
 

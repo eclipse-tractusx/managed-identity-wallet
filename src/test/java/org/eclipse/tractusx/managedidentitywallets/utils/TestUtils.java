@@ -72,11 +72,11 @@ public class TestUtils {
         }
 
         //check expiry date
-        Assertions.assertEquals(verifiableCredential.getExpirationDate().compareTo(miwSettings.vcExpiryDate().toInstant()), 0);
+        Assertions.assertEquals(0, verifiableCredential.getExpirationDate().compareTo(miwSettings.vcExpiryDate().toInstant()));
     }
 
-    public static ResponseEntity<String> issueMembershipVC(TestRestTemplate restTemplate, String bpn) {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+    public static ResponseEntity<String> issueMembershipVC(TestRestTemplate restTemplate, String bpn, String baseWalletBpn) {
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseWalletBpn);
         IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
         HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
 

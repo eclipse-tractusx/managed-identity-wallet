@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
@@ -45,11 +46,16 @@ import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationF
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
 import org.springframework.stereotype.Service;
 
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The type Presentation service.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -74,7 +80,16 @@ public class PresentationService extends BaseService<Credential, Long> {
         return credentialSpecificationUtil;
     }
 
-    public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience) {
+    /**
+     * Create presentation map.
+     *
+     * @param data      the data
+     * @param asJwt     the as jwt
+     * @param audience  the audience
+     * @param callerBpn the caller bpn
+     * @return the map
+     */
+    public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
         Map<String, Object> response = new HashMap<>();
 
         String holderIdentifier = data.get("holderIdentifier").toString();
@@ -82,10 +97,13 @@ public class PresentationService extends BaseService<Credential, Long> {
         //check if holder wallet is in the system
         Wallet holderWallet = walletService.getWalletByIdentifier(holderIdentifier);
 
+
         List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get("verifiableCredentials");
 
-        List<VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
+        //only support one credential at a time to create VP
+        Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
 
+        List<VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
         verifiableCredentialList.forEach(map -> {
             VerifiableCredential verifiableCredential = new VerifiableCredential(map);
             validateCredential(verifiableCredential, holderIdentifier);
@@ -93,8 +111,12 @@ public class PresentationService extends BaseService<Credential, Long> {
             verifiableCredentials.add(verifiableCredential);
         });
 
+        String issuerDidString = URLDecoder.decode(verifiableCredentials.get(0).getIssuer().toString(), Charset.defaultCharset());
+        Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer());
+        Wallet issuerWallet = walletService.getWalletByIdentifier(issuerDidString);
 
-        Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer()); //TODO need to discuss, what if we have credentials with separate issuer?
+        //validate BPN access
+        Validate.isFalse(issuerWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
 
         if (asJwt) {
 
@@ -105,6 +127,7 @@ public class PresentationService extends BaseService<Credential, Long> {
             //Build JWT
             SignedJWT presentation = presentationFactory.createPresentation(
                     issuerDid, verifiableCredentials, audience, walletKeyService.getEd25519Key(holderWallet.getId()));
+
             response.put("vp", presentation);
         } else {
             VerifiablePresentationBuilder verifiablePresentationBuilder =

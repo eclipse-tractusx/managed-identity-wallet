@@ -36,12 +36,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "VerifiablePresentations")
-public class PresentationController {
+public class PresentationController extends BaseController {
 
     private final PresentationService presentationService;
 
@@ -81,8 +82,8 @@ public class PresentationController {
                     """))
     })
     public ResponseEntity<Map<String, Object>> createPresentation(@RequestBody Map<String, Object> data,
-                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt
+                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Principal principal
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, "smartSense"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, "smartSense", getBPNFromToken(principal)));
     }
 }

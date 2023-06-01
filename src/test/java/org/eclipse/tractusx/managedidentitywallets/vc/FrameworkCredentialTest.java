@@ -54,7 +54,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class FrameworkCredentialTest {
+class FrameworkCredentialTest {
     @Autowired
     private CredentialRepository credentialRepository;
     @Autowired
@@ -84,16 +84,36 @@ public class FrameworkCredentialTest {
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
+
+    @Test
+    void issueFrameworkCredentialWithInvalidBpnAccessTest201() throws JsonProcessingException, JSONException {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+
+        String type = "cx-behavior-twin";
+        String value = "Behavior Twin";
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
+
+        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
     @Test
     void issueBehaviorTwinCredentialTest201() throws JsonProcessingException, JSONException {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
-        String type ="cx-behavior-twin";
-        String value ="Behavior Twin";
+        String type = "cx-behavior-twin";
+        String value = "Behavior Twin";
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
@@ -115,7 +135,7 @@ public class FrameworkCredentialTest {
         String type ="cx-pcf";
         String value ="PCF";
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
@@ -136,7 +156,7 @@ public class FrameworkCredentialTest {
         String type ="cx-quality";
         String value ="Quality";
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
@@ -157,7 +177,7 @@ public class FrameworkCredentialTest {
         String type ="cx-resiliency";
         String value ="Resiliency";
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
@@ -178,7 +198,7 @@ public class FrameworkCredentialTest {
         String type ="cx-sustainability";
         String value ="Sustainability";
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
@@ -200,7 +220,7 @@ public class FrameworkCredentialTest {
         String type ="cx-traceability";
         String value ="ID_3.0_Trace";
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
@@ -222,7 +242,7 @@ public class FrameworkCredentialTest {
         String type ="cx-traceability1";
         String value ="ID_3.0_Trace1";
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
 
@@ -241,9 +261,9 @@ public class FrameworkCredentialTest {
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
-        Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("type").equals(type));
-        Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("value").equals(value));
-        Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("id").equals(wallet.getDid()));
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("type"), type);
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("value"), value);
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("id"), wallet.getDid());
 
         Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
         Assertions.assertNotNull(credential);
@@ -251,9 +271,9 @@ public class FrameworkCredentialTest {
         VerifiableCredential vcFromDB = credential.getData();
         TestUtils.checkVC(vcFromDB, miwSettings);
 
-        Assertions.assertTrue(vcFromDB.getCredentialSubject().get(0).get("type").equals(type));
-        Assertions.assertTrue(vcFromDB.getCredentialSubject().get(0).get("value").equals(value));
-        Assertions.assertTrue(vcFromDB.getCredentialSubject().get(0).get("id").equals(wallet.getDid()));
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("type"), type);
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("value"), value);
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("id"), wallet.getDid());
     }
 
 

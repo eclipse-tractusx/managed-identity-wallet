@@ -44,7 +44,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class DidDocumentsTest {
+class DidDocumentsTest {
     @Autowired
     private WalletRepository walletRepository;
 
