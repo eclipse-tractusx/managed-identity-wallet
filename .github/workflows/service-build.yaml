@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}_MIW_service
+  IMAGE_NAME: ${{ github.repository }}_miw_service
 
 jobs:
   build-and-push-image:
