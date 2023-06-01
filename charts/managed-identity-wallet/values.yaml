@@ -1,25 +1,40 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service
   pullPolicy: Always
   tag: ""
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: acr-credential
+
 nameOverride: ""
 fullnameOverride: ""
 
-secret:
-  # -- Database connection string to the Postgres database of MIW. Used when postgresql.useDefaultJdbcUrl is false
-  jdbcurl: "jdbc:postgresql://<host>:<port>/<db-name>?user=<user>&password=<password>"
-  # -- It can be extracted from Keycloak
-  authclientid: "clientid"
-  # -- It can be extracted from Keycloak
-  authclientsecret: "client"
-  # -- client id for accessing the BPDM data pool endpoint
-  bpdmauthclientid: "clientid"
-  # -- client secret for accessing the BPDM data pool endpoint
-  bpdmauthclientsecret: "client"
+secrets:
+  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
+  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
+  KEYCLOAK_CLIENT_ID: xxx
+  ENCRYPTION_KEY: xxx
+
+envs:
+  APPLICATION_PORT: xxx
+  APPLICATION_ENVIRONMENT: xxx
+  DB_HOST: xxx
+  DB_PORT: xxx
+  DB_NAME: xxx
+  USE_SSL: xxx
+  DB_POOL_SIZE: xxx
+  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
+  MANAGEMENT_PORT: xxx
+  MIW_HOST_NAME: xxx
+  AUTHORITY_WALLET_BPN: xxx
+  AUTHORITY_WALLET_NAME: xxx
+  AUTHORITY_WALLET_DID: xxx
+  VC_SCHEMA_LINK: xxx
+  VC_EXPIRY_DATE: xxx
+  KEYCLOAK_REALM: xxx
+  AUTH_SERVER_URL: xxx
 
 serviceAccount:
   create: true
@@ -84,7 +99,7 @@ affinity: {}
 podAnnotations: {}
 
 postgresql:
-  secret:
-    password: "postgres"
-    postgrespassword: "postgres"
-    user: "postgres"
+  auth:
+    password: postgres
+    username: postgres
+    postgresPassword: postgres
