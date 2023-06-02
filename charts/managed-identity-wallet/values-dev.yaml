@@ -4,7 +4,7 @@ image:
 secrets:
   DB_USER_NAME: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#user>
   DB_PASSWORD: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#password>
-  ENCRYPTION_KEY: 8dfedff855839ff6461f9d7e5ee4bb1b0300206db7d55a76ae0504dfa58f9a90
+  ENCRYPTION_KEY: 76a7834fb37e090c2789a9b1a76748d3
   KEYCLOAK_CLIENT_ID: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#miw-auth-client-id>
 
 envs:
