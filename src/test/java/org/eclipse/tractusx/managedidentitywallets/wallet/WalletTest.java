@@ -36,7 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepos
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -113,9 +113,9 @@ class WalletTest {
         String bpn = UUID.randomUUID().toString();
         String name = "Sample Wallet";
 
-        ResponseEntity<String> response = createWallet(bpn, name);
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, name, restTemplate);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-        Wallet wallet = getWalletFromString(response.getBody());
+        Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         Assertions.assertNotNull(response.getBody());
         Assertions.assertNotNull(wallet.getDidDocument());
@@ -139,7 +139,7 @@ class WalletTest {
 
         ResponseEntity<String> getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "true");
         Assertions.assertEquals(getWalletResponse.getStatusCode().value(), HttpStatus.OK.value());
-        Wallet body = getWalletFromString(getWalletResponse.getBody());
+        Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(1, body.getVerifiableCredentials().size());
         VerifiableCredential verifiableCredential = body.getVerifiableCredentials().get(0);
 
@@ -243,12 +243,12 @@ class WalletTest {
         String name = "Sample Wallet";
 
         //save wallet
-        ResponseEntity<String> response = createWallet(bpn, name);
-        getWalletFromString(response.getBody());
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, name, restTemplate);
+        TestUtils.getWalletFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
         //try with again with same BPN
-        ResponseEntity<String> response1 = createWallet(bpn, name);
+        ResponseEntity<String> response1 = TestUtils.createWallet(bpn, name, restTemplate);
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), response1.getStatusCode().value());
     }
 
@@ -268,7 +268,7 @@ class WalletTest {
     void getWalletByIdentifierWithInvalidBPNTest403() {
         String bpn = UUID.randomUUID().toString();
 
-        createWallet(bpn, "sample name");
+        TestUtils.createWallet(bpn, "sample name", restTemplate);
 
         //create token with different BPN
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("invalid BPN");
@@ -285,7 +285,7 @@ class WalletTest {
         String name = "Sample Name";
 
         //Create entry
-        Wallet wallet = getWalletFromString(createWallet(bpn, name).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, name, restTemplate).getBody());
 
         //get Wallet
         ///get wallet with credentials
@@ -295,7 +295,7 @@ class WalletTest {
 
         ResponseEntity<String> getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "false");
 
-        Wallet body = getWalletFromString(getWalletResponse.getBody());
+        Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
         Assertions.assertNotNull(getWalletResponse.getBody());
         Assertions.assertEquals(body.getBpn(), bpn);
@@ -308,7 +308,7 @@ class WalletTest {
         String name = "Sample Name";
         String did = "did:web:localhost:" + bpn;
         //Create entry
-        Wallet wallet = getWalletFromString(createWallet(bpn, name).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, name, restTemplate).getBody());
 
         //store credentials
         ResponseEntity<Map> response = storeCredential(bpn, did);
@@ -321,7 +321,7 @@ class WalletTest {
 
         ResponseEntity<String> getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "true");
 
-        Wallet body = getWalletFromString(getWalletResponse.getBody());
+        Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
         Assertions.assertNotNull(getWalletResponse.getBody());
         Assertions.assertEquals(2, body.getVerifiableCredentials().size());
@@ -336,7 +336,7 @@ class WalletTest {
         String did = "did:web:localhost:" + bpn;
 
         //Create entry
-        Wallet wallet = getWalletFromString(createWallet(bpn, name).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, name, restTemplate).getBody());
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
@@ -344,7 +344,7 @@ class WalletTest {
 
         ResponseEntity<String> response = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER, HttpMethod.GET, entity, String.class, newWallet.getDid());
 
-        Wallet body = getWalletFromString(response.getBody());
+        Wallet body = TestUtils.getWalletFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(body.getBpn(), bpn);
@@ -381,7 +381,7 @@ class WalletTest {
         String name = "Sample Name";
         String did = "did:web:localhost:" + bpn;
         //Create entry
-        createWallet(bpn, name);
+        TestUtils.createWallet(bpn, name, restTemplate);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
@@ -391,34 +391,6 @@ class WalletTest {
         Assertions.assertTrue(Objects.requireNonNull(body).size() > 0);
     }
 
-    private Wallet getWalletFromString(String body) throws JsonProcessingException {
-        JSONObject jsonObject = new JSONObject(body);
-        //convert DidDocument
-        JSONObject didDocument = jsonObject.getJSONObject("didDocument");
-        jsonObject.remove("didDocument");
-
-        JSONArray credentialArray = null;
-        if (!jsonObject.isNull("verifiableCredentials")) {
-            credentialArray = jsonObject.getJSONArray("verifiableCredentials");
-            jsonObject.remove("verifiableCredentials");
-        }
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        Wallet wallet1 = objectMapper.readValue(jsonObject.toString(), Wallet.class);
-        wallet1.setDidDocument(DidDocument.fromJson(didDocument.toString()));
-
-        //convert VC
-        if (credentialArray != null) {
-            List<VerifiableCredential> verifiableCredentials = new ArrayList<>(credentialArray.length());
-            for (int i = 0; i < credentialArray.length(); i++) {
-                JSONObject object = credentialArray.getJSONObject(i);
-                verifiableCredentials.add(new VerifiableCredential(objectMapper.readValue(object.toString(), Map.class)));
-            }
-            wallet1.setVerifiableCredentials(verifiableCredentials);
-        }
-        System.out.println("wallet -- >" + wallet1.getBpn());
-        return wallet1;
-    }
 
 
     private ResponseEntity<Map> storeCredential(String bpn, String did) throws JsonProcessingException {
@@ -472,19 +444,6 @@ class WalletTest {
     }
 
 
-    private ResponseEntity<String> createWallet(String bpn, String name) {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
-
-        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
-
-        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
-
-        ResponseEntity<String> exchange = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, String.class);
-        return exchange;
-
-    }
-
-
     private List<Wallet> getWalletsFromString(String body) throws JsonProcessingException {
         List<Wallet> walletList = new ArrayList<>();
 
@@ -495,7 +454,7 @@ class WalletTest {
 
         for (int i = 0; i < array.length(); i++) {
             JSONObject wallet = array.getJSONObject(i);
-            walletList.add(getWalletFromString(wallet.toString()));
+            walletList.add(TestUtils.getWalletFromString(wallet.toString()));
         }
         return walletList;
     }

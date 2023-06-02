@@ -82,8 +82,53 @@ public class PresentationController extends BaseController {
                     """))
     })
     public ResponseEntity<Map<String, Object>> createPresentation(@RequestBody Map<String, Object> data,
+                                                                  @RequestParam(name = "audience", required = false) String audience,
                                                                   @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Principal principal
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, "smartSense", getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, getBPNFromToken(principal)));
+    }
+
+    @Operation(summary = "Validate Verifiable Presentation", description = "Permission: **view_wallets** OR **view_wallet**  \n\n Validate Verifiable Presentation with all included credentials")
+    @PostMapping(path = RestURI.API_PRESENTATIONS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(examples = @ExampleObject("""
+                                {
+                                  "holderIdentifier": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                  "verifiableCredentials": [
+                                    {
+                                      "id": "http://example.edu/credentials/333",
+                                      "@context": [
+                                        "https://www.w3.org/2018/credentials/v1",
+                                        "https://www.w3.org/2018/credentials/examples/v1"
+                                      ],
+                                      "type": [
+                                        "University-Degree-Credential, VerifiableCredential"
+                                      ],
+                                      "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                      "issuanceDate": "2019-06-16T18:56:59Z",
+                                      "expirationDate": "2019-06-17T18:56:59Z",
+                                      "credentialSubject": {
+                                        "college": "Test-University"
+                                      },
+                                      "proof": {
+                                        "type": "Ed25519Signature2018",
+                                        "created": "2021-11-17T22:20:27Z",
+                                        "proofPurpose": "assertionMethod",
+                                        "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+                                        "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                      }
+                                    }
+                                  ]
+                                }
+                    """))
+    })
+    public ResponseEntity<Map<String, Object>> validatePresentation(@RequestBody Map<String, Object> data,
+                                                                    @RequestParam(name = "audience", required = false) String audience,
+                                                                    @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt,
+                                                                    @RequestParam(name = "withCredentialExpiryDate", required = false, defaultValue = "false") boolean withCredentialExpiryDate,
+                                                                    @RequestParam(name = "withCredentialsValidation", required = false, defaultValue = "false") boolean withCredentialsValidation
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.validatePresentation(data, asJwt, withCredentialExpiryDate, withCredentialsValidation));
     }
 }

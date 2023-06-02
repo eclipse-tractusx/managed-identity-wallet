@@ -21,6 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -30,12 +32,18 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class TestUtils {
 
@@ -50,7 +58,7 @@ public class TestUtils {
         return exchange;
 
     }
-
+    
     public static Wallet createWallet(String bpn, String did, WalletRepository walletRepository) {
         String didDocument = """
                 {
@@ -105,5 +113,35 @@ public class TestUtils {
                 .bpn(bpn)
                 .build();
         return twinRequest;
+    }
+
+
+    public static Wallet getWalletFromString(String body) throws JsonProcessingException {
+        JSONObject jsonObject = new JSONObject(body);
+        //convert DidDocument
+        JSONObject didDocument = jsonObject.getJSONObject("didDocument");
+        jsonObject.remove("didDocument");
+
+        JSONArray credentialArray = null;
+        if (!jsonObject.isNull("verifiableCredentials")) {
+            credentialArray = jsonObject.getJSONArray("verifiableCredentials");
+            jsonObject.remove("verifiableCredentials");
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Wallet wallet1 = objectMapper.readValue(jsonObject.toString(), Wallet.class);
+        wallet1.setDidDocument(DidDocument.fromJson(didDocument.toString()));
+
+        //convert VC
+        if (credentialArray != null) {
+            List<VerifiableCredential> verifiableCredentials = new ArrayList<>(credentialArray.length());
+            for (int i = 0; i < credentialArray.length(); i++) {
+                JSONObject object = credentialArray.getJSONObject(i);
+                verifiableCredentials.add(new VerifiableCredential(objectMapper.readValue(object.toString(), Map.class)));
+            }
+            wallet1.setVerifiableCredentials(verifiableCredentials);
+        }
+        System.out.println("wallet -- >" + wallet1.getBpn());
+        return wallet1;
     }
 }
