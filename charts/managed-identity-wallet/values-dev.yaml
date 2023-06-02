@@ -18,7 +18,7 @@ ingress:
   hosts:
     - host: managed-identity-wallet-new.dev.demo.catena-x.net
       paths:
-        - path: /(.*)
+        - path: /
           pathType: Prefix
   tls:
     - secretName: miw-secret
