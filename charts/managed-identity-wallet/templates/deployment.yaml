@@ -33,6 +33,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if or .Values.envs .Values.secrets }}
           env:
+            - name: APPLICATION_PORT
+              value: "8080"
           {{- range $key, $val := .Values.envs }}
             - name: {{ $key }}
               value: {{ $val }}

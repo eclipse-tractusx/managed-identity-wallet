@@ -17,8 +17,8 @@ secrets:
 #  KEYCLOAK_CLIENT_ID: xxx
 #  ENCRYPTION_KEY: xxx  # 64 chars
 
+# APPLICATION_PORT is bound to 8080!!
 envs:
-#  APPLICATION_PORT: xxx
 #  APPLICATION_ENVIRONMENT: xxx
 #  DB_HOST: auto
 #  DB_PORT: xxx
