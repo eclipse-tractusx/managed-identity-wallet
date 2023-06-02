@@ -38,6 +38,7 @@ import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.exception.DidDocumentResolverNotRegisteredException;
 import org.eclipse.tractusx.ssi.lib.exception.JwtException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
@@ -155,7 +156,7 @@ public class PresentationService extends BaseService<Credential, Long> {
     }
 
 
-    public Map<String, Object> validatePresentation(Map<String, Object> vp, boolean asJwt, boolean withCredentialExpiryDate, boolean withCredentialsValidation) {
+    public Map<String, Object> validatePresentation(Map<String, Object> vp, boolean asJwt, boolean withCredentialExpiryDate, String audience) {
 
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
@@ -165,9 +166,8 @@ public class PresentationService extends BaseService<Credential, Long> {
             response.put("vp", jwt);
             try {
                 SignedJWT signedJWT = SignedJWT.parse(jwt);
-                //validate
-                //TODO need to verify with withCredentialExperationDate and withCredentialsValidation
 
+                //validate jwt signature
                 DidWebParser didParser = new DidWebParser();
                 var httpClient = HttpClient.newHttpClient();
                 var enforceHttps = true;
@@ -177,13 +177,25 @@ public class PresentationService extends BaseService<Credential, Long> {
                         new DidWebDocumentResolver(httpClient, didParser, enforceHttps));
 
                 SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
-
-
                 jwtVerifier.verify(signedJWT);
-                response.put("valid", true);
 
+
+                //validate audience
+                if (StringUtils.hasText(audience)) {
+                    SignedJwtValidator jwtValidator = new SignedJwtValidator();
+                    jwtValidator.validateAudiences(signedJWT, audience);
+                }
+
+                //validate date
+                if (withCredentialExpiryDate) {
+                    SignedJwtValidator jwtValidator = new SignedJwtValidator();
+                    jwtValidator.validateDate(signedJWT);
+                }
+
+                response.put("valid", true);
             } catch (JwtException | DidDocumentResolverNotRegisteredException | ParseException e) {
                 log.error("Can not verify VP as JWT ", e);
+                response.put("valid", false);
             }
 
         } else {

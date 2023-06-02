@@ -866,11 +866,13 @@
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "http://localhost/*",
-        "http://localhost:8087/*"
+        "http://localhost:8087/*",
+        "http://localhost:8080/*"
       ],
       "webOrigins": [
         "http://localhost",
-        "http://localhost:8087"
+        "http://localhost:8087",
+        "http://localhost:8080"
       ],
       "notBefore": 0,
       "bearerOnly": false,
