@@ -51,6 +51,8 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -133,16 +135,21 @@ public class CredentialService extends BaseService<Credential, Long> {
         if (StringUtils.hasText(credentialId)) {
             filterRequest.appendNewCriteria("credentialId", Operator.EQUALS, credentialId);
         }
-        
+        Specification<Credential> sps = getSpecificationUtil().generateSpecification(filterRequest.getCriteria());
+        FilterRequest request = new FilterRequest();
         if (!CollectionUtils.isEmpty(type)) {
-            filterRequest.appendNewCriteria("type", Operator.IN, type);
+            for (String str : type) {
+                request.appendNewCriteria("type", Operator.CONTAIN, str);
+            }
+            Specification<Credential> sp = getSpecificationUtil().generateOrSpecification(request.getCriteria());
+            sps = sp.and(sps);
         }
 
         Sort sort = new Sort();
         sort.setColumn(sortColumn);
         sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
         filterRequest.setSort(sort);
-        Page<Credential> filter = filter(filterRequest);
+        Page<Credential> filter = getRepository().findAll(sps, PageRequest.of(0, 1000));
 
         List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
         for (Credential credential : filter.getContent()) {
@@ -294,10 +301,10 @@ public class CredentialService extends BaseService<Credential, Long> {
                 new DidWebDocumentResolver(httpClient, didParser, enforceHttps));
 
         LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
-        Boolean valid = proofValidation.checkProof(verifiableCredential); // TODO getting InvalidKeyException
+        Boolean valid = proofValidation.checkProof(verifiableCredential);
         Map<String, Object> response = new HashMap<>();
         response.put("valid", valid);
-        response.put("vp", verifiableCredential);
+        response.put("vc", verifiableCredential);
 
         return response;
     }
