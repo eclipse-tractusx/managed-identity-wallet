@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.google.common.collect.ImmutableMap;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -28,7 +29,6 @@ import com.smartsensesolutions.java.commons.operator.Operator;
 import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -39,6 +39,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepo
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
+import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
@@ -63,9 +64,11 @@ import java.util.*;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class CredentialService extends BaseService<Credential, Long> {
 
+    /**
+     * The constant BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN.
+     */
     public static final String BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN = "Base wallet BPN is not matching with request BPN(from token)";
     private final CredentialRepository credentialRepository;
     private final MIWSettings miwSettings;
@@ -74,6 +77,23 @@ public class CredentialService extends BaseService<Credential, Long> {
     private final SpecificationUtil<Credential> credentialSpecificationUtil;
 
     private final WalletKeyService walletKeyService;
+
+    private final Map<String, String> supportedFrameworkVCTypes;
+
+    public CredentialService(CredentialRepository credentialRepository, MIWSettings miwSettings, WalletService walletService, SpecificationUtil<Credential> credentialSpecificationUtil, WalletKeyService walletKeyService) {
+        this.credentialRepository = credentialRepository;
+        this.miwSettings = miwSettings;
+        this.walletService = walletService;
+        this.credentialSpecificationUtil = credentialSpecificationUtil;
+        this.walletKeyService = walletKeyService;
+
+        Map<String, String> tmpMap = new HashMap<>();
+        for (String type : org.apache.commons.lang3.StringUtils.split(miwSettings.supportedFrameworkVCTypes(), ",")) {
+            tmpMap.put(type.split("=")[0].trim(), type.split("=")[1].trim());
+        }
+        supportedFrameworkVCTypes = ImmutableMap.copyOf(tmpMap);
+
+    }
 
 
     @Override
@@ -141,6 +161,13 @@ public class CredentialService extends BaseService<Credential, Long> {
      * @return the verifiable credential
      */
     public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
+
+        //validate type
+        Validate.isFalse(supportedFrameworkVCTypes.containsKey(request.getType())).launch(new BadDataException("Framework credential of type " + request.getType() + " is not supported"));
+
+        //validate value
+        Validate.isFalse(request.getValue().equals(supportedFrameworkVCTypes.get(request.getType()))).launch(new BadDataException("Invalid value of credential type " + request.getType()));
+
         //Fetch Holder Wallet
         Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
 
@@ -249,6 +276,12 @@ public class CredentialService extends BaseService<Credential, Long> {
         Validate.isTrue(credentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
     }
 
+    /**
+     * Credentials validation map.
+     *
+     * @param data the data
+     * @return the map
+     */
     public Map<String, Object> credentialsValidation(Map<String, Object> data) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         // DID Resolver Constracture params

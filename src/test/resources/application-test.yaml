@@ -4,6 +4,9 @@ spring:
 miw:
   host: localhost
   encryptionKey: ohb7echohNe3zoo1so0eiC2phue4liux
+  authorityWalletDid: did:web:localhost:BPNL000000000000
+  authorityWalletName: Catena-x
+  authorityWalletBpn: BPNL000000000000
   security:
     enabled: true
     realm: miw_test

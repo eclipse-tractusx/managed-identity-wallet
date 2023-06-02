@@ -56,7 +56,7 @@ public class CredentialController extends BaseController {
     /**
      * Gets credentials.
      *
-     * @param id               the id
+     * @param credentialId     the credential id
      * @param issuerIdentifier the issuer identifier
      * @param type             the type
      * @param sortColumn       the sort column
@@ -78,6 +78,7 @@ public class CredentialController extends BaseController {
      * Issue membership credential response entity.
      *
      * @param issueMembershipCredentialRequest the issue membership credential request
+     * @param principal                        the principal
      * @return the response entity
      */
     @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
@@ -112,6 +113,12 @@ public class CredentialController extends BaseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.issueFrameworkCredential(request, getBPNFromToken(principal)));
     }
 
+    /**
+     * Credentials validation response entity.
+     *
+     * @param data the data
+     * @return the response entity
+     */
     @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials")
     @PostMapping(path = RestURI.CREDENTIALS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
