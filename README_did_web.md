@@ -28,9 +28,7 @@ Following tools the MIW development team used successfully:
 5. set ORG_GRADLE_PROJECT_githubUserName and ORG_GRADLE_PROJECT_githubToken values
    in [dev.env](dev-assets%2Fdid-web%2Fdev.env)
 6. Setup [dev.env](dev-assets%2Fdid-web%2Fdev.env) values either in application.yaml or in IDE
-7.
-Run [ManagedIdentityWalletsApplication.java](src%2Fmain%2Fjava%2Forg%2Feclipse%2Ftractusx%2Fmanagedidentitywallets%2FManagedIdentityWalletsApplication.java)
-in IDE
+7. Run [ManagedIdentityWalletsApplication.java](src%2Fmain%2Fjava%2Forg%2Feclipse%2Ftractusx%2Fmanagedidentitywallets%2FManagedIdentityWalletsApplication.java) in IDE
 8. Open API doc on http://localhost:8080
 9. Click on Authorize on swagger UI and on the dialog click again on Authorize.
 10. Login with username=catena-x and password=password
@@ -60,7 +58,7 @@ Currently the minimum is 80%
 
 | name                         | description                                                                                   | default value                                                                                                                                       |
 |------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| APPLICATION_PORT             | port number of application                                                                    | 8087                                                                                                                                                | 
+| APPLICATION_PORT             | port number of application                                                                    | 8080                                                                                                                                                | 
 | APPLICATION_ENVIRONMENT      | Environment of the application ie. local, dev, int and prod                                   | local                                                                                                                                               |
 | DB_HOST                      | Database host                                                                                 | localhost                                                                                                                                           |
 | DB_PORT                      | Port of database                                                                              | 5432                                                                                                                                                |

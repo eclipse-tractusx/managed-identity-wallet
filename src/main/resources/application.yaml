@@ -72,7 +72,7 @@ miw:
     enabled: true
     realm: ${KEYCLOAK_REALM:miw_test}
     clientId: ${KEYCLOAK_CLIENT_ID:miw_private_client}
-    auth-server-url: ${AUTH_SERVER_URL:https://dev-auth.keenlyco.com}
+    auth-server-url: ${AUTH_SERVER_URL:https://localhost:8080}
     auth-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/auth
     token-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/token
     refresh-token-url: ${miw.security.token-url}
