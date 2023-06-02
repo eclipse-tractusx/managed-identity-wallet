@@ -4,14 +4,59 @@ dotenv:
   - 'dev.env'
 
 tasks:
-  runDevEnv:
-    desc: Spin up local Docker environment
-    dir: dev-assets/dev-containers
-    cmds:
-      - docker-compose up
-
   unittest:
     desc: Executes helm unittests
     dir: charts/managed-identity-wallet
     cmds:
       - helm unittest .
+
+  build:
+    desc: Build the whole app
+    cmds:
+      - ./gradlew build -PgithubToken=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 -x test -x jacocoTestCoverageVerification
+
+  buildDocker:
+    desc: Build the app and the corresponding Docker image (tagged as "miw-test")
+    cmds:
+      - task: buildJar
+      - docker build -t local-miw --platform linux/amd64 .
+
+  runDevEnv:
+    desc: Spin up local Docker environment
+    dir: dev-assets/dev-containers
+    ignore_error: true
+    vars:
+      OPTIONS: '{{ default "" .OPTIONS }}'
+      CONTAINERS: '{{ default "local_postgres local_keycloak" .CONTAINERS }}'
+    cmds:
+      - "docker-compose up {{ .OPTIONS }} {{ .CONTAINERS }}"
+
+  stopDevEnv:
+    desc: Stop local Docker environment
+    dir: dev-assets/dev-containers
+    cmds:
+      - docker-compose down
+
+  runDockerApp:
+    desc: Run the app in a container environment
+    cmds:
+      - task: runDevEnv
+        vars:
+          OPTIONS: "-d"
+      - task: buildDocker
+      - cmd: docker rm miw-app
+        ignore_error: true
+      - task: runDevEnv
+        vars:
+          CONTAINERS: "local_miw_app"
+
+  stopDockerApp:
+    desc: Stop all running containers
+    cmds:
+      - docker stop miw-app
+      - task: stopDevEnv
+
+  clean:
+    desc: Cleans everything...
+    cmds:
+      - ./gradlew clean
