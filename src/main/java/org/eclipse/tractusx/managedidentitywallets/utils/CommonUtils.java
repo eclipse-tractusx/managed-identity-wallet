@@ -36,10 +36,7 @@ import org.eclipse.tractusx.ssi.lib.proof.verify.LinkedDataSigner;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The type Common utils.
@@ -69,29 +66,33 @@ public class CommonUtils {
      * Gets credential.
      *
      * @param subject         the subject
-     * @param type            the type
+     * @param types           the types
      * @param issuerDoc       the issuer doc
      * @param privateKeyBytes the private key bytes
      * @param holderDid       the holder did
      * @return the credential
      */
-    public static Credential getCredential(Map<String, Object> subject, String type, DidDocument issuerDoc, byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate) {
+    public static Credential getCredential(Map<String, Object> subject, List<String> types, DidDocument issuerDoc, byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate) {
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
                 new VerifiableCredentialSubject(subject);
 
-        // VC Type
-        List<String> verifiableCredentialType = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type);
+
+        List<String> cloneTypes = new ArrayList<>();
+        cloneTypes.addAll(types);
 
         // Create VC
-        VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, verifiableCredentialType,
+        VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, types,
                 verifiableCredentialSubject, privateKeyBytes, contexts, expiryDate);
 
+        if (cloneTypes.contains(VerifiableCredentialType.VERIFIABLE_CREDENTIAL)) {
+            cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
+        }
         // Create Credential
         return Credential.builder()
                 .holderDid(holderDid)
                 .issuerDid(issuerDoc.getId().toString())
-                .type(type)
+                .type(String.join(",", cloneTypes))
                 .credentialId(verifiableCredential.getId().toString())
                 .data(verifiableCredential)
                 .build();

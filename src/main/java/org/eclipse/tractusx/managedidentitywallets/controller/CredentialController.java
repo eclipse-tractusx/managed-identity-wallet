@@ -142,7 +142,41 @@ public class CredentialController extends BaseController {
                                 }
                     """))
     })
-    public ResponseEntity<Map<String, Object>> createPresentation(@RequestBody Map<String, Object> data) {
+    public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data) {
         return ResponseEntity.status(HttpStatus.OK).body(service.credentialsValidation(data));
+    }
+
+    @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
+    @PostMapping(path = RestURI.CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(examples = @ExampleObject("""
+                                {
+                                      "id": "http://example.edu/credentials/333",
+                                      "@context": [
+                                        "https://www.w3.org/2018/credentials/v1",
+                                        "https://www.w3.org/2018/credentials/examples/v1"
+                                      ],
+                                      "type": [
+                                        "University-Degree-Credential, VerifiableCredential"
+                                      ],
+                                      "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                      "issuanceDate": "2019-06-16T18:56:59Z",
+                                      "expirationDate": "2019-06-17T18:56:59Z",
+                                      "credentialSubject": {
+                                        "college": "Test-University"
+                                      },
+                                      "proof": {
+                                        "type": "Ed25519Signature2018",
+                                        "created": "2021-11-17T22:20:27Z",
+                                        "proofPurpose": "assertionMethod",
+                                        "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+                                        "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                      }
+                                }
+                    """))
+    })
+    public ResponseEntity<VerifiableCredential> issueCredential(@RequestBody Map<String, Object> data, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueCredential(data, getBPNFromToken(principal)));
     }
 }
