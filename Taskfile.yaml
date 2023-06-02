@@ -13,7 +13,7 @@ tasks:
   build:
     desc: Build the whole app
     cmds:
-      - ./gradlew build -PgithubToken=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 -x test -x jacocoTestCoverageVerification
+      - ./gradlew build -PgithubToken=xxx -x test -x jacocoTestCoverageVerification
 
   buildDocker:
     desc: Build the app and the corresponding Docker image (tagged as "miw-test")
