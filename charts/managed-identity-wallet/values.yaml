@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service
   pullPolicy: Always
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets:
   - name: acr-credential
@@ -47,7 +47,7 @@ service:
 
 ingress:
   enabled: false
-  className: ""
+  className: "nginx"
   annotations:
 #    nginx.ingress.kubernetes.io/rewrite-target: /$1
 #    nginx.ingress.kubernetes.io/use-regex: "true"
