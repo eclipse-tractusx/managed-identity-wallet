@@ -49,20 +49,20 @@ ingress:
   enabled: false
   className: ""
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
+#    nginx.ingress.kubernetes.io/rewrite-target: /$1
+#    nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location ~* /list-credential/ {
-          deny all;
-          return 403;
-      }
-      
-      location ~* /webhook/topic/ {
-        deny all;
-        return 403;
-      }
+#    nginx.ingress.kubernetes.io/server-snippet: |
+#      location ~* /list-credential/ {
+#          deny all;
+#          return 403;
+#      }
+#
+#      location ~* /webhook/topic/ {
+#        deny all;
+#        return 403;
+#      }
   hosts:
     - host: chart-example.local
       paths:
