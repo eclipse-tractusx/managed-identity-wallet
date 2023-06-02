@@ -8,7 +8,7 @@ secrets:
   KEYCLOAK_CLIENT_ID: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#miw-auth-client-id>
 
 envs:
-  DB_HOST: managed-identity-wallets-new-postgresql
+  DB_HOST: managed-identity-wallet-new-postgresql
   MIW_HOST_NAME: managed-identity-wallet-new.dev.demo.catena-x.net  # Depend on ingress host name (managed-identity-wallets-new.dev.demo.catena-x.net)
   KEYCLOAK_REALM: CX-Central
   AUTH_SERVER_URL: https://centralidp.dev.demo.catena-x.net/auth/
