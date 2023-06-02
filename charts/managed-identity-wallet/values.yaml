@@ -22,7 +22,7 @@ envs:
 #  APPLICATION_ENVIRONMENT: xxx
 #  DB_HOST: auto
 #  DB_PORT: xxx
-#  DB_NAME: xxx
+#  DB_NAME: xxx  # set it also in the init script in the postgres initdb section below!!
 #  USE_SSL: xxx
 #  DB_POOL_SIZE: xxx
 #  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
@@ -99,6 +99,14 @@ affinity: {}
 podAnnotations: {}
 
 postgresql:
+  primary:
+    initdb:
+      scripts:
+        init_db_script.sh: |
+          #!/bin/sh
+          createdb -O postgres miw
+      user: postgres
+      password: postgres
   auth:
     password: postgres
     username: postgres
