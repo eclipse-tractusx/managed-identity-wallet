@@ -26,6 +26,9 @@ ingress:
         - managed-identity-wallet-new.dev.demo.catena-x.net
 
 postgresql:
+  primary:
+    initdb:
+      password: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#postgres-password>
   auth:
     password: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#password>
     postgresPassword: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#postgres-password>
