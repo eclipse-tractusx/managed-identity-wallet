@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -33,6 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * The type Exception handling.
  */
 @RestControllerAdvice
+@Slf4j
 public class ExceptionHandling extends ResponseEntityExceptionHandler {
 
     /**
@@ -110,4 +112,12 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(Exception.class)
+    ProblemDetail handleException(Exception e) {
+        log.error("Error ", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
 }

@@ -33,5 +33,6 @@ import java.util.List;
 @ConfigurationProperties(prefix = "miw")
 public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
                           String authorityWalletName,
-                          List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate) {
+                          List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
+                          String supportedFrameworkVCTypes) {
 }

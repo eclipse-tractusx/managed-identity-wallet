@@ -82,6 +82,8 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_DISMANTLER, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //issue dismantler Credential
                 .requestMatchers(new AntPathRequestMatcher(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //issue dismantler Credential
                 .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //issue dismantler Credential
+                .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_VALIDATION, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLETS, ApplicationConstant.ROLE_VIEW_WALLET) //issue dismantler Credential
+
                 .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 .and().oauth2ResourceServer()
                 .jwt()

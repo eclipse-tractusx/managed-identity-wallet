@@ -33,22 +33,31 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepo
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
+import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
+import org.eclipse.tractusx.ssi.lib.exception.DidDocumentResolverNotRegisteredException;
+import org.eclipse.tractusx.ssi.lib.exception.JwtException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
+import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.resolver.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.http.HttpClient;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -114,9 +123,11 @@ public class PresentationService extends BaseService<Credential, Long> {
         Wallet issuerWallet = walletService.getWalletByIdentifier(issuerDidString);
 
         //validate BPN access
-        Validate.isFalse(issuerWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
+        Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
 
         if (asJwt) {
+
+            Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
 
             //JWT Factory
             SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
@@ -125,7 +136,7 @@ public class PresentationService extends BaseService<Credential, Long> {
             //Build JWT
             SignedJWT presentation = presentationFactory.createPresentation(
                     issuerDid, verifiableCredentials, audience, walletKeyService.getEd25519Key(holderWallet.getId()));
-            
+
             response.put("vp", presentation.serialize());
         } else {
             VerifiablePresentationBuilder verifiablePresentationBuilder =
@@ -140,6 +151,46 @@ public class PresentationService extends BaseService<Credential, Long> {
                             .build();
             response.put("vp", verifiablePresentation);
         }
+        return response;
+    }
+
+
+    public Map<String, Object> validatePresentation(Map<String, Object> vp, boolean asJwt, boolean withCredentialExpiryDate, boolean withCredentialsValidation) {
+
+        Map<String, Object> response = new HashMap<>();
+        if (asJwt) {
+            //verify as jwt
+            Validate.isNull(vp.get("vp")).launch(new BadDataException("Can not find JWT"));
+            String jwt = vp.get("vp").toString();
+            response.put("vp", jwt);
+            try {
+                SignedJWT signedJWT = SignedJWT.parse(jwt);
+                //validate
+                //TODO need to verify with withCredentialExperationDate and withCredentialsValidation
+
+                DidWebParser didParser = new DidWebParser();
+                var httpClient = HttpClient.newHttpClient();
+                var enforceHttps = true;
+
+                var didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
+                didDocumentResolverRegistry.register(
+                        new DidWebDocumentResolver(httpClient, didParser, enforceHttps));
+
+                SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
+
+
+                jwtVerifier.verify(signedJWT);
+                response.put("valid", true);
+
+            } catch (JwtException | DidDocumentResolverNotRegisteredException | ParseException e) {
+                log.error("Can not verify VP as JWT ", e);
+            }
+
+        } else {
+            //verify as JSON-LD
+
+        }
+
         return response;
     }
 
