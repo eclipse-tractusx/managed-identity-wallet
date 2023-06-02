@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
@@ -51,13 +52,13 @@ public class DidDocumentController {
      */
     @Operation(description = "Resolve the DID document for a given DID or BPN", summary = "Resolve DID Document")
     @GetMapping(path = RestURI.DID_DOCUMENTS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DidDocument> getDidDocument(@PathVariable(name = "identifier") String identifier) {
+    public ResponseEntity<DidDocument> getDidDocument(@Parameter(description = "Did or BPN") @PathVariable(name = "identifier") String identifier) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(identifier));
     }
 
     @Operation(description = "Resolve the DID document for a given BPN", summary = "Resolve DID Document")
     @GetMapping(path = RestURI.DID_RESOLVE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DidDocument> getDidResolve(@PathVariable(name = "bpn") String bpn) {
+    public ResponseEntity<DidDocument> getDidResolve(@Parameter(description = "Did or BPN") @PathVariable(name = "bpn") String bpn) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(bpn));
     }
 }
