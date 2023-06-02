@@ -38,7 +38,6 @@ import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.exception.DidDocumentResolverNotRegisteredException;
 import org.eclipse.tractusx.ssi.lib.exception.JwtException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
-import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
@@ -181,7 +180,7 @@ public class PresentationService extends BaseService<Credential, Long> {
 
 
                 //validate audience
-                if (StringUtils.hasText(audience)) {
+              /*  if (StringUtils.hasText(audience)) {
                     SignedJwtValidator jwtValidator = new SignedJwtValidator();
                     jwtValidator.validateAudiences(signedJWT, audience);
                 }
@@ -190,7 +189,7 @@ public class PresentationService extends BaseService<Credential, Long> {
                 if (withCredentialExpiryDate) {
                     SignedJwtValidator jwtValidator = new SignedJwtValidator();
                     jwtValidator.validateDate(signedJWT);
-                }
+                }*/
 
                 response.put("valid", true);
             } catch (JwtException | DidDocumentResolverNotRegisteredException | ParseException e) {
