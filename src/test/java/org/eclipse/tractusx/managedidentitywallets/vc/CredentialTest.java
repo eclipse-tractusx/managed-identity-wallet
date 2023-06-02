@@ -115,6 +115,12 @@ class CredentialTest {
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size());
 
+        response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}"
+                , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
+        credentialList = getCredentialsFromString(response.getBody());
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
+
         List<String> list = new ArrayList<>();
         list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"

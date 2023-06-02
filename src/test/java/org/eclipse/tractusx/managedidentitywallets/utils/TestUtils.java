@@ -25,6 +25,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -37,6 +38,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 public class TestUtils {
+
+    public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate) {
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+
+        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> exchange = testTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, String.class);
+        return exchange;
+
+    }
 
     public static Wallet createWallet(String bpn, String did, WalletRepository walletRepository) {
         String didDocument = """
