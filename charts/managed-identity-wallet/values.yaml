@@ -12,29 +12,29 @@ nameOverride: ""
 fullnameOverride: ""
 
 secrets:
-  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
-  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
-  KEYCLOAK_CLIENT_ID: xxx
-  ENCRYPTION_KEY: xxx
+#  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
+#  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
+#  KEYCLOAK_CLIENT_ID: xxx
+#  ENCRYPTION_KEY: xxx  # 64 chars
 
 envs:
-  APPLICATION_PORT: xxx
-  APPLICATION_ENVIRONMENT: xxx
-  DB_HOST: xxx
-  DB_PORT: xxx
-  DB_NAME: xxx
-  USE_SSL: xxx
-  DB_POOL_SIZE: xxx
-  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
-  MANAGEMENT_PORT: xxx
-  MIW_HOST_NAME: xxx
-  AUTHORITY_WALLET_BPN: xxx
-  AUTHORITY_WALLET_NAME: xxx
-  AUTHORITY_WALLET_DID: xxx
-  VC_SCHEMA_LINK: xxx
-  VC_EXPIRY_DATE: xxx
-  KEYCLOAK_REALM: xxx
-  AUTH_SERVER_URL: xxx
+#  APPLICATION_PORT: xxx
+#  APPLICATION_ENVIRONMENT: xxx
+#  DB_HOST: auto
+#  DB_PORT: xxx
+#  DB_NAME: xxx
+#  USE_SSL: xxx
+#  DB_POOL_SIZE: xxx
+#  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
+#  MANAGEMENT_PORT: xxx
+#  MIW_HOST_NAME: xxx
+#  AUTHORITY_WALLET_BPN: xxx
+#  AUTHORITY_WALLET_NAME: xxx
+#  AUTHORITY_WALLET_DID: xxx
+#  VC_SCHEMA_LINK: xxx
+#  VC_EXPIRY_DATE: xxx
+#  KEYCLOAK_REALM: xxx
+#  AUTH_SERVER_URL: xxx
 
 serviceAccount:
   create: true
