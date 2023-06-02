@@ -1,6 +1,29 @@
+image:
+  tag: "latest-java-did-web"
+
 secrets:
   DB_USER_NAME: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#user>
   DB_PASSWORD: <path:managed-identity-wallets/data/dev/postgres-managed-identity-wallets-secret-config#password>
+  ENCRYPTION_KEY: xxx
+  KEYCLOAK_CLIENT_ID: <path:managed-identity-wallets/data/dev/managed-identity-wallets-secrets#miw-auth-client-id>
+
+envs:
+  DB_HOST: managed-identity-wallet-new-postgresql-hl
+  MIW_HOST_NAME: managed-identity-wallet-new.dev.demo.catena-x.net  # Depend on ingress host name (managed-identity-wallets-new.dev.demo.catena-x.net)
+  KEYCLOAK_REALM: CX-Central
+  AUTH_SERVER_URL: https://centralidp.dev.demo.catena-x.net/auth/
+
+ingress:
+  enabled: true
+  hosts:
+    - host: managed-identity-wallet-new.dev.demo.catena-x.net
+      paths:
+        - path: /(.*)
+          pathType: Prefix
+  tls:
+    - secretName: miw-secret
+      hosts:
+        - managed-identity-wallet-new.dev.demo.catena-x.net
 
 postgresql:
   auth:
