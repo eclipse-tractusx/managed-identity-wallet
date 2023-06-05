@@ -34,5 +34,6 @@ import java.util.List;
 public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
                           String authorityWalletName,
                           List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
-                          String supportedFrameworkVCTypes) {
+                          String supportedFrameworkVCTypes,
+                          boolean enforceHttps) {
 }

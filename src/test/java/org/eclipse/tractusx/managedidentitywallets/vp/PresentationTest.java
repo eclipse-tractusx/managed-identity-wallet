@@ -33,6 +33,8 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepo
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.exception.DidDocumentResolverNotRegisteredException;
+import org.eclipse.tractusx.ssi.lib.exception.JwtException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -65,9 +67,40 @@ class PresentationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+
+    @Test
+    void validateVPAsJwtWithValidAudienceAndDateValidation200() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException {
+        //create VP
+        String bpn = UUID.randomUUID().toString();
+        String audience = "smartSense";
+        ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
+        Map body = vpResponse.getBody();
+
+        //validate VP
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+        HttpEntity<Map> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Map> validationResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS_VALIDATION + "?asJwt={asJwt}&audience={audience}&withCredentialExpiryDate={withCredentialExpiryDate}", HttpMethod.POST, entity, Map.class, true, "smartSense", true);
+
+
+        //TODO will be checked once we have mock solution
+        //Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.OK.value());
+       /* Assertions.assertTrue(Boolean.parseBoolean(validationResponse.getBody().get("valid").toString()));
+        Assertions.assertTrue(Boolean.parseBoolean(validationResponse.getBody().get("validateAudience").toString()));
+        Assertions.assertTrue(Boolean.parseBoolean(validationResponse.getBody().get("withCredentialExpiryDate").toString()));*/
+    }
+
     @Test
     void createPresentationAsJWT201() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
+        String audience = "smartSense";
+        ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
+        Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.CREATED.value());
+
+
+    }
+
+    private ResponseEntity<Map> createBpnVCAsJwt(String bpn, String audience) throws JsonProcessingException {
         String didWeb = "did:web:localhost:" + bpn;
 
         Map<String, Object> request = getIssueVPRequest(bpn);
@@ -77,8 +110,8 @@ class PresentationTest {
 
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);
 
-        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, "smartSense");
-        Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.CREATED.value());
+        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, audience);
+        return vpResponse;
     }
 
 

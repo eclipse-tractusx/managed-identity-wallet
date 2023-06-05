@@ -64,6 +64,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     }
 
     @SneakyThrows
+
     public Ed25519Key getPrivateKeyByWalletIdentifier(long walletId) {
         WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());

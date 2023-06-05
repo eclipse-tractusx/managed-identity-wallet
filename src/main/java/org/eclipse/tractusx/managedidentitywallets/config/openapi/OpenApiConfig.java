@@ -58,7 +58,7 @@ public class OpenApiConfig {
         info.setDescription("MIW API");
         info.setVersion("0.0.1");
         OpenAPI openAPI = new OpenAPI();
-        if (properties.enabled()) {
+        if (Boolean.TRUE.equals(properties.enabled())) {
             openAPI = enableSecurity(openAPI);
         }
         return openAPI.info(info);

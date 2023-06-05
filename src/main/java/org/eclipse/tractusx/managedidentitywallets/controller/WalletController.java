@@ -132,8 +132,8 @@ public class WalletController extends BaseController {
      */
     @Operation(summary = "Retrieve wallet by identifier", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller) \n\n Retrieve single wallet by identifier, with or without its credentials")
     @GetMapping(path = RestURI.API_WALLETS_IDENTIFIER, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> getWalletByIdentifier(@PathVariable(name = "identifier") String identifier,
-                                                        @Parameter(description = "Did or BPN") @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials,
+    public ResponseEntity<Wallet> getWalletByIdentifier(@Parameter(description = "Did or BPN") @PathVariable(name = "identifier") String identifier,
+                                                        @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials,
                                                         Principal principal) {
 
         return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials, getBPNFromToken(principal)));

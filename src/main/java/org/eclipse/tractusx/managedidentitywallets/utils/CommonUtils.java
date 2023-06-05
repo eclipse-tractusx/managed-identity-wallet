@@ -78,16 +78,14 @@ public class CommonUtils {
                 new VerifiableCredentialSubject(subject);
 
 
-        List<String> cloneTypes = new ArrayList<>();
-        cloneTypes.addAll(types);
+        List<String> cloneTypes = new ArrayList<>(types);
 
         // Create VC
         VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, types,
                 verifiableCredentialSubject, privateKeyBytes, contexts, expiryDate);
 
-        if (cloneTypes.contains(VerifiableCredentialType.VERIFIABLE_CREDENTIAL)) {
             cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
-        }
+
         // Create Credential
         return Credential.builder()
                 .holderDid(holderDid)
