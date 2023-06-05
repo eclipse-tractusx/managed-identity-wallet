@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
+import com.smartsensesolutions.java.commons.criteria.CriteriaOperator;
 import com.smartsensesolutions.java.commons.operator.Operator;
 import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
@@ -51,8 +52,6 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -122,34 +121,38 @@ public class CredentialService extends BaseService<Credential, Long> {
      */
     public List<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
-
+        filterRequest.setPage(0);
+        filterRequest.setSize(1000);
 
         Wallet holderWallet = walletService.getWalletByIdentifier(callerBPN);
-        filterRequest.appendNewCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
+        filterRequest.appendCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
 
         if (StringUtils.hasText(issuerIdentifier)) {
             Wallet issuerWallet = walletService.getWalletByIdentifier(issuerIdentifier);
-            filterRequest.appendNewCriteria("issuerDid", Operator.EQUALS, issuerWallet.getDid());
+            filterRequest.appendCriteria("issuerDid", Operator.EQUALS, issuerWallet.getDid());
         }
 
         if (StringUtils.hasText(credentialId)) {
-            filterRequest.appendNewCriteria("credentialId", Operator.EQUALS, credentialId);
+            filterRequest.appendCriteria("credentialId", Operator.EQUALS, credentialId);
         }
-        Specification<Credential> sps = getSpecificationUtil().generateSpecification(filterRequest.getCriteria());
+//        Specification<Credential> sps = getSpecificationUtil().generateSpecification(filterRequest.getCriteria());
         FilterRequest request = new FilterRequest();
         if (!CollectionUtils.isEmpty(type)) {
+            request.setPage(filterRequest.getPage());
+            request.setSize(filterRequest.getSize());
+            request.setCriteriaOperator(CriteriaOperator.OR);
             for (String str : type) {
-                request.appendNewCriteria("type", Operator.CONTAIN, str);
+                request.appendCriteria("type", Operator.CONTAIN, str);
             }
-            Specification<Credential> sp = getSpecificationUtil().generateOrSpecification(request.getCriteria());
-            sps = sp.and(sps);
+//            Specification<Credential> sp = getSpecificationUtil().generateOrSpecification(request.getCriteria());
+//            sps = sp.and(sps);
         }
 
         Sort sort = new Sort();
         sort.setColumn(sortColumn);
         sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
         filterRequest.setSort(sort);
-        Page<Credential> filter = getRepository().findAll(sps, PageRequest.of(0, 1000));
+        Page<Credential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
         List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
         for (Credential credential : filter.getContent()) {
