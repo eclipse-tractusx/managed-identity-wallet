@@ -262,7 +262,7 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         //issue BPN credentials``
         Wallet baseWallet = getWalletByIdentifier(miwSettings.authorityWalletBpn());
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
         Credential credential = CommonUtils.getCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 "id", wallet.getDid(),

@@ -135,7 +135,7 @@ public class PresentationService extends BaseService<Credential, Long> {
 
             //Build JWT
             SignedJWT presentation = presentationFactory.createPresentation(
-                    issuerDid, verifiableCredentials, audience, walletKeyService.getEd25519Key(holderWallet.getId()));
+                    issuerDid, verifiableCredentials, audience, walletKeyService.getPrivateKeyByWalletIdentifier(holderWallet.getId()));
 
             response.put("vp", presentation.serialize());
         } else {
@@ -169,7 +169,7 @@ public class PresentationService extends BaseService<Credential, Long> {
                 //validate jwt signature
                 DidWebParser didParser = new DidWebParser();
                 var httpClient = HttpClient.newHttpClient();
-                var enforceHttps = true;
+                var enforceHttps = false;
 
                 var didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
                 didDocumentResolverRegistry.register(
