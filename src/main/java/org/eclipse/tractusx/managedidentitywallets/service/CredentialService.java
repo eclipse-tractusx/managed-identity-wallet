@@ -187,7 +187,7 @@ public class CredentialService extends BaseService<Credential, Long> {
         Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
 
         Map<String, Object> subject = Map.of("type", request.getType(),
                 "id", holderWallet.getDid(),
@@ -225,7 +225,7 @@ public class CredentialService extends BaseService<Credential, Long> {
         //check duplicate
         isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
 
         Map<String, Object> subject = Map.of("type", MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL,
                 "id", holderWallet.getDid(),
@@ -264,7 +264,7 @@ public class CredentialService extends BaseService<Credential, Long> {
         //validate BPN access
         Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         //VC Subject
         Credential credential = CommonUtils.getCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
@@ -297,7 +297,7 @@ public class CredentialService extends BaseService<Credential, Long> {
         // DID Resolver Constracture params
         DidWebParser didParser = new DidWebParser();
         var httpClient = HttpClient.newHttpClient();
-        var enforceHttps = true;
+        var enforceHttps = false;
 
         var didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
         didDocumentResolverRegistry.register(
@@ -319,7 +319,7 @@ public class CredentialService extends BaseService<Credential, Long> {
         Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifier(issuerWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
 
         // Create Credential
         Credential credential = CommonUtils.getCredential(verifiableCredential.getCredentialSubject().get(0),
