@@ -38,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -50,6 +52,7 @@ import java.util.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
+@ExtendWith(MockitoExtension.class)
 class CredentialTest {
 
     @Autowired
@@ -132,19 +135,20 @@ class CredentialTest {
 
     @Test
     void validateCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
-        String bpn = UUID.randomUUID().toString();
 
+
+        String bpn = UUID.randomUUID().toString();
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         TestUtils.createWallet(bpn, "Test", restTemplate);
         ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
         Map<String, Objects> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-//        ResponseEntity<Map> response = restTemplate.exchange(RestURI.CREDENTIALS_VALIDATION, HttpMethod.POST, entity, Map.class);
-//        Boolean valid = proofValidation.checkProof(verifiableCredential);
-//        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());// TODO did will resolved
-//        Assertions.assertTrue((Boolean) response.getBody().get("valid")); //TODO getting false from lib
+        ResponseEntity<Map> response = restTemplate.exchange(RestURI.CREDENTIALS_VALIDATION, HttpMethod.POST, entity, Map.class);
 
+        //TODO check will be added once we have mock solution
+      /*  Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertTrue((Boolean) response.getBody().get("valid")); */
     }
 
 

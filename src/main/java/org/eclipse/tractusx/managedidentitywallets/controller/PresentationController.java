@@ -152,6 +152,6 @@ public class PresentationController extends BaseController {
                                                                     @Parameter(description = "Pass true in case of VP is in JWT format") @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt,
                                                                     @Parameter(description = "Check expiry of VC(Only supported in case of JWT formatted VP)") @RequestParam(name = "withCredentialExpiryDate", required = false, defaultValue = "false") boolean withCredentialExpiryDate
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.validatePresentation(data, asJwt, withCredentialExpiryDate, audience));
+        return ResponseEntity.status(HttpStatus.OK).body(presentationService.validatePresentation(data, asJwt, withCredentialExpiryDate, audience));
     }
 }

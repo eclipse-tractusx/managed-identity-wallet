@@ -41,6 +41,8 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -50,6 +52,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
@@ -86,7 +89,7 @@ class FrameworkCredentialTest {
 
 
     @Test
-    void issueFrameworkCredentialWithInvalidBpnAccessTest201() throws JsonProcessingException, JSONException {
+    void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JsonProcessingException, JSONException {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
@@ -104,132 +107,28 @@ class FrameworkCredentialTest {
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
-    @Test
-    void issueBehaviorTwinCredentialTest201() throws JsonProcessingException, JSONException {
-        String bpn = UUID.randomUUID().toString();
+    @ParameterizedTest
+    @MethodSource("getTypes")
+    void issueFrameWorkVCTest201(IssueFrameworkCredentialRequest request) throws JsonProcessingException, JSONException {
+        String bpn = request.getBpn();
         String did = "did:web:localhost:" + bpn;
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
-        String type = "cx-behavior-twin";
-        String value = "Behavior Twin";
+        String type = request.getType();
+        String value = request.getValue();
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+        createAndValidateVC(bpn, did, type, value);
 
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
-
-        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-
-        validate(wallet, type, value, response, miwSettings);
     }
 
-
-    @Test
-    void issuePCFCredentialTest201() throws JsonProcessingException, JSONException {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
-
-        String type ="cx-pcf";
-        String value ="PCF";
-
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
-
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
-
-        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-
-        validate(wallet, type, value, response, miwSettings);
-    }
-
-    @Test
-    void issueQualityCredentialTest201() throws JsonProcessingException, JSONException {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
-
-        String type ="cx-quality";
-        String value ="Quality";
-
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
-
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
-
-        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-
-        validate(wallet, type, value, response, miwSettings);
-    }
-
-    @Test
-    void issueResiliencyCredentialTest201() throws JsonProcessingException, JSONException {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
-
-        String type ="cx-resiliency";
-        String value ="Resiliency";
-
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
-
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
-
-        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-
-        validate(wallet, type, value, response, miwSettings);
-    }
-
-    @Test
-    void issueSustainabilityCredentialTest201() throws JsonProcessingException, JSONException {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
-
-        String type ="cx-sustainability";
-        String value ="Sustainability";
-
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
-
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
-
-        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-
-        validate(wallet, type, value, response, miwSettings);
-    }
-
-
-    @Test
-    void issueTraceabilityCredentialTest201() throws JsonProcessingException, JSONException {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
-
-        String type ="cx-traceability";
-        String value ="ID_3.0_Trace";
-
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
-
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
-
-        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-
-        validate(wallet, type, value, response, miwSettings);
+    static Stream<IssueFrameworkCredentialRequest> getTypes() {
+        return Stream.of(
+                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-behavior-twin").value("Behavior Twin").build(),
+                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-pcf").value("PCF").build(),
+                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-quality").value("Quality").build(),
+                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-resiliency").value("Resiliency").build(),
+                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-sustainability").value("Sustainability").build(),
+                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-traceability").value("ID_3.0_Trace").build()
+        );
     }
 
     @Test
@@ -239,8 +138,8 @@ class FrameworkCredentialTest {
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
 
-        String type ="cx-traceability1";
-        String value ="ID_3.0_Trace1";
+        String type = "cx-traceability1";
+        String value = "ID_3.0_Trace1";
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
@@ -251,6 +150,21 @@ class FrameworkCredentialTest {
         ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode().value());
 
+    }
+
+    private void createAndValidateVC(String bpn, String did, String type, String value) throws JsonProcessingException {
+        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
+
+        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
+        validate(wallet, type, value, response, miwSettings);
     }
 
     private void validate(Wallet wallet, String type, String value, ResponseEntity<String> response, MIWSettings miwSettings) throws JsonProcessingException {

@@ -43,7 +43,7 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
     public static final String TIMESTAMP = "timestamp";
 
     /**
-     * Handle wallet not found problem problem detail.
+     * Handle wallet not found problem detail.
      *
      * @param e the e
      * @return the problem detail

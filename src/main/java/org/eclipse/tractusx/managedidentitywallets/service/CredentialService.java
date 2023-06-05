@@ -50,6 +50,7 @@ import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
+import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -295,13 +296,11 @@ public class CredentialService extends BaseService<Credential, Long> {
     public Map<String, Object> credentialsValidation(Map<String, Object> data) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         // DID Resolver Constracture params
-        DidWebParser didParser = new DidWebParser();
-        var httpClient = HttpClient.newHttpClient();
-        var enforceHttps = false;
 
-        var didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
+
+        DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
         didDocumentResolverRegistry.register(
-                new DidWebDocumentResolver(httpClient, didParser, enforceHttps));
+                new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
 
         LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
         Boolean valid = proofValidation.checkProof(verifiableCredential);
