@@ -26,7 +26,9 @@ import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
@@ -35,9 +37,8 @@ import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
-import org.eclipse.tractusx.ssi.lib.exception.DidDocumentResolverNotRegisteredException;
-import org.eclipse.tractusx.ssi.lib.exception.JwtException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
@@ -45,6 +46,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
+import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.resolver.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
@@ -57,7 +59,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.nio.charset.Charset;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -76,6 +77,8 @@ public class PresentationService extends BaseService<Credential, Long> {
     private final WalletService walletService;
 
     private final WalletKeyService walletKeyService;
+
+    private final MIWSettings miwSettings;
 
     @Override
     protected BaseRepository<Credential, Long> getRepository() {
@@ -155,6 +158,7 @@ public class PresentationService extends BaseService<Credential, Long> {
     }
 
 
+    @SneakyThrows
     public Map<String, Object> validatePresentation(Map<String, Object> vp, boolean asJwt, boolean withCredentialExpiryDate, String audience) {
 
         Map<String, Object> response = new HashMap<>();
@@ -163,46 +167,79 @@ public class PresentationService extends BaseService<Credential, Long> {
             Validate.isNull(vp.get("vp")).launch(new BadDataException("Can not find JWT"));
             String jwt = vp.get("vp").toString();
             response.put("vp", jwt);
-            try {
-                SignedJWT signedJWT = SignedJWT.parse(jwt);
 
-                //validate jwt signature
-                DidWebParser didParser = new DidWebParser();
-                var httpClient = HttpClient.newHttpClient();
-                var enforceHttps = false;
+            SignedJWT signedJWT = SignedJWT.parse(jwt);
 
-                var didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
-                didDocumentResolverRegistry.register(
-                        new DidWebDocumentResolver(httpClient, didParser, enforceHttps));
+            boolean validateSignature = validateSignature(signedJWT);
 
-                SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
-                jwtVerifier.verify(signedJWT);
+            //validate audience
+            boolean validateAudience = validateAudience(audience, signedJWT);
 
+            //validate date
+            boolean validateExpiryDate = validateExpiryDate(withCredentialExpiryDate, signedJWT);
 
-                //validate audience
-              /*  if (StringUtils.hasText(audience)) {
-                    SignedJwtValidator jwtValidator = new SignedJwtValidator();
-                    jwtValidator.validateAudiences(signedJWT, audience);
-                }
+            response.put("valid", (validateSignature && validateAudience && validateExpiryDate));
 
-                //validate date
-                if (withCredentialExpiryDate) {
-                    SignedJwtValidator jwtValidator = new SignedJwtValidator();
-                    jwtValidator.validateDate(signedJWT);
-                }*/
+            if (StringUtils.hasText(audience)) {
+                response.put("validateAudience", validateAudience);
 
-                response.put("valid", true);
-            } catch (JwtException | DidDocumentResolverNotRegisteredException | ParseException e) {
-                log.error("Can not verify VP as JWT ", e);
-                response.put("valid", false);
+            }
+            if (withCredentialExpiryDate) {
+                response.put("validateExpiryDate", validateExpiryDate);
             }
 
         } else {
-            //verify as JSON-LD
-
+            throw new BadDataException("Validation of VP in form of JSON-LD is not supported");
         }
 
         return response;
+    }
+
+    private boolean validateSignature(SignedJWT signedJWT) {
+        //validate jwt signature
+        try {
+            DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
+            didDocumentResolverRegistry.register(
+                    new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
+
+            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
+            jwtVerifier.verify(signedJWT);
+            return true;
+        } catch (Exception e) {
+            log.error("Can not verify signature of jwt", e);
+            return false;
+        }
+    }
+
+    private boolean validateExpiryDate(boolean withCredentialExpiryDate, SignedJWT signedJWT) {
+        if (withCredentialExpiryDate) {
+            try {
+                SignedJwtValidator jwtValidator = new SignedJwtValidator();
+                jwtValidator.validateDate(signedJWT);
+                return true;
+            } catch (Exception e) {
+                log.error("Can not expiry date ", e);
+                return false;
+            }
+
+        } else {
+            return true;
+        }
+    }
+
+    private boolean validateAudience(String audience, SignedJWT signedJWT) {
+        if (StringUtils.hasText(audience)) {
+            try {
+                SignedJwtValidator jwtValidator = new SignedJwtValidator();
+                jwtValidator.validateAudiences(signedJWT, audience);
+                return true;
+            } catch (Exception e) {
+                log.error("Can not validate audience ", e);
+                return false;
+            }
+        } else {
+            return true;
+        }
     }
 
     private void validateCredential(VerifiableCredential verifiableCredential, String holderIdentifier) {
