@@ -46,7 +46,7 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
-	implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.2'
+	implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'org.eclipse.tractusx.ssi.lib:cx-ssi-lib:0.0.4'
 	runtimeOnly 'org.postgresql:postgresql'

@@ -137,7 +137,7 @@ public class CredentialController extends BaseController {
                                       "issuanceDate": "2019-06-16T18:56:59Z",
                                       "expirationDate": "2019-06-17T18:56:59Z",
                                       "credentialSubject": {
-                                        "college": "Test-University"
+                                        "college": "org.eclipse.tractusx.managedidentitywallets.Test-University"
                                       },
                                       "proof": {
                                         "type": "Ed25519Signature2018",
@@ -171,14 +171,7 @@ public class CredentialController extends BaseController {
                                       "issuanceDate": "2019-06-16T18:56:59Z",
                                       "expirationDate": "2019-06-17T18:56:59Z",
                                       "credentialSubject": {
-                                        "college": "Test-University"
-                                      },
-                                      "proof": {
-                                        "type": "Ed25519Signature2018",
-                                        "created": "2021-11-17T22:20:27Z",
-                                        "proofPurpose": "assertionMethod",
-                                        "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
-                                        "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                        "college": "org.eclipse.tractusx.managedidentitywallets.Test-University"
                                       }
                                 }
                     """))
