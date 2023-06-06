@@ -42,10 +42,12 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
@@ -92,7 +94,9 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final WalletKeyService walletKeyService;
 
-    private final CredentialRepository credentialRepository;
+    private final HoldersCredentialRepository holdersCredentialRepository;
+
+    private final IssuersCredentialRepository issuersCredentialRepository;
 
     private final SpecificationUtil<Wallet> walletSpecificationUtil;
 
@@ -117,14 +121,9 @@ public class WalletService extends BaseService<Wallet, Long> {
     public Map<String, String> storeCredential(Map<String, Object> data, String identifier, String callerBpn) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet wallet = getWalletByIdentifier(identifier);
-        String did = wallet.getDid();
-        String holderDid = verifiableCredential.getCredentialSubject().get(0).get("id").toString();
 
         //validate BPN access
         Validate.isFalse(callerBpn.equalsIgnoreCase(wallet.getBpn())).launch(new ForbiddenException("Wallet BPN is not matching with request BPN(from the token)"));
-
-        //check ownership of credentials
-        Validate.isFalse(did.equals(holderDid)).launch(new ForbiddenException(String.format("The target wallet %s is not holder of provided credentials", identifier)));
 
         //check type
         Validate.isTrue(verifiableCredential.getTypes().isEmpty()).launch(new BadDataException("Invalid types provided in credentials"));
@@ -132,11 +131,13 @@ public class WalletService extends BaseService<Wallet, Long> {
         if (verifiableCredential.getTypes().size() > 1) {
             verifiableCredential.getTypes().remove("VerifiableCredential");
         }
-        credentialRepository.save(Credential.builder()
+        holdersCredentialRepository.save(HoldersCredential.builder()
                 .holderDid(wallet.getDid())
                 .issuerDid(URLDecoder.decode(verifiableCredential.getIssuer().toString(), Charset.defaultCharset()))
                 .type(verifiableCredential.getTypes().get(0))
                 .data(verifiableCredential)
+                .selfIssued(false)
+                .stored(true)  //credential is stored(not issued by MIW)
                 .credentialId(verifiableCredential.getId().toString())
                 .build());
         return Map.of("message", String.format("Credential with id %s has been successfully stored", verifiableCredential.getId()));
@@ -158,7 +159,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         Validate.isFalse(callerBpn.equalsIgnoreCase(wallet.getBpn())).launch(new ForbiddenException("Wallet BPN is not matching with request BPN(from the token)"));
 
         if (withCredentials) {
-            wallet.setVerifiableCredentials(credentialRepository.getCredentialsByHolder(wallet.getDid()));
+            wallet.setVerifiableCredentials(holdersCredentialRepository.getCredentialsByHolder(wallet.getDid()));
         }
         return wallet;
     }
@@ -201,6 +202,12 @@ public class WalletService extends BaseService<Wallet, Long> {
         return filter(filterRequest);
     }
 
+    @SneakyThrows
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
+    public Wallet createWallet(CreateWalletRequest request) {
+        return createWallet(request, false);
+    }
+
     /**
      * Create wallet.
      *
@@ -208,8 +215,7 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the wallet
      */
     @SneakyThrows
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public Wallet createWallet(CreateWalletRequest request) {
+    private Wallet createWallet(CreateWalletRequest request, boolean authority) {
         validateCreateWallet(request);
 
 
@@ -264,12 +270,20 @@ public class WalletService extends BaseService<Wallet, Long> {
         Wallet baseWallet = getWalletByIdentifier(miwSettings.authorityWalletBpn());
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
-        Credential credential = CommonUtils.getCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
+                "id", wallet.getDid(),
+                "bpn", wallet.getBpn()), types, baseWallet.getDidDocument(), privateKeyBytes, wallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), authority);
+
+        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 "id", wallet.getDid(),
                 "bpn", wallet.getBpn()), types, baseWallet.getDidDocument(), privateKeyBytes, wallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
-        //Store Credential
-        credentialRepository.save(credential);
+        //Store Credential in holder wallet
+        holdersCredentialRepository.save(holdersCredential);
+
+        //save in issuers wallet
+        issuersCredentialRepository.save(issuersCredential);
+
         log.debug("BPN credential issued for bpn -{}", request.getBpn());
 
         return wallet;
@@ -286,7 +300,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                     .name(miwSettings.authorityWalletName())
                     .bpn(miwSettings.authorityWalletBpn())
                     .build();
-            createWallet(request);
+            createWallet(request, true);
             log.info("Authority wallet created with bpn {}", miwSettings.authorityWalletBpn());
         } else {
             log.info("Authority wallet exists with bpn {}", miwSettings.authorityWalletBpn());

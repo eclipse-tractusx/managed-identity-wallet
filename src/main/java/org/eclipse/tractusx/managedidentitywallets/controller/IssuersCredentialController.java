@@ -31,7 +31,7 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
-import org.eclipse.tractusx.managedidentitywallets.service.CredentialService;
+import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,83 +42,48 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The type Credential controller.
- */
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "VerifiableCredentials")
-public class CredentialController extends BaseController {
+public class IssuersCredentialController extends BaseController {
 
-    private final CredentialService service;
+    private final IssuersCredentialService issuersCredentialService;
 
 
-    /**
-     * Gets credentials.
-     *
-     * @param credentialId     the credential id
-     * @param issuerIdentifier the issuer identifier
-     * @param type             the type
-     * @param sortColumn       the sort column
-     * @param sortTpe          the sort tpe
-     * @param principal        the principal
-     * @return the credentials
-     */
+    @Tag(name = "Verifiable Credential -Issuer")
     @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
-    @GetMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = RestURI.ISSUERS_CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<VerifiableCredential>> getCredentials(@RequestParam(required = false) String credentialId,
-                                                                     @RequestParam(required = false) String issuerIdentifier,
+                                                                     @RequestParam(required = false) String holderIdentifier,
                                                                      @RequestParam(required = false) List<String> type,
                                                                      @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
                                                                      @RequestParam(required = false, defaultValue = "desc") String sortTpe, Principal principal) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getCredentials(credentialId, issuerIdentifier, type, sortColumn, sortTpe, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.getCredentials(credentialId, holderIdentifier, type, sortColumn, sortTpe, getBPNFromToken(principal)));
     }
 
-    /**
-     * Issue membership credential response entity.
-     *
-     * @param issueMembershipCredentialRequest the issue membership credential request
-     * @param principal                        the principal
-     * @return the response entity
-     */
+    @Tag(name = "Verifiable Credential -Issuer")
+
     @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueMembershipCredential(issueMembershipCredentialRequest, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, getBPNFromToken(principal)));
     }
 
-    /**
-     * Issue dismantler credential response entity.
-     *
-     * @param request   the request
-     * @param principal the principal
-     * @return the response entity
-     */
+    @Tag(name = "Verifiable Credential -Issuer")
+
     @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_DISMANTLER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueDismantlerCredential(request, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueDismantlerCredential(request, getBPNFromToken(principal)));
     }
 
-    /**
-     * Issue framework credential response entity.
-     *
-     * @param request   the request
-     * @param principal the principal
-     * @return the response entity
-     */
+    @Tag(name = "Verifiable Credential -Issuer")
     @Operation(summary = "Issue a Use Case Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueFrameworkCredential(request, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueFrameworkCredential(request, getBPNFromToken(principal)));
     }
 
-    /**
-     * Credentials validation response entity.
-     *
-     * @param data the data
-     * @return the response entity
-     */
+    @Tag(name = "Verifiable Credential - Validation")
     @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials")
     @PostMapping(path = RestURI.CREDENTIALS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
@@ -131,14 +96,14 @@ public class CredentialController extends BaseController {
                                         "https://www.w3.org/2018/credentials/examples/v1"
                                       ],
                                       "type": [
-                                        "University-Degree-Credential, VerifiableCredential"
+                                        "University-Degree-Credential", "VerifiableCredential"
                                       ],
                                       "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
                                       "issuanceDate": "2019-06-16T18:56:59Z",
                                       "expirationDate": "2019-06-17T18:56:59Z",
-                                      "credentialSubject": {
-                                        "college": "org.eclipse.tractusx.managedidentitywallets.Test-University"
-                                      },
+                                      "credentialSubject": [{
+                                        "college": "Test-University"
+                                      }],
                                       "proof": {
                                         "type": "Ed25519Signature2018",
                                         "created": "2021-11-17T22:20:27Z",
@@ -150,11 +115,12 @@ public class CredentialController extends BaseController {
                     """))
     })
     public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.credentialsValidation(data));
+        return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.credentialsValidation(data));
     }
 
-    @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
-    @PostMapping(path = RestURI.CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Verifiable Credential -Issuer")
+    @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
+    @PostMapping(path = RestURI.ISSUERS_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
@@ -165,18 +131,18 @@ public class CredentialController extends BaseController {
                                         "https://www.w3.org/2018/credentials/examples/v1"
                                       ],
                                       "type": [
-                                        "University-Degree-Credential, VerifiableCredential"
+                                        "University-Degree-Credential","VerifiableCredential"
                                       ],
                                       "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
                                       "issuanceDate": "2019-06-16T18:56:59Z",
                                       "expirationDate": "2019-06-17T18:56:59Z",
-                                      "credentialSubject": {
-                                        "college": "org.eclipse.tractusx.managedidentitywallets.Test-University"
-                                      }
+                                      "credentialSubject": [{
+                                        "college": "Test-University"
+                                      }]
                                 }
                     """))
     })
     public ResponseEntity<VerifiableCredential> issueCredential(@RequestBody Map<String, Object> data, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueCredential(data, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(data, getBPNFromToken(principal)));
     }
 }

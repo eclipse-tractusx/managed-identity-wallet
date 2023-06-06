@@ -37,7 +37,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Credential extends MIWBaseEntity {
+public class IssuersCredential extends MIWBaseEntity {
 
 
     @Id
