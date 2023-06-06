@@ -29,8 +29,10 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
@@ -48,6 +50,7 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -69,6 +72,9 @@ class DismantlerHoldersCredentialTest {
 
     @Autowired
     private MIWSettings miwSettings;
+
+    @Autowired
+    private IssuersCredentialRepository issuersCredentialRepository;
 
 
     @Test
@@ -107,15 +113,20 @@ class DismantlerHoldersCredentialTest {
 
         Assertions.assertEquals("vehicleDismantle", verifiableCredential.getCredentialSubject().get(0).get("activityType").toString());
 
-        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
-        Assertions.assertNotNull(credential);
-        TestUtils.checkVC(credential.getData(), miwSettings);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        Assertions.assertFalse(credentials.isEmpty());
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
 
 
-        VerifiableCredential data = credential.getData();
+        VerifiableCredential data = credentials.get(0).getData();
 
         Assertions.assertEquals("vehicleDismantle", data.getCredentialSubject().get(0).get("activityType").toString());
 
+        //check in issuer wallet
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        Assertions.assertEquals(1, issuerVCs.size());
+        TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
+        Assertions.assertEquals("vehicleDismantle", issuerVCs.get(0).getData().getCredentialSubject().get(0).get("activityType").toString());
     }
 
     @Test

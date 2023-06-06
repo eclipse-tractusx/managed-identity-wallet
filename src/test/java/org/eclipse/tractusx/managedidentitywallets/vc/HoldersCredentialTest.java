@@ -29,6 +29,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
@@ -36,6 +37,9 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.json.JSONArray;
@@ -53,6 +57,8 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.net.URI;
+import java.time.Instant;
 import java.util.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
@@ -74,6 +80,42 @@ class HoldersCredentialTest {
 
     @Autowired
     private IssuersCredentialController credentialController;
+
+
+    @Test
+    void issueCredentialTestWithInvalidBPNAccess403() throws JsonProcessingException {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+        String type = "TestCredential";
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("not valid BPN");
+
+        ResponseEntity<String> response = issueVC(bpn, did, type, headers);
+
+
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
+
+    @Test
+    void issueCredentialTest200() throws JsonProcessingException {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+        String type = "TestCredential";
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+
+        ResponseEntity<String> response = issueVC(bpn, did, type, headers);
+
+
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+        Assertions.assertNotNull(verifiableCredential.getProof());
+
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
+        Assertions.assertFalse(credentials.isEmpty());
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
+        Assertions.assertTrue(credentials.get(0).isSelfIssued());
+
+    }
 
 
     @Test
@@ -211,5 +253,37 @@ class HoldersCredentialTest {
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
         Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
         return map;
+    }
+
+
+    private ResponseEntity<String> issueVC(String bpn, String did, String type, HttpHeaders headers) throws JsonProcessingException {
+        //save wallet
+        TestUtils.createWallet(bpn, did, restTemplate);
+
+        // Create VC without proof
+        //VC Bulider
+        VerifiableCredentialBuilder verifiableCredentialBuilder =
+                new VerifiableCredentialBuilder();
+
+        //VC Subject
+        VerifiableCredentialSubject verifiableCredentialSubject =
+                new VerifiableCredentialSubject(Map.of("test", "test"));
+
+        //Using Builder
+        VerifiableCredential credentialWithoutProof =
+                verifiableCredentialBuilder
+                        .id(URI.create(UUID.randomUUID().toString()))
+                        .context(miwSettings.vcContexts())
+                        .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
+                        .issuer(URI.create(did)) //issuer must be base wallet
+                        .expirationDate(miwSettings.vcExpiryDate().toInstant())
+                        .issuanceDate(Instant.now())
+                        .credentialSubject(verifiableCredentialSubject)
+                        .build();
+
+        Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
+        HttpEntity<Map> entity = new HttpEntity<>(map, headers);
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS, HttpMethod.POST, entity, String.class);
+        return response;
     }
 }

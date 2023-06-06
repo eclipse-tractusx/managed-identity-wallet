@@ -202,6 +202,12 @@ public class WalletService extends BaseService<Wallet, Long> {
         return filter(filterRequest);
     }
 
+    /**
+     * Create wallet wallet.
+     *
+     * @param request the request
+     * @return the wallet
+     */
     @SneakyThrows
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public Wallet createWallet(CreateWalletRequest request) {

@@ -29,8 +29,10 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
@@ -50,6 +52,7 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -71,6 +74,11 @@ class FrameworkHoldersCredentialTest {
 
     @Autowired
     private MIWSettings miwSettings;
+
+    @Autowired
+    private IssuersCredentialRepository issuersCredentialRepository;
+
+    private static int count = 0;
 
 
     @Test
@@ -117,7 +125,9 @@ class FrameworkHoldersCredentialTest {
         String value = request.getValue();
 
         createAndValidateVC(bpn, did, type, value);
-
+        //check in issuer tables
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        Assertions.assertEquals(1, issuerVCs.size());
     }
 
     static Stream<IssueFrameworkCredentialRequest> getTypes() {
@@ -165,6 +175,7 @@ class FrameworkHoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
         validate(wallet, type, value, response, miwSettings);
+
     }
 
     private void validate(Wallet wallet, String type, String value, ResponseEntity<String> response, MIWSettings miwSettings) throws JsonProcessingException {
@@ -179,10 +190,10 @@ class FrameworkHoldersCredentialTest {
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("value"), value);
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("id"), wallet.getDid());
 
-        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
-        Assertions.assertNotNull(credential);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        Assertions.assertFalse(credentials.isEmpty());
 
-        VerifiableCredential vcFromDB = credential.getData();
+        VerifiableCredential vcFromDB = credentials.get(0).getData();
         TestUtils.checkVC(vcFromDB, miwSettings);
 
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("type"), type);

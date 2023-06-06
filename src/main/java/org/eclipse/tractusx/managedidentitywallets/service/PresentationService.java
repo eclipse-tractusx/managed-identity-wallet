@@ -123,7 +123,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         String issuerDidString = URLDecoder.decode(verifiableCredentials.get(0).getIssuer().toString(), Charset.defaultCharset());
         Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer());
-        Wallet issuerWallet = walletService.getWalletByIdentifier(issuerDidString);
+        walletService.getWalletByIdentifier(issuerDidString);
 
         //validate BPN access  - Issuer(Creator) of VP must be caller
         Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
@@ -158,6 +158,15 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     }
 
 
+    /**
+     * Validate presentation map.
+     *
+     * @param vp                       the vp
+     * @param asJwt                    the as jwt
+     * @param withCredentialExpiryDate the with credential expiry date
+     * @param audience                 the audience
+     * @return the map
+     */
     @SneakyThrows
     public Map<String, Object> validatePresentation(Map<String, Object> vp, boolean asJwt, boolean withCredentialExpiryDate, String audience) {
 
@@ -243,10 +252,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     }
 
     private void validateCredential(VerifiableCredential verifiableCredential, String holderIdentifier) {
-
         //check holders
         Validate.isFalse(verifiableCredential.getCredentialSubject().get(0).get("id").toString().equals(holderIdentifier)).launch(new ForbiddenException("VC " + verifiableCredential.getTypes() + " is not match with holder identifier " + holderIdentifier));
-
-        //TODO need to validate policies
     }
 }
