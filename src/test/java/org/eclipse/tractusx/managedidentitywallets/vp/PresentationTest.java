@@ -23,21 +23,28 @@ package org.eclipse.tractusx.managedidentitywallets.vp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.controller.PresentationController;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.exception.DidDocumentResolverNotRegisteredException;
 import org.eclipse.tractusx.ssi.lib.exception.JwtException;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
+import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -67,9 +74,15 @@ class PresentationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private PresentationService presentationService;
+
+    @Autowired
+    private PresentationController presentationController;
+
 
     @Test
-    void validateVPAsJwtWithValidAudienceAndDateValidation200() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException {
+    void validateVPAssJsonLd400() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
         //create VP
         String bpn = UUID.randomUUID().toString();
         String audience = "smartSense";
@@ -80,14 +93,89 @@ class PresentationTest {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         HttpEntity<Map> entity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> validationResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS_VALIDATION + "?asJwt={asJwt}&audience={audience}&withCredentialExpiryDate={withCredentialExpiryDate}", HttpMethod.POST, entity, Map.class, true, "smartSense", true);
+        ResponseEntity<Map> validationResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS_VALIDATION, HttpMethod.POST, entity, Map.class);
+        Assertions.assertEquals(validationResponse.getStatusCode().value(), HttpStatus.BAD_REQUEST.value());
+    }
 
 
-        //TODO will be checked once we have mock solution
-        //Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.OK.value());
-       /* Assertions.assertTrue(Boolean.parseBoolean(validationResponse.getBody().get("valid").toString()));
-        Assertions.assertTrue(Boolean.parseBoolean(validationResponse.getBody().get("validateAudience").toString()));
-        Assertions.assertTrue(Boolean.parseBoolean(validationResponse.getBody().get("withCredentialExpiryDate").toString()));*/
+    @Test
+    void validateVPAsJwt() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
+        String bpn = UUID.randomUUID().toString();
+        String audience = "smartSense";
+        ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
+        Map body = vpResponse.getBody();
+
+        try (MockedConstruction mocked = Mockito.mockConstruction(SignedJwtVerifier.class)) {
+
+            DidDocumentResolverRegistry didDocumentResolverRegistry = Mockito.mock(DidDocumentResolverRegistry.class);
+            SignedJwtVerifier signedJwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
+
+            Mockito.doNothing().when(signedJwtVerifier).verify(Mockito.any(SignedJWT.class));
+
+            Thread.sleep(62000L); // need to remove this??? then we need to mock validate
+
+            ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, null, true, false);
+
+            Map map = mapResponseEntity.getBody();
+
+            Assertions.assertTrue(Boolean.parseBoolean(map.get("valid").toString()));
+            Assertions.assertFalse(map.containsKey("validateAudience"));
+            Assertions.assertFalse(map.containsKey("validateExpiryDate"));
+        }
+    }
+
+    @Test
+    void validateVPAsJwtWithInvalidSignatureAndInValidAudienceAndExpiryDateValidation() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
+        //create VP
+        String bpn = UUID.randomUUID().toString();
+        String audience = "smartSense";
+        ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
+        Map body = vpResponse.getBody();
+
+        try (MockedConstruction mocked = Mockito.mockConstruction(SignedJwtVerifier.class)) {
+
+            DidDocumentResolverRegistry didDocumentResolverRegistry = Mockito.mock(DidDocumentResolverRegistry.class);
+            SignedJwtVerifier signedJwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
+
+            Mockito.doThrow(new JwtException("invalid")).when(signedJwtVerifier).verify(Mockito.any(SignedJWT.class));
+            
+            Thread.sleep(62000L); // need to remove this???
+
+            ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, "no valid", true, true);
+
+            Map map = mapResponseEntity.getBody();
+
+            Assertions.assertFalse(Boolean.parseBoolean(map.get("valid").toString()));
+            Assertions.assertFalse(Boolean.parseBoolean(map.get("validateAudience").toString()));
+            Assertions.assertFalse(Boolean.parseBoolean(map.get("validateExpiryDate").toString()));
+
+        }
+    }
+
+    @Test
+    void validateVPAsJwtWithValidAudienceAndDateValidation() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException {
+        //create VP
+        String bpn = UUID.randomUUID().toString();
+        String audience = "smartSense";
+        ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
+        Map body = vpResponse.getBody();
+
+        try (MockedConstruction mocked = Mockito.mockConstruction(SignedJwtVerifier.class)) {
+
+            DidDocumentResolverRegistry didDocumentResolverRegistry = Mockito.mock(DidDocumentResolverRegistry.class);
+            SignedJwtVerifier signedJwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
+            Mockito.doNothing().when(signedJwtVerifier).verify(Mockito.any(SignedJWT.class));
+
+
+            ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, audience, true, true);
+
+            Map map = mapResponseEntity.getBody();
+
+            Assertions.assertTrue(Boolean.parseBoolean(map.get("valid").toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(map.get("validateAudience").toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(map.get("validateExpiryDate").toString()));
+
+        }
     }
 
     @Test
