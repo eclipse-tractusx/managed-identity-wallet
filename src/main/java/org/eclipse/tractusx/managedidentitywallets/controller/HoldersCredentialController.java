@@ -97,4 +97,11 @@ public class HoldersCredentialController extends BaseController {
     public ResponseEntity<VerifiableCredential> issueCredential(@RequestBody Map<String, Object> data, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, getBPNFromToken(principal)));
     }
+
+    @Operation(description = "Permission: **update_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Delete a verifiable credential by its ID", summary = "Delete a verifiable credential by its ID")
+    @DeleteMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> deleteCredential(@RequestParam(name = "id") String credentialId, Principal principal) {
+        holdersCredentialService.deleteCredential(credentialId, getBPNFromToken(principal));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

@@ -23,7 +23,6 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.ssi.lib.model.Ed25519Signature2020;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -96,42 +95,6 @@ public class CommonUtils {
                 .credentialId(verifiableCredential.getId().toString())
                 .data(verifiableCredential)
                 .selfIssued(selfIssued)
-                .build();
-    }
-
-
-    /**
-     * Gets credential.
-     *
-     * @param subject         the subject
-     * @param types           the types
-     * @param issuerDoc       the issuer doc
-     * @param privateKeyBytes the private key bytes
-     * @param holderDid       the holder did
-     * @return the credential
-     */
-    public static IssuersCredential getIssuersCredential(Map<String, Object> subject, List<String> types, DidDocument issuerDoc,
-                                                         byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate) {
-        //VC Subject
-        VerifiableCredentialSubject verifiableCredentialSubject =
-                new VerifiableCredentialSubject(subject);
-
-
-        List<String> cloneTypes = new ArrayList<>(types);
-
-        // Create VC
-        VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, types,
-                verifiableCredentialSubject, privateKeyBytes, contexts, expiryDate);
-
-        cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
-
-        // Create Credential
-        return IssuersCredential.builder()
-                .holderDid(holderDid)
-                .issuerDid(issuerDoc.getId().toString())
-                .type(String.join(",", cloneTypes))
-                .credentialId(verifiableCredential.getId().toString())
-                .data(verifiableCredential)
                 .build();
     }
 

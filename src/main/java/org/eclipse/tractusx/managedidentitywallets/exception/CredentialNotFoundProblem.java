@@ -19,32 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
-
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Miw verifiable credential type.
+ * The type Wallet not found problem.
  */
-public class MIWVerifiableCredentialType extends VerifiableCredentialType {
+public class CredentialNotFoundProblem extends RuntimeException {
 
     /**
-     * The constant DISMANTLER_CREDENTIAL_CX.
+     * Instantiates a new Wallet not found problem.
      */
-    public static final String DISMANTLER_CREDENTIAL_CX = "DismantlerCredentialCX";
-    public static final String DISMANTLER_CREDENTIAL = "DismantlerCredential";
+    public CredentialNotFoundProblem() {
+    }
 
     /**
-     * The constant USE_CASE_FRAMEWORK_CONDITION_CX.
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
      */
-    public static final String USE_CASE_FRAMEWORK_CONDITION_CX = "UseCaseFrameworkConditionCX";
+    public CredentialNotFoundProblem(String message) {
+        super(message);
+    }
 
-    public static final String BPN_CREDENTIAL = "BpnCredential";
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public CredentialNotFoundProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    public static final String BPN_CREDENTIAL_CX = "BpnCredentialCX";
-
-    public static final String MEMBERSHIP_CREDENTIAL_CX = "MembershipCredentialCX";
-    public static final String SUMMARY_CREDENTIAL = "SummaryCredential";
-
-
+    /**
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param cause the cause
+     */
+    public CredentialNotFoundProblem(Throwable cause) {
+        super(cause);
+    }
 }
