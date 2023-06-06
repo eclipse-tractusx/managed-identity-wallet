@@ -89,6 +89,11 @@ class WalletTest {
         Assertions.assertEquals(wallet.getBpn(), miwSettings.authorityWalletBpn());
         Assertions.assertEquals(wallet.getName(), miwSettings.authorityWalletName());
         Assertions.assertNotNull(wallet.getDidDocument());
+
+        //check BPN credentials issued for authority wallet
+        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        Assertions.assertFalse(vcs.isEmpty());
+        Assertions.assertTrue(vcs.get(0).isSelfIssued());
     }
 
 
@@ -154,18 +159,20 @@ class WalletTest {
     @Test
     void storeCredentialsTest201() throws JsonProcessingException {
 
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+        TestUtils.createWallet(bpn, "name", restTemplate);
 
-        //make sure authority wallet is created
-        authorityWalletExistTest();
-        String did = "did:web:localhost:" + miwSettings.authorityWalletBpn();
-
-        ResponseEntity<Map> response = storeCredential(miwSettings.authorityWalletBpn(), did);
+        ResponseEntity<Map> response = storeCredential(bpn, did);
 
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-        Wallet byBpn = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-        List<HoldersCredential> byHolder = holdersCredentialRepository.getByHolderDid(byBpn.getDid());
-        Assertions.assertEquals(2, byHolder.size());
+        Wallet byBpn = walletRepository.getByBpn(bpn);
 
+        List<HoldersCredential> vc = holdersCredentialRepository.getByHolderDidAndType(did, "University-Degree-Credential");
+        Assertions.assertFalse(vc.isEmpty());
+
+        Assertions.assertTrue(vc.get(0).isStored());
+        Assertions.assertFalse(vc.get(0).isSelfIssued());
     }
 
 
@@ -227,11 +234,15 @@ class WalletTest {
 
     @Test
     void storeCredentialsWithDifferentHolder403() throws JsonProcessingException {
-        //make sure authority wallet is created
-        authorityWalletExistTest();
-        String did = "did:web:localhost:" + miwSettings.authorityWalletBpn();
 
-        ResponseEntity<Map> response = storeCredential(miwSettings.authorityWalletBpn(), "Some Random bpn");
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+        TestUtils.createWallet(bpn, "name", restTemplate);
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("Some random pbn");
+
+        ResponseEntity<Map> response = storeCredential(bpn, did, headers);
+
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
 
     }
@@ -392,9 +403,7 @@ class WalletTest {
     }
 
 
-
-    private ResponseEntity<Map> storeCredential(String bpn, String did) throws JsonProcessingException {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+    private ResponseEntity<Map> storeCredential(String bpn, String did, HttpHeaders headers) throws JsonProcessingException {
         String vc = """
                                 {
                                     "id": "http://example.edu/credentials/3732",
@@ -441,6 +450,11 @@ class WalletTest {
 
         ResponseEntity<Map> response = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, HttpMethod.POST, entity, Map.class, bpn);
         return response;
+    }
+
+    private ResponseEntity<Map> storeCredential(String bpn, String did) throws JsonProcessingException {
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+        return storeCredential(bpn, did, headers);
     }
 
 

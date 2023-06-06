@@ -333,7 +333,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         // Create Credential
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
-                privateKeyBytes, issuerWallet.getDid(),
+                privateKeyBytes,
+                issuerWallet.getDid(), //TODO need to check, how we can identify holder of VC, need to m
                 verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), false);
 
 

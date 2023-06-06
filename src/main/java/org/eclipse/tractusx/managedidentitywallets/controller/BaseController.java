@@ -28,8 +28,17 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import java.security.Principal;
 
+/**
+ * The type Base controller.
+ */
 public class BaseController {
 
+    /**
+     * Gets bpn from token.
+     *
+     * @param principal the principal
+     * @return the bpn from token
+     */
     public String getBPNFromToken(Principal principal) {
         Object principal1 = ((JwtAuthenticationToken) principal).getPrincipal();
         Jwt jwt = (Jwt) principal1;
