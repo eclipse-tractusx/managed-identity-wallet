@@ -209,12 +209,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
 
-        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
-
         //save in holder wallet
-        holdersCredentialRepository.save(holdersCredential);
+        holdersCredential = holdersCredentialRepository.save(holdersCredential);
 
-        //Store Credential in issuers wallet table
+        //Store Credential in issuers table
+        IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
         issuersCredential = create(issuersCredential);
 
         // Return VC
@@ -252,12 +251,12 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
 
-        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
         //save in holder wallet
-        holdersCredentialRepository.save(holdersCredential);
+        holdersCredential = holdersCredentialRepository.save(holdersCredential);
 
-        //Store Credential in issuers wallet table
+        //Store Credential in issuers table
+        IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
         issuersCredential = create(issuersCredential);
 
         // Return VC
@@ -296,17 +295,13 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 "status", "Active",
                 "startTime", Instant.now().toString()), types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
 
-        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
-                "id", holderWallet.getDid(),
-                "holderIdentifier", holderWallet.getBpn(),
-                "memberOf", baseWallet.getName(),
-                "status", "Active",
-                "startTime", Instant.now().toString()), types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
         //save in holder wallet
-        holdersCredentialRepository.save(holdersCredential);
+        holdersCredential = holdersCredentialRepository.save(holdersCredential);
 
-        //Store Credential in holder table
+        IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
+
+        //Store Credential in issuer table
         issuersCredential = create(issuersCredential);
 
         // Return VC
@@ -323,6 +318,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     public VerifiableCredential issueCredentialUsingBaseWallet(Map<String, Object> data, String callerBpn) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+
         Wallet issuerWallet = walletService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
         //validate BPN access, VC must be issued by base wallet
@@ -340,15 +336,12 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 privateKeyBytes, issuerWallet.getDid(),
                 verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), false);
 
-        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(verifiableCredential.getCredentialSubject().get(0),
-                verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
-                privateKeyBytes, issuerWallet.getDid(),
-                verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()));
 
         //save in holder wallet
-        holdersCredentialRepository.save(holdersCredential);
+        holdersCredential = holdersCredentialRepository.save(holdersCredential);
 
         //Store Credential in issuers table
+        IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
         issuersCredential = create(issuersCredential);
 
         // Return VC

@@ -35,6 +35,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
@@ -46,6 +47,9 @@ import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -211,5 +215,21 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         // Return VC
         return credential.getData();
+    }
+
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
+    public void deleteCredential(String credentialId, String bpnFromToken) {
+        //Fetch Holder Wallet
+        Wallet holderWallet = walletService.getWalletByIdentifier(bpnFromToken);
+
+        //check credential exp
+        isCredentialExistWithId(holderWallet.getDid(), credentialId);
+
+        //remove credential
+        holdersCredentialRepository.deleteByCredentialId(credentialId);
+    }
+
+    private void isCredentialExistWithId(String holderDid, String credentialId) {
+        Validate.isFalse(holdersCredentialRepository.existsByHolderDidAndCredentialId(holderDid, credentialId)).launch(new CredentialNotFoundProblem("Credential ID: " + credentialId + " is not exists "));
     }
 }

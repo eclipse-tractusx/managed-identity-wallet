@@ -274,14 +274,11 @@ public class WalletService extends BaseService<Wallet, Long> {
                 "id", wallet.getDid(),
                 "bpn", wallet.getBpn()), types, baseWallet.getDidDocument(), privateKeyBytes, wallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), authority);
 
-        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
-                "id", wallet.getDid(),
-                "bpn", wallet.getBpn()), types, baseWallet.getDidDocument(), privateKeyBytes, wallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
-
         //Store Credential in holder wallet
-        holdersCredentialRepository.save(holdersCredential);
+        holdersCredential = holdersCredentialRepository.save(holdersCredential);
 
-        //save in issuers wallet
+        //Store Credential in issuers table
+        IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
         issuersCredentialRepository.save(issuersCredential);
 
         log.debug("BPN credential issued for bpn -{}", request.getBpn());

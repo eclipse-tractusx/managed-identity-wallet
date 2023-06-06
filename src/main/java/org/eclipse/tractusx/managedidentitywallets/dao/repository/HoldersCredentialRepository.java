@@ -24,6 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -67,4 +68,10 @@ public interface HoldersCredentialRepository extends BaseRepository<HoldersCrede
      * @return the boolean
      */
     boolean existsByHolderDidAndType(String holderDid, String type);
+
+    @Modifying
+    @Query("delete from HoldersCredential where credentialId=:credentialId")
+    void deleteByCredentialId(@Param("credentialId") String credentialId);
+
+    boolean existsByHolderDidAndCredentialId(String holderDid, String credentialId);
 }
