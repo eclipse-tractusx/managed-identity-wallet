@@ -136,7 +136,6 @@ public class CredentialService extends BaseService<Credential, Long> {
         if (StringUtils.hasText(credentialId)) {
             filterRequest.appendCriteria("credentialId", Operator.EQUALS, credentialId);
         }
-//        Specification<Credential> sps = getSpecificationUtil().generateSpecification(filterRequest.getCriteria());
         FilterRequest request = new FilterRequest();
         if (!CollectionUtils.isEmpty(type)) {
             request.setPage(filterRequest.getPage());
@@ -145,8 +144,6 @@ public class CredentialService extends BaseService<Credential, Long> {
             for (String str : type) {
                 request.appendCriteria("type", Operator.CONTAIN, str);
             }
-//            Specification<Credential> sp = getSpecificationUtil().generateOrSpecification(request.getCriteria());
-//            sps = sp.and(sps);
         }
 
         Sort sort = new Sort();
@@ -295,9 +292,8 @@ public class CredentialService extends BaseService<Credential, Long> {
      */
     public Map<String, Object> credentialsValidation(Map<String, Object> data) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+
         // DID Resolver Constracture params
-
-
         DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
         didDocumentResolverRegistry.register(
                 new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));

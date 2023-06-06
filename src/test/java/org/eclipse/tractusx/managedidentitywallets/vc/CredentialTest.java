@@ -21,12 +21,14 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.controller.CredentialController;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
@@ -34,11 +36,15 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
+import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,6 +71,9 @@ class CredentialTest {
     private WalletRepository walletRepository;
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private CredentialController credentialController;
 
 
     @Test
@@ -133,22 +142,48 @@ class CredentialTest {
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
     }
 
+
     @Test
-    void validateCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void validateCredentialsWithInvalidVC() throws com.fasterxml.jackson.core.JsonProcessingException {
+        //data setup
+        Map<String, Object> map = issueVC();
+
+        //service call
+        try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
+
+            //mock setup
+            LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
+            utils.when(() -> {
+                LinkedDataProofValidation.newInstance(Mockito.any(DidDocumentResolverRegistryImpl.class));
+            }).thenReturn(mock);
+            Mockito.when(mock.checkProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
+
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
+            Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get("valid").toString()));
+        }
+    }
 
 
-        String bpn = UUID.randomUUID().toString();
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
-        TestUtils.createWallet(bpn, "Test", restTemplate);
-        ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
-        Map<String, Objects> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
-        HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-        ResponseEntity<Map> response = restTemplate.exchange(RestURI.CREDENTIALS_VALIDATION, HttpMethod.POST, entity, Map.class);
+    @Test
+    void validateCredentials() throws com.fasterxml.jackson.core.JsonProcessingException {
 
-        //TODO check will be added once we have mock solution
-      /*  Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertTrue((Boolean) response.getBody().get("valid")); */
+        //data setup
+        Map<String, Object> map = issueVC();
+
+
+        //service call
+        try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
+
+            //mock setup
+            LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
+            utils.when(() -> {
+                LinkedDataProofValidation.newInstance(Mockito.any(DidDocumentResolverRegistryImpl.class));
+            }).thenReturn(mock);
+            Mockito.when(mock.checkProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
+            Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get("valid").toString()));
+        }
     }
 
 
@@ -168,5 +203,13 @@ class CredentialTest {
         return credentialList;
     }
 
-
+    private Map<String, Object> issueVC() throws JsonProcessingException {
+        String bpn = UUID.randomUUID().toString();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+        TestUtils.createWallet(bpn, "Test", restTemplate);
+        ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
+        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
+        Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
+        return map;
+    }
 }
