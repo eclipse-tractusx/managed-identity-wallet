@@ -16,6 +16,7 @@ CREATE TABLE public.wallet (
   CONSTRAINT wallet_pkey PRIMARY KEY (id),
   CONSTRAINT wallet_fk FOREIGN KEY (modified_from) REFERENCES public.wallet(bpn)
 );
+COMMENT ON TABLE public.wallet IS 'This table will store wallets';
 
 
 CREATE TABLE public.wallet_key (
@@ -32,9 +33,10 @@ CREATE TABLE public.wallet_key (
   CONSTRAINT wallet_fk FOREIGN KEY (wallet_id) REFERENCES public.wallet(id),
   CONSTRAINT wallet_key_fk FOREIGN KEY (modified_from) REFERENCES public.wallet(bpn)
 );
+COMMENT ON TABLE public.wallet_key IS 'This table will store key pair of wallets';
 
 
-CREATE TABLE public.credential (
+CREATE TABLE public.issuers_credential (
   id bigserial NOT NULL,
   holder_did varchar(255) NOT NULL,
   issuer_did varchar(255) NOT NULL,
@@ -44,7 +46,29 @@ CREATE TABLE public.credential (
   created_at timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   modified_at timestamp(6) NULL,
   modified_from varchar(255) NULL,
-  CONSTRAINT credential_pkey PRIMARY KEY (id),
-  CONSTRAINT credential_fk FOREIGN KEY (modified_from) REFERENCES public.wallet(bpn),
-  CONSTRAINT holder_wallet_fk FOREIGN KEY (holder_did) REFERENCES public.wallet(did)
+  CONSTRAINT issuers_credential_pkey PRIMARY KEY (id),
+  CONSTRAINT issuers_credential_fk FOREIGN KEY (modified_from) REFERENCES public.wallet(bpn),
+  CONSTRAINT issuers_credential_holder_wallet_fk FOREIGN KEY (holder_did) REFERENCES public.wallet(did)
 );
+COMMENT ON TABLE  public.issuers_credential IS 'This table will store issuers credentials';
+
+
+CREATE TABLE public.holders_credential (
+  id bigserial NOT NULL,
+  holder_did varchar(255) NOT NULL,
+  issuer_did varchar(255) NOT NULL,
+  credential_id varchar(255) NOT NULL,
+  "data" text NOT NULL,
+  "type" varchar(255) NULL,
+  is_self_issued bool NOT null default false,
+  is_stored bool NOT null default false,
+  created_at timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  modified_at timestamp(6) NULL,
+  modified_from varchar(255) NULL,
+  CONSTRAINT holders_credential_pkey PRIMARY KEY (id),
+  CONSTRAINT holders_credential_fk FOREIGN KEY (modified_from) REFERENCES public.wallet(bpn),
+  CONSTRAINT holders_credential_holder_wallet_fk FOREIGN KEY (holder_did) REFERENCES public.wallet(did)
+);
+COMMENT ON TABLE  public.holders_credential IS 'This table will store holders credentials';
+
+COMMENT ON  COLUMN public.holders_credential.is_stored IS 'true is VC is stored using store VC api(Not issued by MIW)';
