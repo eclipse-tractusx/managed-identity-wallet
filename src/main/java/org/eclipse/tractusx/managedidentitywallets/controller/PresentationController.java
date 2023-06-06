@@ -40,13 +40,25 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.Map;
 
+/**
+ * The type Presentation controller.
+ */
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "VerifiablePresentations")
 public class PresentationController extends BaseController {
 
     private final PresentationService presentationService;
 
+    /**
+     * Create presentation response entity.
+     *
+     * @param data      the data
+     * @param audience  the audience
+     * @param asJwt     the as jwt
+     * @param principal the principal
+     * @return the response entity
+     */
+    @Tag(name = "Verifiable Presentations - Generation")
     @Operation(summary = "Create Verifiable Presentation", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller) \n\n Create a verifiable presentation from a list of verifiable credentials, signed by the holder")
     @PostMapping(path = RestURI.API_PRESENTATIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
@@ -62,14 +74,14 @@ public class PresentationController extends BaseController {
                                         "https://www.w3.org/2018/credentials/examples/v1"
                                       ],
                                       "type": [
-                                        "University-Degree-Credential, VerifiableCredential"
+                                        "University-Degree-Credential", "VerifiableCredential"
                                       ],
                                       "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
                                       "issuanceDate": "2019-06-16T18:56:59Z",
                                       "expirationDate": "2019-06-17T18:56:59Z",
-                                      "credentialSubject": {
+                                      "credentialSubject": [{
                                         "college": "Test-University"
-                                      },
+                                      }],
                                       "proof": {
                                         "type": "Ed25519Signature2018",
                                         "created": "2021-11-17T22:20:27Z",
@@ -89,6 +101,16 @@ public class PresentationController extends BaseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, getBPNFromToken(principal)));
     }
 
+    /**
+     * Validate presentation response entity.
+     *
+     * @param data                     the data
+     * @param audience                 the audience
+     * @param asJwt                    the as jwt
+     * @param withCredentialExpiryDate the with credential expiry date
+     * @return the response entity
+     */
+    @Tag(name = "Verifiable Presentations - Validation")
     @Operation(summary = "Validate Verifiable Presentation", description = "Permission: **view_wallets** OR **view_wallet**  \n\n Validate Verifiable Presentation with all included credentials")
     @PostMapping(path = RestURI.API_PRESENTATIONS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 

@@ -26,8 +26,8 @@ import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplica
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
@@ -55,10 +55,10 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-class IssueCredentialTest {
+class IssueHoldersCredentialTest {
 
     @Autowired
-    private CredentialRepository credentialRepository;
+    private HoldersCredentialRepository holdersCredentialRepository;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -118,7 +118,7 @@ class IssueCredentialTest {
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         Assertions.assertNotNull(verifiableCredential.getProof());
-        Credential credential = credentialRepository.getByHolderDidAndType(did, type);
+        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(did, type);
         Assertions.assertNotNull(credential);
         TestUtils.checkVC(credential.getData(), miwSettings);
     }

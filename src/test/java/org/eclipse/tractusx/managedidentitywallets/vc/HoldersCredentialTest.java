@@ -28,8 +28,8 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.controller.CredentialController;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
@@ -59,10 +59,10 @@ import java.util.*;
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 @ExtendWith(MockitoExtension.class)
-class CredentialTest {
+class HoldersCredentialTest {
 
     @Autowired
-    private CredentialRepository credentialRepository;
+    private HoldersCredentialRepository holdersCredentialRepository;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -73,7 +73,7 @@ class CredentialTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private CredentialController credentialController;
+    private IssuersCredentialController credentialController;
 
 
     @Test

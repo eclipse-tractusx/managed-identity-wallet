@@ -69,21 +69,38 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
+
+                //did document resolve APIs
                 .requestMatchers(new AntPathRequestMatcher(RestURI.DID_RESOLVE, GET.name())).permitAll() //Get did document
                 .requestMatchers(new AntPathRequestMatcher(RestURI.DID_DOCUMENTS, GET.name())).permitAll() //Get did document
+
+                //wallet APIS
                 .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, POST.name())).hasRole(ApplicationConstant.ROLE_ADD_WALLETS) //Create wallet
                 .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLETS) //Get all wallet
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get wallet by BPN
+                .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get wallet by identifier
                 .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //Store credential
+
+                //VP-Generation
+                .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //Create VP
+
+                //VP - Validation
+                .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_VALIDATION, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLETS, ApplicationConstant.ROLE_VIEW_WALLET) //validate VP
+
+                //VC - Holder
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get credentials
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLET, ApplicationConstant.ROLE_UPDATE_WALLETS) //issue credentials
+
+                //VC - validation
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_VALIDATION, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //validate credentials
+
+                //VC - Issuer
+                .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_UPDATE_WALLETS) //Lis of issuer VC
+                .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLET, ApplicationConstant.ROLE_UPDATE_WALLETS) //Issue VC
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //issue Membership Credential
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_DISMANTLER, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //issue dismantler Credential
                 .requestMatchers(new AntPathRequestMatcher(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //issue dismantler Credential
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLETS, ApplicationConstant.ROLE_UPDATE_WALLET) //issue dismantler Credential
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_VALIDATION, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLETS, ApplicationConstant.ROLE_VIEW_WALLET) //issue dismantler Credential
 
+                //error
                 .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 .and().oauth2ResourceServer()
                 .jwt()

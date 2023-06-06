@@ -53,7 +53,13 @@ public class RestURI {
      * The constant CREDENTIALS.
      */
     public static final String CREDENTIALS = "/api/credentials";
+
+
     public static final String CREDENTIALS_VALIDATION = "/api/credentials/validation";
+
+
+    public static final String ISSUERS_CREDENTIALS = "/api/credentials/issuer";
+
     /**
      * The constant CREDENTIALS_ISSUER_MEMBERSHIP.
      */

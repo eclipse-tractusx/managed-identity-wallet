@@ -34,9 +34,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
@@ -62,49 +64,60 @@ import java.time.Instant;
 import java.util.*;
 
 /**
- * The type Credential service.
+ * The type Issuers credential service.
  */
 @Service
 @Slf4j
-public class CredentialService extends BaseService<Credential, Long> {
+public class IssuersCredentialService extends BaseService<IssuersCredential, Long> {
 
     /**
      * The constant BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN.
      */
     public static final String BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN = "Base wallet BPN is not matching with request BPN(from token)";
-    private final CredentialRepository credentialRepository;
+    private final IssuersCredentialRepository issuersCredentialRepository;
     private final MIWSettings miwSettings;
     private final WalletService walletService;
 
-    private final SpecificationUtil<Credential> credentialSpecificationUtil;
+    private final SpecificationUtil<IssuersCredential> credentialSpecificationUtil;
 
     private final WalletKeyService walletKeyService;
 
     private final Map<String, String> supportedFrameworkVCTypes;
 
-    public CredentialService(CredentialRepository credentialRepository, MIWSettings miwSettings, WalletService walletService, SpecificationUtil<Credential> credentialSpecificationUtil, WalletKeyService walletKeyService) {
-        this.credentialRepository = credentialRepository;
+    private final HoldersCredentialRepository holdersCredentialRepository;
+
+    /**
+     * Instantiates a new Issuers credential service.
+     *
+     * @param issuersCredentialRepository the issuers credential repository
+     * @param miwSettings                 the miw settings
+     * @param walletService               the wallet service
+     * @param credentialSpecificationUtil the credential specification util
+     * @param walletKeyService            the wallet key service
+     * @param holdersCredentialRepository the holders credential repository
+     */
+    public IssuersCredentialService(IssuersCredentialRepository issuersCredentialRepository, MIWSettings miwSettings, WalletService walletService, SpecificationUtil<IssuersCredential> credentialSpecificationUtil, WalletKeyService walletKeyService, HoldersCredentialRepository holdersCredentialRepository) {
+        this.issuersCredentialRepository = issuersCredentialRepository;
         this.miwSettings = miwSettings;
         this.walletService = walletService;
         this.credentialSpecificationUtil = credentialSpecificationUtil;
         this.walletKeyService = walletKeyService;
-
+        this.holdersCredentialRepository = holdersCredentialRepository;
         Map<String, String> tmpMap = new HashMap<>();
         for (String type : org.apache.commons.lang3.StringUtils.split(miwSettings.supportedFrameworkVCTypes(), ",")) {
             tmpMap.put(type.split("=")[0].trim(), type.split("=")[1].trim());
         }
         supportedFrameworkVCTypes = ImmutableMap.copyOf(tmpMap);
-
     }
 
 
     @Override
-    protected BaseRepository<Credential, Long> getRepository() {
-        return credentialRepository;
+    protected BaseRepository<IssuersCredential, Long> getRepository() {
+        return issuersCredentialRepository;
     }
 
     @Override
-    protected SpecificationUtil<Credential> getSpecificationUtil() {
+    protected SpecificationUtil<IssuersCredential> getSpecificationUtil() {
         return credentialSpecificationUtil;
     }
 
@@ -112,25 +125,26 @@ public class CredentialService extends BaseService<Credential, Long> {
     /**
      * Gets credentials.
      *
-     * @param credentialId     the credentialId
-     * @param issuerIdentifier the issuer identifier
+     * @param credentialId     the credential id
+     * @param holderIdentifier the issuer identifier
      * @param type             the type
      * @param sortColumn       the sort column
      * @param sortType         the sort type
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public List<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
+    public List<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
         filterRequest.setPage(0);
         filterRequest.setSize(1000);
 
-        Wallet holderWallet = walletService.getWalletByIdentifier(callerBPN);
-        filterRequest.appendCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
+        //Issuer must be caller of API
+        Wallet issuerWallet = walletService.getWalletByIdentifier(callerBPN);
+        filterRequest.appendCriteria("issuerDid", Operator.EQUALS, issuerWallet.getDid());
 
-        if (StringUtils.hasText(issuerIdentifier)) {
-            Wallet issuerWallet = walletService.getWalletByIdentifier(issuerIdentifier);
-            filterRequest.appendCriteria("issuerDid", Operator.EQUALS, issuerWallet.getDid());
+        if (StringUtils.hasText(holderIdentifier)) {
+            Wallet holderWallet = walletService.getWalletByIdentifier(holderIdentifier);
+            filterRequest.appendCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
         }
 
         if (StringUtils.hasText(credentialId)) {
@@ -150,10 +164,10 @@ public class CredentialService extends BaseService<Credential, Long> {
         sort.setColumn(sortColumn);
         sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
         filterRequest.setSort(sort);
-        Page<Credential> filter = filter(filterRequest, request, CriteriaOperator.AND);
+        Page<IssuersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
         List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
-        for (Credential credential : filter.getContent()) {
+        for (IssuersCredential credential : filter.getContent()) {
             list.add(credential.getData());
         }
 
@@ -193,13 +207,18 @@ public class CredentialService extends BaseService<Credential, Long> {
                 "contract-template", request.getContractTemplate(),
                 "contract-version", request.getContractVersion());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
-        Credential credential = CommonUtils.getCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
 
-        //Store Credential
-        credential = create(credential);
+        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
+
+        //save in holder wallet
+        holdersCredentialRepository.save(holdersCredential);
+
+        //Store Credential in issuers wallet table
+        issuersCredential = create(issuersCredential);
 
         // Return VC
-        return credential.getData();
+        return issuersCredential.getData();
     }
 
     /**
@@ -231,13 +250,18 @@ public class CredentialService extends BaseService<Credential, Long> {
                 "activityType", request.getActivityType(),
                 "allowedVehicleBrands", request.getAllowedVehicleBrands());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
-        Credential credential = CommonUtils.getCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
 
-        //Store Credential
-        credential = create(credential);
+        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
+
+        //save in holder wallet
+        holdersCredentialRepository.save(holdersCredential);
+
+        //Store Credential in issuers wallet table
+        issuersCredential = create(issuersCredential);
 
         // Return VC
-        return credential.getData();
+        return issuersCredential.getData();
     }
 
     /**
@@ -265,23 +289,75 @@ public class CredentialService extends BaseService<Credential, Long> {
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         //VC Subject
-        Credential credential = CommonUtils.getCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
+                "id", holderWallet.getDid(),
+                "holderIdentifier", holderWallet.getBpn(),
+                "memberOf", baseWallet.getName(),
+                "status", "Active",
+                "startTime", Instant.now().toString()), types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
+
+        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
                 "id", holderWallet.getDid(),
                 "holderIdentifier", holderWallet.getBpn(),
                 "memberOf", baseWallet.getName(),
                 "status", "Active",
                 "startTime", Instant.now().toString()), types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate());
 
-        //Store Credential
-        credential = create(credential);
+        //save in holder wallet
+        holdersCredentialRepository.save(holdersCredential);
+
+        //Store Credential in holder table
+        issuersCredential = create(issuersCredential);
 
         // Return VC
-        return credential.getData();
+        return issuersCredential.getData();
+    }
+
+
+    /**
+     * Issue credential using base wallet
+     *
+     * @param data      the data
+     * @param callerBpn the caller bpn
+     * @return the verifiable credential
+     */
+    public VerifiableCredential issueCredentialUsingBaseWallet(Map<String, Object> data, String callerBpn) {
+        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+        Wallet issuerWallet = walletService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
+
+        //validate BPN access, VC must be issued by base wallet
+        Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+
+        //issuer must be base wallet
+        Validate.isFalse(issuerWallet.getBpn().equals(miwSettings.authorityWalletBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+
+        // get Key
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+
+        // Create Credential
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
+                verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
+                privateKeyBytes, issuerWallet.getDid(),
+                verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), false);
+
+        IssuersCredential issuersCredential = CommonUtils.getIssuersCredential(verifiableCredential.getCredentialSubject().get(0),
+                verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
+                privateKeyBytes, issuerWallet.getDid(),
+                verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()));
+
+        //save in holder wallet
+        holdersCredentialRepository.save(holdersCredential);
+
+        //Store Credential in issuers table
+        issuersCredential = create(issuersCredential);
+
+        // Return VC
+        return issuersCredential.getData();
     }
 
 
     private void isCredentialExit(String holderDid, String credentialType) {
-        Validate.isTrue(credentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
+        Validate.isTrue(holdersCredentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
     }
 
     /**
@@ -305,27 +381,5 @@ public class CredentialService extends BaseService<Credential, Long> {
         response.put("vc", verifiableCredential);
 
         return response;
-    }
-
-    public VerifiableCredential issueCredential(Map<String, Object> data, String callerBpn) {
-        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
-        Wallet issuerWallet = walletService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
-        //validate BPN access
-        Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
-
-        // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
-
-        // Create Credential
-        Credential credential = CommonUtils.getCredential(verifiableCredential.getCredentialSubject().get(0),
-                verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
-                privateKeyBytes, issuerWallet.getDid(),
-                verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()));
-
-        //Store Credential
-        credential = create(credential);
-
-        // Return VC
-        return credential.getData();
     }
 }
