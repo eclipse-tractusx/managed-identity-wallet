@@ -112,6 +112,14 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(CredentialNotFoundProblem.class)
+    ProblemDetail handleNotFoundCredentialProblem(CredentialNotFoundProblem e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+        problemDetail.setTitle(e.getMessage());
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
     @ExceptionHandler(Exception.class)
     ProblemDetail handleException(Exception e) {
         log.error("Error ", e);

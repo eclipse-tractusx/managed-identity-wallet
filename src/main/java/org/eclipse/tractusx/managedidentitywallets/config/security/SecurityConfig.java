@@ -36,8 +36,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 /**
  * The type Security config.
@@ -89,6 +88,7 @@ public class SecurityConfig {
                 //VC - Holder
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //get credentials
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, POST.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLET, ApplicationConstant.ROLE_UPDATE_WALLETS) //issue credentials
+                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, DELETE.name())).hasAnyRole(ApplicationConstant.ROLE_UPDATE_WALLET) //delete credentials
 
                 //VC - validation
                 .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_VALIDATION, POST.name())).hasAnyRole(ApplicationConstant.ROLE_VIEW_WALLET, ApplicationConstant.ROLE_VIEW_WALLETS) //validate credentials

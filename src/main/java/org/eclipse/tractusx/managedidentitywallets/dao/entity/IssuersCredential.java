@@ -61,4 +61,14 @@ public class IssuersCredential extends MIWBaseEntity {
 
     @Column(nullable = false)
     private String credentialId;
+
+    public static IssuersCredential of(HoldersCredential holdersCredential) {
+        return IssuersCredential.builder()
+                .credentialId(holdersCredential.getCredentialId())
+                .data(holdersCredential.getData())
+                .type(holdersCredential.getType())
+                .issuerDid(holdersCredential.getIssuerDid())
+                .holderDid(holdersCredential.getHolderDid())
+                .build();
+    }
 }
