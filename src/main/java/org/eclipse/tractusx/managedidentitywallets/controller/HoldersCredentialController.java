@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The type Credential controller.
+ * The type Holders credential controller.
  */
 @RestController
 @RequiredArgsConstructor
@@ -71,6 +71,13 @@ public class HoldersCredentialController extends BaseController {
     }
 
 
+    /**
+     * Issue credential response entity.
+     *
+     * @param data      the data
+     * @param principal the principal
+     * @return the response entity
+     */
     @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
     @PostMapping(path = RestURI.CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
@@ -98,6 +105,13 @@ public class HoldersCredentialController extends BaseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, getBPNFromToken(principal)));
     }
 
+    /**
+     * Delete credential response entity.
+     *
+     * @param credentialId the credential id
+     * @param principal    the principal
+     * @return the response entity
+     */
     @Operation(description = "Permission: **update_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Delete a verifiable credential by its ID", summary = "Delete a verifiable credential by its ID")
     @DeleteMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> deleteCredential(@RequestParam(name = "id") String credentialId, Principal principal) {

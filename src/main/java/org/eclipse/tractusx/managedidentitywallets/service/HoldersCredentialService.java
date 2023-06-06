@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.google.common.collect.ImmutableMap;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -30,8 +29,8 @@ import com.smartsensesolutions.java.commons.operator.Operator;
 import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -39,12 +38,7 @@ import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundP
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
-import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -53,14 +47,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.net.http.HttpClient;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Credential service.
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class HoldersCredentialService extends BaseService<HoldersCredential, Long> {
 
     /**
@@ -68,39 +65,11 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      */
     public static final String BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN = "Base wallet BPN is not matching with request BPN(from token)";
     private final HoldersCredentialRepository holdersCredentialRepository;
-    private final MIWSettings miwSettings;
     private final WalletService walletService;
 
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
     private final WalletKeyService walletKeyService;
-
-    private final Map<String, String> supportedFrameworkVCTypes;
-
-    /**
-     * Instantiates a new Holders credential service.
-     *
-     * @param holdersCredentialRepository the holders credential repository
-     * @param miwSettings                 the miw settings
-     * @param walletService               the wallet service
-     * @param credentialSpecificationUtil the credential specification util
-     * @param walletKeyService            the wallet key service
-     */
-    public HoldersCredentialService(HoldersCredentialRepository holdersCredentialRepository, MIWSettings miwSettings, WalletService walletService, SpecificationUtil<HoldersCredential> credentialSpecificationUtil, WalletKeyService walletKeyService) {
-        this.holdersCredentialRepository = holdersCredentialRepository;
-        this.miwSettings = miwSettings;
-        this.walletService = walletService;
-        this.credentialSpecificationUtil = credentialSpecificationUtil;
-        this.walletKeyService = walletKeyService;
-
-        Map<String, String> tmpMap = new HashMap<>();
-        for (String type : org.apache.commons.lang3.StringUtils.split(miwSettings.supportedFrameworkVCTypes(), ",")) {
-            tmpMap.put(type.split("=")[0].trim(), type.split("=")[1].trim());
-        }
-        supportedFrameworkVCTypes = ImmutableMap.copyOf(tmpMap);
-
-    }
-
 
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {
@@ -166,28 +135,6 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
     }
 
     /**
-     * Credentials validation map.
-     *
-     * @param data the data
-     * @return the map
-     */
-    public Map<String, Object> credentialsValidation(Map<String, Object> data) {
-        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
-
-        DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
-        didDocumentResolverRegistry.register(
-                new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
-
-        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
-        Boolean valid = proofValidation.checkProof(verifiableCredential);
-        Map<String, Object> response = new HashMap<>();
-        response.put("valid", valid);
-        response.put("vc", verifiableCredential);
-
-        return response;
-    }
-
-    /**
      * Issue credential verifiable credential.
      *
      * @param data      the data
@@ -217,6 +164,12 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         return credential.getData();
     }
 
+    /**
+     * Delete credential.
+     *
+     * @param credentialId the credential id
+     * @param bpnFromToken the bpn from token
+     */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public void deleteCredential(String credentialId, String bpnFromToken) {
         //Fetch Holder Wallet

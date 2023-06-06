@@ -24,9 +24,21 @@ package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 
+import java.util.List;
+
 /**
  * The interface Credential repository.
  */
 public interface IssuersCredentialRepository extends BaseRepository<IssuersCredential, Long> {
-    
+
+
+    /**
+     * Gets by issuer did and holder did and type.
+     *
+     * @param issuerDid              the issuer did
+     * @param holderDid              the holder did
+     * @param membershipCredentialCx the membership credential cx
+     * @return the by issuer did and holder did and type
+     */
+    List<IssuersCredential> getByIssuerDidAndHolderDidAndType(String issuerDid, String holderDid, String membershipCredentialCx);
 }

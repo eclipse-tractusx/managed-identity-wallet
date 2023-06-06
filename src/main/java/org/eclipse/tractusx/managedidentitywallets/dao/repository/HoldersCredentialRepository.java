@@ -58,7 +58,7 @@ public interface HoldersCredentialRepository extends BaseRepository<HoldersCrede
      * @param type      the type
      * @return the by holder did and type
      */
-    HoldersCredential getByHolderDidAndType(String holderDid, String type);
+    List<HoldersCredential> getByHolderDidAndType(String holderDid, String type);
 
     /**
      * Exists by holder did and type boolean.
@@ -69,9 +69,21 @@ public interface HoldersCredentialRepository extends BaseRepository<HoldersCrede
      */
     boolean existsByHolderDidAndType(String holderDid, String type);
 
+    /**
+     * Delete by credential id.
+     *
+     * @param credentialId the credential id
+     */
     @Modifying
     @Query("delete from HoldersCredential where credentialId=:credentialId")
     void deleteByCredentialId(@Param("credentialId") String credentialId);
 
+    /**
+     * Exists by holder did and credential id boolean.
+     *
+     * @param holderDid    the holder did
+     * @param credentialId the credential id
+     * @return the boolean
+     */
     boolean existsByHolderDidAndCredentialId(String holderDid, String credentialId);
 }

@@ -105,15 +105,12 @@ class PresentationTest {
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
 
-        try (MockedConstruction mocked = Mockito.mockConstruction(SignedJwtVerifier.class)) {
-
+        try (MockedConstruction SignedJwtVerifierMock = Mockito.mockConstruction(SignedJwtVerifier.class)) {
             DidDocumentResolverRegistry didDocumentResolverRegistry = Mockito.mock(DidDocumentResolverRegistry.class);
             SignedJwtVerifier signedJwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
 
             Mockito.doNothing().when(signedJwtVerifier).verify(Mockito.any(SignedJWT.class));
-
-            Thread.sleep(62000L); // need to remove this??? then we need to mock validate
-
+            
             ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, null, true, false);
 
             Map map = mapResponseEntity.getBody();
@@ -247,9 +244,9 @@ class PresentationTest {
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         //get BPN credentials
-        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
-
-        Map<String, Object> map = objectMapper.readValue(credential.getData().toJson(), Map.class);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        Assertions.assertFalse(credentials.isEmpty());
+        Map<String, Object> map = objectMapper.readValue(credentials.get(0).getData().toJson(), Map.class);
 
         //create request
         Map<String, Object> request = new HashMap<>();
@@ -272,9 +269,9 @@ class PresentationTest {
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         //get BPN credentials
-        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
 
-        Map<String, Object> map = objectMapper.readValue(credential.getData().toJson(), Map.class);
+        Map<String, Object> map = objectMapper.readValue(credentials.get(0).getData().toJson(), Map.class);
 
         //create request
         Map<String, Object> request = new HashMap<>();

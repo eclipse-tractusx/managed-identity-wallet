@@ -26,6 +26,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
@@ -76,6 +77,7 @@ class DeleteHoldersCredentialTest {
 
         //Fetch bpn credential which is auto generated while create wallet
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDid(did);
+        String type = credentials.get(0).getType();
         Assertions.assertFalse(credentials.isEmpty());
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
@@ -89,6 +91,9 @@ class DeleteHoldersCredentialTest {
         credentials = holdersCredentialRepository.getByHolderDid(did);
         Assertions.assertTrue(credentials.isEmpty());
 
+        //check, VC should not be deleted from issuer table
+        List<IssuersCredential> vcs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);
+        Assertions.assertFalse(vcs.isEmpty());
     }
 
     @Test

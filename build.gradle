@@ -16,7 +16,7 @@ configurations {
 }
 
 repositories {
-//	mavenLocal()
+	mavenLocal()
 	mavenCentral()
 	maven {
 		url = uri("https://repo.danubetech.com/repository/maven-public")
@@ -58,6 +58,7 @@ dependencies {
 	testImplementation "org.testcontainers:postgresql"
 	testImplementation "org.testcontainers:junit-jupiter"
 	testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
+	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
 	testImplementation group: 'org.json', name: 'json', version: '20230227'
 }
 

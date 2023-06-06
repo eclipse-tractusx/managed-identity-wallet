@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -28,6 +29,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
@@ -55,7 +57,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-class IssueHoldersCredentialTest {
+class IssuersCredentialTest {
 
     @Autowired
     private HoldersCredentialRepository holdersCredentialRepository;
@@ -68,26 +70,70 @@ class IssueHoldersCredentialTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private IssuersCredentialRepository issuersCredentialRepository;
+
 
     @Test
-    void issueCredentialsTest403() {
+    void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
+        //TODO added by Ronak
+    }
+
+    @Test
+    void issueCredentialsTestWithInvalidRole403() {
 
         HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(RestURI.CREDENTIALS, HttpMethod.POST, entity, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS, HttpMethod.POST, entity, Map.class);
 
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
+
+    @Test
+    void issueCredentialsWithoutBaseWalletBPN403() throws JsonProcessingException {
+        String bpn = UUID.randomUUID().toString();
+        String holderDid = "did:web:localhost:" + bpn;
+        String type = "TestCredential";
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+
+        ResponseEntity<String> response = issueVC(bpn, holderDid, holderDid, type, headers);
+
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
 
     @Test
     void issueCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
 
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
+        String type = "TestCredential";
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+
+        ResponseEntity<String> response = issueVC(bpn, did, miwSettings.authorityWalletDid(), type, headers);
+
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+        Assertions.assertNotNull(verifiableCredential.getProof());
+
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), type);
+        Assertions.assertFalse(credentials.isEmpty());
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
+
+        //check is it is stored in issuer wallet
+        //TODO need to change once we have solutions to identify VC holder
+        /*List<IssuersCredential> issuersCredentials = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);
+        Assertions.assertEquals(1, issuersCredentials.size());
+        Assertions.assertEquals(type, issuersCredentials.get(0).getType());*/
+    }
+
+
+    private ResponseEntity<String> issueVC(String bpn, String holderDid, String issuerDid, String type, HttpHeaders headers) throws JsonProcessingException {
+
         //save wallet
-        TestUtils.createWallet(bpn, did, restTemplate);
+        TestUtils.createWallet(bpn, holderDid, restTemplate);
 
         // Create VC without proof
         //VC Bulider
@@ -97,31 +143,22 @@ class IssueHoldersCredentialTest {
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
                 new VerifiableCredentialSubject(Map.of("test", "test"));
-        String type = "TestCredential";
+
         //Using Builder
         VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
                         .id(URI.create(UUID.randomUUID().toString()))
                         .context(miwSettings.vcContexts())
                         .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
-                        .issuer(URI.create(did))
+                        .issuer(URI.create(issuerDid)) //issuer must be base wallet
                         .expirationDate(miwSettings.vcExpiryDate().toInstant())
                         .issuanceDate(Instant.now())
                         .credentialSubject(verifiableCredentialSubject)
                         .build();
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS, HttpMethod.POST, entity, String.class);
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-        Assertions.assertNotNull(verifiableCredential.getProof());
-        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(did, type);
-        Assertions.assertNotNull(credential);
-        TestUtils.checkVC(credential.getData(), miwSettings);
+        return restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS, HttpMethod.POST, entity, String.class);
     }
-
 
 }
