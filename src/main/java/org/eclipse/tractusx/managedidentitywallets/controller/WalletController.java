@@ -93,21 +93,14 @@ public class WalletController extends BaseController {
                                      "https://www.w3.org/2018/credentials/examples/v1"
                                    ],
                                    "type": [
-                                     "University-Degree-Credential, VerifiableCredential"
+                                     "University-Degree-Credential", "VerifiableCredential"
                                    ],
                                    "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
                                    "issuanceDate": "2019-06-16T18:56:59Z",
                                    "expirationDate": "2019-06-17T18:56:59Z",
-                                   "credentialSubject": {
+                                   "credentialSubject": [{
                                      "college": "Test-University"
-                                   },
-                                   "credentialStatus": {
-                                     "id": "http://example.edu/api/credentials/status/test#3",
-                                     "type": "StatusList2021Entry",
-                                     "statusPurpose": "revocation",
-                                     "statusListIndex": "3",
-                                     "statusListCredential": "http://example.edu/api/credentials/status/test"
-                                   },
+                                   }],
                                    "proof": {
                                      "type": "Ed25519Signature2018",
                                      "created": "2021-11-17T22:20:27Z",

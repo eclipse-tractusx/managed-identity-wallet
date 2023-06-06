@@ -29,9 +29,9 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.controller.PresentationController;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
@@ -69,7 +69,7 @@ class PresentationTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private CredentialRepository credentialRepository;
+    private HoldersCredentialRepository holdersCredentialRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -138,7 +138,7 @@ class PresentationTest {
             SignedJwtVerifier signedJwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
 
             Mockito.doThrow(new JwtException("invalid")).when(signedJwtVerifier).verify(Mockito.any(SignedJWT.class));
-            
+
             Thread.sleep(62000L); // need to remove this???
 
             ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, "no valid", true, true);
@@ -247,7 +247,7 @@ class PresentationTest {
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         //get BPN credentials
-        Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
 
         Map<String, Object> map = objectMapper.readValue(credential.getData().toJson(), Map.class);
 
@@ -272,7 +272,7 @@ class PresentationTest {
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         //get BPN credentials
-        Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        HoldersCredential credential = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
 
         Map<String, Object> map = objectMapper.readValue(credential.getData().toJson(), Map.class);
 

@@ -25,7 +25,7 @@ import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplica
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -52,7 +52,7 @@ class DidDocumentsTest {
     private WalletKeyRepository walletKeyRepository;
 
     @Autowired
-    private CredentialRepository credentialRepository;
+    private HoldersCredentialRepository holdersCredentialRepository;
 
     @Autowired
     private TestRestTemplate restTemplate;

@@ -29,9 +29,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
@@ -67,12 +67,12 @@ import java.util.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PresentationService extends BaseService<Credential, Long> {
+public class PresentationService extends BaseService<HoldersCredential, Long> {
 
-    private final CredentialRepository credentialRepository;
+    private final HoldersCredentialRepository holdersCredentialRepository;
 
 
-    private final SpecificationUtil<Credential> credentialSpecificationUtil;
+    private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
     private final WalletService walletService;
 
@@ -81,12 +81,12 @@ public class PresentationService extends BaseService<Credential, Long> {
     private final MIWSettings miwSettings;
 
     @Override
-    protected BaseRepository<Credential, Long> getRepository() {
-        return credentialRepository;
+    protected BaseRepository<HoldersCredential, Long> getRepository() {
+        return holdersCredentialRepository;
     }
 
     @Override
-    protected SpecificationUtil<Credential> getSpecificationUtil() {
+    protected SpecificationUtil<HoldersCredential> getSpecificationUtil() {
         return credentialSpecificationUtil;
     }
 
@@ -125,7 +125,7 @@ public class PresentationService extends BaseService<Credential, Long> {
         Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer());
         Wallet issuerWallet = walletService.getWalletByIdentifier(issuerDidString);
 
-        //validate BPN access
+        //validate BPN access  - Issuer(Creator) of VP must be caller
         Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
 
         if (asJwt) {
