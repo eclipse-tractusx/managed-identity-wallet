@@ -144,4 +144,20 @@ public class TestUtils {
         System.out.println("wallet -- >" + wallet1.getBpn());
         return wallet1;
     }
+
+    public static List<VerifiableCredential> getCredentialsFromString(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
+        List<VerifiableCredential> credentialList = new ArrayList<>();
+
+        JSONArray array = new JSONArray(body);
+        if (array.length() == 0) {
+            return credentialList;
+        }
+
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject jsonObject = array.getJSONObject(i);
+            ObjectMapper objectMapper = new ObjectMapper();
+            credentialList.add(new VerifiableCredential(objectMapper.readValue(jsonObject.toString(), Map.class)));
+        }
+        return credentialList;
+    }
 }

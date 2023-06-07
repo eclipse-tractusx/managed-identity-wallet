@@ -39,6 +39,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredential
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,9 @@ class MembershipHoldersCredentialTest {
     @Autowired
     private IssuersCredentialRepository issuersCredentialRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     @Test
     void issueMembershipCredentialTest403() {
@@ -92,6 +96,34 @@ class MembershipHoldersCredentialTest {
 
 
     @Test
+    void issueMembershipCredentialToBaseWalletTest201() throws JsonProcessingException, JSONException {
+
+        Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+
+        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
+        VerifiableCredential verifiableCredential = getVerifiableCredential(response);
+
+        TestUtils.checkVC(verifiableCredential, miwSettings);
+
+        validateTypes(verifiableCredential, miwSettings.authorityWalletBpn());
+
+        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        Assertions.assertFalse(holderVCs.isEmpty());
+
+        TestUtils.checkVC(holderVCs.get(0).getData(), miwSettings);
+        Assertions.assertTrue(holderVCs.get(0).isSelfIssued()); //must be self issued true
+        Assertions.assertFalse(holderVCs.get(0).isStored()); //store must be false
+
+        //check in issuer tables
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        Assertions.assertEquals(1, issuerVCs.size());
+        TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
+    }
+
+
+    @Test
     void issueMembershipCredentialTest201() throws JsonProcessingException, JSONException {
 
         String bpn = UUID.randomUUID().toString();
@@ -104,17 +136,17 @@ class MembershipHoldersCredentialTest {
         ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
-        VerifiableCredential verifiableCredential = new VerifiableCredential(map);
+        VerifiableCredential verifiableCredential = getVerifiableCredential(response);
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
-        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("holderIdentifier"), bpn);
+        validateTypes(verifiableCredential, bpn);
 
         List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         Assertions.assertFalse(holderVCs.isEmpty());
+        Assertions.assertFalse(holderVCs.get(0).isSelfIssued()); //must be self issued false
+        Assertions.assertFalse(holderVCs.get(0).isStored()); //store must be false
+
 
         TestUtils.checkVC(holderVCs.get(0).getData(), miwSettings);
 
@@ -158,6 +190,18 @@ class MembershipHoldersCredentialTest {
         ResponseEntity<String> duplicateResponse = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
 
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), duplicateResponse.getStatusCode().value());
+    }
+
+
+    @NotNull
+    private VerifiableCredential getVerifiableCredential(ResponseEntity<String> response) throws JsonProcessingException {
+        Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
+        return new VerifiableCredential(map);
+    }
+
+    private void validateTypes(VerifiableCredential verifiableCredential, String holderBpn) {
+        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("holderIdentifier"), holderBpn);
     }
 
 }

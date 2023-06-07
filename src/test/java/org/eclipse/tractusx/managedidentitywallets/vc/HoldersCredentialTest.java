@@ -114,6 +114,7 @@ class HoldersCredentialTest {
         Assertions.assertFalse(credentials.isEmpty());
         TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
         Assertions.assertTrue(credentials.get(0).isSelfIssued());
+        Assertions.assertFalse(credentials.get(0).isStored());
 
     }
 
@@ -165,13 +166,13 @@ class HoldersCredentialTest {
 
         ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}"
                 , HttpMethod.GET, entity, String.class, baseDID);
-        List<VerifiableCredential> credentialList = getCredentialsFromString(response.getBody());
+        List<VerifiableCredential> credentialList = TestUtils.getCredentialsFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size());
 
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}"
                 , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
-        credentialList = getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getCredentialsFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
@@ -179,7 +180,7 @@ class HoldersCredentialTest {
         list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
                 , HttpMethod.GET, entity, String.class, String.join(",", list));
-        credentialList = getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getCredentialsFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
     }
@@ -228,22 +229,6 @@ class HoldersCredentialTest {
         }
     }
 
-
-    private List<VerifiableCredential> getCredentialsFromString(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
-        List<VerifiableCredential> credentialList = new ArrayList<>();
-
-        JSONArray array = new JSONArray(body);
-        if (array.length() == 0) {
-            return credentialList;
-        }
-
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject jsonObject = array.getJSONObject(i);
-            ObjectMapper objectMapper = new ObjectMapper();
-            credentialList.add(new VerifiableCredential(objectMapper.readValue(jsonObject.toString(), Map.class)));
-        }
-        return credentialList;
-    }
 
     private Map<String, Object> issueVC() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();

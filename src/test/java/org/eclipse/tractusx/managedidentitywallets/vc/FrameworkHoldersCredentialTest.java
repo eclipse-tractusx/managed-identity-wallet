@@ -115,6 +115,30 @@ class FrameworkHoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
+    @Test
+    void issueFrameWorkVCToBaseWalletTest201() throws JSONException {
+        String bpn = miwSettings.authorityWalletBpn();
+        String type = "cx-pcf";
+        String value = "PCF";
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
+
+        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        Assertions.assertFalse(credentials.isEmpty());
+
+        VerifiableCredential vcFromDB = credentials.get(0).getData();
+        TestUtils.checkVC(vcFromDB, miwSettings);
+
+        Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
+        Assertions.assertTrue(credentials.get(0).isSelfIssued()); //self issue must be false
+    }
+
     @ParameterizedTest
     @MethodSource("getTypes")
     void issueFrameWorkVCTest201(IssueFrameworkCredentialRequest request) throws JsonProcessingException, JSONException {
@@ -196,6 +220,8 @@ class FrameworkHoldersCredentialTest {
         VerifiableCredential vcFromDB = credentials.get(0).getData();
         TestUtils.checkVC(vcFromDB, miwSettings);
 
+        Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
+        Assertions.assertFalse(credentials.get(0).isSelfIssued()); //self issue must be false
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("type"), type);
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("value"), value);
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("id"), wallet.getDid());
