@@ -190,7 +190,7 @@ public class IssuersCredentialController extends BaseController {
                                 }
                     """))
     })
-    public ResponseEntity<VerifiableCredential> issueCredential(@RequestBody Map<String, Object> data, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(data, getBPNFromToken(principal)));
+    public ResponseEntity<VerifiableCredential> issueCredential(@RequestParam String holderDid, @RequestBody Map<String, Object> data, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, getBPNFromToken(principal)));
     }
 }
