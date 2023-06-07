@@ -322,7 +322,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param callerBpn the caller bpn
      * @return the verifiable credential
      */
-    public VerifiableCredential issueCredentialUsingBaseWallet(Map<String, Object> data, String callerBpn) {
+    public VerifiableCredential issueCredentialUsingBaseWallet(String holderDid, Map<String, Object> data, String callerBpn) {
+        //Fetch Holder Wallet
+        Wallet holderWallet = walletService.getWalletByIdentifier(holderDid);
+
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
 
         Wallet issuerWallet = walletService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
@@ -332,13 +335,13 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         // get Key
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
 
-        boolean isSelfIssued = isSelfIssued(issuerWallet.getBpn()); //TODO need to pass holder bpn
+        boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
         // Create Credential
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
                 privateKeyBytes,
-                issuerWallet.getDid(), //TODO need to check, how we can identify holder of VC, need to m
+                holderWallet.getDid(),
                 verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), isSelfIssued);
 
 
