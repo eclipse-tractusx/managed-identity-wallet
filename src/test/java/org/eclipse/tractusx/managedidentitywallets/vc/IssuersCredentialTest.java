@@ -29,6 +29,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
@@ -187,17 +188,17 @@ class IssuersCredentialTest {
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
 
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), type);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
         Assertions.assertFalse(credentials.isEmpty());
         TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
-       /* Assertions.assertFalse(credentials.get(0).isStored());  //stored must be false
+        Assertions.assertFalse(credentials.get(0).isStored());  //stored must be false
         Assertions.assertFalse(credentials.get(0).isSelfIssued());  //stored must be false
-*/
+
         //check is it is stored in issuer wallet
         //TODO need to change once we have solutions to identify VC holder
-        /*List<IssuersCredential> issuersCredentials = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);
+        List<IssuersCredential> issuersCredentials = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);
         Assertions.assertEquals(1, issuersCredentials.size());
-        Assertions.assertEquals(type, issuersCredentials.get(0).getType());*/
+        Assertions.assertEquals(type, issuersCredentials.get(0).getType());
     }
 
 
@@ -229,7 +230,7 @@ class IssuersCredentialTest {
 
         Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-        return restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS, HttpMethod.POST, entity, String.class);
+        return restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
     }
 
 }
