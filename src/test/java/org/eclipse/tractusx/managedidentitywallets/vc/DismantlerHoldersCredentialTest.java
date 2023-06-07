@@ -94,10 +94,21 @@ class DismantlerHoldersCredentialTest {
 
 
     @Test
+    void issueDismantlerCredentialToBaseWalletTest201() throws JsonProcessingException, JSONException {
+        ResponseEntity<String> response = issueDismantlerCredential(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        Assertions.assertFalse(credentials.isEmpty());
+        Assertions.assertTrue(credentials.get(0).isSelfIssued()); //self issued must be false
+        Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
+    }
+
+
+    @Test
     void issueDismantlerCredentialTest201() throws JsonProcessingException, JSONException {
 
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:"+bpn;
+        String did = "did:web:localhost:" + bpn;
 
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
         ResponseEntity<String> response = issueDismantlerCredential(bpn, did);
@@ -116,7 +127,8 @@ class DismantlerHoldersCredentialTest {
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
         Assertions.assertFalse(credentials.isEmpty());
         TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
-
+        Assertions.assertFalse(credentials.get(0).isSelfIssued()); //self issued must be false
+        Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
 
         VerifiableCredential data = credentials.get(0).getData();
 
