@@ -24,6 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.did;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
@@ -125,7 +126,7 @@ class DidDocumentsTest {
                 .bpn(bpn)
                 .did(did)
                 .didDocument(DidDocument.fromJson(didDocument))
-                .algorithm("ED25519")
+                .algorithm(StringPool.ED_25519)
                 .name(bpn)
                 .build();
         return walletRepository.save(wallet);

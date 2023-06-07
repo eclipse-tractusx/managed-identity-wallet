@@ -49,6 +49,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class IssuersCredentialController extends BaseController {
 
+    public static final String API_TAG_VERIFIABLE_CREDENTIAL_ISSUER = "Verifiable Credential - Issuer";
+    public static final String API_TAG_VERIFIABLE_CREDENTIAL_VALIDATION = "Verifiable Credential - Validation";
+    
     private final IssuersCredentialService issuersCredentialService;
 
 
@@ -63,7 +66,7 @@ public class IssuersCredentialController extends BaseController {
      * @param principal        the principal
      * @return the credentials
      */
-    @Tag(name = "Verifiable Credential -Issuer")
+    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
     @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.ISSUERS_CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<VerifiableCredential>> getCredentials(@RequestParam(required = false) String credentialId,
@@ -81,8 +84,14 @@ public class IssuersCredentialController extends BaseController {
      * @param principal                        the principal
      * @return the response entity
      */
-    @Tag(name = "Verifiable Credential -Issuer")
-
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(examples = @ExampleObject("""
+                                {
+                                   "bpn": "BPNL000000000000"
+                                 }
+                    """))
+    })
+    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
     @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest, Principal principal) {
@@ -96,8 +105,18 @@ public class IssuersCredentialController extends BaseController {
      * @param principal the principal
      * @return the response entity
      */
-    @Tag(name = "Verifiable Credential -Issuer")
-
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(examples = @ExampleObject("""
+                                {
+                                   "bpn": "BPNL000000000000",
+                                   "activityType": "vehicleDismantle",
+                                   "allowedVehicleBrands": [
+                                     "Audi", "Abarth", "Alfa Romeo", "Chrysler"
+                                   ]
+                                 }
+                    """))
+    })
+    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
     @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_DISMANTLER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request, Principal principal) {
@@ -111,7 +130,18 @@ public class IssuersCredentialController extends BaseController {
      * @param principal the principal
      * @return the response entity
      */
-    @Tag(name = "Verifiable Credential -Issuer")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(examples = @ExampleObject("""
+                                {
+                                  "bpn": "BPNL000000000000",
+                                  "value": "PCF",
+                                  "type": "cx-pcf",
+                                  "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                  "contract-version": "1.0.0"
+                                }
+                    """))
+    })
+    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
     @Operation(summary = "Issue a Use Case Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
@@ -124,7 +154,7 @@ public class IssuersCredentialController extends BaseController {
      * @param data the data
      * @return the response entity
      */
-    @Tag(name = "Verifiable Credential - Validation")
+    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_VALIDATION)
     @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials")
     @PostMapping(path = RestURI.CREDENTIALS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
@@ -166,7 +196,7 @@ public class IssuersCredentialController extends BaseController {
      * @param principal the principal
      * @return the response entity
      */
-    @Tag(name = "Verifiable Credential -Issuer")
+    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
     @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
     @PostMapping(path = RestURI.ISSUERS_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
@@ -190,7 +220,7 @@ public class IssuersCredentialController extends BaseController {
                                 }
                     """))
     })
-    public ResponseEntity<VerifiableCredential> issueCredential(@RequestParam String holderDid, @RequestBody Map<String, Object> data, Principal principal) {
+    public ResponseEntity<VerifiableCredential> issueCredentialUsingBaseWallet(@RequestParam String holderDid, @RequestBody Map<String, Object> data, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, getBPNFromToken(principal)));
     }
 }

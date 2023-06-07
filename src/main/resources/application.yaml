@@ -69,6 +69,7 @@ miw:
   vcExpiryDate: ${VC_EXPIRY_DATE:01-01-2025} #dd-MM-yyyy ie.  01-01-2025 expiry date will be 2024-12-31T18:30:00Z in VC
   supportedFrameworkVCTypes: ${SUPPORTED_FRAMEWORK_VC_TYPES:cx-behavior-twin=Behavior Twin,cx-pcf=PCF,cx-quality=Quality,cx-resiliency=Resiliency,cx-sustainability=Sustainability,cx-traceability=ID_3.0_Trace}
   enforceHttps: ${ENFORCE_HTTPS_IN_DID_RESOLUTION:true}
+  contractTemplatesUrl: ${CONTRACT_TEMPLATES_URL:https://public.catena-x.org/contracts/}
   security:
     enabled: true
     realm: ${KEYCLOAK_REALM:miw_test}

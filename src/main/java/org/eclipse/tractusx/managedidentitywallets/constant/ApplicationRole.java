@@ -21,12 +21,9 @@
 
 package org.eclipse.tractusx.managedidentitywallets.constant;
 
-/**
- * The type Application constant.
- */
-public class ApplicationConstant {
+public class ApplicationRole {
 
-    private ApplicationConstant() {
+    private ApplicationRole() {
         throw new IllegalStateException("Constant class");
     }
 
@@ -53,17 +50,5 @@ public class ApplicationConstant {
      * The constant ROLE_UPDATE_WALLET.
      */
     public static final String ROLE_UPDATE_WALLET = "update_wallet";
-
-
-    /**
-     * The constant DID.
-     */
-    public static final String DID = "did";
-
-    /**
-     * The constant BPN.
-     */
-    public static final String BPN = "bpn";
-
 
 }

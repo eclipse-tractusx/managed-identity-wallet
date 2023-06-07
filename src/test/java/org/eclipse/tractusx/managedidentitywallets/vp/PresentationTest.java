@@ -28,6 +28,7 @@ import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplica
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.controller.PresentationController;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -110,14 +111,14 @@ class PresentationTest {
             SignedJwtVerifier signedJwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
 
             Mockito.doNothing().when(signedJwtVerifier).verify(Mockito.any(SignedJWT.class));
-            
+
             ResponseEntity<Map<String, Object>> mapResponseEntity = presentationController.validatePresentation(body, null, true, false);
 
             Map map = mapResponseEntity.getBody();
 
-            Assertions.assertTrue(Boolean.parseBoolean(map.get("valid").toString()));
-            Assertions.assertFalse(map.containsKey("validateAudience"));
-            Assertions.assertFalse(map.containsKey("validateExpiryDate"));
+            Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
+            Assertions.assertFalse(map.containsKey(StringPool.VALIDATE_AUDIENCE));
+            Assertions.assertFalse(map.containsKey(StringPool.VALIDATE_EXPIRY_DATE));
         }
     }
 
@@ -142,9 +143,9 @@ class PresentationTest {
 
             Map map = mapResponseEntity.getBody();
 
-            Assertions.assertFalse(Boolean.parseBoolean(map.get("valid").toString()));
-            Assertions.assertFalse(Boolean.parseBoolean(map.get("validateAudience").toString()));
-            Assertions.assertFalse(Boolean.parseBoolean(map.get("validateExpiryDate").toString()));
+            Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
+            Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALIDATE_AUDIENCE).toString()));
+            Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
 
         }
     }
@@ -168,9 +169,9 @@ class PresentationTest {
 
             Map map = mapResponseEntity.getBody();
 
-            Assertions.assertTrue(Boolean.parseBoolean(map.get("valid").toString()));
-            Assertions.assertTrue(Boolean.parseBoolean(map.get("validateAudience").toString()));
-            Assertions.assertTrue(Boolean.parseBoolean(map.get("validateExpiryDate").toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALIDATE_AUDIENCE).toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
 
         }
     }
@@ -250,8 +251,8 @@ class PresentationTest {
 
         //create request
         Map<String, Object> request = new HashMap<>();
-        request.put("holderIdentifier", wallet.getDid());
-        request.put("verifiableCredentials", List.of(map, map));
+        request.put(StringPool.HOLDER_IDENTIFIER, wallet.getDid());
+        request.put(StringPool.VERIFIABLE_CREDENTIALS, List.of(map, map));
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("invalid bpn");
         headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON_VALUE));
@@ -275,8 +276,8 @@ class PresentationTest {
 
         //create request
         Map<String, Object> request = new HashMap<>();
-        request.put("holderIdentifier", wallet.getDid());
-        request.put("verifiableCredentials", List.of(map));
+        request.put(StringPool.HOLDER_IDENTIFIER, wallet.getDid());
+        request.put(StringPool.VERIFIABLE_CREDENTIALS, List.of(map));
         return request;
     }
 }

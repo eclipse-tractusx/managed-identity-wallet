@@ -28,6 +28,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -98,7 +99,7 @@ class IssuersCredentialTest {
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(holderBpn, jsonObject.get("type").toString(), jsonObject.get("value").toString());
+            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(holderBpn, jsonObject.get(StringPool.TYPE).toString(), jsonObject.get(StringPool.VALUE).toString());
             HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); //ony base wallet can issue VC
             ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
             Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
@@ -111,7 +112,7 @@ class IssuersCredentialTest {
                 , HttpMethod.GET, entity, String.class, holderDID);
         List<VerifiableCredential> credentialList = TestUtils.getCredentialsFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size());  //5 framework CV + 1 membership
+        Assertions.assertEquals(12, Objects.requireNonNull(credentialList).size());  //5 framework CV + 1 membership + 6 Summary VC
 
 
         response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?credentialId={id}"
@@ -195,7 +196,6 @@ class IssuersCredentialTest {
         Assertions.assertFalse(credentials.get(0).isSelfIssued());  //stored must be false
 
         //check is it is stored in issuer wallet
-        //TODO need to change once we have solutions to identify VC holder
         List<IssuersCredential> issuersCredentials = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);
         Assertions.assertEquals(1, issuersCredentials.size());
         Assertions.assertEquals(type, issuersCredentials.get(0).getType());
