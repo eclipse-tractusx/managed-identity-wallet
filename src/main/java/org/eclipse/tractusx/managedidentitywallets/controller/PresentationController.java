@@ -47,6 +47,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PresentationController extends BaseController {
 
+    public static final String API_TAG_VERIFIABLE_PRESENTATIONS_GENERATION = "Verifiable Presentations - Generation";
+    public static final String API_TAG_VERIFIABLE_PRESENTATIONS_VALIDATION = "Verifiable Presentations - Validation";
     private final PresentationService presentationService;
 
     /**
@@ -58,7 +60,7 @@ public class PresentationController extends BaseController {
      * @param principal the principal
      * @return the response entity
      */
-    @Tag(name = "Verifiable Presentations - Generation")
+    @Tag(name = API_TAG_VERIFIABLE_PRESENTATIONS_GENERATION)
     @Operation(summary = "Create Verifiable Presentation", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller) \n\n Create a verifiable presentation from a list of verifiable credentials, signed by the holder")
     @PostMapping(path = RestURI.API_PRESENTATIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
@@ -110,7 +112,7 @@ public class PresentationController extends BaseController {
      * @param withCredentialExpiryDate the with credential expiry date
      * @return the response entity
      */
-    @Tag(name = "Verifiable Presentations - Validation")
+    @Tag(name = API_TAG_VERIFIABLE_PRESENTATIONS_VALIDATION)
     @Operation(summary = "Validate Verifiable Presentation", description = "Permission: **view_wallets** OR **view_wallet**  \n\n Validate Verifiable Presentation with all included credentials")
     @PostMapping(path = RestURI.API_PRESENTATIONS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 

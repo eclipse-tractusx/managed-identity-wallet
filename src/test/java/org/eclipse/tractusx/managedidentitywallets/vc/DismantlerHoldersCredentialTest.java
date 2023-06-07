@@ -28,6 +28,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -122,7 +123,7 @@ class DismantlerHoldersCredentialTest {
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
 
-        Assertions.assertEquals("vehicleDismantle", verifiableCredential.getCredentialSubject().get(0).get("activityType").toString());
+        Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, verifiableCredential.getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
         Assertions.assertFalse(credentials.isEmpty());
@@ -132,13 +133,13 @@ class DismantlerHoldersCredentialTest {
 
         VerifiableCredential data = credentials.get(0).getData();
 
-        Assertions.assertEquals("vehicleDismantle", data.getCredentialSubject().get(0).get("activityType").toString());
+        Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, data.getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
 
         //check in issuer wallet
         List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
         Assertions.assertEquals(1, issuerVCs.size());
         TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
-        Assertions.assertEquals("vehicleDismantle", issuerVCs.get(0).getData().getCredentialSubject().get(0).get("activityType").toString());
+        Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, issuerVCs.get(0).getData().getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
     }
 
     @Test
@@ -153,7 +154,7 @@ class DismantlerHoldersCredentialTest {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn); //token must contain base wallet BPN
 
         IssueDismantlerCredentialRequest request = IssueDismantlerCredentialRequest.builder()
-                .activityType("vehicleDismantle")
+                .activityType(StringPool.VEHICLE_DISMANTLE)
                 .bpn(bpn)
                 .allowedVehicleBrands(Set.of("BMW"))
                 .build();
@@ -191,7 +192,7 @@ class DismantlerHoldersCredentialTest {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()); //token must contain base wallet BPN
 
         IssueDismantlerCredentialRequest request = IssueDismantlerCredentialRequest.builder()
-                .activityType("vehicleDismantle")
+                .activityType(StringPool.VEHICLE_DISMANTLE)
                 .bpn(bpn)
                 .allowedVehicleBrands(Set.of("BMW"))
                 .build();

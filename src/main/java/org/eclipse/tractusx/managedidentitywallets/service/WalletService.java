@@ -40,21 +40,16 @@ import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
-import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
-import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
-import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.base.MultibaseFactory;
@@ -63,7 +58,6 @@ import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -86,6 +80,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WalletService extends BaseService<Wallet, Long> {
 
+
     private final WalletRepository walletRepository;
 
     private final MIWSettings miwSettings;
@@ -96,9 +91,12 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final HoldersCredentialRepository holdersCredentialRepository;
 
-    private final IssuersCredentialRepository issuersCredentialRepository;
-
     private final SpecificationUtil<Wallet> walletSpecificationUtil;
+
+    private final IssuersCredentialService issuersCredentialService;
+
+    private final CommonService commonService;
+
 
     @Override
     protected BaseRepository<Wallet, Long> getRepository() {
@@ -144,6 +142,10 @@ public class WalletService extends BaseService<Wallet, Long> {
     }
 
 
+    private Wallet getWalletByIdentifier(String identifier) {
+        return commonService.getWalletByIdentifier(identifier);
+    }
+
     /**
      * Gets wallet by identifier.
      *
@@ -164,22 +166,6 @@ public class WalletService extends BaseService<Wallet, Long> {
         return wallet;
     }
 
-    /**
-     * Gets wallet by identifier.
-     *
-     * @param identifier the identifier
-     * @return the wallet by identifier
-     */
-    public Wallet getWalletByIdentifier(String identifier) {
-        Wallet wallet;
-        if (CommonUtils.getIdentifierType(identifier).equals(ApplicationConstant.BPN)) {
-            wallet = walletRepository.getByBpn(identifier);
-        } else {
-            wallet = walletRepository.getByDid(identifier);
-        }
-        Validate.isNull(wallet).launch(new WalletNotFoundProblem("Wallet not found for identifier " + identifier));
-        return wallet;
-    }
 
     /**
      * Gets wallets.
@@ -259,7 +245,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .bpn(request.getBpn())
                 .name(request.getName())
                 .did(URLDecoder.decode(did.toUri().toString(), Charset.defaultCharset()))
-                .algorithm("ED25519")
+                .algorithm(StringPool.ED_25519)
                 .build());
 
         //Save key
@@ -272,22 +258,10 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .build());
         log.debug("Wallet created for bpn ->{}", request.getBpn());
 
-        //issue BPN credentials``
-        Wallet baseWallet = getWalletByIdentifier(miwSettings.authorityWalletBpn());
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
-        List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
-        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(Map.of("type", MIWVerifiableCredentialType.BPN_CREDENTIAL,
-                "id", wallet.getDid(),
-                "bpn", wallet.getBpn()), types, baseWallet.getDidDocument(), privateKeyBytes, wallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), authority);
+        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
-        //Store Credential in holder wallet
-        holdersCredential = holdersCredentialRepository.save(holdersCredential);
-
-        //Store Credential in issuers table
-        IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
-        issuersCredentialRepository.save(issuersCredential);
-
-        log.debug("BPN credential issued for bpn -{}", request.getBpn());
+        //issue BPN credentials
+        issuersCredentialService.issueBpnCredential(issuerWallet, wallet, authority);
 
         return wallet;
     }

@@ -78,18 +78,21 @@ class DeleteHoldersCredentialTest {
         //Fetch bpn credential which is auto generated while create wallet
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDid(did);
         String type = credentials.get(0).getType();
+        String idToDeleted = credentials.get(0).getCredentialId();
         Assertions.assertFalse(credentials.isEmpty());
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?id={id}", HttpMethod.DELETE, entity, String.class, credentials.get(0).getCredentialId());
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?id={id}", HttpMethod.DELETE, entity, String.class, idToDeleted);
 
         Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCode().value());
 
         credentials = holdersCredentialRepository.getByHolderDid(did);
-        Assertions.assertTrue(credentials.isEmpty());
+        credentials.forEach(vc -> {
+            Assertions.assertNotEquals(vc.getCredentialId(), idToDeleted);
+        });
 
         //check, VC should not be deleted from issuer table
         List<IssuersCredential> vcs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);

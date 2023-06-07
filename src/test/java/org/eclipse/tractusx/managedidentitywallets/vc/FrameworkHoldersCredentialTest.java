@@ -28,6 +28,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -210,9 +211,9 @@ class FrameworkHoldersCredentialTest {
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("type"), type);
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("value"), value);
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("id"), wallet.getDid());
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.TYPE), type);
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.VALUE), value);
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
         Assertions.assertFalse(credentials.isEmpty());
@@ -222,10 +223,8 @@ class FrameworkHoldersCredentialTest {
 
         Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
         Assertions.assertFalse(credentials.get(0).isSelfIssued()); //self issue must be false
-        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("type"), type);
-        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("value"), value);
-        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get("id"), wallet.getDid());
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.TYPE), type);
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.VALUE), value);
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
     }
-
-
 }

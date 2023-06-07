@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -43,8 +44,8 @@ public class BaseController {
         Object principal1 = ((JwtAuthenticationToken) principal).getPrincipal();
         Jwt jwt = (Jwt) principal1;
 
-        Validate.isFalse(jwt.getClaims().containsKey("BPN")).launch(new ForbiddenException("Invalid token, BPN not found"));
+        Validate.isFalse(jwt.getClaims().containsKey(StringPool.BPN_UPPER_CASE)).launch(new ForbiddenException("Invalid token, BPN not found"));
 
-        return jwt.getClaims().get("BPN").toString();
+        return jwt.getClaims().get(StringPool.BPN_UPPER_CASE).toString();
     }
 }

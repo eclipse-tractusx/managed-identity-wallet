@@ -45,6 +45,7 @@ public class MIWVerifiableCredentialType extends VerifiableCredentialType {
 
     public static final String MEMBERSHIP_CREDENTIAL_CX = "MembershipCredentialCX";
     public static final String SUMMARY_CREDENTIAL = "SummaryCredential";
+    public static final String SUMMARY_LIST_CREDENTIAL = "Summary-List";
 
 
 }
