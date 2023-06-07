@@ -81,9 +81,10 @@ Currently the minimum is 80%
 | AUTH_SERVER_URL                 | Keycloak server url                                                                           |                                                                                                                                                     |
 | SUPPORTED_FRAMEWORK_VC_TYPES    | Supported framework VC, provide values ie type1=value1,type2=value2                           | cx-behavior-twin=Behavior Twin,cx-pcf=PCF,cx-quality=Quality,cx-resiliency=Resiliency,cx-sustainability=Sustainability,cx-traceability=ID_3.0_Trace |
 | ENFORCE_HTTPS_IN_DID_RESOLUTION | Enforce https during web did resolution                                                       | true                                                                                                                                                |
+| CONTRACT_TEMPLATES_URL          | Contract templates URL used in summary VC                                                     | https://public.catena-x.org/contracts/                                                                                                              |
 |                                 |                                                                                               |                                                                                                                                                     |
 
-## Reference
+## Reference of external lib
 
 1. https://www.testcontainers.org/modules/databases/postgres/
 2. https://github.com/dasniko/testcontainers-keycloak

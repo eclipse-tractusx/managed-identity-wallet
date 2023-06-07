@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -74,7 +75,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
-    private final WalletService walletService;
+    private final CommonService commonService;
 
     private final WalletKeyService walletKeyService;
 
@@ -102,13 +103,13 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
         Map<String, Object> response = new HashMap<>();
 
-        String holderIdentifier = data.get("holderIdentifier").toString();
+        String holderIdentifier = data.get(StringPool.HOLDER_IDENTIFIER).toString();
 
         //check if holder wallet is in the system
-        Wallet holderWallet = walletService.getWalletByIdentifier(holderIdentifier);
+        Wallet holderWallet = commonService.getWalletByIdentifier(holderIdentifier);
 
 
-        List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get("verifiableCredentials");
+        List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
 
         //only support one credential at a time to create VP
         Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
@@ -123,7 +124,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         String issuerDidString = URLDecoder.decode(verifiableCredentials.get(0).getIssuer().toString(), Charset.defaultCharset());
         Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer());
-        walletService.getWalletByIdentifier(issuerDidString);
+        commonService.getWalletByIdentifier(issuerDidString);
 
         //validate BPN access  - Issuer(Creator) of VP must be caller
         Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
@@ -140,7 +141,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             SignedJWT presentation = presentationFactory.createPresentation(
                     issuerDid, verifiableCredentials, audience, walletKeyService.getPrivateKeyByWalletIdentifier(holderWallet.getId()));
 
-            response.put("vp", presentation.serialize());
+            response.put(StringPool.VP, presentation.serialize());
         } else {
             VerifiablePresentationBuilder verifiablePresentationBuilder =
                     new VerifiablePresentationBuilder();
@@ -152,7 +153,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                             .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
                             .verifiableCredentials(verifiableCredentials)
                             .build();
-            response.put("vp", verifiablePresentation);
+            response.put(StringPool.VP, verifiablePresentation);
         }
         return response;
     }
@@ -173,9 +174,9 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
             //verify as jwt
-            Validate.isNull(vp.get("vp")).launch(new BadDataException("Can not find JWT"));
-            String jwt = vp.get("vp").toString();
-            response.put("vp", jwt);
+            Validate.isNull(vp.get(StringPool.VP)).launch(new BadDataException("Can not find JWT"));
+            String jwt = vp.get(StringPool.VP).toString();
+            response.put(StringPool.VP, jwt);
 
             SignedJWT signedJWT = SignedJWT.parse(jwt);
 
@@ -187,14 +188,14 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             //validate date
             boolean validateExpiryDate = validateExpiryDate(withCredentialExpiryDate, signedJWT);
 
-            response.put("valid", (validateSignature && validateAudience && validateExpiryDate));
+            response.put(StringPool.VALID, (validateSignature && validateAudience && validateExpiryDate));
 
             if (StringUtils.hasText(audience)) {
-                response.put("validateAudience", validateAudience);
+                response.put(StringPool.VALIDATE_AUDIENCE, validateAudience);
 
             }
             if (withCredentialExpiryDate) {
-                response.put("validateExpiryDate", validateExpiryDate);
+                response.put(StringPool.VALIDATE_EXPIRY_DATE, validateExpiryDate);
             }
 
         } else {
@@ -253,6 +254,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private void validateCredential(VerifiableCredential verifiableCredential, String holderIdentifier) {
         //check holders
-        Validate.isFalse(verifiableCredential.getCredentialSubject().get(0).get("id").toString().equals(holderIdentifier)).launch(new ForbiddenException("VC " + verifiableCredential.getTypes() + " is not match with holder identifier " + holderIdentifier));
+        Validate.isFalse(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID).toString().equals(holderIdentifier)).launch(new ForbiddenException("VC " + verifiableCredential.getTypes() + " is not match with holder identifier " + holderIdentifier));
     }
 }

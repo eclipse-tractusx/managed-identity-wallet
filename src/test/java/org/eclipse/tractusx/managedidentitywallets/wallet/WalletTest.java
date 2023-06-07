@@ -28,6 +28,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -43,8 +44,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -60,8 +59,6 @@ import java.util.*;
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class WalletTest {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(WalletTest.class);
 
     @Autowired
     private WalletRepository walletRepository;
@@ -145,13 +142,13 @@ class WalletTest {
         ResponseEntity<String> getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "true");
         Assertions.assertEquals(getWalletResponse.getStatusCode().value(), HttpStatus.OK.value());
         Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
-        Assertions.assertEquals(1, body.getVerifiableCredentials().size());
+        Assertions.assertEquals(2, body.getVerifiableCredentials().size());
         VerifiableCredential verifiableCredential = body.getVerifiableCredentials().get(0);
 
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("id"), wallet.getDid());
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
 
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get("bpn"), wallet.getBpn());
-        Assertions.assertEquals(MIWVerifiableCredentialType.BPN_CREDENTIAL, verifiableCredential.getCredentialSubject().get(0).get("type"));
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.BPN), wallet.getBpn());
+        Assertions.assertEquals(MIWVerifiableCredentialType.BPN_CREDENTIAL, verifiableCredential.getCredentialSubject().get(0).get(StringPool.TYPE));
 
     }
 
@@ -335,7 +332,7 @@ class WalletTest {
         Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
         Assertions.assertNotNull(getWalletResponse.getBody());
-        Assertions.assertEquals(2, body.getVerifiableCredentials().size());
+        Assertions.assertEquals(3, body.getVerifiableCredentials().size()); //BPN VC + Summery VC + Stored VC
         Assertions.assertEquals(body.getBpn(), bpn);
     }
 

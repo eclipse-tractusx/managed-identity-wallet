@@ -31,6 +31,7 @@ import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -64,8 +65,10 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      * The constant BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN.
      */
     public static final String BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN = "Base wallet BPN is not matching with request BPN(from token)";
+
     private final HoldersCredentialRepository holdersCredentialRepository;
-    private final WalletService walletService;
+
+    private final CommonService commonService;
 
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
@@ -99,16 +102,16 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         filterRequest.setSize(1000);
 
         //Holder must be caller of API
-        Wallet holderWallet = walletService.getWalletByIdentifier(callerBPN);
-        filterRequest.appendCriteria("holderDid", Operator.EQUALS, holderWallet.getDid());
+        Wallet holderWallet = commonService.getWalletByIdentifier(callerBPN);
+        filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid());
 
         if (StringUtils.hasText(issuerIdentifier)) {
-            Wallet issuerWallet = walletService.getWalletByIdentifier(issuerIdentifier);
-            filterRequest.appendCriteria("issuerDid", Operator.EQUALS, issuerWallet.getDid());
+            Wallet issuerWallet = commonService.getWalletByIdentifier(issuerIdentifier);
+            filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid());
         }
 
         if (StringUtils.hasText(credentialId)) {
-            filterRequest.appendCriteria("credentialId", Operator.EQUALS, credentialId);
+            filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, credentialId);
         }
         FilterRequest request = new FilterRequest();
         if (!CollectionUtils.isEmpty(type)) {
@@ -116,7 +119,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
             request.setSize(filterRequest.getSize());
             request.setCriteriaOperator(CriteriaOperator.OR);
             for (String str : type) {
-                request.appendCriteria("type", Operator.CONTAIN, str);
+                request.appendCriteria(StringPool.TYPE, Operator.CONTAIN, str);
             }
         }
 
@@ -143,7 +146,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      */
     public VerifiableCredential issueCredential(Map<String, Object> data, String callerBpn) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
-        Wallet issuerWallet = walletService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
+        Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
         //validate BPN access, Holder must be caller of API
         Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
@@ -173,7 +176,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public void deleteCredential(String credentialId, String bpnFromToken) {
         //Fetch Holder Wallet
-        Wallet holderWallet = walletService.getWalletByIdentifier(bpnFromToken);
+        Wallet holderWallet = commonService.getWalletByIdentifier(bpnFromToken);
 
         //check credential exp
         isCredentialExistWithId(holderWallet.getDid(), credentialId);

@@ -28,6 +28,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -155,7 +156,7 @@ class HoldersCredentialTest {
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn, jsonObject.get("type").toString(), jsonObject.get("value").toString());
+            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn, jsonObject.get(StringPool.TYPE).toString(), jsonObject.get(StringPool.VALUE).toString());
             HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); //ony base wallet can issue VC
             ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
             Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
@@ -168,7 +169,7 @@ class HoldersCredentialTest {
                 , HttpMethod.GET, entity, String.class, baseDID);
         List<VerifiableCredential> credentialList = TestUtils.getCredentialsFromString(response.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size());
+        Assertions.assertEquals(7, Objects.requireNonNull(credentialList).size()); //5  framework + 1 BPN + 1 Summary
 
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}"
                 , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
@@ -202,7 +203,7 @@ class HoldersCredentialTest {
             Mockito.when(mock.checkProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
-            Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get("valid").toString()));
+            Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
 
@@ -225,7 +226,7 @@ class HoldersCredentialTest {
             Mockito.when(mock.checkProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
-            Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get("valid").toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
 

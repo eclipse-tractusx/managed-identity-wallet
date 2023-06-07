@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
@@ -79,7 +80,7 @@ public class TestUtils {
                 .bpn(bpn)
                 .did(did)
                 .didDocument(DidDocument.fromJson(didDocument))
-                .algorithm("ED25519")
+                .algorithm(StringPool.ED_25519)
                 .name(bpn)
                 .build();
         return walletRepository.save(wallet);
@@ -119,13 +120,13 @@ public class TestUtils {
     public static Wallet getWalletFromString(String body) throws JsonProcessingException {
         JSONObject jsonObject = new JSONObject(body);
         //convert DidDocument
-        JSONObject didDocument = jsonObject.getJSONObject("didDocument");
-        jsonObject.remove("didDocument");
+        JSONObject didDocument = jsonObject.getJSONObject(StringPool.DID_DOCUMENT);
+        jsonObject.remove(StringPool.DID_DOCUMENT);
 
         JSONArray credentialArray = null;
-        if (!jsonObject.isNull("verifiableCredentials")) {
-            credentialArray = jsonObject.getJSONArray("verifiableCredentials");
-            jsonObject.remove("verifiableCredentials");
+        if (!jsonObject.isNull(StringPool.VERIFIABLE_CREDENTIALS)) {
+            credentialArray = jsonObject.getJSONArray(StringPool.VERIFIABLE_CREDENTIALS);
+            jsonObject.remove(StringPool.VERIFIABLE_CREDENTIALS);
         }
 
         ObjectMapper objectMapper = new ObjectMapper();

@@ -21,7 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
-import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationConstant;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.ssi.lib.model.Ed25519Signature2020;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -35,6 +35,8 @@ import org.eclipse.tractusx.ssi.lib.proof.transform.LinkedDataTransformer;
 import org.eclipse.tractusx.ssi.lib.proof.verify.LinkedDataSigner;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.*;
 
@@ -55,9 +57,9 @@ public class CommonUtils {
      */
     public static String getIdentifierType(String identifier) {
         if (identifier.startsWith("did:web")) {
-            return ApplicationConstant.DID;
+            return StringPool.DID;
         } else {
-            return ApplicationConstant.BPN;
+            return StringPool.BPN;
         }
     }
 
@@ -90,7 +92,7 @@ public class CommonUtils {
         // Create Credential
         return HoldersCredential.builder()
                 .holderDid(holderDid)
-                .issuerDid(issuerDoc.getId().toString())
+                .issuerDid(URLDecoder.decode(issuerDoc.getId().toString(), Charset.defaultCharset()))
                 .type(String.join(",", cloneTypes))
                 .credentialId(verifiableCredential.getId().toString())
                 .data(verifiableCredential)
