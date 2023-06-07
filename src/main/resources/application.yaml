@@ -64,7 +64,7 @@ miw:
   encryptionKey: ${ENCRYPTION_KEY:Woh9waid4Ei5eez0aitieghoow9so4oe}
   authorityWalletBpn: ${AUTHORITY_WALLET_BPN:BPNL000000000000}
   authorityWalletName: ${AUTHORITY_WALLET_NAME:Catena-X}
-  authorityWalletDid: ${AUTHORITY_WALLET_DID:localhost:BPNL000000000000}
+  authorityWalletDid: ${AUTHORITY_WALLET_DID:did:web:localhost:BPNL000000000000}
   vcContexts: ${VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData}
   vcExpiryDate: ${VC_EXPIRY_DATE:01-01-2025} #dd-MM-yyyy ie.  01-01-2025 expiry date will be 2024-12-31T18:30:00Z in VC
   supportedFrameworkVCTypes: ${SUPPORTED_FRAMEWORK_VC_TYPES:cx-behavior-twin=Behavior Twin,cx-pcf=PCF,cx-quality=Quality,cx-resiliency=Resiliency,cx-sustainability=Sustainability,cx-traceability=ID_3.0_Trace}

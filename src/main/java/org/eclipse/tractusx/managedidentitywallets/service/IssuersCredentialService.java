@@ -195,11 +195,12 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
 
-        //validate BPN access
-        Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
-
+        validateAccess(callerBPN, baseWallet);
         // get Key
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
+
+        //if base wallet issue credentials to itself
+        boolean isSelfIssued = isSelfIssued(request.getBpn());
 
         Map<String, Object> subject = Map.of("type", request.getType(),
                 "id", holderWallet.getDid(),
@@ -207,7 +208,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 "contract-template", request.getContractTemplate(),
                 "contract-version", request.getContractVersion());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
-        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
         //save in holder wallet
         holdersCredential = holdersCredentialRepository.save(holdersCredential);
@@ -233,15 +234,17 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         Wallet holderWallet = walletService.getWalletByIdentifier(request.getBpn());
 
         // Fetch Issuer Wallet
-        Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
+        Wallet issuerWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
 
-        //check BPN access
-        Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+        validateAccess(callerBPN, issuerWallet);
 
         //check duplicate
         isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+
+        //if base wallet issue credentials to itself
+        boolean isSelfIssued = isSelfIssued(request.getBpn());
 
         Map<String, Object> subject = Map.of("type", MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL,
                 "id", holderWallet.getDid(),
@@ -249,7 +252,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 "activityType", request.getActivityType(),
                 "allowedVehicleBrands", request.getAllowedVehicleBrands());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
-        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
 
         //save in holder wallet
@@ -280,20 +283,23 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
 
         // Fetch Issuer Wallet
-        Wallet baseWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
+        Wallet issuerWallet = walletService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
 
-        //validate BPN access
-        Validate.isFalse(callerBPN.equals(baseWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+        validateAccess(callerBPN, issuerWallet);
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+
+        //if base wallet issue credentials to itself
+        boolean isSelfIssued = isSelfIssued(issueMembershipCredentialRequest.getBpn());
+
         //VC Subject
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(Map.of("type", VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
                 "id", holderWallet.getDid(),
                 "holderIdentifier", holderWallet.getBpn(),
-                "memberOf", baseWallet.getName(),
+                "memberOf", issuerWallet.getName(),
                 "status", "Active",
-                "startTime", Instant.now().toString()), types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), false);
+                "startTime", Instant.now().toString()), types, issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
 
         //save in holder wallet
@@ -321,21 +327,19 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         Wallet issuerWallet = walletService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
-        //validate BPN access, VC must be issued by base wallet
-        Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
-
-        //issuer must be base wallet
-        Validate.isFalse(issuerWallet.getBpn().equals(miwSettings.authorityWalletBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+        validateAccess(callerBpn, issuerWallet);
 
         // get Key
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+
+        boolean isSelfIssued = isSelfIssued(issuerWallet.getBpn()); //TODO need to pass holder bpn
 
         // Create Credential
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
                 privateKeyBytes,
                 issuerWallet.getDid(), //TODO need to check, how we can identify holder of VC, need to m
-                verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), false);
+                verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), isSelfIssued);
 
 
         //save in holder wallet
@@ -347,11 +351,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         return issuersCredential.getData();
-    }
-
-
-    private void isCredentialExit(String holderDid, String credentialType) {
-        Validate.isTrue(holdersCredentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
     }
 
     /**
@@ -376,4 +375,23 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         return response;
     }
+
+
+    private void validateAccess(String callerBpn, Wallet issuerWallet) {
+        //validate BPN access, VC must be issued by base wallet
+        Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+
+        //issuer must be base wallet
+        Validate.isFalse(issuerWallet.getBpn().equals(miwSettings.authorityWalletBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+    }
+
+
+    private void isCredentialExit(String holderDid, String credentialType) {
+        Validate.isTrue(holdersCredentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
+    }
+    
+    private boolean isSelfIssued(String holderBpn) {
+        return holderBpn.equals(miwSettings.authorityWalletBpn());
+    }
+
 }
