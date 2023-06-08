@@ -75,7 +75,7 @@ Currently the minimum is 80%
 | AUTHORITY_WALLET_NAME           | Base wallet name                                                                              | Catena-X                                                                                                                                            |
 | AUTHORITY_WALLET_DID            | Base wallet web did                                                                           | web:did:host:BPNL000000000000                                                                                                                       |
 | VC_SCHEMA_LINK                  | Comma separated list of VC schema URL                                                         | https://www.w3.org/2018/credentials/v1, https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData                  |
-| VC_EXPIRY_DATE                  | Expiry date of VC (dd-MM-yyyy ie.  01-01-2025 expiry date will be 2024-12-31T18:30:00Z in VC) | 01-01-2025                                                                                                                                          |
+| VC_EXPIRY_DATE                  | Expiry date of VC (dd-MM-yyyy ie. 01-01-2025 expiry date will be 2024-12-31T18:30:00Z in VC) | 01-01-2025                                                                                                                                          |
 | KEYCLOAK_REALM                  | Realm name of keycloak                                                                        | miw_test                                                                                                                                            |
 | KEYCLOAK_CLIENT_ID              | Keycloak private client id                                                                    |                                                                                                                                                     |
 | AUTH_SERVER_URL                 | Keycloak server url                                                                           |                                                                                                                                                     |
@@ -83,6 +83,13 @@ Currently the minimum is 80%
 | ENFORCE_HTTPS_IN_DID_RESOLUTION | Enforce https during web did resolution                                                       | true                                                                                                                                                |
 | CONTRACT_TEMPLATES_URL          | Contract templates URL used in summary VC                                                     | https://public.catena-x.org/contracts/                                                                                                              |
 |                                 |                                                                                               |                                                                                                                                                     |
+
+## Technical Debts and Known issue
+
+1. Keys are stored in database in encrypted format, need to store keys in more secure place ie. Vault
+2. Policies can be validated dynamically as per
+   request while validating VP and
+   VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
 
 ## Reference of external lib
 

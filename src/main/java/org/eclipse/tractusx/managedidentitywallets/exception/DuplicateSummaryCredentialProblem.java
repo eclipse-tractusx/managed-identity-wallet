@@ -19,42 +19,45 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
-
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.springframework.stereotype.Repository;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The interface Wallet repository.
+ * The type Duplicate wallet problem.
  */
-@Repository
-public interface WalletRepository extends BaseRepository<Wallet, Long> {
+public class DuplicateSummaryCredentialProblem extends RuntimeException {
 
     /**
-     * Gets by bpn.
-     *
-     * @param bpn the bpn
-     * @return the by bpn
+     * Instantiates a new Duplicate wallet problem.
      */
-    Wallet getByBpn(String bpn);
+    public DuplicateSummaryCredentialProblem() {
+    }
 
     /**
-     * Exists by bpn boolean.
+     * Instantiates a new Duplicate wallet problem.
      *
-     * @param bpn the bpn
-     * @return the boolean
+     * @param message the message
      */
-    boolean existsByBpn(String bpn);
+    public DuplicateSummaryCredentialProblem(String message) {
+        super(message);
+    }
 
     /**
-     * Gets by did.
+     * Instantiates a new Duplicate wallet problem.
      *
-     * @param did the did
-     * @return the by did
+     * @param message the message
+     * @param cause   the cause
      */
-    Wallet getByDid(String did);
+    public DuplicateSummaryCredentialProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    int countByBpn(String bpn);
+    /**
+     * Instantiates a new Duplicate wallet problem.
+     *
+     * @param cause the cause
+     */
+    public DuplicateSummaryCredentialProblem(Throwable cause) {
+        super(cause);
+    }
 
 }

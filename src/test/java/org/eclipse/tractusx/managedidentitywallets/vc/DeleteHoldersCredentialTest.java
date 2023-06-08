@@ -96,7 +96,10 @@ class DeleteHoldersCredentialTest {
 
         //check, VC should not be deleted from issuer table
         List<IssuersCredential> vcs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);
-        Assertions.assertFalse(vcs.isEmpty());
+        IssuersCredential issuersCredential = vcs.stream()
+                .filter(vc -> vc.getCredentialId().equalsIgnoreCase(idToDeleted)).findFirst()
+                .orElse(null);
+        Assertions.assertNotNull(issuersCredential);
     }
 
     @Test

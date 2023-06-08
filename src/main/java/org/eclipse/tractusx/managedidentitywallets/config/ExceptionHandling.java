@@ -104,8 +104,8 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
      * @param e the e
      * @return the problem detail
      */
-    @ExceptionHandler(DuplicateCredentialProblem.class)
-    ProblemDetail handleDuplicateCredentialProblem(DuplicateCredentialProblem e) {
+    @ExceptionHandler({DuplicateCredentialProblem.class, DuplicateSummaryCredentialProblem.class})
+    ProblemDetail handleDuplicateCredentialProblem(RuntimeException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
         problemDetail.setTitle(e.getMessage());
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
