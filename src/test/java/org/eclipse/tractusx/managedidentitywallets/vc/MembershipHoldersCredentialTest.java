@@ -95,11 +95,95 @@ class MembershipHoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
+    @Test
+    void issueMembershipCredentialToBaseWalletTest409() throws JsonProcessingException {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        // create wallet, in background bpn and summary credential generated
+        TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+
+        // create manually 2nd summary credential
+        issueSummaryCredentialinDB(did);
+
+        // get 409 status as 2 summary credential found in holder table
+        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), response.getStatusCode().value());
+    }
+
+    @Test
+    void issueMembershipCredentialToBaseWalletTest400() throws JsonProcessingException {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        // create wallet, in background bpn and summary credential generated
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+
+        //add 2 subject in VC for testing
+        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+
+        String vc = """
+                {
+                      "@context": [
+                        "https://www.w3.org/2018/credentials/v1",
+                        "https://www.w3.org/2018/credentials/examples/v1"
+                      ],
+                      "id": "urn:uuid:12345678-1234-1234-1234-123456789abc",
+                      "type": [
+                        "VerifiableCredential",
+                        "SummaryCredential"
+                      ],
+                      "issuer": "did:web:localhost:BPNL000000000000",
+                      "issuanceDate": "2023-06-02T12:00:00Z",
+                      "expirationDate": "2022-06-16T18:56:59Z",
+                      "credentialSubject": [{
+                        "id": "did:web:localhost:BPNL000000000000",
+                        "holderIdentifier": "BPN of holder",
+                        "type": "Summary-List",
+                        "name": "CX-Credentials",
+                        "items": [
+                          "cx-active-member",
+                          "cx-dismantler",
+                          "cx-pcf",
+                          "cx-sustainability",
+                          "cx-quality",
+                          "cx-traceability",
+                          "cx-behavior-twin",
+                          "cx-bpn"
+                        ],
+                        "contract-templates": "https://public.catena-x.org/contracts/"
+                      },{
+                          "name":"test name"
+                      }],
+                      "proof": {
+                        "type": "Ed25519Signature2018",
+                        "created": "2023-06-02T12:00:00Z",
+                        "proofPurpose": "assertionMethod",
+                        "verificationMethod": "did:web:example.com#key-1",
+                        "jws": "eyJhbGciOiJFZERTQSJ9.eyJpYXQiOjE2MjM1NzA3NDEsImV4cCI6MTYyMzU3NDM0MSwianRpIjoiMTIzNDU2NzgtMTIzNC0xMjM0LTEyMzQtMTIzNDU2Nzg5YWJjIiwicHJvb2YiOnsiaWQiOiJkaWQ6d2ViOmV4YW1wbGUuY29tIiwibmFtZSI6IkJlaXNwaWVsLU9yZ2FuaXNhdGlvbiJ9fQ.SignedExampleSignature"
+                      }
+                    }
+                """;
+        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc, Map.class));
+        vcs.get(0).setData(verifiableCredential);
+
+        holdersCredentialRepository.save(vcs.get(0));
+
+        //Check if we do not have items in subject
+        ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode().value());
+
+        vcs.get(0).getData().getCredentialSubject().remove(1);
+        vcs.get(0).getData().getCredentialSubject().get(0).remove(StringPool.ITEMS);
+        holdersCredentialRepository.save(vcs.get(0));
+    }
+
 
     @Test
     void issueMembershipCredentialToBaseWalletTest201() throws JsonProcessingException, JSONException {
 
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
@@ -121,6 +205,8 @@ class MembershipHoldersCredentialTest {
         List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         Assertions.assertEquals(1, issuerVCs.size());
         TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, oldSummaryCredentialId);
     }
 
 
@@ -129,10 +215,9 @@ class MembershipHoldersCredentialTest {
 
         String bpn = UUID.randomUUID().toString();
 
-        String did = "did:web:localhost:" + bpn;
-
-        //save wallet
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+        //create wallet
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
@@ -155,6 +240,9 @@ class MembershipHoldersCredentialTest {
         List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         Assertions.assertEquals(1, issuerVCs.size());
         TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
+
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, oldSummaryCredentialId);
     }
 
 
@@ -165,7 +253,7 @@ class MembershipHoldersCredentialTest {
         String did = "did:web:localhost:" + bpn;
 
         //save wallet
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+        TestUtils.createWallet(bpn, did, walletRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
@@ -183,7 +271,7 @@ class MembershipHoldersCredentialTest {
         String did = "did:web:localhost:" + bpn;
 
         //save wallet
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+        TestUtils.createWallet(bpn, did, walletRepository);
 
         ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
@@ -203,6 +291,52 @@ class MembershipHoldersCredentialTest {
     private void validateTypes(VerifiableCredential verifiableCredential, String holderBpn) {
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.HOLDER_IDENTIFIER), holderBpn);
+    }
+
+    private void issueSummaryCredentialinDB(String did) throws JsonProcessingException {
+        String vc = """
+                                {
+                                    "id": "http://example.edu/credentials/3732",
+                                    "@context":
+                                    [
+                                        "https://www.w3.org/2018/credentials/v1",
+                                        "https://www.w3.org/2018/credentials/examples/v1"
+                                    ],
+                                    "type":
+                                    [
+                                        "SummaryCredential", "VerifiableCredential"
+                                    ],
+                                    "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                    "issuanceDate": "2019-06-16T18:56:59Z",
+                                    "expirationDate": "2019-06-17T18:56:59Z",
+                                    "credentialSubject":
+                                    [
+                                        {
+                                            "id": "##did",
+                                            "college": "Test-University"
+                                        }
+                                    ],
+                                    "proof":
+                                    {
+                                        "type": "Ed25519Signature2018",
+                                        "created": "2021-11-17T22:20:27Z",
+                                        "proofPurpose": "assertionMethod",
+                                        "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
+                                        "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                    }
+                                }
+                """;
+        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc, Map.class));
+        HoldersCredential holdersCredential = HoldersCredential.builder()
+                .credentialId(verifiableCredential.getId().toString())
+                .data(new VerifiableCredential(verifiableCredential))
+                .holderDid(did)
+                .type(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL)
+                .selfIssued(false)
+                .stored(false)
+                .issuerDid(miwSettings.authorityWalletDid())
+                .build();
+        holdersCredentialRepository.save(holdersCredential);
     }
 
 }

@@ -101,7 +101,7 @@ class FrameworkHoldersCredentialTest {
     void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JsonProcessingException, JSONException {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+        TestUtils.createWallet(bpn, did, walletRepository);
 
         String type = "cx-behavior-twin";
         String value = "Behavior Twin";
@@ -117,10 +117,14 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameWorkVCToBaseWalletTest201() throws JSONException {
+    void issueFrameWorkVCToBaseWalletTest201() throws JSONException, JsonProcessingException {
         String bpn = miwSettings.authorityWalletBpn();
         String type = "cx-pcf";
         String value = "PCF";
+        //create wallet
+        Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
+
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
@@ -138,6 +142,9 @@ class FrameworkHoldersCredentialTest {
 
         Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
         Assertions.assertTrue(credentials.get(0).isSelfIssued()); //self issue must be false
+
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, type, oldSummaryCredentialId);
     }
 
     @ParameterizedTest
@@ -188,7 +195,9 @@ class FrameworkHoldersCredentialTest {
     }
 
     private void createAndValidateVC(String bpn, String did, String type, String value) throws JsonProcessingException {
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+        //create wallet
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
@@ -199,11 +208,11 @@ class FrameworkHoldersCredentialTest {
         ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        validate(wallet, type, value, response, miwSettings);
+        validate(wallet, type, value, response, miwSettings, oldSummaryCredentialId);
 
     }
 
-    private void validate(Wallet wallet, String type, String value, ResponseEntity<String> response, MIWSettings miwSettings) throws JsonProcessingException {
+    private void validate(Wallet wallet, String type, String value, ResponseEntity<String> response, MIWSettings miwSettings, String oldSummaryCredentialId) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
@@ -226,5 +235,8 @@ class FrameworkHoldersCredentialTest {
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.TYPE), type);
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.VALUE), value);
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
+
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, type, oldSummaryCredentialId);
     }
 }

@@ -35,10 +35,10 @@ public interface IssuersCredentialRepository extends BaseRepository<IssuersCrede
     /**
      * Gets by issuer did and holder did and type.
      *
-     * @param issuerDid              the issuer did
-     * @param holderDid              the holder did
-     * @param membershipCredentialCx the membership credential cx
+     * @param issuerDid the issuer did
+     * @param holderDid the holder did
+     * @param type      the type
      * @return the by issuer did and holder did and type
      */
-    List<IssuersCredential> getByIssuerDidAndHolderDidAndType(String issuerDid, String holderDid, String membershipCredentialCx);
+    List<IssuersCredential> getByIssuerDidAndHolderDidAndType(String issuerDid, String holderDid, String type);
 }

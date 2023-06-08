@@ -36,9 +36,11 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,6 +80,16 @@ class WalletTest {
     @Autowired
     private HoldersCredentialRepository holdersCredentialRepository;
 
+    @Autowired
+    private WalletService walletService;
+
+
+    @Test
+    void createDuplicateAuthorityWalletTest() {
+        walletService.createAuthorityWallet();
+        int count = walletRepository.countByBpn(miwSettings.authorityWalletBpn());
+        Assertions.assertEquals(1, count);
+    }
 
     @Test
     void authorityWalletExistTest() {
@@ -134,7 +146,7 @@ class WalletTest {
 
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
 
-        //check if BPN credentials is issued
+        //check if BPN and Summary credentials is issued
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
@@ -143,13 +155,21 @@ class WalletTest {
         Assertions.assertEquals(getWalletResponse.getStatusCode().value(), HttpStatus.OK.value());
         Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(2, body.getVerifiableCredentials().size());
-        VerifiableCredential verifiableCredential = body.getVerifiableCredentials().get(0);
 
+        VerifiableCredential verifiableCredential = body.getVerifiableCredentials().stream()
+                .filter(vp -> vp.getTypes().contains(MIWVerifiableCredentialType.BPN_CREDENTIAL_CX))
+                .findFirst()
+                .orElse(null);
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
-
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.BPN), wallet.getBpn());
         Assertions.assertEquals(MIWVerifiableCredentialType.BPN_CREDENTIAL, verifiableCredential.getCredentialSubject().get(0).get(StringPool.TYPE));
 
+        VerifiableCredential summaryVerifiableCredential = body.getVerifiableCredentials().stream()
+                .filter(vc -> vc.getTypes().contains(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL)).findFirst()
+                .orElse(null);
+        VerifiableCredentialSubject subject = summaryVerifiableCredential.getCredentialSubject().get(0);
+        List<String> list = (List<String>) subject.get(StringPool.ITEMS);
+        Assertions.assertTrue(list.contains(MIWVerifiableCredentialType.BPN_CREDENTIAL_CX));
     }
 
 

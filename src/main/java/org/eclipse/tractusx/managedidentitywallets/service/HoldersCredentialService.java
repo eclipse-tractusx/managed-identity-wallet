@@ -163,6 +163,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         //Store Credential in holder table
         credential = create(credential);
 
+        log.debug("VC type of {} issued to bpn ->{}", verifiableCredential.getTypes(), callerBpn);
         // Return VC
         return credential.getData();
     }
@@ -183,6 +184,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         //remove credential
         holdersCredentialRepository.deleteByCredentialId(credentialId);
+        log.debug("VC deleted with id ->{} of bpn ->{}", credentialId, holderWallet.getBpn());
     }
 
     private void isCredentialExistWithId(String holderDid, String credentialId) {
