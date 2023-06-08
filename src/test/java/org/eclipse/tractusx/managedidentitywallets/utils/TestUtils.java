@@ -24,15 +24,21 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +65,7 @@ public class TestUtils {
         return exchange;
 
     }
-    
+
     public static Wallet createWallet(String bpn, String did, WalletRepository walletRepository) {
         String didDocument = """
                 {
@@ -160,5 +166,38 @@ public class TestUtils {
             credentialList.add(new VerifiableCredential(objectMapper.readValue(jsonObject.toString(), Map.class)));
         }
         return credentialList;
+    }
+
+
+    public static String getSummaryCredentialId(String holderDID, HoldersCredentialRepository holdersCredentialRepository) {
+        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(holderDID, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+        Assertions.assertEquals(1, holderVCs.size());
+        return holderVCs.get(0).getData().getId().toString();
+    }
+
+    public static void checkSummaryCredential(String issuerDID, String holderDID, HoldersCredentialRepository holdersCredentialRepository,
+                                              IssuersCredentialRepository issuersCredentialRepository, String type, String previousSummaryCredentialId) {
+
+        //get VC from holder of Summary type
+        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(holderDID, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+        Assertions.assertEquals(1, holderVCs.size());
+        VerifiableCredential vc = holderVCs.get(0).getData();
+        VerifiableCredentialSubject subject = vc.getCredentialSubject().get(0);
+
+        //check if type is in items
+        List<String> list = (List<String>) subject.get(StringPool.ITEMS);
+        Assertions.assertTrue(list.contains(type));
+
+        //check in issuer table
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(issuerDID, holderDID,
+                MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+        IssuersCredential issuersCredential = issuerVCs.stream()
+                .filter(issuerVC -> issuerVC.getCredentialId().equalsIgnoreCase(vc.getId().toString())).findFirst()
+                .orElse(null);
+        Assertions.assertNotNull(issuersCredential);
+        IssuersCredential previousIssuersCredential = issuerVCs.stream()
+                .filter(issuerVC -> issuerVC.getCredentialId().equalsIgnoreCase(previousSummaryCredentialId)).findFirst()
+                .orElse(null);
+        Assertions.assertNotNull(previousIssuersCredential);
     }
 }

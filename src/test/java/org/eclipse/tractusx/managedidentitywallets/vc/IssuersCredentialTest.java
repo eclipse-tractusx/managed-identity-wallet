@@ -132,6 +132,15 @@ class IssuersCredentialTest {
         credentialList.forEach(vc -> {
             Assertions.assertTrue(vc.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
         });
+
+        list = new ArrayList<>();
+        list.add(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+        response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?type={list}&holderIdentifier={did}"
+                , HttpMethod.GET, entity, String.class, String.join(",", list), holderDID);
+        credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size()); //5 framework CV + 1 membership
+
     }
 
     @Test

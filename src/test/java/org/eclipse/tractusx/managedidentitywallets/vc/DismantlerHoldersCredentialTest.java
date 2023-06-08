@@ -96,12 +96,16 @@ class DismantlerHoldersCredentialTest {
 
     @Test
     void issueDismantlerCredentialToBaseWalletTest201() throws JsonProcessingException, JSONException {
+        Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
         ResponseEntity<String> response = issueDismantlerCredential(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
         Assertions.assertFalse(credentials.isEmpty());
         Assertions.assertTrue(credentials.get(0).isSelfIssued()); //self issued must be false
         Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, oldSummaryCredentialId);
     }
 
 
@@ -111,7 +115,10 @@ class DismantlerHoldersCredentialTest {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
 
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+        //create wallet
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
+
         ResponseEntity<String> response = issueDismantlerCredential(bpn, did);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
@@ -140,6 +147,9 @@ class DismantlerHoldersCredentialTest {
         Assertions.assertEquals(1, issuerVCs.size());
         TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
         Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, issuerVCs.get(0).getData().getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
+
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, oldSummaryCredentialId);
     }
 
     @Test

@@ -60,6 +60,8 @@ public interface HoldersCredentialRepository extends BaseRepository<HoldersCrede
      */
     List<HoldersCredential> getByHolderDidAndType(String holderDid, String type);
 
+    List<HoldersCredential> getByHolderDidAndIssuerDidAndType(String holderDid, String issuerDid, String type);
+
     /**
      * Exists by holder did and type boolean.
      *

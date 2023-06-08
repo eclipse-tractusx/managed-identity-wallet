@@ -44,6 +44,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateSummaryCredentialProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
@@ -207,7 +208,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredentialRepository.save(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
 
         log.debug("BPN credential issued for bpn -{}", holderWallet.getBpn());
 
@@ -258,7 +259,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery cred
-        updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getBpn(), holderWallet.getDid(), request.getType());
+        updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType());
 
         log.debug("Framework VC of type ->{} issued to bpn ->{}", request.getType(), request.getBpn());
 
@@ -309,7 +310,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
 
         log.debug("Dismantler VC issued to bpn -> {}", request.getBpn());
 
@@ -362,7 +363,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
 
         log.debug("Membership VC issued to bpn ->{}", issueMembershipCredentialRequest.getBpn());
 
@@ -409,6 +410,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //Store Credential in issuers table
         IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
         issuersCredential = create(issuersCredential);
+
+        log.debug("VC type of {} issued to bpn ->{}", verifiableCredential.getTypes(), holderWallet.getBpn());
 
         // Return VC
         return issuersCredential.getData();
@@ -465,16 +468,16 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param holderDid         the holder did
      * @param type              the type
      */
-    private void updateSummeryCredentials(DidDocument issuerDidDocument, byte[] issuerPrivateKey, String holderBpn, String holderDid, String type) {
+    private void updateSummeryCredentials(DidDocument issuerDidDocument, byte[] issuerPrivateKey, String issuerDid, String holderBpn, String holderDid, String type) {
 
         //get summery VC of holder
-        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndType(holderDid, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndIssuerDidAndType(holderDid, issuerDid, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         List<String> items;
         if (CollectionUtils.isEmpty(vcs)) {
             log.debug("No summery VC found for did ->{}", holderDid);
             items = List.of(type);
         } else {
-            Validate.isTrue(vcs.size() > 1).launch(new BadDataException("Something is not right, there should be only one summery VC of holder at a time"));
+            Validate.isTrue(vcs.size() > 1).launch(new DuplicateSummaryCredentialProblem("Something is not right, there should be only one summery VC of holder at a time"));
             HoldersCredential summeryCredential = vcs.get(0);
 
             //check if summery VC has subject
