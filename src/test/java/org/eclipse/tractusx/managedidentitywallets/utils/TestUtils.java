@@ -39,6 +39,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredential
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
@@ -199,5 +200,19 @@ public class TestUtils {
                 .filter(issuerVC -> issuerVC.getCredentialId().equalsIgnoreCase(previousSummaryCredentialId)).findFirst()
                 .orElse(null);
         Assertions.assertNotNull(previousIssuersCredential);
+    }
+
+
+    @NotNull
+    public static List<VerifiableCredential> getVerifiableCredentials(ResponseEntity<String> response, ObjectMapper objectMapper) throws JsonProcessingException {
+        Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
+
+        List<Map<String, Object>> vcs = (List<Map<String, Object>>) map.get("content");
+
+        List<VerifiableCredential> credentialList = new ArrayList<>();
+        for (Map<String, Object> stringObjectMap : vcs) {
+            credentialList.add(new VerifiableCredential(stringObjectMap));
+        }
+        return credentialList;
     }
 }
