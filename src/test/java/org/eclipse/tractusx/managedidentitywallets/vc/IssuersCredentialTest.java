@@ -110,14 +110,16 @@ class IssuersCredentialTest {
 
         ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderIdentifier={did}"
                 , HttpMethod.GET, entity, String.class, holderDID);
-        List<VerifiableCredential> credentialList = TestUtils.getCredentialsFromString(response.getBody());
+
+        List<VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
+
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(12, Objects.requireNonNull(credentialList).size());  //5 framework CV + 1 membership + 6 Summary VC
 
 
         response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?credentialId={id}"
                 , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
-        credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
@@ -125,7 +127,7 @@ class IssuersCredentialTest {
         list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?type={list}"
                 , HttpMethod.GET, entity, String.class, String.join(",", list));
-        credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
 
         //all VC must be type of MEMBERSHIP_CREDENTIAL_CX
@@ -137,11 +139,11 @@ class IssuersCredentialTest {
         list.add(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?type={list}&holderIdentifier={did}"
                 , HttpMethod.GET, entity, String.class, String.join(",", list), holderDID);
-        credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size()); //5 framework CV + 1 membership
-
     }
+
 
     @Test
     void issueCredentialsTestWithInvalidRole403() {

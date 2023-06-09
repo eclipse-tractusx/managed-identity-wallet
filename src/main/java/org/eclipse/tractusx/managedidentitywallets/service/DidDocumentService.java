@@ -37,7 +37,7 @@ public class DidDocumentService {
     private final CommonService commonService;
 
     /**
-     * Gets did document.
+     * Gets did document by identifier(BPN or Did).
      *
      * @param identifier the identifier
      * @return the did document

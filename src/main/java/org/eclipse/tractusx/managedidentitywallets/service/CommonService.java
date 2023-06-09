@@ -39,7 +39,7 @@ public class CommonService {
     private final WalletRepository walletRepository;
 
     /**
-     * Gets wallet by identifier.
+     * Gets wallet by identifier(BPN or did).
      *
      * @param identifier the identifier
      * @return the wallet by identifier

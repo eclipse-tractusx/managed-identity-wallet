@@ -167,13 +167,13 @@ class HoldersCredentialTest {
 
         ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}"
                 , HttpMethod.GET, entity, String.class, baseDID);
-        List<VerifiableCredential> credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        List<VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(7, Objects.requireNonNull(credentialList).size()); //5  framework + 1 BPN + 1 Summary
 
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}"
                 , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
-        credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
@@ -181,7 +181,7 @@ class HoldersCredentialTest {
         list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
                 , HttpMethod.GET, entity, String.class, String.join(",", list));
-        credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
@@ -189,7 +189,7 @@ class HoldersCredentialTest {
         list.add(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
                 , HttpMethod.GET, entity, String.class, String.join(",", list));
-        credentialList = TestUtils.getCredentialsFromString(response.getBody());
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, credentialList.size());
         VerifiableCredentialSubject subject = credentialList.get(0).getCredentialSubject().get(0);

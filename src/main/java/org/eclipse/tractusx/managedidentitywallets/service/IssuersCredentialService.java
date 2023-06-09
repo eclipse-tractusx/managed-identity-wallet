@@ -58,6 +58,7 @@ import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
 import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -143,10 +144,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public List<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
+    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
-        filterRequest.setPage(0);
-        filterRequest.setSize(1000);
+        filterRequest.setSize(size);
+        filterRequest.setPage(pageNumber);
 
         //Issuer must be caller of API
         Wallet issuerWallet = commonService.getWalletByIdentifier(callerBPN);
@@ -180,8 +181,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         for (IssuersCredential credential : filter.getContent()) {
             list.add(credential.getData());
         }
-
-        return list;
+        return new PageImpl<>(list, filter.getPageable(), filter.getTotalElements());
     }
 
 

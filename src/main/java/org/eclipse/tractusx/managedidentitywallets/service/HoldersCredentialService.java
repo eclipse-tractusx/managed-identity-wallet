@@ -41,6 +41,7 @@ import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -86,7 +87,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
 
     /**
-     * Gets credentials.
+     * Gets list of holder's credentials
      *
      * @param credentialId     the credentialId
      * @param issuerIdentifier the issuer identifier
@@ -96,10 +97,10 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public List<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, String callerBPN) {
+    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
-        filterRequest.setPage(0);
-        filterRequest.setSize(1000);
+        filterRequest.setPage(pageNumber);
+        filterRequest.setSize(size);
 
         //Holder must be caller of API
         Wallet holderWallet = commonService.getWalletByIdentifier(callerBPN);
@@ -134,7 +135,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
             list.add(credential.getData());
         }
 
-        return list;
+        return new PageImpl<>(list, filter.getPageable(), filter.getTotalElements());
     }
 
     /**

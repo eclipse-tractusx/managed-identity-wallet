@@ -22,13 +22,17 @@
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.HoldersCredentialService;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,12 +66,15 @@ public class HoldersCredentialController extends BaseController {
      */
     @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<VerifiableCredential>> getCredentials(@RequestParam(required = false) String credentialId,
-                                                                     @RequestParam(required = false) String issuerIdentifier,
-                                                                     @RequestParam(required = false) List<String> type,
-                                                                     @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
-                                                                     @RequestParam(required = false, defaultValue = "desc") String sortTpe, Principal principal) {
-        return ResponseEntity.status(HttpStatus.OK).body(holdersCredentialService.getCredentials(credentialId, issuerIdentifier, type, sortColumn, sortTpe, getBPNFromToken(principal)));
+    public ResponseEntity<PageImpl<VerifiableCredential>> getCredentials(@RequestParam(required = false) String credentialId,
+                                                                         @RequestParam(required = false) String issuerIdentifier,
+                                                                         @RequestParam(required = false) List<String> type,
+                                                                         @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
+                                                                         @RequestParam(required = false, defaultValue = "desc") String sortTpe,
+                                                                         @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Page number, Page number start with zero") @RequestParam(required = false, defaultValue = "0") int pageNumber,
+                                                                         @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Number of records per page") @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
+                                                                         Principal principal) {
+        return ResponseEntity.status(HttpStatus.OK).body(holdersCredentialService.getCredentials(credentialId, issuerIdentifier, type, sortColumn, sortTpe, pageNumber, size, getBPNFromToken(principal)));
     }
 
 
