@@ -44,7 +44,6 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateSummaryCredentialProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
@@ -470,23 +469,19 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     private void updateSummeryCredentials(DidDocument issuerDidDocument, byte[] issuerPrivateKey, String issuerDid, String holderBpn, String holderDid, String type) {
 
-        //get summery VC of holder
-        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndIssuerDidAndType(holderDid, issuerDid, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+        //get last issued summary vc to holder to update items
+        Page<IssuersCredential> filter = getLastIssuedSummaryCredential(issuerDid, holderDid);
         List<String> items;
-        if (CollectionUtils.isEmpty(vcs)) {
-            log.debug("No summery VC found for did ->{}", holderDid);
-            items = List.of(type);
-        } else {
-            Validate.isTrue(vcs.size() > 1).launch(new DuplicateSummaryCredentialProblem("Something is not right, there should be only one summery VC of holder at a time"));
-            HoldersCredential summeryCredential = vcs.get(0);
+        if (!filter.getContent().isEmpty()) {
+            IssuersCredential issuersCredential = filter.getContent().get(0);
 
             //check if summery VC has subject
-            Validate.isTrue(summeryCredential.getData().getCredentialSubject().isEmpty()).launch(new BadDataException("VC subject not found in existing su,,ery VC"));
+            Validate.isTrue(issuersCredential.getData().getCredentialSubject().isEmpty()).launch(new BadDataException("VC subject not found in existing su,,ery VC"));
 
             //Check if we have only one subject in summery VC
-            Validate.isTrue(summeryCredential.getData().getCredentialSubject().size() > 1).launch(new BadDataException("VC subjects can more then 1 in case of summery VC"));
+            Validate.isTrue(issuersCredential.getData().getCredentialSubject().size() > 1).launch(new BadDataException("VC subjects can more then 1 in case of summery VC"));
 
-            VerifiableCredentialSubject subject = summeryCredential.getData().getCredentialSubject().get(0);
+            VerifiableCredentialSubject subject = issuersCredential.getData().getCredentialSubject().get(0);
             if (subject.containsKey(StringPool.ITEMS)) {
                 items = (List<String>) subject.get(StringPool.ITEMS);
                 if (!items.contains(type)) {
@@ -495,7 +490,17 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
             } else {
                 items = List.of(type);
             }
-            //delete old summery VC from holder table
+        } else {
+            items = List.of(type);
+        }
+        log.debug("Issuing summary VC with items ->{}", items);
+
+        //get summery VC of holder
+        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndIssuerDidAndTypeAndStored(holderDid, issuerDid, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL, false); //deleted only not stored VC
+        if (CollectionUtils.isEmpty(vcs)) {
+            log.debug("No summery VC found for did ->{}, checking in issuer", holderDid);
+        } else {
+            //delete old summery VC from holder table, delete only not stored VC
             holdersCredentialRepository.deleteAll(vcs);
         }
 
@@ -524,5 +529,23 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredentialRepository.save(IssuersCredential.of(holdersCredential));
 
         log.info("Summery VC updated for holder did -> {}", holderDid);
+    }
+
+    private Page<IssuersCredential> getLastIssuedSummaryCredential(String issuerDid, String holderDid) {
+        FilterRequest filterRequest = new FilterRequest();
+
+        //we need latest one record
+        filterRequest.setPage(0);
+        filterRequest.setSize(1);
+        Sort sort = new Sort();
+        sort.setColumn(StringPool.CREATED_AT);
+        sort.setSortType(SortType.valueOf("desc".toUpperCase()));
+        filterRequest.setSort(sort);
+
+        filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderDid);
+        filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerDid);
+        filterRequest.appendCriteria(StringPool.TYPE, Operator.EQUALS, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
+
+        return filter(filterRequest);
     }
 }
