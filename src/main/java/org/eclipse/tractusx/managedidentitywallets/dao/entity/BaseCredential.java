@@ -21,30 +21,22 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.MappedSuperclass;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.tractusx.managedidentitywallets.utils.StringToCredentialConverter;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
-
-/**
- * The type Credential.
- */
+@MappedSuperclass
 @Getter
 @Setter
-@Entity
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class Credential extends MIWBaseEntity {
-
-
-    @Id
-    @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
-    private Long id;
+@AllArgsConstructor
+public class BaseCredential extends MIWBaseEntity {
 
     @Column(nullable = false)
     private String holderDid;
@@ -58,4 +50,7 @@ public class Credential extends MIWBaseEntity {
     @Column(nullable = false)
     @Convert(converter = StringToCredentialConverter.class)
     private VerifiableCredential data;
+
+    @Column(nullable = false)
+    private String credentialId;
 }

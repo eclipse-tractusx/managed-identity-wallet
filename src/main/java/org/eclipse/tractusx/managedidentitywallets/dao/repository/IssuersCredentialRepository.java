@@ -22,39 +22,23 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.springframework.stereotype.Repository;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
+
+import java.util.List;
 
 /**
- * The interface Wallet repository.
+ * The interface Credential repository.
  */
-@Repository
-public interface WalletRepository extends BaseRepository<Wallet, Long> {
+public interface IssuersCredentialRepository extends BaseRepository<IssuersCredential, Long> {
+
 
     /**
-     * Gets by bpn.
+     * Gets by issuer did and holder did and type.
      *
-     * @param bpn the bpn
-     * @return the by bpn
+     * @param issuerDid the issuer did
+     * @param holderDid the holder did
+     * @param type      the type
+     * @return the by issuer did and holder did and type
      */
-    Wallet getByBpn(String bpn);
-
-    /**
-     * Exists by bpn boolean.
-     *
-     * @param bpn the bpn
-     * @return the boolean
-     */
-    boolean existsByBpn(String bpn);
-
-    /**
-     * Gets by did.
-     *
-     * @param did the did
-     * @return the by did
-     */
-    Wallet getByDid(String did);
-
-    int countByBpn(String bpn);
-
+    List<IssuersCredential> getByIssuerDidAndHolderDidAndType(String issuerDid, String holderDid, String type);
 }

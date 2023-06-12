@@ -28,9 +28,12 @@ import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
@@ -48,6 +51,7 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -55,9 +59,9 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class DismantlerCredentialTest {
+class DismantlerHoldersCredentialTest {
     @Autowired
-    private CredentialRepository credentialRepository;
+    private HoldersCredentialRepository holdersCredentialRepository;
     @Autowired
     private WalletRepository walletRepository;
 
@@ -69,6 +73,9 @@ public class DismantlerCredentialTest {
 
     @Autowired
     private MIWSettings miwSettings;
+
+    @Autowired
+    private IssuersCredentialRepository issuersCredentialRepository;
 
 
     @Test
@@ -88,12 +95,30 @@ public class DismantlerCredentialTest {
 
 
     @Test
+    void issueDismantlerCredentialToBaseWalletTest201() throws JsonProcessingException, JSONException {
+        Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
+        ResponseEntity<String> response = issueDismantlerCredential(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        Assertions.assertFalse(credentials.isEmpty());
+        Assertions.assertTrue(credentials.get(0).isSelfIssued()); //self issued must be false
+        Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, oldSummaryCredentialId);
+    }
+
+
+    @Test
     void issueDismantlerCredentialTest201() throws JsonProcessingException, JSONException {
 
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:"+bpn;
+        String did = "did:web:localhost:" + bpn;
 
-        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+        //create wallet
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
+
         ResponseEntity<String> response = issueDismantlerCredential(bpn, did);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
@@ -105,16 +130,50 @@ public class DismantlerCredentialTest {
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
 
-        Assertions.assertTrue(verifiableCredential.getCredentialSubject().get(0).get("activityType").toString().equals("vehicleDismantle"));
+        Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, verifiableCredential.getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
 
-        Credential credential = credentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
-        Assertions.assertNotNull(credential);
-        TestUtils.checkVC(credential.getData(), miwSettings);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        Assertions.assertFalse(credentials.isEmpty());
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
+        Assertions.assertFalse(credentials.get(0).isSelfIssued()); //self issued must be false
+        Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
+
+        VerifiableCredential data = credentials.get(0).getData();
+
+        Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, data.getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
+
+        //check in issuer wallet
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        Assertions.assertEquals(1, issuerVCs.size());
+        TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
+        Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, issuerVCs.get(0).getData().getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
+
+        //check summary credential
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX, oldSummaryCredentialId);
+    }
+
+    @Test
+    void issueDismantlerCredentialWithInvalidBpnAccess409() {
+        String bpn = UUID.randomUUID().toString();
+
+        String did = "did:web:localhost:" + bpn;
+
+        //create entry
+        Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn); //token must contain base wallet BPN
+
+        IssueDismantlerCredentialRequest request = IssueDismantlerCredentialRequest.builder()
+                .activityType(StringPool.VEHICLE_DISMANTLE)
+                .bpn(bpn)
+                .allowedVehicleBrands(Set.of("BMW"))
+                .build();
 
 
-        VerifiableCredential data = credential.getData();
+        HttpEntity<IssueDismantlerCredentialRequest> entity = new HttpEntity<>(request, headers);
 
-        Assertions.assertTrue(data.getCredentialSubject().get(0).get("activityType").toString().equals("vehicleDismantle"));
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_DISMANTLER, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
 
     }
 
@@ -140,10 +199,10 @@ public class DismantlerCredentialTest {
     private ResponseEntity<String> issueDismantlerCredential(String bpn, String did){
 
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()); //token must contain base wallet BPN
 
         IssueDismantlerCredentialRequest request = IssueDismantlerCredentialRequest.builder()
-                .activityType("vehicleDismantle")
+                .activityType(StringPool.VEHICLE_DISMANTLE)
                 .bpn(bpn)
                 .allowedVehicleBrands(Set.of("BMW"))
                 .build();

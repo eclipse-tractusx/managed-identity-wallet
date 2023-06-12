@@ -23,27 +23,36 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
+import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
+import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.springframework.stereotype.Service;
 
-/**
- * The type Did document service.
- */
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class DidDocumentService {
-    
-    private final CommonService commonService;
+@RequiredArgsConstructor
+public class CommonService {
+
+    private final WalletRepository walletRepository;
 
     /**
-     * Gets did document by identifier(BPN or Did).
+     * Gets wallet by identifier(BPN or did).
      *
      * @param identifier the identifier
-     * @return the did document
+     * @return the wallet by identifier
      */
-    public DidDocument getDidDocument(String identifier) {
-        return commonService.getWalletByIdentifier(identifier).getDidDocument();
+    public Wallet getWalletByIdentifier(String identifier) {
+        Wallet wallet;
+        if (CommonUtils.getIdentifierType(identifier).equals(StringPool.BPN)) {
+            wallet = walletRepository.getByBpn(identifier);
+        } else {
+            wallet = walletRepository.getByDid(identifier);
+        }
+        Validate.isNull(wallet).launch(new WalletNotFoundProblem("Wallet not found for identifier " + identifier));
+        return wallet;
     }
 
 }
