@@ -58,6 +58,7 @@ import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -126,13 +127,13 @@ public class WalletService extends BaseService<Wallet, Long> {
         //check type
         Validate.isTrue(verifiableCredential.getTypes().isEmpty()).launch(new BadDataException("Invalid types provided in credentials"));
 
-        if (verifiableCredential.getTypes().size() > 1) {
-            verifiableCredential.getTypes().remove("VerifiableCredential");
-        }
+        List<String> cloneTypes = new ArrayList<>(verifiableCredential.getTypes());
+        cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
+
         holdersCredentialRepository.save(HoldersCredential.builder()
                 .holderDid(wallet.getDid())
                 .issuerDid(URLDecoder.decode(verifiableCredential.getIssuer().toString(), Charset.defaultCharset()))
-                .type(verifiableCredential.getTypes().get(0))
+                .type(String.join(",", cloneTypes))
                 .data(verifiableCredential)
                 .selfIssued(false)
                 .stored(true)  //credential is stored(not issued by MIW)
