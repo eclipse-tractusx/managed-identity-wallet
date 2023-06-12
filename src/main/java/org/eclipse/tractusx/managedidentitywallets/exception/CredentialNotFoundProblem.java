@@ -19,51 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 /**
- * The type Application constant.
+ * The type Wallet not found problem.
  */
-public class ApplicationConstant {
+public class CredentialNotFoundProblem extends RuntimeException {
 
-    private ApplicationConstant() {
-        throw new IllegalStateException("Constant class");
+    /**
+     * Instantiates a new Wallet not found problem.
+     */
+    public CredentialNotFoundProblem() {
     }
 
     /**
-     * The constant ROLE_VIEW_WALLETS.
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
      */
-    public static final String ROLE_VIEW_WALLETS = "view_wallets";
-    /**
-     * The constant ROLE_VIEW_WALLET.
-     */
-    public static final String ROLE_VIEW_WALLET = "view_wallet";
-
-    /**
-     * The constant ROLE_ADD_WALLETS.
-     */
-    public static final String ROLE_ADD_WALLETS = "add_wallets";
+    public CredentialNotFoundProblem(String message) {
+        super(message);
+    }
 
     /**
-     * The constant ROLE_UPDATE_WALLETS.
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param message the message
+     * @param cause   the cause
      */
-    public static final String ROLE_UPDATE_WALLETS = "update_wallets";
+    public CredentialNotFoundProblem(String message, Throwable cause) {
+        super(message, cause);
+    }
 
     /**
-     * The constant ROLE_UPDATE_WALLET.
+     * Instantiates a new Wallet not found problem.
+     *
+     * @param cause the cause
      */
-    public static final String ROLE_UPDATE_WALLET = "update_wallet";
-
-
-    /**
-     * The constant DID.
-     */
-    public static final String DID = "did";
-
-    /**
-     * The constant BPN.
-     */
-    public static final String BPN = "bpn";
-
-
+    public CredentialNotFoundProblem(Throwable cause) {
+        super(cause);
+    }
 }

@@ -725,7 +725,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "miw_private_client_secret",
+      "secret": "miw_private_client",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -778,6 +778,21 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "BPN"
+          }
+        },
+        {
+          "id": "f446598c-1637-4585-b2b6-0204d2e6e92e",
+          "name": "client_bpn_mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.value": "BPNL000000000000",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "BPN",
+            "access.tokenResponse.claim": "false"
           }
         },
         {
@@ -850,10 +865,14 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost:8087/*"
+        "http://localhost/*",
+        "http://localhost:8087/*",
+        "http://localhost:8080/*"
       ],
       "webOrigins": [
-        "http://localhost:8087"
+        "http://localhost",
+        "http://localhost:8087",
+        "http://localhost:8080"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -877,18 +896,19 @@
       "nodeReRegistrationTimeout": -1,
       "protocolMappers": [
         {
-          "id": "8097e876-fee0-4c8e-861d-8da7c996e058",
-          "name": "BPN",
+          "id": "1312c58c-7950-4e3f-b45d-a77b827a62d7",
+          "name": "BPN_user_attribute",
           "protocol": "openid-connect",
-          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
           "config": {
-            "claim.value": "BPNL000000000000",
+            "aggregate.attrs": "false",
             "userinfo.token.claim": "true",
+            "multivalued": "false",
+            "user.attribute": "BPN",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "BPN",
-            "access.tokenResponse.claim": "false"
+            "claim.name": "BPN"
           }
         }
       ],
@@ -2435,16 +2455,21 @@
   },
   "users": [
     {
-      "username": "valid_user",
-      "email": "valid@test.test",
-      "firstName": "Reporter",
-      "lastName": "Reporter",
+      "username": "catena-x",
+      "email": "miwuser@test.test",
+      "firstName": "miwuser",
+      "lastName": "miwuser",
       "enabled": true,
       "emailVerified": true,
+      "attributes": {
+        "BPN": [
+          "BPNL000000000000"
+        ]
+      },
       "credentials": [
         {
           "type": "password",
-          "value": "s3cr3t"
+          "value": "password"
         }
       ],
       "clientRoles": {
@@ -2453,27 +2478,11 @@
           "manage-account"
         ],
         "miw_private_client": [
-          "view_wallets","view_wallet","add_wallets","update_wallets","update_wallet"
-        ]
-      }
-    },
-    {
-      "username": "invalid_user",
-      "email": "invalid@test.test",
-      "firstName": "Reporter",
-      "lastName": "Reporter",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [
-        {
-          "type": "password",
-          "value": "s3cr3t"
-        }
-      ],
-      "clientRoles": {
-        "account": [
-          "view-profile",
-          "manage-account"
+          "view_wallets",
+          "view_wallet",
+          "add_wallets",
+          "update_wallets",
+          "update_wallet"
         ]
       }
     }

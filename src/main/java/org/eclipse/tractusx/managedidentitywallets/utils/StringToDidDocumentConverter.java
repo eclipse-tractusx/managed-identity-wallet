@@ -22,20 +22,26 @@
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import jakarta.persistence.AttributeConverter;
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The type String to did document converter.
  */
 public class StringToDidDocumentConverter implements AttributeConverter<DidDocument, String> {
 
+    @SneakyThrows
     @Override
     public String convertToDatabaseColumn(DidDocument didDocument) {
-        return didDocument.toJson();
+        return URLDecoder.decode(didDocument.toJson(), StandardCharsets.UTF_8);
     }
 
     @Override
     public DidDocument convertToEntityAttribute(String string) {
+
         return DidDocument.fromJson(string);
     }
 }

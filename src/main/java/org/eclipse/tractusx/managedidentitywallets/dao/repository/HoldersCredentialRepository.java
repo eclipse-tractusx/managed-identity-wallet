@@ -22,8 +22,9 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Credential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,14 +33,14 @@ import java.util.List;
 /**
  * The interface Credential repository.
  */
-public interface CredentialRepository extends BaseRepository<Credential, Long> {
+public interface HoldersCredentialRepository extends BaseRepository<HoldersCredential, Long> {
     /**
      * Gets by holder did.
      *
      * @param holderDid the holder did
      * @return the by holder did
      */
-    List<Credential> getByHolderDid(String holderDid);
+    List<HoldersCredential> getByHolderDid(String holderDid);
 
     /**
      * Gets credentials by holder.
@@ -47,7 +48,7 @@ public interface CredentialRepository extends BaseRepository<Credential, Long> {
      * @param holderDid the holder did
      * @return the credentials by holder
      */
-    @Query("select data from Credential where holderDid=:holderDid")
+    @Query("select data from HoldersCredential where holderDid=:holderDid")
     List<VerifiableCredential> getCredentialsByHolder(@Param("holderDid") String holderDid);
 
     /**
@@ -57,7 +58,9 @@ public interface CredentialRepository extends BaseRepository<Credential, Long> {
      * @param type      the type
      * @return the by holder did and type
      */
-    Credential getByHolderDidAndType(String holderDid, String type);
+    List<HoldersCredential> getByHolderDidAndType(String holderDid, String type);
+
+    List<HoldersCredential> getByHolderDidAndIssuerDidAndTypeAndStored(String holderDid, String issuerDid, String type, boolean stored);
 
     /**
      * Exists by holder did and type boolean.
@@ -67,4 +70,22 @@ public interface CredentialRepository extends BaseRepository<Credential, Long> {
      * @return the boolean
      */
     boolean existsByHolderDidAndType(String holderDid, String type);
+
+    /**
+     * Delete by credential id.
+     *
+     * @param credentialId the credential id
+     */
+    @Modifying
+    @Query("delete from HoldersCredential where credentialId=:credentialId")
+    void deleteByCredentialId(@Param("credentialId") String credentialId);
+
+    /**
+     * Exists by holder did and credential id boolean.
+     *
+     * @param holderDid    the holder did
+     * @param credentialId the credential id
+     * @return the boolean
+     */
+    boolean existsByHolderDidAndCredentialId(String holderDid, String credentialId);
 }
