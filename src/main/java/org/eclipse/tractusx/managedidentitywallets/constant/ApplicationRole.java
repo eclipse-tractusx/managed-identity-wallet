@@ -19,42 +19,36 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.constant;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.springframework.stereotype.Repository;
+public class ApplicationRole {
 
-/**
- * The interface Wallet repository.
- */
-@Repository
-public interface WalletRepository extends BaseRepository<Wallet, Long> {
+    private ApplicationRole() {
+        throw new IllegalStateException("Constant class");
+    }
 
     /**
-     * Gets by bpn.
-     *
-     * @param bpn the bpn
-     * @return the by bpn
+     * The constant ROLE_VIEW_WALLETS.
      */
-    Wallet getByBpn(String bpn);
+    public static final String ROLE_VIEW_WALLETS = "view_wallets";
+    /**
+     * The constant ROLE_VIEW_WALLET.
+     */
+    public static final String ROLE_VIEW_WALLET = "view_wallet";
 
     /**
-     * Exists by bpn boolean.
-     *
-     * @param bpn the bpn
-     * @return the boolean
+     * The constant ROLE_ADD_WALLETS.
      */
-    boolean existsByBpn(String bpn);
+    public static final String ROLE_ADD_WALLETS = "add_wallets";
 
     /**
-     * Gets by did.
-     *
-     * @param did the did
-     * @return the by did
+     * The constant ROLE_UPDATE_WALLETS.
      */
-    Wallet getByDid(String did);
+    public static final String ROLE_UPDATE_WALLETS = "update_wallets";
 
-    int countByBpn(String bpn);
+    /**
+     * The constant ROLE_UPDATE_WALLET.
+     */
+    public static final String ROLE_UPDATE_WALLET = "update_wallet";
 
 }

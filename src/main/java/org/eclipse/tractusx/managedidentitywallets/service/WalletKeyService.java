@@ -36,6 +36,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
 
+/**
+ * The type Wallet key service.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -58,17 +61,30 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     }
 
 
+    /**
+     * Get private key by wallet identifier as bytes byte [ ].
+     *
+     * @param walletId the wallet id
+     * @return the byte [ ]
+     */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifier(long walletId) {
-        WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
-        String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
-        return new PemReader(new StringReader(privateKey)).readPemObject().getContent();
+    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
+        return getPrivateKeyByWalletIdentifier(walletId).getEncoded();
     }
 
+    /**
+     * Gets private key by wallet identifier.
+     *
+     * @param walletId the wallet id
+     * @return the private key by wallet identifier
+     */
     @SneakyThrows
-    public Ed25519Key getEd25519Key(long walletId) {
-        return new Ed25519Key(getPrivateKeyByWalletIdentifier(walletId));
 
+    public Ed25519Key getPrivateKeyByWalletIdentifier(long walletId) {
+        WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
+        String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
+        byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
+        return Ed25519Key.asPrivateKey(content);
     }
 
 }

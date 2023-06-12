@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 /**
@@ -45,7 +47,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Wallets")
-public class WalletController {
+public class WalletController extends BaseController {
 
     private final WalletService service;
 
@@ -55,6 +57,17 @@ public class WalletController {
      * @param request the request
      * @return the response entity
      */
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
+            @Content(examples = {
+
+                    @ExampleObject(name = "Create wallet with BPN", value = """
+                                                        {
+                                                          "bpn": "BPNL000000000001",
+                                                          "name": "smartSense"
+                                                        }
+                            """)
+            })
+    })
     @Operation(summary = "Create Wallet", description = "Permission: **add_wallets** \n\n Create a wallet and store it")
     @PostMapping(path = RestURI.WALLETS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request) {
@@ -80,21 +93,14 @@ public class WalletController {
                                      "https://www.w3.org/2018/credentials/examples/v1"
                                    ],
                                    "type": [
-                                     "University-Degree-Credential, VerifiableCredential"
+                                     "University-Degree-Credential", "VerifiableCredential"
                                    ],
                                    "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
                                    "issuanceDate": "2019-06-16T18:56:59Z",
                                    "expirationDate": "2019-06-17T18:56:59Z",
-                                   "credentialSubject": {
+                                   "credentialSubject": [{
                                      "college": "Test-University"
-                                   },
-                                   "credentialStatus": {
-                                     "id": "http://example.edu/api/credentials/status/test#3",
-                                     "type": "StatusList2021Entry",
-                                     "statusPurpose": "revocation",
-                                     "statusListIndex": "3",
-                                     "statusListCredential": "http://example.edu/api/credentials/status/test"
-                                   },
+                                   }],
                                    "proof": {
                                      "type": "Ed25519Signature2018",
                                      "created": "2021-11-17T22:20:27Z",
@@ -105,8 +111,9 @@ public class WalletController {
                                  }
                     """))
     })
-    public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data, @PathVariable(name = "identifier") String identifier) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier));
+    public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data,
+                                                               @Parameter(description = "Did or BPN") @PathVariable(name = "identifier") String identifier, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier, getBPNFromToken(principal)));
     }
 
     /**
@@ -118,8 +125,11 @@ public class WalletController {
      */
     @Operation(summary = "Retrieve wallet by identifier", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller) \n\n Retrieve single wallet by identifier, with or without its credentials")
     @GetMapping(path = RestURI.API_WALLETS_IDENTIFIER, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> getWalletByIdentifier(@PathVariable(name = "identifier") String identifier, @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials));
+    public ResponseEntity<Wallet> getWalletByIdentifier(@Parameter(description = "Did or BPN") @PathVariable(name = "identifier") String identifier,
+                                                        @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials,
+                                                        Principal principal) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials, getBPNFromToken(principal)));
     }
 
     /**

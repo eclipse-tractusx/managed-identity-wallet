@@ -39,6 +39,7 @@ public class RestURI {
      * The constant DID_DOCUMENTS.
      */
     public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
+    public static final String DID_RESOLVE = "/{bpn}/did.json";
     /**
      * The constant WALLETS_BY_BPN.
      */
@@ -52,6 +53,13 @@ public class RestURI {
      * The constant CREDENTIALS.
      */
     public static final String CREDENTIALS = "/api/credentials";
+
+
+    public static final String CREDENTIALS_VALIDATION = "/api/credentials/validation";
+
+
+    public static final String ISSUERS_CREDENTIALS = "/api/credentials/issuer";
+
     /**
      * The constant CREDENTIALS_ISSUER_MEMBERSHIP.
      */
@@ -68,5 +76,6 @@ public class RestURI {
     public static final String API_CREDENTIALS_ISSUER_FRAMEWORK = "/api/credentials/issuer/framework";
 
     public static final String API_PRESENTATIONS = "/api/presentations";
+    public static final String API_PRESENTATIONS_VALIDATION = "/api/presentations/validation";
 
 }

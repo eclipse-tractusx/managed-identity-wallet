@@ -16,6 +16,7 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	maven {
 		url = uri("https://repo.danubetech.com/repository/maven-public")
@@ -45,9 +46,9 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
-	implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.2'
+	implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
 	implementation 'org.liquibase:liquibase-core'
-	implementation 'org.eclipse.tractusx.ssi.lib:cx-ssi-lib:0.0.4'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.6'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -57,6 +58,7 @@ dependencies {
 	testImplementation "org.testcontainers:postgresql"
 	testImplementation "org.testcontainers:junit-jupiter"
 	testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
+	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
 	testImplementation group: 'org.json', name: 'json', version: '20230227'
 }
 

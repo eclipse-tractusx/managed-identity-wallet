@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class EncryptionTest {
+class EncryptionTest {
 
     @Autowired
     private EncryptionUtils encryptionUtils;

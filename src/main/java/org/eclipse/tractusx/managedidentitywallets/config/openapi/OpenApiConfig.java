@@ -58,7 +58,7 @@ public class OpenApiConfig {
         info.setDescription("MIW API");
         info.setVersion("0.0.1");
         OpenAPI openAPI = new OpenAPI();
-        if (properties.enabled()) {
+        if (Boolean.TRUE.equals(properties.enabled())) {
             openAPI = enableSecurity(openAPI);
         }
         return openAPI.info(info);
@@ -79,6 +79,7 @@ public class OpenApiConfig {
     }
 
     private OpenAPI enableSecurity(OpenAPI openAPI) {
+        String authorization = "Authorization";
         Components components = new Components();
         components.addSecuritySchemes(
                 "open_id_scheme",
@@ -93,7 +94,13 @@ public class OpenApiConfig {
                                 )
                         )
         );
+
+        components.addSecuritySchemes(authorization,
+                new SecurityScheme().name(authorization)
+                        .type(SecurityScheme.Type.HTTP).scheme("Bearer"));
         return openAPI.components(components)
-                .addSecurityItem(new SecurityRequirement().addList("open_id_scheme", Collections.emptyList()));
+                .addSecurityItem(new SecurityRequirement()
+                        .addList(authorization, Collections.emptyList())
+                        .addList("open_id_scheme", Collections.emptyList()));
     }
 }

@@ -24,8 +24,9 @@ package org.eclipse.tractusx.managedidentitywallets.did;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.CredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -44,7 +45,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class DidDocumentsTest {
+class DidDocumentsTest {
     @Autowired
     private WalletRepository walletRepository;
 
@@ -52,7 +53,7 @@ public class DidDocumentsTest {
     private WalletKeyRepository walletKeyRepository;
 
     @Autowired
-    private CredentialRepository credentialRepository;
+    private HoldersCredentialRepository holdersCredentialRepository;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -72,6 +73,35 @@ public class DidDocumentsTest {
 
         createWallet(bpn, did);
         ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, bpn);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+    }
+
+    @Test
+    void getDidDocumentWithDid200() {
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        createWallet(bpn, did);
+        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, did);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertNotNull(response.getBody());
+    }
+
+    @Test
+    void getDidResolveInvalidBpn404() {
+        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_RESOLVE, String.class, UUID.randomUUID().toString());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
+    }
+
+    @Test
+    void getDidResolveWithBpn200() {
+
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+
+        createWallet(bpn, did);
+        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_RESOLVE, String.class, bpn);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
     }
@@ -96,21 +126,9 @@ public class DidDocumentsTest {
                 .bpn(bpn)
                 .did(did)
                 .didDocument(DidDocument.fromJson(didDocument))
-                .algorithm("ED25519")
+                .algorithm(StringPool.ED_25519)
                 .name(bpn)
                 .build();
         return walletRepository.save(wallet);
     }
-
-    @Test
-    void getDidDocumentWithDid200() {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-
-        createWallet(bpn, did);
-        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, did);
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertNotNull(response.getBody());
-    }
-    
 }
