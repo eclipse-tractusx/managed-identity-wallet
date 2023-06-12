@@ -68,6 +68,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -237,7 +238,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         didDocumentBuilder.id(did.toUri());
         didDocumentBuilder.verificationMethods(verificationMethods);
         DidDocument didDocument = didDocumentBuilder.build();
-
+        didDocument = DidDocument.fromJson(URLDecoder.decode(didDocument.toJson(), StandardCharsets.UTF_8));
         log.debug("did document created for bpn ->{}", request.getBpn());
 
         //Save wallet
