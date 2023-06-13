@@ -117,8 +117,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
         verifiableCredentialList.forEach(map -> {
             VerifiableCredential verifiableCredential = new VerifiableCredential(map);
-            validateCredential(verifiableCredential, holderIdentifier);
-
             verifiableCredentials.add(verifiableCredential);
         });
 
@@ -126,20 +124,23 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer());
         commonService.getWalletByIdentifier(issuerDidString);
 
-        //validate BPN access  - Issuer(Creator) of VP must be caller
+        //validate BPN access  - Issuer(Creator) of VP must be caller Issuer of VP must be holder of VC
         Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
 
         if (asJwt) {
 
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
 
+            //Issuer of VP is holder of VC
+            Did vpIssuerDid = DidParser.parse(holderWallet.getDid());
+
             //JWT Factory
             SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
-                    new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), issuerDid);
+                    new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), vpIssuerDid);
 
             //Build JWT
-            SignedJWT presentation = presentationFactory.createPresentation(
-                    issuerDid, verifiableCredentials, audience, walletKeyService.getPrivateKeyByWalletIdentifier(holderWallet.getId()));
+            SignedJWT presentation = presentationFactory.createPresentation(vpIssuerDid
+                    , verifiableCredentials, audience, walletKeyService.getPrivateKeyByWalletIdentifier(holderWallet.getId()));
 
             response.put(StringPool.VP, presentation.serialize());
         } else {
@@ -250,10 +251,5 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         } else {
             return true;
         }
-    }
-
-    private void validateCredential(VerifiableCredential verifiableCredential, String holderIdentifier) {
-        //check holders
-        Validate.isFalse(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID).toString().equals(holderIdentifier)).launch(new ForbiddenException("VC " + verifiableCredential.getTypes() + " is not match with holder identifier " + holderIdentifier));
     }
 }
