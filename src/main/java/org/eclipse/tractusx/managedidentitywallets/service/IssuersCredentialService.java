@@ -509,8 +509,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         Map<String, Object> subject = Map.of(StringPool.ID, holderDid,
                 StringPool.HOLDER_IDENTIFIER, holderBpn,
-                StringPool.TYPE, MIWVerifiableCredentialType.SUMMARY_LIST_CREDENTIAL,
-                StringPool.NAME, StringPool.CX_CREDENTIALS,
                 StringPool.ITEMS, items,
                 StringPool.CONTRACT_TEMPLATES, miwSettings.contractTemplatesUrl());
 
