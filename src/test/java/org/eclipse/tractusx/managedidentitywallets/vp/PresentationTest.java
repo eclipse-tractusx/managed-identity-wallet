@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.vp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
@@ -53,6 +54,7 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,13 +179,19 @@ class PresentationTest {
     }
 
     @Test
-    void createPresentationAsJWT201() throws JsonProcessingException {
+    void createPresentationAsJWT201() throws JsonProcessingException, ParseException {
         String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
         String audience = "smartSense";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.CREATED.value());
+        String jwt = vpResponse.getBody().get("vp").toString();
+        SignedJWT signedJWT = SignedJWT.parse(jwt);
+        JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+        String iss = claimsSet.getStringClaim("iss");
 
-
+        //issuer of VP is must be holder of VP
+        Assertions.assertEquals(iss, did);
     }
 
     private ResponseEntity<Map> createBpnVCAsJwt(String bpn, String audience) throws JsonProcessingException {
