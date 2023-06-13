@@ -4,6 +4,7 @@ dotenv:
   - 'dev.env'
 
 tasks:
+
   unittest:
     desc: Executes helm unittests
     dir: charts/managed-identity-wallet
@@ -18,10 +19,10 @@ tasks:
   buildDocker:
     desc: Build the app and the corresponding Docker image (tagged as "miw-test")
     cmds:
-      - task: buildJar
+      - task: build
       - docker build -t local-miw --platform linux/amd64 .
 
-  runDevEnv:
+  startDevEnv:
     desc: Spin up local Docker environment
     dir: dev-assets/dev-containers
     ignore_error: true
@@ -37,7 +38,7 @@ tasks:
     cmds:
       - docker-compose down
 
-  runDockerApp:
+  startDockerApp:
     desc: Run the app in a container environment
     cmds:
       - task: runDevEnv
