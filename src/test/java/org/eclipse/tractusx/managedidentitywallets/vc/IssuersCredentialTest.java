@@ -186,6 +186,19 @@ class IssuersCredentialTest {
         Assertions.assertTrue(credentials.get(0).isSelfIssued());  //stored must be true
     }
 
+
+    @Test
+    void issueSummaryCredentials400() throws com.fasterxml.jackson.core.JsonProcessingException {
+
+        String bpn = UUID.randomUUID().toString();
+        String did = "did:web:localhost:" + bpn;
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+
+        ResponseEntity<String> response = issueVC(bpn, did, miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.SUMMARY_CREDENTIAL, headers);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode().value());
+    }
+
     @Test
     void issueCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
 

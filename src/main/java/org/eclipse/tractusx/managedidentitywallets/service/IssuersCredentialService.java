@@ -386,6 +386,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
 
+        //Summary VC can not be issued using API, as summary VC is issuing at runtime
+        verifiableCredential.getTypes().forEach(type -> {
+            Validate.isTrue(type.equals(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL)).launch(new BadDataException("Can not issue " + MIWVerifiableCredentialType.SUMMARY_CREDENTIAL + " type VC using API"));
+        });
+
         Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
         validateAccess(callerBpn, issuerWallet);
