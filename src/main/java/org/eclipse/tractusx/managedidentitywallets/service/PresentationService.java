@@ -99,9 +99,10 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
      * @return the map
      */
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
+        List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
 
-
-        Map<String, Object> response = new HashMap<>();
+        //only support one credential at a time to create VP
+        Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
 
         String holderIdentifier = data.get(StringPool.HOLDER_IDENTIFIER).toString();
 
@@ -111,19 +112,13 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         //validate BPN access  - Issuer(Creator) of VP must be caller Issuer of VP must be holder of VC
         Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Holder identifier is not matching with request BPN(from the token)"));
 
-
-        List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
-
-        //only support one credential at a time to create VP
-        Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
-
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
         verifiableCredentialList.forEach(map -> {
             VerifiableCredential verifiableCredential = new VerifiableCredential(map);
             verifiableCredentials.add(verifiableCredential);
         });
 
-
+        Map<String, Object> response = new HashMap<>();
         if (asJwt) {
 
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
