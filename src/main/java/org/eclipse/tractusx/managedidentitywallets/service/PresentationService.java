@@ -57,9 +57,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URI;
-import java.net.URLDecoder;
 import java.net.http.HttpClient;
-import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -101,12 +99,17 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
      * @return the map
      */
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
+
+
         Map<String, Object> response = new HashMap<>();
 
         String holderIdentifier = data.get(StringPool.HOLDER_IDENTIFIER).toString();
 
         //check if holder wallet is in the system
         Wallet holderWallet = commonService.getWalletByIdentifier(holderIdentifier);
+
+        //validate BPN access  - Issuer(Creator) of VP must be caller Issuer of VP must be holder of VC
+        Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Holder identifier is not matching with request BPN(from the token)"));
 
 
         List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
@@ -120,12 +123,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             verifiableCredentials.add(verifiableCredential);
         });
 
-        String issuerDidString = URLDecoder.decode(verifiableCredentials.get(0).getIssuer().toString(), Charset.defaultCharset());
-        Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer());
-        commonService.getWalletByIdentifier(issuerDidString);
-
-        //validate BPN access  - Issuer(Creator) of VP must be caller Issuer of VP must be holder of VC
-        Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
 
         if (asJwt) {
 
