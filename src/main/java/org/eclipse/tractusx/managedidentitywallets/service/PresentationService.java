@@ -57,9 +57,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URI;
-import java.net.URLDecoder;
 import java.net.http.HttpClient;
-import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -101,45 +99,40 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
      * @return the map
      */
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
-        Map<String, Object> response = new HashMap<>();
+        List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
+
+        //only support one credential at a time to create VP
+        Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
 
         String holderIdentifier = data.get(StringPool.HOLDER_IDENTIFIER).toString();
 
         //check if holder wallet is in the system
         Wallet holderWallet = commonService.getWalletByIdentifier(holderIdentifier);
 
-
-        List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
-
-        //only support one credential at a time to create VP
-        Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
+        //validate BPN access  - Issuer(Creator) of VP must be caller Issuer of VP must be holder of VC
+        Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Holder identifier is not matching with request BPN(from the token)"));
 
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
         verifiableCredentialList.forEach(map -> {
             VerifiableCredential verifiableCredential = new VerifiableCredential(map);
-            validateCredential(verifiableCredential, holderIdentifier);
-
             verifiableCredentials.add(verifiableCredential);
         });
 
-        String issuerDidString = URLDecoder.decode(verifiableCredentials.get(0).getIssuer().toString(), Charset.defaultCharset());
-        Did issuerDid = DidParser.parse(verifiableCredentials.get(0).getIssuer());
-        commonService.getWalletByIdentifier(issuerDidString);
-
-        //validate BPN access  - Issuer(Creator) of VP must be caller
-        Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Issuer wallet BPN is not matching with request BPN(from the token)"));
-
+        Map<String, Object> response = new HashMap<>();
         if (asJwt) {
 
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
 
+            //Issuer of VP is holder of VC
+            Did vpIssuerDid = DidParser.parse(holderWallet.getDid());
+
             //JWT Factory
             SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
-                    new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), issuerDid);
+                    new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), vpIssuerDid);
 
             //Build JWT
-            SignedJWT presentation = presentationFactory.createPresentation(
-                    issuerDid, verifiableCredentials, audience, walletKeyService.getPrivateKeyByWalletIdentifier(holderWallet.getId()));
+            SignedJWT presentation = presentationFactory.createPresentation(vpIssuerDid
+                    , verifiableCredentials, audience, walletKeyService.getPrivateKeyByWalletIdentifier(holderWallet.getId()));
 
             response.put(StringPool.VP, presentation.serialize());
         } else {
@@ -250,10 +243,5 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         } else {
             return true;
         }
-    }
-
-    private void validateCredential(VerifiableCredential verifiableCredential, String holderIdentifier) {
-        //check holders
-        Validate.isFalse(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID).toString().equals(holderIdentifier)).launch(new ForbiddenException("VC " + verifiableCredential.getTypes() + " is not match with holder identifier " + holderIdentifier));
     }
 }
