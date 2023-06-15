@@ -53,7 +53,7 @@ tasks:
   stopDockerApp:
     desc: Stop all running containers
     cmds:
-      - docker stop miw-app
+      - docker stop local_miw_app
       - task: stopDevEnv
 
   clean:
