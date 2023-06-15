@@ -37,12 +37,9 @@ import lombok.*;
 @Builder
 public class IssueFrameworkCredentialRequest {
 
-    @NotBlank(message = "Please provide BPN")
-    @Size(min = 5, max = 255, message = "Please provide valid BPN")
-    private String bpn;
-
-    @NotBlank(message = "Please provide value")
-    private String value;
+    @NotBlank(message = "Please provide holder identifier")
+    @Size(min = 5, max = 255, message = "Please provide valid identifier")
+    private String holderIdentifier;
 
     @NotBlank(message = "Please provide type")
     private String type;

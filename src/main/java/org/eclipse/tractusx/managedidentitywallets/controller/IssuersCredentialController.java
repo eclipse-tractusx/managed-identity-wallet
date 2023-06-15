@@ -139,9 +139,8 @@ public class IssuersCredentialController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                  "bpn": "BPNL000000000000",
-                                  "value": "PCF",
-                                  "type": "cx-pcf",
+                                  "holderIdentifier": "BPNL000000000000",
+                                  "type": "BehaviorTwinCredential",
                                   "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
                                   "contract-version": "1.0.0"
                                 }

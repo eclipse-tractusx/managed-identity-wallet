@@ -100,7 +100,7 @@ class WalletTest {
         Assertions.assertNotNull(wallet.getDidDocument());
 
         //check BPN credentials issued for authority wallet
-        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
         Assertions.assertFalse(vcs.isEmpty());
         Assertions.assertTrue(vcs.get(0).isSelfIssued());
     }
@@ -157,7 +157,7 @@ class WalletTest {
         Assertions.assertEquals(2, body.getVerifiableCredentials().size());
 
         VerifiableCredential verifiableCredential = body.getVerifiableCredentials().stream()
-                .filter(vp -> vp.getTypes().contains(MIWVerifiableCredentialType.BPN_CREDENTIAL_CX))
+                .filter(vp -> vp.getTypes().contains(MIWVerifiableCredentialType.BPN_CREDENTIAL))
                 .findFirst()
                 .orElse(null);
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
@@ -169,7 +169,7 @@ class WalletTest {
                 .orElse(null);
         VerifiableCredentialSubject subject = summaryVerifiableCredential.getCredentialSubject().get(0);
         List<String> list = (List<String>) subject.get(StringPool.ITEMS);
-        Assertions.assertTrue(list.contains(MIWVerifiableCredentialType.BPN_CREDENTIAL_CX));
+        Assertions.assertTrue(list.contains(MIWVerifiableCredentialType.BPN_CREDENTIAL));
     }
 
 
