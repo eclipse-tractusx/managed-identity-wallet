@@ -234,6 +234,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         Map<String, Object> subject = Map.of(
                 StringPool.TYPE, request.getType(),
                 StringPool.ID, holderWallet.getDid(),
+                StringPool.HOLDER_IDENTIFIER, holderWallet.getBpn(),
                 StringPool.CONTRACT_TEMPLATE, request.getContractTemplate(),
                 StringPool.CONTRACT_VERSION, request.getContractVersion());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);

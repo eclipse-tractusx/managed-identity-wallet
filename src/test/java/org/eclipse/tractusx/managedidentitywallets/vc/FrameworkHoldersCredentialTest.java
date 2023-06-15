@@ -220,6 +220,8 @@ class FrameworkHoldersCredentialTest {
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.TYPE), type);
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.HOLDER_IDENTIFIER), wallet.getBpn());
+
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
@@ -232,6 +234,7 @@ class FrameworkHoldersCredentialTest {
         Assertions.assertFalse(credentials.get(0).isSelfIssued()); //self issue must be false
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.TYPE), type);
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.HOLDER_IDENTIFIER), wallet.getBpn());
 
         //check summary credential
         TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, type, oldSummaryCredentialId);
