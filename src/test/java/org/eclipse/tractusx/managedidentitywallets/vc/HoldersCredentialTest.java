@@ -145,18 +145,18 @@ class HoldersCredentialTest {
         TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         String vcList = """
                 [
-                {"type":"cx-traceability","value":"ID_3.0_Trace"},
-                {"type":"cx-sustainability","value":"Sustainability"},
-                {"type":"cx-resiliency","value":"Resiliency"},
-                {"type":"cx-quality","value":"Quality"},
-                {"type":"cx-pcf","value":"PCF"}
+                {"type":"TraceabilityCredential"},
+                {"type":"SustainabilityCredential"},
+                {"type":"ResiliencyCredential"},
+                {"type":"QualityCredential"},
+                {"type":"PcfCredential"}
                 ]
                 """;
         JSONArray jsonArray = new JSONArray(vcList);
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn, jsonObject.get(StringPool.TYPE).toString(), jsonObject.get(StringPool.VALUE).toString());
+            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn, jsonObject.get(StringPool.TYPE).toString());
             HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); //ony base wallet can issue VC
             ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
             Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
@@ -178,7 +178,7 @@ class HoldersCredentialTest {
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
         List<String> list = new ArrayList<>();
-        list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
                 , HttpMethod.GET, entity, String.class, String.join(",", list));
         credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
@@ -194,7 +194,7 @@ class HoldersCredentialTest {
         Assertions.assertEquals(1, credentialList.size());
         VerifiableCredentialSubject subject = credentialList.get(0).getCredentialSubject().get(0);
         List<String> itemList = (List<String>) subject.get(StringPool.ITEMS);
-        Assertions.assertTrue(itemList.contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
+        Assertions.assertTrue(itemList.contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             Assertions.assertTrue(itemList.contains(jsonObject.get(StringPool.TYPE).toString()));

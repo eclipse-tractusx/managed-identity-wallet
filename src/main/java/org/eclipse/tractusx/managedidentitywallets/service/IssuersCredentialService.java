@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.google.common.collect.ImmutableMap;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -88,8 +87,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
     private final WalletKeyService walletKeyService;
 
-    private final Map<String, String> supportedFrameworkVCTypes;
-
     private final HoldersCredentialRepository holdersCredentialRepository;
 
     private final CommonService commonService;
@@ -113,11 +110,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         this.walletKeyService = walletKeyService;
         this.holdersCredentialRepository = holdersCredentialRepository;
         this.commonService = commonService;
-        Map<String, String> tmpMap = new HashMap<>();
-        for (String type : org.apache.commons.lang3.StringUtils.split(miwSettings.supportedFrameworkVCTypes(), ",")) {
-            tmpMap.put(type.split("=")[0].trim(), type.split("=")[1].trim());
-        }
-        supportedFrameworkVCTypes = ImmutableMap.copyOf(tmpMap);
     }
 
 
@@ -194,7 +186,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
-        List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
                 StringPool.BPN, holderWallet.getBpn()), types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), authority);
@@ -207,7 +199,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredentialRepository.save(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
 
         log.debug("BPN credential issued for bpn -{}", holderWallet.getBpn());
 
@@ -225,13 +217,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
 
         //validate type
-        Validate.isFalse(supportedFrameworkVCTypes.containsKey(request.getType())).launch(new BadDataException("Framework credential of type " + request.getType() + " is not supported"));
-
-        //validate value
-        Validate.isFalse(request.getValue().equals(supportedFrameworkVCTypes.get(request.getType()))).launch(new BadDataException("Invalid value of credential type " + request.getType()));
+        Validate.isFalse(miwSettings.supportedFrameworkVCTypes().contains(request.getType())).launch(new BadDataException("Framework credential of type " + request.getType() + " is not supported, supported values are " + miwSettings.supportedFrameworkVCTypes()));
 
         //Fetch Holder Wallet
-        Wallet holderWallet = commonService.getWalletByIdentifier(request.getBpn());
+        Wallet holderWallet = commonService.getWalletByIdentifier(request.getHolderIdentifier());
 
         Wallet baseWallet = commonService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
 
@@ -240,11 +229,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
 
         //if base wallet issue credentials to itself
-        boolean isSelfIssued = isSelfIssued(request.getBpn());
+        boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
-        Map<String, Object> subject = Map.of(StringPool.TYPE, request.getType(),
+        Map<String, Object> subject = Map.of(
+                StringPool.TYPE, request.getType(),
                 StringPool.ID, holderWallet.getDid(),
-                StringPool.VALUE, request.getValue(),
                 StringPool.CONTRACT_TEMPLATE, request.getContractTemplate(),
                 StringPool.CONTRACT_VERSION, request.getContractVersion());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
@@ -260,7 +249,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //update summery cred
         updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType());
 
-        log.debug("Framework VC of type ->{} issued to bpn ->{}", request.getType(), request.getBpn());
+        log.debug("Framework VC of type ->{} issued to bpn ->{}", request.getType(), holderWallet.getBpn());
 
         // Return VC
         return issuersCredential.getData();
@@ -285,7 +274,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         validateAccess(callerBPN, issuerWallet);
 
         //check duplicate
-        isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
 
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
 
@@ -297,7 +286,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.HOLDER_IDENTIFIER, holderWallet.getBpn(),
                 StringPool.ACTIVITY_TYPE, request.getActivityType(),
                 StringPool.ALLOWED_VEHICLE_BRANDS, request.getAllowedVehicleBrands());
-        List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
 
@@ -309,7 +298,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL_CX);
+        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
 
         log.debug("Dismantler VC issued to bpn -> {}", request.getBpn());
 
@@ -331,7 +320,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         Wallet holderWallet = commonService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
 
         //check duplicate
-        isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
         // Fetch Issuer Wallet
         Wallet issuerWallet = commonService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
@@ -339,7 +328,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         validateAccess(callerBPN, issuerWallet);
 
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
-        List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(issueMembershipCredentialRequest.getBpn());
@@ -362,7 +351,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
         log.debug("Membership VC issued to bpn ->{}", issueMembershipCredentialRequest.getBpn());
 

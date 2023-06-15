@@ -112,13 +112,12 @@ public class TestUtils {
         return restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
     }
 
-    public static IssueFrameworkCredentialRequest getIssueFrameworkCredentialRequest(String bpn, String type, String value) {
+    public static IssueFrameworkCredentialRequest getIssueFrameworkCredentialRequest(String bpn, String type) {
         IssueFrameworkCredentialRequest twinRequest = IssueFrameworkCredentialRequest.builder()
                 .contractTemplate("http://localhost")
                 .contractVersion("v1")
                 .type(type)
-                .value(value)
-                .bpn(bpn)
+                .holderIdentifier(bpn)
                 .build();
         return twinRequest;
     }
@@ -151,22 +150,6 @@ public class TestUtils {
         }
         System.out.println("wallet -- >" + wallet1.getBpn());
         return wallet1;
-    }
-
-    public static List<VerifiableCredential> getCredentialsFromString(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
-        List<VerifiableCredential> credentialList = new ArrayList<>();
-
-        JSONArray array = new JSONArray(body);
-        if (array.length() == 0) {
-            return credentialList;
-        }
-
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject jsonObject = array.getJSONObject(i);
-            ObjectMapper objectMapper = new ObjectMapper();
-            credentialList.add(new VerifiableCredential(objectMapper.readValue(jsonObject.toString(), Map.class)));
-        }
-        return credentialList;
     }
 
 

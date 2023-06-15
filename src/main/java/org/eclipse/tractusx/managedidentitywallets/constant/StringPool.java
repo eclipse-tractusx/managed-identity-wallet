@@ -50,7 +50,6 @@ public class StringPool {
     public static final String NAME = "name";
     public static final String CONTRACT_TEMPLATES = "contract-templates";
     public static final String CONTRACT_TEMPLATE = "contract-template";
-    public static final String CX_CREDENTIALS = "CX-Credentials";
     public static final String TYPE = "type";
     public static final String MEMBER_OF = "memberOf";
     public static final String STATUS = "status";

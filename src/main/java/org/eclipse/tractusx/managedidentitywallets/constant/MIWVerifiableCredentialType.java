@@ -28,10 +28,6 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
  */
 public class MIWVerifiableCredentialType extends VerifiableCredentialType {
 
-    /**
-     * The constant DISMANTLER_CREDENTIAL_CX.
-     */
-    public static final String DISMANTLER_CREDENTIAL_CX = "DismantlerCredentialCX";
     public static final String DISMANTLER_CREDENTIAL = "DismantlerCredential";
 
     /**
@@ -41,11 +37,7 @@ public class MIWVerifiableCredentialType extends VerifiableCredentialType {
 
     public static final String BPN_CREDENTIAL = "BpnCredential";
 
-    public static final String BPN_CREDENTIAL_CX = "BpnCredentialCX";
-
-    public static final String MEMBERSHIP_CREDENTIAL_CX = "MembershipCredentialCX";
     public static final String SUMMARY_CREDENTIAL = "SummaryCredential";
-    public static final String SUMMARY_LIST_CREDENTIAL = "Summary-List";
 
 
 }
