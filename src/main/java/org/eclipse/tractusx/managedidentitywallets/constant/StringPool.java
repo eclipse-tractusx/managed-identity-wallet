@@ -28,7 +28,7 @@ public class StringPool {
 
     public static final String CREDENTIAL_ID = "credentialId";
     public static final String VALUE = "value";
-    public static final String CONTRACT_VERSION = "contract-version";
+    public static final String CONTRACT_VERSION = "contractVersion";
     public static final String ACTIVITY_TYPE = "activityType";
     public static final String ALLOWED_VEHICLE_BRANDS = "allowedVehicleBrands";
     public static final String VERIFIABLE_CREDENTIALS = "verifiableCredentials";
@@ -48,8 +48,8 @@ public class StringPool {
     public static final String HOLDER_DID = "holderDid";
     public static final String HOLDER_IDENTIFIER = "holderIdentifier";
     public static final String NAME = "name";
-    public static final String CONTRACT_TEMPLATES = "contract-templates";
-    public static final String CONTRACT_TEMPLATE = "contract-template";
+    public static final String CONTRACT_TEMPLATES = "contractTemplates";
+    public static final String CONTRACT_TEMPLATE = "contractTemplate";
     public static final String TYPE = "type";
     public static final String MEMBER_OF = "memberOf";
     public static final String STATUS = "status";

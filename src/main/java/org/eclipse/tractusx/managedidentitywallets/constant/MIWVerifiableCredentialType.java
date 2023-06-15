@@ -33,7 +33,7 @@ public class MIWVerifiableCredentialType extends VerifiableCredentialType {
     /**
      * The constant USE_CASE_FRAMEWORK_CONDITION_CX.
      */
-    public static final String USE_CASE_FRAMEWORK_CONDITION_CX = "UseCaseFrameworkConditionCX";
+    public static final String USE_CASE_FRAMEWORK_CONDITION_CX = "UseCaseFrameworkCondition";
 
     public static final String BPN_CREDENTIAL = "BpnCredential";
 
