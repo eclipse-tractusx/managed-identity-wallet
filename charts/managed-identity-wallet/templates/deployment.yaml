@@ -52,10 +52,25 @@ spec:
               containerPort: 8080
               protocol: TCP
           livenessProbe:
-            initialDelaySeconds: 60
+            failureThreshold: 3
             httpGet:
-              path: /
-              port: http
+              path: /actuator/health/liveness
+              port: 8090
+              scheme: HTTP
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+            initialDelaySeconds: 90
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8090
+              scheme: HTTP
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+            initialDelaySeconds: 90
           resources:
             requests:
               cpu: "{{ .Values.resources.cpu }}m"
