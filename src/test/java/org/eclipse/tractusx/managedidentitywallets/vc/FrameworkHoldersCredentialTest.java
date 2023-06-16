@@ -133,7 +133,7 @@ class FrameworkHoldersCredentialTest {
         ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertFalse(credentials.isEmpty());
 
         VerifiableCredential vcFromDB = credentials.get(0).getData();
@@ -156,7 +156,7 @@ class FrameworkHoldersCredentialTest {
 
         createAndValidateVC(bpn, did, type);
         //check in issuer tables
-        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertEquals(1, issuerVCs.size());
     }
 
@@ -215,7 +215,7 @@ class FrameworkHoldersCredentialTest {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
-        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX));
+        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION));
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
@@ -224,7 +224,7 @@ class FrameworkHoldersCredentialTest {
 
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
 
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertFalse(credentials.isEmpty());
 
         VerifiableCredential vcFromDB = credentials.get(0).getData();
