@@ -120,8 +120,8 @@ class MembershipHoldersCredentialTest {
         //check items, it should be 2
         List<String> items = (List<String>) summaryVcs.get(0).getData().getCredentialSubject().get(0).get(StringPool.ITEMS);
 
-        Assertions.assertTrue(items.contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
-        Assertions.assertTrue(items.contains(MIWVerifiableCredentialType.BPN_CREDENTIAL_CX));
+        Assertions.assertTrue(items.contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
+        Assertions.assertTrue(items.contains(MIWVerifiableCredentialType.BPN_CREDENTIAL));
     }
 
     @Test
@@ -153,14 +153,7 @@ class MembershipHoldersCredentialTest {
                         "type": "Summary-List",
                         "name": "CX-Credentials",
                         "items": [
-                          "cx-active-member",
-                          "cx-dismantler",
-                          "cx-pcf",
-                          "cx-sustainability",
-                          "cx-quality",
-                          "cx-traceability",
-                          "cx-behavior-twin",
-                          "cx-bpn"
+                         "MembershipCredential","DismantlerCredential","PcfCredential","SustainabilityCredential","QualityCredential","TraceabilityCredential","BehaviorTwinCredential","BpnCredential"
                         ],
                         "contract-templates": "https://public.catena-x.org/contracts/"
                       },{
@@ -224,14 +217,7 @@ class MembershipHoldersCredentialTest {
                         "type": "Summary-List",
                         "name": "CX-Credentials",
                         "items": [
-                          "cx-active-member",
-                          "cx-dismantler",
-                          "cx-pcf",
-                          "cx-sustainability",
-                          "cx-quality",
-                          "cx-traceability",
-                          "cx-behavior-twin",
-                          "cx-bpn"
+                         "MembershipCredential","DismantlerCredential","PcfCredential","SustainabilityCredential","QualityCredential","TraceabilityCredential","BehaviorTwinCredential","BpnCredential"
                         ],
                         "contract-templates": "https://public.catena-x.org/contracts/"
                       },{
@@ -276,7 +262,7 @@ class MembershipHoldersCredentialTest {
 
         validateTypes(verifiableCredential, miwSettings.authorityWalletBpn());
 
-        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         Assertions.assertFalse(holderVCs.isEmpty());
 
         TestUtils.checkVC(holderVCs.get(0).getData(), miwSettings);
@@ -284,11 +270,11 @@ class MembershipHoldersCredentialTest {
         Assertions.assertFalse(holderVCs.get(0).isStored()); //store must be false
 
         //check in issuer tables
-        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         Assertions.assertEquals(1, issuerVCs.size());
         TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
         //check summary credential
-        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, oldSummaryCredentialId);
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL, oldSummaryCredentialId);
     }
 
 
@@ -310,7 +296,7 @@ class MembershipHoldersCredentialTest {
 
         validateTypes(verifiableCredential, bpn);
 
-        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         Assertions.assertFalse(holderVCs.isEmpty());
         Assertions.assertFalse(holderVCs.get(0).isSelfIssued()); //must be self issued false
         Assertions.assertFalse(holderVCs.get(0).isStored()); //store must be false
@@ -319,12 +305,12 @@ class MembershipHoldersCredentialTest {
         TestUtils.checkVC(holderVCs.get(0).getData(), miwSettings);
 
         //check in issuer tables
-        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX);
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         Assertions.assertEquals(1, issuerVCs.size());
         TestUtils.checkVC(issuerVCs.get(0).getData(), miwSettings);
 
         //check summary credential
-        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX, oldSummaryCredentialId);
+        TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL, oldSummaryCredentialId);
     }
 
 
@@ -371,7 +357,7 @@ class MembershipHoldersCredentialTest {
     }
 
     private void validateTypes(VerifiableCredential verifiableCredential, String holderBpn) {
-        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL_CX));
+        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.HOLDER_IDENTIFIER), holderBpn);
     }
 }

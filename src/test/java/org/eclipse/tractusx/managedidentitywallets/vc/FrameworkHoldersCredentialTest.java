@@ -43,6 +43,7 @@ import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -103,12 +104,11 @@ class FrameworkHoldersCredentialTest {
         String did = "did:web:localhost:" + bpn;
         TestUtils.createWallet(bpn, did, walletRepository);
 
-        String type = "cx-behavior-twin";
-        String value = "Behavior Twin";
+        String type = "BehaviorTwinCredential";
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -119,22 +119,21 @@ class FrameworkHoldersCredentialTest {
     @Test
     void issueFrameWorkVCToBaseWalletTest201() throws JSONException, JsonProcessingException {
         String bpn = miwSettings.authorityWalletBpn();
-        String type = "cx-pcf";
-        String value = "PCF";
+        String type = "PcfCredential";
         //create wallet
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertFalse(credentials.isEmpty());
 
         VerifiableCredential vcFromDB = credentials.get(0).getData();
@@ -150,30 +149,31 @@ class FrameworkHoldersCredentialTest {
     @ParameterizedTest
     @MethodSource("getTypes")
     void issueFrameWorkVCTest201(IssueFrameworkCredentialRequest request) throws JsonProcessingException, JSONException {
-        String bpn = request.getBpn();
+        String bpn = request.getHolderIdentifier();
         String did = "did:web:localhost:" + bpn;
 
         String type = request.getType();
-        String value = request.getValue();
 
-        createAndValidateVC(bpn, did, type, value);
+        createAndValidateVC(bpn, did, type);
         //check in issuer tables
-        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertEquals(1, issuerVCs.size());
     }
 
     static Stream<IssueFrameworkCredentialRequest> getTypes() {
         return Stream.of(
-                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-behavior-twin").value("Behavior Twin").build(),
-                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-pcf").value("PCF").build(),
-                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-quality").value("Quality").build(),
-                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-resiliency").value("Resiliency").build(),
-                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-sustainability").value("Sustainability").build(),
-                IssueFrameworkCredentialRequest.builder().bpn(UUID.randomUUID().toString()).type("cx-traceability").value("ID_3.0_Trace").build()
+                IssueFrameworkCredentialRequest.builder().holderIdentifier(UUID.randomUUID().toString()).type("BehaviorTwinCredential").build(),
+                IssueFrameworkCredentialRequest.builder().holderIdentifier(UUID.randomUUID().toString()).type("PcfCredential").build(),
+                IssueFrameworkCredentialRequest.builder().holderIdentifier(UUID.randomUUID().toString()).type("QualityCredential").build(),
+                IssueFrameworkCredentialRequest.builder().holderIdentifier(UUID.randomUUID().toString()).type("ResiliencyCredential").build(),
+                IssueFrameworkCredentialRequest.builder().holderIdentifier(UUID.randomUUID().toString()).type("SustainabilityCredential").build(),
+                IssueFrameworkCredentialRequest.builder().holderIdentifier(UUID.randomUUID().toString()).type("TraceabilityCredential").build()
         );
     }
 
+
     @Test
+    @DisplayName("Issue framework with invalid type")
     void issueFrameworkCredentialTest400() throws JsonProcessingException, JSONException {
         String bpn = UUID.randomUUID().toString();
         String did = "did:web:localhost:" + bpn;
@@ -181,11 +181,10 @@ class FrameworkHoldersCredentialTest {
 
 
         String type = "cx-traceability1";
-        String value = "ID_3.0_Trace1";
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
@@ -194,37 +193,38 @@ class FrameworkHoldersCredentialTest {
 
     }
 
-    private void createAndValidateVC(String bpn, String did, String type, String value) throws JsonProcessingException {
+    private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException {
         //create wallet
         Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type, value);
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
 
         HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        validate(wallet, type, value, response, miwSettings, oldSummaryCredentialId);
+        validate(wallet, type, response, miwSettings, oldSummaryCredentialId);
 
     }
 
-    private void validate(Wallet wallet, String type, String value, ResponseEntity<String> response, MIWSettings miwSettings, String oldSummaryCredentialId) throws JsonProcessingException {
+    private void validate(Wallet wallet, String type, ResponseEntity<String> response, MIWSettings miwSettings, String oldSummaryCredentialId) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
-        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX));
+        Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION));
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.TYPE), type);
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.VALUE), value);
+        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.HOLDER_IDENTIFIER), wallet.getBpn());
+
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
 
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION_CX);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertFalse(credentials.isEmpty());
 
         VerifiableCredential vcFromDB = credentials.get(0).getData();
@@ -233,8 +233,8 @@ class FrameworkHoldersCredentialTest {
         Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
         Assertions.assertFalse(credentials.get(0).isSelfIssued()); //self issue must be false
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.TYPE), type);
-        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.VALUE), value);
         Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.ID), wallet.getDid());
+        Assertions.assertEquals(vcFromDB.getCredentialSubject().get(0).get(StringPool.HOLDER_IDENTIFIER), wallet.getBpn());
 
         //check summary credential
         TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, type, oldSummaryCredentialId);
