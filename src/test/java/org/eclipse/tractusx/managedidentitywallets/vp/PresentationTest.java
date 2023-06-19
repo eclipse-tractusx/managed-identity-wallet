@@ -253,7 +253,7 @@ class PresentationTest {
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         //get BPN credentials
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
         Assertions.assertFalse(credentials.isEmpty());
         Map<String, Object> map = objectMapper.readValue(credentials.get(0).getData().toJson(), Map.class);
 
@@ -278,7 +278,7 @@ class PresentationTest {
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         //get BPN credentials
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL_CX);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
 
         Map<String, Object> map = objectMapper.readValue(credentials.get(0).getData().toJson(), Map.class);
 

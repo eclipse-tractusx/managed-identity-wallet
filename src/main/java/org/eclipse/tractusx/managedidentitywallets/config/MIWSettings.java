@@ -26,6 +26,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The type Miw settings.
@@ -34,6 +35,6 @@ import java.util.List;
 public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
                           String authorityWalletName,
                           List<String> vcContexts, @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
-                          String supportedFrameworkVCTypes,
+                          Set<String> supportedFrameworkVCTypes,
                           boolean enforceHttps, String contractTemplatesUrl) {
 }
