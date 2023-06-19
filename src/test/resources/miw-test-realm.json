@@ -781,6 +781,38 @@
           }
         },
         {
+          "id": "c46e9cc6-3057-4640-a78b-e12fc3a723df",
+          "name": "bpn",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "aggregate.attrs": "false",
+            "userinfo.token.claim": "true",
+            "multivalued": "false",
+            "user.attribute": "bpn",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "bpn"
+          }
+        },
+        {
+          "id": "c46e9cc6-3057-4640-a78b-e12fc3a814df",
+          "name": "bPn",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "aggregate.attrs": "false",
+            "userinfo.token.claim": "true",
+            "multivalued": "false",
+            "user.attribute": "bPn",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "bPn"
+          }
+        },
+        {
           "id": "1340463e-a737-4507-8ecb-b01715a9fde4",
           "name": "Client IP Address",
           "protocol": "openid-connect",
