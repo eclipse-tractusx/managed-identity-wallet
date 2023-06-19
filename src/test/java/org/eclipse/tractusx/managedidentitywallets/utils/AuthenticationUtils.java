@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public class AuthenticationUtils {
@@ -80,6 +81,12 @@ public class AuthenticationUtils {
 
 
     private static String getJwtToken(String username, String bpn) {
+
+        List<String> list = List.of("BPN", "bpn", "bPn"); //Do not add more field here, if you do make sure you change in keycloak realm file
+        Random randomizer = new Random();
+        String attributeName = list.get(randomizer.nextInt(list.size()));
+        System.out.println("attributeName---------------------->" + attributeName);
+
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(TestContextInitializer.getAuthServerUrl())
                 .realm(StringPool.REALM)
@@ -96,7 +103,7 @@ public class AuthenticationUtils {
         UserResource userResource = realmResource.users().get(userRepresentations.get(0).getId());
         userRepresentation.setEmailVerified(true);
         userRepresentation.setEnabled(true);
-        userRepresentation.setAttributes(Map.of(StringPool.BPN_UPPER_CASE, List.of(bpn)));
+        userRepresentation.setAttributes(Map.of(attributeName, List.of(bpn)));
         userResource.update(userRepresentation);
         return getJwtToken(username);
     }

@@ -28,6 +28,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.security.Principal;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * The type Base controller.
@@ -44,8 +46,11 @@ public class BaseController {
         Object principal1 = ((JwtAuthenticationToken) principal).getPrincipal();
         Jwt jwt = (Jwt) principal1;
 
-        Validate.isFalse(jwt.getClaims().containsKey(StringPool.BPN_UPPER_CASE)).launch(new ForbiddenException("Invalid token, BPN not found"));
-
-        return jwt.getClaims().get(StringPool.BPN_UPPER_CASE).toString();
+        //this will misbehave if we have more then one claims with different case
+        // ie. BPN=123456 and bpn=789456
+        Map<String, Object> claims = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        claims.putAll(jwt.getClaims());
+        Validate.isFalse(claims.containsKey(StringPool.BPN)).launch(new ForbiddenException("Invalid token, BPN not found"));
+        return claims.get(StringPool.BPN).toString();
     }
 }
