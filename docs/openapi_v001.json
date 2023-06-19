@@ -639,7 +639,7 @@
                         }
                     },
                     {
-                        "name": "id",
+                        "name": "credentialId",
                         "in": "query",
                         "schema": {
                             "type": "string"
