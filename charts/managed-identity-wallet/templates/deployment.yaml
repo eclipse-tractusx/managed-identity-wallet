@@ -76,8 +76,8 @@ spec:
               cpu: "4"
               memory: "1Gi"
             limits:
-              cpu: "{{ mul .Values.resources.cpu 2 }}m"
-              memory: "{{ .Values.resources.memory }}Mi"
+              cpu: "4m"
+              memory: "1Gi"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
