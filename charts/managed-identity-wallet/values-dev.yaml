@@ -12,7 +12,8 @@ envs:
   MIW_HOST_NAME: managed-identity-wallets-new.dev.demo.catena-x.net  # Depend on ingress host name (managed-identity-wallets-new.dev.demo.catena-x.net)
   KEYCLOAK_REALM: CX-Central
   AUTH_SERVER_URL: https://centralidp.dev.demo.catena-x.net/auth
-  AUTHORITY_WALLET_DID: "did:web:managed-identity-wallets-new.dev.demo.catena-x.net:BPNL000000000000"
+  AUTHORITY_WALLET_DID: "did:web:managed-identity-wallets-new.dev.demo.catena-x.net:BPNL00000003CRHK"
+  AUTHORITY_WALLET_BPN: "BPNL00000003CRHK"
 
 ingress:
   enabled: true
