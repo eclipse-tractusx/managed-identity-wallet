@@ -36,6 +36,9 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.did.resolver.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
@@ -47,9 +50,6 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
-import org.eclipse.tractusx.ssi.lib.resolver.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;

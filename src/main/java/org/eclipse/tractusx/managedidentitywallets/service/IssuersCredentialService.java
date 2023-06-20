@@ -46,6 +46,8 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredential
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -53,8 +55,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -423,8 +424,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         didDocumentResolverRegistry.register(
                 new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
 
-        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
-        Boolean valid = proofValidation.checkProof(verifiableCredential);
+//        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
+        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS,
+                didDocumentResolverRegistry);
+//        Boolean valid = proofValidation.checkProof(verifiableCredential);
+        Boolean valid = proofValidation.verifiyProof(verifiableCredential);
         Map<String, Object> response = new HashMap<>();
         response.put(StringPool.VALID, valid);
         response.put("vc", verifiableCredential);

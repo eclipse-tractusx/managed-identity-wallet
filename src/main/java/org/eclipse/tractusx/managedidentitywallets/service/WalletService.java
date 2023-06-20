@@ -52,10 +52,12 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProb
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.base.MultibaseFactory;
+import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519Key;
 import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519KeySet;
+import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
+import org.eclipse.tractusx.ssi.lib.model.base.MultibaseFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
@@ -66,6 +68,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.StringWriter;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -220,23 +223,32 @@ public class WalletService extends BaseService<Wallet, Long> {
         Did did = DidWebFactory.fromHostname(miwSettings.host() + ":" + request.getBpn());
 
         //Extracting keys 
-        Ed25519KeySet keySet = new Ed25519KeySet(keyPair.getPrivateKey(), keyPair.getPublicKey());
-        MultibaseString publicKeyBase = MultibaseFactory.create(keySet.getPublicKey());
+//        Ed25519KeySet keySet = new Ed25519KeySet(keyPair.getPrivateKey(), keyPair.getPublicKey());
+        Ed25519Key privateKey = Ed25519Key.asPrivateKey(keyPair.getPrivateKey());
+        Ed25519Key publicKey = Ed25519Key.asPrivateKey(keyPair.getPublicKey());
+        MultibaseString publicKeyBase = MultibaseFactory.create(publicKey.getEncoded());
 
         //Building Verification Methods:
-        List<VerificationMethod> verificationMethods = new ArrayList<>();
-        Ed25519VerificationKey2020Builder builder = new Ed25519VerificationKey2020Builder();
-        Ed25519VerificationKey2020 key =
-                builder
-                        .id(did.toUri())
+//        List<VerificationMethod> verificationMethods = new ArrayList<>();
+//        Ed25519VerificationKey2020Builder builder = new Ed25519VerificationKey2020Builder();
+        Ed25519VerificationMethodBuilder ed25519VerificationKey2020Builder =
+                new Ed25519VerificationMethodBuilder();
+        Ed25519VerificationMethod ed25519VerificationMethod =
+                ed25519VerificationKey2020Builder
+                        .id(URI.create(did + "#key-1"))
                         .controller(did.toUri())
                         .publicKeyMultiBase(publicKeyBase)
                         .build();
-        verificationMethods.add(key);
+//        verificationMethods.add(key);
+
+        // JWK
+        JsonWebKey jwk = JsonWebKey.fromED21559("", publicKey.getEncoded(), privateKey.getEncoded());//#key-2
+        JWKVerificationMethod jwkVerificationMethod =
+                new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
 
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         didDocumentBuilder.id(did.toUri());
-        didDocumentBuilder.verificationMethods(verificationMethods);
+        didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));//ed25519VerificationMethod
         DidDocument didDocument = didDocumentBuilder.build();
         didDocument = DidDocument.fromJson(URLDecoder.decode(didDocument.toJson(), StandardCharsets.UTF_8));
         log.debug("did document created for bpn ->{}", request.getBpn());

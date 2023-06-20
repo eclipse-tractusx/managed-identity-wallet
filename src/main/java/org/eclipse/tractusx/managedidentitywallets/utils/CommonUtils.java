@@ -23,16 +23,14 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.ssi.lib.model.Ed25519Signature2020;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
-import org.eclipse.tractusx.ssi.lib.proof.hash.LinkedDataHasher;
-import org.eclipse.tractusx.ssi.lib.proof.transform.LinkedDataTransformer;
-import org.eclipse.tractusx.ssi.lib.proof.verify.LinkedDataSigner;
+import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -117,11 +115,19 @@ public class CommonUtils {
 
 
         //Ed25519 Proof Builder
-        LinkedDataProofGenerator generator = new LinkedDataProofGenerator(
-                new LinkedDataHasher(), new LinkedDataTransformer(), new LinkedDataSigner());
+//        LinkedDataProofGenerator generator = new LinkedDataProofGenerator(
+//                new LinkedDataHasher(), new LinkedDataTransformer(), new LinkedDataSigner());
+        LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
-        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), verificationMethod,
-                privateKey);
+//        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), verificationMethod,
+//                privateKey);
+//        Ed25519Signature2020 proof =
+//                (Ed25519Signature2020) generator.createProof(
+//                        builder.build(), verificationMethod, privateKey);
+        JWSSignature2020 proof =
+                (JWSSignature2020) generator.createProof(
+                        builder.build(), verificationMethod, privateKey);
+
 
         //Adding Proof to VC
         builder.proof(proof);
