@@ -36,9 +36,8 @@ import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
 import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
-import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -68,7 +67,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.StringWriter;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -222,33 +220,20 @@ public class WalletService extends BaseService<Wallet, Long> {
         //create did json
         Did did = DidWebFactory.fromHostname(miwSettings.host() + ":" + request.getBpn());
 
-        //Extracting keys 
-//        Ed25519KeySet keySet = new Ed25519KeySet(keyPair.getPrivateKey(), keyPair.getPublicKey());
+        //Extracting keys
         Ed25519Key privateKey = Ed25519Key.asPrivateKey(keyPair.getPrivateKey());
-        Ed25519Key publicKey = Ed25519Key.asPrivateKey(keyPair.getPublicKey());
+        Ed25519Key publicKey = Ed25519Key.asPublicKey(keyPair.getPublicKey());
         MultibaseString publicKeyBase = MultibaseFactory.create(publicKey.getEncoded());
 
         //Building Verification Methods:
-//        List<VerificationMethod> verificationMethods = new ArrayList<>();
-//        Ed25519VerificationKey2020Builder builder = new Ed25519VerificationKey2020Builder();
-        Ed25519VerificationMethodBuilder ed25519VerificationKey2020Builder =
-                new Ed25519VerificationMethodBuilder();
-        Ed25519VerificationMethod ed25519VerificationMethod =
-                ed25519VerificationKey2020Builder
-                        .id(URI.create(did + "#key-1"))
-                        .controller(did.toUri())
-                        .publicKeyMultiBase(publicKeyBase)
-                        .build();
-//        verificationMethods.add(key);
-
         // JWK
-        JsonWebKey jwk = JsonWebKey.fromED21559("", publicKey.getEncoded(), privateKey.getEncoded());//#key-2
+        JsonWebKey jwk = JsonWebKey.fromED21559("", publicKey.getEncoded(), privateKey.getEncoded());
         JWKVerificationMethod jwkVerificationMethod =
                 new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
 
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         didDocumentBuilder.id(did.toUri());
-        didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));//ed25519VerificationMethod
+        didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));
         DidDocument didDocument = didDocumentBuilder.build();
         didDocument = DidDocument.fromJson(URLDecoder.decode(didDocument.toJson(), StandardCharsets.UTF_8));
         log.debug("did document created for bpn ->{}", request.getBpn());
@@ -322,12 +307,12 @@ public class WalletService extends BaseService<Wallet, Long> {
         return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
     }
 
-
     @SneakyThrows
     private String getPrivateKeyString(byte[] privateKeyBytes) {
         StringWriter stringWriter = new StringWriter();
-        JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-        pemWriter.writeObject(PrivateKeyInfoFactory.createPrivateKeyInfo(new Ed25519PrivateKeyParameters(privateKeyBytes, 0)));
+        PemWriter pemWriter = new PemWriter(stringWriter);
+        pemWriter.writeObject(new PemObject("PRIVATE KEY", privateKeyBytes));
+        pemWriter.flush();
         pemWriter.close();
         return stringWriter.toString();
     }
@@ -335,8 +320,9 @@ public class WalletService extends BaseService<Wallet, Long> {
     @SneakyThrows
     private String getPublicKeyString(byte[] publicKeyBytes) {
         StringWriter stringWriter = new StringWriter();
-        JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-        pemWriter.writeObject(SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(new Ed25519PublicKeyParameters(publicKeyBytes, 0)));
+        PemWriter pemWriter = new PemWriter(stringWriter);
+        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKeyBytes));
+        pemWriter.flush();
         pemWriter.close();
         return stringWriter.toString();
     }

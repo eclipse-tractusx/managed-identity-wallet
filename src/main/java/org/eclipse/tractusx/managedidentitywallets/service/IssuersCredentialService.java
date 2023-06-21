@@ -424,10 +424,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         didDocumentResolverRegistry.register(
                 new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
 
-//        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
         LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS,
                 didDocumentResolverRegistry);
-//        Boolean valid = proofValidation.checkProof(verifiableCredential);
         Boolean valid = proofValidation.verifiyProof(verifiableCredential);
         Map<String, Object> response = new HashMap<>();
         response.put(StringPool.VALID, valid);

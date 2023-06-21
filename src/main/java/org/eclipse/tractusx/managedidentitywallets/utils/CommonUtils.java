@@ -114,16 +114,9 @@ public class CommonUtils {
                         .credentialSubject(verifiableCredentialSubject);
 
 
-        //Ed25519 Proof Builder
-//        LinkedDataProofGenerator generator = new LinkedDataProofGenerator(
-//                new LinkedDataHasher(), new LinkedDataTransformer(), new LinkedDataSigner());
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
-//        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), verificationMethod,
-//                privateKey);
-//        Ed25519Signature2020 proof =
-//                (Ed25519Signature2020) generator.createProof(
-//                        builder.build(), verificationMethod, privateKey);
+
         JWSSignature2020 proof =
                 (JWSSignature2020) generator.createProof(
                         builder.build(), verificationMethod, privateKey);
