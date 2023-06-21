@@ -73,6 +73,11 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+build {
+	archivesBaseName = "miw"
+	version = "latest"
+}
+
 test {
 	finalizedBy jacocoTestReport
 }
