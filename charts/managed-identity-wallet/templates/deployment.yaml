@@ -73,8 +73,8 @@ spec:
             initialDelaySeconds: 30
           resources:
             requests:
-              cpu: "4"
-              memory: "1Gi"
+              cpu: "250m"
+              memory: "500Mi"
             limits:
               cpu: "4"
               memory: 1Gi
