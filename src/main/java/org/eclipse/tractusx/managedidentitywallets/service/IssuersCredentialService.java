@@ -506,12 +506,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.TYPE, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL,
                 StringPool.CONTRACT_TEMPLATES, miwSettings.contractTemplatesUrl());
 
-
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types,
                 issuerDidDocument,
                 issuerPrivateKey,
-                holderDid, miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
+                holderDid, miwSettings.summaryVcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
 
         //save in holder wallet
