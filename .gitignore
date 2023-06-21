@@ -42,3 +42,4 @@ hs_err_pid*.log
 dev-assets/secrets/*
 local.db
 jacoco-report
+/dev.env
