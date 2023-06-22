@@ -87,8 +87,12 @@ securityContext: {}
 
 # provide only the numbers without suffix (Mi or m will be added in template)
 resources:
-  memory: 256
-  cpu: 250
+  requests:
+    cpu: 250m
+    memory: 500Mi
+  limits:
+    cpu: 4
+    memory: 1Gi
 
 nodeSelector:
   "kubernetes.io/os": linux
