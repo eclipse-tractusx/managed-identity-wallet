@@ -77,15 +77,13 @@ ingress:
 podSecurityContext: {}
 # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-# runAsNonRoot: true
-# runAsUser: 1000
+securityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsGroup: 11111
+  runAsUser: 11111
 
-# provide only the numbers without suffix (Mi or m will be added in template)
 resources:
   requests:
     cpu: 250m
