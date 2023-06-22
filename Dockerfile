@@ -3,9 +3,9 @@ FROM eclipse-temurin:19-jre-alpine
 EXPOSE 8080:8080
 
 # run as non-root user
-RUN addgroup -g 1001 -S user && adduser -u 1001 -S -s /bin/false -G user user
+RUN addgroup -g 11111 -S miw && adduser -u 11111 -S -s /bin/false -G miw miw
 
-USER user
+USER miw
 
 COPY /build/libs/miw-latest.jar /app/
 
