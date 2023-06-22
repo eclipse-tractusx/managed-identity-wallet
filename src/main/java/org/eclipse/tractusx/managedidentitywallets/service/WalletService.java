@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.google.crypto.tink.subtle.Base64;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -31,14 +32,11 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
-import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
-import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
+import org.bouncycastle.jcajce.provider.asymmetric.edec.KeyPairGeneratorSpi;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -52,10 +50,10 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProb
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.base.MultibaseFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519KeySet;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
+import org.eclipse.tractusx.ssi.lib.model.base.MultibaseFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
@@ -65,10 +63,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.StringWriter;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +130,7 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         holdersCredentialRepository.save(HoldersCredential.builder()
                 .holderDid(wallet.getDid())
-                .issuerDid(URLDecoder.decode(verifiableCredential.getIssuer().toString(), Charset.defaultCharset()))
+                .issuerDid(verifiableCredential.getIssuer().toString())
                 .type(String.join(",", cloneTypes))
                 .data(verifiableCredential)
                 .selfIssued(false)
@@ -212,12 +209,11 @@ public class WalletService extends BaseService<Wallet, Long> {
     private Wallet createWallet(CreateWalletRequest request, boolean authority) {
         validateCreateWallet(request);
 
-
         //create private key pair
         Ed25519KeySet keyPair = createKeyPair();
 
         //create did json
-        Did did = DidWebFactory.fromHostname(miwSettings.host() + ":" + request.getBpn());
+        Did did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), request.getBpn());
 
         //Extracting keys 
         Ed25519KeySet keySet = new Ed25519KeySet(keyPair.getPrivateKey(), keyPair.getPublicKey());
@@ -225,8 +221,8 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         //Building Verification Methods:
         List<VerificationMethod> verificationMethods = new ArrayList<>();
-        Ed25519VerificationKey2020Builder builder = new Ed25519VerificationKey2020Builder();
-        Ed25519VerificationKey2020 key =
+        Ed25519VerificationMethodBuilder builder = new Ed25519VerificationMethodBuilder();
+        Ed25519VerificationMethod key =
                 builder
                         .id(did.toUri())
                         .controller(did.toUri())
@@ -238,7 +234,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         didDocumentBuilder.id(did.toUri());
         didDocumentBuilder.verificationMethods(verificationMethods);
         DidDocument didDocument = didDocumentBuilder.build();
-        didDocument = DidDocument.fromJson(URLDecoder.decode(didDocument.toJson(), StandardCharsets.UTF_8));
+        didDocument = DidDocument.fromJson(didDocument.toJson());
         log.debug("did document created for bpn ->{}", request.getBpn());
 
         //Save wallet
@@ -246,7 +242,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .didDocument(didDocument)
                 .bpn(request.getBpn())
                 .name(request.getName())
-                .did(URLDecoder.decode(did.toUri().toString(), Charset.defaultCharset()))
+                .did(did.toUri().toString())
                 .algorithm(StringPool.ED_25519)
                 .build());
 
@@ -296,37 +292,30 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     @SneakyThrows
     private Ed25519KeySet createKeyPair() {
-        SecureRandom secureRandom = new SecureRandom();
+        KeyPairGeneratorSpi.Ed25519 ed25519 = new KeyPairGeneratorSpi.Ed25519();
+        ed25519.initialize(256, new SecureRandom());
+        KeyPair keyPair = ed25519.generateKeyPair();
+        PublicKey PubKey = keyPair.getPublic();
+        PrivateKey PivKey = keyPair.getPrivate();
+        Ed25519PrivateKeyParameters ed25519PrivateKeyParameters =
+                (Ed25519PrivateKeyParameters) PrivateKeyFactory.createKey(PivKey.getEncoded());
+        Ed25519PublicKeyParameters publicKeyParameters =
+                (Ed25519PublicKeyParameters) PublicKeyFactory.createKey(PubKey.getEncoded());
 
-        Ed25519KeyPairGenerator keyPairGenerator = new Ed25519KeyPairGenerator();
-        keyPairGenerator.init(new Ed25519KeyGenerationParameters(secureRandom));
-
-        AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
-        Ed25519PrivateKeyParameters privateKey = (Ed25519PrivateKeyParameters) keyPair.getPrivate();
-        Ed25519PublicKeyParameters publicKey = (Ed25519PublicKeyParameters) keyPair.getPublic();
-
-        byte[] privateKeyBytes = privateKey.getEncoded();
-        byte[] publicKeyBytes = publicKey.getEncoded();
+        byte[] privateKeyBytes = ed25519PrivateKeyParameters.getEncoded();
+        byte[] publicKeyBytes = publicKeyParameters.getEncoded();
         return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
     }
 
 
     @SneakyThrows
     private String getPrivateKeyString(byte[] privateKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-        pemWriter.writeObject(PrivateKeyInfoFactory.createPrivateKeyInfo(new Ed25519PrivateKeyParameters(privateKeyBytes, 0)));
-        pemWriter.close();
-        return stringWriter.toString();
+        return Base64.encode(privateKeyBytes);
     }
 
     @SneakyThrows
     private String getPublicKeyString(byte[] publicKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-        pemWriter.writeObject(SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(new Ed25519PublicKeyParameters(publicKeyBytes, 0)));
-        pemWriter.close();
-        return stringWriter.toString();
+        return Base64.encode(publicKeyBytes);
     }
 
 }

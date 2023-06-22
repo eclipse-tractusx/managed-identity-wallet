@@ -36,7 +36,7 @@ public class StringToDidDocumentConverter implements AttributeConverter<DidDocum
     @SneakyThrows
     @Override
     public String convertToDatabaseColumn(DidDocument didDocument) {
-        return URLDecoder.decode(didDocument.toJson(), StandardCharsets.UTF_8);
+        return didDocument.toJson();
     }
 
     @Override
