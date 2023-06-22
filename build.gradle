@@ -48,7 +48,7 @@ dependencies {
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
 	implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
 	implementation 'org.liquibase:liquibase-core'
-	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.6'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.7'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

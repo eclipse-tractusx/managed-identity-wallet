@@ -29,8 +29,6 @@ import org.eclipse.tractusx.managedidentitywallets.utils.StringToDidDocumentConv
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -66,16 +64,6 @@ public class Wallet extends MIWBaseEntity {
     @Convert(converter = StringToDidDocumentConverter.class)
     private DidDocument didDocument;
 
-
     @Transient
     private List<VerifiableCredential> verifiableCredentials;
-
-    /**
-     * Sets did.
-     *
-     * @param did the did
-     */
-    public void setDid(String did) {
-        this.did = URLDecoder.decode(did, Charset.defaultCharset());
-    }
 }
