@@ -21,22 +21,22 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.ssi.lib.model.Ed25519Signature2020;
+import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
+import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
-import org.eclipse.tractusx.ssi.lib.proof.hash.LinkedDataHasher;
-import org.eclipse.tractusx.ssi.lib.proof.transform.LinkedDataTransformer;
-import org.eclipse.tractusx.ssi.lib.proof.verify.LinkedDataSigner;
+import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 
 import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.*;
 
@@ -74,25 +74,20 @@ public class CommonUtils {
      * @param holderDid       the holder did
      * @return the credential
      */
-    public static HoldersCredential getHoldersCredential(Map<String, Object> subject, List<String> types, DidDocument issuerDoc,
+    public static HoldersCredential getHoldersCredential(VerifiableCredentialSubject subject, List<String> types, DidDocument issuerDoc,
                                                          byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate, boolean selfIssued) {
-        //VC Subject
-        VerifiableCredentialSubject verifiableCredentialSubject =
-                new VerifiableCredentialSubject(subject);
-
-
         List<String> cloneTypes = new ArrayList<>(types);
 
         // Create VC
         VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, types,
-                verifiableCredentialSubject, privateKeyBytes, contexts, expiryDate);
+                subject, privateKeyBytes, contexts, expiryDate);
 
-            cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
+        cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
 
         // Create Credential
         return HoldersCredential.builder()
                 .holderDid(holderDid)
-                .issuerDid(URLDecoder.decode(issuerDoc.getId().toString(), Charset.defaultCharset()))
+                .issuerDid(issuerDoc.getId().toString())
                 .type(String.join(",", cloneTypes))
                 .credentialId(verifiableCredential.getId().toString())
                 .data(verifiableCredential)
@@ -100,28 +95,28 @@ public class CommonUtils {
                 .build();
     }
 
-
+    @SneakyThrows({UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class})
     private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
                                                                    VerifiableCredentialSubject verifiableCredentialSubject,
                                                                    byte[] privateKey, List<String> contexts, Date expiryDate) {
         //VC Builder
+        URI id = URI.create(UUID.randomUUID().toString());
         VerifiableCredentialBuilder builder =
                 new VerifiableCredentialBuilder()
                         .context(contexts)
-                        .id(URI.create(UUID.randomUUID().toString()))
+                        .id(id)
                         .type(verifiableCredentialType)
                         .issuer(issuerDoc.getId())
                         .expirationDate(expiryDate.toInstant())
                         .issuanceDate(Instant.now())
                         .credentialSubject(verifiableCredentialSubject);
 
-
         //Ed25519 Proof Builder
-        LinkedDataProofGenerator generator = new LinkedDataProofGenerator(
-                new LinkedDataHasher(), new LinkedDataTransformer(), new LinkedDataSigner());
+        LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.ED21559);
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
-        Ed25519Signature2020 proof = generator.createEd25519Signature2020(builder.build(), verificationMethod,
-                privateKey);
+        VerifiableCredential credential = builder.build();
+        Proof proof = generator.createProof(credential, verificationMethod,
+                new x21559PrivateKey(privateKey));
 
         //Adding Proof to VC
         builder.proof(proof);
