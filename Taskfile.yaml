@@ -70,3 +70,5 @@ tasks:
     desc: Cleans everything...
     cmds:
       - ./gradlew clean
+      - cmd: docker rmi local-miw
+        ignore_error: true
