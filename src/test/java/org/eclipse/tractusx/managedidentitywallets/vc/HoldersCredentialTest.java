@@ -56,7 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
@@ -64,7 +63,6 @@ import java.time.Instant;
 import java.util.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 @ExtendWith(MockitoExtension.class)
 class HoldersCredentialTest {
@@ -216,7 +214,7 @@ class HoldersCredentialTest {
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
                 LinkedDataProofValidation.newInstance(
-                        SignatureType.ED21559,
+                        Mockito.eq(SignatureType.ED21559),
                         Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
@@ -241,7 +239,7 @@ class HoldersCredentialTest {
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
                 LinkedDataProofValidation.newInstance(
-                        SignatureType.ED21559,
+                        Mockito.eq(SignatureType.ED21559),
                         Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
