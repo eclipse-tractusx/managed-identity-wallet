@@ -7,6 +7,8 @@ includes:
   check:
     taskfile: .tasks/check-tools.yaml
     internal: true
+  docker:
+    taskfile: .tasks/docker-{{OS}}.yaml
 
 tasks:
   check-prerequisites:
@@ -20,55 +22,13 @@ tasks:
     cmds:
       - helm unittest .
 
-  buildApp:
+  build-app:
     desc: Build the whole app
     cmds:
       - ./gradlew build -PgithubToken=$GITHUB_TOKEN $SKIP_GRADLE_TASKS_PARAM
 
-  buildDocker:
-    desc: Build the app and the corresponding Docker image (tagged as "miw-test")
-    cmds:
-      - task: buildApp
-      - docker build -t local-miw --platform linux/amd64 .
-
-  startDevContainers:
-    desc: Spin up local Docker environment
-    dir: dev-assets/dev-containers
-    ignore_error: true
-    vars:
-      OPTIONS: '{{ default "" .OPTIONS }}'
-      CONTAINERS: '{{ default "local_postgres local_keycloak" .CONTAINERS }}'
-    cmds:
-      - "docker-compose up {{ .OPTIONS }} {{ .CONTAINERS }}"
-
-  stopDevContainers:
-    desc: Stop local Docker environment
-    dir: dev-assets/dev-containers
-    cmds:
-      - docker-compose down
-
-  startDockerApp:
-    desc: Run the app in a container environment
-    cmds:
-      - task: startDevContainers
-        vars:
-          OPTIONS: "-d"
-      - task: buildDocker
-      - cmd: docker rm miw-app
-        ignore_error: true
-      - task: startDevContainers
-        vars:
-          CONTAINERS: "local_miw_app"
-
-  stopDockerApp:
-    desc: Stop all running containers
-    cmds:
-      - docker stop local_miw_app
-      - task: stopDevContainers
-
-  cleanAll:
+  clean-all:
     desc: Cleans everything...
     cmds:
       - ./gradlew clean
-      - cmd: docker rmi local-miw
-        ignore_error: true
+      - task: docker:cleanup
