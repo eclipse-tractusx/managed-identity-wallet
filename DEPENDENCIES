@@ -16,7 +16,7 @@ maven/mavencentral/com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.12.
 maven/mavencentral/com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.14.2, Apache-2.0, approved, #8162
 maven/mavencentral/com.fasterxml.jackson.module/jackson-module-parameter-names/2.14.2, Apache-2.0, approved, #5938
 maven/mavencentral/com.fasterxml/classmate/1.5.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.github.dasniko/testcontainers-keycloak/2.5.0, , restricted, clearlydefined
+maven/mavencentral/com.github.dasniko/testcontainers-keycloak/2.5.0, Apache-2.0, approved, #9175
 maven/mavencentral/com.github.docker-java/docker-java-api/3.3.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.github.docker-java/docker-java-transport-zerodep/3.3.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #7946
 maven/mavencentral/com.github.docker-java/docker-java-transport/3.3.0, Apache-2.0, approved, #7942
@@ -29,7 +29,7 @@ maven/mavencentral/com.ibm.async/asyncutil/0.1.0, Apache-2.0, approved, clearlyd
 maven/mavencentral/com.jayway.jsonpath/json-path/2.7.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/9.24.4, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.opencsv/opencsv/5.7.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.smartsensesolutions/commons-dao/0.0.5, , restricted, clearlydefined
+maven/mavencentral/com.smartsensesolutions/commons-dao/0.0.5, Apache-2.0, approved, #9176
 maven/mavencentral/com.sun.activation/jakarta.activation/1.2.1, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 maven/mavencentral/com.sun.istack/istack-commons-runtime/4.1.1, BSD-3-Clause, approved, #2590
 maven/mavencentral/com.sun.mail/jakarta.mail/1.6.5, EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, ee4j.mail
@@ -66,7 +66,7 @@ maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.1, EPL-2.0 OR B
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.0.0, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.inject/jakarta.inject-api/2.0.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/jakarta.persistence/jakarta.persistence-api/3.0.0, NOASSERTION, restricted, clearlydefined
+maven/mavencentral/jakarta.persistence/jakarta.persistence-api/3.0.0, EPL-2.0 OR BSD-3-Clause AND (EPL-2.0 OR BSD-3-Clause AND BSD-3-Clause), approved, #9177
 maven/mavencentral/jakarta.transaction/jakarta.transaction-api/2.0.0, EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, #7697
 maven/mavencentral/jakarta.validation/jakarta.validation-api/2.0.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/jakarta.validation/jakarta.validation-api/3.0.2, Apache-2.0, approved, clearlydefined
@@ -137,7 +137,7 @@ maven/mavencentral/org.jboss.spec.javax.ws.rs/jboss-jaxrs-api_2.1_spec/2.0.1.Fin
 maven/mavencentral/org.jboss.spec.javax.xml.bind/jboss-jaxb-api_2.3_spec/2.0.0.Final, BSD-3-Clause, approved, #2122
 maven/mavencentral/org.jboss/jandex/2.4.2.Final, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.jetbrains/annotations/17.0.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.json/json/20230227, None, restricted, #8132
+maven/mavencentral/org.json/json/20230227, None, restricted, #9174
 maven/mavencentral/org.junit.jupiter/junit-jupiter-api/5.9.1, EPL-2.0, approved, #3133
 maven/mavencentral/org.junit.jupiter/junit-jupiter-api/5.9.2, EPL-2.0, approved, #3133
 maven/mavencentral/org.junit.jupiter/junit-jupiter-engine/5.9.2, EPL-2.0, approved, #3125
