@@ -46,6 +46,8 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredential
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -53,8 +55,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -187,9 +188,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     public VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL);
-        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
+        VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
-                StringPool.BPN, holderWallet.getBpn()), types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), authority);
+                StringPool.BPN, holderWallet.getBpn()));
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(verifiableCredentialSubject,
+                types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), authority);
 
         //Store Credential in holder wallet
         holdersCredential = holdersCredentialRepository.save(holdersCredential);
@@ -231,12 +234,12 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
-        Map<String, Object> subject = Map.of(
+        VerifiableCredentialSubject subject = new VerifiableCredentialSubject(Map.of(
                 StringPool.TYPE, request.getType(),
                 StringPool.ID, holderWallet.getDid(),
                 StringPool.HOLDER_IDENTIFIER, holderWallet.getBpn(),
                 StringPool.CONTRACT_TEMPLATE, request.getContractTemplate(),
-                StringPool.CONTRACT_VERSION, request.getContractVersion());
+                StringPool.CONTRACT_VERSION, request.getContractVersion()));
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, baseWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
@@ -282,11 +285,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(request.getBpn());
 
-        Map<String, Object> subject = Map.of(StringPool.TYPE, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL,
+        VerifiableCredentialSubject subject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
                 StringPool.HOLDER_IDENTIFIER, holderWallet.getBpn(),
                 StringPool.ACTIVITY_TYPE, request.getActivityType(),
-                StringPool.ALLOWED_VEHICLE_BRANDS, request.getAllowedVehicleBrands());
+                StringPool.ALLOWED_VEHICLE_BRANDS, request.getAllowedVehicleBrands()));
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
@@ -335,12 +338,13 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         boolean isSelfIssued = isSelfIssued(issueMembershipCredentialRequest.getBpn());
 
         //VC Subject
-        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(Map.of(StringPool.TYPE, VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
+        VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, VerifiableCredentialType.MEMBERSHIP_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
                 StringPool.HOLDER_IDENTIFIER, holderWallet.getBpn(),
                 StringPool.MEMBER_OF, issuerWallet.getName(),
                 StringPool.STATUS, "Active",
-                StringPool.START_TIME, Instant.now().toString()), types, issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
+                StringPool.START_TIME, Instant.now().toString()));
+        HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(verifiableCredentialSubject, types, issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 
 
         //save in holder wallet
@@ -423,8 +427,21 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         didDocumentResolverRegistry.register(
                 new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
 
-        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didDocumentResolverRegistry);
-        Boolean valid = proofValidation.checkProof(verifiableCredential);
+        String proofTye = verifiableCredential.getProof().get(StringPool.TYPE).toString();
+        LinkedDataProofValidation proofValidation;
+        if (SignatureType.ED21559.toString().equals(proofTye)) {
+            proofValidation = LinkedDataProofValidation.newInstance(
+                    SignatureType.ED21559,
+                    didDocumentResolverRegistry);
+        } else if (SignatureType.JWS.toString().equals(proofTye)) {
+            proofValidation = LinkedDataProofValidation.newInstance(
+                    SignatureType.JWS,
+                    didDocumentResolverRegistry);
+        } else {
+            throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
+        }
+
+        Boolean valid = proofValidation.verifiyProof(verifiableCredential);
         Map<String, Object> response = new HashMap<>();
         response.put(StringPool.VALID, valid);
         response.put("vc", verifiableCredential);
@@ -482,6 +499,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 }
             } else {
                 items = List.of(type);
+
             }
         } else {
             items = List.of(type);
@@ -500,11 +518,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //issue new summery VC
         boolean isSelfIssued = isSelfIssued(holderBpn);
 
-        Map<String, Object> subject = Map.of(StringPool.ID, holderDid,
+        VerifiableCredentialSubject subject = new VerifiableCredentialSubject(Map.of(StringPool.ID, holderDid,
                 StringPool.HOLDER_IDENTIFIER, holderBpn,
                 StringPool.ITEMS, items,
                 StringPool.TYPE, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL,
-                StringPool.CONTRACT_TEMPLATES, miwSettings.contractTemplatesUrl());
+                StringPool.CONTRACT_TEMPLATES, miwSettings.contractTemplatesUrl()));
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types,

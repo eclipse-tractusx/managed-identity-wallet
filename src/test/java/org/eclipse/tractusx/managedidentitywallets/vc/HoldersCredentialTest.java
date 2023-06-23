@@ -37,12 +37,13 @@ import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
@@ -55,7 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
@@ -63,7 +63,6 @@ import java.time.Instant;
 import java.util.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ActiveProfiles("test")
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 @ExtendWith(MockitoExtension.class)
 class HoldersCredentialTest {
@@ -214,9 +213,11 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(DidDocumentResolverRegistryImpl.class));
+                LinkedDataProofValidation.newInstance(
+                        Mockito.eq(SignatureType.ED21559),
+                        Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
-            Mockito.when(mock.checkProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -237,9 +238,11 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(DidDocumentResolverRegistryImpl.class));
+                LinkedDataProofValidation.newInstance(
+                        Mockito.eq(SignatureType.ED21559),
+                        Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
-            Mockito.when(mock.checkProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));

@@ -29,6 +29,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletReposito
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.exception.DidParseException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,7 +50,12 @@ public class CommonService {
         if (CommonUtils.getIdentifierType(identifier).equals(StringPool.BPN)) {
             wallet = walletRepository.getByBpn(identifier);
         } else {
-            wallet = walletRepository.getByDid(identifier);
+            try {
+                wallet = walletRepository.getByDid(identifier);
+            } catch (DidParseException e) {
+                log.error("Error while parsing did {}", identifier, e);
+                throw new WalletNotFoundProblem("Error while parsing did " + identifier);
+            }
         }
         Validate.isNull(wallet).launch(new WalletNotFoundProblem("Wallet not found for identifier " + identifier));
         return wallet;
