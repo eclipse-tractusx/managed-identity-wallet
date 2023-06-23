@@ -1,0 +1,49 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Build the app and the corresponding Docker image (tagged as "miw-test")
+    cmds:
+      - task: :build-app
+      - docker build -t local-miw --platform linux/amd64 .
+
+  start-middleware:
+    desc: Spin up local Docker environment
+    dir: dev-assets/dev-containers
+    ignore_error: true
+    vars:
+      OPTIONS: '{{ default "" .OPTIONS }}'
+      CONTAINERS: '{{ default "local_postgres local_keycloak" .CONTAINERS }}'
+    cmds:
+      - "docker-compose up {{ .OPTIONS }} {{ .CONTAINERS }}"
+
+  stop-middleware:
+    desc: Stop local Docker environment
+    dir: dev-assets/dev-containers
+    cmds:
+      - docker-compose down
+
+  start-app:
+    desc: Run the app in a container environment (including middleware aka Postgresql and Keycloak)
+    cmds:
+      - task: start-middleware
+        vars:
+          OPTIONS: "-d"
+      - task: build
+      - cmd: docker rm miw-app
+        ignore_error: true
+      - task: start-middleware
+        vars:
+          CONTAINERS: "local_miw_app"
+
+  stop-app:
+    desc: Stop all running containers
+    cmds:
+      - docker stop local_miw_app
+      - task: stop-middleware
+
+  cleanup:
+    desc: Cleans everything about docker...
+    cmds:
+      - cmd: docker rmi local-miw
+        ignore_error: true
