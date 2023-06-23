@@ -10,7 +10,7 @@ tasks:
     cmds:
       - helm unittest .
 
-  build:
+  buildApp:
     desc: Build the whole app
     cmds:
       - ./gradlew build -PgithubToken=xxx -x test -x jacocoTestCoverageVerification
@@ -18,10 +18,10 @@ tasks:
   buildDocker:
     desc: Build the app and the corresponding Docker image (tagged as "miw-test")
     cmds:
-      - task: build
+      - task: buildApp
       - docker build -t local-miw --platform linux/amd64 .
 
-  runDevEnv:
+  startDevContainers:
     desc: Spin up local Docker environment
     dir: dev-assets/dev-containers
     ignore_error: true
@@ -31,22 +31,22 @@ tasks:
     cmds:
       - "docker-compose up {{ .OPTIONS }} {{ .CONTAINERS }}"
 
-  stopDevEnv:
+  stopDevContainers:
     desc: Stop local Docker environment
     dir: dev-assets/dev-containers
     cmds:
       - docker-compose down
 
-  runDockerApp:
+  startDockerApp:
     desc: Run the app in a container environment
     cmds:
-      - task: runDevEnv
+      - task: startDevContainers
         vars:
           OPTIONS: "-d"
       - task: buildDocker
       - cmd: docker rm miw-app
         ignore_error: true
-      - task: runDevEnv
+      - task: startDevContainers
         vars:
           CONTAINERS: "local_miw_app"
 
@@ -54,9 +54,9 @@ tasks:
     desc: Stop all running containers
     cmds:
       - docker stop local_miw_app
-      - task: stopDevEnv
+      - task: stopDevContainers
 
-  clean:
+  cleanAll:
     desc: Cleans everything...
     cmds:
       - ./gradlew clean
