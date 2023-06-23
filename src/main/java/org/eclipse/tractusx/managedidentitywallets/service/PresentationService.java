@@ -36,8 +36,14 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519Key;
+import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
+import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
+import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
@@ -47,9 +53,6 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.resolver.DidDocumentResolverRegistryImpl;
-import org.eclipse.tractusx.ssi.lib.resolver.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
@@ -98,19 +101,18 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
      * @param callerBpn the caller bpn
      * @return the map
      */
+    @SneakyThrows({InvalidePrivateKeyFormat.class})
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
         List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
 
         //only support one credential at a time to create VP
         Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
 
-        String holderIdentifier = data.get(StringPool.HOLDER_IDENTIFIER).toString();
-
         //check if holder wallet is in the system
-        Wallet holderWallet = commonService.getWalletByIdentifier(holderIdentifier);
+        Wallet callerWallet = commonService.getWalletByIdentifier(callerBpn);
 
         //validate BPN access  - Issuer(Creator) of VP must be caller Issuer of VP must be holder of VC
-        Validate.isFalse(holderWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Holder identifier is not matching with request BPN(from the token)"));
+        Validate.isFalse(callerWallet.getBpn().equalsIgnoreCase(callerBpn)).launch(new ForbiddenException("Holder identifier is not matching with request BPN(from the token)"));
 
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
         verifiableCredentialList.forEach(map -> {
@@ -124,15 +126,17 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
 
             //Issuer of VP is holder of VC
-            Did vpIssuerDid = DidParser.parse(holderWallet.getDid());
+            Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
 
             //JWT Factory
             SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
                     new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), vpIssuerDid);
 
             //Build JWT
+            Ed25519Key ed25519Key = walletKeyService.getPrivateKeyByWalletIdentifier(callerWallet.getId());
+            x21559PrivateKey privateKey = new x21559PrivateKey(ed25519Key.getEncoded());
             SignedJWT presentation = presentationFactory.createPresentation(vpIssuerDid
-                    , verifiableCredentials, audience, walletKeyService.getPrivateKeyByWalletIdentifier(holderWallet.getId()));
+                    , verifiableCredentials, audience, privateKey);
 
             response.put(StringPool.VP, presentation.serialize());
         } else {
