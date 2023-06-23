@@ -1,0 +1,36 @@
+version: '3'
+
+tasks:
+  check-all:
+    cmds:
+      - task: check-helm
+      - task: check-helm-plugins
+      - task: check-docker
+      - task: check-docker-compose
+      - task: check-java
+
+  check-helm:
+    dir: .tasks
+    cmds:
+      - pwd
+      - ./check_bin_{{OS}}.sh helm https://helm.sh/docs/intro/quickstart/#install-helm
+
+  check-helm-plugins:
+    dir: .tasks
+    cmds:
+      - ./check_helm_plugin_{{OS}}.sh unittest
+
+  check-docker:
+    dir: .tasks
+    cmds:
+      - ./check_bin_{{OS}}.sh docker https://www.docker.com
+
+  check-docker-compose:
+    dir: .tasks
+    cmds:
+      - ./check_bin_{{OS}}.sh docker-compose https://www.docker.com
+
+  check-java:
+    dir: .tasks
+    cmds:
+      - ./check_bin_{{OS}}.sh java https://www.codejava.net/java-core/install-openjdk-17-on-macos
