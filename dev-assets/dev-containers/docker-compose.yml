@@ -5,7 +5,7 @@ services:
     image: local-miw:latest
     container_name: local_miw_app
     env_file:
-      - ../../dev.env
+      - ../../local.env
     ports:
       - "8087:8087"
     environment:
@@ -17,7 +17,7 @@ services:
     image: postgres:14.2-alpine
     container_name: local_postgres
     env_file:
-      - ../../dev.env
+      - ../../local.env
     volumes:
       - postgres-data:/data/postgres-data
     ports:
@@ -32,7 +32,7 @@ services:
       - start-dev
       - --import-realm
     env_file:
-      - ../../dev.env
+      - ../../local.env
     volumes:
       - ./keycloak/local-realm.json:/opt/keycloak/data/import/local-realm.json
     ports:
