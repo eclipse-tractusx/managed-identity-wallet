@@ -43,3 +43,4 @@ dev-assets/secrets/*
 local.db
 jacoco-report
 /dev.env
+local.env
