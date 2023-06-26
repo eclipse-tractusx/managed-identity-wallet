@@ -45,5 +45,6 @@ public class IssueDismantlerCredentialRequest {
     @Size(min = 1, message = "Please provide valid activity type")
     private String activityType;
 
-    private Set<String> allowedVehicleBrands;
+    @Builder.Default
+    private Set<String> allowedVehicleBrands = Set.of();
 }
