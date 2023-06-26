@@ -75,7 +75,7 @@ public class CommonUtils {
      * @return the credential
      */
     public static HoldersCredential getHoldersCredential(VerifiableCredentialSubject subject, List<String> types, DidDocument issuerDoc,
-                                                         byte[] privateKeyBytes, String holderDid, List<String> contexts, Date expiryDate, boolean selfIssued) {
+                                                         byte[] privateKeyBytes, String holderDid, List<URI> contexts, Date expiryDate, boolean selfIssued) {
         List<String> cloneTypes = new ArrayList<>(types);
 
         // Create VC
@@ -98,7 +98,7 @@ public class CommonUtils {
     @SneakyThrows({UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class})
     private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
                                                                    VerifiableCredentialSubject verifiableCredentialSubject,
-                                                                   byte[] privateKey, List<String> contexts, Date expiryDate) {
+                                                                   byte[] privateKey, List<URI> contexts, Date expiryDate) {
         //VC Builder
         URI id = URI.create(UUID.randomUUID().toString());
         VerifiableCredentialBuilder builder =
