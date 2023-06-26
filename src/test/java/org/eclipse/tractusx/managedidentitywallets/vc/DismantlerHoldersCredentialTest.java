@@ -176,6 +176,26 @@ class DismantlerHoldersCredentialTest {
     }
 
     @Test
+    void issueDismantlerCredentialWithoutAllowedVehicleBrands() {
+        Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()); //token must contain base wallet BPN
+
+        IssueDismantlerCredentialRequest request = IssueDismantlerCredentialRequest.builder()
+                .activityType(StringPool.VEHICLE_DISMANTLE)
+                .bpn(miwSettings.authorityWalletBpn())
+                .allowedVehicleBrands(null)
+                .build();
+
+        HttpEntity<IssueDismantlerCredentialRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_DISMANTLER, HttpMethod.POST, entity, String.class);
+
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+    }
+
+
+    @Test
     void issueDismantlerCredentialWithDuplicateBpn409() {
 
         String bpn = UUID.randomUUID().toString();
@@ -191,7 +211,6 @@ class DismantlerHoldersCredentialTest {
         ResponseEntity<String> duplicateResponse = issueDismantlerCredential(bpn, did);
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), duplicateResponse.getStatusCode().value());
     }
-
 
 
     private ResponseEntity<String> issueDismantlerCredential(String bpn, String did){
