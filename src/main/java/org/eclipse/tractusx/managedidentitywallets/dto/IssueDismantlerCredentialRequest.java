@@ -22,7 +22,6 @@
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -46,6 +45,5 @@ public class IssueDismantlerCredentialRequest {
     @Size(min = 1, message = "Please provide valid activity type")
     private String activityType;
 
-    @NotEmpty(message = "Please provide allowed vehicle brands")
     private Set<String> allowedVehicleBrands;
 }
