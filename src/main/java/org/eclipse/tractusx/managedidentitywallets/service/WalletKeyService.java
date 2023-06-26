@@ -27,7 +27,7 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
@@ -82,7 +82,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     public Ed25519Key getPrivateKeyByWalletIdentifier(long walletId) {
         WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
-        byte[] content = Base64.decode(privateKey);
+        byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
         return Ed25519Key.asPrivateKey(content);
     }
 
