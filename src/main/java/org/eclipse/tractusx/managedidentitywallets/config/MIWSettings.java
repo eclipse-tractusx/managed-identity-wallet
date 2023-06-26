@@ -24,6 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +35,7 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "miw")
 public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
                           String authorityWalletName,
-                          List<String> vcContexts, List<String> summaryVcContexts,
+                          List<URI> vcContexts, List<URI> summaryVcContexts,
                           @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
                           Set<String> supportedFrameworkVCTypes,
                           boolean enforceHttps, String contractTemplatesUrl) {
