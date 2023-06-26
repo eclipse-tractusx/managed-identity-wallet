@@ -289,7 +289,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.ID, holderWallet.getDid(),
                 StringPool.HOLDER_IDENTIFIER, holderWallet.getBpn(),
                 StringPool.ACTIVITY_TYPE, request.getActivityType(),
-                StringPool.ALLOWED_VEHICLE_BRANDS, request.getAllowedVehicleBrands()));
+                StringPool.ALLOWED_VEHICLE_BRANDS, request.getAllowedVehicleBrands() == null ? Collections.emptySet() : request.getAllowedVehicleBrands()));
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types, issuerWallet.getDidDocument(), privateKeyBytes, holderWallet.getDid(), miwSettings.vcContexts(), miwSettings.vcExpiryDate(), isSelfIssued);
 

@@ -238,7 +238,7 @@ class PresentationTest {
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);
 
         ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, "smartSense");
-        Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.FORBIDDEN.value());
+        Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.NOT_FOUND.value());
     }
 
     @Test
