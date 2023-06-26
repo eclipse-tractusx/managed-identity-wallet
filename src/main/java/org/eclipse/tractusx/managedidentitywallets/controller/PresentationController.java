@@ -159,7 +159,7 @@ public class PresentationController extends BaseController {
                                                 ],
                                                 "@context": [
                                                   "https://www.w3.org/2018/credentials/v1",
-                                                  "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData"
+                                                  "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json"
                                                 ],
                                                 "issuer": "did:web:localhost:BPNL000000000000",
                                                 "expirationDate": "2024-12-31T18:30:00Z"
