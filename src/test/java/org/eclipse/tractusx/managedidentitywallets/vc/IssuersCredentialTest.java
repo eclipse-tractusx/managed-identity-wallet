@@ -140,6 +140,10 @@ class IssuersCredentialTest {
         credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size()); //5 framework CV + 1 membership
+
+        for (VerifiableCredential vc : credentialList) {
+            Assertions.assertEquals(2, vc.getContext().size(), "Each credential requires 2 contexts");
+        }
     }
 
 

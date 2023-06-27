@@ -49,6 +49,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ public class TestUtils {
     public static void checkVC(VerifiableCredential verifiableCredential, MIWSettings miwSettings) {
         //text context URL
         Assertions.assertEquals(verifiableCredential.getContext().size(), miwSettings.vcContexts().size());
-        for (String link : verifiableCredential.getContext()) {
+        for (URI link : verifiableCredential.getContext()) {
             Assertions.assertTrue(miwSettings.vcContexts().contains(link));
         }
 
