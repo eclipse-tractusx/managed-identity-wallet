@@ -26,11 +26,7 @@ Following tools the MIW development team used successfully:
 3. set ORG_GRADLE_PROJECT_githubUserName and ORG_GRADLE_PROJECT_githubToken values
    in [dev.env](dev-assets%2Fdid-web%2Fdev.env)
 4. Setup [dev.env](dev-assets%2Fdid-web%2Fdev.env) values either in application.yaml or in IDE
-5.
-
-Run [ManagedIdentityWalletsApplication.java](src%2Fmain%2Fjava%2Forg%2Feclipse%2Ftractusx%2Fmanagedidentitywallets%2FManagedIdentityWalletsApplication.java)
-in IDE
-
+5. Run [ManagedIdentityWalletsApplication.java](src%2Fmain%2Fjava%2Forg%2Feclipse%2Ftractusx%2Fmanagedidentitywallets%2FManagedIdentityWalletsApplication.java) in IDE
 6. Open API doc on http://localhost:8080
 7. Click on Authorize on swagger UI and on the dialog click again on Authorize.
 8. Login with username=catena-x and password=password
