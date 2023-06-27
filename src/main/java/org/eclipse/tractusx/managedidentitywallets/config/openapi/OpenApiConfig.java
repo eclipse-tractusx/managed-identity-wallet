@@ -79,11 +79,13 @@ public class OpenApiConfig {
     }
 
     private OpenAPI enableSecurity(OpenAPI openAPI) {
-        String authorization = "Authorization";
+        String publicClientAuth = "Authenticate using username and password";
         Components components = new Components();
         components.addSecuritySchemes(
-                "open_id_scheme",
+                publicClientAuth,
                 new SecurityScheme()
+                        .name(publicClientAuth)
+                        .description("Authenticate using username and password. before using this make sure we configured public client in keycloak with valid redirect url and web origin")
                         .type(SecurityScheme.Type.OAUTH2)
                         .flows(new OAuthFlows()
                                 .authorizationCode(new OAuthFlow()
@@ -95,12 +97,24 @@ public class OpenApiConfig {
                         )
         );
 
-        components.addSecuritySchemes(authorization,
-                new SecurityScheme().name(authorization)
+        //with client_is and client_secret
+        String name = "Authenticate using client_id and client_secret";
+        components.addSecuritySchemes(name, new SecurityScheme().name(name)
+                .description("Authenticate using private keycloak client_id and client_secret. before using this we need to add Web origins for client in keycloak")
+                .type(SecurityScheme.Type.OAUTH2).flows(new OAuthFlows().clientCredentials(new OAuthFlow()
+                        .tokenUrl(properties.tokenUrl())
+                        .authorizationUrl(properties.authUrl()))));
+
+        //Auth using access_token
+        String accessTokenAuth = "Authenticate using access_token";
+        components.addSecuritySchemes(accessTokenAuth,
+                new SecurityScheme().name(accessTokenAuth)
+                        .description("Authenticate using token")
                         .type(SecurityScheme.Type.HTTP).scheme("Bearer"));
         return openAPI.components(components)
                 .addSecurityItem(new SecurityRequirement()
-                        .addList(authorization, Collections.emptyList())
-                        .addList("open_id_scheme", Collections.emptyList()));
+                        .addList(accessTokenAuth, Collections.emptyList())
+                        .addList(name, Collections.emptyList())
+                        .addList(publicClientAuth, Collections.emptyList()));
     }
 }
