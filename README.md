@@ -1,6 +1,6 @@
-# Managed Identity Wallets <a id="introduction"></a>
+# Managed Identity Wallet <a id="introduction"></a>
 
-The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using did:web
+The Managed Identity Wallet (MIW) service implements the Self-Sovereign-Identity (SSI) using did:web
 
 # Developer Documentation
 
