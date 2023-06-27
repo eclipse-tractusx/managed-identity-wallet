@@ -74,7 +74,7 @@ spec:
             failureThreshold: 3
             httpGet:
               path: /actuator/health/liveness
-              port: "8090"
+              port: 8090
               scheme: HTTP
             periodSeconds: 5
             successThreshold: 1
@@ -84,7 +84,7 @@ spec:
             failureThreshold: 3
             httpGet:
               path: /actuator/health/readiness
-              port: "8090"
+              port: 8090
               scheme: HTTP
             periodSeconds: 5
             successThreshold: 1
