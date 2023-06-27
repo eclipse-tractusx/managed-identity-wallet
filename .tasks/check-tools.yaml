@@ -27,6 +27,7 @@ tasks:
       - task: check-docker
       - task: check-docker-compose
       - task: check-java
+    ignore_error: true
 
   check-helm:
     dir: .tasks
