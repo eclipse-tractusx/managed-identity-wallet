@@ -213,9 +213,7 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(
-                        Mockito.eq(SignatureType.ED21559),
-                        Mockito.any(DidDocumentResolverRegistryImpl.class));
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
@@ -238,9 +236,7 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(
-                        Mockito.eq(SignatureType.ED21559),
-                        Mockito.any(DidDocumentResolverRegistryImpl.class));
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
