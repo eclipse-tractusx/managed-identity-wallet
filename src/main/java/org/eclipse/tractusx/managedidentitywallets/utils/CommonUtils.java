@@ -28,7 +28,7 @@ import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
 import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
-import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
+import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -38,7 +38,10 @@ import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * The type Common utils.
@@ -111,12 +114,13 @@ public class CommonUtils {
                         .issuanceDate(Instant.now())
                         .credentialSubject(verifiableCredentialSubject);
 
-        //Ed25519 Proof Builder
-        LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.ED21559);
+
+        LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
-        VerifiableCredential credential = builder.build();
-        Proof proof = generator.createProof(credential, verificationMethod,
-                new x21559PrivateKey(privateKey));
+
+        JWSSignature2020 proof =
+                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKey));
+
 
         //Adding Proof to VC
         builder.proof(proof);
