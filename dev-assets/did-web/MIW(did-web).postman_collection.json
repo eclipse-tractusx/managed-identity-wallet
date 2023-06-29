@@ -1,0 +1,756 @@
+{
+	"info": {
+		"_postman_id": "732ec4fa-eb0b-4ef0-8fcd-5cc0729a5191",
+		"name": "MIW(did:web)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5107879"
+	},
+	"item": [
+		{
+			"name": "Wallet",
+			"item": [
+				{
+					"name": "Create wallet",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bpn\": \"BPNL000000000001\",\n  \"name\": \"ZF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/wallets",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"wallets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get list of wallets",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/wallets?pageNumber=0&size=2147483647&sortColumn=createdAt&sortTpe=desc",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"wallets"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "2147483647"
+								},
+								{
+									"key": "sortColumn",
+									"value": "createdAt"
+								},
+								{
+									"key": "sortTpe",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get wallet by identifier(BPN or  did web)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/api/wallets/BPNL000000000001?withCredentials=true",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"wallets",
+								"BPNL000000000001"
+							],
+							"query": [
+								{
+									"key": "withCredentials",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store VC in wallet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"http://example.edu/credentials/3732\",\n  \"@context\": [\n    \"https://www.w3.org/2018/credentials/v1\",\n    \"https://www.w3.org/2018/credentials/examples/v1\"\n  ],\n  \"type\": [\n    \"University-Degree-Credential\",\n    \"VerifiableCredential\"\n  ],\n  \"issuer\": \"did:example:76e12ec712ebc6f1c221ebfeb1f\",\n  \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n  \"expirationDate\": \"2019-06-17T18:56:59Z\",\n  \"credentialSubject\": [\n    {\n      \"college\": \"Test-University\"\n    }\n  ],\n  \"proof\": {\n    \"type\": \"Ed25519Signature2018\",\n    \"created\": \"2021-11-17T22:20:27Z\",\n    \"proofPurpose\": \"assertionMethod\",\n    \"verificationMethod\": \"did:example:76e12ec712ebc6f1c221ebfeb1f#key-1\",\n    \"jws\": \"eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/wallets/BPNL000000000001/credentials",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"wallets",
+								"BPNL000000000001",
+								"credentials"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Token",
+			"item": [
+				{
+					"name": "Create access_token using client_id and client_secret",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"pm.environment.set(\"access_token\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "{{grant_type}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{scope}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token",
+							"host": [
+								"{{keycloak_host}}"
+							],
+							"path": [
+								"realms",
+								"{{realm}}",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifiable Credential - Issuer",
+			"item": [
+				{
+					"name": "Issue membership VC using BPN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bpn\": \"BPNL000000000001\"\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/credentials/issuer/membership",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials",
+								"issuer",
+								"membership"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get VC issued by base wallet",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/api/credentials/issuer?pageNumber=0&size=2147483647&sortColumn=createdAt&sortTpe=desc",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials",
+								"issuer"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "2147483647"
+								},
+								{
+									"key": "sortColumn",
+									"value": "createdAt"
+								},
+								{
+									"key": "sortTpe",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Issue VC using base wallet to any wallet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"http://example.edu/credentials/333\",\n  \"@context\": [\n    \"https://www.w3.org/2018/credentials/v1\",\n    \"https://www.w3.org/2018/credentials/examples/v1\"\n  ],\n  \"type\": [\n    \"University-Degree-Credential\",\n    \"VerifiableCredential\"\n  ],\n  \"issuer\": \"did:example:76e12ec712ebc6f1c221ebfeb1f\",\n  \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n  \"expirationDate\": \"2019-06-17T18:56:59Z\",\n  \"credentialSubject\": [\n    {\n      \"college\": \"Test-University\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/credentials/issuer?holderDid=did%3Aweb%3Alocalhost%3ABPNL000000000002",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials",
+								"issuer"
+							],
+							"query": [
+								{
+									"key": "holderDid",
+									"value": "did%3Aweb%3Alocalhost%3ABPNL000000000002"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Issue use case(Framework) VC ",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"holderIdentifier\": \"BPNL000000000000\",\n  \"type\": \"BehaviorTwinCredential\",\n  \"contract-template\": \"https://public.catena-x.org/contracts/traceabilty.v1.pdf\",\n  \"contract-version\": \"1.0.0\"\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/credentials/issuer/framework",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials",
+								"issuer",
+								"framework"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Issue dismantler VC ",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bpn\": \"BPNL000000000000\",\n  \"activityType\": \"vehicleDismantle\",\n  \"allowedVehicleBrands\": [\n    \"Audi\",\n    \"Abarth\",\n    \"Alfa Romeo\",\n    \"Chrysler\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/credentials/issuer/dismantler",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials",
+								"issuer",
+								"dismantler"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Did Document",
+			"item": [
+				{
+					"name": "Resolve did document",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/BPNL000000000002/did.json",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"BPNL000000000002",
+								"did.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve did document using identifier ",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/api/didDocuments/BPNL000000000000",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"didDocuments",
+								"BPNL000000000000"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifiable Presentations - Generation",
+			"item": [
+				{
+					"name": "Create VP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"holderIdentifier\": \"did:web:localhost:BPNL000000000002\",\n  \"verifiableCredentials\": [\n    {\n  \"issuanceDate\": \"2023-06-28T09:13:30Z\",\n  \"credentialSubject\": [\n    {\n      \"holderIdentifier\": \"BPNL000000000002\",\n      \"startTime\": \"2023-06-28T09:13:30.132987788Z\",\n      \"id\": \"did:web:localhost:BPNL000000000002\",\n      \"memberOf\": \"Catena-X\",\n      \"type\": \"MembershipCredential\",\n      \"status\": \"Active\"\n    }\n  ],\n  \"id\": \"ecb7be4f-d5a4-4989-a3c5-28b5e23a5d60\",\n  \"proof\": {\n    \"assertionMethod\": \"did:web:localhost:BPNL000000000000#\",\n    \"proofPurpose\": \"proofPurpose\",\n    \"type\": \"JsonWebSignature2020\",\n    \"created\": \"2023-06-28T09:13:30Z\",\n    \"jws\": \"eyJhbGciOiJFZERTQSJ9..qYKidcqk04oXCt4kKy4IEf-bc-umXpa5K18-5d_gEJQhR1Y8gJdACR0f5h0l7SbkOcS2Zt2Hhj--76zJhZFhCg\"\n  },\n  \"type\": [\n    \"VerifiableCredential\",\n    \"MembershipCredential\"\n  ],\n  \"@context\": [\n    \"https://www.w3.org/2018/credentials/v1\",\n    \"https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json\"\n  ],\n  \"issuer\": \"did:web:localhost:BPNL000000000000\",\n  \"expirationDate\": \"2023-09-30T18:30:00Z\"\n}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/presentations?audience=smart&asJwt=true",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"presentations"
+							],
+							"query": [
+								{
+									"key": "audience",
+									"value": "smart"
+								},
+								{
+									"key": "asJwt",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifiable Presentations - Validation",
+			"item": [
+				{
+					"name": "Validate VP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vp\": \"eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiYXVkIjoic21hcnRTZW5zZSIsImlzcyI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJ2cCI6eyJpZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAjMWQ2ODg4N2EtMzY4NC00ZDU0LWFkYjAtMmM4MWJiNjc4NTJiIiwidHlwZSI6WyJWZXJpZmlhYmxlUHJlc2VudGF0aW9uIl0sIkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sInZlcmlmaWFibGVDcmVkZW50aWFsIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJCcG5DcmVkZW50aWFsQ1giXSwiaWQiOiJhY2I5NTIyZi1kYjIyLTRmOTAtOTQ3NS1jM2YzNTExZjljZGUiLCJpc3N1ZXIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMy0wNi0wMVQwODo1Nzo1MFoiLCJleHBpcmF0aW9uRGF0ZSI6IjIwMjQtMTItMzFUMTg6MzA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiYnBuIjoiQlBOTDAwMDAwMDAwMDAwMCIsImlkIjoiZGlkOndlYjpsb2NhbGhvc3Q6QlBOTDAwMDAwMDAwMDAwMCIsInR5cGUiOiJCcG5DcmVkZW50aWFsIn0sInByb29mIjp7InByb29mUHVycG9zZSI6InByb29mUHVycG9zZSIsInZlcmlmaWNhdGlvbk1ldGhvZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJ0eXBlIjoiRWQyNTUxOVNpZ25hdHVyZTIwMjAiLCJwcm9vZlZhbHVlIjoiejRkdUJmY0NzYVN6aU5lVXc4WUJ5eUZkdlpYVzhlQUs5MjhkeDNQeExqV0N2S3p0Slo5bWh4aEh3ZTVCdVRRUW5KRmtvb01nUUdLREU0OGNpTHJHaHBzUEEiLCJjcmVhdGVkIjoiMjAyMy0wNi0wMVQwODo1Nzo1MFoifX19LCJleHAiOjE2ODU2ODEwNTIsImp0aSI6IjFhYmQxYjAxLTBkZTUtNGY1Ny04ZjBlLWRmNzBhNzNkMjE2NyJ9.Hfm-ANjoeZ8fO-32LPOsQ3-xXSclPUd28p9hvlWyVVB0Mz7n0k-KAHra5kpT0oGrGtdhC1lZ0AitdB_td6VrAQ\"\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/presentations/validation?audience=smart&asJwt=true&withCredentialExpiryDate=true",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"presentations",
+								"validation"
+							],
+							"query": [
+								{
+									"key": "audience",
+									"value": "smart"
+								},
+								{
+									"key": "asJwt",
+									"value": "true"
+								},
+								{
+									"key": "withCredentialExpiryDate",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifiable Credential - Holder",
+			"item": [
+				{
+					"name": "Query VC(get holder's VC)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{host}}/api/credentials?sortColumn=createdAt&sortTpe=desc&pageNumber=0&size=2147483647",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials"
+							],
+							"query": [
+								{
+									"key": "sortColumn",
+									"value": "createdAt"
+								},
+								{
+									"key": "sortTpe",
+									"value": "desc"
+								},
+								{
+									"key": "pageNumber",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "2147483647"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Issue VC to self",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"http://example.edu/credentials/333\",\n  \"@context\": [\n    \"https://www.w3.org/2018/credentials/v1\",\n    \"https://www.w3.org/2018/credentials/examples/v1\"\n  ],\n  \"type\": [\n    \"University-Degree-Credential\",\n    \"VerifiableCredential\"\n  ],\n  \"issuer\": \"did:example:76e12ec712ebc6f1c221ebfeb1f\",\n  \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n  \"expirationDate\": \"2019-06-17T18:56:59Z\",\n  \"credentialSubject\": [\n    {\n      \"college\": \"Test-University\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/credentials",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete VC",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{keycloak_host}}/api/credentials?id=ecb7be4f-d5a4-4989-a3c5-28b5e23a5d60",
+							"host": [
+								"{{keycloak_host}}"
+							],
+							"path": [
+								"api",
+								"credentials"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "ecb7be4f-d5a4-4989-a3c5-28b5e23a5d60"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifiable Credential - Validation",
+			"item": [
+				{
+					"name": "Validate VC",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"http://example.edu/credentials/333\",\n  \"@context\": [\n    \"https://www.w3.org/2018/credentials/v1\",\n    \"https://www.w3.org/2018/credentials/examples/v1\"\n  ],\n  \"type\": [\n    \"University-Degree-Credential\",\n    \"VerifiableCredential\"\n  ],\n  \"issuer\": \"did:example:76e12ec712ebc6f1c221ebfeb1f\",\n  \"issuanceDate\": \"2019-06-16T18:56:59Z\",\n  \"expirationDate\": \"2019-06-17T18:56:59Z\",\n  \"credentialSubject\": [\n    {\n      \"college\": \"Test-University\"\n    }\n  ],\n  \"proof\": {\n    \"type\": \"Ed25519Signature2018\",\n    \"created\": \"2021-11-17T22:20:27Z\",\n    \"proofPurpose\": \"assertionMethod\",\n    \"verificationMethod\": \"did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1\",\n    \"jws\": \"eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{host}}/api/credentials/validation",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"credentials",
+								"validation"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
