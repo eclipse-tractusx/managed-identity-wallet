@@ -63,7 +63,7 @@ public class WalletController extends BaseController {
                     @ExampleObject(name = "Create wallet with BPN", value = """
                                                         {
                                                           "bpn": "BPNL000000000001",
-                                                          "name": "smartSense"
+                                                          "name": "companyA"
                                                         }
                             """)
             })
