@@ -24,7 +24,7 @@ description: Managed Identity Wallets Service
 type: application
 
 version: 1.0.1-rc1
-appVersion: 3.3.3.b420443
+appVersion: 0.0.1-SNAPSHOT.b75ebaf
 
 dependencies:
   - name: postgresql
