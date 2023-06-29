@@ -22,7 +22,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service
   pullPolicy: Always
-  tag: "latest"
+  tag: ""
 
 imagePullSecrets:
   - name: acr-credential
