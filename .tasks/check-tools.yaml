@@ -32,7 +32,6 @@ tasks:
   check-helm:
     dir: .tasks
     cmds:
-      - pwd
       - ./check_bin_{{OS}}.sh helm https://helm.sh/docs/intro/quickstart/#install-helm
 
   check-helm-plugins:
