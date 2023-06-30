@@ -150,8 +150,11 @@ public class WalletService extends BaseService<Wallet, Long> {
     public Wallet getWalletByIdentifier(String identifier, boolean withCredentials, String callerBpn) {
         Wallet wallet = getWalletByIdentifier(identifier);
 
-        //validate BPN access
-        Validate.isFalse(callerBpn.equalsIgnoreCase(wallet.getBpn())).launch(new ForbiddenException("Wallet BPN is not matching with request BPN(from the token)"));
+        // authority wallet can see all wallets
+        if (!miwSettings.authorityWalletBpn().equals(callerBpn)) {
+            //validate BPN access
+            Validate.isFalse(callerBpn.equalsIgnoreCase(wallet.getBpn())).launch(new ForbiddenException("Wallet BPN is not matching with request BPN(from the token)"));
+        }
 
         if (withCredentials) {
             wallet.setVerifiableCredentials(holdersCredentialRepository.getCredentialsByHolder(wallet.getDid()));
