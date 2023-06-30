@@ -19,8 +19,11 @@
 
 version: 3
 
+env:
+  ENV: docker # local or docker
+
 dotenv:
-  - 'local.env'
+  - 'dev-assets/env-files/env.{{.ENV}}'
 
 includes:
   check:
