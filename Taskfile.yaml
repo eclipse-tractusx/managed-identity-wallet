@@ -34,7 +34,7 @@ includes:
   helm:
     taskfile: dev-assets/tasks/helm.yaml
   app:
-    taskfile: dev-assets/tasks/app.yaml
+    taskfile: dev-assets/tasks/app_{{OS}}.yaml
 
 tasks:
   check-prereqs:

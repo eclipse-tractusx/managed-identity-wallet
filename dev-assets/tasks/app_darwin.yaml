@@ -24,3 +24,14 @@ tasks:
     desc: Build the whole app
     cmds:
       - ./gradlew build -PgithubToken=$GITHUB_TOKEN $SKIP_GRADLE_TASKS_PARAM
+
+  get-token:
+    desc: Obtain a BEARER token from Keycloak to access the MIW API
+    dir: dev-assets/scripts
+    vars:
+      TOKEN:
+        sh: ./get_Token.sh
+    silent: true
+    cmds:
+      - echo "New Token -> {{.TOKEN}}"
+      - echo "BAERER {{.TOKEN}}" | pbcopy
