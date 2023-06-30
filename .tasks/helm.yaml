@@ -17,30 +17,11 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-version: 3
-
-dotenv:
-  - 'local.env'
-
-includes:
-  check:
-    taskfile: .tasks/check-tools.yaml
-    internal: true
-  docker:
-    taskfile: .tasks/docker-{{OS}}.yaml
-  helm:
-    taskfile: .tasks/helm.yaml
-  app:
-    taskfile: .tasks/app.yaml
+version: '3'
 
 tasks:
-  check-prereqs:
-    desc: Checks the local machine for all tools, which are used for MIW development
+  unittest:
+    desc: Executes helm unittests
+    dir: charts/managed-identity-wallet
     cmds:
-      - task: check:check-all
-
-  clean-all:
-    desc: Cleans everything...
-    cmds:
-      - ./gradlew clean
-      - task: docker:cleanup
+      - helm unittest .
