@@ -58,13 +58,11 @@ bin/
 
 hs_err_pid*.log
 
-.env
-
-dev-assets/secrets/*
 local.db
 jacoco-report
-/dev.env
-local.env
+dev-assets/env-files/env.local
+dev-assets/env-files/env.docker
+dev-assets/docker-environment/postgres/db.sh
 
 .java-version
 
