@@ -27,14 +27,14 @@ dotenv:
 
 includes:
   check:
-    taskfile: .tasks/check-tools.yaml
+    taskfile: dev-assets/tasks/check-tools.yaml
     internal: true
   docker:
-    taskfile: .tasks/docker-{{OS}}.yaml
+    taskfile: dev-assets/tasks/docker-{{OS}}.yaml
   helm:
-    taskfile: .tasks/helm.yaml
+    taskfile: dev-assets/tasks/helm.yaml
   app:
-    taskfile: .tasks/app.yaml
+    taskfile: dev-assets/tasks/app.yaml
 
 tasks:
   check-prereqs:
