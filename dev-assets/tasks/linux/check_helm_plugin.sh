@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # /********************************************************************************
 # * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
 # *
@@ -17,21 +19,12 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-version: '3'
+RESULT=$(helm plugin list | tail -n +2)
 
-tasks:
-  build:
-    desc: Build the whole app
-    cmds:
-      - ./gradlew build -PgithubToken=$GITHUB_TOKEN $SKIP_GRADLE_TASKS_PARAM
-
-  get-token:
-    desc: Obtain a BEARER token from Keycloak to access the MIW API
-    dir: dev-assets/scripts
-    vars:
-      TOKEN:
-        sh: ./get_Token.sh
-    silent: true
-    cmds:
-      - echo "New Token -> {{.TOKEN}}"
-      - echo "BAERER {{.TOKEN}}" | pbcopy
+if [[ $RESULT =~ $1 ]];
+then
+    echo "Plugin found! Info: $RESULT"
+else
+    echo "Plugin not found"
+    exit 1
+fi

@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # /********************************************************************************
 # * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
 # *
@@ -17,53 +19,13 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-application-local.yaml
-build
-.gradle
-.gradletasknamecache
-.idea/*
-!.idea/runConfigurations
-!.idea/runConfigurations/*
-!.idea/dictionaries
-!.idea/dictionaries/*
-!.idea/copyright
-!.idea/copyright/*
-!.idea/codeStyles
-!.idea/codeStyles/*
-!.idea/icon.png
-out
-*.iml
-.vscode
+RESULT=$(which $1)
 
-*.versionsBackup
-*.releaseBackup
-release.properties
-
-
-local.properties
-*.swp
-
-.video
-.attach_pid*
-apidoc
-
-
-bin/
-.settings
-.project
-.classpath
-.konan
-
-.DS_Store
-
-hs_err_pid*.log
-
-local.db
-jacoco-report
-dev-assets/env-files/env.local
-dev-assets/env-files/env.docker
-dev-assets/env-files/env.environment
-dev-assets/docker-environment/postgres/db.sh
-
-.java-version
-
+if [[ $RESULT =~ "not found" ]];
+then
+    echo "Binary not found!"
+    echo "You can install it from here: $2"
+    exit 1
+else
+    echo "Binary found in: $RESULT"
+fi
