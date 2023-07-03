@@ -25,3 +25,9 @@ tasks:
     dir: charts/managed-identity-wallet
     cmds:
       - helm unittest .
+
+  readme:
+    desc: Rebuilds the readme of the Helm chart
+    dir: charts/managed-identity-wallet
+    cmds:
+      - helm-docs .
