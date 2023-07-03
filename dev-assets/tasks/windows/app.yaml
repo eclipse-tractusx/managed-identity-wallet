@@ -31,7 +31,17 @@ tasks:
     cmds:
       - echo "Not implemented for windows!"
 
+  test-report:
+    desc: Generates the test report for MIW
+    cmds:
+      - .\gradlew.bat jacocoTestReport
+
+  coverage:
+    desc: Runs the coverage check
+    cmds:
+      - .\gradlew.bat jacocoTestCoverageVerification
+
   clean:
     desc: Cleans the build directory
     cmds:
-      - gradlew.bat clean
+      - .\gradlew.bat clean
