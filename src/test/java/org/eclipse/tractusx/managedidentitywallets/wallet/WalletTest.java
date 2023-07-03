@@ -311,10 +311,9 @@ class WalletTest {
         String name = "Sample Name";
 
         //Create entry
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, name, restTemplate).getBody());
+        TestUtils.getWalletFromString(TestUtils.createWallet(bpn, name, restTemplate).getBody());
 
-        //get Wallet
-        ///get wallet with credentials
+        //get wallet without credentials
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
@@ -322,6 +321,18 @@ class WalletTest {
         ResponseEntity<String> getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "false");
 
         Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
+        Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
+        Assertions.assertNotNull(getWalletResponse.getBody());
+        Assertions.assertEquals(body.getBpn(), bpn);
+
+        //get wallet without credentials with authority wallet
+        headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+
+        entity = new HttpEntity<>(headers);
+
+        getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "false");
+
+        body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
         Assertions.assertNotNull(getWalletResponse.getBody());
         Assertions.assertEquals(body.getBpn(), bpn);
@@ -334,7 +345,7 @@ class WalletTest {
         String name = "Sample Name";
         String did = "did:web:localhost:" + bpn;
         //Create entry
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, name, restTemplate).getBody());
+        TestUtils.getWalletFromString(TestUtils.createWallet(bpn, name, restTemplate).getBody());
 
         //store credentials
         ResponseEntity<Map> response = storeCredential(bpn, did);
@@ -348,6 +359,19 @@ class WalletTest {
         ResponseEntity<String> getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "true");
 
         Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
+        Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
+        Assertions.assertNotNull(getWalletResponse.getBody());
+        Assertions.assertEquals(3, body.getVerifiableCredentials().size()); //BPN VC + Summery VC + Stored VC
+        Assertions.assertEquals(body.getBpn(), bpn);
+
+        ///get wallet with credentials with authority wallet
+        headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+
+        entity = new HttpEntity<>(headers);
+
+        getWalletResponse = restTemplate.exchange(RestURI.API_WALLETS_IDENTIFIER + "?withCredentials={withCredentials}", HttpMethod.GET, entity, String.class, bpn, "true");
+
+        body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
         Assertions.assertNotNull(getWalletResponse.getBody());
         Assertions.assertEquals(3, body.getVerifiableCredentials().size()); //BPN VC + Summery VC + Stored VC
