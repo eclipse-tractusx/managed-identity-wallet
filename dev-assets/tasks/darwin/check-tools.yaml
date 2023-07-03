@@ -35,6 +35,11 @@ tasks:
     cmds:
       - ./check_bin.sh helm https://helm.sh/docs/intro/quickstart/#install-helm
 
+  check-helm-docs:
+    dir: dev-assets/tasks/{{OS}}
+    cmds:
+      - ./check_bin.sh helm-docs https://github.com/norwoodj/helm-docs
+
   check-helm-plugins:
     dir: dev-assets/tasks/darwin
     cmds:
