@@ -237,8 +237,8 @@ public class WalletService extends BaseService<Wallet, Long> {
         //Save key
         walletKeyService.getRepository().save(WalletKey.builder()
                 .walletId(wallet.getId())
-                .referenceKey("dummy ref key")  //TODO removed once vault setup is ready
-                .vaultAccessToken("dummy vault access token") ////TODO removed once vault setup is ready
+                .referenceKey("dummy ref key, removed once vault setup is ready")
+                .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
                 .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
                 .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey().asByte())))
                 .build());
@@ -277,24 +277,6 @@ public class WalletService extends BaseService<Wallet, Long> {
         }
 
     }
-/*
-    @SneakyThrows
-    private Ed25519KeySet createKeyPair() {
-        KeyPairGeneratorSpi.Ed25519 ed25519 = new KeyPairGeneratorSpi.Ed25519();
-        ed25519.initialize(256, new SecureRandom());
-        KeyPair keyPair = ed25519.generateKeyPair();
-        PublicKey PubKey = keyPair.getPublic();
-        PrivateKey PivKey = keyPair.getPrivate();
-        Ed25519PrivateKeyParameters ed25519PrivateKeyParameters =
-                (Ed25519PrivateKeyParameters) PrivateKeyFactory.createKey(PivKey.getEncoded());
-        Ed25519PublicKeyParameters publicKeyParameters =
-                (Ed25519PublicKeyParameters) PublicKeyFactory.createKey(PubKey.getEncoded());
-
-        byte[] privateKeyBytes = ed25519PrivateKeyParameters.getEncoded();
-        byte[] publicKeyBytes = publicKeyParameters.getEncoded();
-        return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
-    }*/
-
     @SneakyThrows
     private String getPrivateKeyString(byte[] privateKeyBytes) {
         StringWriter stringWriter = new StringWriter();
