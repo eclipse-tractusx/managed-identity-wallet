@@ -25,6 +25,6 @@ if [[ $RESULT =~ $1 ]];
 then
     echo "Plugin found! Info: $RESULT"
 else
-    echo "Plugin not found"
+    echo "Plugin not found. Install it from here: $2"
     exit 1
 fi
