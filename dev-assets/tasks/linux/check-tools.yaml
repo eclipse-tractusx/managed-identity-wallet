@@ -44,7 +44,7 @@ tasks:
   check-helm-plugins:
     dir: dev-assets/tasks/linux
     cmds:
-      - ./check_helm_plugin.sh unittest
+      - ./check_helm_plugin.sh unittest https://github.com/helm-unittest/helm-unittest#install
 
   check-docker:
     dir: dev-assets/tasks/linux
