@@ -95,3 +95,12 @@ tests:
             runAsGroup: 11111
             runAsNonRoot: true
             runAsUser: 11111
+
+  - it: should have environment variables set
+    template: templates/deployment.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 1
