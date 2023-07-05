@@ -6,6 +6,7 @@ on:
     paths:
       - 'charts/**'
   workflow_dispatch:
+    branches: [ 'features/java-did-web' ]
 
 jobs:
   lint-test:
