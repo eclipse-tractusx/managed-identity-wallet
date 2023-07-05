@@ -17,18 +17,25 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-suite: test dev deployment
-chart:
-  version: 9.9.9+test
-  appVersion: 9.9.9
-values:
-  - ../../values-dev.yaml
-tests:
-  - it: should have environment variables set
-    template: templates/deployment.yaml
-    asserts:
-      - isNotEmpty:
-          path: spec.template.spec.containers[0].env
-      - lengthEqual:
-          path: spec.template.spec.containers[0].env
-          count: 11
+image:
+  tag: "latest"
+
+secrets:
+  DB_USER_NAME: dbuser
+  DB_PASSWORD: password
+
+envs:
+  DB_HOST: postgres-host
+  MIW_HOST_NAME: miw
+
+ingress:
+  enabled: true
+  hosts:
+    - host: localhost.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: miw-secret
+      hosts:
+        - localhost.local
