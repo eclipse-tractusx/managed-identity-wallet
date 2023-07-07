@@ -41,6 +41,9 @@ Description of the env files:
 - **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords. Everything else can remain as it is.
 - **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords. Everything else can remain as it is.
 
+> IMPORTANT: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
+(under "features in development")
+
 In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to build the add, 
 because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
 The access token need to have `read:packages` access. (ref: https://github.com/settings/tokens/new)
@@ -157,8 +160,6 @@ This process ensures that any issues with the database schema are resolved by re
 2. Policies can be validated dynamically as per
    request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
-3. When you are using MacOS and the MIW docker container won't start up, you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
-   (under "features in development")
 
 ## Reference of external lib
 
