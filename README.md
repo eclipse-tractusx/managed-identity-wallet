@@ -48,6 +48,8 @@ In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ a
 because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
 The access token need to have `read:packages` access. (ref: https://github.com/settings/tokens/new)
 
+And change the _COMPOSE_COMMAND_ variable to either _docker-compose_ or _docker compose_. It depends on docker compose version you are using: V1 or V2
+
 Note: _SKIP_GRADLE_TASKS_PARAM_ is used to pass parameters to the build process of the MIW jar. Currently, it skips the tests and code coverage, but speeds up the build time.
 If you want to activate it, just comment it out like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
 
