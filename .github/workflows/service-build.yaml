@@ -80,7 +80,7 @@ jobs:
         uses: veracode/veracode-uploadandscan-action@0.2.1
         continue-on-error: true
         with:
-          appname: 'project-managed-identity-wallets'
+          appname: 'project-managed-identity-wallet'
           createprofile: false
           filepath: 'build/libs/*' # add filepath for upload
           vid: '${{ secrets.ORG_VERACODE_API_ID }}' # reference to API ID, which is set as github org. secret
