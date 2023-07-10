@@ -29,8 +29,8 @@ Following tools the MIW development team used successfully:
 
 To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a task executor. You have to install it first.
 
-Before executing any of th tasks, you have to choose your flow (_local_ or _docker_). _local_ is default.
-To change that, you need to edit the variable **ENV** in the _Taskfile.yaml_.
+> **IMPORTANT**: Before executing any of th tasks, you have to choose your flow (_local_ or _docker_). _local_ is default.
+To change that, you need to edit the variable **ENV** in the _Taskfile.yaml_. (see below)
 
 After that, run `task check-prereqs` to see, if any other required tool is installed or missing. If something is missing, a link to the install docs is provided.
 
@@ -41,7 +41,7 @@ Description of the env files:
 - **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords. Everything else can remain as it is.
 - **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords. Everything else can remain as it is.
 
-> IMPORTANT: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
+> **IMPORTANT**: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
 (under "features in development")
 
 In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to build the add, 
