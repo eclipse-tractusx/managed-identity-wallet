@@ -29,26 +29,43 @@ Following tools the MIW development team used successfully:
 
 To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a task executor. You have to install it first.
 
-Before executing any of th tasks, you have to choose your flow (_local_ or _docker_). _local_ is default.
-To change that, you need to edit the variable **ENV** in the _Taskfile.yaml_.
+> **IMPORTANT**: Before executing any of th tasks, you have to choose your flow (_local_ or _docker_). _local_ is
+> default.
+> To change that, you need to edit the variable **ENV** in the _Taskfile.yaml_. (see below)
 
-After that, run `task check-prereqs` to see, if any other required tool is installed or missing. If something is missing, a link to the install docs is provided.
+After that, run `task check-prereqs` to see, if any other required tool is installed or missing. If something is
+missing, a link to the install docs is provided.
 
-Now, you have to adjust the _env_ files (located in _dev-assets/env-files_). To do that, copy every file to the same directory, but without ".dist" at the end.
+Now, you have to adjust the _env_ files (located in _dev-assets/env-files_). To do that, copy every file to the same
+directory, but without ".dist" at the end.
 
-Description of the env files: 
+Description of the env files:
 
-- **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords. Everything else can remain as it is.
-- **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords. Everything else can remain as it is.
+- **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords. Everything else can
+  remain as it is.
+- **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords. Everything else
+  can remain as it is.
 
-In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to build the add, 
+> **IMPORTANT**: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start
+> at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker
+> settings
+(under "features in development")
+
+In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to
+build the add,
 because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
 The access token need to have `read:packages` access. (ref: https://github.com/settings/tokens/new)
 
-Note: _SKIP_GRADLE_TASKS_PARAM_ is used to pass parameters to the build process of the MIW jar. Currently, it skips the tests and code coverage, but speeds up the build time.
-If you want to activate it, just comment it out like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
+And change the _COMPOSE_COMMAND_ variable to either _docker-compose_ or _docker compose_. It depends on docker compose
+version you are using: V1 or V2
 
-After every execution (either _local_ or _docker_ flow), run the matching "stop" task (e.g.: `task docker:start-app` -> `task docker:stop-app`)
+Note: _SKIP_GRADLE_TASKS_PARAM_ is used to pass parameters to the build process of the MIW jar. Currently, it skips the
+tests and code coverage, but speeds up the build time.
+If you want to activate it, just comment it out
+like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
+
+After every execution (either _local_ or _docker_ flow), run the matching "stop" task (
+e.g.: `task docker:start-app` -> `task docker:stop-app`)
 
 When you just run `task` without parameters, you will see all tasks available.
 
@@ -158,6 +175,7 @@ This process ensures that any issues with the database schema are resolved by re
 2. Policies can be validated dynamically as per
    request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
+
 3. When you are using MacOS and the MIW docker container won't start up, you can enable the docker-desktop feature "Use
    Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
    (under "features in development")

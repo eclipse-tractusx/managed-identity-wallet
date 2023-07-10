@@ -48,7 +48,6 @@ public class StringPool {
     public static final String HOLDER_DID = "holderDid";
     public static final String HOLDER_IDENTIFIER = "holderIdentifier";
     public static final String NAME = "name";
-    public static final String CONTRACT_TEMPLATES = "contractTemplates";
     public static final String CONTRACT_TEMPLATE = "contractTemplate";
     public static final String TYPE = "type";
     public static final String MEMBER_OF = "memberOf";

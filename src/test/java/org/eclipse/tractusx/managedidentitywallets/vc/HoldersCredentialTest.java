@@ -329,7 +329,7 @@ class HoldersCredentialTest {
         //Using Builder
         VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
-                        .id(URI.create(UUID.randomUUID().toString()))
+                        .id(URI.create(did + "#" + UUID.randomUUID().toString()))
                         .context(miwSettings.vcContexts())
                         .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
                         .issuer(URI.create(did)) //issuer must be base wallet

@@ -17,17 +17,25 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-version: '3'
+image:
+  tag: "latest"
 
-tasks:
-  unittest:
-    desc: Executes helm unittests
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm unittest -f 'tests/**/*.yaml' .
+secrets:
+  DB_USER_NAME: dbuser
+  DB_PASSWORD: password
 
-  readme:
-    desc: Rebuilds the readme of the Helm chart
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm-docs .
+envs:
+  DB_HOST: postgres-host
+  MIW_HOST_NAME: miw
+
+ingress:
+  enabled: true
+  hosts:
+    - host: localhost.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: miw-secret
+      hosts:
+        - localhost.local
