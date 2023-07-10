@@ -522,7 +522,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.HOLDER_IDENTIFIER, holderBpn,
                 StringPool.ITEMS, items,
                 StringPool.TYPE, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL,
-                StringPool.CONTRACT_TEMPLATES, miwSettings.contractTemplatesUrl()));
+                StringPool.CONTRACT_TEMPLATE, miwSettings.contractTemplatesUrl()));
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types,
