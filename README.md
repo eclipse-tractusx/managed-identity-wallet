@@ -149,6 +149,7 @@ This process ensures that any issues with the database schema are resolved by re
 | SUPPORTED_FRAMEWORK_VC_TYPES    | Supported framework VC, provide values ie type1=value1,type2=value2                          | cx-behavior-twin=Behavior Twin,cx-pcf=PCF,cx-quality=Quality,cx-resiliency=Resiliency,cx-sustainability=Sustainability,cx-traceability=ID_3.0_Trace |
 | ENFORCE_HTTPS_IN_DID_RESOLUTION | Enforce https during web did resolution                                                      | true                                                                                                                                                |
 | CONTRACT_TEMPLATES_URL          | Contract templates URL used in summary VC                                                    | https://public.catena-x.org/contracts/                                                                                                              |
+| APP_LOG_LEVEL                   | Log level of application                                                                     | INFO                                                                                                                                                |
 |                                 |                                                                                              |                                                                                                                                                     |
 
 ## Technical Debts and Known issue
@@ -157,8 +158,45 @@ This process ensures that any issues with the database schema are resolved by re
 2. Policies can be validated dynamically as per
    request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
-3. When you are using MacOS and the MIW docker container won't start up, you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
+3. When you are using MacOS and the MIW docker container won't start up, you can enable the docker-desktop feature "Use
+   Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
    (under "features in development")
+
+## Logging in application
+
+Log level in application can be set using environment variable ``APP_LOG_LEVEL``. Possible values
+are ``OFF, ERROR, WARN, INFO, DEBUG, TRACE`` and default value set to ``INFO``
+
+### Change log level at runtime using Spring actuator
+
+We can use ``/actuator/loggers`` API endpoint of actuator for log related things. This end point can be accessible with
+role ``manage_app``. We can add this role to authority wallet client using keycloak as below:
+
+![manage_app.png](docs%2Fmanage_app.png)
+
+1. API to get current log settings
+
+```agsl
+curl --location 'http://localhost:8090/actuator/loggers' \
+--header 'Authorization: Bearer access_token'
+```
+
+2. Change log level at runtime
+
+```agsl
+
+curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer access_token' \
+--data '{"configuredLevel":"INFO"}'
+
+i.e.
+
+curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer access_token' \
+--data '{"configuredLevel":"INFO"}'
+```
 
 ## Reference of external lib
 
