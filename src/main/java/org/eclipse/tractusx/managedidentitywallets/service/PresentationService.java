@@ -148,7 +148,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             // Build VP
             VerifiablePresentation verifiablePresentation =
                     verifiablePresentationBuilder
-                            .id(URI.create(UUID.randomUUID().toString()))
+                            .id(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
                             .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
                             .verifiableCredentials(verifiableCredentials)
                             .build();
