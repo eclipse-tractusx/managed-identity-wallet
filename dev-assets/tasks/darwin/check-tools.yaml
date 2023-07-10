@@ -60,7 +60,7 @@ tasks:
     silent: true
     cmds:
       - echo "If following command fails execute this, if you have Docker-Desktop installed (probably will fix it) ->"
-      - echo "mkdir -p /usr/local/lib/docker && ln -s /Applications/Docker.app/Contents/Resources/cli-plugins /usr/local/lib/docker/cli-plugins"
+      - echo "sudo mkdir -p /usr/local/lib/docker && sudo ln -s /Applications/Docker.app/Contents/Resources/cli-plugins /usr/local/lib/docker/cli-plugins"
       - docker compose version
 
   check-jq:
