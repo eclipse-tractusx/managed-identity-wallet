@@ -44,13 +44,15 @@ management:
   server:
     port: ${MANAGEMENT_PORT:8090}
   endpoint:
+    loggers:
+      enabled: true
     health:
       probes:
         enabled: true
   endpoints:
     web:
       exposure:
-        include: '*, pre-stop'
+        include: '*, pre-stop, loggers'
   health:
     db:
       enabled: true
@@ -58,6 +60,14 @@ management:
       enabled: true
     readinessState:
       enabled: true
+
+# log level
+logging:
+  level:
+    org:
+      eclipse:
+        tractusx:
+          managedidentitywallets: ${APP_LOG_LEVEL:INFO}
 
 miw:
   host: ${MIW_HOST_NAME:localhost}
