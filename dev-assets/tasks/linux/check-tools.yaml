@@ -59,7 +59,7 @@ tasks:
     dir: dev-assets/tasks/linux
     silent: true
     cmds:
-      - ./check_bin.sh docker-compose https://www.docker.com
+      - docker compose version
 
   check-jq:
     dir: dev-assets/tasks/linux

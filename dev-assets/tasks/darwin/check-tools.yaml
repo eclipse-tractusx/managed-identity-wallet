@@ -59,7 +59,9 @@ tasks:
     dir: dev-assets/tasks/darwin
     silent: true
     cmds:
-      - ./check_bin.sh docker-compose https://www.docker.com
+      - echo "If following command fails execute this, if you have Docker-Desktop installed (probably will fix it) ->"
+      - echo "mkdir -p /usr/local/lib/docker && ln -s /Applications/Docker.app/Contents/Resources/cli-plugins /usr/local/lib/docker/cli-plugins"
+      - docker compose version
 
   check-jq:
     dir: dev-assets/tasks/darwin
