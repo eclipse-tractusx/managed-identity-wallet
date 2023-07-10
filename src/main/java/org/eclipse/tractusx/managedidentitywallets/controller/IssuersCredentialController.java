@@ -53,9 +53,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class IssuersCredentialController extends BaseController {
 
+    /**
+     * The constant API_TAG_VERIFIABLE_CREDENTIAL_ISSUER.
+     */
     public static final String API_TAG_VERIFIABLE_CREDENTIAL_ISSUER = "Verifiable Credential - Issuer";
+    /**
+     * The constant API_TAG_VERIFIABLE_CREDENTIAL_VALIDATION.
+     */
     public static final String API_TAG_VERIFIABLE_CREDENTIAL_VALIDATION = "Verifiable Credential - Validation";
-    
+
     private final IssuersCredentialService issuersCredentialService;
 
 
@@ -65,6 +71,8 @@ public class IssuersCredentialController extends BaseController {
      * @param credentialId     the credential id
      * @param holderIdentifier the holder identifier
      * @param type             the type
+     * @param pageNumber       the page number
+     * @param size             the size
      * @param sortColumn       the sort column
      * @param sortTpe          the sort tpe
      * @param principal        the principal
@@ -156,7 +164,8 @@ public class IssuersCredentialController extends BaseController {
     /**
      * Credentials validation response entity.
      *
-     * @param data the data
+     * @param data                     the data
+     * @param withCredentialExpiryDate the with credential expiry date
      * @return the response entity
      */
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_VALIDATION)
@@ -190,13 +199,15 @@ public class IssuersCredentialController extends BaseController {
                                 }
                     """))
     })
-    public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data) {
-        return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.credentialsValidation(data));
+    public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data,
+                                                                     @Parameter(description = "Check expiry of VC") @RequestParam(name = "withCredentialExpiryDate", defaultValue = "false", required = false) boolean withCredentialExpiryDate) {
+        return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.credentialsValidation(data, withCredentialExpiryDate));
     }
 
     /**
      * Issue credential response entity.
      *
+     * @param holderDid the holder did
      * @param data      the data
      * @param principal the principal
      * @return the response entity
