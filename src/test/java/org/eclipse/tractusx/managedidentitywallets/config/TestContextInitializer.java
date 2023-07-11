@@ -22,27 +22,35 @@
 package org.eclipse.tractusx.managedidentitywallets.config;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import lombok.SneakyThrows;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
+
+import java.net.ServerSocket;
 
 public class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:15.2");
-
+    private static final int port = findFreePort();
     private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer().withRealmImportFile("miw-test-realm.json");
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
-        postgreSQLContainer.start();
         KEYCLOAK_CONTAINER.start();
         String authServerUrl = KEYCLOAK_CONTAINER.getAuthServerUrl();
 
         TestPropertyValues.of(
-                "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
-                "spring.datasource.username=" + postgreSQLContainer.getUsername(),
-                "spring.datasource.password=" + postgreSQLContainer.getPassword(),
+                "server.port=" + port,
+                "miw.host: localhost:${server.port}",
+                "miw.enforceHttps=false",
+                "miw.authorityWalletBpn: BPNL000000000000",
+                "miw.authorityWalletName: Test-X",
+                "miw.authorityWalletDid: did:web:localhost%3A${server.port}:BPNL000000000000",
+                "spring.datasource.url=jdbc:h2:mem:testdb",
+                "spring.datasource.driverClassName=org.h2.Driver",
+                "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+                "spring.datasource.username=sa",
+                "spring.datasource.password=password",
                 "miw.security.auth-server-url=" + authServerUrl,
                 "miw.security.auth-url=${miw.security.auth-server-url}realms/${miw.security.realm}/protocol/openid-connect/auth",
                 "miw.security.token-url=${miw.security.auth-server-url}realms/${miw.security.realm}/protocol/openid-connect/token",
@@ -54,5 +62,12 @@ public class TestContextInitializer implements ApplicationContextInitializer<Con
 
     public static String getAuthServerUrl() {
         return KEYCLOAK_CONTAINER.getAuthServerUrl();
+    }
+
+    @SneakyThrows
+    public static int findFreePort() {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        }
     }
 }

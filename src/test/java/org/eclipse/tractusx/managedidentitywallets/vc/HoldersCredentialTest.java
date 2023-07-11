@@ -38,6 +38,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -62,7 +63,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 @ExtendWith(MockitoExtension.class)
 class HoldersCredentialTest {
@@ -85,7 +86,7 @@ class HoldersCredentialTest {
     @Test
     void issueCredentialTestWithInvalidBPNAccess403() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("not valid BPN");
 
@@ -99,7 +100,7 @@ class HoldersCredentialTest {
     @Test
     void issueCredentialTest200() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
@@ -115,7 +116,6 @@ class HoldersCredentialTest {
         TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
         Assertions.assertTrue(credentials.get(0).isSelfIssued());
         Assertions.assertFalse(credentials.get(0).isStored());
-
     }
 
 
@@ -137,7 +137,7 @@ class HoldersCredentialTest {
 
         String baseDID = miwSettings.authorityWalletDid();
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         //save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
@@ -273,7 +273,7 @@ class HoldersCredentialTest {
         //Using Builder
         VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
-                        .id(URI.create(did + "#" + UUID.randomUUID().toString()))
+                        .id(URI.create(did + "#" + UUID.randomUUID()))
                         .context(miwSettings.vcContexts())
                         .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
                         .issuer(URI.create(did)) //issuer must be base wallet
