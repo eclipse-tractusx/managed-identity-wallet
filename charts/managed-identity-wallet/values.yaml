@@ -1,0 +1,135 @@
+# /********************************************************************************
+# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# *
+# * See the NOTICE file(s) distributed with this work for additional
+# * information regarding copyright ownership.
+# *
+# * This program and the accompanying materials are made available under the
+# * terms of the Apache License, Version 2.0 which is available at
+# * https://www.apache.org/licenses/LICENSE-2.0.
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# * License for the specific language governing permissions and limitations
+# * under the License.
+# *
+# * SPDX-License-Identifier: Apache-2.0
+# ********************************************************************************/
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service
+  pullPolicy: Always
+  tag: ""
+
+imagePullSecrets:
+  - name: acr-credential
+
+nameOverride: ""
+fullnameOverride: ""
+
+secrets:
+#  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
+#  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
+#  KEYCLOAK_CLIENT_ID: xxx
+#  ENCRYPTION_KEY: xxx  # 64 chars
+
+# APPLICATION_PORT is bound to 8080!!
+envs:
+#  APPLICATION_ENVIRONMENT: xxx
+#  DB_HOST: auto
+#  DB_PORT: xxx
+#  DB_NAME: xxx  # set it also in the init script in the postgres initdb section below!!
+#  USE_SSL: xxx
+#  DB_POOL_SIZE: xxx
+#  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
+#  MANAGEMENT_PORT: xxx
+#  MIW_HOST_NAME: xxx
+#  AUTHORITY_WALLET_BPN: xxx
+#  AUTHORITY_WALLET_NAME: xxx
+#  AUTHORITY_WALLET_DID: xxx
+#  VC_SCHEMA_LINK: xxx
+#  VC_EXPIRY_DATE: xxx
+#  KEYCLOAK_REALM: xxx
+#  AUTH_SERVER_URL: xxx
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+#  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+#    nginx.ingress.kubernetes.io/rewrite-target: /$1
+#    nginx.ingress.kubernetes.io/use-regex: "true"
+#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+#    nginx.ingress.kubernetes.io/server-snippet: |
+#      location ~* /list-credential/ {
+#          deny all;
+#          return 403;
+#      }
+#
+#      location ~* /webhook/topic/ {
+#        deny all;
+#        return 403;
+#      }
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsGroup: 11111
+  runAsUser: 11111
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 500Mi
+  limits:
+    cpu: 4
+    memory: 1Gi
+
+nodeSelector:
+  "kubernetes.io/os": linux
+
+tolerations: []
+
+affinity: {}
+
+podAnnotations: {}
+
+postgresql:
+  primary:
+    initdb:
+      scripts:
+        init_db_script.sh: |
+          #!/bin/sh
+          createdb -O postgres miw
+      user: postgres
+      password: postgres
+  auth:
+    password: postgres
+    username: postgres
+    postgresPassword: postgres
