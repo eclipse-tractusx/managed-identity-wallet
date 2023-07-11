@@ -48,8 +48,7 @@ Description of the env files:
 
 > **IMPORTANT**: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start
 > at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker
-> settings
-(under "features in development")
+> settings (under "features in development"). This should fix the issue.
 
 In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to
 build the add,
@@ -175,10 +174,6 @@ This process ensures that any issues with the database schema are resolved by re
 2. Policies can be validated dynamically as per
    request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
-
-3. When you are using MacOS and the MIW docker container won't start up, you can enable the docker-desktop feature "Use
-   Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker settings
-   (under "features in development")
 
 ## Logging in application
 
