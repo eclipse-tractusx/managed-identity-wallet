@@ -61,6 +61,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -221,6 +222,16 @@ public class WalletService extends BaseService<Wallet, Long> {
         didDocumentBuilder.id(did.toUri());
         didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));
         DidDocument didDocument = didDocumentBuilder.build();
+        //modify context URLs
+        List<URI> context = didDocument.getContext();
+        List<URI> mutableContext = new ArrayList<>();
+        mutableContext.addAll(context);
+        miwSettings.didDocumentContextUrls().forEach(uri -> {
+            if (!mutableContext.contains(uri)) {
+                mutableContext.add(uri);
+            }
+        });
+        didDocument.put("@context", mutableContext);
         didDocument = DidDocument.fromJson(didDocument.toJson());
         log.debug("did document created for bpn ->{}", request.getBpn());
 
