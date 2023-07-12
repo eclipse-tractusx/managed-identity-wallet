@@ -22,12 +22,12 @@ image:
 
 secrets:
   DB_USER_NAME: postgres
-  DB_PASSWORD: ci_test
+  DB_PASSWORD: pg_test_ci
   ENCRYPTION_KEY: d6aab34fb68e090c2789a9b1a67648d3
   KEYCLOAK_CLIENT_ID: mit_ci_test
 
 envs:
-  DB_HOST: managed-identity-wallet-postgresql
+  DB_HOST: test-postgres
   MIW_HOST_NAME: miw.local
   KEYCLOAK_REALM: MIW
   AUTH_SERVER_URL: https://localhost/auth
@@ -47,10 +47,11 @@ ingress:
         - miw.local
 
 postgresql:
+  fullnameOverride: test-postgres
   primary:
     initdb:
       password: pg_test_ci
   auth:
-    password: ci_test
+    password: pg_test_ci
     postgresPassword: pg_test_ci
     username: postgres
