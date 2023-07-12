@@ -105,4 +105,4 @@ These are some commits with their corresponding semantic release types:
 |:----------------------------------------------------------------------------------------------------|:-------------|
 | fix(typo): correct minor typos in code                                                              | Patch        |
 | feat: add new feature                                                                               | Minor        |
-| feat: add new feature that breaks backward compatibility<br/><br/>BREAKING CHANGE: \<descriptrion\> | Major        |
+| feat: add new feature that breaks backward compatibility<br/><br/>BREAKING CHANGE: \<description\> | Major        |
