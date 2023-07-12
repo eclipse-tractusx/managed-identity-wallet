@@ -61,13 +61,14 @@ public class SecurityConfig {
     @ConditionalOnProperty(value = "miw.security.enabled", havingValue = "true", matchIfMissing = true)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().and()
-                .csrf().and()
+                .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeHttpRequests()
                 .requestMatchers(new AntPathRequestMatcher("/")).permitAll() // forwards to swagger
                 .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
 
                 //did document resolve APIs
                 .requestMatchers(new AntPathRequestMatcher(RestURI.DID_RESOLVE, GET.name())).permitAll() //Get did document

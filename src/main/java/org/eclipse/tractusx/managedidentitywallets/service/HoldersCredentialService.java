@@ -104,11 +104,11 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         //Holder must be caller of API
         Wallet holderWallet = commonService.getWalletByIdentifier(callerBPN);
-        filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid().toString());
+        filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid());
 
         if (StringUtils.hasText(issuerIdentifier)) {
             Wallet issuerWallet = commonService.getWalletByIdentifier(issuerIdentifier);
-            filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid().toString());
+            filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid());
         }
 
         if (StringUtils.hasText(credentialId)) {

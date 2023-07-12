@@ -142,7 +142,7 @@ class IssuersCredentialTest {
         Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size()); //5 framework CV + 1 membership
 
         for (VerifiableCredential vc : credentialList) {
-            Assertions.assertEquals(2, vc.getContext().size(), "Each credential requires 2 contexts");
+            Assertions.assertEquals(3, vc.getContext().size(), "Each credential requires 3 contexts");
         }
     }
 
@@ -245,7 +245,7 @@ class IssuersCredentialTest {
         //Using Builder
         VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
-                        .id(URI.create(UUID.randomUUID().toString()))
+                        .id(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
                         .context(miwSettings.vcContexts())
                         .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
                         .issuer(URI.create(issuerDid)) //issuer must be base wallet

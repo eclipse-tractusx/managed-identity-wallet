@@ -19,19 +19,22 @@
 
 version: 3
 
+vars:
+  ENV: docker # local or docker
+
 dotenv:
-  - 'local.env'
+  - 'dev-assets/env-files/env.{{.ENV}}'
 
 includes:
   check:
-    taskfile: .tasks/check-tools.yaml
+    taskfile: dev-assets/tasks/{{OS}}/check-tools.yaml
     internal: true
   docker:
-    taskfile: .tasks/docker-{{OS}}.yaml
+    taskfile: dev-assets/tasks/{{OS}}/docker.yaml
   helm:
-    taskfile: .tasks/helm.yaml
+    taskfile: dev-assets/tasks/helm.yaml
   app:
-    taskfile: .tasks/app.yaml
+    taskfile: dev-assets/tasks/{{OS}}/app.yaml
 
 tasks:
   check-prereqs:
@@ -42,5 +45,5 @@ tasks:
   clean-all:
     desc: Cleans everything...
     cmds:
-      - ./gradlew clean
+      - task: app:clean
       - task: docker:cleanup

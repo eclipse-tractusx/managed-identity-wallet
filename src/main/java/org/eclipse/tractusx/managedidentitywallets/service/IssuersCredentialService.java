@@ -133,6 +133,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param type             the type
      * @param sortColumn       the sort column
      * @param sortType         the sort type
+     * @param pageNumber       the page number
+     * @param size             the size
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
@@ -182,6 +184,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      *
      * @param baseWallet   the base wallet
      * @param holderWallet the holder wallet
+     * @param authority    the authority
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
@@ -416,10 +419,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     /**
      * Credentials validation map.
      *
-     * @param data the data
+     * @param data                     the data
+     * @param withCredentialExpiryDate the with credential expiry date
      * @return the map
      */
-    public Map<String, Object> credentialsValidation(Map<String, Object> data) {
+    public Map<String, Object> credentialsValidation(Map<String, Object> data, boolean withCredentialExpiryDate) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
 
         // DID Resolver Constracture params
@@ -441,12 +445,32 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
             throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
         }
 
-        Boolean valid = proofValidation.verifiyProof(verifiableCredential);
+        boolean valid = proofValidation.verifiyProof(verifiableCredential);
+
         Map<String, Object> response = new HashMap<>();
-        response.put(StringPool.VALID, valid);
+
+        //check expiry
+        boolean dateValidation = validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
+
+        response.put(StringPool.VALID, valid && dateValidation);
         response.put("vc", verifiableCredential);
 
         return response;
+    }
+
+    private static boolean validateExpiry(boolean withCredentialExpiryDate, VerifiableCredential verifiableCredential, Map<String, Object> response) {
+        //validate expiry date
+        boolean dateValidation = true;
+        if (withCredentialExpiryDate) {
+            Instant expirationDate = verifiableCredential.getExpirationDate();
+            if (expirationDate.isBefore(Instant.now())) {
+                dateValidation = false;
+                response.put(StringPool.VALIDATE_EXPIRY_DATE, false);
+            } else {
+                response.put(StringPool.VALIDATE_EXPIRY_DATE, true);
+            }
+        }
+        return dateValidation;
     }
 
 
@@ -522,7 +546,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.HOLDER_IDENTIFIER, holderBpn,
                 StringPool.ITEMS, items,
                 StringPool.TYPE, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL,
-                StringPool.CONTRACT_TEMPLATES, miwSettings.contractTemplatesUrl()));
+                StringPool.CONTRACT_TEMPLATE, miwSettings.contractTemplatesUrl()));
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types,
