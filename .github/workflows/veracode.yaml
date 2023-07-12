@@ -75,7 +75,7 @@ jobs:
         with:
           appname: 'project-managed-identity-wallet'
           createprofile: false
-          filepath: 'build/libs/*' # add filepath for upload
+          filepath: 'build/libs/miw-latest.jar' # add filepath for upload
           vid: '${{ secrets.ORG_VERACODE_API_ID }}' # reference to API ID, which is set as github org. secret
           vkey: '${{ secrets.ORG_VERACODE_API_KEY }}' #reference to API Key in github, which is set as github or. secret
-          include: 'build/libs/miw-latest.jar'
+          #include: 'build/libs/miw-latest.jar'
