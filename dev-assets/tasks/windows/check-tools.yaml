@@ -17,53 +17,39 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-application-local.yaml
-build
-.gradle
-.gradletasknamecache
-.idea/*
-!.idea/runConfigurations
-!.idea/runConfigurations/*
-!.idea/dictionaries
-!.idea/dictionaries/*
-!.idea/copyright
-!.idea/copyright/*
-!.idea/codeStyles
-!.idea/codeStyles/*
-!.idea/icon.png
-out
-*.iml
-.vscode
+version: '3'
 
-*.versionsBackup
-*.releaseBackup
-release.properties
+tasks:
+  check-all:
+    cmds:
+      - task: check-helm
+      - task: check-helm-plugins
+      - task: check-docker
+      - task: check-docker-compose
+      - task: check-java
+    ignore_error: true
 
+  check-helm:
+    dir: .tasks
+    cmds:
+      - echo "Not implemented for windows!"
 
-local.properties
-*.swp
+  check-helm-plugins:
+    dir: .tasks
+    cmds:
+      - echo "Not implemented for windows!"
 
-.video
-.attach_pid*
-apidoc
+  check-docker:
+    dir: .tasks
+    cmds:
+      - echo "Not implemented for windows!"
 
+  check-docker-compose:
+    dir: .tasks
+    cmds:
+      - echo "Not implemented for windows!"
 
-bin/
-.settings
-.project
-.classpath
-.konan
-
-.DS_Store
-
-hs_err_pid*.log
-
-local.db
-jacoco-report
-dev-assets/env-files/env.local
-dev-assets/env-files/env.docker
-dev-assets/env-files/env.environment
-dev-assets/docker-environment/postgres/db.sh
-
-.java-version
-
+  check-java:
+    dir: .tasks
+    cmds:
+      - echo "Not implemented for windows!"

@@ -20,36 +20,38 @@
 version: '3'
 
 tasks:
-  check-all:
+  build:
+    desc: Build the app and the corresponding Docker image (tagged as "miw-test")
     cmds:
-      - task: check-helm
-      - task: check-helm-plugins
-      - task: check-docker
-      - task: check-docker-compose
-      - task: check-java
+      - echo "Not implemented for windows!"
+
+  start-middleware:
+    desc: Spin up local Docker environment
+    dir: dev-assets/docker-environment
     ignore_error: true
-
-  check-helm:
-    dir: .tasks
+    vars:
+      OPTIONS: '{{ default "" .OPTIONS }}'
+      CONTAINERS: '{{ default "postgres keycloak" .CONTAINERS }}'
     cmds:
-      - ./check_bin_{{OS}}.sh helm https://helm.sh/docs/intro/quickstart/#install-helm
+      - echo "Not implemented for windows!"
 
-  check-helm-plugins:
-    dir: .tasks
+  stop-middleware:
+    desc: Stop local Docker environment
+    dir: dev-assets/docker-environment
     cmds:
-      - ./check_helm_plugin_{{OS}}.sh unittest
+      - echo "Not implemented for windows!"
 
-  check-docker:
-    dir: .tasks
+  start-app:
+    desc: Run the app in a container environment (including middleware aka Postgresql and Keycloak)
     cmds:
-      - ./check_bin_{{OS}}.sh docker https://www.docker.com
+      - echo "Not implemented for windows!"
 
-  check-docker-compose:
-    dir: .tasks
+  stop-app:
+    desc: Stop all running containers
     cmds:
-      - ./check_bin_{{OS}}.sh docker-compose https://www.docker.com
+      - echo "Not implemented for windows!"
 
-  check-java:
-    dir: .tasks
+  cleanup:
+    desc: Cleans everything about docker...
     cmds:
-      - ./check_bin_{{OS}}.sh java https://www.codejava.net/java-core/install-openjdk-17-on-macos
+      - echo "Not implemented for windows!"

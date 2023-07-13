@@ -17,53 +17,21 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-application-local.yaml
-build
-.gradle
-.gradletasknamecache
-.idea/*
-!.idea/runConfigurations
-!.idea/runConfigurations/*
-!.idea/dictionaries
-!.idea/dictionaries/*
-!.idea/copyright
-!.idea/copyright/*
-!.idea/codeStyles
-!.idea/codeStyles/*
-!.idea/icon.png
-out
-*.iml
-.vscode
+version: '3'
 
-*.versionsBackup
-*.releaseBackup
-release.properties
+tasks:
+  build:
+    desc: Build the whole app
+    cmds:
+      - ./gradlew build -PgithubToken=$GITHUB_TOKEN $SKIP_GRADLE_TASKS_PARAM
 
+  get-token:
+    desc: Obtain a BEARER token from Keycloak to access the MIW API
+    dir: dev-assets/scripts
+    cmds:
+      - echo "BAERER $(./get_Token.sh)"
 
-local.properties
-*.swp
-
-.video
-.attach_pid*
-apidoc
-
-
-bin/
-.settings
-.project
-.classpath
-.konan
-
-.DS_Store
-
-hs_err_pid*.log
-
-local.db
-jacoco-report
-dev-assets/env-files/env.local
-dev-assets/env-files/env.docker
-dev-assets/env-files/env.environment
-dev-assets/docker-environment/postgres/db.sh
-
-.java-version
-
+  clean:
+    desc: Cleans the build directory
+    cmds:
+      - ./gradlew clean

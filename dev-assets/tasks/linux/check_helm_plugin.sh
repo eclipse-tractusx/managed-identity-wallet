@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # /********************************************************************************
 # * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
 # *
@@ -17,8 +19,12 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-# Personal development data
-GITHUB_TOKEN=xxx
+RESULT=$(helm plugin list | tail -n +2)
 
-# Build
-SKIP_GRADLE_TASKS_PARAM="-x jacocoTestCoverageVerification -x test"
+if [[ $RESULT =~ $1 ]];
+then
+    echo "Plugin found! Info: $RESULT"
+else
+    echo "Plugin not found"
+    exit 1
+fi

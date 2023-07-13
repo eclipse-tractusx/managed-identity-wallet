@@ -17,31 +17,45 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-version: 3
-
-dotenv:
-  - 'dev-assets/env-files/env.environment'
-  - 'dev-assets/env-files/env.{{.ENV}}'
-
-includes:
-  check:
-    taskfile: dev-assets/tasks/{{OS}}/check-tools.yaml
-    internal: true
-  docker:
-    taskfile: dev-assets/tasks/{{OS}}/docker.yaml
-  helm:
-    taskfile: dev-assets/tasks/helm.yaml
-  app:
-    taskfile: dev-assets/tasks/{{OS}}/app.yaml
+version: '3'
 
 tasks:
-  check-prereqs:
-    desc: Checks the local machine for all tools, which are used for MIW development
+  check-all:
     cmds:
-      - task: check:check-all
+      - task: check-helm
+      - task: check-helm-plugins
+      - task: check-docker
+      - task: check-docker-compose
+      - task: check-java
+      - task: check-jq
+    ignore_error: true
 
-  clean-all:
-    desc: Cleans everything...
+  check-helm:
+    dir: dev-assets/tasks/{{OS}}
     cmds:
-      - task: app:clean
-      - task: docker:cleanup
+      - ./check_bin.sh helm https://helm.sh/docs/intro/quickstart/#install-helm
+
+  check-helm-plugins:
+    dir: dev-assets/tasks/darwin
+    cmds:
+      - ./check_helm_plugin.sh unittest
+
+  check-docker:
+    dir: dev-assets/tasks/darwin
+    cmds:
+      - ./check_bin.sh docker https://www.docker.com
+
+  check-docker-compose:
+    dir: dev-assets/tasks/darwin
+    cmds:
+      - ./check_bin.sh docker-compose https://www.docker.com
+
+  check-jq:
+    dir: dev-assets/tasks/darwin
+    cmds:
+      - ./check_bin.sh jq https://jqlang.github.io/jq/
+
+  check-java:
+    dir: dev-assets/tasks/darwin
+    cmds:
+      - ./check_bin.sh java https://www.codejava.net/java-core/install-openjdk-17-on-macos

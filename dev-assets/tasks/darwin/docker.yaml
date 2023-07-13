@@ -36,7 +36,7 @@ tasks:
     cmds:
       - cat postgres/db.sh.tpl | envsubst > postgres/db.sh
       - chmod +x postgres/db.sh
-      - "docker-compose up {{ .OPTIONS }} {{ .CONTAINERS }}"
+      - "docker-compose up {{.OPTIONS}} {{.CONTAINERS}}"
 
   stop-middleware:
     desc: Stop local Docker environment
@@ -63,7 +63,8 @@ tasks:
   stop-app:
     desc: Stop all running containers
     cmds:
-      - docker stop miw
+      - cmd: docker stop miw
+        ignore_error: true
       - task: stop-middleware
 
   cleanup:

@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # /********************************************************************************
 # * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
 # *
@@ -17,10 +19,13 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-version: '3'
+RESULT=$(which $1)
 
-tasks:
-  build:
-    desc: Build the whole app
-    cmds:
-      - ./gradlew build -PgithubToken=$GITHUB_TOKEN $SKIP_GRADLE_TASKS_PARAM
+if [[ $RESULT =~ "not found" ]];
+then
+    echo "Binary not found!"
+    echo "You can install it from here: $2"
+    exit 1
+else
+    echo "Binary found in: $RESULT"
+fi
