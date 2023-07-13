@@ -184,10 +184,12 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             //validate audience
             boolean validateAudience = validateAudience(audience, signedJWT);
 
-            //validate date
-            boolean validateExpiryDate = validateExpiryDate(withCredentialExpiryDate, signedJWT);
+            //validate jwt date
+            boolean validateJWTExpiryDate = validateJWTExpiryDate(signedJWT);
+            response.put(StringPool.VALIDATE_JWT_EXPIRY_DATE, validateJWTExpiryDate);
 
             boolean validCredential = true;
+            boolean validateExpiryDate = true;
             try {
                 final ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> claims = mapper.readValue(signedJWT.getPayload().toBytes(), Map.class);
@@ -197,6 +199,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                 VerifiablePresentation presentation = jsonLdSerializer.deserializePresentation(new SerializedVerifiablePresentation(vpClaim));
 
                 for (VerifiableCredential credential : presentation.getVerifiableCredentials()) {
+                    validateExpiryDate = commonService.validateExpiry(withCredentialExpiryDate, credential, response);
                     if (!validateCredential(credential)) {
                         validCredential = false;
                     }
@@ -205,14 +208,11 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                 throw new BadDataException(String.format("Validation of VP in form of JSON-LD is not supported. Invalid Json-LD: %s", e.getMessage()));
             }
 
-            response.put(StringPool.VALID, (validateSignature && validateAudience && validateExpiryDate && validCredential));
+            response.put(StringPool.VALID, (validateSignature && validateAudience && validateExpiryDate && validCredential && validateJWTExpiryDate));
 
             if (StringUtils.hasText(audience)) {
                 response.put(StringPool.VALIDATE_AUDIENCE, validateAudience);
 
-            }
-            if (withCredentialExpiryDate) {
-                response.put(StringPool.VALIDATE_EXPIRY_DATE, validateExpiryDate);
             }
 
         } else {
@@ -237,19 +237,14 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         }
     }
 
-    private boolean validateExpiryDate(boolean withCredentialExpiryDate, SignedJWT signedJWT) {
-        if (withCredentialExpiryDate) {
-            try {
-                SignedJwtValidator jwtValidator = new SignedJwtValidator();
-                jwtValidator.validateDate(signedJWT);
-                return true;
-            } catch (Exception e) {
-                log.error("Can not expiry date ", e);
-                return false;
-            }
-
-        } else {
+    private boolean validateJWTExpiryDate(SignedJWT signedJWT) {
+        try {
+            SignedJwtValidator jwtValidator = new SignedJwtValidator();
+            jwtValidator.validateDate(signedJWT);
             return true;
+        } catch (Exception e) {
+            log.error("Can not expiry date ", e);
+            return false;
         }
     }
 

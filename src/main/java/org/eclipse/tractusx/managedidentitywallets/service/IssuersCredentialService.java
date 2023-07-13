@@ -450,27 +450,12 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         Map<String, Object> response = new HashMap<>();
 
         //check expiry
-        boolean dateValidation = validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
+        boolean dateValidation = commonService.validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
 
         response.put(StringPool.VALID, valid && dateValidation);
         response.put("vc", verifiableCredential);
 
         return response;
-    }
-
-    private static boolean validateExpiry(boolean withCredentialExpiryDate, VerifiableCredential verifiableCredential, Map<String, Object> response) {
-        //validate expiry date
-        boolean dateValidation = true;
-        if (withCredentialExpiryDate) {
-            Instant expirationDate = verifiableCredential.getExpirationDate();
-            if (expirationDate.isBefore(Instant.now())) {
-                dateValidation = false;
-                response.put(StringPool.VALIDATE_EXPIRY_DATE, false);
-            } else {
-                response.put(StringPool.VALIDATE_EXPIRY_DATE, true);
-            }
-        }
-        return dateValidation;
     }
 
 
