@@ -76,7 +76,7 @@ The available scopes/roles are:
 6. Role `manage_app` used to change log level of application at runtime. Check Logging in application section for more
    details
 
-Additionally a Token mapper can to be created under *Clients* &gt;
+Additionally a Token mapper can be created under *Clients* &gt;
 *ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
 configuration (using as example `BPNL000000001`):
 
