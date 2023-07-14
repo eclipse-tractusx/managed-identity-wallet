@@ -27,7 +27,7 @@ Following tools the MIW development team used successfully:
 
 ## Manual Keycloak Configuration
 
-Within the development setup the Keycloak is initially prepared with the
+Within the development setup the Keycloak instance is initially prepared with the
 values in `./dev-assets/docker-environment/keycloak`. The realm could also be
 manually added and configured at http://localhost:8080 via the "Add realm"
 button. It can be for example named `localkeycloak`. Also add an additional client,
