@@ -31,6 +31,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -233,7 +234,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         });
         didDocument.put("@context", mutableContext);
         didDocument = DidDocument.fromJson(didDocument.toJson());
-        log.debug("did document created for bpn ->{}", request.getBpn());
+        log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
 
         //Save wallet
         Wallet wallet = create(Wallet.builder()
@@ -253,7 +254,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
                 .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey().asByte())))
                 .build());
-        log.debug("Wallet created for bpn ->{}", request.getBpn());
+        log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
 
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
@@ -275,9 +276,9 @@ public class WalletService extends BaseService<Wallet, Long> {
                     .bpn(miwSettings.authorityWalletBpn())
                     .build();
             createWallet(request, true);
-            log.info("Authority wallet created with bpn {}", miwSettings.authorityWalletBpn());
+            log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
         } else {
-            log.info("Authority wallet exists with bpn {}", miwSettings.authorityWalletBpn());
+            log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
         }
     }
 
