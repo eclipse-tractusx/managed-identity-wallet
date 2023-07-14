@@ -1,0 +1,1854 @@
+{
+    "openapi": "3.0.1",
+    "info":
+    {
+        "title": "Managed Identity Wallets API",
+        "description": "Managed Identity Wallets API",
+        "contact":
+        {
+            "name": "Eclipse Tractus-X",
+            "url": "https://projects.eclipse.org/projects/automotive.tractusx",
+            "email": "tractusx-dev@eclipse.org"
+        },
+        "license":
+        {
+            "name": "Apache 2.0",
+            "url": "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE"
+        },
+        "version": "0.0.1"
+    },
+    "servers":
+    [
+        {
+            "url": "http://localhost:8087",
+            "description": "Generated server url"
+        }
+    ],
+    "security":
+    [
+        {
+            "Authenticate using access_token":
+            []
+        }
+    ],
+    "paths":
+    {
+        "/api/wallets":
+        {
+            "get":
+            {
+                "tags":
+                [
+                    "Wallets"
+                ],
+                "summary": "List of wallets",
+                "description": "Permission: **view_wallets** \n\n Retrieve list of registered wallets",
+                "operationId": "getWallets",
+                "parameters":
+                [
+                    {
+                        "name": "pageNumber",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 2147483647
+                        }
+                    },
+                    {
+                        "name": "sortColumn",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string",
+                            "default": "createdAt"
+                        }
+                    },
+                    {
+                        "name": "sortTpe",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string",
+                            "default": "desc"
+                        }
+                    }
+                ],
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/PageWallet"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post":
+            {
+                "tags":
+                [
+                    "Wallets"
+                ],
+                "summary": "Create Wallet",
+                "description": "Permission: **add_wallets** \n\n Create a wallet and store it",
+                "operationId": "createWallet",
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "$ref": "#/components/schemas/CreateWalletRequest"
+                            },
+                            "examples":
+                            {
+                                "Create wallet with BPN":
+                                {
+                                    "description": "Create wallet with BPN",
+                                    "value":
+                                    {
+                                        "bpn": "BPNL000000000001",
+                                        "name": "companyA"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/Wallet"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/wallets/{identifier}/credentials":
+        {
+            "post":
+            {
+                "tags":
+                [
+                    "Wallets"
+                ],
+                "summary": "Store Verifiable Credential",
+                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier",
+                "operationId": "storeCredential",
+                "parameters":
+                [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Did or BPN",
+                        "required": true,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "type": "object",
+                                "additionalProperties":
+                                {
+                                    "type": "object"
+                                }
+                            },
+                            "example":
+                            {
+                                "id": "http://example.edu/credentials/3732",
+                                "@context":
+                                [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://www.w3.org/2018/credentials/examples/v1"
+                                ],
+                                "type":
+                                [
+                                    "University-Degree-Credential",
+                                    "VerifiableCredential"
+                                ],
+                                "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                "issuanceDate": "2019-06-16T18:56:59Z",
+                                "expirationDate": "2019-06-17T18:56:59Z",
+                                "credentialSubject":
+                                [
+                                    {
+                                        "college": "Test-University"
+                                    }
+                                ],
+                                "proof":
+                                {
+                                    "type": "Ed25519Signature2018",
+                                    "created": "2021-11-17T22:20:27Z",
+                                    "proofPurpose": "assertionMethod",
+                                    "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
+                                    "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "type": "object",
+                                    "additionalProperties":
+                                    {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/presentations":
+        {
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Presentations - Generation"
+                ],
+                "summary": "Create Verifiable Presentation",
+                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller) \n\n Create a verifiable presentation from a list of verifiable credentials, signed by the holder",
+                "operationId": "createPresentation",
+                "parameters":
+                [
+                    {
+                        "name": "audience",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "asJwt",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "type": "object",
+                                "additionalProperties":
+                                {
+                                    "type": "object"
+                                }
+                            },
+                            "example":
+                            {
+                                "holderIdentifier": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                "verifiableCredentials":
+                                [
+                                    {
+                                        "id": "http://example.edu/credentials/333",
+                                        "@context":
+                                        [
+                                            "https://www.w3.org/2018/credentials/v1",
+                                            "https://www.w3.org/2018/credentials/examples/v1"
+                                        ],
+                                        "type":
+                                        [
+                                            "University-Degree-Credential",
+                                            "VerifiableCredential"
+                                        ],
+                                        "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                        "issuanceDate": "2019-06-16T18:56:59Z",
+                                        "expirationDate": "2019-06-17T18:56:59Z",
+                                        "credentialSubject":
+                                        [
+                                            {
+                                                "college": "Test-University"
+                                            }
+                                        ],
+                                        "proof":
+                                        {
+                                            "type": "Ed25519Signature2018",
+                                            "created": "2021-11-17T22:20:27Z",
+                                            "proofPurpose": "assertionMethod",
+                                            "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+                                            "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "type": "object",
+                                    "additionalProperties":
+                                    {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/presentations/validation":
+        {
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Presentations - Validation"
+                ],
+                "summary": "Validate Verifiable Presentation",
+                "description": "Permission: **view_wallets** OR **view_wallet**  \n\n Validate Verifiable Presentation with all included credentials",
+                "operationId": "validatePresentation",
+                "parameters":
+                [
+                    {
+                        "name": "audience",
+                        "in": "query",
+                        "description": "Audience to validate in VP (Only supported in case of JWT formatted VP)",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "asJwt",
+                        "in": "query",
+                        "description": "Pass true in case of VP is in JWT format",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "withCredentialExpiryDate",
+                        "in": "query",
+                        "description": "Check expiry of VC(Only supported in case of JWT formatted VP)",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "type": "object",
+                                "additionalProperties":
+                                {
+                                    "type": "object"
+                                }
+                            },
+                            "examples":
+                            {
+                                "VP as JWT":
+                                {
+                                    "description": "VP as JWT",
+                                    "value":
+                                    {
+                                        "vp": "eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiYXVkIjoic21hcnRTZW5zZSIsImlzcyI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJ2cCI6eyJpZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAjMWQ2ODg4N2EtMzY4NC00ZDU0LWFkYjAtMmM4MWJiNjc4NTJiIiwidHlwZSI6WyJWZXJpZmlhYmxlUHJlc2VudGF0aW9uIl0sIkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sInZlcmlmaWFibGVDcmVkZW50aWFsIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJCcG5DcmVkZW50aWFsQ1giXSwiaWQiOiJhY2I5NTIyZi1kYjIyLTRmOTAtOTQ3NS1jM2YzNTExZjljZGUiLCJpc3N1ZXIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMy0wNi0wMVQwODo1Nzo1MFoiLCJleHBpcmF0aW9uRGF0ZSI6IjIwMjQtMTItMzFUMTg6MzA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiYnBuIjoiQlBOTDAwMDAwMDAwMDAwMCIsImlkIjoiZGlkOndlYjpsb2NhbGhvc3Q6QlBOTDAwMDAwMDAwMDAwMCIsInR5cGUiOiJCcG5DcmVkZW50aWFsIn0sInByb29mIjp7InByb29mUHVycG9zZSI6InByb29mUHVycG9zZSIsInZlcmlmaWNhdGlvbk1ldGhvZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJ0eXBlIjoiRWQyNTUxOVNpZ25hdHVyZTIwMjAiLCJwcm9vZlZhbHVlIjoiejRkdUJmY0NzYVN6aU5lVXc4WUJ5eUZkdlpYVzhlQUs5MjhkeDNQeExqV0N2S3p0Slo5bWh4aEh3ZTVCdVRRUW5KRmtvb01nUUdLREU0OGNpTHJHaHBzUEEiLCJjcmVhdGVkIjoiMjAyMy0wNi0wMVQwODo1Nzo1MFoifX19LCJleHAiOjE2ODU2ODEwNTIsImp0aSI6IjFhYmQxYjAxLTBkZTUtNGY1Ny04ZjBlLWRmNzBhNzNkMjE2NyJ9.Hfm-ANjoeZ8fO-32LPOsQ3-xXSclPUd28p9hvlWyVVB0Mz7n0k-KAHra5kpT0oGrGtdhC1lZ0AitdB_td6VrAQ"
+                                    }
+                                },
+                                "VP as json-ld":
+                                {
+                                    "description": "VP as json-ld",
+                                    "value":
+                                    {
+                                        "vp":
+                                        {
+                                            "id": "b9d97cef-758d-4a7c-843d-86f17632b08a",
+                                            "type":
+                                            [
+                                                "VerifiablePresentation"
+                                            ],
+                                            "@context":
+                                            [
+                                                "https://www.w3.org/2018/credentials/v1"
+                                            ],
+                                            "verifiableCredential":
+                                            [
+                                                {
+                                                    "issuanceDate": "2023-06-01T08:57:50Z",
+                                                    "credentialSubject":
+                                                    [
+                                                        {
+                                                            "bpn": "BPNL000000000000",
+                                                            "id": "did:web:localhost:BPNL000000000000",
+                                                            "type": "BpnCredential"
+                                                        }
+                                                    ],
+                                                    "id": "acb9522f-db22-4f90-9475-c3f3511f9cde",
+                                                    "proof":
+                                                    {
+                                                        "proofPurpose": "proofPurpose",
+                                                        "verificationMethod": "did:web:localhost:BPNL000000000000",
+                                                        "type": "Ed25519Signature2020",
+                                                        "proofValue": "z4duBfcCsaSziNeUw8YByyFdvZXW8eAK928dx3PxLjWCvKztJZ9mhxhHwe5BuTQQnJFkooMgQGKDE48ciLrGhpsPA",
+                                                        "created": "2023-06-01T08:57:50Z"
+                                                    },
+                                                    "type":
+                                                    [
+                                                        "VerifiableCredential",
+                                                        "BpnCredentialCX"
+                                                    ],
+                                                    "@context":
+                                                    [
+                                                        "https://www.w3.org/2018/credentials/v1",
+                                                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json"
+                                                    ],
+                                                    "issuer": "did:web:localhost:BPNL000000000000",
+                                                    "expirationDate": "2024-12-31T18:30:00Z"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "type": "object",
+                                    "additionalProperties":
+                                    {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/credentials":
+        {
+            "get":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Holder"
+                ],
+                "summary": "Query Verifiable Credentials",
+                "description": "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria",
+                "operationId": "getCredentials",
+                "parameters":
+                [
+                    {
+                        "name": "credentialId",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "issuerIdentifier",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "array",
+                            "items":
+                            {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "sortColumn",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string",
+                            "default": "createdAt"
+                        }
+                    },
+                    {
+                        "name": "sortTpe",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string",
+                            "default": "desc"
+                        }
+                    },
+                    {
+                        "name": "pageNumber",
+                        "in": "query",
+                        "description": "Page number, Page number start with zero",
+                        "required": false,
+                        "schema":
+                        {
+                            "maximum": 2147483647,
+                            "minimum": 0,
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Number of records per page",
+                        "required": false,
+                        "schema":
+                        {
+                            "maximum": 2147483647,
+                            "minimum": 0,
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 2147483647
+                        }
+                    }
+                ],
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/PageImplVerifiableCredential"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Holder"
+                ],
+                "summary": "Issue Verifiable Credential",
+                "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID",
+                "operationId": "issueCredential",
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "type": "object",
+                                "additionalProperties":
+                                {
+                                    "type": "object"
+                                }
+                            },
+                            "example":
+                            {
+                                "id": "http://example.edu/credentials/333",
+                                "@context":
+                                [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://www.w3.org/2018/credentials/examples/v1"
+                                ],
+                                "type":
+                                [
+                                    "University-Degree-Credential",
+                                    "VerifiableCredential"
+                                ],
+                                "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                "issuanceDate": "2019-06-16T18:56:59Z",
+                                "expirationDate": "2019-06-17T18:56:59Z",
+                                "credentialSubject":
+                                [
+                                    {
+                                        "college": "Test-University"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/VerifiableCredential"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Holder"
+                ],
+                "summary": "Delete a verifiable credential by its ID",
+                "description": "Permission: **update_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Delete a verifiable credential by its ID",
+                "operationId": "deleteCredential",
+                "parameters":
+                [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/credentials/validation":
+        {
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Validation"
+                ],
+                "summary": "Validate Verifiable Credentials",
+                "description": "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials",
+                "operationId": "credentialsValidation",
+                "parameters":
+                [
+                    {
+                        "name": "withCredentialExpiryDate",
+                        "in": "query",
+                        "description": "Check expiry of VC",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "type": "object",
+                                "additionalProperties":
+                                {
+                                    "type": "object"
+                                }
+                            },
+                            "example":
+                            {
+                                "id": "http://example.edu/credentials/333",
+                                "@context":
+                                [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://www.w3.org/2018/credentials/examples/v1"
+                                ],
+                                "type":
+                                [
+                                    "University-Degree-Credential",
+                                    "VerifiableCredential"
+                                ],
+                                "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                "issuanceDate": "2019-06-16T18:56:59Z",
+                                "expirationDate": "2019-06-17T18:56:59Z",
+                                "credentialSubject":
+                                [
+                                    {
+                                        "college": "Test-University"
+                                    }
+                                ],
+                                "proof":
+                                {
+                                    "type": "Ed25519Signature2018",
+                                    "created": "2021-11-17T22:20:27Z",
+                                    "proofPurpose": "assertionMethod",
+                                    "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
+                                    "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "type": "object",
+                                    "additionalProperties":
+                                    {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/credentials/issuer":
+        {
+            "get":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Issuer"
+                ],
+                "summary": "Query Verifiable Credentials",
+                "description": "Permission: **view_wallets** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria",
+                "operationId": "getCredentials_1",
+                "parameters":
+                [
+                    {
+                        "name": "credentialId",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "holderIdentifier",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "array",
+                            "items":
+                            {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "pageNumber",
+                        "in": "query",
+                        "description": "Page number, Page number start with zero",
+                        "required": false,
+                        "schema":
+                        {
+                            "maximum": 2147483647,
+                            "minimum": 0,
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Number of records per page",
+                        "required": false,
+                        "schema":
+                        {
+                            "maximum": 2147483647,
+                            "minimum": 0,
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 2147483647
+                        }
+                    },
+                    {
+                        "name": "sortColumn",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string",
+                            "default": "createdAt"
+                        }
+                    },
+                    {
+                        "name": "sortTpe",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "string",
+                            "default": "desc"
+                        }
+                    }
+                ],
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/PageImplVerifiableCredential"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Issuer"
+                ],
+                "summary": "Issue Verifiable Credential",
+                "description": "Permission: **update_wallets** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID",
+                "operationId": "issueCredentialUsingBaseWallet",
+                "parameters":
+                [
+                    {
+                        "name": "holderDid",
+                        "in": "query",
+                        "required": true,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "type": "object",
+                                "additionalProperties":
+                                {
+                                    "type": "object"
+                                }
+                            },
+                            "example":
+                            {
+                                "id": "http://example.edu/credentials/333",
+                                "@context":
+                                [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://www.w3.org/2018/credentials/examples/v1"
+                                ],
+                                "type":
+                                [
+                                    "University-Degree-Credential",
+                                    "VerifiableCredential"
+                                ],
+                                "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                "issuanceDate": "2019-06-16T18:56:59Z",
+                                "expirationDate": "2019-06-17T18:56:59Z",
+                                "credentialSubject":
+                                [
+                                    {
+                                        "college": "Test-University"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/VerifiableCredential"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/credentials/issuer/membership":
+        {
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Issuer"
+                ],
+                "summary": "Issue a Membership Verifiable Credential with base wallet issuer",
+                "description": "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet",
+                "operationId": "issueMembershipCredential",
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "$ref": "#/components/schemas/IssueMembershipCredentialRequest"
+                            },
+                            "example":
+                            {
+                                "bpn": "BPNL000000000000"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/VerifiableCredential"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/credentials/issuer/framework":
+        {
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Issuer"
+                ],
+                "summary": "Issue a Use Case Verifiable Credential with base wallet issuer",
+                "description": "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet",
+                "operationId": "issueFrameworkCredential",
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "$ref": "#/components/schemas/IssueFrameworkCredentialRequest"
+                            },
+                            "example":
+                            {
+                                "holderIdentifier": "BPNL000000000000",
+                                "type": "BehaviorTwinCredential",
+                                "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                "contract-version": "1.0.0"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/VerifiableCredential"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/credentials/issuer/dismantler":
+        {
+            "post":
+            {
+                "tags":
+                [
+                    "Verifiable Credential - Issuer"
+                ],
+                "summary": "Issue a Dismantler Verifiable Credential with base wallet issuer",
+                "description": "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet",
+                "operationId": "issueDismantlerCredential",
+                "requestBody":
+                {
+                    "content":
+                    {
+                        "application/json":
+                        {
+                            "schema":
+                            {
+                                "$ref": "#/components/schemas/IssueDismantlerCredentialRequest"
+                            },
+                            "example":
+                            {
+                                "bpn": "BPNL000000000000",
+                                "activityType": "vehicleDismantle",
+                                "allowedVehicleBrands":
+                                [
+                                    "Audi",
+                                    "Abarth",
+                                    "Alfa Romeo",
+                                    "Chrysler"
+                                ]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/VerifiableCredential"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/{bpn}/did.json":
+        {
+            "get":
+            {
+                "tags":
+                [
+                    "DIDDocument"
+                ],
+                "summary": "Resolve DID Document",
+                "description": "Resolve the DID document for a given BPN",
+                "operationId": "getDidResolve",
+                "parameters":
+                [
+                    {
+                        "name": "bpn",
+                        "in": "path",
+                        "description": "Did or BPN",
+                        "required": true,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/DidDocument"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/wallets/{identifier}":
+        {
+            "get":
+            {
+                "tags":
+                [
+                    "Wallets"
+                ],
+                "summary": "Retrieve wallet by identifier",
+                "description": "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller or Base wallet, authority wallet can see all wallets) \n\n Retrieve single wallet by identifier, with or without its credentials",
+                "operationId": "getWalletByIdentifier",
+                "parameters":
+                [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Did or BPN",
+                        "required": true,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "withCredentials",
+                        "in": "query",
+                        "required": false,
+                        "schema":
+                        {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/Wallet"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/didDocuments/{identifier}":
+        {
+            "get":
+            {
+                "tags":
+                [
+                    "DIDDocument"
+                ],
+                "summary": "Resolve DID Document",
+                "description": "Resolve the DID document for a given DID or BPN",
+                "operationId": "getDidDocument",
+                "parameters":
+                [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Did or BPN",
+                        "required": true,
+                        "schema":
+                        {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses":
+                {
+                    "200":
+                    {
+                        "description": "OK",
+                        "content":
+                        {
+                            "application/json":
+                            {
+                                "schema":
+                                {
+                                    "$ref": "#/components/schemas/DidDocument"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components":
+    {
+        "schemas":
+        {
+            "CreateWalletRequest":
+            {
+                "required":
+                [
+                    "bpn",
+                    "name"
+                ],
+                "type": "object",
+                "properties":
+                {
+                    "bpn":
+                    {
+                        "maxLength": 255,
+                        "minLength": 5,
+                        "type": "string"
+                    },
+                    "name":
+                    {
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "type": "string"
+                    }
+                }
+            },
+            "DidDocument":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "id":
+                    {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "verificationMethods":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "$ref": "#/components/schemas/VerificationMethod"
+                        }
+                    },
+                    "context":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    },
+                    "empty":
+                    {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties":
+                {
+                    "type": "object"
+                }
+            },
+            "VerifiableCredential":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "id":
+                    {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "types":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "type": "string"
+                        }
+                    },
+                    "issuer":
+                    {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "expirationDate":
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "credentialSubject":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "$ref": "#/components/schemas/VerifiableCredentialSubject"
+                        }
+                    },
+                    "proof":
+                    {
+                        "type": "object",
+                        "properties":
+                        {
+                            "type":
+                            {
+                                "type": "string"
+                            },
+                            "empty":
+                            {
+                                "type": "boolean"
+                            }
+                        },
+                        "additionalProperties":
+                        {
+                            "type": "object"
+                        }
+                    },
+                    "issuanceDate":
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "context":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    },
+                    "empty":
+                    {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties":
+                {
+                    "type": "object"
+                }
+            },
+            "VerifiableCredentialSubject":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "id":
+                    {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "empty":
+                    {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties":
+                {
+                    "type": "object"
+                }
+            },
+            "VerificationMethod":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "id":
+                    {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "type":
+                    {
+                        "type": "string"
+                    },
+                    "controller":
+                    {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "empty":
+                    {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties":
+                {
+                    "type": "object"
+                }
+            },
+            "Wallet":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "name":
+                    {
+                        "type": "string"
+                    },
+                    "did":
+                    {
+                        "type": "string"
+                    },
+                    "bpn":
+                    {
+                        "type": "string"
+                    },
+                    "algorithm":
+                    {
+                        "type": "string"
+                    },
+                    "didDocument":
+                    {
+                        "type": "object",
+                        "properties":
+                        {
+                            "id":
+                            {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            "verificationMethods":
+                            {
+                                "type": "array",
+                                "items":
+                                {
+                                    "$ref": "#/components/schemas/VerificationMethod"
+                                }
+                            },
+                            "context":
+                            {
+                                "type": "array",
+                                "items":
+                                {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            },
+                            "empty":
+                            {
+                                "type": "boolean"
+                            }
+                        },
+                        "additionalProperties":
+                        {
+                            "type": "object"
+                        }
+                    },
+                    "verifiableCredentials":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "$ref": "#/components/schemas/VerifiableCredential"
+                        }
+                    }
+                }
+            },
+            "IssueMembershipCredentialRequest":
+            {
+                "required":
+                [
+                    "bpn"
+                ],
+                "type": "object",
+                "properties":
+                {
+                    "bpn":
+                    {
+                        "maxLength": 255,
+                        "minLength": 5,
+                        "type": "string"
+                    }
+                }
+            },
+            "IssueFrameworkCredentialRequest":
+            {
+                "required":
+                [
+                    "contract-template",
+                    "contract-version",
+                    "holderIdentifier",
+                    "type"
+                ],
+                "type": "object",
+                "properties":
+                {
+                    "holderIdentifier":
+                    {
+                        "maxLength": 255,
+                        "minLength": 5,
+                        "type": "string"
+                    },
+                    "type":
+                    {
+                        "type": "string"
+                    },
+                    "contract-template":
+                    {
+                        "type": "string"
+                    },
+                    "contract-version":
+                    {
+                        "type": "string"
+                    }
+                }
+            },
+            "IssueDismantlerCredentialRequest":
+            {
+                "required":
+                [
+                    "activityType",
+                    "bpn"
+                ],
+                "type": "object",
+                "properties":
+                {
+                    "bpn":
+                    {
+                        "maxLength": 255,
+                        "minLength": 5,
+                        "type": "string"
+                    },
+                    "activityType":
+                    {
+                        "maxLength": 2147483647,
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "allowedVehicleBrands":
+                    {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items":
+                        {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "PageWallet":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "totalElements":
+                    {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "$ref": "#/components/schemas/Wallet"
+                        }
+                    },
+                    "number":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort":
+                    {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "pageable":
+                    {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "numberOfElements":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "first":
+                    {
+                        "type": "boolean"
+                    },
+                    "last":
+                    {
+                        "type": "boolean"
+                    },
+                    "empty":
+                    {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PageableObject":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "offset":
+                    {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sort":
+                    {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "pageNumber":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageSize":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "paged":
+                    {
+                        "type": "boolean"
+                    },
+                    "unpaged":
+                    {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SortObject":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "empty":
+                    {
+                        "type": "boolean"
+                    },
+                    "sorted":
+                    {
+                        "type": "boolean"
+                    },
+                    "unsorted":
+                    {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PageImplVerifiableCredential":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "content":
+                    {
+                        "type": "array",
+                        "items":
+                        {
+                            "$ref": "#/components/schemas/VerifiableCredential"
+                        }
+                    },
+                    "pageable":
+                    {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "totalElements":
+                    {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "last":
+                    {
+                        "type": "boolean"
+                    },
+                    "size":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "number":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort":
+                    {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "numberOfElements":
+                    {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "first":
+                    {
+                        "type": "boolean"
+                    },
+                    "empty":
+                    {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "securitySchemes":
+        {
+            "Authenticate using access_token":
+            {
+                "type": "apiKey",
+                "description": "**Bearer (apiKey)** \nJWT Authorization header using the Bearer scheme.\n\nEnter **Bearer** [space] and then your token in the text input below.\n\nExample: Bearer 12345abcdef",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    }
+}
