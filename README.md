@@ -162,11 +162,11 @@ When you just run `task` without parameters, you will see all tasks available.
 
 # End Users
 See OpenAPI documentation, which is automatically created from
-the source and available on each deployment at the `/docs` endpoint
-(e.g. locally at http://localhost:8000/docs). An export of the JSON
-document can be also found in [docs/openapi_v001.json](docs/openapi_v001.json).
+the source and available on each deployment at the `/docs/api-docs/docs` endpoint
+(e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
+document can be also found in [docs/openapi_v002.json](docs/openapi_v002.json).
 
-## Test Coverage
+# Test Coverage
 
 Jacoco is used to generate the coverage report. The report generation
 and the coverage verification are automatically executed after tests.
@@ -187,7 +187,7 @@ task app:coverage
 
 Currently, the minimum is 80% coverage.
 
-## Common issues and solutions during local setup
+# Common issues and solutions during local setup
 
 #### 1. Can not build with test cases
 
@@ -214,7 +214,7 @@ In case you encounter any database-related issues, you can resolve them by follo
 
 This process ensures that any issues with the database schema are resolved by recreating it in a fresh state.
 
-## Environment Variables <a id= "environmentVariables"></a>
+# Environment Variables <a id= "environmentVariables"></a>
 
 | name                            | description                                                                                  | default value                                                                                                                                       |
 |---------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -245,14 +245,14 @@ This process ensures that any issues with the database schema are resolved by re
 | APP_LOG_LEVEL                   | Log level of application                                                                     | INFO                                                                                                                                                |
 |                                 |                                                                                              |                                                                                                                                                     |
 
-## Technical Debts and Known issue
+# Technical Debts and Known issue
 
 1. Keys are stored in database in encrypted format, need to store keys in more secure place ie. Vault
 2. Policies can be validated dynamically as per
    request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
 
-## Logging in application
+# Logging in application
 
 Log level in application can be set using environment variable ``APP_LOG_LEVEL``. Possible values
 are ``OFF, ERROR, WARN, INFO, DEBUG, TRACE`` and default value set to ``INFO``
