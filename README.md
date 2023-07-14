@@ -73,7 +73,7 @@ The available scopes/roles are:
     * to get stored Verifiable Credentials of the related BPN
     * to validate any Verifiable Credential
     * to validate any Verifiable Presentation
-6. Role `manage_app` used to change log level of application at runtime. Check Logging in application section for more
+6. Role `manage_app` used to change the log level of the application at runtime. Check Logging in the application section for more
    details
 
 Additionally a Token mapper can be created under *Clients* &gt;
