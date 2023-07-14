@@ -31,18 +31,22 @@ Within the development setup the Keycloak is initially prepared with the
 values in `./dev-assets/docker-environment/keycloak`. The realm could also be
 manually added and configured at http://localhost:8080 via the "Add realm"
 button. It can be for example named `localkeycloak`. Also add an additional client,
-e.g. named `ManagedIdentityWallets` with *valid redirect url* set to
+e.g. named `miw_private_client` with *valid redirect url* set to
 `http://localhost:8080/*`. The roles
+
 * add_wallets
 * view_wallets
 * update_wallets
 * delete_wallets
 * view_wallet
 * update_wallet
-  can be added under *Clients > ManagedIdentityWallets > Roles* and then
-  assigned to the client using *Clients > ManagedIdentityWallets > Client Scopes*
-  *> Service Account Roles > Client Roles > ManagedIdentityWallets*. The
-  available scopes/roles are:
+* manage_app
+
+Roles can be added under *Clients > miw_private_client > Roles* and then
+assigned to the client using *Clients > miw_private_client > Client Scopes*
+*> Service Account Roles > Client Roles > miw_private_client*.
+
+The available scopes/roles are:
 
 1. Role `add_wallets` to create a new wallet
 
@@ -59,32 +63,34 @@ e.g. named `ManagedIdentityWallets` with *valid redirect url* set to
     * to issue a Verifiable Presentation
 
 4. Role `update_wallet`:
-   * to remove a Verifiable Credential
-   * to store a Verifiable Credential
-   * to issue a Verifiable Credential
-   * to issue a Verifiable Presentation
-   
+    * to remove a Verifiable Credential
+    * to store a Verifiable Credential
+    * to issue a Verifiable Credential
+    * to issue a Verifiable Presentation
+
 5. Role `view_wallet` requires the BPN of Caller and it can be used:
     * to get the Wallet of the related BPN
     * to get stored Verifiable Credentials of the related BPN
     * to validate any Verifiable Credential
     * to validate any Verifiable Presentation
+6. Role `manage_app` used to change log level of application at runtime. Check Logging in application section for more
+   details
 
 Additionally a Token mapper can to be created under *Clients* &gt;
 *ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
 configuration (using as example `BPNL000000001`):
 
-| Key                 | Value                     |
-|---------------------|---------------------------|
-| Name                | StaticBPN                 |
-| Mapper Type         | Hardcoded claim           |
-| Token Claim Name    | BPN                       |
-| Claim value         | BPNL000000001             |
-| Claim JSON Type     | String                    |
-| Add to ID token     | OFF                       |
-| Add to access token | ON                        |
-| Add to userinfo     | OFF                       |
-| includeInAccessTokenResponse.label | ON         | 
+| Key                                | Value           |
+|------------------------------------|-----------------|
+| Name                               | StaticBPN       |
+| Mapper Type                        | Hardcoded claim |
+| Token Claim Name                   | BPN             |
+| Claim value                        | BPNL000000001   |
+| Claim JSON Type                    | String          |
+| Add to ID token                    | OFF             |
+| Add to access token                | ON              |
+| Add to userinfo                    | OFF             |
+| includeInAccessTokenResponse.label | ON              | 
 
 If you receive an error message, that the client secret is not valid, please go into
 keycloak admin and within *Clients > Credentials* recreate the secret.
