@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +68,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         String redirectUri = properties.getPath();
-        log.info("Set landing page to path {}", redirectUri);
+        log.info("Set landing page to path {}", StringEscapeUtils.escapeJava(redirectUri));
         registry.addRedirectViewController("/", redirectUri);
     }
 }
