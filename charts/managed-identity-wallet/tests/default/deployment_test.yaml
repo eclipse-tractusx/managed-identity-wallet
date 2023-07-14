@@ -104,3 +104,21 @@ tests:
       - lengthEqual:
           path: spec.template.spec.containers[0].env
           count: 1
+
+  - it: should have empty values
+    template: templates/deployment.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.affinity
+      - notExists:
+          path: spec.template.spec.tolerations
+
+  - it: should have nodeSelector value set
+    template: templates/deployment.yaml
+    asserts:
+      - exists:
+          path: spec.template.spec.nodeSelector
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            "kubernetes.io/os": linux

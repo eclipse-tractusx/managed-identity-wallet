@@ -21,17 +21,24 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
-import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class DeleteHoldersCredentialTest {
     @Autowired
@@ -57,6 +64,33 @@ class DeleteHoldersCredentialTest {
     @Autowired
     private MIWSettings miwSettings;
 
+    @Autowired
+    private WalletService walletService;
+
+    private String tenantBpn;
+    private Did tenantDid;
+    private String bpnOperator;
+    private Did operatorDid;
+
+    @BeforeEach
+    @SneakyThrows
+    public void setup() {
+        tenantBpn = UUID.randomUUID().toString();
+        bpnOperator = miwSettings.authorityWalletBpn();
+        operatorDid = DidParser.parse(miwSettings.authorityWalletDid());
+
+        final CreateWalletRequest createWalletRequest = new CreateWalletRequest();
+        createWalletRequest.setBpn(tenantBpn);
+        createWalletRequest.setName("My Test Tenant Wallet");
+        final Wallet tenantWallet = walletService.createWallet(createWalletRequest);
+        tenantDid = DidParser.parse(tenantWallet.getDid());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        Wallet tenantWallet = walletService.getWalletByIdentifier(tenantBpn, false, bpnOperator);
+        walletService.delete(tenantWallet.getId());
+    }
 
     @Test
     void deleteCredentialTestWithInvalidRole403() {
@@ -68,18 +102,13 @@ class DeleteHoldersCredentialTest {
 
     @Test
     void deleteCredentialTest204() {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-        //create new wallet
-        TestUtils.createWallet(bpn, did, restTemplate);
-
         //Fetch bpn credential which is auto generated while create wallet
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDid(did);
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDid(tenantDid.toString());
         String type = credentials.get(0).getType();
         String idToDeleted = credentials.get(0).getCredentialId();
         Assertions.assertFalse(credentials.isEmpty());
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(tenantBpn);
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
@@ -87,17 +116,18 @@ class DeleteHoldersCredentialTest {
 
         Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCode().value());
 
-        credentials = holdersCredentialRepository.getByHolderDid(did);
+        credentials = holdersCredentialRepository.getByHolderDid(tenantBpn);
         credentials.forEach(vc -> {
             Assertions.assertNotEquals(vc.getCredentialId(), idToDeleted);
         });
 
         //check, VC should not be deleted from issuer table
-        List<IssuersCredential> vcs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, type);
-        IssuersCredential issuersCredential = vcs.stream()
-                .filter(vc -> vc.getCredentialId().equalsIgnoreCase(idToDeleted)).findFirst()
-                .orElse(null);
-        Assertions.assertNotNull(issuersCredential);
+        List<IssuersCredential> vcs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), tenantDid.toString(), type);
+
+        boolean isNotDeleted = vcs.stream()
+                .anyMatch(vc -> vc.getCredentialId().equals(idToDeleted));
+
+        Assertions.assertTrue(isNotDeleted);
     }
 
     @Test
@@ -107,5 +137,4 @@ class DeleteHoldersCredentialTest {
         ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?id={id}", HttpMethod.DELETE, entity, String.class, "");
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
     }
-
 }

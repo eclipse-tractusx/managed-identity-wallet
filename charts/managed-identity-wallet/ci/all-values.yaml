@@ -17,23 +17,41 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-apiVersion: v2
-name: managed-identity-wallet
-description: |
-  The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using did:web.
+image:
+  tag: "latest-java-did-web"
 
-type: application
+secrets:
+  DB_USER_NAME: postgres
+  DB_PASSWORD: pg_test_ci
+  ENCRYPTION_KEY: d6aab34fb68e090c2789a9b1a67648d3
+  KEYCLOAK_CLIENT_ID: mit_ci_test
 
-version: 1.0.1-rc1
-appVersion: 0.0.1-SNAPSHOT.b75ebaf
+envs:
+  DB_HOST: test-postgres
+  MIW_HOST_NAME: miw.local
+  KEYCLOAK_REALM: MIW
+  AUTH_SERVER_URL: https://localhost/auth
+  AUTHORITY_WALLET_DID: "did:web:miw.local:BPNL000000000000"
+  AUTHORITY_WALLET_BPN: "BPNL000000000000"
 
-home: https://eclipse-tractusx.github.io
-keywords:
-  - Managed Identity Wallet
-  - eclipse-tractusx
+ingress:
+  enabled: true
+  hosts:
+    - host: miw.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: miw-secret
+      hosts:
+        - miw.local
 
-dependencies:
-  - name: postgresql
-    version: 11.9.13
-    repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.enabled
+postgresql:
+  fullnameOverride: test-postgres
+  primary:
+    initdb:
+      password: pg_test_ci
+  auth:
+    password: pg_test_ci
+    postgresPassword: pg_test_ci
+    username: postgres

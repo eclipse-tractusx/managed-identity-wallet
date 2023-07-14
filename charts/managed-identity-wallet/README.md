@@ -2,7 +2,38 @@
 
 ![Version: 1.0.1-rc1](https://img.shields.io/badge/Version-1.0.1--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1-SNAPSHOT.b75ebaf](https://img.shields.io/badge/AppVersion-0.0.1--SNAPSHOT.b75ebaf-informational?style=flat-square)
 
-Managed Identity Wallets Service
+The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using did:web.
+
+**Homepage:** <https://eclipse-tractusx.github.io>
+
+## Get Repo Info
+
+    helm repo add my-miw https://pmoscode-helm.github.io/miw/
+    helm repo update
+
+## Install chart
+
+    helm install [RELEASE_NAME] my-miw/miw
+
+The command deploys miw on the Kubernetes cluster in the default configuration.
+
+See configuration below.
+
+See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
+
+## Uninstall Chart
+
+    helm uninstall [RELEASE_NAME]
+
+This removes all the Kubernetes components associated with the chart and deletes the release.
+
+See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
+
+## Upgrading Chart
+
+    helm upgrade [RELEASE_NAME] [CHART]
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
 ## Requirements
 

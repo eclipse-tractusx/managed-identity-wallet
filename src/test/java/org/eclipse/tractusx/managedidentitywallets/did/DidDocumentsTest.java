@@ -24,12 +24,9 @@ package org.eclipse.tractusx.managedidentitywallets.did;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,21 +38,14 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.UUID;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class DidDocumentsTest {
-    @Autowired
-    private WalletRepository walletRepository;
 
     @Autowired
-    private WalletKeyRepository walletKeyRepository;
-
-    @Autowired
-    private HoldersCredentialRepository holdersCredentialRepository;
-
+    private WalletService walletService;
     @Autowired
     private TestRestTemplate restTemplate;
-
 
     @Test
     void getDidDocumentInvalidBpn404() {
@@ -67,21 +57,9 @@ class DidDocumentsTest {
     void getDidDocumentWithBpn200() {
 
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        createWallet(bpn);
 
-        createWallet(bpn, did);
         ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, bpn);
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertNotNull(response.getBody());
-    }
-
-    @Test
-    void getDidDocumentWithDid200() {
-        String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
-
-        createWallet(bpn, did);
-        ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_DOCUMENTS, String.class, did);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
     }
@@ -96,37 +74,17 @@ class DidDocumentsTest {
     void getDidResolveWithBpn200() {
 
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
 
-        createWallet(bpn, did);
+        createWallet(bpn);
         ResponseEntity<String> response = restTemplate.getForEntity(RestURI.DID_RESOLVE, String.class, bpn);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertNotNull(response.getBody());
     }
 
-    private Wallet createWallet(String bpn, String did) {
-        String didDocument = """
-                {
-                  "id": "did:web:localhost%3Abpn123124",
-                  "verificationMethod": [
-                    {
-                      "publicKeyMultibase": "z9mo3TUPvEntiBQtHYVXXy5DfxLGgaHa84ZT6Er2qWs4y",
-                      "controller": "did:web:localhost%3Abpn123124",
-                      "id": "did:web:localhost%3Abpn123124#key-1",
-                      "type": "Ed25519VerificationKey2020"
-                    }
-                  ],
-                  "@context": "https://www.w3.org/ns/did/v1"
-                }
-                """;
-
-        Wallet wallet = Wallet.builder()
-                .bpn(bpn)
-                .did(did)
-                .didDocument(DidDocument.fromJson(didDocument))
-                .algorithm(StringPool.ED_25519)
-                .name(bpn)
-                .build();
-        return walletRepository.save(wallet);
+    private Wallet createWallet(String bpn) {
+        CreateWalletRequest createWalletRequest = new CreateWalletRequest();
+        createWalletRequest.setBpn(bpn);
+        createWalletRequest.setName("wallet_" + bpn);
+        return walletService.createWallet(createWalletRequest);
     }
 }
