@@ -160,6 +160,11 @@ When you just run `task` without parameters, you will see all tasks available.
 5. Click on "Authorize" and "close"
 6. MIW is up and running
 
+# End Users
+See OpenAPI documentation, which is automatically created from
+the source and available on each deployment at the `/docs` endpoint
+(e.g. locally at http://localhost:8000/docs). An export of the JSON
+document can be also found in [docs/openapi_v001.json](docs/openapi_v001.json).
 
 ## Test Coverage
 
