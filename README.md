@@ -23,6 +23,72 @@ Following tools the MIW development team used successfully:
 | Database | DBeaver  | https://dbeaver.io/                             |
 | IAM      | Keycloak | https://www.keycloak.org/                       |                                                                                                   |
 
+# Administrator Documentation
+
+## Manual Keycloak Configuration
+
+Within the development setup the Keycloak is initially prepared with the
+values in `./dev-assets/docker-environment/keycloak`. The realm could also be
+manually added and configured at http://localhost:8080 via the "Add realm"
+button. It can be for example named `localkeycloak`. Also add an additional client,
+e.g. named `ManagedIdentityWallets` with *valid redirect url* set to
+`http://localhost:8080/*`. The roles
+* add_wallets
+* view_wallets
+* update_wallets
+* delete_wallets
+* view_wallet
+* update_wallet
+  can be added under *Clients > ManagedIdentityWallets > Roles* and then
+  assigned to the client using *Clients > ManagedIdentityWallets > Client Scopes*
+  *> Service Account Roles > Client Roles > ManagedIdentityWallets*. The
+  available scopes/roles are:
+
+1. Role `add_wallets` to create a new wallet
+
+2. Role `view_wallets`:
+    * to get a list of all wallets
+    * to retrieve one wallet by its identifier
+    * to validate a Verifiable Credential
+    * to validate a Verifiable Presentation
+    * to get all stored Verifiable Credentials
+
+3. Role `update_wallets` for the following actions:
+    * to store Verifiable Credential
+    * to issue a Verifiable Credential
+    * to issue a Verifiable Presentation
+
+4. Role `update_wallet`:
+   * to remove a Verifiable Credential
+   * to store a Verifiable Credential
+   * to issue a Verifiable Credential
+   * to issue a Verifiable Presentation
+   
+5. Role `view_wallet` requires the BPN of Caller and it can be used:
+    * to get the Wallet of the related BPN
+    * to get stored Verifiable Credentials of the related BPN
+    * to validate any Verifiable Credential
+    * to validate any Verifiable Presentation
+
+Additionally a Token mapper can to be created under *Clients* &gt;
+*ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
+configuration (using as example `BPNL000000001`):
+
+| Key                 | Value                     |
+|---------------------|---------------------------|
+| Name                | StaticBPN                 |
+| Mapper Type         | Hardcoded claim           |
+| Token Claim Name    | BPN                       |
+| Claim value         | BPNL000000001             |
+| Claim JSON Type     | String                    |
+| Add to ID token     | OFF                       |
+| Add to access token | ON                        |
+| Add to userinfo     | OFF                       |
+| includeInAccessTokenResponse.label | ON         | 
+
+If you receive an error message, that the client secret is not valid, please go into
+keycloak admin and within *Clients > Credentials* recreate the secret.
+
 ## Development Setup
 
 ### Prerequisites
