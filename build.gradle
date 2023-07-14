@@ -57,7 +57,7 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation "org.testcontainers:testcontainers"
-	testImplementation "org.testcontainers:postgresql"
+	testImplementation 'com.h2database:h2:2.2.220'
 	testImplementation "org.testcontainers:junit-jupiter"
 	testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
 	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
