@@ -38,6 +38,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -56,7 +57,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class IssuersCredentialTest {
 
@@ -102,7 +103,6 @@ class IssuersCredentialTest {
             ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
             Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
         }
-
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
@@ -162,7 +162,7 @@ class IssuersCredentialTest {
     @Test
     void issueCredentialsWithoutBaseWalletBPN403() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String holderDid = "did:web:localhost:" + bpn;
+        String holderDid = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
@@ -193,7 +193,7 @@ class IssuersCredentialTest {
     void issueSummaryCredentials400() throws com.fasterxml.jackson.core.JsonProcessingException {
 
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         ResponseEntity<String> response = issueVC(bpn, did, miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.SUMMARY_CREDENTIAL, headers);
@@ -205,7 +205,7 @@ class IssuersCredentialTest {
     void issueCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
 
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
@@ -245,7 +245,7 @@ class IssuersCredentialTest {
         //Using Builder
         VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
-                        .id(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
+                        .id(URI.create(issuerDid + "#" + UUID.randomUUID()))
                         .context(miwSettings.vcContexts())
                         .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
                         .issuer(URI.create(issuerDid)) //issuer must be base wallet

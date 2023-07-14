@@ -40,6 +40,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredential
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
@@ -55,7 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class DismantlerHoldersCredentialTest {
     @Autowired
@@ -80,7 +81,6 @@ class DismantlerHoldersCredentialTest {
     void issueDismantlerCredentialTest403() {
         String bpn = UUID.randomUUID().toString();
 
-        String did = "did:web:localhost:" + bpn;
         HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
 
         IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
@@ -93,7 +93,7 @@ class DismantlerHoldersCredentialTest {
 
 
     @Test
-    void issueDismantlerCredentialToBaseWalletTest201() throws JsonProcessingException, JSONException {
+    void issueDismantlerCredentialToBaseWalletTest201() throws JSONException {
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
         ResponseEntity<String> response = issueDismantlerCredential(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
@@ -111,7 +111,7 @@ class DismantlerHoldersCredentialTest {
     void issueDismantlerCredentialTest201() throws JsonProcessingException, JSONException {
 
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         //create wallet
         Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
@@ -154,7 +154,7 @@ class DismantlerHoldersCredentialTest {
     void issueDismantlerCredentialWithInvalidBpnAccess409() {
         String bpn = UUID.randomUUID().toString();
 
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         //create entry
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
@@ -178,7 +178,7 @@ class DismantlerHoldersCredentialTest {
     @Test
     void issueDismantlerCredentialWithoutAllowedVehicleBrands() {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost%3A8080:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()); //token must contain base wallet BPN
@@ -200,8 +200,7 @@ class DismantlerHoldersCredentialTest {
     void issueDismantlerCredentialWithDuplicateBpn409() {
 
         String bpn = UUID.randomUUID().toString();
-
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         //create entry
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
