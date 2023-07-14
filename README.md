@@ -23,6 +23,78 @@ Following tools the MIW development team used successfully:
 | Database | DBeaver  | https://dbeaver.io/                             |
 | IAM      | Keycloak | https://www.keycloak.org/                       |                                                                                                   |
 
+# Administrator Documentation
+
+## Manual Keycloak Configuration
+
+Within the development setup the Keycloak is initially prepared with the
+values in `./dev-assets/docker-environment/keycloak`. The realm could also be
+manually added and configured at http://localhost:8080 via the "Add realm"
+button. It can be for example named `localkeycloak`. Also add an additional client,
+e.g. named `miw_private_client` with *valid redirect url* set to
+`http://localhost:8080/*`. The roles
+
+* add_wallets
+* view_wallets
+* update_wallets
+* delete_wallets
+* view_wallet
+* update_wallet
+* manage_app
+
+Roles can be added under *Clients > miw_private_client > Roles* and then
+assigned to the client using *Clients > miw_private_client > Client Scopes*
+*> Service Account Roles > Client Roles > miw_private_client*.
+
+The available scopes/roles are:
+
+1. Role `add_wallets` to create a new wallet
+
+2. Role `view_wallets`:
+    * to get a list of all wallets
+    * to retrieve one wallet by its identifier
+    * to validate a Verifiable Credential
+    * to validate a Verifiable Presentation
+    * to get all stored Verifiable Credentials
+
+3. Role `update_wallets` for the following actions:
+    * to store Verifiable Credential
+    * to issue a Verifiable Credential
+    * to issue a Verifiable Presentation
+
+4. Role `update_wallet`:
+    * to remove a Verifiable Credential
+    * to store a Verifiable Credential
+    * to issue a Verifiable Credential
+    * to issue a Verifiable Presentation
+
+5. Role `view_wallet` requires the BPN of Caller and it can be used:
+    * to get the Wallet of the related BPN
+    * to get stored Verifiable Credentials of the related BPN
+    * to validate any Verifiable Credential
+    * to validate any Verifiable Presentation
+6. Role `manage_app` used to change log level of application at runtime. Check Logging in application section for more
+   details
+
+Additionally a Token mapper can to be created under *Clients* &gt;
+*ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
+configuration (using as example `BPNL000000001`):
+
+| Key                                | Value           |
+|------------------------------------|-----------------|
+| Name                               | StaticBPN       |
+| Mapper Type                        | Hardcoded claim |
+| Token Claim Name                   | BPN             |
+| Claim value                        | BPNL000000001   |
+| Claim JSON Type                    | String          |
+| Add to ID token                    | OFF             |
+| Add to access token                | ON              |
+| Add to userinfo                    | OFF             |
+| includeInAccessTokenResponse.label | ON              | 
+
+If you receive an error message, that the client secret is not valid, please go into
+keycloak admin and within *Clients > Credentials* recreate the secret.
+
 ## Development Setup
 
 ### Prerequisites
@@ -88,8 +160,13 @@ When you just run `task` without parameters, you will see all tasks available.
 5. Click on "Authorize" and "close"
 6. MIW is up and running
 
+# End Users
+See OpenAPI documentation, which is automatically created from
+the source and available on each deployment at the `/docs/api-docs/docs` endpoint
+(e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
+document can be also found in [docs/openapi_v002.json](docs/openapi_v002.json).
 
-## Test Coverage
+# Test Coverage
 
 Jacoco is used to generate the coverage report. The report generation
 and the coverage verification are automatically executed after tests.
@@ -110,7 +187,7 @@ task app:coverage
 
 Currently, the minimum is 80% coverage.
 
-## Common issues and solutions during local setup
+# Common issues and solutions during local setup
 
 #### 1. Can not build with test cases
 
@@ -137,7 +214,7 @@ In case you encounter any database-related issues, you can resolve them by follo
 
 This process ensures that any issues with the database schema are resolved by recreating it in a fresh state.
 
-## Environment Variables <a id= "environmentVariables"></a>
+# Environment Variables <a id= "environmentVariables"></a>
 
 | name                            | description                                                                                  | default value                                                                                                                                       |
 |---------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -168,14 +245,14 @@ This process ensures that any issues with the database schema are resolved by re
 | APP_LOG_LEVEL                   | Log level of application                                                                     | INFO                                                                                                                                                |
 |                                 |                                                                                              |                                                                                                                                                     |
 
-## Technical Debts and Known issue
+# Technical Debts and Known issue
 
 1. Keys are stored in database in encrypted format, need to store keys in more secure place ie. Vault
 2. Policies can be validated dynamically as per
    request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
 
-## Logging in application
+# Logging in application
 
 Log level in application can be set using environment variable ``APP_LOG_LEVEL``. Possible values
 are ``OFF, ERROR, WARN, INFO, DEBUG, TRACE`` and default value set to ``INFO``
