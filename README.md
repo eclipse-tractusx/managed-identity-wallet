@@ -78,7 +78,7 @@ The available scopes/roles are:
 
 Additionally a Token mapper can be created under *Clients* &gt;
 *ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
-configuration (using as example `BPNL000000001`):
+configuration (using as an example `BPNL000000001`):
 
 | Key                                | Value           |
 |------------------------------------|-----------------|
