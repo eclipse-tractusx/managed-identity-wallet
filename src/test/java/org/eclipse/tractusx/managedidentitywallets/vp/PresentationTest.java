@@ -109,7 +109,8 @@ class PresentationTest {
         Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
         Assertions.assertFalse(map.containsKey(StringPool.VALIDATE_AUDIENCE));
         Assertions.assertFalse(map.containsKey(StringPool.VALIDATE_EXPIRY_DATE));
-        Assertions.assertFalse(map.containsKey(StringPool.VALIDATE_JWT_EXPIRY_DATE));
+        Assertions.assertTrue(map.containsKey(StringPool.VALIDATE_JWT_EXPIRY_DATE));
+        Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALIDATE_JWT_EXPIRY_DATE).toString()));
     }
 
     @Test
@@ -135,9 +136,9 @@ class PresentationTest {
 
             Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALID).toString()));
             Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALIDATE_AUDIENCE).toString()));
-            Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(map.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
+            Assertions.assertTrue(map.containsKey(StringPool.VALIDATE_JWT_EXPIRY_DATE));
             Assertions.assertFalse(Boolean.parseBoolean(map.get(StringPool.VALIDATE_JWT_EXPIRY_DATE).toString()));
-
         }
     }
 
