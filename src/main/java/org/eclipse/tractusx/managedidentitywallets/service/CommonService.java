@@ -31,7 +31,11 @@ import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProbl
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.exception.DidParseException;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -60,6 +64,21 @@ public class CommonService {
         }
         Validate.isNull(wallet).launch(new WalletNotFoundProblem("Wallet not found for identifier " + identifier));
         return wallet;
+    }
+
+    public static boolean validateExpiry(boolean withCredentialExpiryDate, VerifiableCredential verifiableCredential, Map<String, Object> response) {
+        //validate expiry date
+        boolean dateValidation = true;
+        if (withCredentialExpiryDate) {
+            Instant expirationDate = verifiableCredential.getExpirationDate();
+            if (expirationDate.isBefore(Instant.now())) {
+                dateValidation = false;
+                response.put(StringPool.VALIDATE_EXPIRY_DATE, false);
+            } else {
+                response.put(StringPool.VALIDATE_EXPIRY_DATE, true);
+            }
+        }
+        return dateValidation;
     }
 
 }
