@@ -49,7 +49,11 @@ dependencies {
 	implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.13'
-	testImplementation 'org.projectlombok:lombok:1.18.26'
+
+	//Added explicitly to mitigate CVE 2022-1471
+	implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
+
+	testImplementation 'org.projectlombok:lombok:1.18.28'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

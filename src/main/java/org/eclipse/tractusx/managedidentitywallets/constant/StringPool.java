@@ -36,6 +36,7 @@ public class StringPool {
     public static final String VALID = "valid";
     public static final String VALIDATE_AUDIENCE = "validateAudience";
     public static final String VALIDATE_EXPIRY_DATE = "validateExpiryDate";
+    public static final String VALIDATE_JWT_EXPIRY_DATE = "validateJWTExpiryDate";
     public static final String DID_DOCUMENT = "didDocument";
     public static final String VEHICLE_DISMANTLE = "vehicleDismantle";
     public static final String CREATED_AT = "createdAt";

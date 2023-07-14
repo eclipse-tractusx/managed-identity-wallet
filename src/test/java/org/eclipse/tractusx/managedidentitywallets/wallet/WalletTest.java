@@ -55,6 +55,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.net.URI;
 import java.util.*;
 
 
@@ -133,6 +134,10 @@ class WalletTest {
 
         Assertions.assertNotNull(response.getBody());
         Assertions.assertNotNull(wallet.getDidDocument());
+        List<URI> context = wallet.getDidDocument().getContext();
+        miwSettings.didDocumentContextUrls().forEach(uri -> {
+            Assertions.assertTrue(context.contains(uri));
+        });
         Assertions.assertEquals(wallet.getBpn(), bpn);
         Assertions.assertEquals(wallet.getName(), name);
 
@@ -141,7 +146,6 @@ class WalletTest {
         Assertions.assertEquals(walletFromDB.getName(), name);
         Assertions.assertNotNull(walletFromDB);
         WalletKey walletKey = walletKeyRepository.getByWalletId(walletFromDB.getId());
-        Assertions.assertNotNull(wallet.getDidDocument());
         Assertions.assertNotNull(walletKey);
 
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
