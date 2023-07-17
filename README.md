@@ -164,7 +164,7 @@ When you just run `task` without parameters, you will see all tasks available.
 See OpenAPI documentation, which is automatically created from
 the source and available on each deployment at the `/docs/api-docs/docs` endpoint
 (e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
-document can be also found in [docs/openapi_v002.json](docs/openapi_v002.json).
+document can be also found in [docs/openapi_v001.json](docs/openapi_v001.json).
 
 # Test Coverage
 

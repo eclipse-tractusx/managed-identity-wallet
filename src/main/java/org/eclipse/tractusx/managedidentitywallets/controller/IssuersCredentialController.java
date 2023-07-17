@@ -175,28 +175,38 @@ public class IssuersCredentialController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                      "id": "http://example.edu/credentials/333",
-                                      "@context": [
-                                        "https://www.w3.org/2018/credentials/v1",
-                                        "https://www.w3.org/2018/credentials/examples/v1"
-                                      ],
-                                      "type": [
-                                        "University-Degree-Credential", "VerifiableCredential"
-                                      ],
-                                      "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                      "issuanceDate": "2019-06-16T18:56:59Z",
-                                      "expirationDate": "2019-06-17T18:56:59Z",
-                                      "credentialSubject": [{
-                                        "college": "Test-University"
-                                      }],
-                                      "proof": {
-                                        "type": "Ed25519Signature2018",
-                                        "created": "2021-11-17T22:20:27Z",
-                                        "proofPurpose": "assertionMethod",
-                                        "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#keys-1",
-                                        "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
-                                      }
-                                }
+                                     "credentialSubject":
+                                     [
+                                         {
+                                             "bpn": "BPNL000000000000",
+                                             "id": "did:web:localhost:BPNL000000000000",
+                                             "type": "BpnCredential"
+                                         }
+                                     ],
+                                     "issuanceDate": "2023-07-14T11:05:44Z",
+                                     "id": "did:web:localhost:BPNL000000000000#f177b3e9-bbf9-45db-bc3d-80152abcb419",
+                                     "proof":
+                                     {
+                                         "created": "2023-07-14T11:05:48Z",
+                                         "jws": "eyJhbGciOiJFZERTQSJ9..C4oYBfTh11OKG0yV0qoCQxF6zZWZLb9dPXJCP6oCtpyB_sSc8o6cPhByKwf-0o7ElsUr0mh6AGPwGxdoOijfDw",
+                                         "proofPurpose": "proofPurpose",
+                                         "type": "JsonWebSignature2020",
+                                         "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                     },
+                                     "type":
+                                     [
+                                         "VerifiableCredential",
+                                         "BpnCredential"
+                                     ],
+                                     "@context":
+                                     [
+                                         "https://www.w3.org/2018/credentials/v1",
+                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://w3id.org/security/suites/jws-2020/v1"
+                                     ],
+                                     "issuer": "did:web:localhost:BPNL000000000000",
+                                     "expirationDate": "2023-09-30T18:30:00Z"
+                                 }
                     """))
     })
     public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data,
@@ -225,7 +235,7 @@ public class IssuersCredentialController extends BaseController {
                                         "https://www.w3.org/2018/credentials/examples/v1"
                                       ],
                                       "type": [
-                                        "University-Degree-Credential","VerifiableCredential"
+                                        "VerifiableCredential", "University-Degree-Credential"
                                       ],
                                       "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
                                       "issuanceDate": "2019-06-16T18:56:59Z",
