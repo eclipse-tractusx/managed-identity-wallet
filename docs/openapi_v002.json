@@ -2,19 +2,18 @@
     "openapi": "3.0.1",
     "info":
     {
-        "title": "Managed Identity Wallets API",
-        "description": "Managed Identity Wallets API",
-        "contact":
-        {
-            "name": "Eclipse Tractus-X",
-            "url": "https://projects.eclipse.org/projects/automotive.tractusx",
-            "email": "tractusx-dev@eclipse.org"
-        },
-        "license":
-        {
-            "name": "Apache 2.0",
-            "url": "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE"
-        },
+      "title": "Managed Identity Wallets API",
+      "description": "Managed Identity Wallets API",
+      "termsOfService": "https://www.eclipse.org/legal/termsofuse.php",
+      "contact": {
+        "name": "Eclipse Tractus-X",
+        "url": "https://projects.eclipse.org/projects/automotive.tractusx",
+        "email": "tractusx-dev@eclipse.org"
+      },
+      "license": {
+        "name": "Apache 2.0",
+        "url": "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE"
+      },
         "version": "0.0.1"
     },
     "servers":
