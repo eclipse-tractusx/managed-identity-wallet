@@ -97,9 +97,9 @@ public class HoldersCredentialController extends BaseController {
                                         "https://www.w3.org/2018/credentials/examples/v1"
                                       ],
                                       "type": [
-                                        "University-Degree-Credential","VerifiableCredential"
+                                        "VerifiableCredential", "University-Degree-Credential"
                                       ],
-                                      "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
+                                      "issuer": "did:web:localhost:BPNL000000000000",
                                       "issuanceDate": "2019-06-16T18:56:59Z",
                                       "expirationDate": "2019-06-17T18:56:59Z",
                                       "credentialSubject": [{
