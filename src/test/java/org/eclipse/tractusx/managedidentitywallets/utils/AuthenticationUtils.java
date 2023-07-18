@@ -85,7 +85,6 @@ public class AuthenticationUtils {
         List<String> list = List.of("BPN", "bpn", "bPn"); //Do not add more field here, if you do make sure you change in keycloak realm file
         Random randomizer = new Random();
         String attributeName = list.get(randomizer.nextInt(list.size()));
-        System.out.println("attributeName---------------------->" + attributeName);
 
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(TestContextInitializer.getAuthServerUrl())

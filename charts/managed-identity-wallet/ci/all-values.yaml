@@ -17,17 +17,41 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-version: '3'
+image:
+  tag: "latest-java-did-web"
 
-tasks:
-  unittest:
-    desc: Executes helm unittests
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm unittest -f 'tests/**/*.yaml' .
+secrets:
+  DB_USER_NAME: postgres
+  DB_PASSWORD: pg_test_ci
+  ENCRYPTION_KEY: d6aab34fb68e090c2789a9b1a67648d3
+  KEYCLOAK_CLIENT_ID: mit_ci_test
 
-  readme:
-    desc: Rebuilds the readme of the Helm chart
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm-docs .
+envs:
+  DB_HOST: test-postgres
+  MIW_HOST_NAME: miw.local
+  KEYCLOAK_REALM: MIW
+  AUTH_SERVER_URL: https://localhost/auth
+  AUTHORITY_WALLET_DID: "did:web:miw.local:BPNL000000000000"
+  AUTHORITY_WALLET_BPN: "BPNL000000000000"
+
+ingress:
+  enabled: true
+  hosts:
+    - host: miw.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: miw-secret
+      hosts:
+        - miw.local
+
+postgresql:
+  fullnameOverride: test-postgres
+  primary:
+    initdb:
+      password: pg_test_ci
+  auth:
+    password: pg_test_ci
+    postgresPassword: pg_test_ci
+    username: postgres

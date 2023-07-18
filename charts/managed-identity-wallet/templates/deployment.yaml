@@ -50,10 +50,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if or .Values.envs .Values.secrets }}
           env:
             - name: APPLICATION_PORT
               value: "8080"
+          {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
             - name: {{ $key }}
               value: {{ $val }}

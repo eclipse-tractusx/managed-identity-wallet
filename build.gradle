@@ -48,14 +48,20 @@ dependencies {
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
 	implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
 	implementation 'org.liquibase:liquibase-core'
-	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.8'
+	implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.13'
+
+	//Added explicitly to mitigate CVE 2022-1471
+	implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
+
+	testImplementation 'org.projectlombok:lombok:1.18.28'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation "org.testcontainers:testcontainers"
-	testImplementation "org.testcontainers:postgresql"
+	testImplementation 'com.h2database:h2:2.2.220'
 	testImplementation "org.testcontainers:junit-jupiter"
 	testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
 	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'

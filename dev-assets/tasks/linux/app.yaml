@@ -31,6 +31,16 @@ tasks:
     cmds:
       - echo "BAERER $(./get_Token.sh)"
 
+  test-report:
+    desc: Generates the test report for MIW
+    cmds:
+      - ./gradlew jacocoTestReport
+
+  coverage:
+    desc: Runs the coverage check
+    cmds:
+      - ./gradlew jacocoTestCoverageVerification
+
   clean:
     desc: Cleans the build directory
     cmds:

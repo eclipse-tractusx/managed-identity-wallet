@@ -17,9 +17,7 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-FROM eclipse-temurin:19-jre-alpine
-
-EXPOSE 8080:8080
+FROM eclipse-temurin:17-jre-alpine
 
 # run as non-root user
 RUN addgroup -g 11111 -S miw && adduser -u 11111 -S -s /bin/false -G miw miw
