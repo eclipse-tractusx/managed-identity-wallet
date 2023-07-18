@@ -20,6 +20,7 @@
  */
 
 package org.eclipse.tractusx.managedidentitywallets.config.security;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,9 +28,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -49,18 +52,14 @@ public class CustomAuthenticationConverter implements Converter<Jwt, AbstractAut
         this.resourceId = resourceId;
         grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
     }
-
     @Override
     public AbstractAuthenticationToken convert(Jwt source) {
-        Collection<GrantedAuthority> convert = grantedAuthoritiesConverter.convert(source);
-        if (!CollectionUtils.isEmpty(convert)) {
-            Collection<GrantedAuthority> authorities = new HashSet<>(convert);
-            authorities.addAll(extractResourceRoles(source, resourceId));
-            extractResourceRoles(source, resourceId);
-            return new JwtAuthenticationToken(source, authorities);
-        } else {
-            return new JwtAuthenticationToken(source, Collections.emptyList());
-        }
+        Collection<GrantedAuthority> authorities = (grantedAuthoritiesConverter.convert(source))
+                .stream()
+                .collect(Collectors.toSet());
+        authorities.addAll(extractResourceRoles(source, resourceId));
+        extractResourceRoles(source, resourceId);
+        return new JwtAuthenticationToken(source, authorities);
     }
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt, String resourceId) {

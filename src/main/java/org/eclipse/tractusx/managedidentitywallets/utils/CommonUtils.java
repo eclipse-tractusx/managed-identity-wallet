@@ -103,11 +103,17 @@ public class CommonUtils {
                                                                    VerifiableCredentialSubject verifiableCredentialSubject,
                                                                    byte[] privateKey, List<URI> contexts, Date expiryDate) {
         //VC Builder
+
+        // if the credential does not contain the JWS proof-context add it
+        URI jwsUri = URI.create("https://w3id.org/security/suites/jws-2020/v1");
+        if (!contexts.contains(jwsUri))
+            contexts.add(jwsUri);
+
         URI id = URI.create(UUID.randomUUID().toString());
         VerifiableCredentialBuilder builder =
                 new VerifiableCredentialBuilder()
                         .context(contexts)
-                        .id(id)
+                        .id(URI.create(issuerDoc.getId() + "#" + id))
                         .type(verifiableCredentialType)
                         .issuer(issuerDoc.getId())
                         .expirationDate(expiryDate.toInstant())

@@ -1,0 +1,48 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+## Get Repo Info
+
+    helm repo add my-miw https://pmoscode-helm.github.io/miw/
+    helm repo update
+
+## Install chart
+
+    helm install [RELEASE_NAME] my-miw/miw
+
+The command deploys miw on the Kubernetes cluster in the default configuration.
+
+See configuration below.
+
+See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
+
+## Uninstall Chart
+
+    helm uninstall [RELEASE_NAME]
+
+This removes all the Kubernetes components associated with the chart and deletes the release.
+
+See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
+
+## Upgrading Chart
+
+    helm upgrade [RELEASE_NAME] [CHART]
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesHeader" . }}
+
+{{ template "chart.valuesTable" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

@@ -26,7 +26,7 @@ services:
     image: local-miw:latest
     container_name: miw
     env_file:
-      - ../../local.env
+      - ../env-files/env.$DEV_ENVIRONMENT
     ports:
       - "8000:8000"
       - "8090:8090"
@@ -39,11 +39,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/db.sh:/docker-entrypoint-initdb.d/init-database.sh
     env_file:
-      - ../../local.env
-    #environment:
-    #  POSTGRES_DB: keycloak
-    #  POSTGRES_USER: keycloak
-    #  POSTGRES_PASSWORD: password
+      - ../env-files/env.$DEV_ENVIRONMENT
     ports:
       - "5432:5432"
     networks:
@@ -52,22 +48,14 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:21.1
     env_file:
-      - ../../local.env
+      - ../env-files/env.$DEV_ENVIRONMENT
     environment:
       DB_SCHEMA: public
-      KC_HOSTNAME: keycloak
-    #  DB_VENDOR: POSTGRES
-    #  DB_ADDR: postgres
-    #  DB_DATABASE: keycloak
-    #  DB_USER: keycloak
-    #  DB_PASSWORD: password
-    #  KEYCLOAK_ADMIN: admin
-    #  KEYCLOAK_ADMIN_PASSWORD: admin
     command:
       - start-dev
       - --import-realm
     volumes:
-      - ./keycloak/miw_test_realm_docker.json:/opt/keycloak/data/import/miw_test_realm_docker.json
+      - ./keycloak/miw_test_realm_$DEV_ENVIRONMENT.json:/opt/keycloak/data/import/miw_test_realm.json
     ports:
       - "8080:8080"
     depends_on:

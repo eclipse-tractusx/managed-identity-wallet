@@ -25,9 +25,6 @@ import jakarta.persistence.AttributeConverter;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-
 /**
  * The type String to did document converter.
  */

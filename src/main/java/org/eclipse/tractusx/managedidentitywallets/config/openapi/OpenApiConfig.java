@@ -24,9 +24,9 @@ package org.eclipse.tractusx.managedidentitywallets.config.openapi;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.OAuthFlow;
-import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.AllArgsConstructor;
@@ -55,9 +55,22 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI openAPI() {
         Info info = new Info();
-        info.setTitle("MIW API");
-        info.setDescription("MIW API");
+        info.setTitle("Managed Identity Wallets API");
+        info.setDescription("Managed Identity Wallets API");
+        info.termsOfService("https://www.eclipse.org/legal/termsofuse.php");
         info.setVersion("0.0.1");
+
+        Contact contact = new Contact();
+        contact.name("Eclipse Tractus-X");
+        contact.email("tractusx-dev@eclipse.org");
+        contact.url("https://projects.eclipse.org/projects/automotive.tractusx");
+        info.contact(contact);
+
+        License license = new License();
+        license.name("Apache 2.0");
+        license.url("https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE");
+        info.license(license);
+
         OpenAPI openAPI = new OpenAPI();
         if (Boolean.TRUE.equals(properties.enabled())) {
             openAPI = enableSecurity(openAPI);
