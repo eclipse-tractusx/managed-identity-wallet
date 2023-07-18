@@ -3,6 +3,8 @@ plugins {
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyVersion}"
 	id "jacoco"
+	id 'project-report'
+
 }
 
 group = "${groupName}"
@@ -53,6 +55,10 @@ dependencies {
 	//Added explicitly to mitigate CVE 2022-1471
 	implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
 
+	//Added explicitly to mitigate CVE 2023-24998
+	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
+
+
 	testImplementation 'org.projectlombok:lombok:1.18.28'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
@@ -86,6 +92,10 @@ build {
 
 test {
 	finalizedBy jacocoTestReport
+}
+
+htmlDependencyReport {
+	projects = project.allprojects
 }
 
 jacocoTestReport {
