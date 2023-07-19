@@ -30,14 +30,14 @@ imagePullSecrets:
 nameOverride: ""
 fullnameOverride: ""
 
-secrets:
+secrets: {}
 #  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
 #  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
 #  KEYCLOAK_CLIENT_ID: xxx
 #  ENCRYPTION_KEY: xxx  # 64 chars
 
 # APPLICATION_PORT is bound to 8080!!
-envs:
+envs: {}
 #  APPLICATION_ENVIRONMENT: xxx
 #  DB_HOST: auto
 #  DB_PORT: xxx
