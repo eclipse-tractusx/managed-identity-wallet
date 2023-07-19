@@ -91,20 +91,26 @@ public class HoldersCredentialController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                      "id": "http://example.edu/credentials/333",
-                                      "@context": [
-                                        "https://www.w3.org/2018/credentials/v1",
-                                        "https://www.w3.org/2018/credentials/examples/v1"
-                                      ],
-                                      "type": [
-                                        "VerifiableCredential", "University-Degree-Credential"
-                                      ],
-                                      "issuer": "did:web:localhost:BPNL000000000000",
-                                      "issuanceDate": "2019-06-16T18:56:59Z",
-                                      "expirationDate": "2019-06-17T18:56:59Z",
-                                      "credentialSubject": [{
-                                        "college": "Test-University"
-                                      }]
+                                  "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                  "@context": [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                    "https://w3id.org/security/suites/jws-2020/v1"
+                                  ],
+                                  "type": [
+                                    "VerifiableCredential",
+                                    "BpnCredential"
+                                  ],
+                                  "issuer": "did:web:localhost:BPNL000000000000",
+                                  "expirationDate": "2024-12-31T18:30:00Z",
+                                  "issuanceDate": "2023-07-19T09:11:34Z",
+                                  "credentialSubject": [
+                                    {
+                                      "bpn": "BPNL000000000000",
+                                      "id": "did:web:localhost:BPNL000000000000",
+                                      "type": "BpnCredential"
+                                    }
+                                  ]
                                 }
                     """))
     })

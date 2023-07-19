@@ -177,16 +177,16 @@ public class WalletController extends BaseController {
                                      ],
                                      "type":
                                      [
-                                         "LegalParticipant", "VerifiableCredential"
+                                         "LegalParticipant","VerifiableCredential"
                                      ],
-                                     "id": "did:web:localhost",
-                                     "issuer": "did:web:localhost",
+                                     "id": "did:web:hella.proofsense.in",
+                                     "issuer": "did:web:hella.proofsense.in",
                                      "issuanceDate": "2023-05-04T07:36:03.633Z",
                                      "credentialSubject":
                                      {
-                                         "id": "https://localhost/.well-known/participant.json",
+                                         "id": "https://hella.proofsense.in/.well-known/participant.json",
                                          "type": "gx:LegalParticipant",
-                                         "gx:legalName": "Demo",
+                                         "gx:legalName": "Hella",
                                          "gx:legalRegistrationNumber":
                                          {
                                              "gx:taxID": "113123123"
@@ -206,7 +206,7 @@ public class WalletController extends BaseController {
                                          "type": "JsonWebSignature2020",
                                          "created": "2023-05-04T07:36:04.079Z",
                                          "proofPurpose": "assertionMethod",
-                                         "verificationMethod": "did:web:localhost",
+                                         "verificationMethod": "did:web:hella.proofsense.in",
                                          "jws": "eyJhbGciOiJQUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..iHki8WC3nPfcSRkC_AV4tXh0ikfT7BLPTGc_0ecI8zontTmJLqwcpPfAt0PFsoo3SkZgc6j636z55jj5tagBc-OKoiDu7diWryNAnL9ASsmWJyrPhOKVARs6x6PxVaTFBuyCfAHZeipxmkcYfNB_jooIXO2HuRcL2odhsQHELkGc5IDD-aBMWyNpfVAaYQ-cCzvDflZQlsowziUKfMkBfwpwgMdXFIgKWYdDIRvzA-U-XiC11-6QV7tPeKsMguEU0F5bh8cCEm2rooqXtENcsM_7cqFdQoOyblJyM-agoz2LUTj9QIdn9_gnNkGN-2U7_qBJWmHkK1Hm_mHqcNeeQw"
                                      }
                                  }
