@@ -67,42 +67,37 @@ public class PresentationController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                     "holderIdentifier": "did:web:localhost:BPNL000000000000",
                                      "verifiableCredentials":
                                      [
                                          {
-                                             "credentialSubject":
-                                             [
-                                                 {
-                                                     "bpn": "BPNL000000000000",
-                                                     "id": "did:web:localhost:BPNL000000000000",
-                                                     "type": "BpnCredential"
-                                                 }
-                                             ],
-                                             "issuanceDate": "2023-07-14T11:05:44Z",
-                                             "id": "did:web:localhost:BPNL000000000000#f177b3e9-bbf9-45db-bc3d-80152abcb419",
-                                             "proof":
-                                             {
-                                                 "created": "2023-07-14T11:05:48Z",
-                                                 "jws": "eyJhbGciOiJFZERTQSJ9..C4oYBfTh11OKG0yV0qoCQxF6zZWZLb9dPXJCP6oCtpyB_sSc8o6cPhByKwf-0o7ElsUr0mh6AGPwGxdoOijfDw",
-                                                 "proofPurpose": "proofPurpose",
-                                                 "type": "JsonWebSignature2020",
-                                                 "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                                             },
-                                             "type":
-                                             [
-                                                 "VerifiableCredential",
-                                                 "BpnCredential"
-                                             ],
-                                             "@context":
-                                             [
-                                                 "https://www.w3.org/2018/credentials/v1",
-                                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                                 "https://w3id.org/security/suites/jws-2020/v1"
-                                             ],
-                                             "issuer": "did:web:localhost:BPNL000000000000",
-                                             "expirationDate": "2023-09-30T18:30:00Z"
-                                         }
+                                            "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                            "@context": [
+                                              "https://www.w3.org/2018/credentials/v1",
+                                              "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                              "https://w3id.org/security/suites/jws-2020/v1"
+                                            ],
+                                            "type": [
+                                              "VerifiableCredential",
+                                              "BpnCredential"
+                                            ],
+                                            "issuer": "did:web:localhost:BPNL000000000000",
+                                            "expirationDate": "2024-12-31T18:30:00Z",
+                                            "issuanceDate": "2023-07-19T09:11:34Z",
+                                            "credentialSubject": [
+                                              {
+                                                "bpn": "BPNL000000000000",
+                                                "id": "did:web:localhost:BPNL000000000000",
+                                                "type": "BpnCredential"
+                                              }
+                                            ],
+                                            "proof": {
+                                              "created": "2023-07-19T09:11:39Z",
+                                              "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                              "proofPurpose": "proofPurpose",
+                                              "type": "JsonWebSignature2020",
+                                              "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                            }
+                                          }
                                      ]
                                  }
                     """))
@@ -132,7 +127,7 @@ public class PresentationController extends BaseController {
 
                     @ExampleObject(name = "VP as JWT", value = """
                                                         {
-                                                          "vp": "eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiYXVkIjoic21hcnRTZW5zZSIsImlzcyI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJ2cCI6eyJpZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAjMWQ2ODg4N2EtMzY4NC00ZDU0LWFkYjAtMmM4MWJiNjc4NTJiIiwidHlwZSI6WyJWZXJpZmlhYmxlUHJlc2VudGF0aW9uIl0sIkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sInZlcmlmaWFibGVDcmVkZW50aWFsIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJCcG5DcmVkZW50aWFsQ1giXSwiaWQiOiJhY2I5NTIyZi1kYjIyLTRmOTAtOTQ3NS1jM2YzNTExZjljZGUiLCJpc3N1ZXIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMy0wNi0wMVQwODo1Nzo1MFoiLCJleHBpcmF0aW9uRGF0ZSI6IjIwMjQtMTItMzFUMTg6MzA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiYnBuIjoiQlBOTDAwMDAwMDAwMDAwMCIsImlkIjoiZGlkOndlYjpsb2NhbGhvc3Q6QlBOTDAwMDAwMDAwMDAwMCIsInR5cGUiOiJCcG5DcmVkZW50aWFsIn0sInByb29mIjp7InByb29mUHVycG9zZSI6InByb29mUHVycG9zZSIsInZlcmlmaWNhdGlvbk1ldGhvZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJ0eXBlIjoiRWQyNTUxOVNpZ25hdHVyZTIwMjAiLCJwcm9vZlZhbHVlIjoiejRkdUJmY0NzYVN6aU5lVXc4WUJ5eUZkdlpYVzhlQUs5MjhkeDNQeExqV0N2S3p0Slo5bWh4aEh3ZTVCdVRRUW5KRmtvb01nUUdLREU0OGNpTHJHaHBzUEEiLCJjcmVhdGVkIjoiMjAyMy0wNi0wMVQwODo1Nzo1MFoifX19LCJleHAiOjE2ODU2ODEwNTIsImp0aSI6IjFhYmQxYjAxLTBkZTUtNGY1Ny04ZjBlLWRmNzBhNzNkMjE2NyJ9.Hfm-ANjoeZ8fO-32LPOsQ3-xXSclPUd28p9hvlWyVVB0Mz7n0k-KAHra5kpT0oGrGtdhC1lZ0AitdB_td6VrAQ"
+                                                          "vp": "eyJraWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidHlwIjoiSldUIiwiYWxnIjoiRWREU0EifQ.eyJzdWIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiYXVkIjoic21hcnQiLCJpc3MiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidnAiOnsiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIzZmZWRmYWRmLWYxNTItNGNjZS05MWQ1LWNjMjhhNzhlMTExMyIsInR5cGUiOlsiVmVyaWZpYWJsZVByZXNlbnRhdGlvbiJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ2ZXJpZmlhYmxlQ3JlZGVudGlhbCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vY2F0ZW5heC1uZy5naXRodWIuaW8vcHJvZHVjdC1jb3JlLXNjaGVtYXMvYnVzaW5lc3NQYXJ0bmVyRGF0YS5qc29uIiwiaHR0cHM6Ly93M2lkLm9yZy9zZWN1cml0eS9zdWl0ZXMvandzLTIwMjAvdjEiXSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkJwbkNyZWRlbnRpYWwiXSwiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwI2Y3M2UzNjMxLWJhODctNGEwMy1iZWEzLWIyODcwMDA1Njg3OSIsImlzc3VlciI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJpc3N1YW5jZURhdGUiOiIyMDIzLTA3LTE5VDA5OjExOjM0WiIsImV4cGlyYXRpb25EYXRlIjoiMjAyNC0xMi0zMVQxODozMDowMFoiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJicG4iOiJCUE5MMDAwMDAwMDAwMDAwIiwidHlwZSI6IkJwbkNyZWRlbnRpYWwifSwicHJvb2YiOnsicHJvb2ZQdXJwb3NlIjoicHJvb2ZQdXJwb3NlIiwidHlwZSI6Ikpzb25XZWJTaWduYXR1cmUyMDIwIiwidmVyaWZpY2F0aW9uTWV0aG9kIjoiZGlkOndlYjpsb2NhbGhvc3Q6QlBOTDAwMDAwMDAwMDAwMCMiLCJjcmVhdGVkIjoiMjAyMy0wNy0xOVQwOToxMTozOVoiLCJqd3MiOiJleUpoYkdjaU9pSkZaRVJUUVNKOS4uZmRuMnFVODVhdU9sdGRIRExkSEk3c0pWVjFaUGRmdHBpWGRfbmRYTjBkRmdTRFdpSXJTY2REMDN3dHZLTHFfSC1zaFFXZmgyUlllTW1ybEV6QWhmRHcifX19LCJleHAiOjE2ODk3NTg1NDQsImp0aSI6IjdlNWE4MzQ4LTgwZjUtNGIzMS1iMDNlLTBiOTJmNzc4ZTVjZiJ9.c7FS-CLwm3vxfO9847M5sqcVxv3QbwwSmSsFWcGif7MOesjt1pdnARlQ4pvHzgsFj1UqBEvHwZQvyYyPCQg_Cw"
                                                         }
                             """)
 
@@ -152,37 +147,33 @@ public class PresentationController extends BaseController {
                                                 "verifiableCredential":
                                                 [
                                                     {
-                                                        "credentialSubject":
-                                                        [
-                                                            {
-                                                                "bpn": "BPNL000000000000",
-                                                                "id": "did:web:localhost:BPNL000000000000",
-                                                                "type": "BpnCredential"
-                                                            }
-                                                        ],
-                                                        "issuanceDate": "2023-07-14T11:05:44Z",
-                                                        "id": "did:web:localhost:BPNL000000000000#f177b3e9-bbf9-45db-bc3d-80152abcb419",
-                                                        "proof":
+                                                      "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                                      "@context": [
+                                                        "https://www.w3.org/2018/credentials/v1",
+                                                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                        "https://w3id.org/security/suites/jws-2020/v1"
+                                                      ],
+                                                      "type": [
+                                                        "VerifiableCredential",
+                                                        "BpnCredential"
+                                                      ],
+                                                      "issuer": "did:web:localhost:BPNL000000000000",
+                                                      "expirationDate": "2024-12-31T18:30:00Z",
+                                                      "issuanceDate": "2023-07-19T09:11:34Z",
+                                                      "credentialSubject": [
                                                         {
-                                                            "created": "2023-07-14T11:05:48Z",
-                                                            "jws": "eyJhbGciOiJFZERTQSJ9..C4oYBfTh11OKG0yV0qoCQxF6zZWZLb9dPXJCP6oCtpyB_sSc8o6cPhByKwf-0o7ElsUr0mh6AGPwGxdoOijfDw",
-                                                            "proofPurpose": "proofPurpose",
-                                                            "type": "JsonWebSignature2020",
-                                                            "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                                                        },
-                                                        "type":
-                                                        [
-                                                            "VerifiableCredential",
-                                                            "BpnCredential"
-                                                        ],
-                                                        "@context":
-                                                        [
-                                                            "https://www.w3.org/2018/credentials/v1",
-                                                            "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                                            "https://w3id.org/security/suites/jws-2020/v1"
-                                                        ],
-                                                        "issuer": "did:web:localhost:BPNL000000000000",
-                                                        "expirationDate": "2023-09-30T18:30:00Z"
+                                                          "bpn": "BPNL000000000000",
+                                                          "id": "did:web:localhost:BPNL000000000000",
+                                                          "type": "BpnCredential"
+                                                        }
+                                                      ],
+                                                      "proof": {
+                                                        "created": "2023-07-19T09:11:39Z",
+                                                        "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                                        "proofPurpose": "proofPurpose",
+                                                        "type": "JsonWebSignature2020",
+                                                        "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                                      }
                                                     }
                                                 ]
                                             }

@@ -87,26 +87,32 @@ public class WalletController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                  {
-                                   "id": "http://example.edu/credentials/3732",
+                                   "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                    "@context": [
                                      "https://www.w3.org/2018/credentials/v1",
-                                     "https://www.w3.org/2018/credentials/examples/v1"
+                                     "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                     "https://w3id.org/security/suites/jws-2020/v1"
                                    ],
                                    "type": [
-                                     "University-Degree-Credential", "VerifiableCredential"
+                                     "VerifiableCredential",
+                                     "BpnCredential"
                                    ],
-                                   "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                   "issuanceDate": "2019-06-16T18:56:59Z",
-                                   "expirationDate": "2019-06-17T18:56:59Z",
-                                   "credentialSubject": [{
-                                     "college": "Test-University"
-                                   }],
+                                   "issuer": "did:web:localhost:BPNL000000000000",
+                                   "expirationDate": "2024-12-31T18:30:00Z",
+                                   "issuanceDate": "2023-07-19T09:11:34Z",
+                                   "credentialSubject": [
+                                     {
+                                       "bpn": "BPNL000000000000",
+                                       "id": "did:web:localhost:BPNL000000000000",
+                                       "type": "BpnCredential"
+                                     }
+                                   ],
                                    "proof": {
-                                     "type": "Ed25519Signature2018",
-                                     "created": "2021-11-17T22:20:27Z",
-                                     "proofPurpose": "assertionMethod",
-                                     "verificationMethod": "did:example:76e12ec712ebc6f1c221ebfeb1f#key-1",
-                                     "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..JNerzfrK46Mq4XxYZEnY9xOK80xsEaWCLAHuZsFie1-NTJD17wWWENn_DAlA_OwxGF5dhxUJ05P6Dm8lcmF5Cg"
+                                     "created": "2023-07-19T09:11:39Z",
+                                     "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                     "proofPurpose": "proofPurpose",
+                                     "type": "JsonWebSignature2020",
+                                     "verificationMethod": "did:web:localhost:BPNL000000000000#"
                                    }
                                  }
                     """))

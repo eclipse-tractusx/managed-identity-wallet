@@ -175,38 +175,34 @@ public class IssuersCredentialController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                     "credentialSubject":
-                                     [
-                                         {
-                                             "bpn": "BPNL000000000000",
-                                             "id": "did:web:localhost:BPNL000000000000",
-                                             "type": "BpnCredential"
-                                         }
-                                     ],
-                                     "issuanceDate": "2023-07-14T11:05:44Z",
-                                     "id": "did:web:localhost:BPNL000000000000#f177b3e9-bbf9-45db-bc3d-80152abcb419",
-                                     "proof":
-                                     {
-                                         "created": "2023-07-14T11:05:48Z",
-                                         "jws": "eyJhbGciOiJFZERTQSJ9..C4oYBfTh11OKG0yV0qoCQxF6zZWZLb9dPXJCP6oCtpyB_sSc8o6cPhByKwf-0o7ElsUr0mh6AGPwGxdoOijfDw",
-                                         "proofPurpose": "proofPurpose",
-                                         "type": "JsonWebSignature2020",
-                                         "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                                     },
-                                     "type":
-                                     [
-                                         "VerifiableCredential",
-                                         "BpnCredential"
-                                     ],
-                                     "@context":
-                                     [
-                                         "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                         "https://w3id.org/security/suites/jws-2020/v1"
-                                     ],
-                                     "issuer": "did:web:localhost:BPNL000000000000",
-                                     "expirationDate": "2023-09-30T18:30:00Z"
-                                 }
+                                  "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                  "@context": [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                    "https://w3id.org/security/suites/jws-2020/v1"
+                                  ],
+                                  "type": [
+                                    "VerifiableCredential",
+                                    "BpnCredential"
+                                  ],
+                                  "issuer": "did:web:localhost:BPNL000000000000",
+                                  "expirationDate": "2024-12-31T18:30:00Z",
+                                  "issuanceDate": "2023-07-19T09:11:34Z",
+                                  "credentialSubject": [
+                                    {
+                                      "bpn": "BPNL000000000000",
+                                      "id": "did:web:localhost:BPNL000000000000",
+                                      "type": "BpnCredential"
+                                    }
+                                  ],
+                                  "proof": {
+                                    "created": "2023-07-19T09:11:39Z",
+                                    "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                    "proofPurpose": "proofPurpose",
+                                    "type": "JsonWebSignature2020",
+                                    "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                  }
+                                }
                     """))
     })
     public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data,
@@ -229,20 +225,26 @@ public class IssuersCredentialController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                      "id": "http://example.edu/credentials/333",
-                                      "@context": [
-                                        "https://www.w3.org/2018/credentials/v1",
-                                        "https://www.w3.org/2018/credentials/examples/v1"
-                                      ],
-                                      "type": [
-                                        "VerifiableCredential", "University-Degree-Credential"
-                                      ],
-                                      "issuer": "did:example:76e12ec712ebc6f1c221ebfeb1f",
-                                      "issuanceDate": "2019-06-16T18:56:59Z",
-                                      "expirationDate": "2019-06-17T18:56:59Z",
-                                      "credentialSubject": [{
-                                        "college": "Test-University"
-                                      }]
+                                  "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                  "@context": [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                    "https://w3id.org/security/suites/jws-2020/v1"
+                                  ],
+                                  "type": [
+                                    "VerifiableCredential",
+                                    "BpnCredential"
+                                  ],
+                                  "issuer": "did:web:localhost:BPNL000000000000",
+                                  "expirationDate": "2024-12-31T18:30:00Z",
+                                  "issuanceDate": "2023-07-19T09:11:34Z",
+                                  "credentialSubject": [
+                                    {
+                                      "bpn": "BPNL000000000000",
+                                      "id": "did:web:localhost:BPNL000000000000",
+                                      "type": "BpnCredential"
+                                    }
+                                  ]
                                 }
                     """))
     })
