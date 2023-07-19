@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -79,6 +80,168 @@ public class IssuersCredentialController extends BaseController {
      * @return the credentials
      */
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
+    @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden access", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {@Content(examples = {
+            @ExampleObject(name = "Internal server error", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 500,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "400", description = "The input does not comply to the syntax requirements", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Response in case of invalid data provided", value = """
+                             {
+                                 "type": "about:blank",
+                                 "title": "title",
+                                 "status": 400,
+                                 "detail": "details",
+                                 "instance": "API endpoint",
+                                 "properties":
+                                 {
+                                     "timestamp": 1689760833962,
+                                     "errors":
+                                     {
+                                     }
+                                 }
+                             }
+                            """)
+            })
+    })
+    @ApiResponse(responseCode = "200", description = "Issuer credential list", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Issuer credential list", value = """
+                             {
+                                "content": [
+                                  {
+                                    "credentialSubject": [
+                                      {
+                                        "bpn": "BPNL000000000000",
+                                        "id": "did:web:localhost:BPNL000000000000",
+                                        "type": "BpnCredential"
+                                      }
+                                    ],
+                                    "issuanceDate": "2023-07-19T09:27:42Z",
+                                    "id": "did:web:localhost:BPNL000000000000#ae364f71-f054-4d91-b579-f001bcb3e59e",
+                                    "proof": {
+                                      "created": "2023-07-19T09:27:44Z",
+                                      "jws": "eyJhbGciOiJFZERTQSJ9..evDHQfW4EzJUt2HnS_WlmO8FFtywTGnwyywtCE7WP41my4Iscpqr4tbuVOqnZg85b4U8L3_ut8_pEONIhbExCQ",
+                                      "proofPurpose": "proofPurpose",
+                                      "type": "JsonWebSignature2020",
+                                      "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                    },
+                                    "type": [
+                                      "VerifiableCredential",
+                                      "BpnCredential"
+                                    ],
+                                    "@context": [
+                                      "https://www.w3.org/2018/credentials/v1",
+                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                      "https://w3id.org/security/suites/jws-2020/v1"
+                                    ],
+                                    "issuer": "did:web:localhost:BPNL000000000000",
+                                    "expirationDate": "2024-12-31T18:30:00Z"
+                                  },
+                                  {
+                                    "credentialSubject": [
+                                      {
+                                        "contractTemplate": "https://public.catena-x.org/contracts/",
+                                        "holderIdentifier": "BPNL000000000000",
+                                        "id": "did:web:localhost:BPNL000000000000",
+                                        "items": [
+                                          "BpnCredential"
+                                        ],
+                                        "type": "SummaryCredential"
+                                      }
+                                    ],
+                                    "issuanceDate": "2023-07-19T09:11:39Z",
+                                    "id": "did:web:localhost:BPNL000000000000#3b032840-3cd8-4e69-9a96-f1a0ccf1e689",
+                                    "proof": {
+                                      "created": "2023-07-19T09:11:41Z",
+                                      "jws": "eyJhbGciOiJFZERTQSJ9..YvoFhDip3TQAfZUIu0yc843oA4uGTg049dMFt_GoaMmPjiNB_B1EFOL-gDpwjIxTYNlGOO_CLp9qStbzlDTNBg",
+                                      "proofPurpose": "proofPurpose",
+                                      "type": "JsonWebSignature2020",
+                                      "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                    },
+                                    "type": [
+                                      "VerifiableCredential",
+                                      "SummaryCredential"
+                                    ],
+                                    "@context": [
+                                      "https://www.w3.org/2018/credentials/v1",
+                                      "https://catenax-ng.github.io/product-core-schemas/SummaryVC.json",
+                                      "https://w3id.org/security/suites/jws-2020/v1"
+                                    ],
+                                    "issuer": "did:web:localhost:BPNL000000000000",
+                                    "expirationDate": "2024-12-31T18:30:00Z"
+                                  },
+                                  {
+                                    "credentialSubject": [
+                                      {
+                                        "bpn": "BPNL000000000000",
+                                        "id": "did:web:localhost:BPNL000000000000",
+                                        "type": "BpnCredential"
+                                      }
+                                    ],
+                                    "issuanceDate": "2023-07-19T09:11:34Z",
+                                    "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                    "proof": {
+                                      "created": "2023-07-19T09:11:39Z",
+                                      "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                      "proofPurpose": "proofPurpose",
+                                      "type": "JsonWebSignature2020",
+                                      "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                    },
+                                    "type": [
+                                      "VerifiableCredential",
+                                      "BpnCredential"
+                                    ],
+                                    "@context": [
+                                      "https://www.w3.org/2018/credentials/v1",
+                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                      "https://w3id.org/security/suites/jws-2020/v1"
+                                    ],
+                                    "issuer": "did:web:localhost:BPNL000000000000",
+                                    "expirationDate": "2024-12-31T18:30:00Z"
+                                  }
+                                ],
+                                "pageable": {
+                                  "sort": {
+                                    "empty": false,
+                                    "unsorted": false,
+                                    "sorted": true
+                                  },
+                                  "offset": 0,
+                                  "pageNumber": 0,
+                                  "pageSize": 2147483647,
+                                  "paged": true,
+                                  "unpaged": false
+                                },
+                                "last": true,
+                                "totalPages": 1,
+                                "totalElements": 3,
+                                "first": true,
+                                "size": 2147483647,
+                                "number": 0,
+                                "sort": {
+                                  "empty": false,
+                                  "unsorted": false,
+                                  "sorted": true
+                                },
+                                "numberOfElements": 3,
+                                "empty": false
+                              }
+                            """)
+            })
+    })
     @Operation(description = "Permission: **view_wallets** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.ISSUERS_CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageImpl<VerifiableCredential>> getCredentials(@RequestParam(required = false) String credentialId,
@@ -106,6 +269,74 @@ public class IssuersCredentialController extends BaseController {
                     """))
     })
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
+    @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden access", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {@Content(examples = {
+            @ExampleObject(name = "Internal server error", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 500,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "409", description = "The request could not be completed due to a conflict.", content = {@Content(examples = {
+            @ExampleObject(name = "MembershipCredential already exist", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Credential of type MembershipCredential is already exists ",
+                      "status": 409,
+                      "detail": "Credential of type MembershipCredential is already exists ",
+                      "instance": "/api/credentials/issuer/membership",
+                      "properties": {
+                        "timestamp": 1689772483831
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "201", description = "Issuer credential", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Membership credential", value = """
+                             {
+                               "issuanceDate": "2023-07-19T13:13:53Z",
+                               "credentialSubject": [
+                                 {
+                                   "holderIdentifier": "BPNL000000000000",
+                                   "startTime": "2023-07-19T13:13:53.581081Z",
+                                   "memberOf": "Catena-X",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "MembershipCredential",
+                                   "status": "Active"
+                                 }
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#0d6b6447-99de-4bc5-94f3-3ac0ae8ee188",
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "type": "JsonWebSignature2020",
+                                 "created": "2023-07-19T13:13:57Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..zt7SyONY1shO7N6KrabQJr9uNrToM1Bc4eagTQc1LxAfZ1v-SSp9Y-2cpZNDV8AR08r4L8VbtWrR9t2dNoAfDw"
+                               },
+                               "type": [
+                                 "VerifiableCredential",
+                                 "MembershipCredential"
+                               ],
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
+                               "expirationDate": "2024-12-31T18:30:00Z"
+                             }
+                            """)
+            })
+    })
     @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest, Principal principal) {
@@ -131,6 +362,78 @@ public class IssuersCredentialController extends BaseController {
                     """))
     })
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
+    @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden access", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {@Content(examples = {
+            @ExampleObject(name = "Internal server error", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 500,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "409", description = "The request could not be completed due to a conflict.", content = {@Content(examples = {
+            @ExampleObject(name = "DismantlerCredential already exist", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Credential of type DismantlerCredential is already exists ",
+                      "status": 409,
+                      "detail": "Credential of type DismantlerCredential is already exists ",
+                      "instance": "/api/credentials/issuer/dismantler",
+                      "properties": {
+                        "timestamp": 1689773804746
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "201", description = "Dismantler Credential", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Dismantler Credential", value = """
+                             {
+                                "issuanceDate": "2023-07-19T13:35:33Z",
+                                "credentialSubject": [
+                                  {
+                                    "holderIdentifier": "BPNL000000000000",
+                                    "allowedVehicleBrands": [
+                                      "Audi",
+                                      "Abarth",
+                                      "Alfa Romeo",
+                                      "Chrysler"
+                                    ],
+                                    "id": "did:web:localhost:BPNL000000000000",
+                                    "activityType": "vehicleDismantle",
+                                    "type": "DismantlerCredential"
+                                  }
+                                ],
+                                "id": "did:web:localhost:BPNL000000000000#5caac86c-8ef8-4aab-9d2b-fb18c62560a9",
+                                "proof": {
+                                  "proofPurpose": "proofPurpose",
+                                  "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                  "type": "JsonWebSignature2020",
+                                  "created": "2023-07-19T13:35:38Z",
+                                  "jws": "eyJhbGciOiJFZERTQSJ9..UI82uq6iyqoaKjZIhJiV24v_Bqnj_7EqWiqZ3VWjqkoHLnr7JDtW5KVywWPl27j_baLBxxnM5jqjQdSK4rfbBg"
+                                },
+                                "type": [
+                                  "VerifiableCredential",
+                                  "DismantlerCredential"
+                                ],
+                                "@context": [
+                                  "https://www.w3.org/2018/credentials/v1",
+                                  "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                  "https://w3id.org/security/suites/jws-2020/v1"
+                                ],
+                                "issuer": "did:web:localhost:BPNL000000000000",
+                                "expirationDate": "2024-12-31T18:30:00Z"
+                              }
+                            """)
+            })
+    })
     @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_DISMANTLER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request, Principal principal) {
@@ -156,6 +459,59 @@ public class IssuersCredentialController extends BaseController {
     })
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
     @Operation(summary = "Issue a Use Case Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
+    @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden access", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {@Content(examples = {
+            @ExampleObject(name = "Internal server error", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 500,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "201", description = "Framework credential", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Framework credential", value = """
+                             {
+                               "issuanceDate": "2023-07-19T13:49:58Z",
+                               "credentialSubject": [
+                                 {
+                                   "holderIdentifier": "BPNL000000000000",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "BehaviorTwinCredential",
+                                   "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                   "contractVersion": "1.0.0"
+                                 }
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "type": "JsonWebSignature2020",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "created": "2023-07-19T13:50:02Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
+                               },
+                               "type": [
+                                 "VerifiableCredential",
+                                 "UseCaseFrameworkCondition"
+                               ],
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
+                               "expirationDate": "2024-12-31T18:30:00Z"
+                             }
+                            """)
+            })
+    })
     @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueFrameworkCredential(request, getBPNFromToken(principal)));
@@ -169,6 +525,95 @@ public class IssuersCredentialController extends BaseController {
      * @return the response entity
      */
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_VALIDATION)
+    @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden access", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {@Content(examples = {
+            @ExampleObject(name = "Internal server error", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 500,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "200", description = "Validate Verifiable Credentials", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Verifiable Credentials without check expiry", value = """
+                             {
+                               "valid": true,
+                               "vc": {
+                                 "issuanceDate": "2023-07-19T09:11:34Z",
+                                 "credentialSubject": [
+                                   {
+                                     "bpn": "BPNL000000000000",
+                                     "id": "did:web:localhost:BPNL000000000000",
+                                     "type": "BpnCredential"
+                                   }
+                                 ],
+                                 "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                 "proof": {
+                                   "created": "2023-07-19T09:11:39Z",
+                                   "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                   "proofPurpose": "proofPurpose",
+                                   "type": "JsonWebSignature2020",
+                                   "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                 },
+                                 "type": [
+                                   "VerifiableCredential",
+                                   "BpnCredential"
+                                 ],
+                                 "@context": [
+                                   "https://www.w3.org/2018/credentials/v1",
+                                   "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                   "https://w3id.org/security/suites/jws-2020/v1"
+                                 ],
+                                 "issuer": "did:web:localhost:BPNL000000000000",
+                                 "expirationDate": "2024-12-31T18:30:00Z"
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Verifiable Credentials with check expiry", value = """
+                             {
+                               "valid": true,
+                               "vc": {
+                                 "issuanceDate": "2023-07-19T09:11:34Z",
+                                 "credentialSubject": [
+                                   {
+                                     "bpn": "BPNL000000000000",
+                                     "id": "did:web:localhost:BPNL000000000000",
+                                     "type": "BpnCredential"
+                                   }
+                                 ],
+                                 "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                 "proof": {
+                                   "created": "2023-07-19T09:11:39Z",
+                                   "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                   "proofPurpose": "proofPurpose",
+                                   "type": "JsonWebSignature2020",
+                                   "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                 },
+                                 "type": [
+                                   "VerifiableCredential",
+                                   "BpnCredential"
+                                 ],
+                                 "@context": [
+                                   "https://www.w3.org/2018/credentials/v1",
+                                   "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                   "https://w3id.org/security/suites/jws-2020/v1"
+                                 ],
+                                 "issuer": "did:web:localhost:BPNL000000000000",
+                                 "expirationDate": "2024-12-31T18:30:00Z"
+                               },
+                               "validateExpiryDate": true
+                             }
+                            """)
+            })
+    })
     @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials")
     @PostMapping(path = RestURI.CREDENTIALS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
@@ -219,6 +664,57 @@ public class IssuersCredentialController extends BaseController {
      * @return the response entity
      */
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
+    @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden access", content = {@Content(examples = {})})
+    @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {@Content(examples = {
+            @ExampleObject(name = "Internal server error", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 500,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "201", description = "Issuer credential", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Issuer credential", value = """
+                             {
+                               "issuanceDate": "2023-07-19T12:18:30Z",
+                               "credentialSubject": [
+                                 {
+                                   "bpn": "BPNL000000000000",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "BpnCredential"
+                                 }
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#ff084e7a-1b46-4a2f-a78d-3d701a0bd6e4",
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "type": "JsonWebSignature2020",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "created": "2023-07-19T12:18:34Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..0Ua1vcTQAYwQY3PPuHr4RQxqW6iIngrHQQx1oPgk2uzqUpcbfY2YUxXAnbNA333-lSuvNhiV_1NLfBnCEcI2DQ"
+                               },
+                               "type": [
+                                 "VerifiableCredential",
+                                 "BpnCredential"
+                               ],
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
+                               "expirationDate": "2024-12-31T18:30:00Z"
+                             }
+                            """)
+            })
+    })
     @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
     @PostMapping(path = RestURI.ISSUERS_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 
