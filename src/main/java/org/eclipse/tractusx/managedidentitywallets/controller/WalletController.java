@@ -538,10 +538,17 @@ public class WalletController extends BaseController {
     })
     @Operation(summary = "List of wallets", description = "Permission: **view_wallets** \n\n Retrieve list of registered wallets")
     @GetMapping(path = RestURI.WALLETS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<Wallet>> getWallets(@RequestParam(required = false, defaultValue = "0") int pageNumber,
-                                                   @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
+    public ResponseEntity<Page<Wallet>> getWallets(@Parameter(name = "pageNumber", description = "Page number, Page number start with zero") @RequestParam(required = false, defaultValue = "0") int pageNumber,
+                                                   @Parameter(name = "size", description = "Number of records per page") @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
+                                                   @Parameter(name = "sortColumn", description = "Sort column name", examples = {
+                                                           @ExampleObject(value = "createdAt", name = "Creation date"),
+                                                           @ExampleObject(value = "name", name = "Wallet name"),
+                                                           @ExampleObject(value = "did", name = "Wallet did"),
+                                                           @ExampleObject(value = "bpn", name = "Wallet BPN")
+                                                   }
+                                                   )
                                                    @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
-                                                   @RequestParam(required = false, defaultValue = "desc") String sortTpe) {
+                                                   @Parameter(name = "sortTpe", description = "Sort order", examples = {@ExampleObject(value = "desc", name = "Descending order"), @ExampleObject(value = "asc", name = "Ascending order")}) @RequestParam(required = false, defaultValue = "desc") String sortTpe) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getWallets(pageNumber, size, sortColumn, sortTpe));
     }
 }
