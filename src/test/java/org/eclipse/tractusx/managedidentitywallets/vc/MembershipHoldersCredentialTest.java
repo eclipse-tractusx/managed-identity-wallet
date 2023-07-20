@@ -354,6 +354,6 @@ class MembershipHoldersCredentialTest {
 
     private void validateTypes(VerifiableCredential verifiableCredential) {
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.MEMBER_OF), "Test-X");
+        Assertions.assertEquals("Test-X", verifiableCredential.getCredentialSubject().get(0).get(StringPool.MEMBER_OF));
     }
 }

@@ -448,10 +448,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         boolean valid = proofValidation.verifiyProof(verifiableCredential);
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new TreeMap<>();
 
         //check expiry
-        boolean dateValidation = commonService.validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
+        boolean dateValidation = CommonService.validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
 
         response.put(StringPool.VALID, valid && dateValidation);
         response.put("vc", verifiableCredential);

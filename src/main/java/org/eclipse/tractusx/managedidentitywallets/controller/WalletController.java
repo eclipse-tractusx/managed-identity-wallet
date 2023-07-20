@@ -124,30 +124,34 @@ public class WalletController extends BaseController {
             @Content(examples = {
                     @ExampleObject(name = "Success response", value = """
                                      {
-                                       "name": "companyA",
-                                       "did": "did:web:localhost:BPNL000000000501",
-                                       "bpn": "BPNL000000000501",
-                                       "algorithm": "ED25519",
-                                       "didDocument": {
-                                         "id": "did:web:localhost:BPNL000000000501",
-                                         "verificationMethod": [
-                                           {
-                                             "controller": "did:web:localhost:BPNL000000000501",
-                                             "id": "did:web:localhost:BPNL000000000501#",
-                                             "publicKeyJwk": {
-                                               "crv": "Ed25519",
-                                               "kty": "OKP",
-                                               "x": "0Ap6FsX5UuRBIoOzxWtcFA2ymnqXw0U08Ino_mIuYM4"
-                                             },
-                                             "type": "JsonWebKey2020"
-                                           }
-                                         ],
-                                         "@context": [
-                                           "https://www.w3.org/ns/did/v1",
-                                           "https://w3c.github.io/vc-jws-2020/contexts/v1"
-                                         ]
-                                       }
-                                     }                
+                                         "name": "companyA",
+                                         "did": "did:web:localhost:BPNL000000000001",
+                                         "bpn": "BPNL000000000501",
+                                         "algorithm": "ED25519",
+                                         "didDocument":
+                                         {
+                                             "@context":
+                                             [
+                                                 "https://www.w3.org/ns/did/v1",
+                                                 "https://w3c.github.io/vc-jws-2020/contexts/v1"
+                                             ],
+                                             "id": "did:web:localhost:BPNL000000000001",
+                                             "verificationMethod":
+                                             [
+                                                 {
+                                                     "controller": "did:web:localhost:BPNL000000000001",
+                                                     "id": "did:web:localhost:BPNL000000000001#",
+                                                     "publicKeyJwk":
+                                                     {
+                                                         "crv": "Ed25519",
+                                                         "kty": "OKP",
+                                                         "x": "0Ap6FsX5UuRBIoOzxWtcFA2ymnqXw0U08Ino_mIuYM4"
+                                                     },
+                                                     "type": "JsonWebKey2020"
+                                                 }
+                                             ]
+                                         }
+                                     }              
                             """)
             })
     })
@@ -175,18 +179,18 @@ public class WalletController extends BaseController {
                                          "https://www.w3.org/2018/credentials/v1",
                                          "https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#"
                                      ],
+                                     "id": "did:web:localhost.in#123456789",
                                      "type":
                                      [
-                                         "LegalParticipant","VerifiableCredential"
+                                         "VerifiableCredential", "LegalParticipant"
                                      ],
-                                     "id": "did:web:hella.proofsense.in",
-                                     "issuer": "did:web:hella.proofsense.in",
+                                     "issuer": "did:web:localhost.in",
                                      "issuanceDate": "2023-05-04T07:36:03.633Z",
                                      "credentialSubject":
                                      {
-                                         "id": "https://hella.proofsense.in/.well-known/participant.json",
+                                         "id": "https://localhost/.well-known/participant.json",
                                          "type": "gx:LegalParticipant",
-                                         "gx:legalName": "Hella",
+                                         "gx:legalName": "Sample Company",
                                          "gx:legalRegistrationNumber":
                                          {
                                              "gx:taxID": "113123123"
@@ -206,7 +210,7 @@ public class WalletController extends BaseController {
                                          "type": "JsonWebSignature2020",
                                          "created": "2023-05-04T07:36:04.079Z",
                                          "proofPurpose": "assertionMethod",
-                                         "verificationMethod": "did:web:hella.proofsense.in",
+                                         "verificationMethod": "did:web:localhost",
                                          "jws": "eyJhbGciOiJQUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..iHki8WC3nPfcSRkC_AV4tXh0ikfT7BLPTGc_0ecI8zontTmJLqwcpPfAt0PFsoo3SkZgc6j636z55jj5tagBc-OKoiDu7diWryNAnL9ASsmWJyrPhOKVARs6x6PxVaTFBuyCfAHZeipxmkcYfNB_jooIXO2HuRcL2odhsQHELkGc5IDD-aBMWyNpfVAaYQ-cCzvDflZQlsowziUKfMkBfwpwgMdXFIgKWYdDIRvzA-U-XiC11-6QV7tPeKsMguEU0F5bh8cCEm2rooqXtENcsM_7cqFdQoOyblJyM-agoz2LUTj9QIdn9_gnNkGN-2U7_qBJWmHkK1Hm_mHqcNeeQw"
                                      }
                                  }
@@ -252,9 +256,9 @@ public class WalletController extends BaseController {
             @ExampleObject(name = "Wallet not found with provided identifier", value = """
                     {
                         "type": "about:blank",
-                        "title": "Wallet not found for identifier did:web:localhost:BPNL0000000",
+                        "title": "Wallet not found for identifier did:web:localhost:BPNL000000044001",
                         "status": 404,
-                        "detail": "Wallet not found for identifier did:web:localhost:BPNL0000000",
+                        "detail": "Wallet not found for identifier did:web:localhost:BPNL000000044001",
                         "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000/credentials",
                         "properties": {
                           "timestamp": 1689765541959
@@ -265,12 +269,12 @@ public class WalletController extends BaseController {
     @ApiResponse(responseCode = "201", description = "Success Response", content = {@Content(examples = {
             @ExampleObject(name = "Success Response", value = """
                      {
-                        "message": "Credential with id did:web:localhost has been successfully stored"
+                        "message": "Credential with id did:web:localhost#123456789 has been successfully stored"
                       }
                     """)
     })})
     public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data,
-                                                               @Parameter(description = "Did or BPN", examples = {@ExampleObject(name = "bpn", value = "BPNL000000000000", description = "bpn"), @ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @PathVariable(name = "identifier") String identifier, Principal principal) {
+                                                               @Parameter(description = "Did or BPN", examples = {@ExampleObject(name = "bpn", value = "BPNL000000000001", description = "bpn"), @ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000001")}) @PathVariable(name = "identifier") String identifier, Principal principal) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier, getBPNFromToken(principal)));
     }
@@ -339,97 +343,101 @@ public class WalletController extends BaseController {
                         "did": "did:web:localhost:BPNL000000000001",
                         "bpn": "BPNL000000000001",
                         "algorithm": "ED25519",
-                        "didDocument": {
-                          "id": "did:web:localhost:BPNL000000000001",
-                          "verificationMethod": [
-                            {
-                              "controller": "did:web:localhost:BPNL000000000001",
-                              "id": "did:web:localhost:BPNL000000000001#",
-                              "publicKeyJwk": {
-                                "crv": "Ed25519",
-                                "kty": "OKP",
-                                "x": "mhph0ZSVk7cDVmazbaaC3jBDpphW4eNygAK9gHPlMow"
-                              },
-                              "type": "JsonWebKey2020"
-                            }
-                          ],
-                          "@context": [
-                            "https://www.w3.org/ns/did/v1",
-                            "https://w3c.github.io/vc-jws-2020/contexts/v1"
-                          ]
-                        }
-                      }
-                    """), @ExampleObject(name = "Wallet details without with credentials true", value = """
-            {
-                "name": "companyA",
-                "did": "did:web:localhost:BPNL000000000001",
-                "bpn": "BPNL000000000001",
-                "algorithm": "ED25519",
-                "didDocument":
-                {
-                    "id": "did:web:localhost:BPNL000000000001",
-                    "verificationMethod":
-                    [
+                        "didDocument":
                         {
-                            "controller": "did:web:localhost:BPNL000000000001",
-                            "id": "did:web:localhost:BPNL000000000001#",
-                            "publicKeyJwk":
-                            {
-                                "crv": "Ed25519",
-                                "kty": "OKP",
-                                "x": "mhph0ZSVk7cDVmazbaaC3jBDpphW4eNygAK9gHPlMow"
-                            },
-                            "type": "JsonWebKey2020"
+                            "@context":
+                            [
+                                "https://www.w3.org/ns/did/v1",
+                                "https://w3c.github.io/vc-jws-2020/contexts/v1"
+                            ],
+                            "id": "did:web:localhost:BPNL000000000001",
+                            "verificationMethod":
+                            [
+                                {
+                                    "controller": "did:web:localhost:BPNL000000000001",
+                                    "id": "did:web:localhost:BPNL000000000001#",
+                                    "publicKeyJwk":
+                                    {
+                                        "crv": "Ed25519",
+                                        "kty": "OKP",
+                                        "x": "mhph0ZSVk7cDVmazbaaC3jBDpphW4eNygAK9gHPlMow"
+                                    },
+                                    "type": "JsonWebKey2020"
+                                }
+                            ]
                         }
-                    ],
-                    "@context":
-                    [
-                        "https://www.w3.org/ns/did/v1",
-                        "https://w3c.github.io/vc-jws-2020/contexts/v1"
-                    ]
-                },
-                "verifiableCredentials":
-                [
-                    {
-                        "credentialSubject":
-                        [
-                            {
-                                "bpn": "BPNL000000000001",
-                                "id": "did:web:localhost:BPNL000000000001",
-                                "type": "BpnCredential"
-                            }
-                        ],
-                        "issuanceDate": "2023-07-19T09:14:45Z",
-                        "id": "did:web:localhost:BPNL000000000000#a1f8ae36-9919-4ed8-8546-535280acc5bf",
-                        "proof":
-                        {
-                            "created": "2023-07-19T09:14:47Z",
-                            "jws": "eyJhbGciOiJFZERTQSJ9..O69dLGMDVgZQJ7chFx3aUbkJFvibH8WWunw634rIDC77_pdiUHvQpQ0hq15_7OgFMy3dp-9H-pNgxTZ-i4UXCw",
-                            "proofPurpose": "proofPurpose",
-                            "type": "JsonWebSignature2020",
-                            "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                        },
-                        "type":
-                        [
-                            "VerifiableCredential",
-                            "BpnCredential"
-                        ],
-                        "@context":
-                        [
-                            "https://www.w3.org/2018/credentials/v1",
-                            "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                            "https://w3id.org/security/suites/jws-2020/v1"
-                        ],
-                        "issuer": "did:web:localhost:BPNL000000000000",
-                        "expirationDate": "2023-09-30T18:30:00Z"
                     }
-                ]
-            }
+                    """), @ExampleObject(name = "Wallet details without with credentials true", value = """
+                        {
+                            "name": "companyA",
+                            "did": "did:web:localhost:BPNL000000000001",
+                            "bpn": "BPNL000000000001",
+                            "algorithm": "ED25519",
+                            "didDocument":
+                            {
+                                "@context":
+                                [
+                                    "https://www.w3.org/ns/did/v1",
+                                    "https://w3c.github.io/vc-jws-2020/contexts/v1"
+                                ],
+                                "id": "did:web:localhost:BPNL000000000001",
+                                "verificationMethod":
+                                [
+                                    {
+                                        "controller": "did:web:localhost:BPNL000000000001",
+                                        "id": "did:web:localhost:BPNL000000000001#",
+                                        "publicKeyJwk":
+                                        {
+                                            "crv": "Ed25519",
+                                            "kty": "OKP",
+                                            "x": "mhph0ZSVk7cDVmazbaaC3jBDpphW4eNygAK9gHPlMow"
+                                        },
+                                        "type": "JsonWebKey2020"
+                                    }
+                                ]
+                            },
+                            "verifiableCredentials":
+                            [
+                                {
+                                    "@context":
+                                    [
+                                        "https://www.w3.org/2018/credentials/v1",
+                                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                        "https://w3id.org/security/suites/jws-2020/v1"
+                                    ],
+                                    "id": "did:web:localhost:BPNL000000000000#a1f8ae36-9919-4ed8-8546-535280acc5bf",
+                                    "type":
+                                    [
+                                        "VerifiableCredential",
+                                        "BpnCredential"
+                                    ],
+                                    "issuer": "did:web:localhost:BPNL000000000000",
+                                    "issuanceDate": "2023-07-19T09:14:45Z",
+                                    "expirationDate": "2023-09-30T18:30:00Z",
+                                    "credentialSubject":
+                                    [
+                                        {
+                                            "bpn": "BPNL000000000001",
+                                            "id": "did:web:localhost:BPNL000000000001",
+                                            "type": "BpnCredential"
+                                        }
+                                    ],
+                                    "proof":
+                                    {
+                                        "created": "2023-07-19T09:14:47Z",
+                                        "jws": "eyJhbGciOiJFZERTQSJ9..O69dLGMDVgZQJ7chFx3aUbkJFvibH8WWunw634rIDC77_pdiUHvQpQ0hq15_7OgFMy3dp-9H-pNgxTZ-i4UXCw",
+                                        "proofPurpose": "proofPurpose",
+                                        "type": "JsonWebSignature2020",
+                                        "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                    }
+                                }
+                            ]
+                        }
             """)
     })})
     @Operation(summary = "Retrieve wallet by identifier", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller or Base wallet, authority wallet can see all wallets) \n\n Retrieve single wallet by identifier, with or without its credentials")
     @GetMapping(path = RestURI.API_WALLETS_IDENTIFIER, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> getWalletByIdentifier(@Parameter(description = "Did or BPN", examples = {@ExampleObject(name = "bpn", value = "BPNL000000000501", description = "bpn"), @ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000501")}) @PathVariable(name = "identifier") String identifier,
+    public ResponseEntity<Wallet> getWalletByIdentifier(@Parameter(description = "Did or BPN", examples = {@ExampleObject(name = "bpn", value = "BPNL000000000001", description = "bpn"), @ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000001")}) @PathVariable(name = "identifier") String identifier,
                                                         @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials,
                                                         Principal principal) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials, getBPNFromToken(principal)));
@@ -487,6 +495,10 @@ public class WalletController extends BaseController {
                                    "bpn": "BPNL000000000001",
                                    "algorithm": "ED25519",
                                    "didDocument": {
+                                   "@context": [
+                                       "https://www.w3.org/ns/did/v1",
+                                       "https://w3c.github.io/vc-jws-2020/contexts/v1"
+                                     ],
                                      "id": "did:web:localhost:BPNL000000000001",
                                      "verificationMethod": [
                                        {
@@ -499,10 +511,6 @@ public class WalletController extends BaseController {
                                          },
                                          "type": "JsonWebKey2020"
                                        }
-                                     ],
-                                     "@context": [
-                                       "https://www.w3.org/ns/did/v1",
-                                       "https://w3c.github.io/vc-jws-2020/contexts/v1"
                                      ]
                                    }
                                  }

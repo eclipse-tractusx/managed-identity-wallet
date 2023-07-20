@@ -243,13 +243,20 @@ public class IssuersCredentialController extends BaseController {
     })
     @Operation(description = "Permission: **view_wallets** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
     @GetMapping(path = RestURI.ISSUERS_CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageImpl<VerifiableCredential>> getCredentials(@RequestParam(required = false) String credentialId,
-                                                                         @RequestParam(required = false) String holderIdentifier,
-                                                                         @RequestParam(required = false) List<String> type,
+    public ResponseEntity<PageImpl<VerifiableCredential>> getCredentials(@Parameter(name = "credentialId", description = "Credential Id", examples = {@ExampleObject(name = "Credential Id", value = "did:web:localhost:BPNL000000000000#12528899-160a-48bd-ba15-f396c3959ae9")}) @RequestParam(required = false) String credentialId,
+                                                                         @Parameter(name = "holderIdentifier", description = "Holder identifier(did of BPN)", examples = {@ExampleObject(name = "bpn", value = "BPNL000000000001", description = "bpn"), @ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000001")}) @RequestParam(required = false) String holderIdentifier,
+                                                                         @Parameter(name = "type", description = "Type of VC", examples = {@ExampleObject(name = "SummaryCredential", value = "SummaryCredential", description = "SummaryCredential"), @ExampleObject(description = "BpnCredential", name = "BpnCredential", value = "BpnCredential")}) @RequestParam(required = false) List<String> type,
                                                                          @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Page number, Page number start with zero") @RequestParam(required = false, defaultValue = "0") int pageNumber,
                                                                          @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Number of records per page") @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
-                                                                         @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
-                                                                         @RequestParam(required = false, defaultValue = "desc") String sortTpe, Principal principal) {
+                                                                         @Parameter(name = "sortColumn", description = "Sort column name",
+                                                                                 examples = {
+                                                                                         @ExampleObject(value = "createdAt", name = "creation date"),
+                                                                                         @ExampleObject(value = "holderDid", name = "Holder did"),
+                                                                                         @ExampleObject(value = "type", name = "Credential type"),
+                                                                                         @ExampleObject(value = "credentialId", name = "Credential id")
+                                                                                 }
+                                                                         ) @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
+                                                                         @Parameter(name = "sortTpe", description = "Sort order", examples = {@ExampleObject(value = "desc", name = "Descending order"), @ExampleObject(value = "asc", name = "Ascending order")}) @RequestParam(required = false, defaultValue = "desc") String sortTpe, Principal principal) {
         return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.getCredentials(credentialId, holderIdentifier, type, sortColumn, sortTpe, pageNumber, size, getBPNFromToken(principal)));
     }
 
@@ -516,16 +523,70 @@ public class IssuersCredentialController extends BaseController {
      * @param principal the principal
      * @return the response entity
      */
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
-            @Content(examples = @ExampleObject("""
-                                {
-                                  "holderIdentifier": "BPNL000000000000",
-                                  "type": "BehaviorTwinCredential",
-                                  "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                  "contract-version": "1.0.0"
-                                }
-                    """))
-    })
+
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = {
+                    @Content(examples = {
+                            @ExampleObject(name = "BehaviorTwinCredential", value = """
+                                                                    {
+                                                                      "holderIdentifier": "BPNL000000000000",
+                                                                      "type": "BehaviorTwinCredential",
+                                                                      "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                                      "contract-version": "1.0.0"
+                                                                    }
+                                    """),
+                            @ExampleObject(name = "PcfCredential", value = """
+                                                                    {
+                                                                      "holderIdentifier": "BPNL000000000000",
+                                                                      "type": "PcfCredential",
+                                                                      "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                                      "contract-version": "1.0.0"
+                                                                    }
+                                    """),
+                            @ExampleObject(name = "SustainabilityCredential", value = """
+                                                                    {
+                                                                      "holderIdentifier": "BPNL000000000000",
+                                                                      "type": "SustainabilityCredential",
+                                                                      "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                                      "contract-version": "1.0.0"
+                                                                    }
+                                    """),
+                            @ExampleObject(name = "QualityCredential", value = """
+                                                                    {
+                                                                      "holderIdentifier": "BPNL000000000000",
+                                                                      "type": "QualityCredential",
+                                                                      "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                                      "contract-version": "1.0.0"
+                                                                    }
+                                    """),
+                            @ExampleObject(name = "TraceabilityCredential", value = """
+                                                                    {
+                                                                      "holderIdentifier": "BPNL000000000000",
+                                                                      "type": "TraceabilityCredential",
+                                                                      "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                                      "contract-version": "1.0.0"
+                                                                    }
+                                    """),
+                            @ExampleObject(name = "BehaviorTwinCredential", value = """
+                                                                    {
+                                                                      "holderIdentifier": "BPNL000000000000",
+                                                                      "type": "BehaviorTwinCredential",
+                                                                      "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                                      "contract-version": "1.0.0"
+                                                                    }
+                                    """),
+                            @ExampleObject(name = "ResiliencyCredential", value = """
+                                                                    {
+                                                                      "holderIdentifier": "BPNL000000000000",
+                                                                      "type": "ResiliencyCredential",
+                                                                      "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                                      "contract-version": "1.0.0"
+                                                                    }
+                                    """)
+
+                    })
+            }
+    )
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
     @Operation(summary = "Issue a Use Case Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {@Content(examples = {})})
@@ -849,6 +910,7 @@ public class IssuersCredentialController extends BaseController {
                     @ExampleObject(name = "Verifiable Credentials with check expiry", value = """
                              {
                                "valid": true,
+                               "validateExpiryDate": true,
                                "vc": {
                                  "issuanceDate": "2023-07-19T09:11:34Z",
                                  "credentialSubject": [
@@ -877,8 +939,76 @@ public class IssuersCredentialController extends BaseController {
                                  ],
                                  "issuer": "did:web:localhost:BPNL000000000000",
                                  "expirationDate": "2024-12-31T18:30:00Z"
-                               },
-                               "validateExpiryDate": true
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Verifiable expired credentials with check expiry ", value = """
+                             {
+                               "valid": false,
+                               "validateExpiryDate": false,
+                               "vc": {
+                                 "issuanceDate": "2023-07-19T09:11:34Z",
+                                 "credentialSubject": [
+                                   {
+                                     "bpn": "BPNL000000000000",
+                                     "id": "did:web:localhost:BPNL000000000000",
+                                     "type": "BpnCredential"
+                                   }
+                                 ],
+                                 "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                 "proof": {
+                                   "created": "2023-07-19T09:11:39Z",
+                                   "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
+                                   "proofPurpose": "proofPurpose",
+                                   "type": "JsonWebSignature2020",
+                                   "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                 },
+                                 "type": [
+                                   "VerifiableCredential",
+                                   "BpnCredential"
+                                 ],
+                                 "@context": [
+                                   "https://www.w3.org/2018/credentials/v1",
+                                   "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                   "https://w3id.org/security/suites/jws-2020/v1"
+                                 ],
+                                 "issuer": "did:web:localhost:BPNL000000000000",
+                                 "expirationDate": "2022-12-31T18:30:00Z"
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Verifiable Credentials with invalid signature", value = """
+                             {
+                               "valid": false,
+                               "vc": {
+                               "@context": [
+                                   "https://www.w3.org/2018/credentials/v1",
+                                   "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                   "https://w3id.org/security/suites/jws-2020/v1"
+                                 ],
+                                 "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                 "type": [
+                                   "VerifiableCredential",
+                                   "BpnCredential"
+                                 ],
+                                 "issuer": "did:web:localhost:BPNL000000000000",
+                                 "expirationDate": "2024-12-31T18:30:00Z"
+                                 "issuanceDate": "2023-07-19T09:11:34Z",
+                                 "credentialSubject": [
+                                   {
+                                     "bpn": "BPNL000000000000",
+                                     "id": "did:web:localhost:BPNL000000000000",
+                                     "type": "BpnCredential"
+                                   }
+                                 ],
+                                 "proof": {
+                                   "created": "2023-07-19T09:11:39Z",
+                                   "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhf",
+                                   "proofPurpose": "proofPurpose",
+                                   "type": "JsonWebSignature2020",
+                                   "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                 },
+                               }
                              }
                             """)
             })

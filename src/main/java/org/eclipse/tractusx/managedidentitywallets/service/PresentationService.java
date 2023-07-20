@@ -191,7 +191,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             boolean validCredential = true;
             boolean validateExpiryDate = true;
             try {
-                final ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> claims = mapper.readValue(signedJWT.getPayload().toBytes(), Map.class);
                 String vpClaim = mapper.writeValueAsString(claims.get("vp"));
 
@@ -199,7 +199,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                 VerifiablePresentation presentation = jsonLdSerializer.deserializePresentation(new SerializedVerifiablePresentation(vpClaim));
 
                 for (VerifiableCredential credential : presentation.getVerifiableCredentials()) {
-                    validateExpiryDate = commonService.validateExpiry(withCredentialExpiryDate, credential, response);
+                    validateExpiryDate = CommonService.validateExpiry(withCredentialExpiryDate, credential, response);
                     if (!validateCredential(credential)) {
                         validCredential = false;
                     }
@@ -265,12 +265,12 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private boolean validateCredential(VerifiableCredential credential)
             throws UnsupportedSignatureTypeException {
-        final DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
+        DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
         didDocumentResolverRegistry.register(
                 new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
 
-        final String proofType = credential.getProof().getType();
-        final LinkedDataProofValidation linkedDataProofValidation;
+        String proofType = credential.getProof().getType();
+        LinkedDataProofValidation linkedDataProofValidation;
         if (SignatureType.ED21559.toString().equals(proofType)) {
             linkedDataProofValidation = LinkedDataProofValidation.newInstance(
                     SignatureType.ED21559,
@@ -285,7 +285,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             throw new UnsupportedSignatureTypeException(proofType);
         }
 
-        final boolean isValid = linkedDataProofValidation.verifiyProof(credential);
+        boolean isValid = linkedDataProofValidation.verifiyProof(credential);
         if (isValid) {
             log.debug("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
         } else {
