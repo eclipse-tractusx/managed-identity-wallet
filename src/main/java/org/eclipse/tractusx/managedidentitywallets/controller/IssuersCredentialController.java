@@ -122,6 +122,19 @@ public class IssuersCredentialController extends BaseController {
                              {
                                 "content": [
                                   {
+                                    "@context": [
+                                      "https://www.w3.org/2018/credentials/v1",
+                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                      "https://w3id.org/security/suites/jws-2020/v1"
+                                    ],
+                                    "id": "did:web:localhost:BPNL000000000000#ae364f71-f054-4d91-b579-f001bcb3e59e",
+                                    "type": [
+                                      "VerifiableCredential",
+                                      "BpnCredential"
+                                    ],
+                                    "issuer": "did:web:localhost:BPNL000000000000",
+                                    "issuanceDate": "2023-07-19T09:27:42Z",
+                                    "expirationDate": "2024-12-31T18:30:00Z",
                                     "credentialSubject": [
                                       {
                                         "bpn": "BPNL000000000000",
@@ -129,28 +142,27 @@ public class IssuersCredentialController extends BaseController {
                                         "type": "BpnCredential"
                                       }
                                     ],
-                                    "issuanceDate": "2023-07-19T09:27:42Z",
-                                    "id": "did:web:localhost:BPNL000000000000#ae364f71-f054-4d91-b579-f001bcb3e59e",
                                     "proof": {
                                       "created": "2023-07-19T09:27:44Z",
                                       "jws": "eyJhbGciOiJFZERTQSJ9..evDHQfW4EzJUt2HnS_WlmO8FFtywTGnwyywtCE7WP41my4Iscpqr4tbuVOqnZg85b4U8L3_ut8_pEONIhbExCQ",
                                       "proofPurpose": "proofPurpose",
                                       "type": "JsonWebSignature2020",
                                       "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                                    },
+                                    }
+                                  },
+                                  {
                                     "type": [
                                       "VerifiableCredential",
-                                      "BpnCredential"
+                                      "SummaryCredential"
                                     ],
                                     "@context": [
                                       "https://www.w3.org/2018/credentials/v1",
-                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                      "https://catenax-ng.github.io/product-core-schemas/SummaryVC.json",
                                       "https://w3id.org/security/suites/jws-2020/v1"
                                     ],
                                     "issuer": "did:web:localhost:BPNL000000000000",
+                                    "issuanceDate": "2023-07-19T09:11:39Z",
                                     "expirationDate": "2024-12-31T18:30:00Z"
-                                  },
-                                  {
                                     "credentialSubject": [
                                       {
                                         "contractTemplate": "https://public.catena-x.org/contracts/",
@@ -162,28 +174,28 @@ public class IssuersCredentialController extends BaseController {
                                         "type": "SummaryCredential"
                                       }
                                     ],
-                                    "issuanceDate": "2023-07-19T09:11:39Z",
-                                    "id": "did:web:localhost:BPNL000000000000#3b032840-3cd8-4e69-9a96-f1a0ccf1e689",
                                     "proof": {
                                       "created": "2023-07-19T09:11:41Z",
                                       "jws": "eyJhbGciOiJFZERTQSJ9..YvoFhDip3TQAfZUIu0yc843oA4uGTg049dMFt_GoaMmPjiNB_B1EFOL-gDpwjIxTYNlGOO_CLp9qStbzlDTNBg",
                                       "proofPurpose": "proofPurpose",
                                       "type": "JsonWebSignature2020",
                                       "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                                    },
-                                    "type": [
-                                      "VerifiableCredential",
-                                      "SummaryCredential"
-                                    ],
-                                    "@context": [
-                                      "https://www.w3.org/2018/credentials/v1",
-                                      "https://catenax-ng.github.io/product-core-schemas/SummaryVC.json",
-                                      "https://w3id.org/security/suites/jws-2020/v1"
-                                    ],
-                                    "issuer": "did:web:localhost:BPNL000000000000",
-                                    "expirationDate": "2024-12-31T18:30:00Z"
+                                    }
                                   },
                                   {
+                                    "@context": [
+                                      "https://www.w3.org/2018/credentials/v1",
+                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                      "https://w3id.org/security/suites/jws-2020/v1"
+                                    ],
+                                    "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                    "type": [
+                                      "VerifiableCredential",
+                                      "BpnCredential"
+                                    ],
+                                    "issuer": "did:web:localhost:BPNL000000000000",
+                                    "issuanceDate": "2023-07-19T09:11:34Z",
+                                    "expirationDate": "2024-12-31T18:30:00Z",
                                     "credentialSubject": [
                                       {
                                         "bpn": "BPNL000000000000",
@@ -191,26 +203,13 @@ public class IssuersCredentialController extends BaseController {
                                         "type": "BpnCredential"
                                       }
                                     ],
-                                    "issuanceDate": "2023-07-19T09:11:34Z",
-                                    "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                     "proof": {
                                       "created": "2023-07-19T09:11:39Z",
                                       "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                                       "proofPurpose": "proofPurpose",
                                       "type": "JsonWebSignature2020",
                                       "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                                    },
-                                    "type": [
-                                      "VerifiableCredential",
-                                      "BpnCredential"
-                                    ],
-                                    "@context": [
-                                      "https://www.w3.org/2018/credentials/v1",
-                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                      "https://w3id.org/security/suites/jws-2020/v1"
-                                    ],
-                                    "issuer": "did:web:localhost:BPNL000000000000",
-                                    "expirationDate": "2024-12-31T18:30:00Z"
+                                    }
                                   }
                                 ],
                                 "pageable": {
@@ -299,11 +298,58 @@ public class IssuersCredentialController extends BaseController {
                     }
                     """)
     })})
+    @ApiResponse(responseCode = "404", description = "Wallet not found with provided identifier", content = {@Content(examples = {
+            @ExampleObject(name = "Wallet not found with provided identifier", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 404,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "400", description = "The input does not comply to the syntax requirements", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Response in case of invalid data provided", value = """
+                             {
+                                 "type": "about:blank",
+                                 "title": "Invalid data provided",
+                                 "status": 400,
+                                 "detail": "details",
+                                 "instance": "API endpoint",
+                                 "properties":
+                                 {
+                                     "timestamp": 1689760833962,
+                                     "errors":
+                                     {
+                                         "filed": "filed error message"
+                                     }
+                                 }
+                             }
+                            """)
+            })
+    })
     @ApiResponse(responseCode = "201", description = "Issuer credential", content = {
             @Content(examples = {
                     @ExampleObject(name = "Membership credential", value = """
                              {
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#0d6b6447-99de-4bc5-94f3-3ac0ae8ee188",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "MembershipCredential"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
                                "issuanceDate": "2023-07-19T13:13:53Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
                                "credentialSubject": [
                                  {
                                    "holderIdentifier": "BPNL000000000000",
@@ -314,25 +360,13 @@ public class IssuersCredentialController extends BaseController {
                                    "status": "Active"
                                  }
                                ],
-                               "id": "did:web:localhost:BPNL000000000000#0d6b6447-99de-4bc5-94f3-3ac0ae8ee188",
                                "proof": {
                                  "proofPurpose": "proofPurpose",
                                  "verificationMethod": "did:web:localhost:BPNL000000000000#",
                                  "type": "JsonWebSignature2020",
                                  "created": "2023-07-19T13:13:57Z",
                                  "jws": "eyJhbGciOiJFZERTQSJ9..zt7SyONY1shO7N6KrabQJr9uNrToM1Bc4eagTQc1LxAfZ1v-SSp9Y-2cpZNDV8AR08r4L8VbtWrR9t2dNoAfDw"
-                               },
-                               "type": [
-                                 "VerifiableCredential",
-                                 "MembershipCredential"
-                               ],
-                               "@context": [
-                                 "https://www.w3.org/2018/credentials/v1",
-                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                 "https://w3id.org/security/suites/jws-2020/v1"
-                               ],
-                               "issuer": "did:web:localhost:BPNL000000000000",
-                               "expirationDate": "2024-12-31T18:30:00Z"
+                               }
                              }
                             """)
             })
@@ -392,11 +426,58 @@ public class IssuersCredentialController extends BaseController {
                     }
                     """)
     })})
+    @ApiResponse(responseCode = "404", description = "Wallet not found with provided identifier", content = {@Content(examples = {
+            @ExampleObject(name = "Wallet not found with provided identifier", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 404,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "400", description = "The input does not comply to the syntax requirements", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Response in case of invalid data provided", value = """
+                             {
+                                 "type": "about:blank",
+                                 "title": "Invalid data provided",
+                                 "status": 400,
+                                 "detail": "details",
+                                 "instance": "API endpoint",
+                                 "properties":
+                                 {
+                                     "timestamp": 1689760833962,
+                                     "errors":
+                                     {
+                                         "filed": "filed error message"
+                                     }
+                                 }
+                             }
+                            """)
+            })
+    })
     @ApiResponse(responseCode = "201", description = "Dismantler Credential", content = {
             @Content(examples = {
                     @ExampleObject(name = "Dismantler Credential", value = """
                              {
+                                "@context": [
+                                  "https://www.w3.org/2018/credentials/v1",
+                                  "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                  "https://w3id.org/security/suites/jws-2020/v1"
+                                ],
+                                "id": "did:web:localhost:BPNL000000000000#5caac86c-8ef8-4aab-9d2b-fb18c62560a9",
+                                "type": [
+                                  "VerifiableCredential",
+                                  "DismantlerCredential"
+                                ],
+                                "issuer": "did:web:localhost:BPNL000000000000",
                                 "issuanceDate": "2023-07-19T13:35:33Z",
+                                "expirationDate": "2024-12-31T18:30:00Z",
                                 "credentialSubject": [
                                   {
                                     "holderIdentifier": "BPNL000000000000",
@@ -411,25 +492,13 @@ public class IssuersCredentialController extends BaseController {
                                     "type": "DismantlerCredential"
                                   }
                                 ],
-                                "id": "did:web:localhost:BPNL000000000000#5caac86c-8ef8-4aab-9d2b-fb18c62560a9",
                                 "proof": {
                                   "proofPurpose": "proofPurpose",
                                   "verificationMethod": "did:web:localhost:BPNL000000000000#",
                                   "type": "JsonWebSignature2020",
                                   "created": "2023-07-19T13:35:38Z",
                                   "jws": "eyJhbGciOiJFZERTQSJ9..UI82uq6iyqoaKjZIhJiV24v_Bqnj_7EqWiqZ3VWjqkoHLnr7JDtW5KVywWPl27j_baLBxxnM5jqjQdSK4rfbBg"
-                                },
-                                "type": [
-                                  "VerifiableCredential",
-                                  "DismantlerCredential"
-                                ],
-                                "@context": [
-                                  "https://www.w3.org/2018/credentials/v1",
-                                  "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                  "https://w3id.org/security/suites/jws-2020/v1"
-                                ],
-                                "issuer": "did:web:localhost:BPNL000000000000",
-                                "expirationDate": "2024-12-31T18:30:00Z"
+                                }
                               }
                             """)
             })
@@ -475,11 +544,58 @@ public class IssuersCredentialController extends BaseController {
                     }
                     """)
     })})
+    @ApiResponse(responseCode = "404", description = "Wallet not found with provided identifier", content = {@Content(examples = {
+            @ExampleObject(name = "Wallet not found with provided identifier", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 404,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "400", description = "The input does not comply to the syntax requirements", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Response in case of invalid data provided", value = """
+                             {
+                                 "type": "about:blank",
+                                 "title": "Invalid data provided",
+                                 "status": 400,
+                                 "detail": "details",
+                                 "instance": "API endpoint",
+                                 "properties":
+                                 {
+                                     "timestamp": 1689760833962,
+                                     "errors":
+                                     {
+                                         "filed": "filed error message"
+                                     }
+                                 }
+                             }
+                            """)
+            })
+    })
     @ApiResponse(responseCode = "201", description = "Framework credential", content = {
             @Content(examples = {
-                    @ExampleObject(name = "Framework credential", value = """
+                    @ExampleObject(name = "BehaviorTwin credential", value = """
                              {
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "UseCaseFrameworkCondition"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
                                "issuanceDate": "2023-07-19T13:49:58Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
                                "credentialSubject": [
                                  {
                                    "holderIdentifier": "BPNL000000000000",
@@ -489,25 +605,178 @@ public class IssuersCredentialController extends BaseController {
                                    "contractVersion": "1.0.0"
                                  }
                                ],
-                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
                                "proof": {
                                  "proofPurpose": "proofPurpose",
                                  "type": "JsonWebSignature2020",
                                  "verificationMethod": "did:web:localhost:BPNL000000000000#",
                                  "created": "2023-07-19T13:50:02Z",
                                  "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
-                               },
-                               "type": [
-                                 "VerifiableCredential",
-                                 "UseCaseFrameworkCondition"
-                               ],
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Pcf Credential", value = """
+                             {
                                "@context": [
                                  "https://www.w3.org/2018/credentials/v1",
                                  "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                                  "https://w3id.org/security/suites/jws-2020/v1"
                                ],
+                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "UseCaseFrameworkCondition"
+                               ],
                                "issuer": "did:web:localhost:BPNL000000000000",
-                               "expirationDate": "2024-12-31T18:30:00Z"
+                               "issuanceDate": "2023-07-19T13:49:58Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
+                               "credentialSubject": [
+                                 {
+                                   "holderIdentifier": "BPNL000000000000",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "PcfCredential",
+                                   "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                   "contractVersion": "1.0.0"
+                                 }
+                               ],
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "type": "JsonWebSignature2020",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "created": "2023-07-19T13:50:02Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Sustainability Credential", value = """
+                             {
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "UseCaseFrameworkCondition"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
+                               "issuanceDate": "2023-07-19T13:49:58Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
+                               "credentialSubject": [
+                                 {
+                                   "holderIdentifier": "BPNL000000000000",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "SustainabilityCredential",
+                                   "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                   "contractVersion": "1.0.0"
+                                 }
+                               ],
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "type": "JsonWebSignature2020",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "created": "2023-07-19T13:50:02Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Quality Credential", value = """
+                             {
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "UseCaseFrameworkCondition"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
+                               "issuanceDate": "2023-07-19T13:49:58Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
+                               "credentialSubject": [
+                                 {
+                                   "holderIdentifier": "BPNL000000000000",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "QualityCredential",
+                                   "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                   "contractVersion": "1.0.0"
+                                 }
+                               ],
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "type": "JsonWebSignature2020",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "created": "2023-07-19T13:50:02Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Traceability Credential", value = """
+                             {
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "UseCaseFrameworkCondition"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
+                               "issuanceDate": "2023-07-19T13:49:58Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
+                               "credentialSubject": [
+                                 {
+                                   "holderIdentifier": "BPNL000000000000",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "TraceabilityCredential",
+                                   "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                   "contractVersion": "1.0.0"
+                                 }
+                               ],
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "type": "JsonWebSignature2020",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "created": "2023-07-19T13:50:02Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
+                               }
+                             }
+                            """),
+                    @ExampleObject(name = "Resiliency Credential", value = """
+                             {
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "UseCaseFrameworkCondition"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
+                               "issuanceDate": "2023-07-19T13:49:58Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
+                               "credentialSubject": [
+                                 {
+                                   "holderIdentifier": "BPNL000000000000",
+                                   "id": "did:web:localhost:BPNL000000000000",
+                                   "type": "ResiliencyCredential",
+                                   "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                   "contractVersion": "1.0.0"
+                                 }
+                               ],
+                               "proof": {
+                                 "proofPurpose": "proofPurpose",
+                                 "type": "JsonWebSignature2020",
+                                 "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                 "created": "2023-07-19T13:50:02Z",
+                                 "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
+                               }
                              }
                             """)
             })
@@ -620,19 +889,19 @@ public class IssuersCredentialController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                  "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                   "@context": [
                                     "https://www.w3.org/2018/credentials/v1",
                                     "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                                     "https://w3id.org/security/suites/jws-2020/v1"
                                   ],
+                                  "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                   "type": [
                                     "VerifiableCredential",
                                     "BpnCredential"
                                   ],
                                   "issuer": "did:web:localhost:BPNL000000000000",
-                                  "expirationDate": "2024-12-31T18:30:00Z",
                                   "issuanceDate": "2023-07-19T09:11:34Z",
+                                  "expirationDate": "2024-12-31T18:30:00Z",
                                   "credentialSubject": [
                                     {
                                       "bpn": "BPNL000000000000",
@@ -680,11 +949,58 @@ public class IssuersCredentialController extends BaseController {
                     }
                     """)
     })})
+    @ApiResponse(responseCode = "404", description = "Wallet not found with provided identifier", content = {@Content(examples = {
+            @ExampleObject(name = "Wallet not found with provided identifier", value = """
+                    {
+                      "type": "about:blank",
+                      "title": "Error Title",
+                      "status": 404,
+                      "detail": "Error Details",
+                      "instance": "API endpoint",
+                      "properties": {
+                        "timestamp": 1689762476720
+                      }
+                    }
+                    """)
+    })})
+    @ApiResponse(responseCode = "400", description = "The input does not comply to the syntax requirements", content = {
+            @Content(examples = {
+                    @ExampleObject(name = "Response in case of invalid data provided", value = """
+                             {
+                                 "type": "about:blank",
+                                 "title": "Invalid data provided",
+                                 "status": 400,
+                                 "detail": "details",
+                                 "instance": "API endpoint",
+                                 "properties":
+                                 {
+                                     "timestamp": 1689760833962,
+                                     "errors":
+                                     {
+                                         "filed": "filed error message"
+                                     }
+                                 }
+                             }
+                            """)
+            })
+    })
     @ApiResponse(responseCode = "201", description = "Issuer credential", content = {
             @Content(examples = {
                     @ExampleObject(name = "Issuer credential", value = """
                              {
+                               "@context": [
+                                 "https://www.w3.org/2018/credentials/v1",
+                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                 "https://w3id.org/security/suites/jws-2020/v1"
+                               ],
+                               "id": "did:web:localhost:BPNL000000000000#ff084e7a-1b46-4a2f-a78d-3d701a0bd6e4",
+                               "type": [
+                                 "VerifiableCredential",
+                                 "BpnCredential"
+                               ],
+                               "issuer": "did:web:localhost:BPNL000000000000",
                                "issuanceDate": "2023-07-19T12:18:30Z",
+                               "expirationDate": "2024-12-31T18:30:00Z",
                                "credentialSubject": [
                                  {
                                    "bpn": "BPNL000000000000",
@@ -692,25 +1008,13 @@ public class IssuersCredentialController extends BaseController {
                                    "type": "BpnCredential"
                                  }
                                ],
-                               "id": "did:web:localhost:BPNL000000000000#ff084e7a-1b46-4a2f-a78d-3d701a0bd6e4",
                                "proof": {
                                  "proofPurpose": "proofPurpose",
                                  "type": "JsonWebSignature2020",
                                  "verificationMethod": "did:web:localhost:BPNL000000000000#",
                                  "created": "2023-07-19T12:18:34Z",
                                  "jws": "eyJhbGciOiJFZERTQSJ9..0Ua1vcTQAYwQY3PPuHr4RQxqW6iIngrHQQx1oPgk2uzqUpcbfY2YUxXAnbNA333-lSuvNhiV_1NLfBnCEcI2DQ"
-                               },
-                               "type": [
-                                 "VerifiableCredential",
-                                 "BpnCredential"
-                               ],
-                               "@context": [
-                                 "https://www.w3.org/2018/credentials/v1",
-                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                 "https://w3id.org/security/suites/jws-2020/v1"
-                               ],
-                               "issuer": "did:web:localhost:BPNL000000000000",
-                               "expirationDate": "2024-12-31T18:30:00Z"
+                               }
                              }
                             """)
             })
@@ -721,19 +1025,19 @@ public class IssuersCredentialController extends BaseController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                  "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                   "@context": [
                                     "https://www.w3.org/2018/credentials/v1",
                                     "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                                     "https://w3id.org/security/suites/jws-2020/v1"
                                   ],
+                                  "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                   "type": [
                                     "VerifiableCredential",
                                     "BpnCredential"
                                   ],
                                   "issuer": "did:web:localhost:BPNL000000000000",
-                                  "expirationDate": "2024-12-31T18:30:00Z",
                                   "issuanceDate": "2023-07-19T09:11:34Z",
+                                  "expirationDate": "2024-12-31T18:30:00Z",
                                   "credentialSubject": [
                                     {
                                       "bpn": "BPNL000000000000",
@@ -744,7 +1048,7 @@ public class IssuersCredentialController extends BaseController {
                                 }
                     """))
     })
-    public ResponseEntity<VerifiableCredential> issueCredentialUsingBaseWallet(@RequestParam String holderDid, @RequestBody Map<String, Object> data, Principal principal) {
+    public ResponseEntity<VerifiableCredential> issueCredentialUsingBaseWallet(@Parameter(description = "Holder DID", examples = {@ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @RequestParam(name = "holderDid") String holderDid, @RequestBody Map<String, Object> data, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, getBPNFromToken(principal)));
     }
 }

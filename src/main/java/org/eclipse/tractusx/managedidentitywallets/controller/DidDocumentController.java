@@ -85,6 +85,10 @@ public class DidDocumentController {
             @Content(examples = {
                     @ExampleObject(name = " DID document", value = """
                              {
+                                "@context": [
+                                 "https://www.w3.org/ns/did/v1",
+                                 "https://w3c.github.io/vc-jws-2020/contexts/v1"
+                               ],
                                "id": "did:web:localhost:BPNL000000000000",
                                "verificationMethod": [
                                  {
@@ -97,10 +101,6 @@ public class DidDocumentController {
                                    },
                                    "type": "JsonWebKey2020"
                                  }
-                               ],
-                               "@context": [
-                                 "https://www.w3.org/ns/did/v1",
-                                 "https://w3c.github.io/vc-jws-2020/contexts/v1"
                                ]
                              }
                             """)
@@ -150,6 +150,10 @@ public class DidDocumentController {
             @Content(examples = {
                     @ExampleObject(name = " DID document", value = """
                              {
+                               "@context": [
+                                 "https://www.w3.org/ns/did/v1",
+                                 "https://w3c.github.io/vc-jws-2020/contexts/v1"
+                               ],
                                "id": "did:web:localhost:BPNL000000000000",
                                "verificationMethod": [
                                  {
@@ -162,10 +166,6 @@ public class DidDocumentController {
                                    },
                                    "type": "JsonWebKey2020"
                                  }
-                               ],
-                               "@context": [
-                                 "https://www.w3.org/ns/did/v1",
-                                 "https://w3c.github.io/vc-jws-2020/contexts/v1"
                                ]
                              }
                             """)
