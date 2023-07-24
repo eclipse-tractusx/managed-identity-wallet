@@ -21,9 +21,10 @@ suite: test default deployment
 chart:
   version: 9.9.9+test
   appVersion: 9.9.9
+templates:
+  - templates/deployment.yaml
 tests:
   - it: should have correct metadata
-    template: templates/deployment.yaml
     asserts:
       - hasDocuments:
           count: 1
@@ -41,7 +42,6 @@ tests:
             app.kubernetes.io/managed-by: Helm
 
   - it: must have important values set
-    template: templates/deployment.yaml
     asserts:
       - equal:
           path: spec.replicas
@@ -59,7 +59,6 @@ tests:
             protocol: TCP
 
   - it: must have probes set
-    template: templates/deployment.yaml
     asserts:
       - isNotEmpty:
           path: spec.template.spec.containers[0].livenessProbe
@@ -67,7 +66,6 @@ tests:
           path: spec.template.spec.containers[0].readinessProbe
 
   - it: must have resource limits set
-    template: templates/deployment.yaml
     asserts:
       - isNotEmpty:
           path: spec.template.spec.containers[0].resources
@@ -85,7 +83,6 @@ tests:
           path: spec.template.spec.containers[0].resources.requests.memory
 
   - it: must have a security context
-    template: templates/deployment.yaml
     asserts:
       - isSubset:
           path: spec.template.spec.containers[0].securityContext
@@ -97,7 +94,6 @@ tests:
             runAsUser: 11111
 
   - it: should have environment variables set
-    template: templates/deployment.yaml
     asserts:
       - isNotEmpty:
           path: spec.template.spec.containers[0].env
@@ -106,7 +102,6 @@ tests:
           count: 1
 
   - it: should have empty values
-    template: templates/deployment.yaml
     asserts:
       - notExists:
           path: spec.template.spec.affinity
@@ -114,7 +109,6 @@ tests:
           path: spec.template.spec.tolerations
 
   - it: should have nodeSelector value set
-    template: templates/deployment.yaml
     asserts:
       - exists:
           path: spec.template.spec.nodeSelector

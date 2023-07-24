@@ -21,11 +21,12 @@ suite: test dev ingress
 chart:
   version: 9.9.9+test
   appVersion: 9.9.9
+templates:
+  - templates/ingress.yaml
 values:
   - values.yml
 tests:
   - it: should have correct metadata
-    template: templates/ingress.yaml
     asserts:
       - hasDocuments:
           count: 1
@@ -43,7 +44,6 @@ tests:
             app.kubernetes.io/managed-by: Helm
 
   - it: must have rules set
-    template: templates/ingress.yaml
     asserts:
       - isNotEmpty:
           path: spec.rules
@@ -59,7 +59,6 @@ tests:
           path: spec.rules[0].http.paths[0].path
 
   - it: must have tls set
-    template: templates/ingress.yaml
     asserts:
       - isNotEmpty:
           path: spec.tls

@@ -21,9 +21,10 @@ suite: test default ingress
 chart:
   version: 9.9.9+test
   appVersion: 9.9.9
+templates:
+  - templates/ingress.yaml
 tests:
   - it: should not be available
-    template: templates/ingress.yaml
     asserts:
       - hasDocuments:
           count: 0
