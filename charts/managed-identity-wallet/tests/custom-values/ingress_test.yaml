@@ -17,7 +17,7 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-suite: test dev ingress
+suite: test custom-values ingress
 chart:
   version: 9.9.9+test
   appVersion: 9.9.9
