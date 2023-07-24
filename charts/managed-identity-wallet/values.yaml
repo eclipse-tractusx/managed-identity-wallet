@@ -120,6 +120,15 @@ affinity: {}
 
 podAnnotations: {}
 
+backup:
+  database:
+    enabled: false
+    cron: "* */6 * * *"
+    storage:
+      keepStorage: true
+      diskSize: 10G
+      storageClassName: "-"
+
 postgresql:
   primary:
     initdb:
