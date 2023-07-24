@@ -23,3 +23,6 @@
 .vscode/
 tests/
 values-*.yaml
+README.md.gotmpl
+ci/
+argocd/
