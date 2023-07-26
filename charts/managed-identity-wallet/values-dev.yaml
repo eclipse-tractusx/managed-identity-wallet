@@ -36,6 +36,8 @@ envs:
 
 ingress:
   enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
   hosts:
     - host: managed-identity-wallets-new.dev.demo.catena-x.net
       paths:

@@ -17,25 +17,14 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-suite: test default serviceaccount
+suite: test default PVC for backup DB
 chart:
   version: 9.9.9+test
   appVersion: 9.9.9
+templates:
+  - templates/backup/persistentvolumeclaim.yaml
 tests:
-  - it: should have correct metadata
-    template: templates/serviceaccount.yaml
+  - it: should have backup functionality disabled
     asserts:
       - hasDocuments:
-          count: 1
-      - containsDocument:
-          kind: ServiceAccount
-          apiVersion: v1
-          name: RELEASE-NAME-managed-identity-wallet
-      - isSubset:
-          path: metadata.labels
-          content:
-            helm.sh/chart: managed-identity-wallet-9.9.9_test
-            app.kubernetes.io/name: managed-identity-wallet
-            app.kubernetes.io/instance: RELEASE-NAME
-            app.kubernetes.io/version: "9.9.9"
-            app.kubernetes.io/managed-by: Helm
+          count: 0

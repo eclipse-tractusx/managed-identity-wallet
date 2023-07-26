@@ -1,0 +1,130 @@
+# /********************************************************************************
+# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# *
+# * See the NOTICE file(s) distributed with this work for additional
+# * information regarding copyright ownership.
+# *
+# * This program and the accompanying materials are made available under the
+# * terms of the Apache License, Version 2.0 which is available at
+# * https://www.apache.org/licenses/LICENSE-2.0.
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# * License for the specific language governing permissions and limitations
+# * under the License.
+# *
+# * SPDX-License-Identifier: Apache-2.0
+# ********************************************************************************/
+
+suite: test custom-values deployment
+chart:
+  version: 9.9.9+test
+  appVersion: 9.9.9
+templates:
+  - templates/deployment.yaml
+tests:
+  - it: should have latest image tag
+    values:
+      - values.yml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: .:latest
+
+  - it: should have environment variables set (envs and secrets set)
+    values:
+      - values.yml
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: APPLICATION_PORT
+            value: "8080"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: DB_HOST
+            value: postgres-host
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MIW_HOST_NAME
+            value: miw
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: RELEASE-NAME-managed-identity-wallet
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: DB_USER_NAME
+            valueFrom:
+              secretKeyRef:
+                key: DB_USER_NAME
+                name: RELEASE-NAME-managed-identity-wallet
+
+  - it: should have environment variables set (only envs set)
+    values:
+      - values-envs.yml
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: APPLICATION_PORT
+            value: "8080"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: DB_HOST
+            value: postgres-host
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MIW_HOST_NAME
+            value: miw
+
+  - it: should have environment variables set (envs and secrets set)
+    values:
+      - values-secrets.yml
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: APPLICATION_PORT
+            value: "8080"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: RELEASE-NAME-managed-identity-wallet
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: DB_USER_NAME
+            valueFrom:
+              secretKeyRef:
+                key: DB_USER_NAME
+                name: RELEASE-NAME-managed-identity-wallet

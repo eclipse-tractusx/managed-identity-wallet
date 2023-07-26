@@ -1,8 +1,40 @@
 # managed-identity-wallet
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.0.0](https://img.shields.io/badge/AppVersion-4.0.0-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
 
-Managed Identity Wallets Service
+Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
+And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g., within logistical supply chains.
+
+**Homepage:** <https://github.com/eclipse-tractusx/managed-identity-wallet>
+
+## Get Repo Info
+
+    helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/dev
+    helm repo update
+
+## Install chart
+
+    helm install [RELEASE_NAME] tractusx-dev/managed-identity-wallet
+
+The command deploys miw on the Kubernetes cluster in the default configuration.
+
+See configuration below.
+
+See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
+
+## Uninstall Chart
+
+    helm uninstall [RELEASE_NAME]
+
+This removes all the Kubernetes components associated with the chart and deletes the release.
+
+See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
+
+## Upgrading Chart
+
+    helm upgrade [RELEASE_NAME] [CHART]
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
 ## Requirements
 
@@ -14,40 +46,40 @@ Managed Identity Wallets Service
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` |  |
-| envs | string | `nil` |  |
+| affinity | object | `{}` | Affinity configuration |
+| backup | object | `{"database":{"cron":"* */6 * * *","enabled":false,"storage":{"diskSize":"10G","keepStorage":true,"storageClassName":"-"}}}` | Simple Postgresql backup solution (Dump data to second PV) |
+| backup.database | object | `{"cron":"* */6 * * *","enabled":false,"storage":{"diskSize":"10G","keepStorage":true,"storageClassName":"-"}}` | Backup database |
+| backup.database.cron | string | `"* */6 * * *"` | Backup schedule (help: https://crontab.guru) |
+| backup.database.enabled | bool | `false` | Enable / Disable the backup |
+| backup.database.storage | object | `{"diskSize":"10G","keepStorage":true,"storageClassName":"-"}` | Storage configuration |
+| backup.database.storage.diskSize | string | `"10G"` | Disk size for backup content |
+| backup.database.storage.keepStorage | bool | `true` | Set to true, if the PV should stay even when the chart release is uninstalled |
+| backup.database.storage.storageClassName | string | `"-"` | storageClassName |
+| envs | object | `{}` | Parameters for the application (will be provided as plain environment variables) |
 | fullnameOverride | string | `""` |  |
-| image.pullPolicy | string | `"Always"` |  |
-| image.repository | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service"` |  |
-| image.tag | string | `"latest"` |  |
-| imagePullSecrets[0].name | string | `"acr-credential"` |  |
-| ingress.annotations."kubernetes.io/ingress.class" | string | `"nginx"` |  |
-| ingress.enabled | bool | `false` |  |
-| ingress.hosts[0].host | string | `"chart-example.local"` |  |
-| ingress.hosts[0].paths[0].path | string | `"/"` |  |
-| ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` |  |
-| ingress.tls | list | `[]` |  |
+| image | object | `{"pullPolicy":"Always","repository":"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service","tag":""}` | Image of the main container |
+| image.pullPolicy | string | `"Always"` | PullPolicy |
+| image.repository | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service"` | Image repository |
+| image.tag | string | `""` | Image tag (empty one will use "appVersion" value from chart definition) |
+| imagePullSecrets | list | `[{"name":"acr-credential"}]` | Credentials for a private repo |
+| ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration |
 | nameOverride | string | `""` |  |
-| nodeSelector."kubernetes.io/os" | string | `"linux"` |  |
-| podAnnotations | object | `{}` |  |
-| podSecurityContext | object | `{}` |  |
-| postgresql.auth.password | string | `"postgres"` |  |
-| postgresql.auth.postgresPassword | string | `"postgres"` |  |
-| postgresql.auth.username | string | `"postgres"` |  |
-| postgresql.primary.initdb.password | string | `"postgres"` |  |
-| postgresql.primary.initdb.scripts."init_db_script.sh" | string | `"#!/bin/sh\ncreatedb -O postgres miw\n"` |  |
-| postgresql.primary.initdb.user | string | `"postgres"` |  |
-| replicaCount | int | `1` |  |
-| resources.cpu | int | `250` |  |
-| resources.memory | int | `256` |  |
-| secrets | string | `nil` |  |
-| securityContext | object | `{}` |  |
-| service.port | int | `8080` |  |
-| service.type | string | `"ClusterIP"` |  |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.create | bool | `true` |  |
-| serviceAccount.name | string | `""` |  |
-| tolerations | list | `[]` |  |
+| nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
+| podAnnotations | object | `{}` | PodAnnotation configuration |
+| podSecurityContext | object | `{}` | PodSecurityContext |
+| replicaCount | int | `1` | The amount of replicas to run |
+| resources | object | `{"limits":{"cpu":4,"memory":"1Gi"},"requests":{"cpu":"250m","memory":"500Mi"}}` | Resource boundaries |
+| secrets | object | `{}` | Parameters for the application (will be stored as secrets - so, for passwords, ...) |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"privileged":false,"runAsGroup":11111,"runAsNonRoot":true,"runAsUser":11111}` | Preconfigured SecurityContext |
+| service | object | `{"port":8080,"type":"ClusterIP"}` | Service configuration |
+| serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | ServiceAccount configuration |
+| tolerations | list | `[]` | Tolerations configuration |
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Peter Motzko | <peter.motzko@volkswagen.de> | <https://github.com/pmoscode> |
 
 ----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.10.0](https://github.com/norwoodj/helm-docs/releases/v1.10.0)
+Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
