@@ -27,11 +27,7 @@ image:
   # -- PullPolicy
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
-  tag: ""
-
-# -- Credentials for a private repo
-imagePullSecrets:
-  - name: acr-credential
+  tag: "" 
 
 nameOverride: ""
 fullnameOverride: ""
