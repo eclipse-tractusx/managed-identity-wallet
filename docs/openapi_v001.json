@@ -34,7 +34,8 @@
                                     "items": {
                                         "$ref": "#/components/schemas/WalletDto"
                                     },
-                                    "type": "array"
+                                    "type": "array",
+                                    "maxItems": 100
                                 }
                             }
                         }
@@ -676,7 +677,8 @@
                             "items": {
                                 "type": "string"
                             },
-                            "type": "array"
+                            "type": "array",
+                            "maxItems": 100
                         },
                         "required": false,
                         "deprecated": false,
@@ -696,7 +698,8 @@
                                     "items": {
                                         "$ref": "#/components/schemas/VerifiableCredentialDto"
                                     },
-                                    "type": "array"
+                                    "type": "array",
+                                    "maxItems": 100
                                 }
                             }
                         }
@@ -1109,10 +1112,10 @@
                                             "issuer": "did:web:miw.de/bpn0000000000",
                                             "issuanceDate": "2021-06-16T18:56:59Z",
                                             "credentialSubject": {
-                                                "type":"MembershipCredential",
+                                                "type": "MembershipCredential",
                                                 "memberOf": "Catena-X",
-                                                "status":"Active",
-                                                "startTime":"2021-06-16T18:56:59Z"
+                                                "status": "Active",
+                                                "startTime": "2021-06-16T18:56:59Z"
                                             },
                                             "holderIdentifier": "bpn",
                                             "proof": {
@@ -1894,7 +1897,8 @@
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -1964,10 +1968,10 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
-                    "credentialStatus": {
-                    },
+                    "credentialStatus": {},
                     "credentialSubject": {
                         "additionalProperties": {
                             "$ref": "#/components/schemas/Any"
@@ -1995,13 +1999,15 @@
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "type": {
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -2121,10 +2127,10 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
-                    "CredentialStatus": {
-                    },
+                    "CredentialStatus": {},
                     "credentialSubject": {
                         "additionalProperties": {
                             "$ref": "#/components/schemas/Any"
@@ -2152,7 +2158,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -2175,31 +2182,36 @@
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "authenticationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "capabilityDelegationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "capabilityInvocationVerificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "context": {
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "controller": {
                         "$ref": "#/components/schemas/Short"
@@ -2211,18 +2223,22 @@
                         "items": {
                             "$ref": "#/components/schemas/Any"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "services": {
                         "items": {
+                            "$ref": "#/components/schemas/Any"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "verificationMethods": {
                         "items": {
                             "$ref": "#/components/schemas/DidVerificationMethodDto"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -2294,7 +2310,8 @@
                             "type": "string",
                             "nullable": true
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "kid": {
                         "type": "string",
@@ -2327,7 +2344,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "credentialSubject": {
                         "additionalProperties": {
@@ -2361,7 +2379,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -2379,7 +2398,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "credentialSubject": {
                         "additionalProperties": {
@@ -2409,7 +2429,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -2430,7 +2451,8 @@
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -2445,7 +2467,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "holder": {
                         "type": "string",
@@ -2462,13 +2485,15 @@
                         "items": {
                             "type": "string"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     },
                     "verifiableCredential": {
                         "items": {
                             "$ref": "#/components/schemas/VerifiableCredentialDto"
                         },
-                        "type": "array"
+                        "type": "array",
+                        "maxItems": 100
                     }
                 },
                 "required": [
@@ -2504,6 +2529,8 @@
             }
         }
     },
-    "security": [],
+    "security": {
+        "auth-token": {}
+    },
     "tags": []
 }
