@@ -124,7 +124,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
-
+            log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
 
             //Issuer of VP is holder of VC
@@ -142,6 +142,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
             response.put(StringPool.VP, presentation.serialize());
         } else {
+            log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
             VerifiablePresentationBuilder verifiablePresentationBuilder =
                     new VerifiablePresentationBuilder();
 
@@ -172,6 +173,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
+            log.debug("Validating VP as JWT");
             //verify as jwt
             Validate.isNull(vp.get(StringPool.VP)).launch(new BadDataException("Can not find JWT"));
             String jwt = vp.get(StringPool.VP).toString();
@@ -216,6 +218,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             }
 
         } else {
+            log.debug("Validating VP as json-ld");
             throw new BadDataException("Validation of VP in form of JSON-LD is not supported");
         }
 

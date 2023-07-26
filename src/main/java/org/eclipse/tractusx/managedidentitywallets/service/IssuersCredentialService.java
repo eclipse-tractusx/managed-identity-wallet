@@ -522,6 +522,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
             log.debug("No summery VC found for did ->{}, checking in issuer", StringEscapeUtils.escapeJava(holderDid));
         } else {
             //delete old summery VC from holder table, delete only not stored VC
+            log.debug("Deleting older summary VC fir bpn -{}", holderBpn);
             holdersCredentialRepository.deleteAll(vcs);
         }
 
