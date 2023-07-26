@@ -76,23 +76,7 @@ service:
 # -- Ingress configuration
 ingress:
   enabled: false
-#  className: nginx
-  annotations:
-    kubernetes.io/ingress.class: nginx
-#    nginx.ingress.kubernetes.io/rewrite-target: /$1
-#    nginx.ingress.kubernetes.io/use-regex: "true"
-#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-#    nginx.ingress.kubernetes.io/server-snippet: |
-#      location ~* /list-credential/ {
-#          deny all;
-#          return 403;
-#      }
-#
-#      location ~* /webhook/topic/ {
-#        deny all;
-#        return 403;
-#      }
+  annotations: {}
   hosts:
     - host: chart-example.local
       paths:
@@ -105,7 +89,6 @@ ingress:
 
 # -- PodSecurityContext
 podSecurityContext: {}
-# fsGroup: 2000
 
 # -- Preconfigured SecurityContext
 securityContext:
