@@ -93,7 +93,7 @@ public class DidDocumentController {
                                "verificationMethod": [
                                  {
                                    "controller": "did:web:localhost:BPNL000000000000",
-                                   "id": "did:web:localhost:BPNL000000000000#",
+                                   "id": "did:web:localhost:BPNL000000000000",
                                    "publicKeyJwk": {
                                      "crv": "Ed25519",
                                      "kty": "OKP",
