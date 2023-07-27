@@ -27,23 +27,27 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.net.ServerSocket;
+import java.util.Base64;
 
 public class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final int port = findFreePort();
     private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer().withRealmImportFile("miw-test-realm.json");
 
+    @SneakyThrows
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         KEYCLOAK_CONTAINER.start();
         String authServerUrl = KEYCLOAK_CONTAINER.getAuthServerUrl();
-
+        SecretKey secretKey = KeyGenerator.getInstance("AES").generateKey();
         TestPropertyValues.of(
                 "server.port=" + port,
                 "miw.host: localhost:${server.port}",
                 "miw.enforceHttps=false",
-                "miw.encryptionKey=Woh9waid4Ei5eez0aitieghoow9so4oe",
+                "miw.encryptionKey="+ Base64.getEncoder().encodeToString(secretKey.getEncoded()),
                 "miw.authorityWalletBpn: BPNL000000000000",
                 "miw.authorityWalletName: Test-X",
                 "miw.authorityWalletDid: did:web:localhost%3A${server.port}:BPNL000000000000",
