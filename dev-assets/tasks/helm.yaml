@@ -24,4 +24,10 @@ tasks:
     desc: Executes helm unittests
     dir: charts/managed-identity-wallet
     cmds:
-      - helm unittest .
+      - helm unittest -f 'tests/**/*.yaml' -f 'tests/**/**/*.yaml' .
+
+  readme:
+    desc: Rebuilds the readme of the Helm chart
+    dir: charts/managed-identity-wallet
+    cmds:
+      - helm-docs .

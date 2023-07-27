@@ -52,10 +52,10 @@ public class IssuersCredential extends MIWBaseEntity {
     @Column(nullable = false)
     private String issuerDid;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name="credential_type")
     private String type;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name="credential_data")
     @Convert(converter = StringToCredentialConverter.class)
     private VerifiableCredential data;
 

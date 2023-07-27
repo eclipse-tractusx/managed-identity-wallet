@@ -51,4 +51,6 @@ public class ApplicationRole {
      */
     public static final String ROLE_UPDATE_WALLET = "update_wallet";
 
+    public static final String ROLE_MANAGE_APP = "manage_app";
+
 }

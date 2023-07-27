@@ -17,27 +17,30 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
+# -- The amount of replicas to run
 replicaCount: 1
 
+# -- Image of the main container
 image:
-  repository: ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service
+  # -- Image repository
+  repository: tractusx/managed-identity-wallet
+  # -- PullPolicy
   pullPolicy: Always
-  tag: ""
-
-imagePullSecrets:
-  - name: acr-credential
+  # -- Image tag (empty one will use "appVersion" value from chart definition)
+  tag: "" 
 
 nameOverride: ""
 fullnameOverride: ""
 
-secrets:
+# -- Parameters for the application (will be stored as secrets - so, for passwords, ...)
+secrets: {}
 #  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
 #  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
 #  KEYCLOAK_CLIENT_ID: xxx
 #  ENCRYPTION_KEY: xxx  # 64 chars
 
-# APPLICATION_PORT is bound to 8080!!
-envs:
+# -- Parameters for the application (will be provided as plain environment variables)
+envs: {}
 #  APPLICATION_ENVIRONMENT: xxx
 #  DB_HOST: auto
 #  DB_PORT: xxx
@@ -55,34 +58,21 @@ envs:
 #  KEYCLOAK_REALM: xxx
 #  AUTH_SERVER_URL: xxx
 
+# -- ServiceAccount configuration
 serviceAccount:
   create: true
   annotations: {}
   name: ""
 
+# -- Service configuration
 service:
   type: ClusterIP
   port: 8080
 
+# -- Ingress configuration
 ingress:
   enabled: false
-#  className: nginx
-  annotations:
-    kubernetes.io/ingress.class: nginx
-#    nginx.ingress.kubernetes.io/rewrite-target: /$1
-#    nginx.ingress.kubernetes.io/use-regex: "true"
-#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-#    nginx.ingress.kubernetes.io/server-snippet: |
-#      location ~* /list-credential/ {
-#          deny all;
-#          return 403;
-#      }
-#
-#      location ~* /webhook/topic/ {
-#        deny all;
-#        return 403;
-#      }
+  annotations: {}
   hosts:
     - host: chart-example.local
       paths:
@@ -93,9 +83,10 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+# -- PodSecurityContext
 podSecurityContext: {}
-# fsGroup: 2000
 
+# -- Preconfigured SecurityContext
 securityContext:
   privileged: false
   allowPrivilegeEscalation: false
@@ -103,6 +94,7 @@ securityContext:
   runAsGroup: 11111
   runAsUser: 11111
 
+# -- Resource boundaries
 resources:
   requests:
     cpu: 250m
@@ -111,15 +103,37 @@ resources:
     cpu: 4
     memory: 1Gi
 
+# -- NodeSelector configuration
 nodeSelector:
   "kubernetes.io/os": linux
 
+# -- Tolerations configuration
 tolerations: []
 
+# -- Affinity configuration
 affinity: {}
 
+# -- PodAnnotation configuration
 podAnnotations: {}
 
+# -- Simple Postgresql backup solution (Dump data to second PV)
+backup:
+  # -- Backup database
+  database:
+    # -- Enable / Disable the backup
+    enabled: false
+    # -- Backup schedule (help: https://crontab.guru)
+    cron: "* */6 * * *"
+    # -- Storage configuration
+    storage:
+      # -- Set to true, if the PV should stay even when the chart release is uninstalled
+      keepStorage: true
+      # -- Disk size for backup content
+      diskSize: 10G
+      # -- storageClassName
+      storageClassName: "-"
+
+# @ignored
 postgresql:
   primary:
     initdb:
