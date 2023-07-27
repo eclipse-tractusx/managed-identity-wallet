@@ -29,6 +29,7 @@ tasks:
       - task: check-docker-compose
       - task: check-java
       - task: check-jq
+      - task: check-git-changelog
     ignore_error: true
 
   check-helm:
@@ -62,6 +63,12 @@ tasks:
       - echo "task 'check-prereq' not implemented for windows!"
 
   check-jq:
+    dir: dev-assets/tasks/windows
+    silent: true
+    cmds:
+      - echo "task 'check-prereq' not implemented for windows!"
+
+  check-git-changelog:
     dir: dev-assets/tasks/windows
     silent: true
     cmds:
