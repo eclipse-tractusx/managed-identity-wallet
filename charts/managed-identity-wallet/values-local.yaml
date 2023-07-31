@@ -21,8 +21,6 @@ image:
   tag: "latest-java-did-web"
 
 secrets:
-  DB_USER_NAME: postgres
-  DB_PASSWORD: xxx
   ENCRYPTION_KEY: 76a7834fb37e090c2789a9b1a76748d3
   KEYCLOAK_CLIENT_ID: z445srtzr5g
 
@@ -57,10 +55,8 @@ backup:
       storageClassName: hostpath
 
 postgresql:
-  primary:
-    initdb:
-      password: xxx
+  enabled: true
   auth:
     password: xxx
-    postgresPassword: xxx
     username: postgres
+    postgresPassword: xxx

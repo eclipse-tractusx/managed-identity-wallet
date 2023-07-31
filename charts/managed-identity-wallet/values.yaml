@@ -23,40 +23,38 @@ replicaCount: 1
 # -- Image of the main container
 image:
   # -- Image repository
-  repository: tractusx/managed-identity-wallet
+  repository: ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service
   # -- PullPolicy
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
-  tag: "" 
+  tag: ""
+
+# -- Credentials name for private repos
+imagePullSecrets: []
 
 nameOverride: ""
 fullnameOverride: ""
 
 # -- Parameters for the application (will be stored as secrets - so, for passwords, ...)
-secrets: {}
-#  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
-#  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
-#  KEYCLOAK_CLIENT_ID: xxx
-#  ENCRYPTION_KEY: xxx  # 64 chars
+secrets:
+  KEYCLOAK_CLIENT_ID: ""
+  ENCRYPTION_KEY: ""  # 64 chars
 
 # -- Parameters for the application (will be provided as plain environment variables)
-envs: {}
-#  APPLICATION_ENVIRONMENT: xxx
-#  DB_HOST: auto
-#  DB_PORT: xxx
-#  DB_NAME: xxx  # set it also in the init script in the postgres initdb section below!!
-#  USE_SSL: xxx
-#  DB_POOL_SIZE: xxx
-#  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
-#  MANAGEMENT_PORT: xxx
-#  MIW_HOST_NAME: xxx
-#  AUTHORITY_WALLET_BPN: xxx
-#  AUTHORITY_WALLET_NAME: xxx
-#  AUTHORITY_WALLET_DID: xxx
-#  VC_SCHEMA_LINK: xxx
-#  VC_EXPIRY_DATE: xxx
-#  KEYCLOAK_REALM: xxx
-#  AUTH_SERVER_URL: xxx
+envs:
+  APPLICATION_ENVIRONMENT: "dev"
+  USE_SSL: false
+  DB_POOL_SIZE:
+  KEYCLOAK_MIW_PUBLIC_CLIENT: ""
+  MANAGEMENT_PORT:
+  MIW_HOST_NAME: localhost
+  AUTHORITY_WALLET_BPN: ""
+  AUTHORITY_WALLET_NAME: ""
+  AUTHORITY_WALLET_DID: ""
+  VC_SCHEMA_LINK: ""
+  VC_EXPIRY_DATE: ""
+  KEYCLOAK_REALM: ""
+  AUTH_SERVER_URL: ""
 
 # -- ServiceAccount configuration
 serviceAccount:
@@ -133,17 +131,20 @@ backup:
       # -- storageClassName
       storageClassName: "-"
 
-# @ignored
 postgresql:
-  primary:
-    initdb:
-      scripts:
-        init_db_script.sh: |
-          #!/bin/sh
-          createdb -O postgres miw
-      user: postgres
-      password: postgres
+  external:
+    enabled: false
+    config:
+      host: ""
+      port: 5432
+      database: ""
+    auth:
+      username: ""
+      password: ""
+      existingSecret: ""
+      existingSecretKey: password
+
+  # @ignored
   auth:
-    password: postgres
-    username: postgres
-    postgresPassword: postgres
+    username: miw
+    database: miw
