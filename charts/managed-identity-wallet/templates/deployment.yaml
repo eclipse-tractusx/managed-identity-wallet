@@ -53,11 +53,6 @@ spec:
           env:
             - name: APPLICATION_PORT
               value: "8080"
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "managed-identity-wallet.fullname" . }}-postgresql
-                  key: password
             {{- if .Values.postgresql.external.enabled }}
             - name: DB_HOST
               value: {{ .Values.postgresql.external.config.host }}
