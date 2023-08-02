@@ -25,10 +25,9 @@ secrets:
   KEYCLOAK_CLIENT_ID: z445srtzr5g
 
 envs:
-  DB_HOST: miw-postgresql
   MIW_HOST_NAME: localhost
   KEYCLOAK_REALM: miw_test
-  AUTH_SERVER_URL: http://<ip-of-keycloack>/auth
+  AUTH_SERVER_URL: http://<your_local_ip>:<port>/auth
   AUTHORITY_WALLET_DID: "did:web:managed-identity-wallets-new.dev.demo.catena-x.net:BPNL000000000000"
   AUTHORITY_WALLET_BPN: "BPNL000000000000"
 
@@ -55,8 +54,18 @@ backup:
       storageClassName: hostpath
 
 postgresql:
-  enabled: true
+  internal:
+    enabled: true
+  external:
+    config:
+      host: <your_local_ip>
+      port: 5432
+      database: miw
+    auth:
+      username:
+      password:
+      existingSecret: ""
+      existingSecretKey: password
   auth:
-    password: xxx
-    username: postgres
-    postgresPassword: xxx
+    username: miw
+    database: miw
