@@ -132,8 +132,9 @@ backup:
       storageClassName: "-"
 
 postgresql:
+  internal:
+    enabled: true
   external:
-    enabled: false
     config:
       host: ""
       port: 5432

@@ -53,11 +53,23 @@ spec:
           env:
             - name: APPLICATION_PORT
               value: "8080"
-            {{- if .Values.postgresql.external.enabled }}
+            {{- if .Values.postgresql.internal.enabled }}
+            - name: DB_HOST
+              value: {{ .Release.Name }}-postgresql
+            - name: DB_USER_NAME
+              value: {{ .Values.postgresql.auth.username }}
+            - name: DB_NAME
+              value: {{ .Values.postgresql.auth.database }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
+            {{- else }}
             - name: DB_HOST
               value: {{ .Values.postgresql.external.config.host }}
             - name: DB_PORT
-              value: {{ .Values.postgresql.external.config.port }}
+              value: {{ .Values.postgresql.external.config.port | quote }}
             - name: DB_USER_NAME
               value: {{ .Values.postgresql.external.auth.username }}
             - name: DB_NAME
@@ -72,31 +84,21 @@ spec:
                   name: {{ include "managed-identity-wallet.fullname" . }}-postgresql
                   key: password
                   {{- end }}
-            {{- else }}
-            - name: DB_HOST
-              value: {{ include "managed-identity-wallet.fullname" . }}-postgresql
-            - name: DB_USER_NAME
-              value: {{ .Values.postgresql.auth.username }}
-            - name: DB_NAME
-              value: {{ .Values.postgresql.auth.database }}
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "managed-identity-wallet.fullname" . }}-postgresql
-                  key: password
             {{- end }}
           {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
+            {{- if $val }}
             - name: {{ $key }}
               value: {{ $val }}
-          {{- end}}
+            {{- end }}
+          {{- end }}
           {{- range $key, $val := .Values.secrets }}
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
                   name: {{ include "managed-identity-wallet.fullname" $ }}
                   key: {{ $key }}
-          {{- end}}
+          {{- end }}
           {{- end }}
           ports:
             - name: http
