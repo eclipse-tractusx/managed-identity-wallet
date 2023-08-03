@@ -29,6 +29,7 @@ tasks:
       - task: check-docker-compose
       - task: check-java
       - task: check-jq
+      - task: check-git-changelog
     ignore_error: true
 
   check-helm:
@@ -69,6 +70,12 @@ tasks:
     silent: true
     cmds:
       - ./check_bin.sh jq https://jqlang.github.io/jq/
+
+  check-git-changelog:
+    dir: dev-assets/tasks/darwin
+    silent: true
+    cmds:
+      - ./check_bin.sh git-changelog https://pypi.org/project/git-changelog/#description
 
   check-java:
     dir: dev-assets/tasks/darwin

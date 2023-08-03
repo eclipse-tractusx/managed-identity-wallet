@@ -42,6 +42,12 @@ tasks:
     cmds:
       - task: check:check-all
 
+  changelog:
+    desc: Generate Changelog
+    cmds:
+      - rm -f CHANGELOG.md
+      - git-changelog -o CHANGELOG.md -c conventional -t keepachangelog .
+
   clean-all:
     desc: Cleans everything...
     cmds:
