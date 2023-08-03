@@ -31,6 +31,7 @@ import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -104,11 +105,11 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         //Holder must be caller of API
         Wallet holderWallet = commonService.getWalletByIdentifier(callerBPN);
-        filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid().toString());
+        filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid());
 
         if (StringUtils.hasText(issuerIdentifier)) {
             Wallet issuerWallet = commonService.getWalletByIdentifier(issuerIdentifier);
-            filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid().toString());
+            filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid());
         }
 
         if (StringUtils.hasText(credentialId)) {
@@ -164,7 +165,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         //Store Credential in holder table
         credential = create(credential);
 
-        log.debug("VC type of {} issued to bpn ->{}", verifiableCredential.getTypes(), callerBpn);
+        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(callerBpn));
         // Return VC
         return credential.getData();
     }
@@ -185,7 +186,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         //remove credential
         holdersCredentialRepository.deleteByCredentialId(credentialId);
-        log.debug("VC deleted with id ->{} of bpn ->{}", credentialId, holderWallet.getBpn());
+        log.debug("VC deleted with id ->{} of bpn ->{}", StringEscapeUtils.escapeJava(credentialId), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
     }
 
     private void isCredentialExistWithId(String holderDid, String credentialId) {

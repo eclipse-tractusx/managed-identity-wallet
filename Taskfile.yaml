@@ -19,8 +19,10 @@
 
 version: 3
 
+vars:
+  ENV: docker # local or docker
+
 dotenv:
-  - 'dev-assets/env-files/env.environment'
   - 'dev-assets/env-files/env.{{.ENV}}'
 
 includes:
@@ -39,6 +41,12 @@ tasks:
     desc: Checks the local machine for all tools, which are used for MIW development
     cmds:
       - task: check:check-all
+
+  changelog:
+    desc: Generate Changelog
+    cmds:
+      - rm -f CHANGELOG.md
+      - git-changelog -o CHANGELOG.md -c conventional -t keepachangelog .
 
   clean-all:
     desc: Cleans everything...

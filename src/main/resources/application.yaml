@@ -11,9 +11,9 @@ spring:
   application:
     name: miw
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:miw}?useSSL=${USE_SSL:false}
-    username: ${DB_USER_NAME:root}
-    password: ${DB_PASSWORD:smart}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?useSSL=${USE_SSL}
+    username: ${DB_USER_NAME}
+    password: ${DB_PASSWORD}
     initialization-mode: always
     hikari:
       maximumPoolSize: ${DB_POOL_SIZE:10}
@@ -31,7 +31,7 @@ spring:
 springdoc:
   swagger-ui:
     oauth:
-      clientId: ${KEYCLOAK_MIW_PUBLIC_CLIENT:miw_public} #It should be public client created in keycloak
+      clientId: ${KEYCLOAK_MIW_PUBLIC_CLIENT} #It should be public client created in keycloak
     disable-swagger-default-url: true
     path: /ui/swagger-ui
     show-common-extensions: true
@@ -44,13 +44,15 @@ management:
   server:
     port: ${MANAGEMENT_PORT:8090}
   endpoint:
+    loggers:
+      enabled: true
     health:
       probes:
         enabled: true
   endpoints:
     web:
       exposure:
-        include: '*, pre-stop'
+        include: '*, pre-stop, loggers'
   health:
     db:
       enabled: true
@@ -59,9 +61,17 @@ management:
     readinessState:
       enabled: true
 
+# log level
+logging:
+  level:
+    org:
+      eclipse:
+        tractusx:
+          managedidentitywallets: ${APP_LOG_LEVEL:INFO}
+
 miw:
   host: ${MIW_HOST_NAME:localhost}
-  encryptionKey: ${ENCRYPTION_KEY:Woh9waid4Ei5eez0aitieghoow9so4oe}
+  encryptionKey: ${ENCRYPTION_KEY}
   authorityWalletBpn: ${AUTHORITY_WALLET_BPN:BPNL000000000000}
   authorityWalletName: ${AUTHORITY_WALLET_NAME:Catena-X}
   authorityWalletDid: ${AUTHORITY_WALLET_DID:did:web:localhost:BPNL000000000000}
@@ -71,10 +81,11 @@ miw:
   supportedFrameworkVCTypes: ${SUPPORTED_FRAMEWORK_VC_TYPES:PcfCredential, SustainabilityCredential, QualityCredential, TraceabilityCredential, BehaviorTwinCredential, ResiliencyCredential}
   enforceHttps: ${ENFORCE_HTTPS_IN_DID_RESOLUTION:true}
   contractTemplatesUrl: ${CONTRACT_TEMPLATES_URL:https://public.catena-x.org/contracts/}
+  didDocumentContextUrls: ${DID_DOCUMENT_CONTEXT_URL:https://www.w3.org/ns/did/v1,https://w3c.github.io/vc-jws-2020/contexts/v1}
   security:
     enabled: true
     realm: ${KEYCLOAK_REALM:miw_test}
-    clientId: ${KEYCLOAK_CLIENT_ID:miw_private_client}
+    clientId: ${KEYCLOAK_CLIENT_ID}
     auth-server-url: ${AUTH_SERVER_URL:http://localhost:8081}
     auth-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/auth
     token-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/token

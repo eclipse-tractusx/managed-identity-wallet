@@ -26,23 +26,36 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * The type Application config.
  */
 @Configuration
 @Slf4j
-@RequiredArgsConstructor
 public class ApplicationConfig implements WebMvcConfigurer {
 
     private final SwaggerUiConfigProperties properties;
+    private final String resourceBundlePath;
+
+    @Autowired
+    public ApplicationConfig(@Value("${resource.bundle.path:classpath:i18n/language}") String resourceBundlePath, SwaggerUiConfigProperties properties) {
+        this.resourceBundlePath = resourceBundlePath;
+        this.properties = properties;
+    }
 
     /**
      * Object mapper object mapper.
@@ -67,7 +80,22 @@ public class ApplicationConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         String redirectUri = properties.getPath();
-        log.info("Set landing page to path {}", redirectUri);
+        log.info("Set landing page to path {}", StringEscapeUtils.escapeJava(redirectUri));
         registry.addRedirectViewController("/", redirectUri);
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource bean = new ReloadableResourceBundleMessageSource();
+        bean.setBasename(resourceBundlePath);
+        bean.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        return bean;
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean validator() {
+        LocalValidatorFactoryBean beanValidatorFactory = new LocalValidatorFactoryBean();
+        beanValidatorFactory.setValidationMessageSource(messageSource());
+        return beanValidatorFactory;
     }
 }

@@ -36,6 +36,7 @@ public class StringPool {
     public static final String VALID = "valid";
     public static final String VALIDATE_AUDIENCE = "validateAudience";
     public static final String VALIDATE_EXPIRY_DATE = "validateExpiryDate";
+    public static final String VALIDATE_JWT_EXPIRY_DATE = "validateJWTExpiryDate";
     public static final String DID_DOCUMENT = "didDocument";
     public static final String VEHICLE_DISMANTLE = "vehicleDismantle";
     public static final String CREATED_AT = "createdAt";
@@ -48,7 +49,6 @@ public class StringPool {
     public static final String HOLDER_DID = "holderDid";
     public static final String HOLDER_IDENTIFIER = "holderIdentifier";
     public static final String NAME = "name";
-    public static final String CONTRACT_TEMPLATES = "contractTemplates";
     public static final String CONTRACT_TEMPLATE = "contractTemplate";
     public static final String TYPE = "type";
     public static final String MEMBER_OF = "memberOf";

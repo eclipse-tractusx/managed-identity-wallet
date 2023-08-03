@@ -24,38 +24,61 @@ tasks:
     cmds:
       - task: check-helm
       - task: check-helm-plugins
+      - task: check-helm-docs
       - task: check-docker
       - task: check-docker-compose
       - task: check-java
       - task: check-jq
+      - task: check-git-changelog
     ignore_error: true
 
   check-helm:
-    dir: dev-assets/tasks/{{OS}}
+    dir: dev-assets/tasks/darwin
+    silent: true
     cmds:
       - ./check_bin.sh helm https://helm.sh/docs/intro/quickstart/#install-helm
 
+  check-helm-docs:
+    dir: dev-assets/tasks/darwin
+    silent: true
+    cmds:
+      - ./check_bin.sh helm-docs https://github.com/norwoodj/helm-docs
+
   check-helm-plugins:
     dir: dev-assets/tasks/darwin
+    silent: true
     cmds:
-      - ./check_helm_plugin.sh unittest
+      - ./check_helm_plugin.sh unittest https://github.com/helm-unittest/helm-unittest#install
 
   check-docker:
     dir: dev-assets/tasks/darwin
+    silent: true
     cmds:
       - ./check_bin.sh docker https://www.docker.com
 
   check-docker-compose:
     dir: dev-assets/tasks/darwin
+    silent: true
     cmds:
-      - ./check_bin.sh docker-compose https://www.docker.com
+      - echo "If following command fails execute this, if you have Docker-Desktop installed (probably will fix it) ->"
+      - echo "sudo mkdir -p /usr/local/lib/docker"
+      - echo "sudo ln -s /Applications/Docker.app/Contents/Resources/cli-plugins /usr/local/lib/docker/cli-plugins"
+      - docker compose version
 
   check-jq:
     dir: dev-assets/tasks/darwin
+    silent: true
     cmds:
       - ./check_bin.sh jq https://jqlang.github.io/jq/
 
+  check-git-changelog:
+    dir: dev-assets/tasks/darwin
+    silent: true
+    cmds:
+      - ./check_bin.sh git-changelog https://pypi.org/project/git-changelog/#description
+
   check-java:
     dir: dev-assets/tasks/darwin
+    silent: true
     cmds:
       - ./check_bin.sh java https://www.codejava.net/java-core/install-openjdk-17-on-macos

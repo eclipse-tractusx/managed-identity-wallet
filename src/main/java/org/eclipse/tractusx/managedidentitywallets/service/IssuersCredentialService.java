@@ -30,6 +30,7 @@ import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
@@ -133,6 +134,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param type             the type
      * @param sortColumn       the sort column
      * @param sortType         the sort type
+     * @param pageNumber       the page number
+     * @param size             the size
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
@@ -182,6 +185,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      *
      * @param baseWallet   the base wallet
      * @param holderWallet the holder wallet
+     * @param authority    the authority
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
@@ -204,7 +208,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //update summery VC
         updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
 
-        log.debug("BPN credential issued for bpn -{}", holderWallet.getBpn());
+        log.debug("BPN credential issued for bpn -{}", StringEscapeUtils.escapeJava(holderWallet.getBpn()));
 
         return issuersCredential.getData();
     }
@@ -253,7 +257,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //update summery cred
         updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType());
 
-        log.debug("Framework VC of type ->{} issued to bpn ->{}", request.getType(), holderWallet.getBpn());
+        log.debug("Framework VC of type ->{} issued to bpn ->{}", StringEscapeUtils.escapeJava(request.getType()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
 
         // Return VC
         return issuersCredential.getData();
@@ -304,7 +308,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //update summery VC
         updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
 
-        log.debug("Dismantler VC issued to bpn -> {}", request.getBpn());
+        log.debug("Dismantler VC issued to bpn -> {}", StringEscapeUtils.escapeJava(request.getBpn()));
 
         // Return VC
         return issuersCredential.getData();
@@ -358,7 +362,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //update summery VC
         updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
-        log.debug("Membership VC issued to bpn ->{}", issueMembershipCredentialRequest.getBpn());
+        log.debug("Membership VC issued to bpn ->{}", StringEscapeUtils.escapeJava(issueMembershipCredentialRequest.getBpn()));
 
         // Return VC
         return issuersCredential.getData();
@@ -407,7 +411,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
         issuersCredential = create(issuersCredential);
 
-        log.debug("VC type of {} issued to bpn ->{}", verifiableCredential.getTypes(), holderWallet.getBpn());
+        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
 
         // Return VC
         return issuersCredential.getData();
@@ -416,10 +420,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     /**
      * Credentials validation map.
      *
-     * @param data the data
+     * @param data                     the data
+     * @param withCredentialExpiryDate the with credential expiry date
      * @return the map
      */
-    public Map<String, Object> credentialsValidation(Map<String, Object> data) {
+    public Map<String, Object> credentialsValidation(Map<String, Object> data, boolean withCredentialExpiryDate) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
 
         // DID Resolver Constracture params
@@ -441,9 +446,14 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
             throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
         }
 
-        Boolean valid = proofValidation.verifiyProof(verifiableCredential);
-        Map<String, Object> response = new HashMap<>();
-        response.put(StringPool.VALID, valid);
+        boolean valid = proofValidation.verifiyProof(verifiableCredential);
+
+        Map<String, Object> response = new TreeMap<>();
+
+        //check expiry
+        boolean dateValidation = CommonService.validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
+
+        response.put(StringPool.VALID, valid && dateValidation);
         response.put("vc", verifiableCredential);
 
         return response;
@@ -504,14 +514,15 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         } else {
             items = List.of(type);
         }
-        log.debug("Issuing summary VC with items ->{}", items);
+        log.debug("Issuing summary VC with items ->{}", StringEscapeUtils.escapeJava(items.toString()));
 
         //get summery VC of holder
         List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndIssuerDidAndTypeAndStored(holderDid, issuerDid, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL, false); //deleted only not stored VC
         if (CollectionUtils.isEmpty(vcs)) {
-            log.debug("No summery VC found for did ->{}, checking in issuer", holderDid);
+            log.debug("No summery VC found for did ->{}, checking in issuer", StringEscapeUtils.escapeJava(holderDid));
         } else {
             //delete old summery VC from holder table, delete only not stored VC
+            log.debug("Deleting older summary VC fir bpn -{}", holderBpn);
             holdersCredentialRepository.deleteAll(vcs);
         }
 
@@ -522,7 +533,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.HOLDER_IDENTIFIER, holderBpn,
                 StringPool.ITEMS, items,
                 StringPool.TYPE, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL,
-                StringPool.CONTRACT_TEMPLATES, miwSettings.contractTemplatesUrl()));
+                StringPool.CONTRACT_TEMPLATE, miwSettings.contractTemplatesUrl()));
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         HoldersCredential holdersCredential = CommonUtils.getHoldersCredential(subject, types,
@@ -537,7 +548,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //Store Credential in issuers table
         issuersCredentialRepository.save(IssuersCredential.of(holdersCredential));
 
-        log.info("Summery VC updated for holder did -> {}", holderDid);
+        log.info("Summery VC updated for holder did -> {}", StringEscapeUtils.escapeJava(holderDid));
     }
 
     private Page<IssuersCredential> getLastIssuedSummaryCredential(String issuerDid, String holderDid) {

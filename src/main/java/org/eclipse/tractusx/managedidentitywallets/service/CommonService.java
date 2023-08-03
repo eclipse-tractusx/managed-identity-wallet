@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
@@ -30,7 +31,11 @@ import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProbl
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.exception.DidParseException;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -53,12 +58,27 @@ public class CommonService {
             try {
                 wallet = walletRepository.getByDid(identifier);
             } catch (DidParseException e) {
-                log.error("Error while parsing did {}", identifier, e);
+                log.error("Error while parsing did {}", StringEscapeUtils.escapeJava(identifier), e);
                 throw new WalletNotFoundProblem("Error while parsing did " + identifier);
             }
         }
         Validate.isNull(wallet).launch(new WalletNotFoundProblem("Wallet not found for identifier " + identifier));
         return wallet;
+    }
+
+    public static boolean validateExpiry(boolean withCredentialExpiryDate, VerifiableCredential verifiableCredential, Map<String, Object> response) {
+        //validate expiry date
+        boolean dateValidation = true;
+        if (withCredentialExpiryDate) {
+            Instant expirationDate = verifiableCredential.getExpirationDate();
+            if (expirationDate.isBefore(Instant.now())) {
+                dateValidation = false;
+                response.put(StringPool.VALIDATE_EXPIRY_DATE, false);
+            } else {
+                response.put(StringPool.VALIDATE_EXPIRY_DATE, true);
+            }
+        }
+        return dateValidation;
     }
 
 }

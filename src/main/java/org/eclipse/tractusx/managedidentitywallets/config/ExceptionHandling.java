@@ -21,13 +21,20 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -35,7 +42,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 @RestControllerAdvice
 @Slf4j
-public class ExceptionHandling extends ResponseEntityExceptionHandler {
+public class ExceptionHandling {
 
     /**
      * The constant TIMESTAMP.
@@ -98,6 +105,37 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+
+    /**
+     * Handle validation problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ProblemDetail handleValidation(MethodArgumentNotValidException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        problemDetail.setTitle("Invalid data provided");
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        problemDetail.setProperty("errors", handleValidationError(e.getFieldErrors()));
+        return problemDetail;
+    }
+
+    /**
+     * Handle validation problem detail.
+     *
+     * @param exception the exception
+     * @return the problem detail
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    ProblemDetail handleValidation(ConstraintViolationException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problemDetail.setTitle("Invalid data provided");
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        problemDetail.setProperty("errors", exception.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList());
+        return problemDetail;
+    }
+
     /**
      * Handle duplicate credential problem problem detail.
      *
@@ -112,6 +150,12 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Handle not found credential problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
     @ExceptionHandler(CredentialNotFoundProblem.class)
     ProblemDetail handleNotFoundCredentialProblem(CredentialNotFoundProblem e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
@@ -120,6 +164,12 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Handle exception problem detail.
+     *
+     * @param e the e
+     * @return the problem detail
+     */
     @ExceptionHandler(Exception.class)
     ProblemDetail handleException(Exception e) {
         log.error("Error ", e);
@@ -127,5 +177,16 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
         problemDetail.setTitle(e.getMessage());
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         return problemDetail;
+    }
+
+    /**
+     * @param fieldErrors errors
+     * @return ResponseEntity with error details
+     */
+    private Map<String, String> handleValidationError(List<FieldError> fieldErrors) {
+
+        Map<String, String> messages = new HashMap<>();
+        fieldErrors.forEach(fieldError -> messages.put(fieldError.getField(), fieldError.getDefaultMessage()));
+        return messages;
     }
 }

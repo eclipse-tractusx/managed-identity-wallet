@@ -34,11 +34,11 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -55,7 +55,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class MembershipHoldersCredentialTest {
     @Autowired
@@ -63,8 +63,6 @@ class MembershipHoldersCredentialTest {
     @Autowired
     private WalletRepository walletRepository;
 
-    @Autowired
-    private WalletKeyRepository walletKeyRepository;
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -82,7 +80,7 @@ class MembershipHoldersCredentialTest {
     void issueMembershipCredentialTest403() {
         String bpn = UUID.randomUUID().toString();
 
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
 
@@ -97,7 +95,7 @@ class MembershipHoldersCredentialTest {
     @Test
     void testIssueSummeryVCAfterDeleteSummaryVCFromHolderWallet() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         // create wallet, in background bpn and summary credential generated
         Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
@@ -125,7 +123,7 @@ class MembershipHoldersCredentialTest {
     @Test
     void testStoredSummaryVCTest() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         // create wallet, in background bpn and summary credential generated
         Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
@@ -187,7 +185,7 @@ class MembershipHoldersCredentialTest {
     @Test
     void issueMembershipCredentialToBaseWalletTest400() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         // create wallet, in background bpn and summary credential generated
         Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
@@ -258,7 +256,7 @@ class MembershipHoldersCredentialTest {
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
-        validateTypes(verifiableCredential, miwSettings.authorityWalletBpn());
+        validateTypes(verifiableCredential);
 
         List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         Assertions.assertFalse(holderVCs.isEmpty());
@@ -292,7 +290,7 @@ class MembershipHoldersCredentialTest {
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
-        validateTypes(verifiableCredential, bpn);
+        validateTypes(verifiableCredential);
 
         List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         Assertions.assertFalse(holderVCs.isEmpty());
@@ -316,7 +314,7 @@ class MembershipHoldersCredentialTest {
     void issueMembershipCredentialWithInvalidBpnAccess409() {
         String bpn = UUID.randomUUID().toString();
 
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         //save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
@@ -334,7 +332,7 @@ class MembershipHoldersCredentialTest {
 
         String bpn = UUID.randomUUID().toString();
 
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         //save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
@@ -354,8 +352,8 @@ class MembershipHoldersCredentialTest {
         return new VerifiableCredential(map);
     }
 
-    private void validateTypes(VerifiableCredential verifiableCredential, String holderBpn) {
+    private void validateTypes(VerifiableCredential verifiableCredential) {
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
-        Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.HOLDER_IDENTIFIER), holderBpn);
+        Assertions.assertEquals("Test-X", verifiableCredential.getCredentialSubject().get(0).get(StringPool.MEMBER_OF));
     }
 }

@@ -31,6 +31,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -61,6 +62,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +133,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .stored(true)  //credential is stored(not issued by MIW)
                 .credentialId(verifiableCredential.getId().toString())
                 .build());
+        log.debug("VC type of {} stored for bpn ->{} with id-{}", cloneTypes, callerBpn, verifiableCredential.getId());
         return Map.of("message", String.format("Credential with id %s has been successfully stored", verifiableCredential.getId()));
     }
 
@@ -221,8 +224,17 @@ public class WalletService extends BaseService<Wallet, Long> {
         didDocumentBuilder.id(did.toUri());
         didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));
         DidDocument didDocument = didDocumentBuilder.build();
+        //modify context URLs
+        List<URI> context = didDocument.getContext();
+        List<URI> mutableContext = new ArrayList<>(context);
+        miwSettings.didDocumentContextUrls().forEach(uri -> {
+            if (!mutableContext.contains(uri)) {
+                mutableContext.add(uri);
+            }
+        });
+        didDocument.put("@context", mutableContext);
         didDocument = DidDocument.fromJson(didDocument.toJson());
-        log.debug("did document created for bpn ->{}", request.getBpn());
+        log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
 
         //Save wallet
         Wallet wallet = create(Wallet.builder()
@@ -237,12 +249,12 @@ public class WalletService extends BaseService<Wallet, Long> {
         //Save key
         walletKeyService.getRepository().save(WalletKey.builder()
                 .walletId(wallet.getId())
-                .referenceKey("dummy ref key")  //TODO removed once vault setup is ready
-                .vaultAccessToken("dummy vault access token") ////TODO removed once vault setup is ready
+                .referenceKey("dummy ref key, removed once vault setup is ready")
+                .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
                 .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
                 .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey().asByte())))
                 .build());
-        log.debug("Wallet created for bpn ->{}", request.getBpn());
+        log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
 
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
@@ -264,9 +276,9 @@ public class WalletService extends BaseService<Wallet, Long> {
                     .bpn(miwSettings.authorityWalletBpn())
                     .build();
             createWallet(request, true);
-            log.info("Authority wallet created with bpn {}", miwSettings.authorityWalletBpn());
+            log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
         } else {
-            log.info("Authority wallet exists with bpn {}", miwSettings.authorityWalletBpn());
+            log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
         }
     }
 
@@ -277,24 +289,6 @@ public class WalletService extends BaseService<Wallet, Long> {
         }
 
     }
-/*
-    @SneakyThrows
-    private Ed25519KeySet createKeyPair() {
-        KeyPairGeneratorSpi.Ed25519 ed25519 = new KeyPairGeneratorSpi.Ed25519();
-        ed25519.initialize(256, new SecureRandom());
-        KeyPair keyPair = ed25519.generateKeyPair();
-        PublicKey PubKey = keyPair.getPublic();
-        PrivateKey PivKey = keyPair.getPrivate();
-        Ed25519PrivateKeyParameters ed25519PrivateKeyParameters =
-                (Ed25519PrivateKeyParameters) PrivateKeyFactory.createKey(PivKey.getEncoded());
-        Ed25519PublicKeyParameters publicKeyParameters =
-                (Ed25519PublicKeyParameters) PublicKeyFactory.createKey(PubKey.getEncoded());
-
-        byte[] privateKeyBytes = ed25519PrivateKeyParameters.getEncoded();
-        byte[] publicKeyBytes = publicKeyParameters.getEncoded();
-        return new Ed25519KeySet(privateKeyBytes, publicKeyBytes);
-    }*/
-
     @SneakyThrows
     private String getPrivateKeyString(byte[] privateKeyBytes) {
         StringWriter stringWriter = new StringWriter();

@@ -38,6 +38,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -47,6 +48,7 @@ import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -62,7 +64,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ManagedIdentityWalletsApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 @ExtendWith(MockitoExtension.class)
 class HoldersCredentialTest {
@@ -85,7 +87,7 @@ class HoldersCredentialTest {
     @Test
     void issueCredentialTestWithInvalidBPNAccess403() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("not valid BPN");
 
@@ -99,7 +101,7 @@ class HoldersCredentialTest {
     @Test
     void issueCredentialTest200() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
@@ -115,7 +117,6 @@ class HoldersCredentialTest {
         TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
         Assertions.assertTrue(credentials.get(0).isSelfIssued());
         Assertions.assertFalse(credentials.get(0).isStored());
-
     }
 
 
@@ -137,7 +138,7 @@ class HoldersCredentialTest {
 
         String baseDID = miwSettings.authorityWalletDid();
         String bpn = UUID.randomUUID().toString();
-        String did = "did:web:localhost:" + bpn;
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         //save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
@@ -217,17 +218,44 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
 
 
     @Test
-    void validateCredentials() throws com.fasterxml.jackson.core.JsonProcessingException {
+    @DisplayName("validate VC with date check true, it should return true")
+    void validateCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {
 
         //data setup
         Map<String, Object> map = issueVC();
+
+        //service call
+        try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
+
+            //mock setup
+            LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
+            utils.when(() -> {
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
+            }).thenReturn(mock);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
+            Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
+            Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
+        }
+    }
+
+    @Test
+    @DisplayName("validate expired VC with date check false, it should return true")
+    void validateCredentialsWithExpiryCheckFalse() throws com.fasterxml.jackson.core.JsonProcessingException {
+
+        //data setup
+        Map<String, Object> map = issueVC();
+        //modify expiry date
+        Instant instant = Instant.now().minusSeconds(60);
+        map.put("expirationDate", instant.toString());
 
 
         //service call
@@ -240,8 +268,36 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
+        }
+    }
+
+
+    @Test
+    @DisplayName("validate expired VC with date check true, it should return false")
+    void validateExpiredCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {
+
+        //data setup
+        Map<String, Object> map = issueVC();
+        //modify expiry date
+        Instant instant = Instant.now().minusSeconds(60);
+        map.put("expirationDate", instant.toString());
+
+        //service call
+        try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
+
+            //mock setup
+            LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
+            utils.when(() -> {
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
+            }).thenReturn(mock);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
+            Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
+            Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
+
         }
     }
 
@@ -273,7 +329,7 @@ class HoldersCredentialTest {
         //Using Builder
         VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
-                        .id(URI.create(UUID.randomUUID().toString()))
+                        .id(URI.create(did + "#" + UUID.randomUUID()))
                         .context(miwSettings.vcContexts())
                         .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
                         .issuer(URI.create(did)) //issuer must be base wallet

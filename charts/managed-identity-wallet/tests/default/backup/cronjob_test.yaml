@@ -17,43 +17,14 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-suite: test default service
+suite: test default cronjob for backup DB
 chart:
   version: 9.9.9+test
   appVersion: 9.9.9
+templates:
+  - templates/backup/cronjob.yaml
 tests:
-  - it: should have correct metadata
-    template: templates/service.yaml
+  - it: should have backup functionality disabled
     asserts:
       - hasDocuments:
-          count: 1
-      - containsDocument:
-          kind: Service
-          apiVersion: v1
-          name: RELEASE-NAME-managed-identity-wallet
-      - isSubset:
-          path: metadata.labels
-          content:
-            helm.sh/chart: managed-identity-wallet-9.9.9_test
-            app.kubernetes.io/name: managed-identity-wallet
-            app.kubernetes.io/instance: RELEASE-NAME
-            app.kubernetes.io/version: "9.9.9"
-            app.kubernetes.io/managed-by: Helm
-
-  - it: must have type set to ClusterIP
-    template: templates/service.yaml
-    asserts:
-      - equal:
-          path: spec.type
-          value: ClusterIP
-
-  - it: must have ports set
-    template: templates/service.yaml
-    asserts:
-      - contains:
-          path: spec.ports
-          content:
-            name: http
-            targetPort: http
-            port: 8080
-            protocol: TCP
+          count: 0

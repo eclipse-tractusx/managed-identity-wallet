@@ -36,6 +36,16 @@ tasks:
       - echo "BEARER {{.TOKEN}}"
       - echo "BEARER {{.TOKEN}}" | pbcopy
 
+  test-report:
+    desc: Generates the test report for MIW
+    cmds:
+      - ./gradlew jacocoTestReport
+
+  coverage:
+    desc: Runs the coverage check
+    cmds:
+      - ./gradlew jacocoTestCoverageVerification
+
   clean:
     desc: Cleans the build directory
     cmds:

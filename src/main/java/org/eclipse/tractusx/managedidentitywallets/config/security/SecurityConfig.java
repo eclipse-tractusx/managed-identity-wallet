@@ -28,10 +28,12 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -60,51 +62,51 @@ public class SecurityConfig {
     @Bean
     @ConditionalOnProperty(value = "miw.security.enabled", havingValue = "true", matchIfMissing = true)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and()
-                .csrf().and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeHttpRequests()
-                .requestMatchers(new AntPathRequestMatcher("/")).permitAll() // forwards to swagger
-                .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
+        http.cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.xssProtection(Customizer.withDefaults()).contentSecurityPolicy(contentSecurityPolicyConfig -> contentSecurityPolicyConfig.policyDirectives("script-src 'self'")))
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests.requestMatchers(new AntPathRequestMatcher("/")).permitAll() // forwards to swagger
+                        .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
 
-                //did document resolve APIs
-                .requestMatchers(new AntPathRequestMatcher(RestURI.DID_RESOLVE, GET.name())).permitAll() //Get did document
-                .requestMatchers(new AntPathRequestMatcher(RestURI.DID_DOCUMENTS, GET.name())).permitAll() //Get did document
+                        //did document resolve APIs
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.DID_RESOLVE, GET.name())).permitAll() //Get did document
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.DID_DOCUMENTS, GET.name())).permitAll() //Get did document
 
-                //wallet APIS
-                .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, POST.name())).hasRole(ApplicationRole.ROLE_ADD_WALLETS) //Create wallet
-                .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLETS) //Get all wallet
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //get wallet by identifier
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS, ApplicationRole.ROLE_UPDATE_WALLET) //Store credential
+                        //wallet APIS
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, POST.name())).hasRole(ApplicationRole.ROLE_ADD_WALLETS) //Create wallet
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.WALLETS, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLETS) //Get all wallet
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //get wallet by identifier
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS, ApplicationRole.ROLE_UPDATE_WALLET) //Store credential
 
-                //VP-Generation
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS, ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_VIEW_WALLETS, ApplicationRole.ROLE_VIEW_WALLET) //Create VP
+                        //VP-Generation
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS, ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_VIEW_WALLETS, ApplicationRole.ROLE_VIEW_WALLET) //Create VP
 
-                //VP - Validation
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_VALIDATION, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLETS, ApplicationRole.ROLE_VIEW_WALLET) //validate VP
+                        //VP - Validation
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_VALIDATION, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLETS, ApplicationRole.ROLE_VIEW_WALLET) //validate VP
 
-                //VC - Holder
-                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //get credentials
-                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_UPDATE_WALLETS) //issue credentials
-                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, DELETE.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET) //delete credentials
+                        //VC - Holder
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //get credentials
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_UPDATE_WALLETS) //issue credentials
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, DELETE.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET) //delete credentials
 
-                //VC - validation
-                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_VALIDATION, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //validate credentials
+                        //VC - validation
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_VALIDATION, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //validate credentials
 
-                //VC - Issuer
-                .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //Lis of issuer VC
-                .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //Issue VC
-                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue Membership Credential
-                .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_DISMANTLER, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue dismantler Credential
-                .requestMatchers(new AntPathRequestMatcher(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue dismantler Credential
+                        //VC - Issuer
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //Lis of issuer VC
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //Issue VC
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue Membership Credential
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_DISMANTLER, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue dismantler Credential
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue dismantler Credential
 
-                //error
-                .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
-                .and().oauth2ResourceServer()
-                .jwt()
-                .jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()));
+                        //error
+                        .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
+                ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
+                        jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()))));
         return http.build();
     }
 
