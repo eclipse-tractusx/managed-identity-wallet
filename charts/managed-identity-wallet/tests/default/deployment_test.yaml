@@ -41,7 +41,7 @@ tests:
             app.kubernetes.io/version: "9.9.9"
             app.kubernetes.io/managed-by: Helm
 
-  - it: must have important values set
+  - it: should have important values set
     asserts:
       - equal:
           path: spec.replicas
@@ -58,14 +58,14 @@ tests:
             containerPort: 8080
             protocol: TCP
 
-  - it: must have probes set
+  - it: should have probes set
     asserts:
       - isNotEmpty:
           path: spec.template.spec.containers[0].livenessProbe
       - isNotEmpty:
           path: spec.template.spec.containers[0].readinessProbe
 
-  - it: must have resource limits set
+  - it: should have resource limits set
     asserts:
       - isNotEmpty:
           path: spec.template.spec.containers[0].resources
@@ -82,7 +82,7 @@ tests:
       - isNotEmpty:
           path: spec.template.spec.containers[0].resources.requests.memory
 
-  - it: must have a security context
+  - it: should have a security context
     asserts:
       - isSubset:
           path: spec.template.spec.containers[0].securityContext
@@ -99,7 +99,7 @@ tests:
           path: spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.template.spec.containers[0].env
-          count: 1
+          count: 9
 
   - it: should have empty values
     asserts:
@@ -116,3 +116,8 @@ tests:
           path: spec.template.spec.nodeSelector
           content:
             "kubernetes.io/os": linux
+
+  - it: should not have "imagePullSecrets" set
+    asserts:
+      - notExists:
+          path: spec.template.spec.imagePullSecrets

@@ -40,91 +40,34 @@ tests:
           path: spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.template.spec.containers[0].env
-          count: 5
-      - contains:
+          count: 9
+      - equal:
           path: spec.template.spec.containers[0].env
-          content:
-            name: APPLICATION_PORT
-            value: "8080"
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DB_HOST
-            value: postgres-host
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: MIW_HOST_NAME
-            value: miw
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: DB_PASSWORD
-                name: RELEASE-NAME-managed-identity-wallet
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DB_USER_NAME
-            valueFrom:
-              secretKeyRef:
-                key: DB_USER_NAME
-                name: RELEASE-NAME-managed-identity-wallet
-
-  - it: should have environment variables set (only envs set)
-    values:
-      - values-envs.yml
-    asserts:
-      - isNotEmpty:
-          path: spec.template.spec.containers[0].env
-      - lengthEqual:
-          path: spec.template.spec.containers[0].env
-          count: 3
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: APPLICATION_PORT
-            value: "8080"
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DB_HOST
-            value: postgres-host
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: MIW_HOST_NAME
-            value: miw
-
-  - it: should have environment variables set (envs and secrets set)
-    values:
-      - values-secrets.yml
-    asserts:
-      - isNotEmpty:
-          path: spec.template.spec.containers[0].env
-      - lengthEqual:
-          path: spec.template.spec.containers[0].env
-          count: 3
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: APPLICATION_PORT
-            value: "8080"
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: DB_PASSWORD
-                name: RELEASE-NAME-managed-identity-wallet
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DB_USER_NAME
-            valueFrom:
-              secretKeyRef:
-                key: DB_USER_NAME
-                name: RELEASE-NAME-managed-identity-wallet
+          value:
+            - name: APPLICATION_PORT
+              value: "8080"
+            - name: DB_HOST
+              value: RELEASE-NAME-postgresql
+            - name: DB_USER_NAME
+              value: miw
+            - name: DB_NAME
+              value: miw
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: RELEASE-NAME-postgresql
+            - name: APPLICATION_ENVIRONMENT
+              value: dev
+            - name: MIW_HOST_NAME
+              value: localhost
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: ENCRYPTION_KEY
+                  name: RELEASE-NAME-managed-identity-wallet
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: KEYCLOAK_CLIENT_ID
+                  name: RELEASE-NAME-managed-identity-wallet
