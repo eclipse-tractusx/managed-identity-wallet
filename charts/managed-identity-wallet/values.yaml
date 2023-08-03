@@ -23,15 +23,11 @@ replicaCount: 1
 # -- Image of the main container
 image:
   # -- Image repository
-  repository: ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service
+  repository: tractusx/managed-identity-wallet
   # -- PullPolicy
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
-  tag: ""
-
-# -- Credentials for a private repo
-imagePullSecrets:
-  - name: acr-credential
+  tag: "" 
 
 nameOverride: ""
 fullnameOverride: ""

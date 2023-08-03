@@ -23,9 +23,9 @@
 
 # download the latest version of the Eclipse Dash License tool
 curl --output org.eclipse.dash.licenses.jar \
-  https://repo.eclipse.org/service/local/repositories/dash-licenses-snapshots/content/org/eclipse/dash/org.eclipse.dash.licenses/1.0.3-SNAPSHOT/org.eclipse.dash.licenses-1.0.3-20230713.055020-51.jar
+  https://repo.eclipse.org/service/local/repositories/dash-licenses-snapshots/content/org/eclipse/dash/org.eclipse.dash.licenses/1.0.3-SNAPSHOT/org.eclipse.dash.licenses-1.0.3-20230725.055026-63.jar
 
 # update DEPENDENCIES file
-./gradlew dependencies | grep -Poh "(?<=\s)[\w\.-]+:[\w\.-]+:[^:\s]+" | grep -v "^org\.eclipse" | sort | uniq \
- | java -jar org.eclipse.dash.licenses.jar -summary DEPENDENCIES - \
- | grep restricted
+./gradlew dependencies | grep -Poh "(?<=\s)[\w\.-]+:[\w\.-]+:[^:\s]+" | grep -v "^org\.eclipse" | sort | uniq |
+  java -jar org.eclipse.dash.licenses.jar -summary DEPENDENCIES - |
+  grep restricted
