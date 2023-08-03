@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
+import com.nimbusds.jwt.SignedJWT;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -35,6 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialServ
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -61,7 +63,6 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-@Disabled("Disabled until Membership Credentials are Json-LD compliant")
 public class PresentationValidationTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -78,7 +79,7 @@ public class PresentationValidationTest {
     private MIWSettings miwSettings;
 
     private final String bpnTenant_1 = UUID.randomUUID().toString();
-    private  final String bpnTenant_2 = UUID.randomUUID().toString();
+    private final String bpnTenant_2 = UUID.randomUUID().toString();
     private String bpnOperator;
     private Did tenant_1;
     private Did tenant_2;
@@ -111,7 +112,7 @@ public class PresentationValidationTest {
     }
 
     @AfterEach
-    public void cleanUp(){
+    public void cleanUp() {
         try {
             Wallet tenantWallet = walletService.getWalletByIdentifier(bpnTenant_1, false, bpnOperator);
             walletService.delete(tenantWallet.getId());
@@ -134,6 +135,20 @@ public class PresentationValidationTest {
     }
 
     @Test
+    @SneakyThrows
+    public void testSuccessfulValidationForMultipleVC() {
+        final Map<String, Object> creationResponseResponse = createPresentationJwt(List.of(membershipCredential_1, membershipCredential_2), tenant_1);
+        final String encodedJwtPayload = ((String) creationResponseResponse.get("vp")).split("\\.")[1];
+        Map<String, Object> decodedJwtPayload = OBJECT_MAPPER.readValue(Base64.getUrlDecoder().decode(encodedJwtPayload), Map.class);
+        VerifiablePresentation presentation = new VerifiablePresentation((Map) decodedJwtPayload.get("vp"));
+        VerifiablePresentationValidationResponse response = validateJwtOfCredential(creationResponseResponse);
+
+        Assertions.assertTrue(response.valid);
+
+        Assertions.assertEquals(2, presentation.getVerifiableCredentials().size());
+    }
+
+    @Test
     public void testValidationFailureOfCredentialWitInvalidExpirationDate() {
         // test is related to this old issue where the signature check still succeeded
         // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
@@ -141,6 +156,19 @@ public class PresentationValidationTest {
         // e.g. an attacker tries to extend the validity of a verifiable credential
         copyCredential.put(VerifiableCredential.EXPIRATION_DATE, "2500-09-30T22:00:00Z");
         final Map<String, Object> presentation = createPresentationJwt(copyCredential, tenant_1);
+        VerifiablePresentationValidationResponse response = validateJwtOfCredential(presentation);
+        Assertions.assertFalse(response.valid);
+    }
+
+
+    @Test
+    public void testValidationFailureOfCredentialWitInvalidExpirationDateInSecondCredential() {
+        // test is related to this old issue where the signature check still succeeded
+        // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
+        final VerifiableCredential copyCredential = new VerifiableCredential(membershipCredential_1);
+        // e.g. an attacker tries to extend the validity of a verifiable credential
+        copyCredential.put(VerifiableCredential.EXPIRATION_DATE, "2500-09-30T22:00:00Z");
+        final Map<String, Object> presentation = createPresentationJwt(List.of(membershipCredential_1, copyCredential), tenant_1);
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(presentation);
         Assertions.assertFalse(response.valid);
     }
@@ -195,6 +223,11 @@ public class PresentationValidationTest {
                 OBJECT_MAPPER.writeValueAsString(response)));
     }
 
+    private Map<String, Object> createPresentationJwt(List<VerifiableCredential> verifiableCredential, Did issuer) {
+        return presentationService.createPresentation(Map.of(StringPool.VERIFIABLE_CREDENTIALS, verifiableCredential),
+                true, issuer.toString(), issuer.toString());
+    }
+
     private Map<String, Object> createPresentationJwt(VerifiableCredential verifiableCredential, Did issuer) {
         return presentationService.createPresentation(Map.of(StringPool.VERIFIABLE_CREDENTIALS, List.of(verifiableCredential)),
                 true, issuer.toString(), issuer.toString());
@@ -208,5 +241,6 @@ public class PresentationValidationTest {
     private static class VerifiablePresentationValidationResponse {
         boolean valid;
         String vp;
+        boolean validateJWTExpiryDate;
     }
 }
