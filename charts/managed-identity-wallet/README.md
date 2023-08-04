@@ -55,7 +55,20 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | backup.database.storage.diskSize | string | `"10G"` | Disk size for backup content |
 | backup.database.storage.keepStorage | bool | `true` | Set to true, if the PV should stay even when the chart release is uninstalled |
 | backup.database.storage.storageClassName | string | `"-"` | storageClassName |
-| envs | object | `{"APPLICATION_ENVIRONMENT":"dev","AUTHORITY_WALLET_BPN":"","AUTHORITY_WALLET_DID":"","AUTHORITY_WALLET_NAME":"","AUTH_SERVER_URL":"","DB_POOL_SIZE":null,"KEYCLOAK_MIW_PUBLIC_CLIENT":"","KEYCLOAK_REALM":"","MANAGEMENT_PORT":null,"MIW_HOST_NAME":"localhost","USE_SSL":false,"VC_EXPIRY_DATE":"","VC_SCHEMA_LINK":""}` | Parameters for the application (will be provided as plain environment variables) |
+| envs | object | `{"APPLICATION_ENVIRONMENT":"dev","AUTHORITY_WALLET_BPN":"","AUTHORITY_WALLET_DID":"","AUTHORITY_WALLET_NAME":"","AUTH_SERVER_URL":"","DB_POOL_SIZE":"","KEYCLOAK_MIW_PUBLIC_CLIENT":"","KEYCLOAK_REALM":"","MANAGEMENT_PORT":null,"MIW_HOST_NAME":"localhost","USE_SSL":false,"VC_EXPIRY_DATE":"","VC_SCHEMA_LINK":""}` | Parameters for the application (will be provided as plain environment variables) |
+| envs.APPLICATION_ENVIRONMENT | string | `"dev"` | Application environments like dev, int, prod |
+| envs.AUTHORITY_WALLET_BPN | string | `""` | Authority/base wallet/root wallet BPN |
+| envs.AUTHORITY_WALLET_DID | string | `""` | Authority/base wallet/root wallet web did |
+| envs.AUTHORITY_WALLET_NAME | string | `""` | Authority/base wallet/root wallet name |
+| envs.AUTH_SERVER_URL | string | `""` | Keycloak server url |
+| envs.DB_POOL_SIZE | string | `""` | Initial database connection pool size |
+| envs.KEYCLOAK_MIW_PUBLIC_CLIENT | string | `""` | Keycloak public client id, used only if we want to enable login in swagger using keycloak |
+| envs.KEYCLOAK_REALM | string | `""` | Keycloak realm name |
+| envs.MANAGEMENT_PORT | string | `nil` | Spring actuator port |
+| envs.MIW_HOST_NAME | string | `"localhost"` | Hostname of miw application |
+| envs.USE_SSL | bool | `false` | Whether database connection with SSL, true if the database connection is done using SSL |
+| envs.VC_EXPIRY_DATE | string | `""` | Default expiry date of issued VC |
+| envs.VC_SCHEMA_LINK | string | `""` | Verifiable credential schema URL, which will be part of @context in VC |
 | fullnameOverride | string | `""` |  |
 | image | object | `{"pullPolicy":"Always","repository":"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service","tag":""}` | Image of the main container |
 | image.pullPolicy | string | `"Always"` | PullPolicy |
@@ -85,6 +98,8 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | replicaCount | int | `1` | The amount of replicas to run |
 | resources | object | `{"limits":{"cpu":4,"memory":"1Gi"},"requests":{"cpu":"250m","memory":"500Mi"}}` | Resource boundaries |
 | secrets | object | `{"ENCRYPTION_KEY":"","KEYCLOAK_CLIENT_ID":""}` | Parameters for the application (will be stored as secrets - so, for important values, ...) |
+| secrets.ENCRYPTION_KEY | string | `""` | AES encryption key used to encrypt/decrypt private keys (random 32 chars) |
+| secrets.KEYCLOAK_CLIENT_ID | string | `""` | Keycloak confidential client id for MIW application |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"privileged":false,"runAsGroup":11111,"runAsNonRoot":true,"runAsUser":11111}` | Preconfigured SecurityContext |
 | service | object | `{"port":8080,"type":"ClusterIP"}` | Service configuration |
 | serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | ServiceAccount configuration |

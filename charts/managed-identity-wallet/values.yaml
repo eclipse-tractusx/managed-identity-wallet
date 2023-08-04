@@ -37,23 +37,38 @@ fullnameOverride: ""
 
 # -- Parameters for the application (will be stored as secrets - so, for important values, ...)
 secrets:
+  # -- Keycloak confidential client id for MIW application
   KEYCLOAK_CLIENT_ID: ""
-  ENCRYPTION_KEY: ""  # 32 chars
+  # -- AES encryption key used to encrypt/decrypt private keys (random 32 chars)
+  ENCRYPTION_KEY: ""
 
 # -- Parameters for the application (will be provided as plain environment variables)
 envs:
+  # -- Application environments like dev, int, prod
   APPLICATION_ENVIRONMENT: "dev"
+  # -- Whether database connection with SSL, true if the database connection is done using SSL
   USE_SSL: false
-  DB_POOL_SIZE:
+  # -- Initial database connection pool size
+  DB_POOL_SIZE: ""
+  # -- Keycloak public client id, used only if we want to enable login in swagger using keycloak
   KEYCLOAK_MIW_PUBLIC_CLIENT: ""
+  # -- Spring actuator port
   MANAGEMENT_PORT:
+  # -- Hostname of miw application
   MIW_HOST_NAME: localhost
+  # -- Authority/base wallet/root wallet BPN
   AUTHORITY_WALLET_BPN: ""
+  # -- Authority/base wallet/root wallet name
   AUTHORITY_WALLET_NAME: ""
+  # -- Authority/base wallet/root wallet web did
   AUTHORITY_WALLET_DID: ""
+  # -- Verifiable credential schema URL, which will be part of @context in VC
   VC_SCHEMA_LINK: ""
+  # -- Default expiry date of issued VC
   VC_EXPIRY_DATE: ""
+  # -- Keycloak realm name
   KEYCLOAK_REALM: ""
+  # -- Keycloak server url
   AUTH_SERVER_URL: ""
 
 # -- ServiceAccount configuration
