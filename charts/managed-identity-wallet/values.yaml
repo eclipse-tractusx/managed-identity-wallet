@@ -35,10 +35,10 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# -- Parameters for the application (will be stored as secrets - so, for passwords, ...)
+# -- Parameters for the application (will be stored as secrets - so, for important values, ...)
 secrets:
   KEYCLOAK_CLIENT_ID: ""
-  ENCRYPTION_KEY: ""  # 64 chars
+  ENCRYPTION_KEY: ""  # 32 chars
 
 # -- Parameters for the application (will be provided as plain environment variables)
 envs:
@@ -131,21 +131,35 @@ backup:
       # -- storageClassName
       storageClassName: "-"
 
+# -- Configuration of the Postgresql database (internal and external)
 postgresql:
+  # -- Configure bundled postgresql
   internal:
+    # -- Enable bundled database
     enabled: true
+  # -- Configure own postgresql database
   external:
+    # -- General config
     config:
+      # -- Instance host or IP
       host: ""
+      # -- Instance port
       port: 5432
+      # -- Existing database to use
       database: ""
     auth:
+      # -- DB username
       username: ""
+      # -- DB password
       password: ""
+      # -- Existing secret with provided password
       existingSecret: ""
+      # -- Key name of password in secret
       existingSecretKey: password
 
-  # @ignored
+  # -- Default settings for the primary database and user
   auth:
+    # -- username for MIW database
     username: miw
+    # -- MIW database name
     database: miw
