@@ -1,4 +1,4 @@
-# Managed Identity Wallets <a id="introduction"></a>
+# Managed Identity Wallets `<a id="introduction"></a>`
 
 The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using did:web
 
@@ -15,13 +15,13 @@ There are two possible flows, which can be used for development:
 
 Following tools the MIW development team used successfully:
 
-| Area     | Tool     | Download Link                                   | Comment                                                                                           |
-|----------|----------|-------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| IDE      | IntelliJ | https://www.jetbrains.com/idea/download/        | Use [envfile plugin](https://plugins.jetbrains.com/plugin/7861-envfile) to use the **local** flow |
-| Build    | Gradle   | https://gradle.org/install/                     |
-| Runtime  | Docker   | https://www.docker.com/products/docker-desktop/ |                                                                                                   |
-| Database | DBeaver  | https://dbeaver.io/                             |
-| IAM      | Keycloak | https://www.keycloak.org/                       |                                                                                                   |
+| Area     | Tool     | Download Link                                   | Comment                                                                                             |
+| -------- | -------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| IDE      | IntelliJ | https://www.jetbrains.com/idea/download/        | Use[envfile plugin](https://plugins.jetbrains.com/plugin/7861-envfile) to use the **local** flow |
+| Build    | Gradle   | https://gradle.org/install/                     |                                                                                                     |
+| Runtime  | Docker   | https://www.docker.com/products/docker-desktop/ |                                                                                                     |
+| Database | DBeaver  | https://dbeaver.io/                             |                                                                                                     |
+| IAM      | Keycloak | https://www.keycloak.org/                       |                                                                                                     |
 
 # Administrator Documentation
 
@@ -49,30 +49,30 @@ assigned to the client using *Clients > miw_private_client > Client Scopes*
 The available scopes/roles are:
 
 1. Role `add_wallets` to create a new wallet
-
 2. Role `view_wallets`:
-    * to get a list of all wallets
-    * to retrieve one wallet by its identifier
-    * to validate a Verifiable Credential
-    * to validate a Verifiable Presentation
-    * to get all stored Verifiable Credentials
 
+   * to get a list of all wallets
+   * to retrieve one wallet by its identifier
+   * to validate a Verifiable Credential
+   * to validate a Verifiable Presentation
+   * to get all stored Verifiable Credentials
 3. Role `update_wallets` for the following actions:
-    * to store Verifiable Credential
-    * to issue a Verifiable Credential
-    * to issue a Verifiable Presentation
 
+   * to store Verifiable Credential
+   * to issue a Verifiable Credential
+   * to issue a Verifiable Presentation
 4. Role `update_wallet`:
-    * to remove a Verifiable Credential
-    * to store a Verifiable Credential
-    * to issue a Verifiable Credential
-    * to issue a Verifiable Presentation
 
+   * to remove a Verifiable Credential
+   * to store a Verifiable Credential
+   * to issue a Verifiable Credential
+   * to issue a Verifiable Presentation
 5. Role `view_wallet` requires the BPN of Caller and it can be used:
-    * to get the Wallet of the related BPN
-    * to get stored Verifiable Credentials of the related BPN
-    * to validate any Verifiable Credential
-    * to validate any Verifiable Presentation
+
+   * to get the Wallet of the related BPN
+   * to get stored Verifiable Credentials of the related BPN
+   * to validate any Verifiable Credential
+   * to validate any Verifiable Presentation
 6. Role `manage_app` used to change the log level of the application at runtime. Check Logging in the application section for more
    details
 
@@ -100,14 +100,12 @@ Overview by Endpoint
 
 
 
-
-
 Additionally a Token mapper can be created under *Clients* &gt;
 *ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
 configuration (using as an example `BPNL000000001`):
 
 | Key                                | Value           |
-|------------------------------------|-----------------|
+| ---------------------------------- | --------------- |
 | Name                               | StaticBPN       |
 | Mapper Type                        | Hardcoded claim |
 | Token Claim Name                   | BPN             |
@@ -116,7 +114,7 @@ configuration (using as an example `BPNL000000001`):
 | Add to ID token                    | OFF             |
 | Add to access token                | ON              |
 | Add to userinfo                    | OFF             |
-| includeInAccessTokenResponse.label | ON              | 
+| includeInAccessTokenResponse.label | ON              |
 
 If you receive an error message, that the client secret is not valid, please go into
 keycloak admin and within *Clients > Credentials* recreate the secret.
@@ -187,6 +185,7 @@ When you just run `task` without parameters, you will see all tasks available.
 6. MIW is up and running
 
 # End Users
+
 See OpenAPI documentation, which is automatically created from
 the source and available on each deployment at the `/docs/api-docs/docs` endpoint
 (e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
@@ -225,7 +224,7 @@ PostgreSQL and Keycloak Docker containers locally.
 Before running the tests, please ensure that you have Docker runtime installed and that you have the necessary
 permissions to run containers.
 
-Alternative, you can skip test during the build with ``` ./gradlew clean build -x test```
+Alternative, you can skip test during the build with `` ./gradlew clean build -x test``
 
 #### 2. Database migration related issue
 
@@ -240,11 +239,11 @@ In case you encounter any database-related issues, you can resolve them by follo
 
 This process ensures that any issues with the database schema are resolved by recreating it in a fresh state.
 
-# Environment Variables <a id= "environmentVariables"></a>
+# Environment Variables `<a id= "environmentVariables"></a>`
 
 | name                            | description                                                                                  | default value                                                                                                                                       |
-|---------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| APPLICATION_PORT                | port number of application                                                                   | 8080                                                                                                                                                | 
+| ------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| APPLICATION_PORT                | port number of application                                                                   | 8080                                                                                                                                                |
 | APPLICATION_ENVIRONMENT         | Environment of the application ie. local, dev, int and prod                                  | local                                                                                                                                               |
 | DB_HOST                         | Database host                                                                                | localhost                                                                                                                                           |
 | DB_PORT                         | Port of database                                                                             | 5432                                                                                                                                                |
