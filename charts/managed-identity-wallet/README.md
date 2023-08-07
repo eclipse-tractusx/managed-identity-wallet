@@ -70,9 +70,9 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | envs.VC_EXPIRY_DATE | string | `""` | Default expiry date of issued VC |
 | envs.VC_SCHEMA_LINK | string | `""` | Verifiable credential schema URL, which will be part of @context in VC |
 | fullnameOverride | string | `""` |  |
-| image | object | `{"pullPolicy":"Always","repository":"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service","tag":""}` | Image of the main container |
+| image | object | `{"pullPolicy":"Always","repository":"tractusx/managed-identity-wallet","tag":""}` | Image of the main container |
 | image.pullPolicy | string | `"Always"` | PullPolicy |
-| image.repository | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service"` | Image repository |
+| image.repository | string | `"tractusx/managed-identity-wallet"` | Image repository |
 | image.tag | string | `""` | Image tag (empty one will use "appVersion" value from chart definition) |
 | imagePullSecrets | list | `[]` | Credentials name for private repos |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration |
