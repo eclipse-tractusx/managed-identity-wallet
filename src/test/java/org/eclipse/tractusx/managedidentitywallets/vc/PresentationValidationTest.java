@@ -36,7 +36,6 @@ import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialServ
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
-import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -53,6 +52,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.DeserializationFeature;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
@@ -65,7 +65,8 @@ import java.util.UUID;
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 public class PresentationValidationTest {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Autowired
     private WalletService walletService;
@@ -137,11 +138,12 @@ public class PresentationValidationTest {
     @Test
     @SneakyThrows
     public void testSuccessfulValidationForMultipleVC() {
-        final Map<String, Object> creationResponseResponse = createPresentationJwt(List.of(membershipCredential_1, membershipCredential_2), tenant_1);
-        final String encodedJwtPayload = ((String) creationResponseResponse.get("vp")).split("\\.")[1];
+        final Map<String, Object> creationResponse = createPresentationJwt(List.of(membershipCredential_1, membershipCredential_2), tenant_1);
+        // get the payload of the json web token
+        final String encodedJwtPayload = ((String) creationResponse.get("vp")).split("\\.")[1];
         Map<String, Object> decodedJwtPayload = OBJECT_MAPPER.readValue(Base64.getUrlDecoder().decode(encodedJwtPayload), Map.class);
         VerifiablePresentation presentation = new VerifiablePresentation((Map) decodedJwtPayload.get("vp"));
-        VerifiablePresentationValidationResponse response = validateJwtOfCredential(creationResponseResponse);
+        VerifiablePresentationValidationResponse response = validateJwtOfCredential(creationResponse);
 
         Assertions.assertTrue(response.valid);
 
@@ -241,6 +243,6 @@ public class PresentationValidationTest {
     private static class VerifiablePresentationValidationResponse {
         boolean valid;
         String vp;
-        boolean validateJWTExpiryDate;
+//        boolean validateJWTExpiryDate;
     }
 }
