@@ -121,7 +121,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
-
+            log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
 
             //Issuer of VP is holder of VC
@@ -139,6 +139,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
             response.put(StringPool.VP, presentation.serialize());
         } else {
+            log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
             VerifiablePresentationBuilder verifiablePresentationBuilder =
                     new VerifiablePresentationBuilder();
 
@@ -169,6 +170,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
+            log.debug("Validating VP as JWT");
             //verify as jwt
             Validate.isNull(vp.get(StringPool.VP)).launch(new BadDataException("Can not find JWT"));
             String jwt = vp.get(StringPool.VP).toString();
@@ -188,7 +190,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             boolean validCredential = true;
             boolean validateExpiryDate = true;
             try {
-                final ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> claims = mapper.readValue(signedJWT.getPayload().toBytes(), Map.class);
                 String vpClaim = mapper.writeValueAsString(claims.get("vp"));
 
@@ -196,7 +198,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                 VerifiablePresentation presentation = jsonLdSerializer.deserializePresentation(new SerializedVerifiablePresentation(vpClaim));
 
                 for (VerifiableCredential credential : presentation.getVerifiableCredentials()) {
-                    validateExpiryDate = commonService.validateExpiry(withCredentialExpiryDate, credential, response);
+                    validateExpiryDate = CommonService.validateExpiry(withCredentialExpiryDate, credential, response);
                     if (!validateCredential(credential)) {
                         validCredential = false;
                     }
@@ -213,6 +215,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             }
 
         } else {
+            log.debug("Validating VP as json-ld");
             throw new BadDataException("Validation of VP in form of JSON-LD is not supported");
         }
 
@@ -262,12 +265,12 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private boolean validateCredential(VerifiableCredential credential)
             throws UnsupportedSignatureTypeException {
-        final DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
+        DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
         didDocumentResolverRegistry.register(
                 new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
 
-        final String proofType = credential.getProof().getType();
-        final LinkedDataProofValidation linkedDataProofValidation;
+        String proofType = credential.getProof().getType();
+        LinkedDataProofValidation linkedDataProofValidation;
         if (SignatureType.ED21559.toString().equals(proofType)) {
             linkedDataProofValidation = LinkedDataProofValidation.newInstance(
                     SignatureType.ED21559,
@@ -282,7 +285,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             throw new UnsupportedSignatureTypeException(proofType);
         }
 
-        final boolean isValid = linkedDataProofValidation.verifiyProof(credential);
+        boolean isValid = linkedDataProofValidation.verifiyProof(credential);
         if (isValid) {
             log.debug("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
         } else {

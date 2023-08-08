@@ -63,7 +63,7 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
-public class PresentationValidationTest {
+class PresentationValidationTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -91,23 +91,23 @@ public class PresentationValidationTest {
     public void setup() {
         bpnOperator = miwSettings.authorityWalletBpn();
 
-        final CreateWalletRequest createWalletRequest = new CreateWalletRequest();
+        CreateWalletRequest createWalletRequest = new CreateWalletRequest();
         createWalletRequest.setBpn(bpnTenant_1);
         createWalletRequest.setName("My Test Tenant Wallet");
-        final Wallet tenantWallet = walletService.createWallet(createWalletRequest);
+        Wallet tenantWallet = walletService.createWallet(createWalletRequest);
         tenant_1 = DidParser.parse(tenantWallet.getDid());
 
-        final CreateWalletRequest createWalletRequest2 = new CreateWalletRequest();
+        CreateWalletRequest createWalletRequest2 = new CreateWalletRequest();
         createWalletRequest2.setBpn(bpnTenant_2);
         createWalletRequest2.setName("My Test Tenant Wallet");
-        final Wallet tenantWallet2 = walletService.createWallet(createWalletRequest2);
+        Wallet tenantWallet2 = walletService.createWallet(createWalletRequest2);
         tenant_2 = DidParser.parse(tenantWallet2.getDid());
 
-        final IssueMembershipCredentialRequest issueMembershipCredentialRequest = new IssueMembershipCredentialRequest();
+        IssueMembershipCredentialRequest issueMembershipCredentialRequest = new IssueMembershipCredentialRequest();
         issueMembershipCredentialRequest.setBpn(bpnTenant_1);
         membershipCredential_1 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, bpnOperator);
 
-        final IssueMembershipCredentialRequest issueMembershipCredentialRequest2 = new IssueMembershipCredentialRequest();
+        IssueMembershipCredentialRequest issueMembershipCredentialRequest2 = new IssueMembershipCredentialRequest();
         issueMembershipCredentialRequest2.setBpn(bpnTenant_2);
         membershipCredential_2 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest2, bpnOperator);
     }
@@ -129,8 +129,8 @@ public class PresentationValidationTest {
     }
 
     @Test
-    public void testSuccessfulValidation() {
-        final Map<String, Object> presentation = createPresentationJwt(membershipCredential_1, tenant_1);
+    void testSuccessfulValidation() {
+        Map<String, Object> presentation = createPresentationJwt(membershipCredential_1, tenant_1);
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(presentation);
         Assertions.assertTrue(response.valid);
     }
@@ -154,10 +154,10 @@ public class PresentationValidationTest {
     public void testValidationFailureOfCredentialWitInvalidExpirationDate() {
         // test is related to this old issue where the signature check still succeeded
         // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
-        final VerifiableCredential copyCredential = new VerifiableCredential(membershipCredential_1);
+        VerifiableCredential copyCredential = new VerifiableCredential(membershipCredential_1);
         // e.g. an attacker tries to extend the validity of a verifiable credential
         copyCredential.put(VerifiableCredential.EXPIRATION_DATE, "2500-09-30T22:00:00Z");
-        final Map<String, Object> presentation = createPresentationJwt(copyCredential, tenant_1);
+        Map<String, Object> presentation = createPresentationJwt(copyCredential, tenant_1);
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(presentation);
         Assertions.assertFalse(response.valid);
     }
@@ -177,29 +177,29 @@ public class PresentationValidationTest {
 
     @Test
     @SneakyThrows
-    public void testValidationFailureOfPresentationPayloadManipulation() {
-        final Map<String, Object> presentation = createPresentationJwt(membershipCredential_1, tenant_1);
+    void testValidationFailureOfPresentationPayloadManipulation() {
+        Map<String, Object> presentation = createPresentationJwt(membershipCredential_1, tenant_1);
 
-        final String jwt = (String) presentation.get(StringPool.VP);
-        final String payload = jwt.split("\\.")[1];
+        String jwt = (String) presentation.get(StringPool.VP);
+        String payload = jwt.split("\\.")[1];
         Base64.Decoder decoder = Base64.getUrlDecoder();
         Base64.Encoder encoder = Base64.getUrlEncoder();
 
-        final byte[] payloadDecoded = decoder.decode(payload);
-        final Map<String, Object> payloadMap = OBJECT_MAPPER.readValue(payloadDecoded, Map.class);
+        byte[] payloadDecoded = decoder.decode(payload);
+        Map<String, Object> payloadMap = OBJECT_MAPPER.readValue(payloadDecoded, Map.class);
 
         // replace with credential of another tenant
-        final VerifiablePresentation newPresentation = new VerifiablePresentationBuilder()
+        VerifiablePresentation newPresentation = new VerifiablePresentationBuilder()
                 .context(List.of(VerifiablePresentation.DEFAULT_CONTEXT))
                 .id(URI.create(UUID.randomUUID().toString()))
                 .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
                 .verifiableCredentials(List.of(membershipCredential_2))
                 .build();
         payloadMap.put("vp", newPresentation);
-        final String newPayloadJson = OBJECT_MAPPER.writeValueAsString(payloadMap);
-        final String newPayloadEncoded = encoder.encodeToString(newPayloadJson.getBytes());
+        String newPayloadJson = OBJECT_MAPPER.writeValueAsString(payloadMap);
+        String newPayloadEncoded = encoder.encodeToString(newPayloadJson.getBytes());
 
-        final String newJwt = jwt.split("\\.")[0] + "." + newPayloadEncoded + "." + jwt.split("\\.")[2];
+        String newJwt = jwt.split("\\.")[0] + "." + newPayloadEncoded + "." + jwt.split("\\.")[2];
 
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(Map.of(
                 StringPool.VP, newJwt
@@ -210,11 +210,11 @@ public class PresentationValidationTest {
 
     @SneakyThrows
     private VerifiablePresentationValidationResponse validateJwtOfCredential(Map<String, Object> presentationJwt) {
-        final HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
         headers.set("Content-Type", "application/json");
-        final HttpEntity<Map> entity = new HttpEntity<>(presentationJwt, headers);
+        HttpEntity<Map> entity = new HttpEntity<>(presentationJwt, headers);
 
-        final ResponseEntity<String> response = restTemplate.exchange(RestURI.API_PRESENTATIONS_VALIDATION + "?asJwt=true", HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_PRESENTATIONS_VALIDATION + "?asJwt=true", HttpMethod.POST, entity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
             return OBJECT_MAPPER.readValue(response.getBody(), VerifiablePresentationValidationResponse.class);
@@ -243,6 +243,5 @@ public class PresentationValidationTest {
     private static class VerifiablePresentationValidationResponse {
         boolean valid;
         String vp;
-//        boolean validateJWTExpiryDate;
     }
 }
