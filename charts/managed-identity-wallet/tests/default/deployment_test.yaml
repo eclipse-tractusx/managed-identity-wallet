@@ -99,7 +99,39 @@ tests:
           path: spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.template.spec.containers[0].env
-          count: 9
+          count: 10 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
+      - equal:
+          path: spec.template.spec.containers[0].env
+          value:
+            - name: APPLICATION_PORT
+              value: "8080"
+            - name: DB_HOST
+              value: RELEASE-NAME-postgresql
+            - name: DB_USER_NAME
+              value: miw
+            - name: DB_NAME
+              value: miw
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: RELEASE-NAME-postgresql
+            - name: APPLICATION_ENVIRONMENT
+              value: dev
+            - name: MIW_HOST_NAME
+              value: localhost
+            - name: USE_SSL
+              value: false
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: ENCRYPTION_KEY
+                  name: RELEASE-NAME-managed-identity-wallet
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: KEYCLOAK_CLIENT_ID
+                  name: RELEASE-NAME-managed-identity-wallet
 
   - it: should have empty values
     asserts:

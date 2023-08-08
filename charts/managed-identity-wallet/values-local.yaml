@@ -21,13 +21,13 @@ image:
   tag: "latest-java-did-web"
 
 secrets:
-  ENCRYPTION_KEY: 76a7834fb37e090c2789a9b1a76748d3
-  KEYCLOAK_CLIENT_ID: z445srtzr5g
+  ENCRYPTION_KEY: "76a7834fb37e090c2789a9b1a76748d3"
+  KEYCLOAK_CLIENT_ID: "z445srtzr5g"
 
 envs:
-  MIW_HOST_NAME: localhost
-  KEYCLOAK_REALM: miw_test
-  AUTH_SERVER_URL: http://<your_local_ip>:<port>/auth
+  MIW_HOST_NAME: "localhost"
+  KEYCLOAK_REALM: "miw_test"
+  AUTH_SERVER_URL: "http://<your_local_ip>:<port>/auth"
   AUTHORITY_WALLET_DID: "did:web:managed-identity-wallets-new.dev.demo.catena-x.net:BPNL000000000000"
   AUTHORITY_WALLET_BPN: "BPNL000000000000"
 

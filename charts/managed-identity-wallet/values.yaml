@@ -35,11 +35,11 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# -- Parameters for the application (will be stored as secrets - so, for important values, ...)
+# -- Parameters for the application (will be stored in a secret and attached to the container)
 secrets:
   # -- Keycloak confidential client id for MIW application
   KEYCLOAK_CLIENT_ID: ""
-  # -- AES encryption key used to encrypt/decrypt private keys (random 32 chars)
+  # -- AES encryption key used to encrypt/decrypt private keys (random 32 chars - ex.: openssl rand -hex 32)
   ENCRYPTION_KEY: ""
 
 # -- Parameters for the application (will be provided as plain environment variables)
@@ -47,7 +47,7 @@ envs:
   # -- Application environments like dev, int, prod
   APPLICATION_ENVIRONMENT: "dev"
   # -- Whether database connection with SSL, true if the database connection is done using SSL
-  USE_SSL: false
+  USE_SSL: "false"
   # -- Initial database connection pool size
   DB_POOL_SIZE: ""
   # -- Keycloak public client id, used only if we want to enable login in swagger using keycloak
@@ -55,7 +55,7 @@ envs:
   # -- Spring actuator port
   MANAGEMENT_PORT:
   # -- Hostname of miw application
-  MIW_HOST_NAME: localhost
+  MIW_HOST_NAME: "localhost"
   # -- Authority/base wallet/root wallet BPN
   AUTHORITY_WALLET_BPN: ""
   # -- Authority/base wallet/root wallet name
