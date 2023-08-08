@@ -47,9 +47,8 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredential
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
-import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -428,25 +427,18 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
 
         // DID Resolver Constracture params
-        DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
-        didDocumentResolverRegistry.register(
-                new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
-
+        DidResolver resolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
         String proofTye = verifiableCredential.getProof().get(StringPool.TYPE).toString();
         LinkedDataProofValidation proofValidation;
         if (SignatureType.ED21559.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(
-                    SignatureType.ED21559,
-                    didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.ED21559, resolver);
         } else if (SignatureType.JWS.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(
-                    SignatureType.JWS,
-                    didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS, resolver);
         } else {
             throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
         }
 
-        boolean valid = proofValidation.verifiyProof(verifiableCredential);
+        boolean valid = proofValidation.verifyProof(verifiableCredential);
 
         Map<String, Object> response = new TreeMap<>();
 
