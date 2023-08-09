@@ -51,8 +51,42 @@ spec:
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.miw.logging.level }}
+            - name: MIW_HOST_NAME
+              value: {{ tpl .Values.miw.host . }}
+            - name: ENCRYPTION_KEY
+              value: {{ .Values.miw.database.encryptionKey }}
+            - name: AUTHORITY_WALLET_BPN
+              value: {{ tpl .Values.miw.authorityWallet.bpn . }}
+            - name: AUTHORITY_WALLET_DID
+              value: {{ tpl .Values.miw.authorityWallet.did . }}
+            - name: ENFORCE_HTTPS_IN_DID_RESOLUTION
+              value: {{ .Values.miw.ssi.enforceHttpsInDidWebResolution | quote }}
+            - name: APPLICATION_ENVIRONMENT
+              value: {{ .Values.miw.environment }}
+            - name: KEYCLOAK_REALM
+              value: {{ tpl .Values.miw.keycloak.realm . }}
+            - name: KEYCLOAK_CLIENT_ID
+              value: {{ .Values.miw.keycloak.clientId }}
+            - name: AUTH_SERVER_URL
+              value: {{ tpl .Values.miw.keycloak.url . }}
+            - name: USE_SSL
+              value: {{ .Values.miw.database.useSSL | quote }}
+            - name: DB_HOST
+              value: {{ tpl .Values.miw.database.host . }}
+            - name: DB_PORT
+              value: {{ .Values.miw.database.port | quote }}
+            - name: DB_NAME
+              value: {{ tpl .Values.miw.database.database . }}
+            - name: DB_USER_NAME
+              value: {{ .Values.miw.database.user }}
+            - name: DB_PASSWORD
+              value: {{ .Values.miw.database.password }}
             - name: APPLICATION_PORT
               value: "8080"
+            - name: VC_EXPIRY_DATE
+              value: {{ .Values.miw.ssi.vcExpiryDate | quote }}
           {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
             - name: {{ $key }}
@@ -89,7 +123,7 @@ spec:
             periodSeconds: 5
             successThreshold: 1
             timeoutSeconds: 5
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 

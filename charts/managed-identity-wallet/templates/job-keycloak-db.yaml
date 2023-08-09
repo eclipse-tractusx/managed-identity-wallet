@@ -1,0 +1,43 @@
+{{- if .Values.keycloak.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-job-create-db-keycloak
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-db
+          image: postgres:13
+          env:
+            - name: USER
+              value: {{ tpl ( .Values.keycloak.externalDatabase.user | quote ) . }}
+            - name: PGPASSWORD
+              value: {{ tpl ( .Values.keycloak.externalDatabase.password | quote ) . }}
+            - name: HOST
+              value: {{ tpl ( .Values.keycloak.externalDatabase.host | quote ) . }}
+            - name: PORT
+              value: {{ tpl ( .Values.keycloak.externalDatabase.port | quote ) . }}
+            - name: DATABASE
+              value: {{ tpl ( .Values.keycloak.externalDatabase.database | quote ) . }}
+          command: [ "bash", "-c", "--" ]
+          args:
+            - |
+              echo "Postgres user: $USER"
+              echo "Postgres host: $HOST"
+              echo "Postgres port: $PORT"
+              echo "Postgres database: $DATABASE"
+
+              echo "Waiting for postgres to start"
+              while ! psql -h $HOST -p $PORT -U $USER -d postgres -c "select 1" > /dev/null 2>&1; do
+                  sleep 1
+              done
+
+              echo "Creating database $DATABASE"
+              psql -h $HOST -p $PORT -U $USER -d postgres -c "CREATE DATABASE $DATABASE" > /dev/null 2>&1 || echo "Skip creation as database $DATABASE already exists"
+
+          securityContext: {{ .Values.jobSecurityContext | toYaml | nindent 12 }}
+      restartPolicy: Never
+  backoffLimit: 0
+---
+{{- end}} # end if .Values.keycloak.enabled

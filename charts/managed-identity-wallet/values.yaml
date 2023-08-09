@@ -17,60 +17,99 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
+anchors:
+  setupDependencies: &setupDependencies true
+  postgres:
+    host: &postgresHost "{{ .Release.Name }}-postgresql"
+    port: &postgresPort 5432
+    user: &postgresUser user
+    password: &postgresPassword password
+    database: &postgresDatabase postgres
+    backup:
+      enabled: &postgresBackupEnabled false
+  keycloak:
+    realm: &keycloakRealm miw_test
+    clientId: &keycloakClientId miw_private_client
+    host: &keycloakHost "{{ .Release.Name }}-keycloak"
+    url: &keycloakUrl "http://{{ .Release.Name }}-keycloak"
+    user: &keycloakUser user
+    password: &keycloakPassword password
+    postgres:
+      database: &keyCloakPostgresDatabase "miw_keycloak"
+  miw:
+    host: &miwHost "{{ .Release.Name }}-managed-identity-wallet:8080"
+    environment: &miwEnvironment dev
+    logging:
+      level: &miwLoggingLevel INFO
+    authorityWallet:
+      bpn: &authorityWalletBpn "BPNL000000000000"
+      did: &authorityWalletDid  "did:web:{{ .Release.Name }}-managed-identity-wallet%3A8080:BPNL000000000000"
+    ssi:
+      useHttpsInDidWebResolution: &useHttpsInDidWebResolution false
+      vcExpiryDate: &vcExpiryDate "31-12-2023"
+    postgres:
+      database: &miwPostgresDatabase "miw_app"
+      encryptionKey: &miwPostgresEncryptionKey 76a7834fb37e090c2789a9b1a76748d3
+  defaultSecurityContext: &defaultSecurityContext
+    runAsUser: 1001
+    runAsGroup: 0
+    runAsNonRoot: true
+
 # -- The amount of replicas to run
 replicaCount: 1
 
 # -- Image of the main container
 image:
   # -- Image repository
-  repository: tractusx/managed-identity-wallet
+  # TODO change back to tractusx/managed-identity-wallet
+  repository: ghcr.io/catenax-ng/tx-managed-identity-wallet_miw_service
   # -- PullPolicy
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
-  tag: "" 
+  # TODO remove latest again
+  tag: "latest"
 
 nameOverride: ""
 fullnameOverride: ""
 
 # -- Parameters for the application (will be stored as secrets - so, for passwords, ...)
-secrets: {}
+secrets: { }
 #  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
 #  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
 #  KEYCLOAK_CLIENT_ID: xxx
 #  ENCRYPTION_KEY: xxx  # 64 chars
 
 # -- Parameters for the application (will be provided as plain environment variables)
-envs:
-  DB_HOST: "{{ .Release.Name }}-postgresql"
-  DB_PORT: 5432
-  # set it also in the init script in the postgres initdb section below!!
-  DB_NAME: miw
-  DB_USER_NAME: postgres
-  DB_PASSWORD: postgres
-  USE_SSL: false
-  KEYCLOAK_REALM: miw_test
-  KEYCLOAK_CLIENT_ID: miw_private_client
-  AUTH_SERVER_URL: "http://{{ .Release.Name }}-keycloak"
-  ENCRYPTION_KEY: 76a7834fb37e090c2789a9b1a76748d3
-  APPLICATION_ENVIRONMENT: dev
-  ENFORCE_HTTPS_IN_DID_RESOLUTION: false
-#  DB_POOL_SIZE: xxx
-#  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
-#  MANAGEMENT_PORT: xxx
-#  MIW_HOST_NAME: xxx
-  MIW_HOST_NAME: "{{ .Release.Name }}-managed-identity-wallet:8080"
-  AUTHORITY_WALLET_BPN: BPNL000000000000
-#  AUTHORITY_WALLET_NAME: xxx
-  AUTHORITY_WALLET_DID: did:web:{{ .Release.Name }}-managed-identity-wallet%3A8080:BPNL000000000000
-#  VC_SCHEMA_LINK: xxx
-#  VC_EXPIRY_DATE: xxx
-#  KEYCLOAK_REALM: xxx
-#  AUTH_SERVER_URL: xxx
+envs: { }
+
+miw:
+  host: *miwHost
+  environment: *miwEnvironment
+  ssi:
+    enforceHttpsInDidWebResolution: *useHttpsInDidWebResolution
+    vcExpiryDate: *vcExpiryDate
+  authorityWallet:
+    bpn: *authorityWalletBpn
+    did: *authorityWalletDid
+  database:
+    useSSL: false
+    port: *postgresPort
+    host: *postgresHost
+    user: *postgresUser
+    password: *postgresPassword
+    database: *miwPostgresDatabase
+    encryptionKey: *miwPostgresEncryptionKey
+  keycloak:
+    realm: *keycloakRealm
+    clientId: *keycloakClientId
+    url: *keycloakUrl
+  logging:
+    level: *miwLoggingLevel
 
 # -- ServiceAccount configuration
 serviceAccount:
   create: true
-  annotations: {}
+  annotations: { }
   name: ""
 
 # -- Service configuration
@@ -81,27 +120,27 @@ service:
 # -- Ingress configuration
 ingress:
   enabled: false
-  annotations: {}
+  annotations: { }
   hosts:
     - host: chart-example.local
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls: []
+  tls: [ ]
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
 # -- PodSecurityContext
-podSecurityContext: {}
+podSecurityContext: { }
+
+# -- JobSecurityContext
+jobSecurityContext:
+  *defaultSecurityContext
 
 # -- Preconfigured SecurityContext
 securityContext:
-  privileged: false
-  allowPrivilegeEscalation: false
-  runAsNonRoot: true
-  runAsGroup: 11111
-  runAsUser: 11111
+  *defaultSecurityContext
 
 # -- Resource boundaries
 resources:
@@ -117,63 +156,51 @@ nodeSelector:
   "kubernetes.io/os": linux
 
 # -- Tolerations configuration
-tolerations: []
+tolerations: [ ]
 
 # -- Affinity configuration
-affinity: {}
+affinity: { }
 
 # -- PodAnnotation configuration
-podAnnotations: {}
-
-# -- Simple Postgresql backup solution (Dump data to second PV)
-backup:
-  # -- Backup database
-  database:
-    # -- Enable / Disable the backup
-    enabled: false
-    # -- Backup schedule (help: https://crontab.guru)
-    cron: "* */6 * * *"
-    # -- Storage configuration
-    storage:
-      # -- Set to true, if the PV should stay even when the chart release is uninstalled
-      keepStorage: true
-      # -- Disk size for backup content
-      diskSize: 10G
-      # -- storageClassName
-      storageClassName: "-"
+podAnnotations: { }
 
 keycloak:
-  enabled: true
+  enabled: *setupDependencies
   postgresql:
     enabled: false
   externalDatabase:
-    host: '{{ .Release.Name }}-postgresql'
-    port: 5432
-    user: postgres
-    password: postgres
-    database: keycloak
+    host: *postgresHost
+    port: *postgresPort
+    user: *postgresUser
+    password: *postgresPassword
+    database: *keyCloakPostgresDatabase
   auth:
-    adminUser: user
-    adminPassword: password
-    postgresql:
-      enabled: false
+    adminUser: *keycloakUser
+    adminPassword: *keycloakPassword
   keycloakConfigCli:
     enabled: true
     existingConfigmap: keycloak-realm-config
+    backoffLimit: 5
   extraEnvVars:
     - name: KEYCLOAK_HOSTNAME
-      value: "{{ .Release.Name }}-keycloak"
+      value: *keycloakHost
 
 postgresql:
-  primary:
-    initdb:
-      scripts:
-        init_db_script.sh: |
-          #!/bin/sh
-          createdb -O postgres miw
-      user: postgres
-      password: postgres
+  enabled: *setupDependencies
+  service:
+    port: *postgresPort
   auth:
-    password: postgres
-    username: postgres
-    postgresPassword: postgres
+    database: *postgresDatabase
+    username: *postgresUser
+    password: *postgresPassword
+  # -- see https://github.com/bitnami/charts/tree/main/bitnami/postgresql#backup-parameters
+  backup:
+    enabled: *postgresBackupEnabled
+    conjob:
+      schedule: "* */6 * * *"
+      containerSecurityContext:
+        *defaultSecurityContext
+      storage:
+        existingClaim: ""
+        resourcePolicy: "keep"
+        size: "8Gi"
