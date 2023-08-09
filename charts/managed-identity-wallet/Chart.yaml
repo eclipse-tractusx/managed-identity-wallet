@@ -42,6 +42,15 @@ maintainers:
     url: https://github.com/pmoscode
 
 dependencies:
+  - name: keycloak
+    version: 15.1.6
+    repository: https://charts.bitnami.com/bitnami
+    condition: keycloak.enabled
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 2.x.x
   - name: postgresql
     version: 11.9.13
     repository: https://charts.bitnami.com/bitnami

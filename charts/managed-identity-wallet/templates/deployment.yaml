@@ -56,7 +56,7 @@ spec:
           {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
             - name: {{ $key }}
-              value: {{ $val }}
+              value: {{ tpl ($val | quote) $ }}
           {{- end}}
           {{- range $key, $val := .Values.secrets }}
             - name: {{ $key }}

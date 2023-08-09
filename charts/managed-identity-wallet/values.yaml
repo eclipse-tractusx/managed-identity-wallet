@@ -40,19 +40,28 @@ secrets: {}
 #  ENCRYPTION_KEY: xxx  # 64 chars
 
 # -- Parameters for the application (will be provided as plain environment variables)
-envs: {}
-#  APPLICATION_ENVIRONMENT: xxx
-#  DB_HOST: auto
-#  DB_PORT: xxx
-#  DB_NAME: xxx  # set it also in the init script in the postgres initdb section below!!
-#  USE_SSL: xxx
+envs:
+  DB_HOST: "{{ .Release.Name }}-postgresql"
+  DB_PORT: 5432
+  # set it also in the init script in the postgres initdb section below!!
+  DB_NAME: miw
+  DB_USER_NAME: postgres
+  DB_PASSWORD: postgres
+  USE_SSL: false
+  KEYCLOAK_REALM: miw_test
+  KEYCLOAK_CLIENT_ID: miw_private_client
+  AUTH_SERVER_URL: "http://{{ .Release.Name }}-keycloak"
+  ENCRYPTION_KEY: 76a7834fb37e090c2789a9b1a76748d3
+  APPLICATION_ENVIRONMENT: dev
+  ENFORCE_HTTPS_IN_DID_RESOLUTION: false
 #  DB_POOL_SIZE: xxx
 #  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
 #  MANAGEMENT_PORT: xxx
 #  MIW_HOST_NAME: xxx
-#  AUTHORITY_WALLET_BPN: xxx
+  MIW_HOST_NAME: "{{ .Release.Name }}-managed-identity-wallet:8080"
+  AUTHORITY_WALLET_BPN: BPNL000000000000
 #  AUTHORITY_WALLET_NAME: xxx
-#  AUTHORITY_WALLET_DID: xxx
+  AUTHORITY_WALLET_DID: did:web:{{ .Release.Name }}-managed-identity-wallet%3A8080:BPNL000000000000
 #  VC_SCHEMA_LINK: xxx
 #  VC_EXPIRY_DATE: xxx
 #  KEYCLOAK_REALM: xxx
@@ -100,7 +109,7 @@ resources:
     cpu: 250m
     memory: 500Mi
   limits:
-    cpu: 4
+    cpu: 2
     memory: 1Gi
 
 # -- NodeSelector configuration
@@ -133,7 +142,28 @@ backup:
       # -- storageClassName
       storageClassName: "-"
 
-# @ignored
+keycloak:
+  enabled: true
+  postgresql:
+    enabled: false
+  externalDatabase:
+    host: '{{ .Release.Name }}-postgresql'
+    port: 5432
+    user: postgres
+    password: postgres
+    database: keycloak
+  auth:
+    adminUser: user
+    adminPassword: password
+    postgresql:
+      enabled: false
+  keycloakConfigCli:
+    enabled: true
+    existingConfigmap: keycloak-realm-config
+  extraEnvVars:
+    - name: KEYCLOAK_HOSTNAME
+      value: "{{ .Release.Name }}-keycloak"
+
 postgresql:
   primary:
     initdb:
