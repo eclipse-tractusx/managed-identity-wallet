@@ -77,15 +77,21 @@ miw:
     secretPasswordKey: "password"
     # -- Database name. Default: miw_app
     name: "miw_app"
-    # -- Database encryption key for confidential data. If empty it is set to 32 random alphanumeric chars
-    encryptionKey: ""
+    # -- Database encryption key for confidential data. If empty a secret with 32 random alphanumeric chars is generated
+    encryptionKey:
+      # -- Encryption key value. Ignored if `secret` is set
+      value: ""
+      # -- Existing secret for database encryption key
+      secret: ""
+      # -- Existing secret key for database encryption key
+      secretKey: ""
   keycloak:
     # -- Keycloak realm
     realm: "miw_test"
     # -- Keycloak client id
     clientId: "miw_private_client"
-    # -- Keycloak URL. Default: <release name>-keycloak:4200
-    url: "http://{{ .Release.Name }}-keycloak:4200"
+    # -- Keycloak URL. Default: <release name>-keycloak
+    url: "http://{{ .Release.Name }}-keycloak"
   logging:
     # -- Log Level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE. Default: INFO
     level: "INFO"
@@ -182,10 +188,10 @@ keycloak:
   # -- Keycloak authentication
   auth:
     # -- Keycloak admin user
-    adminUser: ""
+    adminUser: "admin"
     # -- Keycloak admin password
-    adminPassword: ""
-  # -- Playground Keycloak realm configuration for the MIW
+    adminPassword: "password"
+  # -- Keycloak realm configuration
   keycloakConfigCli:
     # -- Enable to create the miw playground realm
     enabled: true
@@ -195,9 +201,9 @@ keycloak:
     backoffLimit: 5
   # -- Environment Variables for the Keycloak container
   extraEnvVars:
-    # -- Keycloak hostname. Default: <release name>-keycloak:4200
+    # -- Keycloak hostname. Default: <release name>-keycloak
     - name: KEYCLOAK_HOSTNAME
-      value: "{{ .Release.Name }}-keycloak:4200"
+      value: "{{ .Release.Name }}-keycloak"
 
 # -- Postgresql configuration
 postgresql:
@@ -209,6 +215,8 @@ postgresql:
     enablePostgresUser: false
     # -- User to create
     username: "miw"
+    # -- Password to set
+    password: "password"
   # -- Backup configuration (see https://github.com/bitnami/charts/tree/main/bitnami/postgresql#backup-parameters)
   backup:
     # -- Enable to create a backup cronjob

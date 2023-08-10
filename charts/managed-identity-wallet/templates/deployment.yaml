@@ -56,7 +56,10 @@ spec:
             - name: MIW_HOST_NAME
               value: {{ tpl .Values.miw.host . }}
             - name: ENCRYPTION_KEY
-              value: {{ default .Values.miw.database.encryptionKey (randAlphaNum 32)}}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default .Values.miw.database.encryptionKey.secret (printf "%s-encryption-key" ( include "managed-identity-wallet.fullname" . )) }}
+                  key: {{ default .Values.miw.database.encryptionKey.secretKey "encryption-key" }}
             - name: AUTHORITY_WALLET_BPN
               value: {{ tpl  .Values.miw.authorityWallet.bpn . }}
             - name: AUTHORITY_WALLET_DID
