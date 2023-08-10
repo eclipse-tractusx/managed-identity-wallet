@@ -60,7 +60,7 @@ spec:
             - name: AUTHORITY_WALLET_BPN
               value: {{ tpl .Values.miw.authorityWallet.bpn . }}
             - name: AUTHORITY_WALLET_DID
-              value: {{ tpl .Values.miw.authorityWallet.did . }}
+              value: {{ printf "did:web:%s:%s" ( tpl .Values.miw.host . | replace ":" "%3A" | replace "/" ":") .Values.miw.authorityWallet.bpn }}
             - name: ENFORCE_HTTPS_IN_DID_RESOLUTION
               value: {{ .Values.miw.ssi.enforceHttpsInDidWebResolution | quote }}
             - name: APPLICATION_ENVIRONMENT

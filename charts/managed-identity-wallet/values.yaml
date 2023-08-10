@@ -45,7 +45,6 @@ anchors:
       level: &miwLoggingLevel ""
     authorityWallet:
       bpn: &authorityWalletBpn "BPNL000000000000"
-      did: &authorityWalletDid  "did:web:{{ .Release.Name }}-managed-identity-wallet%3A8080:BPNL000000000000"
     ssi:
       useHttpsInDidWebResolution: &useHttpsInDidWebResolution false
       # -- Verifiable Credential expiry date. Format 'dd-MM-yyyy'. Default: 31-12-<current year>
@@ -94,7 +93,6 @@ miw:
     vcExpiryDate: *vcExpiryDate
   authorityWallet:
     bpn: *authorityWalletBpn
-    did: *authorityWalletDid
   database:
     useSSL: false
     port: *postgresPort
@@ -168,6 +166,7 @@ affinity: { }
 # -- PodAnnotation configuration
 podAnnotations: { }
 
+# -- Keycloak configuration
 keycloak:
   enabled: *setupDependencies
   postgresql:
