@@ -46,7 +46,8 @@ anchors:
       did: &authorityWalletDid  "did:web:{{ .Release.Name }}-managed-identity-wallet%3A8080:BPNL000000000000"
     ssi:
       useHttpsInDidWebResolution: &useHttpsInDidWebResolution false
-      vcExpiryDate: &vcExpiryDate "31-12-2023"
+      # -- Verifiable Credential expiry date. Format 'dd-MM-yyyy'. Default: 31-12-<current year>
+      vcExpiryDate: &vcExpiryDate ""
     postgres:
       database: &miwPostgresDatabase "miw_app"
       encryptionKey: &miwPostgresEncryptionKey 76a7834fb37e090c2789a9b1a76748d3

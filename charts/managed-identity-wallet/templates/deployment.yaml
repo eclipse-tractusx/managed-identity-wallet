@@ -86,7 +86,7 @@ spec:
             - name: APPLICATION_PORT
               value: "8080"
             - name: VC_EXPIRY_DATE
-              value: {{ .Values.miw.ssi.vcExpiryDate | quote }}
+              value: {{ (default .Values.miw.ssi.vcExpiryDate (printf "31-12-%s" (now | date "2006"))) | quote }}
           {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
             - name: {{ $key }}
