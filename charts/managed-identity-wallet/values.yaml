@@ -50,7 +50,8 @@ anchors:
       vcExpiryDate: &vcExpiryDate ""
     postgres:
       database: &miwPostgresDatabase "miw_app"
-      encryptionKey: &miwPostgresEncryptionKey 76a7834fb37e090c2789a9b1a76748d3
+      # -- database encryption key for confidential data. Default: 32 random alphanumeric chars
+      encryptionKey: &miwPostgresEncryptionKey ""
   defaultSecurityContext: &defaultSecurityContext
     runAsUser: 1001
     runAsGroup: 0

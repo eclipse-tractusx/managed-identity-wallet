@@ -56,7 +56,7 @@ spec:
             - name: MIW_HOST_NAME
               value: {{ tpl .Values.miw.host . }}
             - name: ENCRYPTION_KEY
-              value: {{ .Values.miw.database.encryptionKey }}
+              value: {{ default .Values.miw.database.encryptionKey (randAlphaNum 32)}}
             - name: AUTHORITY_WALLET_BPN
               value: {{ tpl .Values.miw.authorityWallet.bpn . }}
             - name: AUTHORITY_WALLET_DID
