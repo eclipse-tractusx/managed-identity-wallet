@@ -23,26 +23,22 @@ replicaCount: 1
 # -- Image of the main container
 image:
   # -- Image repository
-  # TODO change back to tractusx/managed-identity-wallet
-  repository: ghcr.io/catenax-ng/tx-managed-identity-wallet_miw_service
+  repository: tractusx/managed-identity-wallet
   # -- PullPolicy
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
-  # TODO remove latest again
-  tag: "latest"
+  tag: ""
 
 nameOverride: ""
 fullnameOverride: ""
 
 # -- Parameters for the application (will be stored as secrets - so, for passwords, ...)
 secrets: { }
-# TODO write encryption key to secret always
-#  ENCRYPTION_KEY: xxx  # 64 chars
 
-# -- Parameters for the application (will be provided as plain environment variables)
+# -- Parameters for the application (will be provided as environment variables)
 envs: { }
 
-# -- Parameters for the application (will be provided as plain environment variables)
+# -- Managed Identity Wallets configuration
 miw:
   # -- MIW host name. Default: <release name>-managed-identity-wallet:<port>
   host: "{{ .Release.Name }}-managed-identity-wallet:8080"
@@ -69,13 +65,13 @@ miw:
     port: 5432
     # -- Database host. Default: <release name>-postgresql
     host: "{{ .Release.Name }}-postgresql"
-    # -- Database user. Default: miw
+    # -- Database user
     user: "miw"
     # -- Existing secret name for the database password. Default: <release name>-postgresql
     secret: "{{ .Release.Name }}-postgresql"
     # -- Existing secret key for the database password
     secretPasswordKey: "password"
-    # -- Database name. Default: miw_app
+    # -- Database name.
     name: "miw_app"
     # -- Database encryption key for confidential data. If empty a secret with 32 random alphanumeric chars is generated
     encryptionKey:
@@ -90,12 +86,11 @@ miw:
     realm: "miw_test"
     # -- Keycloak client id
     clientId: "miw_private_client"
-    # -- Keycloak URL. Default: <release name>-keycloak
+    # -- Keycloak URL. Default: http://<release name>-keycloak
     url: "http://{{ .Release.Name }}-keycloak"
   logging:
-    # -- Log Level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE. Default: INFO
+    # -- Log Level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE.
     level: "INFO"
-
 
 # -- ServiceAccount configuration
 serviceAccount:
@@ -133,6 +128,8 @@ jobSecurityContext:
 
 # -- Preconfigured SecurityContext
 securityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
   runAsUser: 1001
   runAsGroup: 0
   runAsNonRoot: true
@@ -159,7 +156,7 @@ affinity: { }
 # -- PodAnnotation configuration
 podAnnotations: { }
 
-# -- Keycloak configuration
+# -- Keycloak configuration (see https://github.com/bitnami/charts/tree/main/bitnami/keycloak)
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
@@ -169,9 +166,9 @@ keycloak:
     createDatabaseIfNotExists: true
   # -- Keycloak postgresql database configuration
   postgresql:
-    # -- Enable to deploy Keycloak postgresql database
+    # -- Enable to deploy postgresql instance
     enabled: false
-  # -- Existing database configuration
+  # -- External database configuration
   externalDatabase:
     # -- Database host. Default: <release name>-postgresql
     host: "{{ .Release.Name }}-postgresql"
@@ -190,7 +187,7 @@ keycloak:
     # -- Keycloak admin user
     adminUser: "admin"
     # -- Keycloak admin password
-    adminPassword: "password"
+    adminPassword: ""
   # -- Keycloak realm configuration
   keycloakConfigCli:
     # -- Enable to create the miw playground realm
@@ -198,14 +195,14 @@ keycloak:
     # -- Existing configmap name for the realm configuration
     existingConfigmap: keycloak-realm-config
     # -- Number of retries before considering a Job as failed
-    backoffLimit: 5
+    backoffLimit: 2
   # -- Environment Variables for the Keycloak container
   extraEnvVars:
     # -- Keycloak hostname. Default: <release name>-keycloak
     - name: KEYCLOAK_HOSTNAME
       value: "{{ .Release.Name }}-keycloak"
 
-# -- Postgresql configuration
+# -- Postgresql configuration (see https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
 postgresql:
   # -- Enable to deploy Postgresql
   enabled: true
@@ -215,8 +212,8 @@ postgresql:
     enablePostgresUser: false
     # -- User to create
     username: "miw"
-    # -- Password to set
-    password: "password"
+    # -- Password to set. If empty one is generated
+    password: ""
   # -- Backup configuration (see https://github.com/bitnami/charts/tree/main/bitnami/postgresql#backup-parameters)
   backup:
     # -- Enable to create a backup cronjob
