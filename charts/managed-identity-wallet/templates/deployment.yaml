@@ -52,7 +52,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: APP_LOG_LEVEL
-              value: {{ .Values.miw.logging.level }}
+              value: {{ default .Values.miw.logging.level "INFO" }}
             - name: MIW_HOST_NAME
               value: {{ tpl .Values.miw.host . }}
             - name: ENCRYPTION_KEY

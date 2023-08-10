@@ -38,9 +38,11 @@ anchors:
       database: &keyCloakPostgresDatabase "miw_keycloak"
   miw:
     host: &miwHost "{{ .Release.Name }}-managed-identity-wallet:8080"
+    # -- Runtime environment. Should be ether local, dev, int or prod
     environment: &miwEnvironment dev
     logging:
-      level: &miwLoggingLevel INFO
+      # -- Log Level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE. Default: INFO
+      level: &miwLoggingLevel ""
     authorityWallet:
       bpn: &authorityWalletBpn "BPNL000000000000"
       did: &authorityWalletDid  "did:web:{{ .Release.Name }}-managed-identity-wallet%3A8080:BPNL000000000000"
