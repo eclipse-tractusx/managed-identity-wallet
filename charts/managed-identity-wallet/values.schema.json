@@ -1,0 +1,546 @@
+{
+    "title": "Chart Values",
+    "type": "object",
+    "properties": {
+        "replicaCount": {
+            "type": "number",
+            "description": "The amount of replicas to run",
+            "default": 1
+        },
+        "nameOverride": {
+            "type": "string",
+            "description": "String to partially override common.names.fullname template (will maintain the release name)",
+            "default": ""
+        },
+        "fullnameOverride": {
+            "type": "string",
+            "description": "String to fully override common.names.fullname template",
+            "default": ""
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string",
+                    "description": "MIW image repository",
+                    "default": "tractusx/managed-identity-wallet"
+                },
+                "pullPolicy": {
+                    "type": "string",
+                    "description": "MIW image pull policy",
+                    "default": "Always"
+                },
+                "tag": {
+                    "type": "string",
+                    "description": "MIW image tag (empty one will use \"appVersion\" value from chart definition)",
+                    "default": ""
+                }
+            }
+        },
+        "secrets": {
+            "type": "object",
+            "description": "Parameters for the application (will be stored as secrets - so, for passwords, ...)",
+            "default": {}
+        },
+        "envs": {
+            "type": "object",
+            "description": "Parameters for the application (will be provided as environment variables)",
+            "default": {}
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean",
+                    "description": "Enable creation of ServiceAccount",
+                    "default": true
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations to add to the ServiceAccount",
+                    "default": {}
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of the ServiceAccount to use.",
+                    "default": ""
+                }
+            }
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Kubernetes Service type",
+                    "default": "ClusterIP"
+                },
+                "port": {
+                    "type": "number",
+                    "description": "Kubernetes Service port",
+                    "default": 8080
+                }
+            }
+        },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Enable ingress controller resource",
+                    "default": false
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Ingress annotations",
+                    "default": {}
+                },
+                "hosts": {
+                    "type": "array",
+                    "description": "Ingress accepted hostnames",
+                    "default": [],
+                    "items": {}
+                },
+                "tls": {
+                    "type": "array",
+                    "description": "Ingress TLS configuration",
+                    "default": [],
+                    "items": {}
+                }
+            }
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "description": "Pod Security Context",
+            "default": {}
+        },
+        "jobSecurityContext": {
+            "type": "object",
+            "properties": {
+                "runAsUser": {
+                    "type": "number",
+                    "description": "User ID used to run the job",
+                    "default": 1001
+                },
+                "runAsGroup": {
+                    "type": "number",
+                    "description": "Group ID used to run the job",
+                    "default": 0
+                },
+                "runAsNonRoot": {
+                    "type": "boolean",
+                    "description": "Run the job as a non-root user",
+                    "default": true
+                }
+            }
+        },
+        "securityContext": {
+            "type": "object",
+            "properties": {
+                "privileged": {
+                    "type": "boolean",
+                    "description": "Enable privileged container",
+                    "default": false
+                },
+                "allowPrivilegeEscalation": {
+                    "type": "boolean",
+                    "description": "Allow privilege escalation",
+                    "default": false
+                },
+                "runAsUser": {
+                    "type": "number",
+                    "description": "User ID used to run the container",
+                    "default": 1001
+                },
+                "runAsGroup": {
+                    "type": "number",
+                    "description": "Group ID used to run the container",
+                    "default": 0
+                },
+                "runAsNonRoot": {
+                    "type": "boolean",
+                    "description": "Run the container as a non-root user",
+                    "default": true
+                }
+            }
+        },
+        "resources": {
+            "type": "object",
+            "properties": {
+                "requests": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "string",
+                            "description": "CPU resource requests",
+                            "default": "250m"
+                        },
+                        "memory": {
+                            "type": "string",
+                            "description": "Memory resource requests",
+                            "default": "500Mi"
+                        }
+                    }
+                },
+                "limits": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "number",
+                            "description": "CPU resource limits",
+                            "default": 2
+                        },
+                        "memory": {
+                            "type": "string",
+                            "description": "Memory resource limits",
+                            "default": "1Gi"
+                        }
+                    }
+                }
+            }
+        },
+        "tolerations": {
+            "type": "array",
+            "description": "Tolerations for pod assignment",
+            "default": [],
+            "items": {}
+        },
+        "affinity": {
+            "type": "object",
+            "description": "Affinity for pod assignment",
+            "default": {}
+        },
+        "podAnnotations": {
+            "type": "object",
+            "description": "Pod annotations",
+            "default": {}
+        },
+        "miw": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "type": "string",
+                    "description": "Host name. Default: <release name>-managed-identity-wallet:<port>",
+                    "default": "{{ .Release.Name }}-managed-identity-wallet:8080"
+                },
+                "environment": {
+                    "type": "string",
+                    "description": "Runtime environment. Should be ether local, dev, int or prod",
+                    "default": "dev"
+                },
+                "jobs": {
+                    "type": "object",
+                    "properties": {
+                        "createDatabaseIfNotExists": {
+                            "type": "boolean",
+                            "description": "Enable to create the database if it does not exist",
+                            "default": true
+                        }
+                    }
+                },
+                "ssi": {
+                    "type": "object",
+                    "properties": {
+                        "enforceHttpsInDidWebResolution": {
+                            "type": "boolean",
+                            "description": "Enable to use HTTPS in DID Web Resolution",
+                            "default": false
+                        },
+                        "vcExpiryDate": {
+                            "type": "string",
+                            "description": "Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year>",
+                            "default": ""
+                        }
+                    }
+                },
+                "authorityWallet": {
+                    "type": "object",
+                    "properties": {
+                        "bpn": {
+                            "type": "string",
+                            "description": "Authority Wallet BPN",
+                            "default": "BPNL000000000000"
+                        }
+                    }
+                },
+                "logging": {
+                    "type": "object",
+                    "properties": {
+                        "level": {
+                            "type": "string",
+                            "description": "Log level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE.",
+                            "default": "INFO"
+                        }
+                    }
+                },
+                "database": {
+                    "type": "object",
+                    "properties": {
+                        "useSSL": {
+                            "type": "boolean",
+                            "description": "Set to true to enable SSL connection to the database",
+                            "default": false
+                        },
+                        "port": {
+                            "type": "number",
+                            "description": "Database port",
+                            "default": 5432
+                        },
+                        "host": {
+                            "type": "string",
+                            "description": "Database host. Default: <release name>-postgresql",
+                            "default": "{{ .Release.Name }}-postgresql"
+                        },
+                        "user": {
+                            "type": "string",
+                            "description": "Database user",
+                            "default": "miw"
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Database name",
+                            "default": "miw_app"
+                        },
+                        "secret": {
+                            "type": "string",
+                            "description": "Existing secret name for the database password. Default: <release name>-postgresql",
+                            "default": "{{ .Release.Name }}-postgresql"
+                        },
+                        "secretPasswordKey": {
+                            "type": "string",
+                            "description": "Existing secret key for the database password",
+                            "default": "password"
+                        },
+                        "encryptionKey": {
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "string",
+                                    "description": "Database encryption key for confidential data.  Ignored if `secret` is set. If empty a secret with 32 random alphanumeric chars is generated.",
+                                    "default": ""
+                                },
+                                "secret": {
+                                    "type": "string",
+                                    "description": "Existing secret for database encryption key",
+                                    "default": ""
+                                },
+                                "secretKey": {
+                                    "type": "string",
+                                    "description": "Existing secret key for database encryption key",
+                                    "default": ""
+                                }
+                            }
+                        }
+                    }
+                },
+                "keycloak": {
+                    "type": "object",
+                    "properties": {
+                        "realm": {
+                            "type": "string",
+                            "description": "Keycloak realm",
+                            "default": "miw_test"
+                        },
+                        "clientId": {
+                            "type": "string",
+                            "description": "Keycloak client id",
+                            "default": "miw_private_client"
+                        },
+                        "url": {
+                            "type": "string",
+                            "description": "Keycloak URL. Default: http://<release name>-keycloak",
+                            "default": "http://{{ .Release.Name }}-keycloak"
+                        }
+                    }
+                }
+            }
+        },
+        "keycloak": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Enable to deploy Keycloak",
+                    "default": true
+                },
+                "jobs": {
+                    "type": "object",
+                    "properties": {
+                        "createDatabaseIfNotExists": {
+                            "type": "boolean",
+                            "description": "Enable to create keycloak database if not exists",
+                            "default": true
+                        }
+                    }
+                },
+                "extraEnvVars": {
+                    "type": "array",
+                    "description": "KEYCLOAK_HOSTNAME",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "KEYCLOAK_HOSTNAME"
+                            },
+                            "value": {
+                                "type": "string",
+                                "description": "{{ .Release.Name }}-keycloak"
+                            }
+                        }
+                    }
+                },
+                "postgresql": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable to deploy PostgreSQL",
+                            "default": false
+                        }
+                    }
+                },
+                "externalDatabase": {
+                    "type": "object",
+                    "properties": {
+                        "host": {
+                            "type": "string",
+                            "description": "Database host. Default: <release name>-postgresql",
+                            "default": "{{ .Release.Name }}-postgresql"
+                        },
+                        "port": {
+                            "type": "number",
+                            "description": "Database port",
+                            "default": 5432
+                        },
+                        "user": {
+                            "type": "string",
+                            "description": "Database user",
+                            "default": "miw"
+                        },
+                        "database": {
+                            "type": "string",
+                            "description": "Database name",
+                            "default": "miw_keycloak"
+                        },
+                        "existingSecret": {
+                            "type": "string",
+                            "description": "Existing secret name for the database password. Default: <release name>-postgresql",
+                            "default": "{{ .Release.Name }}-postgresql"
+                        },
+                        "existingSecretPasswordKey": {
+                            "type": "string",
+                            "description": "Existing secret key for the database password",
+                            "default": "password"
+                        }
+                    }
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "adminUser": {
+                            "type": "string",
+                            "description": "Keycloak admin user",
+                            "default": "admin"
+                        },
+                        "adminPassword": {
+                            "type": "string",
+                            "description": "Keycloak admin password",
+                            "default": ""
+                        }
+                    }
+                },
+                "keycloakConfigCli": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable to create the miw playground realm",
+                            "default": true
+                        },
+                        "existingConfigmap": {
+                            "type": "string",
+                            "description": "Existing configmap name for the realm configuration",
+                            "default": "keycloak-realm-config"
+                        },
+                        "backoffLimit": {
+                            "type": "number",
+                            "description": "Number of retries before considering a Job as failed",
+                            "default": 2
+                        }
+                    }
+                }
+            }
+        },
+        "postgresql": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Enable to deploy Postgresql",
+                    "default": true
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "enablePostgresUser": {
+                            "type": "boolean",
+                            "description": "Enable to create the postgresql admin user",
+                            "default": false
+                        },
+                        "username": {
+                            "type": "string",
+                            "description": "Postgresql user to create",
+                            "default": "miw"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "Postgresql password to set (if empty one is generated)",
+                            "default": ""
+                        }
+                    }
+                },
+                "backup": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable to create a backup cronjob",
+                            "default": false
+                        },
+                        "conjob": {
+                            "type": "object",
+                            "properties": {
+                                "schedule": {
+                                    "type": "string",
+                                    "description": "Backup schedule",
+                                    "default": "* */6 * * *"
+                                },
+                                "storage": {
+                                    "type": "object",
+                                    "properties": {
+                                        "existingClaim": {
+                                            "type": "string",
+                                            "description": "Name of an existing PVC to use",
+                                            "default": ""
+                                        },
+                                        "resourcePolicy": {
+                                            "type": "string",
+                                            "description": "Set resource policy to \"keep\" to avoid removing PVCs during a helm delete operation",
+                                            "default": "keep"
+                                        },
+                                        "size": {
+                                            "type": "string",
+                                            "description": "PVC Storage Request for the backup data volume",
+                                            "default": "8Gi"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

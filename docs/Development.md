@@ -1,5 +1,9 @@
 # Development Process
 
+## Summary
+
+[TBD]
+
 ## Branching
 
 The **Managed Identity Wallets** project adheres to
@@ -106,3 +110,43 @@ These are some commits with their corresponding semantic release types:
 | fix(typo): correct minor typos in code                                                              | Patch        |
 | feat: add new feature                                                                               | Minor        |
 | feat: add new feature that breaks backward compatibility<br/><br/>BREAKING CHANGE: \<description\> | Major        |
+
+
+# Helm
+
+## Generate Documentation
+
+To generate the helm documentation we use the [Readme Generator for Helm by Bitnami](https://github.com/bitnami-labs/readme-generator-for-helm).
+
+Installation
+```bash
+npm install -g @bitnami/readme-generator-for-helm
+```
+
+Install Helm-Schema Plugin [link](https://github.com/karuppiah7890/helm-schema-gen)
+```bash
+helm plugin install https://github.com/karuppiah7890/helm-schema-gen.git
+```
+
+Generate schema
+```bash
+helm schema-gen values.yaml > values.schema.json
+```
+
+Usage
+```bash
+Usage: readme-generator [options]
+
+Options:
+  -v, --values <path>  Path to the values.yaml file
+  -r, --readme <path>  Path to the README.md file
+  -c, --config <path>  Path to the config file
+  -s, --schema <path>  Path for the OpenAPI Schema output file
+  --version            Show Readme Generator version
+  -h, --help           display help for command
+```
+
+Generate README.md
+```bash
+readme-generator -v values.yaml -r README.md -s values.schema.json
+```

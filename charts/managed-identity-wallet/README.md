@@ -38,48 +38,117 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 ## Requirements
 
-| Repository | Name | Version |
-|------------|------|---------|
+| Repository                         | Name       | Version |
+|------------------------------------|------------|---------|
+| https://charts.bitnami.com/bitnami | common     | 2.x.x   |
+| https://charts.bitnami.com/bitnami | keycloak   | 15.1.6  |
 | https://charts.bitnami.com/bitnami | postgresql | 11.9.13 |
 
-## Values
+## Parameters
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| affinity | object | `{}` | Affinity configuration |
-| backup | object | `{"database":{"cron":"* */6 * * *","enabled":false,"storage":{"diskSize":"10G","keepStorage":true,"storageClassName":"-"}}}` | Simple Postgresql backup solution (Dump data to second PV) |
-| backup.database | object | `{"cron":"* */6 * * *","enabled":false,"storage":{"diskSize":"10G","keepStorage":true,"storageClassName":"-"}}` | Backup database |
-| backup.database.cron | string | `"* */6 * * *"` | Backup schedule (help: https://crontab.guru) |
-| backup.database.enabled | bool | `false` | Enable / Disable the backup |
-| backup.database.storage | object | `{"diskSize":"10G","keepStorage":true,"storageClassName":"-"}` | Storage configuration |
-| backup.database.storage.diskSize | string | `"10G"` | Disk size for backup content |
-| backup.database.storage.keepStorage | bool | `true` | Set to true, if the PV should stay even when the chart release is uninstalled |
-| backup.database.storage.storageClassName | string | `"-"` | storageClassName |
-| envs | object | `{}` | Parameters for the application (will be provided as plain environment variables) |
-| fullnameOverride | string | `""` |  |
-| image | object | `{"pullPolicy":"Always","repository":"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service","tag":""}` | Image of the main container |
-| image.pullPolicy | string | `"Always"` | PullPolicy |
-| image.repository | string | `"ghcr.io/catenax-ng/tx-managed-identity-wallets_miw_service"` | Image repository |
-| image.tag | string | `""` | Image tag (empty one will use "appVersion" value from chart definition) |
-| imagePullSecrets | list | `[{"name":"acr-credential"}]` | Credentials for a private repo |
-| ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration |
-| nameOverride | string | `""` |  |
-| nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
-| podAnnotations | object | `{}` | PodAnnotation configuration |
-| podSecurityContext | object | `{}` | PodSecurityContext |
-| replicaCount | int | `1` | The amount of replicas to run |
-| resources | object | `{"limits":{"cpu":4,"memory":"1Gi"},"requests":{"cpu":"250m","memory":"500Mi"}}` | Resource boundaries |
-| secrets | object | `{}` | Parameters for the application (will be stored as secrets - so, for passwords, ...) |
-| securityContext | object | `{"allowPrivilegeEscalation":false,"privileged":false,"runAsGroup":11111,"runAsNonRoot":true,"runAsUser":11111}` | Preconfigured SecurityContext |
-| service | object | `{"port":8080,"type":"ClusterIP"}` | Service configuration |
-| serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | ServiceAccount configuration |
-| tolerations | list | `[]` | Tolerations configuration |
+### MIW Common parameters
 
-## Maintainers
+| Name                         | Description                                                                                  | Value                              |
+| ---------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `replicaCount`               | The amount of replicas to run                                                                | `1`                                |
+| `nameOverride`               | String to partially override common.names.fullname template (will maintain the release name) | `""`                               |
+| `fullnameOverride`           | String to fully override common.names.fullname template                                      | `""`                               |
+| `image.repository`           | MIW image repository                                                                         | `tractusx/managed-identity-wallet` |
+| `image.pullPolicy`           | MIW image pull policy                                                                        | `Always`                           |
+| `image.tag`                  | MIW image tag (empty one will use "appVersion" value from chart definition)                  | `""`                               |
+| `secrets`                    | Parameters for the application (will be stored as secrets - so, for passwords, ...)          | `{}`                               |
+| `envs`                       | Parameters for the application (will be provided as environment variables)                   | `{}`                               |
+| `serviceAccount.create`      | Enable creation of ServiceAccount                                                            | `true`                             |
+| `serviceAccount.annotations` | Annotations to add to the ServiceAccount                                                     | `{}`                               |
+| `serviceAccount.name`        | The name of the ServiceAccount to use.                                                       | `""`                               |
 
-| Name | Email | Url |
-| ---- | ------ | --- |
-| Peter Motzko | <peter.motzko@volkswagen.de> | <https://github.com/pmoscode> |
+### Managed Identity Wallet Common Parameters
 
-----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
+| Name                                       | Description                                                                                                                       | Value       |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `service.type`                             | Kubernetes Service type                                                                                                           | `ClusterIP` |
+| `service.port`                             | Kubernetes Service port                                                                                                           | `8080`      |
+| `ingress.enabled`                          | Enable ingress controller resource                                                                                                | `false`     |
+| `ingress.annotations`                      | Ingress annotations                                                                                                               | `{}`        |
+| `ingress.hosts`                            | Ingress accepted hostnames                                                                                                        | `[]`        |
+| `ingress.tls`                              | Ingress TLS configuration                                                                                                         | `[]`        |
+| `podSecurityContext`                       | Pod Security Context                                                                                                              | `{}`        |
+| `jobSecurityContext.runAsUser`             | User ID used to run the job                                                                                                       | `1001`      |
+| `jobSecurityContext.runAsGroup`            | Group ID used to run the job                                                                                                      | `0`         |
+| `jobSecurityContext.runAsNonRoot`          | Run the job as a non-root user                                                                                                    | `true`      |
+| `securityContext.privileged`               | Enable privileged container                                                                                                       | `false`     |
+| `securityContext.allowPrivilegeEscalation` | Allow privilege escalation                                                                                                        | `false`     |
+| `securityContext.runAsUser`                | User ID used to run the container                                                                                                 | `1001`      |
+| `securityContext.runAsGroup`               | Group ID used to run the container                                                                                                | `0`         |
+| `securityContext.runAsNonRoot`             | Run the container as a non-root user                                                                                              | `true`      |
+| `resources.requests.cpu`                   | CPU resource requests                                                                                                             | `250m`      |
+| `resources.requests.memory`                | Memory resource requests                                                                                                          | `500Mi`     |
+| `resources.limits.cpu`                     | CPU resource limits                                                                                                               | `2`         |
+| `resources.limits.memory`                  | Memory resource limits                                                                                                            | `1Gi`       |
+| `nodeSelector`                             | [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) to constrain pods to nodes | `{}`        |
+| `tolerations`                              | Tolerations for pod assignment                                                                                                    | `[]`        |
+| `affinity`                                 | Affinity for pod assignment                                                                                                       | `{}`        |
+| `podAnnotations`                           | Pod annotations                                                                                                                   | `{}`        |
+
+### Managed Identity Wallets Primary Parameters
+
+| Name                                     | Description                                                                                                                                   | Value                                              |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `miw.host`                               | Host name. Default: <release name>-managed-identity-wallet:<port>                                                                             | `{{ .Release.Name }}-managed-identity-wallet:8080` |
+| `miw.environment`                        | Runtime environment. Should be ether local, dev, int or prod                                                                                  | `dev`                                              |
+| `miw.jobs.createDatabaseIfNotExists`     | Enable to create the database if it does not exist                                                                                            | `true`                                             |
+| `miw.ssi.enforceHttpsInDidWebResolution` | Enable to use HTTPS in DID Web Resolution                                                                                                     | `false`                                            |
+| `miw.ssi.vcExpiryDate`                   | Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year>                                            | `""`                                               |
+| `miw.authorityWallet.bpn`                | Authority Wallet BPN                                                                                                                          | `BPNL000000000000`                                 |
+| `miw.logging.level`                      | Log level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE.                                                                                | `INFO`                                             |
+| `miw.database.useSSL`                    | Set to true to enable SSL connection to the database                                                                                          | `false`                                            |
+| `miw.database.port`                      | Database port                                                                                                                                 | `5432`                                             |
+| `miw.database.host`                      | Database host. Default: <release name>-postgresql                                                                                             | `{{ .Release.Name }}-postgresql`                   |
+| `miw.database.user`                      | Database user                                                                                                                                 | `miw`                                              |
+| `miw.database.name`                      | Database name                                                                                                                                 | `miw_app`                                          |
+| `miw.database.secret`                    | Existing secret name for the database password. Default: <release name>-postgresql                                                            | `{{ .Release.Name }}-postgresql`                   |
+| `miw.database.secretPasswordKey`         | Existing secret key for the database password                                                                                                 | `password`                                         |
+| `miw.database.encryptionKey.value`       | Database encryption key for confidential data.  Ignored if `secret` is set. If empty a secret with 32 random alphanumeric chars is generated. | `""`                                               |
+| `miw.database.encryptionKey.secret`      | Existing secret for database encryption key                                                                                                   | `""`                                               |
+| `miw.database.encryptionKey.secretKey`   | Existing secret key for database encryption key                                                                                               | `""`                                               |
+| `miw.keycloak.realm`                     | Keycloak realm                                                                                                                                | `miw_test`                                         |
+| `miw.keycloak.clientId`                  | Keycloak client id                                                                                                                            | `miw_private_client`                               |
+| `miw.keycloak.url`                       | Keycloak URL. Default: http://<release name>-keycloak                                                                                         | `http://{{ .Release.Name }}-keycloak`              |
+
+### Keycloak Parameters (for more parameters see https://github.com/bitnami/charts/tree/main/bitnami/keycloak)
+
+| Name                                                  | Description                                                                        | Value                            |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------- |
+| `keycloak.enabled`                                    | Enable to deploy Keycloak                                                          | `true`                           |
+| `keycloak.jobs.createDatabaseIfNotExists`             | Enable to create keycloak database if not exists                                   | `true`                           |
+| `keycloak.extraEnvVars[0].name`                       | KEYCLOAK_HOSTNAME                                                                  | `KEYCLOAK_HOSTNAME`              |
+| `keycloak.extraEnvVars[0].value`                      | {{ .Release.Name }}-keycloak                                                       | `{{ .Release.Name }}-keycloak`   |
+| `keycloak.postgresql.enabled`                         | Enable to deploy PostgreSQL                                                        | `false`                          |
+| `keycloak.externalDatabase.host`                      | Database host. Default: <release name>-postgresql                                  | `{{ .Release.Name }}-postgresql` |
+| `keycloak.externalDatabase.port`                      | Database port                                                                      | `5432`                           |
+| `keycloak.externalDatabase.user`                      | Database user                                                                      | `miw`                            |
+| `keycloak.externalDatabase.database`                  | Database name                                                                      | `miw_keycloak`                   |
+| `keycloak.externalDatabase.existingSecret`            | Existing secret name for the database password. Default: <release name>-postgresql | `{{ .Release.Name }}-postgresql` |
+| `keycloak.externalDatabase.existingSecretPasswordKey` | Existing secret key for the database password                                      | `password`                       |
+| `keycloak.auth.adminUser`                             | Keycloak admin user                                                                | `admin`                          |
+| `keycloak.auth.adminPassword`                         | Keycloak admin password                                                            | `""`                             |
+| `keycloak.keycloakConfigCli.enabled`                  | Enable to create the miw playground realm                                          | `true`                           |
+| `keycloak.keycloakConfigCli.existingConfigmap`        | Existing configmap name for the realm configuration                                | `keycloak-realm-config`          |
+| `keycloak.keycloakConfigCli.backoffLimit`             | Number of retries before considering a Job as failed                               | `2`                              |
+
+### Postgresql Parameters (for more parameters see https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+
+| Name                                              | Description                                                                         | Value         |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------- |
+| `postgresql.enabled`                              | Enable to deploy Postgresql                                                         | `true`        |
+| `postgresql.auth.enablePostgresUser`              | Enable to create the postgresql admin user                                          | `false`       |
+| `postgresql.auth.username`                        | Postgresql user to create                                                           | `miw`         |
+| `postgresql.auth.password`                        | Postgresql password to set (if empty one is generated)                              | `""`          |
+| `postgresql.backup.enabled`                       | Enable to create a backup cronjob                                                   | `false`       |
+| `postgresql.backup.conjob.schedule`               | Backup schedule                                                                     | `* */6 * * *` |
+| `postgresql.backup.conjob.storage.existingClaim`  | Name of an existing PVC to use                                                      | `""`          |
+| `postgresql.backup.conjob.storage.resourcePolicy` | Set resource policy to "keep" to avoid removing PVCs during a helm delete operation | `keep`        |
+| `postgresql.backup.conjob.storage.size`           | PVC Storage Request for the backup data volume                                      | `8Gi`         |
+
+
+## Bar
