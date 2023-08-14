@@ -105,48 +105,35 @@ a repository.
 
 These are some commits with their corresponding semantic release types:
 
-| Commit Message                                                                                      | Release Type |
-|:----------------------------------------------------------------------------------------------------|:-------------|
-| fix(typo): correct minor typos in code                                                              | Patch        |
-| feat: add new feature                                                                               | Minor        |
+| Commit Message                                                                                     | Release Type |
+|:---------------------------------------------------------------------------------------------------|:-------------|
+| fix(typo): correct minor typos in code                                                             | Patch        |
+| feat: add new feature                                                                              | Minor        |
 | feat: add new feature that breaks backward compatibility<br/><br/>BREAKING CHANGE: \<description\> | Major        |
-
 
 # Helm
 
-## Generate Documentation
+## Documentation
 
-To generate the helm documentation we use the [Readme Generator for Helm by Bitnami](https://github.com/bitnami-labs/readme-generator-for-helm).
+For helm chart documentation we use
+the [Helm-Docs by Norwoodj](https://github.com/norwoodj/helm-docs).
 
-Installation
+### Installation
+
+Homebrew
 ```bash
-npm install -g @bitnami/readme-generator-for-helm
+brew install norwoodj/tap/helm-docs
 ```
 
-Install Helm-Schema Plugin [link](https://github.com/karuppiah7890/helm-schema-gen)
+Scoop
 ```bash
-helm plugin install https://github.com/karuppiah7890/helm-schema-gen.git
+scoop install helm-docs
 ```
 
-Generate schema
-```bash
-helm schema-gen values.yaml > values.schema.json
+### Generate Documentation
+
 ```
-
-Usage
-```bash
-Usage: readme-generator [options]
-
-Options:
-  -v, --values <path>  Path to the values.yaml file
-  -r, --readme <path>  Path to the README.md file
-  -c, --config <path>  Path to the config file
-  -s, --schema <path>  Path for the OpenAPI Schema output file
-  --version            Show Readme Generator version
-  -h, --help           display help for command
-```
-
-Generate README.md
-```bash
-readme-generator -v values.yaml -r README.md -s values.schema.json
+helm-docs
+# OR
+helm-docs --dry-run # prints generated documentation to stdout rather than modifying READMEs
 ```

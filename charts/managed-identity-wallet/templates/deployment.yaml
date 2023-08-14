@@ -51,6 +51,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            # TODO Move ENVS into configmap
             - name: APP_LOG_LEVEL
               value: {{ .Values.miw.logging.level }}
             - name: MIW_HOST_NAME
@@ -129,7 +130,7 @@ spec:
             periodSeconds: 5
             successThreshold: 1
             timeoutSeconds: 5
-            initialDelaySeconds: 60
+            initialDelaySeconds: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
