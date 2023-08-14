@@ -41,13 +41,13 @@ tests:
             app.kubernetes.io/version: "9.9.9"
             app.kubernetes.io/managed-by: Helm
 
-  - it: must have type set to ClusterIP
+  - it: should have type set to ClusterIP
     asserts:
       - equal:
           path: spec.type
           value: ClusterIP
 
-  - it: must have ports set
+  - it: should have ports set
     asserts:
       - contains:
           path: spec.ports

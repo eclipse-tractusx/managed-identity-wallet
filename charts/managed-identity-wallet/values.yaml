@@ -27,36 +27,49 @@ image:
   # -- PullPolicy
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
-  tag: "" 
+  tag: ""
+
+# -- Credentials name for private repos
+imagePullSecrets: []
 
 nameOverride: ""
 fullnameOverride: ""
 
-# -- Parameters for the application (will be stored as secrets - so, for passwords, ...)
-secrets: {}
-#  DB_USER_NAME: xxx # Has to be the same as below in "postgresql" section
-#  DB_PASSWORD: xxx # Has to be the same as below in "postgresql" section
-#  KEYCLOAK_CLIENT_ID: xxx
-#  ENCRYPTION_KEY: xxx  # 64 chars
+# -- Parameters for the application (will be stored in a secret and attached to the container)
+secrets:
+  # -- Keycloak confidential client id for MIW application
+  KEYCLOAK_CLIENT_ID: ""
+  # -- AES encryption key used to encrypt/decrypt private keys (random 32 chars - ex.: openssl rand -hex 32)
+  ENCRYPTION_KEY: ""
 
 # -- Parameters for the application (will be provided as plain environment variables)
-envs: {}
-#  APPLICATION_ENVIRONMENT: xxx
-#  DB_HOST: auto
-#  DB_PORT: xxx
-#  DB_NAME: xxx  # set it also in the init script in the postgres initdb section below!!
-#  USE_SSL: xxx
-#  DB_POOL_SIZE: xxx
-#  KEYCLOAK_MIW_PUBLIC_CLIENT: xxx
-#  MANAGEMENT_PORT: xxx
-#  MIW_HOST_NAME: xxx
-#  AUTHORITY_WALLET_BPN: xxx
-#  AUTHORITY_WALLET_NAME: xxx
-#  AUTHORITY_WALLET_DID: xxx
-#  VC_SCHEMA_LINK: xxx
-#  VC_EXPIRY_DATE: xxx
-#  KEYCLOAK_REALM: xxx
-#  AUTH_SERVER_URL: xxx
+envs:
+  # -- Application environments like dev, int, prod
+  APPLICATION_ENVIRONMENT: "dev"
+  # -- Whether database connection with SSL, true if the database connection is done using SSL
+  USE_SSL: "false"
+  # -- Initial database connection pool size
+  DB_POOL_SIZE: ""
+  # -- Keycloak public client id, used only if we want to enable login in swagger using keycloak
+  KEYCLOAK_MIW_PUBLIC_CLIENT: ""
+  # -- Spring actuator port
+  MANAGEMENT_PORT:
+  # -- Hostname of miw application
+  MIW_HOST_NAME: "localhost"
+  # -- Authority/base wallet/root wallet BPN
+  AUTHORITY_WALLET_BPN: ""
+  # -- Authority/base wallet/root wallet name
+  AUTHORITY_WALLET_NAME: ""
+  # -- Authority/base wallet/root wallet web did
+  AUTHORITY_WALLET_DID: ""
+  # -- Verifiable credential schema URL, which will be part of @context in VC
+  VC_SCHEMA_LINK: ""
+  # -- Default expiry date of issued VC
+  VC_EXPIRY_DATE: ""
+  # -- Keycloak realm name
+  KEYCLOAK_REALM: ""
+  # -- Keycloak server url
+  AUTH_SERVER_URL: ""
 
 # -- ServiceAccount configuration
 serviceAccount:
@@ -133,17 +146,35 @@ backup:
       # -- storageClassName
       storageClassName: "-"
 
-# @ignored
+# -- Configuration of the Postgresql database (internal and external)
 postgresql:
-  primary:
-    initdb:
-      scripts:
-        init_db_script.sh: |
-          #!/bin/sh
-          createdb -O postgres miw
-      user: postgres
-      password: postgres
+  # -- Configure bundled postgresql
+  internal:
+    # -- Enable bundled database
+    enabled: true
+  # -- Configure own postgresql database
+  external:
+    # -- General config
+    config:
+      # -- Instance host or IP
+      host: ""
+      # -- Instance port
+      port: 5432
+      # -- Existing database to use
+      database: ""
+    auth:
+      # -- DB username
+      username: ""
+      # -- DB password
+      password: ""
+      # -- Existing secret with provided password
+      existingSecret: ""
+      # -- Key name of password in secret
+      existingSecretKey: password
+
+  # -- Default settings for the primary database and user
   auth:
-    password: postgres
-    username: postgres
-    postgresPassword: postgres
+    # -- username for MIW database
+    username: miw
+    # -- MIW database name
+    database: miw
