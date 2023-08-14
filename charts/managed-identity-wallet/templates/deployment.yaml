@@ -89,7 +89,7 @@ spec:
           {{- range $key, $val := .Values.envs }}
             {{- if $val }}
             - name: {{ $key }}
-              value: {{ $val }}
+              value: {{ $val | quote }}
             {{- end }}
           {{- end }}
           {{- range $key, $val := .Values.secrets }}

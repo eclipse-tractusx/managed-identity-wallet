@@ -47,22 +47,22 @@ tests:
             - name: APPLICATION_PORT
               value: "8080"
             - name: DB_HOST
-              value: RELEASE-NAME-postgresql
+              value: "RELEASE-NAME-postgresql"
             - name: DB_USER_NAME
-              value: miw
+              value: "miw"
             - name: DB_NAME
-              value: miw
+              value: "miw"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: password
                   name: RELEASE-NAME-postgresql
             - name: APPLICATION_ENVIRONMENT
-              value: dev
+              value: "dev"
             - name: MIW_HOST_NAME
-              value: localhost
+              value: "localhost"
             - name: USE_SSL
-              value: false
+              value: "false"
             - name: ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
