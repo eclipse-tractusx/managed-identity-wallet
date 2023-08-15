@@ -83,6 +83,11 @@ jobs:
       - name: Set up Taskfile
         uses: arduino/setup-task@v1
 
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '17'
+
       - name: Add bitnami repo
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami 
