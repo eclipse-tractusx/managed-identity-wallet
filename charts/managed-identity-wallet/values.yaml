@@ -184,6 +184,10 @@ keycloak:
     auth:
       # -- Keycloak PostgreSQL user
       username: "miw_keycloak"
+      # -- KeycloakPostgresql password to set (if empty one is generated)
+      password: ""
+      # -- Database name
+      database: "miw_keycloak"
   auth:
     # -- Keycloak admin user
     adminUser: "admin"
@@ -208,6 +212,8 @@ postgresql:
     username: "miw"
     # -- Postgresql password to set (if empty one is generated)
     password: ""
+    # -- Postgresql database to create
+    database: "miw_app"
   backup:
     # -- Enable to create a backup cronjob
     enabled: false

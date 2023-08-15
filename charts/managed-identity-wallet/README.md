@@ -108,6 +108,8 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | keycloak.keycloakConfigCli.backoffLimit | int | `2` | Number of retries before considering a Job as failed |
 | keycloak.keycloakConfigCli.enabled | bool | `true` | Enable to create the miw playground realm |
 | keycloak.keycloakConfigCli.existingConfigmap | string | `"keycloak-realm-config"` | Existing configmap name for the realm configuration |
+| keycloak.postgresql.auth.database | string | `"miw_keycloak"` | Database name |
+| keycloak.postgresql.auth.password | string | `""` | KeycloakPostgresql password to set (if empty one is generated) |
 | keycloak.postgresql.auth.username | string | `"miw_keycloak"` | Keycloak PostgreSQL user |
 | keycloak.postgresql.enabled | bool | `true` | Enable to deploy PostgreSQL |
 | keycloak.postgresql.nameOverride | string | `"keycloak-postgresql"` | Name of the PostgreSQL chart to deploy. Mandatory when the MIW deploys a PostgreSQL chart, too. |
@@ -134,6 +136,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | nodeSelector | object | `{}` | [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) to constrain pods to nodes |
 | podAnnotations | object | `{}` | Pod annotations |
 | podSecurityContext | object | `{}` | Pod Security Context |
+| postgresql.auth.database | string | `"miw_app"` | Postgresql database to create |
 | postgresql.auth.enablePostgresUser | bool | `false` | Enable postgresql admin user |
 | postgresql.auth.password | string | `""` | Postgresql password to set (if empty one is generated) |
 | postgresql.auth.username | string | `"miw"` | Postgresql user to create |
@@ -198,10 +201,9 @@ The following two secrets are required to deploy the MIW in a production environ
 
 - Database Password
 - Database Encryption Key
+The **Database Password Secret** stores the password associated with the PostgreSQL database user.
 
-The **Database Password Secret** contains the password for the PostgreSQL database user.
-
-The **Database Encryption Key Secret** contains the encryption key for confidential data the PostgreSQL database (for example private key of wallets).
+Meanwhile, the **Database Encryption Key Secret** holds the encryption key for safeguarding confidential data within the PostgreSQL database. This could include sensitive information such as private keys for wallets.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
