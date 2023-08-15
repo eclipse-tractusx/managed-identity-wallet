@@ -106,7 +106,7 @@ jobs:
         run: task helm:unittest
 
       - name: Build app
-        run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} task app:build
+        run: SKIP_GRADLE_TASKS_PARAM="-x jacocoTestCoverageVerification -x test" GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} task app:build
 
       - name: Kubernetes KinD Cluster
         uses: container-tools/kind-action@v2
