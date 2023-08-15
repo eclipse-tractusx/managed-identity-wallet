@@ -122,4 +122,4 @@ jobs:
           tags: kind-registry:5000/miw:testing
 
       - name: Install the chart on KinD cluster
-        run: helm install --set image.tag=testing --set=image.repository=kind-registry:5000/miw testing charts/managed-identity-wallet
+        run: helm install --wait --set image.tag=testing --set=image.repository=kind-registry:5000/miw testing charts/managed-identity-wallet
