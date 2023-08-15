@@ -46,6 +46,11 @@ jobs:
         with:
           version: v3.12.3
 
+      - name: Add bitnami repo
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami 
+          helm repo update
+
       - name: Update Helm dependencies
         run: |
           cd charts/managed-identity-wallet
@@ -74,6 +79,11 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: v3.12.3
+
+      - name: Add bitnami repo
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami 
+          helm repo update
 
       - name: Update Helm dependencies
         run: |
