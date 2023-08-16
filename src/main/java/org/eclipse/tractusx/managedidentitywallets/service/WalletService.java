@@ -76,6 +76,10 @@ import java.util.Map;
 public class WalletService extends BaseService<Wallet, Long> {
 
 
+    /**
+     * The constant BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN.
+     */
+    public static final String BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN = "Base wallet BPN is not matching with request BPN(from token)";
     private final WalletRepository walletRepository;
 
     private final MIWSettings miwSettings;
@@ -195,8 +199,8 @@ public class WalletService extends BaseService<Wallet, Long> {
      */
     @SneakyThrows
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public Wallet createWallet(CreateWalletRequest request) {
-        return createWallet(request, false);
+    public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
+        return createWallet(request, false,callerBpn);
     }
 
     /**
@@ -206,8 +210,8 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the wallet
      */
     @SneakyThrows
-    private Wallet createWallet(CreateWalletRequest request, boolean authority) {
-        validateCreateWallet(request);
+    private Wallet createWallet(CreateWalletRequest request, boolean authority, String callerBpn) {
+        validateCreateWallet(request,callerBpn);
 
         //create private key pair
         IKeyGenerator keyGenerator = new x21559Generator();
@@ -275,19 +279,22 @@ public class WalletService extends BaseService<Wallet, Long> {
                     .name(miwSettings.authorityWalletName())
                     .bpn(miwSettings.authorityWalletBpn())
                     .build();
-            createWallet(request, true);
+            createWallet(request, true,miwSettings.authorityWalletBpn());
             log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
         } else {
             log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
         }
     }
 
-    private void validateCreateWallet(CreateWalletRequest request) {
+    private void validateCreateWallet(CreateWalletRequest request,String callerBpn) {
+        // check base wallet
+        Validate.isFalse(callerBpn.equalsIgnoreCase(miwSettings.authorityWalletBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
+
+        // check wallet already exists
         boolean exist = walletRepository.existsByBpn(request.getBpn());
         if (exist) {
             throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBpn());
         }
-
     }
     @SneakyThrows
     private String getPrivateKeyString(byte[] privateKeyBytes) {

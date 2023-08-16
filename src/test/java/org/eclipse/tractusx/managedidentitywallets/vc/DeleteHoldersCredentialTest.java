@@ -82,7 +82,7 @@ class DeleteHoldersCredentialTest {
         final CreateWalletRequest createWalletRequest = new CreateWalletRequest();
         createWalletRequest.setBpn(tenantBpn);
         createWalletRequest.setName("My Test Tenant Wallet");
-        final Wallet tenantWallet = walletService.createWallet(createWalletRequest);
+        final Wallet tenantWallet = walletService.createWallet(createWalletRequest,bpnOperator);
         tenantDid = DidParser.parse(tenantWallet.getDid());
     }
 

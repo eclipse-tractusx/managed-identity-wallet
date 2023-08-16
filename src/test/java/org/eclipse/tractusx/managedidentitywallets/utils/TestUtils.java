@@ -56,8 +56,8 @@ import java.util.Map;
 
 public class TestUtils {
 
-    public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate) {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+    public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate,String baseBPN) {
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseBPN);
 
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
 
