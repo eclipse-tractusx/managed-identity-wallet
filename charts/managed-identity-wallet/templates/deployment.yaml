@@ -63,6 +63,8 @@ spec:
                   key: {{ default .Values.miw.database.encryptionKey.secretKey "encryption-key" }}
             - name: AUTHORITY_WALLET_BPN
               value: {{ tpl  .Values.miw.authorityWallet.bpn . }}
+            - name: AUTHORITY_WALLET_NAME
+              value: {{ default (tpl  .Values.miw.authorityWallet.name . ) "" }}
             - name: AUTHORITY_WALLET_DID
               value: {{ printf "did:web:%s:%s" ( tpl .Values.miw.host . | replace ":" "%3A" | replace "/" ":") .Values.miw.authorityWallet.bpn }}
             - name: ENFORCE_HTTPS_IN_DID_RESOLUTION

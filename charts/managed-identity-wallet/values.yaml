@@ -123,6 +123,8 @@ miw:
     # -- Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year>
     vcExpiryDate: ""
   authorityWallet:
+    # -- Authority Wallet Name
+    name: ""
     # -- Authority Wallet BPNL
     bpn: "BPNL000000000000"
   logging:

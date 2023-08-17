@@ -40,7 +40,7 @@ tests:
           path: spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.template.spec.containers[0].env
-          count: 19 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
+          count: 20 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
       - equal:
           path: spec.template.spec.containers[0].env
           value:
@@ -52,9 +52,11 @@ tests:
               valueFrom:
                 secretKeyRef:
                   key: encryption-key
-                  name: RELEASE-NAME-managed-identity-wallet
+                  name: RELEASE-NAME-managed-identity-wallet-encryption-key
             - name: AUTHORITY_WALLET_BPN
               value: BPNL000000000000
+            - name: AUTHORITY_WALLET_NAME
+              value: null
             - name: AUTHORITY_WALLET_DID
               value: did:web:RELEASE-NAME-managed-identity-wallet%3A8080:BPNL000000000000
             - name: ENFORCE_HTTPS_IN_DID_RESOLUTION
@@ -86,4 +88,9 @@ tests:
               value: "8080"
             - name: VC_EXPIRY_DATE
               value: 31-12-2023
+            - name: encryption-key
+              valueFrom:
+                secretKeyRef:
+                  key: encryption-key
+                  name: RELEASE-NAME-managed-identity-wallet
 
