@@ -121,6 +121,20 @@ class WalletTest {
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
+    @Test
+    void createWalletTestWithUserToken403() {
+        String bpn = UUID.randomUUID().toString();
+        String name = "Sample Wallet";
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+
+        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+
+        HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<Wallet> response = restTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, Wallet.class);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    }
+
 
     @Test
     void createWalletTest201() throws JsonProcessingException, JSONException {
