@@ -20,6 +20,10 @@
 image:
   tag: "latest"
 
+secrets:
+  # generate custom secret
+  encryption-key: "foo"
+
 ingress:
   enabled: true
   annotations:

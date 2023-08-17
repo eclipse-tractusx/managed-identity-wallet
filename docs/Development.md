@@ -113,6 +113,23 @@ These are some commits with their corresponding semantic release types:
 
 # Helm
 
+## Unit Test
+
+This repository uses [Helm Unit Test](https://github.com/helm-unittest/helm-unittest) to test the Helm charts.
+
+### Installation
+
+```bash
+$ helm plugin install https://github.com/helm-unittest/helm-unittest.git
+```
+
+### Run Tests
+
+```bash
+$ helm unittest <chart-name>
+```
+
+
 ## Documentation
 
 For helm chart documentation we use

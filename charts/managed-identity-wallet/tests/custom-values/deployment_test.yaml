@@ -40,36 +40,50 @@ tests:
           path: spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.template.spec.containers[0].env
-          count: 10 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
+          count: 18 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
       - equal:
           path: spec.template.spec.containers[0].env
           value:
-            - name: APPLICATION_PORT
-              value: "8080"
+            - name: APP_LOG_LEVEL
+              value: INFO
+            - name: MIW_HOST_NAME
+              value: RELEASE-NAME-managed-identity-wallet:8080
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: encryption-key
+                  name: RELEASE-NAME-managed-identity-wallet-encryption-key
+            - name: AUTHORITY_WALLET_BPN
+              value: BPNL000000000000
+            - name: AUTHORITY_WALLET_DID
+              value: did:web:RELEASE-NAME-managed-identity-wallet%3A8080:BPNL000000000000
+            - name: ENFORCE_HTTPS_IN_DID_RESOLUTION
+              value: "false"
+            - name: APPLICATION_ENVIRONMENT
+              value: dev
+            - name: KEYCLOAK_REALM
+              value: miw_test
+            - name: KEYCLOAK_CLIENT_ID
+              value: miw_private_client
+            - name: AUTH_SERVER_URL
+              value: http://RELEASE-NAME-keycloak
+            - name: USE_SSL
+              value: "false"
             - name: DB_HOST
-              value: "RELEASE-NAME-postgresql"
-            - name: DB_USER_NAME
-              value: "miw"
+              value: RELEASE-NAME-postgresql
+            - name: DB_PORT
+              value: "5432"
             - name: DB_NAME
-              value: "miw"
+              value: miw_app
+            - name: DB_USER_NAME
+              value: miw
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: password
                   name: RELEASE-NAME-postgresql
-            - name: APPLICATION_ENVIRONMENT
-              value: "dev"
-            - name: MIW_HOST_NAME
-              value: "localhost"
-            - name: USE_SSL
-              value: "false"
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: ENCRYPTION_KEY
-                  name: RELEASE-NAME-managed-identity-wallet
-            - name: KEYCLOAK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  key: KEYCLOAK_CLIENT_ID
-                  name: RELEASE-NAME-managed-identity-wallet
+            - name: APPLICATION_PORT
+              value: "8080"
+            - name: VC_EXPIRY_DATE
+              value: 31-12-2023
+
