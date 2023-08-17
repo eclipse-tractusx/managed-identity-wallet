@@ -96,9 +96,10 @@ class MembershipHoldersCredentialTest {
     void testIssueSummeryVCAfterDeleteSummaryVCFromHolderWallet() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
+        String baseBpn = miwSettings.authorityWalletBpn();
 
         // create wallet, in background bpn and summary credential generated
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn).getBody());
 
         List<HoldersCredential> byHolderDid = holdersCredentialRepository.getByHolderDid(did);
 
@@ -124,9 +125,10 @@ class MembershipHoldersCredentialTest {
     void testStoredSummaryVCTest() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
+        String baseBpn = miwSettings.authorityWalletBpn();
 
         // create wallet, in background bpn and summary credential generated
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn).getBody());
 
 
         String vc = """
@@ -185,10 +187,10 @@ class MembershipHoldersCredentialTest {
     @Test
     void issueMembershipCredentialToBaseWalletTest400() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
-        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
+        String baseBpn = miwSettings.authorityWalletBpn();
 
         // create wallet, in background bpn and summary credential generated
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn).getBody());
 
         //add 2 subject in VC for testing
         List<IssuersCredential> vcs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
@@ -278,9 +280,10 @@ class MembershipHoldersCredentialTest {
     void issueMembershipCredentialTest201() throws JsonProcessingException, JSONException {
 
         String bpn = UUID.randomUUID().toString();
+        String baseBpn = miwSettings.authorityWalletBpn();
 
         //create wallet
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn).getBody());
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());

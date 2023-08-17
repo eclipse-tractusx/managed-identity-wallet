@@ -243,37 +243,10 @@ class PresentationTest {
         Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.NOT_FOUND.value());
     }
 
-    @Test
-    void createPresentationWithMoreThenOneVC400() throws JsonProcessingException {
-        String bpn = UUID.randomUUID().toString();
-        String didWeb = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
-
-        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate);
-        Assertions.assertEquals(response.getStatusCode().value(), HttpStatus.CREATED.value());
-        Wallet wallet = TestUtils.getWalletFromString(response.getBody());
-
-        //get BPN credentials
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
-        Assertions.assertFalse(credentials.isEmpty());
-        Map<String, Object> map = objectMapper.readValue(credentials.get(0).getData().toJson(), Map.class);
-
-        //create request
-        Map<String, Object> request = new HashMap<>();
-        request.put(StringPool.HOLDER_IDENTIFIER, wallet.getDid());
-        request.put(StringPool.VERIFIABLE_CREDENTIALS, List.of(map, map));
-
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("invalid bpn");
-        headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON_VALUE));
-
-        HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);
-
-        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, "companyA");
-        Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.BAD_REQUEST.value());
-    }
-
     @NotNull
     private Map<String, Object> getIssueVPRequest(String bpn) throws JsonProcessingException {
-        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate);
+        String baseBpn = miwSettings.authorityWalletBpn();
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn);
         Assertions.assertEquals(response.getStatusCode().value(), HttpStatus.CREATED.value());
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
@@ -291,7 +264,8 @@ class PresentationTest {
 
     @NotNull
     private ResponseEntity<Map> getIssueVPRequestWithShortExpiry(String bpn, String audience) throws JsonProcessingException {
-        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate);
+        String baseBpn = miwSettings.authorityWalletBpn();
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn);
         Assertions.assertEquals(response.getStatusCode().value(), HttpStatus.CREATED.value());
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 

@@ -187,7 +187,8 @@ class FrameworkHoldersCredentialTest {
 
     private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException {
         //create wallet
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate).getBody());
+        String baseBpn = miwSettings.authorityWalletBpn();
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn).getBody());
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
