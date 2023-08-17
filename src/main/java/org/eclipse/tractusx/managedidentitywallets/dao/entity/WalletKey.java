@@ -56,4 +56,6 @@ public class WalletKey extends MIWBaseEntity {
 
     @Column(nullable = false)
     private String publicKey;
+
+    private String keyId;
 }
