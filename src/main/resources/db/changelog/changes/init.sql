@@ -75,3 +75,6 @@ CREATE TABLE IF NOT EXISTS public.holders_credential
 COMMENT ON TABLE public.holders_credential IS 'This table will store holders credentials';
 
 COMMENT ON COLUMN public.holders_credential.is_stored IS 'true is VC is stored using store VC api(Not issued by MIW)';
+
+--changeset nitin:2
+ALTER TABLE public.wallet_key ADD key_id varchar(255) NULL;
