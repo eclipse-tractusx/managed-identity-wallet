@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
@@ -87,19 +87,16 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` | Affinity for pod assignment |
+| affinity | object | `{}` | Affinity configuration |
 | envs | object | `{}` | envs Parameters for the application (will be provided as environment variables) |
 | fullnameOverride | string | `""` | String to fully override common.names.fullname template |
-| image.pullPolicy | string | `"Always"` | MIW image pull policy |
-| image.repository | string | `"tractusx/managed-identity-wallet"` | MIW image repository |
-| image.tag | string | `""` | image tag (empty one will use "appVersion" value from chart definition) |
+| image.pullPolicy | string | `"Always"` | PullPolicy |
+| image.repository | string | `"tractusx/managed-identity-wallet"` | Image repository |
+| image.tag | string | `""` | Image tag (empty one will use "appVersion" value from chart definition) |
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.enabled | bool | `false` | Enable ingress controller resource |
 | ingress.hosts | list | `[]` | Ingress accepted hostnames |
 | ingress.tls | list | `[]` | Ingress TLS configuration |
-| jobSecurityContext.runAsGroup | int | `0` | Group ID used to run the job |
-| jobSecurityContext.runAsNonRoot | bool | `true` | Enable to run the job as a non-root user |
-| jobSecurityContext.runAsUser | int | `1001` | User ID used to run the job |
 | keycloak.auth.adminPassword | string | `""` | Keycloak admin password |
 | keycloak.auth.adminUser | string | `"admin"` | Keycloak admin user |
 | keycloak.enabled | bool | `true` | Enable to deploy Keycloak |
@@ -133,9 +130,9 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | miw.ssi.enforceHttpsInDidWebResolution | bool | `false` | Enable to use HTTPS in DID Web Resolution |
 | miw.ssi.vcExpiryDate | string | `""` | Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year> |
 | nameOverride | string | `""` | String to partially override common.names.fullname template (will maintain the release name) |
-| nodeSelector | object | `{}` | [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) to constrain pods to nodes |
-| podAnnotations | object | `{}` | Pod annotations |
-| podSecurityContext | object | `{}` | Pod Security Context |
+| nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
+| podAnnotations | object | `{}` | PodAnnotation configuration |
+| podSecurityContext | object | `{}` | PodSecurityContext |
 | postgresql.auth.database | string | `"miw_app"` | Postgresql database to create |
 | postgresql.auth.enablePostgresUser | bool | `false` | Enable postgresql admin user |
 | postgresql.auth.password | string | `""` | Postgresql password to set (if empty one is generated) |
@@ -162,7 +159,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
 | serviceAccount.create | bool | `true` | Enable creation of ServiceAccount |
 | serviceAccount.name | string | `""` | The name of the ServiceAccount to use. |
-| tolerations | list | `[]` | Tolerations for pod assignment |
+| tolerations | list | `[]` | Tolerations configuration |
 
 For more information on how to configure the Keycloak see
 - https://github.com/bitnami/charts/tree/main/bitnami/keycloak.

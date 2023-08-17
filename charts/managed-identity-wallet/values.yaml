@@ -26,11 +26,11 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  # -- MIW image repository
+  # -- Image repository
   repository: tractusx/managed-identity-wallet
-  # -- MIW image pull policy
+  # -- PullPolicy
   pullPolicy: Always
-  # -- image tag (empty one will use "appVersion" value from chart definition)
+  # -- Image tag (empty one will use "appVersion" value from chart definition)
   tag: ""
 
 
@@ -47,9 +47,6 @@ serviceAccount:
   annotations: { }
   # -- The name of the ServiceAccount to use.
   name: ""
-
-## @section Managed Identity Wallet Common Parameters
-##
 
 service:
   # -- Kubernetes Service type
@@ -70,16 +67,8 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# -- Pod Security Context
-podSecurityContext: { }
-
-jobSecurityContext:
-  # -- User ID used to run the job
-  runAsUser: 1001
-  # -- Group ID used to run the job
-  runAsGroup: 0
-  # -- Enable to run the job as a non-root user
-  runAsNonRoot: true
+# -- PodSecurityContext
+podSecurityContext: {}
 
 securityContext:
   # -- Enable privileged container
@@ -105,17 +94,18 @@ resources:
     # -- Memory resource limits
     memory: 1Gi
 
-# -- [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) to constrain pods to nodes
-nodeSelector: { }
+# -- NodeSelector configuration
+nodeSelector:
+  "kubernetes.io/os": linux
 
-# -- Tolerations for pod assignment
-tolerations: [ ]
+# -- Tolerations configuration
+tolerations: []
 
-# -- Affinity for pod assignment
-affinity: { }
+# -- Affinity configuration
+affinity: {}
 
-# -- Pod annotations
-podAnnotations: { }
+# -- PodAnnotation configuration
+podAnnotations: {}
 
 ## @section Managed Identity Wallet Primary Parameters
 ##

@@ -17,6 +17,19 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-secrets:
-  DB_USER_NAME: dbuser
-  DB_PASSWORD: password
+image:
+  tag: "latest"
+
+postgresql:
+  internal:
+    enabled: false
+  external:
+    config:
+      host: localhost
+      port: 5432
+      database: miw
+    auth:
+      username: user
+      password: pass
+      existingSecret: ""
+      existingSecretKey: password

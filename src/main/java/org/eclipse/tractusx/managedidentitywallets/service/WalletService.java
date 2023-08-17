@@ -133,6 +133,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .stored(true)  //credential is stored(not issued by MIW)
                 .credentialId(verifiableCredential.getId().toString())
                 .build());
+        log.debug("VC type of {} stored for bpn ->{} with id-{}", cloneTypes, callerBpn, verifiableCredential.getId());
         return Map.of("message", String.format("Credential with id %s has been successfully stored", verifiableCredential.getId()));
     }
 
@@ -225,8 +226,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         DidDocument didDocument = didDocumentBuilder.build();
         //modify context URLs
         List<URI> context = didDocument.getContext();
-        List<URI> mutableContext = new ArrayList<>();
-        mutableContext.addAll(context);
+        List<URI> mutableContext = new ArrayList<>(context);
         miwSettings.didDocumentContextUrls().forEach(uri -> {
             if (!mutableContext.contains(uri)) {
                 mutableContext.add(uri);

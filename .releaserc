@@ -1,0 +1,20 @@
+{
+  "branches": ["main"],
+
+  "plugins": [
+    "gradle-semantic-release-plugin",
+    ["semantic-release-helm", {
+        chartPath: './charts/managed-identity-wallet',
+        onlyUpdateVersion: true,
+    }],
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    ["@semantic-release/changelog", {
+      "changelogFile": "CHANGELOG.md"
+    }],
+    ["@semantic-release/git", {
+      "assets": ["CHANGELOG.md", "gradle.properties", "./charts/managed-identity-wallet/Chart.yaml"],
+      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+    }]
+  ]
+}

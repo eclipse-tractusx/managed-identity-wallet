@@ -22,10 +22,15 @@ FROM eclipse-temurin:17-jre-alpine
 # run as non-root user
 RUN addgroup -g 11111 -S miw && adduser -u 11111 -S -s /bin/false -G miw miw
 
+# add curl for healthcheck
+RUN apk add curl
+
 USER miw
 
 COPY /build/libs/miw-latest.jar /app/
 
 WORKDIR /app
+
+HEALTHCHECK --start-period=30s CMD curl --fail http://localhost:8090/actuator/health/liveness || exit 1
 
 CMD ["java", "-jar", "miw-latest.jar"]
