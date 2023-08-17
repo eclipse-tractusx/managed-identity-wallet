@@ -40,7 +40,7 @@ tests:
           path: spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.template.spec.containers[0].env
-          count: 18 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
+          count: 19 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
       - equal:
           path: spec.template.spec.containers[0].env
           value:
@@ -52,7 +52,7 @@ tests:
               valueFrom:
                 secretKeyRef:
                   key: encryption-key
-                  name: RELEASE-NAME-managed-identity-wallet-encryption-key
+                  name: RELEASE-NAME-managed-identity-wallet
             - name: AUTHORITY_WALLET_BPN
               value: BPNL000000000000
             - name: AUTHORITY_WALLET_DID

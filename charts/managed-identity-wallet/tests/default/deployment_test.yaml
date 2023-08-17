@@ -99,7 +99,7 @@ tests:
           path: spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.template.spec.containers[0].env
-          count: 18 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
+          count: 19 # One hard-wired, four because Values.postgresql.internal.enabled == true and five from values.yaml "secrets" and "envs"
       - equal:
           path: spec.template.spec.containers[0].env
           value:

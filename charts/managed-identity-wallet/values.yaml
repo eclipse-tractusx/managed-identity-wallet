@@ -35,16 +35,16 @@ image:
 
 
 # --  Parameters for the application (will be stored as secrets - so, for passwords, ...)
-secrets: { }
+secrets: {}
 
 # -- envs Parameters for the application (will be provided as environment variables)
-envs: { }
+envs: {}
 
 serviceAccount:
   # --  Enable creation of ServiceAccount
   create: true
   # -- Annotations to add to the ServiceAccount
-  annotations: { }
+  annotations: {}
   # -- The name of the ServiceAccount to use.
   name: ""
 
@@ -58,11 +58,11 @@ ingress:
   # -- Enable ingress controller resource
   enabled: false
   # -- Ingress annotations
-  annotations: { }
+  annotations: {}
   # -- Ingress accepted hostnames
-  hosts: [ ]
+  hosts: []
   # -- Ingress TLS configuration
-  tls: [ ]
+  tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
