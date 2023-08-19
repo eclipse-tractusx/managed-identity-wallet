@@ -109,9 +109,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
         List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
 
-        //only support one credential at a time to create VP
-        Validate.isTrue(verifiableCredentialList.size() > 1).launch(new BadDataException("Only one credentials is supported to create presentation"));
-
         //check if holder wallet is in the system
         Wallet callerWallet = commonService.getWalletByIdentifier(callerBpn);
 

@@ -17,7 +17,7 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-{{ if .Values.backup.database.enabled -}}
+{{ if and .Values.backup.database.enabled .Values.postgresql.internal.enabled -}}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -41,13 +41,13 @@ spec:
                 - "/bin/sh"
               args:
                 - "-c"
-                - 'pg_dump -v -Fc -U {{ .Values.secrets.DB_USER_NAME }} -h {{ .Values.envs.DB_HOST }} miw > /backup/miw-postgres-$(date +"%m-%d-%Y-%H:%M:%S").pgdump'
+                - 'pg_dump -v -Fc -U {{ .Values.postgresql.auth.username }} -h {{ .Release.Name }}-postgresql {{ .Values.postgresql.auth.database }} > /backup/miw-postgres-$(date +"%m-%d-%Y-%H:%M:%S").pgdump'
               env:
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: {{ include "managed-identity-wallet.fullname" . }}
-                      key: DB_PASSWORD
+                      name: {{ .Release.Name }}-postgresql
+                      key: password
           restartPolicy: Never
           volumes:
             - name: data

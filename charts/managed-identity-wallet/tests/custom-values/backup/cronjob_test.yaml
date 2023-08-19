@@ -77,8 +77,8 @@ tests:
             name: PGPASSWORD
             valueFrom:
               secretKeyRef:
-                name: RELEASE-NAME-managed-identity-wallet
-                key: DB_PASSWORD
+                name: RELEASE-NAME-postgresql
+                key: password
 
   - it: should have default command and args
     asserts:
@@ -90,4 +90,11 @@ tests:
           path: spec.jobTemplate.spec.template.spec.containers[0].args
           value:
             - "-c"
-            - 'pg_dump -v -Fc -U dbuser -h postgres-host miw > /backup/miw-postgres-$(date +"%m-%d-%Y-%H:%M:%S").pgdump'
+            - 'pg_dump -v -Fc -U miw -h RELEASE-NAME-postgresql miw > /backup/miw-postgres-$(date +"%m-%d-%Y-%H:%M:%S").pgdump'
+
+  - it: should not render, if external DB is used
+    set:
+      postgresql.internal.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
