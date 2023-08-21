@@ -19,7 +19,6 @@
 
 name: Lint and Test Charts
 
-# Run chart linting and tests on each pull request
 on:
   workflow_dispatch:
   pull_request:
