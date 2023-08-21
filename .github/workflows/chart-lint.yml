@@ -31,6 +31,9 @@ on:
   pull_request:
     paths:
       - 'charts/managed-identity-wallet/**'
+  push:
+    paths:
+      - 'charts/managed-identity-wallet/**'
 
 jobs:
   chart-lint:
