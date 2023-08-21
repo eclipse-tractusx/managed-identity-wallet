@@ -22,12 +22,6 @@ name: Lint and Test Charts
 # Run chart linting and tests on each pull request
 on:
   workflow_dispatch:
-    inputs:
-      force:
-        default: false
-        type: boolean
-        description: Force to run the pipeline, even without real changes
-        required: false
   pull_request:
     paths:
       - 'charts/managed-identity-wallet/**'
