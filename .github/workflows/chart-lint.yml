@@ -85,7 +85,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Add bitnami repo
@@ -122,18 +122,4 @@ jobs:
           tags: kind-registry:5000/miw:testing
 
       - name: Install the chart on KinD cluster
-        run: helm install --set image.tag=testing --set=image.repository=kind-registry:5000/miw testing charts/managed-identity-wallet
-
-      - name: some debug
-        run: |
-          sleep 5
-          helm list
-          helm status testing --show-resources
-          
-          sleep 20
-          helm list
-          helm status testing --show-resources
-          
-          sleep 20
-          helm list
-          helm status testing --show-resources
+        run: helm install -n apps --create-namespace --wait --set image.tag=testing --set=image.repository=kind-registry:5000/miw testing charts/managed-identity-wallet
