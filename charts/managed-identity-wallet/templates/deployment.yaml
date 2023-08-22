@@ -51,54 +51,63 @@ spec:
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            # TODO Move ENVS into configmap
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.miw.logging.level }}
+            - name: MIW_HOST_NAME
+              value: {{ tpl .Values.miw.host . }}
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default .Values.miw.database.encryptionKey.secret (printf "%s-encryption-key" ( include "managed-identity-wallet.fullname" . )) }}
+                  key: {{ default .Values.miw.database.encryptionKey.secretKey "encryption-key" }}
+            - name: AUTHORITY_WALLET_BPN
+              value: {{ tpl  .Values.miw.authorityWallet.bpn . }}
+            - name: AUTHORITY_WALLET_NAME
+              value: {{ default (tpl  .Values.miw.authorityWallet.name . ) "" }}
+            - name: AUTHORITY_WALLET_DID
+              value: {{ printf "did:web:%s:%s" ( tpl .Values.miw.host . | replace ":" "%3A" | replace "/" ":") .Values.miw.authorityWallet.bpn }}
+            - name: ENFORCE_HTTPS_IN_DID_RESOLUTION
+              value: {{ quote .Values.miw.ssi.enforceHttpsInDidWebResolution }}
+            - name: APPLICATION_ENVIRONMENT
+              value: {{ .Values.miw.environment }}
+            - name: KEYCLOAK_REALM
+              value: {{ tpl .Values.miw.keycloak.realm . }}
+            - name: KEYCLOAK_CLIENT_ID
+              value: {{ .Values.miw.keycloak.clientId }}
+            - name: AUTH_SERVER_URL
+              value: {{ tpl .Values.miw.keycloak.url . }}
+            - name: USE_SSL
+              value: {{ quote .Values.miw.database.useSSL }}
+            - name: DB_HOST
+              value: {{  tpl .Values.miw.database.host . }}
+            - name: DB_PORT
+              value: {{ quote .Values.miw.database.port }}
+            - name: DB_NAME
+              value: {{ tpl .Values.miw.database.name . }}
+            - name: DB_USER_NAME
+              value: {{ .Values.miw.database.user }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.miw.database.secret . }}
+                  key: {{  tpl .Values.miw.database.secretPasswordKey . }}
             - name: APPLICATION_PORT
               value: "8080"
-            {{- if .Values.postgresql.internal.enabled }}
-            - name: DB_HOST
-              value: {{ .Release.Name }}-postgresql
-            - name: DB_USER_NAME
-              value: {{ .Values.postgresql.auth.username }}
-            - name: DB_NAME
-              value: {{ .Values.postgresql.auth.database }}
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgresql
-                  key: password
-            {{- else }}
-            - name: DB_HOST
-              value: {{ .Values.postgresql.external.config.host }}
-            - name: DB_PORT
-              value: {{ .Values.postgresql.external.config.port | quote }}
-            - name: DB_USER_NAME
-              value: {{ .Values.postgresql.external.auth.username }}
-            - name: DB_NAME
-              value: {{ .Values.postgresql.external.config.database }}
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.postgresql.external.auth.existingSecret }}
-                  name: {{ .Values.postgresql.external.auth.existingSecret }}
-                  key: {{ .Values.postgresql.external.auth.existingSecretKey }}
-                  {{- else }}
-                  name: {{ include "managed-identity-wallet.fullname" . }}-postgresql
-                  key: password
-                  {{- end }}
-            {{- end }}
+            - name: VC_EXPIRY_DATE
+              value: {{ (default .Values.miw.ssi.vcExpiryDate (printf "31-12-%s" (now | date "2006"))) | quote }}
           {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
-            {{- if $val }}
             - name: {{ $key }}
-              value: {{ $val | quote }}
-            {{- end }}
-          {{- end }}
+              value: {{ tpl ($val | quote) $ }}
+          {{- end}}
           {{- range $key, $val := .Values.secrets }}
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
                   name: {{ include "managed-identity-wallet.fullname" $ }}
                   key: {{ $key }}
-          {{- end }}
+          {{- end}}
           {{- end }}
           ports:
             - name: http

@@ -1,5 +1,9 @@
 # Development Process
 
+## Summary
+
+[TBD]
+
 ## Branching
 
 The **Managed Identity Wallets** project adheres to
@@ -101,8 +105,52 @@ a repository.
 
 These are some commits with their corresponding semantic release types:
 
-| Commit Message                                                                                      | Release Type |
-|:----------------------------------------------------------------------------------------------------|:-------------|
-| fix(typo): correct minor typos in code                                                              | Patch        |
-| feat: add new feature                                                                               | Minor        |
+| Commit Message                                                                                     | Release Type |
+|:---------------------------------------------------------------------------------------------------|:-------------|
+| fix(typo): correct minor typos in code                                                             | Patch        |
+| feat: add new feature                                                                              | Minor        |
 | feat: add new feature that breaks backward compatibility<br/><br/>BREAKING CHANGE: \<description\> | Major        |
+
+# Helm
+
+## Unit Test
+
+This repository uses [Helm Unit Test](https://github.com/helm-unittest/helm-unittest) to test the Helm charts.
+
+### Installation
+
+```bash
+$ helm plugin install https://github.com/helm-unittest/helm-unittest.git
+```
+
+### Run Tests
+
+```bash
+$ helm unittest <chart-name>
+```
+
+
+## Documentation
+
+For helm chart documentation we use
+the [Helm-Docs by Norwoodj](https://github.com/norwoodj/helm-docs).
+
+### Installation
+
+Homebrew
+```bash
+brew install norwoodj/tap/helm-docs
+```
+
+Scoop
+```bash
+scoop install helm-docs
+```
+
+### Generate Documentation
+
+```
+helm-docs
+# OR
+helm-docs --dry-run # prints generated documentation to stdout rather than modifying READMEs
+```

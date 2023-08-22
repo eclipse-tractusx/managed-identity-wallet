@@ -21,7 +21,7 @@ apiVersion: v2
 name: managed-identity-wallet
 description: |
   Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
-  And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g., within logistical supply chains.
+  And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
 
 type: application
 
@@ -42,6 +42,15 @@ maintainers:
     url: https://github.com/pmoscode
 
 dependencies:
+  - name: keycloak
+    version: 15.1.6
+    repository: https://charts.bitnami.com/bitnami
+    condition: keycloak.enabled
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 2.x.x
   - name: postgresql
     version: 11.9.13
     repository: https://charts.bitnami.com/bitnami

@@ -1,3 +1,5 @@
+<a name="readme-top"></a>
+
 {{ template "chart.header" . }}
 
 {{ template "chart.deprecationWarning" . }}
@@ -8,14 +10,46 @@
 
 {{ template "chart.homepageLine" . }}
 
-## Get Repo Info
+
+## Table of Contents
+
+<!-- TABLE OF CONTENTS -->
+<ol>
+    <li><a href="#general-information">Helm Commands</a>
+        <ul>
+            <li><a href="#get-repo-info">Get Repository Info</a></li>
+            <li><a href="#install-chart">Install Chart</a></li>
+            <li><a href="#uninstall-chart">Uninstall Chart</a></li>
+            <li><a href="#upgrading-chart">Upgrading Chart</a></li>
+        </ul>
+    </li>
+    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#values">Values</a></li>
+    <li><a href="#deployment">Deployment</a></li>
+    <li><a href="#configuration">Configuration</a></li>
+</ol>
+
+## Helm Commands
+
+### Get Repository Info
 
     helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/dev
     helm repo update
 
-## Install chart
+
+    helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/stable
+    helm repo update
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Install Chart
 
     helm install [RELEASE_NAME] tractusx-dev/managed-identity-wallet
+
+
+    helm install [RELEASE_NAME] tractusx-stable/managed-identity-wallet
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 The command deploys miw on the Kubernetes cluster in the default configuration.
 
@@ -23,7 +57,9 @@ See configuration below.
 
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
-## Uninstall Chart
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Uninstall Chart
 
     helm uninstall [RELEASE_NAME]
 
@@ -31,18 +67,92 @@ This removes all the Kubernetes components associated with the chart and deletes
 
 See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
 
-## Upgrading Chart
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Upgrading Chart
 
     helm upgrade [RELEASE_NAME] [CHART]
 
+
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 {{ template "chart.requirementsSection" . }}
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 {{ template "chart.valuesHeader" . }}
 
 {{ template "chart.valuesTable" . }}
 
+
+For more information on how to configure the Keycloak see
+- https://github.com/bitnami/charts/tree/main/bitnami/keycloak.
+
+For more information on how to configure the PostgreSQL see
+- https://github.com/bitnami/charts/tree/main/bitnami/postgresql.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Deployment
+
+The chart's default configuration includes the deployment of the Managed Identity Wallet (MIW) alongside a standalone PostgreSQL database and Keycloak. However, in production environments, it is recommended to deactivate the deployment of these additional components. The default deployment is illustrated in the diagram below.
+
+```mermaid
+erDiagram
+    ManagedIdentityWallet }o--|| Keycloak: "authentication"
+    ManagedIdentityWallet }o--|| PostgreSQL: "persistence"
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Configuration
+
+When deploying the MIW in a production environment please read the following sections carefully.
+
+> **Important Disclaimer**
+>
+> **The default configuration is designed exclusively for development and testing purposes. It lacks the necessary security measures and is unsuitable for production environments.**
+>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Secret Management
+
+The following two secrets are required to deploy the MIW in a production environment:
+
+- Database Password
+- Database Encryption Key
+
+The **Database Password Secret** stores the password associated with the PostgreSQL database user.
+
+Meanwhile, the **Database Encryption Key Secret** holds the encryption key for safeguarding confidential data within the PostgreSQL database. This could include sensitive information such as private keys for wallets.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Security Considerations
+
+Besides the database password and encryption key, the following security considerations should be taken into account
+when deploying the MIW in a production environment:
+
+1. By default, `did:web` addresses are not resolved using HTTPS, a configuration that poses security risks and requires activation.
+2. Configure the Managed Identity Wallets environment to `production` for optimal settings.
+3. Deploy the _Database Encryption Key Secret_ independently, avoiding reliance on auto-generated versions.
+4. Enhance security by enabling TLS for the database connection.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Additional Recommendations
+
+1. Refrain from deploying PostgreSQL and Keycloak using this chart in a production environment. It is advised to disable these deployments.
+2. Determine a suitable Verifiable Credential expiry date. The current default is set to the end of each year.
+3. The default Authority Wallet is designated as `BPNL000000000000`. Although using the same Authority Wallet ID as other data spaces isn't inherently insecure, it's recommended to employ a unique ID.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 {{ template "chart.maintainersSection" . }}
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 {{ template "helm-docs.versionFooter" . }}
