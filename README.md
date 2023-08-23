@@ -78,34 +78,34 @@ The available scopes/roles are:
 
 Overview by Endpoint
 
-| Artefact                                        | CRUD   | HTTP Verb/ Request | Endpoint                              | Roles                                        | Constraints                                                      |
-| ----------------------------------------------- | ------ | ------------------ | ------------------------------------- |----------------------------------------------| ---------------------------------------------------------------- |
-| **Wallets**                               | Read   | GET                | /api/wallets                          | **view_wallets**                             |                                                                  |
+| Artefact                                  | CRUD   | HTTP Verb/ Request | Endpoint                              | Roles                                        | Constraints                                                |
+|-------------------------------------------|--------|--------------------|---------------------------------------|----------------------------------------------|------------------------------------------------------------|
+| **Wallets**                               | Read   | GET                | /api/wallets                          | **view_wallets**                             |                                                            |
 | **Wallets**                               | Create | POST               | /api/wallets                          | **add_wallets**                              | **1 BPN : 1 WALLET**(PER ONE [1] BPN ONLY ONE [1] WALLET!) |
-| **Wallets**                               | Create | POST               | /api/wallets/{identifier}/credentials | **update_wallets** <br />OR**update_wallet** |                                                                  |
-| **Wallets**                               | Read   | GET                | /api/wallets/{identifier}             | **view_wallets** OR<br />**view_wallet**     |                                                                  |
-| **Verifiable Presentations - Generation** | Create | POST               | /api/presentation                     | **update_wallets** OR<br />**update_wallet** |                                                                  |
-| **Verifiable Presentations - Validation** | Create | POST               | /api/presentations/validation         | **view_wallets** OR<br />**view_wallet**     |                                                                  |
-| **Verifiable Credential - Holder**        | Read   | GET                | /api/credentials                      | **view_wallets** OR<br />**view_wallet**     |                                                                  |
-| **Verifiable Credential - Holder**        | Create | POST               | /api/credentials                      | **update_wallet** OR<br />**update_wallet**  |                                                                  |
-| **Verifiable Credential - Holder**        | Delete | DELETE             | /api/credentials                      | **update_wallet**                            |                                                                  |
-| **Verfiable Credential - Validation**     | Create | POST               | /api/credentials/validation           | **view_wallets** OR<br />**view_wallet**     |                                                                  |
-| **Verfiable Credential - Issuer**         | Read   | GET                | /api/credentials/issuer               | **view_wallets**                             |                                                                  |
-| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer               | **update_wallets**                           |                                                                  |
-| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/membership    | **update_wallets**                           |                                                                  |
-| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/framework     | **update_wallets**                           |                                                                  |
-| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/distmantler   | **update_wallets**                           |                                                                  |
-| **DIDDocument**                           | Read   | GET                | /{bpn}/did.json                       | N/A                                          |                                                                  |
-| **DIDDocument**                           | Read   | GET                | /api/didDocuments/{identifier}        | N/A                                          |                                                                  |
+| **Wallets**                               | Create | POST               | /api/wallets/{identifier}/credentials | **update_wallets** <br />OR**update_wallet** |                                                            |
+| **Wallets**                               | Read   | GET                | /api/wallets/{identifier}             | **view_wallets** OR<br />**view_wallet**     |                                                            |
+| **Verifiable Presentations - Generation** | Create | POST               | /api/presentation                     | **update_wallets** OR<br />**update_wallet** |                                                            |
+| **Verifiable Presentations - Validation** | Create | POST               | /api/presentations/validation         | **view_wallets** OR<br />**view_wallet**     |                                                            |
+| **Verifiable Credential - Holder**        | Read   | GET                | /api/credentials                      | **view_wallets** OR<br />**view_wallet**     |                                                            |
+| **Verifiable Credential - Holder**        | Create | POST               | /api/credentials                      | **update_wallet** OR<br />**update_wallet**  |                                                            |
+| **Verifiable Credential - Holder**        | Delete | DELETE             | /api/credentials                      | **update_wallet**                            |                                                            |
+| **Verfiable Credential - Validation**     | Create | POST               | /api/credentials/validation           | **view_wallets** OR<br />**view_wallet**     |                                                            |
+| **Verfiable Credential - Issuer**         | Read   | GET                | /api/credentials/issuer               | **view_wallets**                             |                                                            |
+| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer               | **update_wallets**                           |                                                            |
+| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/membership    | **update_wallets**                           |                                                            |
+| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/framework     | **update_wallets**                           |                                                            |
+| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/distmantler   | **update_wallets**                           |                                                            |
+| **DIDDocument**                           | Read   | GET                | /{bpn}/did.json                       | N/A                                          |                                                            |
+| **DIDDocument**                           | Read   | GET                | /api/didDocuments/{identifier}        | N/A                                          |                                                            |
 
 
 
-Additionally a Token mapper can be created under *Clients* &gt;
+Additionally, a Token mapper can be created under *Clients* &gt;
 *ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
 configuration (using as an example `BPNL000000001`):
 
 | Key                                | Value           |
-| ---------------------------------- | --------------- |
+|------------------------------------|-----------------|
 | Name                               | StaticBPN       |
 | Mapper Type                        | Hardcoded claim |
 | Token Claim Name                   | BPN             |
@@ -116,7 +116,7 @@ configuration (using as an example `BPNL000000001`):
 | Add to userinfo                    | OFF             |
 | includeInAccessTokenResponse.label | ON              |
 
-If you receive an error message, that the client secret is not valid, please go into
+If you receive an error message that the client secret is not valid, please go into
 keycloak admin and within *Clients > Credentials* recreate the secret.
 
 ## Development Setup
@@ -147,20 +147,14 @@ Description of the env files:
 > settings (under "features in development"). This should fix the issue.
 
 In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to
-build the add,
-because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
+build the app, because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
 The access token need to have `read:packages` access. (ref: https://github.com/settings/tokens/new)
-
-And change the _COMPOSE_COMMAND_ variable to either _docker-compose_ or _docker compose_. It depends on docker compose
-version you are using: V1 or V2
 
 Note: _SKIP_GRADLE_TASKS_PARAM_ is used to pass parameters to the build process of the MIW jar. Currently, it skips the
 tests and code coverage, but speeds up the build time.
-If you want to activate it, just comment it out
-like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
+If you want to activate it, just comment it out like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
 
-After every execution (either _local_ or _docker_ flow), run the matching "stop" task (
-e.g.: `task docker:start-app` -> `task docker:stop-app`)
+After every execution (either _local_ or _docker_ flow), run the matching "stop" task (e.g.: `task docker:start-app` -> `task docker:stop-app`)
 
 When you just run `task` without parameters, you will see all tasks available.
 
@@ -177,7 +171,7 @@ When you just run `task` without parameters, you will see all tasks available.
 
 ### docker
 
-1. Run `task docker:start-app` and wait until it shows " Started ManagedIdentityWalletsApplication in ... seconds"
+1. Run `task docker:start-app` and wait until it shows "Started ManagedIdentityWalletsApplication in ... seconds"
 2. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their clipboard :) )
 3. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
 4. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
@@ -242,7 +236,7 @@ This process ensures that any issues with the database schema are resolved by re
 # Environment Variables `<a id= "environmentVariables"></a>`
 
 | name                            | description                                                                                  | default value                                                                                                                                       |
-| ------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | APPLICATION_PORT                | port number of application                                                                   | 8080                                                                                                                                                |
 | APPLICATION_ENVIRONMENT         | Environment of the application ie. local, dev, int and prod                                  | local                                                                                                                                               |
 | DB_HOST                         | Database host                                                                                | localhost                                                                                                                                           |
@@ -291,22 +285,21 @@ role ``manage_app``. We can add this role to authority wallet client using keycl
 
 1. API to get current log settings
 
-```agsl
+```bash
 curl --location 'http://localhost:8090/actuator/loggers' \
 --header 'Authorization: Bearer access_token'
 ```
 
 2. Change log level at runtime
 
-```agsl
-
+```bash
 curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer access_token' \
 --data '{"configuredLevel":"INFO"}'
-
+```
 i.e.
-
+```bash
 curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer access_token' \
