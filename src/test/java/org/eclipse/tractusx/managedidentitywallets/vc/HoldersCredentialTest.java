@@ -37,7 +37,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -214,9 +214,9 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidResolver.class));
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verifyProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -237,9 +237,9 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidResolver.class));
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verifyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -264,9 +264,9 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidResolver.class));
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verifyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -290,9 +290,9 @@ class HoldersCredentialTest {
             //mock setup
             LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
             utils.when(() -> {
-                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidResolver.class));
+                LinkedDataProofValidation.newInstance(Mockito.any(SignatureType.class), Mockito.any(DidDocumentResolverRegistryImpl.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verifyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+            Mockito.when(mock.verifiyProof(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -305,7 +305,7 @@ class HoldersCredentialTest {
     private Map<String, Object> issueVC() throws JsonProcessingException {
         String bpn = UUID.randomUUID().toString();
         String baseBpn = miwSettings.authorityWalletBpn();
-        TestUtils.createWallet(bpn, "Test", restTemplate,baseBpn);
+        TestUtils.createWallet(bpn, "Test", restTemplate, baseBpn);
         ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
         Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
@@ -316,7 +316,7 @@ class HoldersCredentialTest {
     private ResponseEntity<String> issueVC(String bpn, String did, String type, HttpHeaders headers) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
         //save wallet
-        TestUtils.createWallet(bpn, did, restTemplate,baseBpn);
+        TestUtils.createWallet(bpn, did, restTemplate, baseBpn);
 
         // Create VC without proof
         //VC Bulider
