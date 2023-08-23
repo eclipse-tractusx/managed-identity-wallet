@@ -91,7 +91,7 @@ public class SecurityConfig {
                         //VC - Holder
                         .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //get credentials
                         .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_UPDATE_WALLETS) //issue credentials
-                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, DELETE.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET) //delete credentials
+
 
                         //VC - validation
                         .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_VALIDATION, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //validate credentials
