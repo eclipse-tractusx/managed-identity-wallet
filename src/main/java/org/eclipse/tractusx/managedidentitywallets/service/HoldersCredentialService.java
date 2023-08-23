@@ -44,9 +44,6 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -168,25 +165,6 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(callerBpn));
         // Return VC
         return credential.getData();
-    }
-
-    /**
-     * Delete credential.
-     *
-     * @param credentialId the credential id
-     * @param bpnFromToken the bpn from token
-     */
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public void deleteCredential(String credentialId, String bpnFromToken) {
-        //Fetch Holder Wallet
-        Wallet holderWallet = commonService.getWalletByIdentifier(bpnFromToken);
-
-        //check credential exp
-        isCredentialExistWithId(holderWallet.getDid(), credentialId);
-
-        //remove credential
-        holdersCredentialRepository.deleteByCredentialId(credentialId);
-        log.debug("VC deleted with id ->{} of bpn ->{}", StringEscapeUtils.escapeJava(credentialId), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
     }
 
     private void isCredentialExistWithId(String holderDid, String credentialId) {

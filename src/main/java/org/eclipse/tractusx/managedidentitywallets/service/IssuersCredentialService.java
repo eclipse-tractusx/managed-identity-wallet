@@ -435,13 +435,9 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         String proofTye = verifiableCredential.getProof().get(StringPool.TYPE).toString();
         LinkedDataProofValidation proofValidation;
         if (SignatureType.ED21559.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(
-                    SignatureType.ED21559,
-                    didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.ED21559, didDocumentResolverRegistry);
         } else if (SignatureType.JWS.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(
-                    SignatureType.JWS,
-                    didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS, didDocumentResolverRegistry);
         } else {
             throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
         }

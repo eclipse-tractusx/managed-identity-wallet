@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.did;
 
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -46,6 +47,9 @@ class DidDocumentsTest {
     private WalletService walletService;
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private MIWSettings miwSettings;
 
     @Test
     void getDidDocumentInvalidBpn404() {
@@ -85,6 +89,6 @@ class DidDocumentsTest {
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();
         createWalletRequest.setBpn(bpn);
         createWalletRequest.setName("wallet_" + bpn);
-        return walletService.createWallet(createWalletRequest);
+        return walletService.createWallet(createWalletRequest,miwSettings.authorityWalletBpn());
     }
 }

@@ -155,10 +155,10 @@ public class WalletController extends BaseController {
                             """)
             })
     })
-    @Operation(summary = "Create Wallet", description = "Permission: **add_wallets** \n\n Create a wallet and store it")
+    @Operation(summary = "Create Wallet", description = "Permission: **add_wallets** (The BPN of the base wallet must equal BPN of caller)\n\n Create a wallet and store it")
     @PostMapping(path = RestURI.WALLETS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createWallet(request));
+    public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request, Principal principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createWallet(request,getBPNFromToken(principal)));
     }
 
     /**

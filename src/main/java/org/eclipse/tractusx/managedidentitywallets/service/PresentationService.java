@@ -263,8 +263,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         }
     }
 
-    private boolean validateCredential(VerifiableCredential credential)
-            throws UnsupportedSignatureTypeException {
+    private boolean validateCredential(VerifiableCredential credential) throws UnsupportedSignatureTypeException {
+
         DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
         didDocumentResolverRegistry.register(
                 new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
