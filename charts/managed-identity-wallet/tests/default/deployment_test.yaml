@@ -89,9 +89,9 @@ tests:
           content:
             allowPrivilegeEscalation: false
             privileged: false
-            runAsGroup: 0
+            runAsGroup: 11111
             runAsNonRoot: true
-            runAsUser: 1001
+            runAsUser: 11111
 
   - it: should have environment variables set
     asserts:

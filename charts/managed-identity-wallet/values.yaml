@@ -76,9 +76,9 @@ securityContext:
   # -- Allow privilege escalation
   allowPrivilegeEscalation: false
   # -- User ID used to run the container
-  runAsUser: 1001
+  runAsUser: 11111
   # -- Group ID used to run the container
-  runAsGroup: 0
+  runAsGroup: 11111
   # -- Enable to run the container as a non-root user
   runAsNonRoot: true
 
