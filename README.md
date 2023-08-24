@@ -15,13 +15,13 @@ There are two possible flows, which can be used for development:
 
 Following tools the MIW development team used successfully:
 
-| Area     | Tool     | Download Link                                   | Comment                                                                                             |
-| -------- | -------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Area     | Tool     | Download Link                                   | Comment                                                                                          |
+|----------|----------|-------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | IDE      | IntelliJ | https://www.jetbrains.com/idea/download/        | Use[envfile plugin](https://plugins.jetbrains.com/plugin/7861-envfile) to use the **local** flow |
-| Build    | Gradle   | https://gradle.org/install/                     |                                                                                                     |
-| Runtime  | Docker   | https://www.docker.com/products/docker-desktop/ |                                                                                                     |
-| Database | DBeaver  | https://dbeaver.io/                             |                                                                                                     |
-| IAM      | Keycloak | https://www.keycloak.org/                       |                                                                                                     |
+| Build    | Gradle   | https://gradle.org/install/                     |                                                                                                  |
+| Runtime  | Docker   | https://www.docker.com/products/docker-desktop/ |                                                                                                  |
+| Database | DBeaver  | https://dbeaver.io/                             |                                                                                                  |
+| IAM      | Keycloak | https://www.keycloak.org/                       |                                                                                                  |
 
 # Administrator Documentation
 
@@ -312,3 +312,7 @@ curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.man
 2. https://github.com/dasniko/testcontainers-keycloak
 3. https://github.com/smartSenseSolutions/smartsense-java-commons
 4. https://github.com/catenax-ng/product-lab-ssi
+
+## Notice for Docker image
+
+See [Docker-hub-notice.md](./Docker-hub-notice.md)
