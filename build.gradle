@@ -90,6 +90,14 @@ build {
 	version = "latest"
 }
 
+bootJar {
+	metaInf {
+		from 'DEPENDENCIES'
+		from 'SECURITY.md'
+		from 'LICENSE'
+	}
+}
+
 test {
 	finalizedBy jacocoTestReport
 }
