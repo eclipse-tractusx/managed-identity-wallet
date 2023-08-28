@@ -29,6 +29,7 @@ import com.smartsensesolutions.java.commons.operator.Operator;
 import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -47,9 +48,8 @@ import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredential
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
-import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -424,25 +424,23 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param withCredentialExpiryDate the with credential expiry date
      * @return the map
      */
+    @SneakyThrows
     public Map<String, Object> credentialsValidation(Map<String, Object> data, boolean withCredentialExpiryDate) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
 
-        // DID Resolver Constracture params
-        DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
-        didDocumentResolverRegistry.register(
-                new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
+        DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
 
         String proofTye = verifiableCredential.getProof().get(StringPool.TYPE).toString();
         LinkedDataProofValidation proofValidation;
         if (SignatureType.ED21559.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.ED21559, didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.ED21559, didResolver);
         } else if (SignatureType.JWS.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS, didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS, didResolver);
         } else {
             throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
         }
 
-        boolean valid = proofValidation.verifiyProof(verifiableCredential);
+        boolean valid = proofValidation.verifyProof(verifiableCredential);
 
         Map<String, Object> response = new TreeMap<>();
 

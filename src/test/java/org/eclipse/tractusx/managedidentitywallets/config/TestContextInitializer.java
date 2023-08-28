@@ -42,7 +42,10 @@ public class TestContextInitializer implements ApplicationContextInitializer<Con
     public void initialize(ConfigurableApplicationContext applicationContext) {
         KEYCLOAK_CONTAINER.start();
         String authServerUrl = KEYCLOAK_CONTAINER.getAuthServerUrl();
-        SecretKey secretKey = KeyGenerator.getInstance("AES").generateKey();
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        // use explicit initialization as the platform default might fail
+        keyGen.init(128);
+        SecretKey secretKey = keyGen.generateKey();
         TestPropertyValues.of(
                 "server.port=" + port,
                 "miw.host: localhost:${server.port}",
