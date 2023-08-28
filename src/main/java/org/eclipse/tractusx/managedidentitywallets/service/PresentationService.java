@@ -41,6 +41,7 @@ import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidJsonLdException;
@@ -229,7 +230,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             didDocumentResolverRegistry.register(
                     new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
 
-            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didDocumentResolverRegistry);
+            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier((DidResolver) didDocumentResolverRegistry);
             return jwtVerifier.verify(signedJWT);
         } catch (Exception e) {
             log.error("Can not verify signature of jwt", e);
@@ -274,18 +275,18 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         if (SignatureType.ED21559.toString().equals(proofType)) {
             linkedDataProofValidation = LinkedDataProofValidation.newInstance(
                     SignatureType.ED21559,
-                    didDocumentResolverRegistry
+                    (DidResolver) didDocumentResolverRegistry
             );
         } else if (SignatureType.JWS.toString().equals(proofType)) {
             linkedDataProofValidation = LinkedDataProofValidation.newInstance(
                     SignatureType.JWS,
-                    didDocumentResolverRegistry
+                    (DidResolver) didDocumentResolverRegistry
             );
         } else {
             throw new UnsupportedSignatureTypeException(proofType);
         }
 
-        boolean isValid = linkedDataProofValidation.verifiyProof(credential);
+        boolean isValid = linkedDataProofValidation.verifyProof(credential);
         if (isValid) {
             log.debug("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
         } else {

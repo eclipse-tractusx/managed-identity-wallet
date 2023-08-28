@@ -49,6 +49,7 @@ import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -435,14 +436,14 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         String proofTye = verifiableCredential.getProof().get(StringPool.TYPE).toString();
         LinkedDataProofValidation proofValidation;
         if (SignatureType.ED21559.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.ED21559, didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.ED21559, (DidResolver) didDocumentResolverRegistry);
         } else if (SignatureType.JWS.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS, didDocumentResolverRegistry);
+            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS, (DidResolver) didDocumentResolverRegistry);
         } else {
             throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
         }
 
-        boolean valid = proofValidation.verifiyProof(verifiableCredential);
+        boolean valid = proofValidation.verifyProof(verifiableCredential);
 
         Map<String, Object> response = new TreeMap<>();
 
