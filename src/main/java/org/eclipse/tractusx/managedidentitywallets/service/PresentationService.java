@@ -39,10 +39,8 @@ import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519Key;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
-import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidJsonLdException;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
@@ -226,11 +224,9 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     private boolean validateSignature(SignedJWT signedJWT) {
         //validate jwt signature
         try {
-            DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
-            didDocumentResolverRegistry.register(
-                    new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
+            DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
 
-            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier((DidResolver) didDocumentResolverRegistry);
+            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didResolver);
             return jwtVerifier.verify(signedJWT);
         } catch (Exception e) {
             log.error("Can not verify signature of jwt", e);
@@ -264,23 +260,21 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         }
     }
 
-    private boolean validateCredential(VerifiableCredential credential) throws UnsupportedSignatureTypeException {
-
-        DidDocumentResolverRegistry didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
-        didDocumentResolverRegistry.register(
-                new DidWebDocumentResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps()));
+    @SneakyThrows
+    private boolean validateCredential(VerifiableCredential credential) {
+        DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
 
         String proofType = credential.getProof().getType();
         LinkedDataProofValidation linkedDataProofValidation;
         if (SignatureType.ED21559.toString().equals(proofType)) {
             linkedDataProofValidation = LinkedDataProofValidation.newInstance(
                     SignatureType.ED21559,
-                    (DidResolver) didDocumentResolverRegistry
+                    didResolver
             );
         } else if (SignatureType.JWS.toString().equals(proofType)) {
             linkedDataProofValidation = LinkedDataProofValidation.newInstance(
                     SignatureType.JWS,
-                    (DidResolver) didDocumentResolverRegistry
+                    didResolver
             );
         } else {
             throw new UnsupportedSignatureTypeException(proofType);
