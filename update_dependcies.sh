@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # /********************************************************************************
 #  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
@@ -19,13 +20,19 @@
 # ********************************************************************************/
 #
 
-#!/bin/bash
-
 # download the latest version of the Eclipse Dash License tool
-curl --output org.eclipse.dash.licenses.jar \
-  https://repo.eclipse.org/service/local/repositories/dash-licenses-snapshots/content/org/eclipse/dash/org.eclipse.dash.licenses/1.0.3-SNAPSHOT/org.eclipse.dash.licenses-1.0.3-20230725.055026-63.jar
+if [[ -f "dash.jar" ]]; then
+  echo "'dash.jar' already downloaded. Remove manually to get the newest version."
+else
+  # '-L' follow redirects
+  # '--output' name the downloaded file 'dash.jar'
+  curl -L --output dash.jar \
+  "https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST"
+fi
 
-# update DEPENDENCIES file
-./gradlew dependencies | grep -Poh "(?<=\s)[\w\.-]+:[\w\.-]+:[^:\s]+" | grep -v "^org\.eclipse" | sort | uniq |
-  java -jar org.eclipse.dash.licenses.jar -summary DEPENDENCIES - |
+# use '-q' to get the raw output of the command (contained in build.gradle)
+./gradlew -q dashDependencies |
+  # run the dash tool and output the summary into the 'DEPENDENCIES' file
+  java -jar dash.jar -summary DEPENDENCIES - |
+  # output any restricted dependencies
   grep restricted
