@@ -67,3 +67,7 @@ dev-assets/docker-environment/postgres/db.sh
 
 .java-version
 
+# a file created by the 'update_dependencies.sh' script
+# it shouldn't be added to version control
+# if the filename changes, this section MUST be updated
+dash.jar
