@@ -23,6 +23,33 @@ Following tools the MIW development team used successfully:
 | Database | DBeaver  | https://dbeaver.io/                             |                                                                                                  |
 | IAM      | Keycloak | https://www.keycloak.org/                       |                                                                                                  |
 
+## Eclipse Dash Tool
+
+[Eclipse Dash Homepage](https://projects.eclipse.org/projects/technology.dash)
+
+The Eclipse Dash tool is used to analyze the dependencies used in the project and ensure all legal requirements are met.
+The easiest way to use it is to run the `update_dependencies.sh` script in the project root.
+
+```bash
+./update_dependencies.sh
+```
+
+To run manually:
+
+1. Download the Dash jar to the root of the
+   project [Download Link](https://projects.eclipse.org/projects/technology.dash/downloads). You can name it anything,
+   but we'll go with `dash.jar`.
+2. Run the gradle command and pipe it's output to dash (note you'll need at least Java 11 to run it):
+
+```bash
+./gradlew -q dashDependencies | java -jar dash.jar -summary DEPENDENCIES - | grep restricted
+```
+
+This command will output all dependencies, then pipe them into dash and finally search for any restricted ones. A
+committer can open and issue to resolve any problems with the dependencies. It would be best to do that during a Pull
+Request.
+
+
 # Administrator Documentation
 
 ## Manual Keycloak Configuration
