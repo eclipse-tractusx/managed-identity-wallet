@@ -92,6 +92,25 @@ build {
     version = "latest"
 }
 
+// Usage: in the root of the project: ./gradlew -q dashDependencies
+//
+// Description: This task gathers all available configurations and their dependencies
+// then filter anything belonging to 'org.eclipse' and outputs the dependencies, each on
+// a new line.
+tasks.register('dashDependencies') {
+    doLast {
+        def deps = []
+        project.configurations.each { conf ->
+            if (conf.canBeResolved) {
+                deps.addAll(conf.incoming.resolutionResult.allDependencies.collect { dep ->
+                    "${dep.selected}"
+                })
+            }
+        }
+        deps.findAll(d -> !d.startsWith('org.eclipse')).unique().sort().each { println it }
+    }
+}
+
 bootJar {
 	metaInf {
 		from 'DEPENDENCIES'
