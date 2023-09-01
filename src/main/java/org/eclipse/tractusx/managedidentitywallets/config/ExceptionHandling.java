@@ -119,7 +119,7 @@ public class ExceptionHandling {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ProblemDetail handleValidation(MethodArgumentNotValidException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(e));
         problemDetail.setTitle("Invalid data provided");
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         problemDetail.setProperty("errors", handleValidationError(e.getFieldErrors()));
@@ -134,7 +134,7 @@ public class ExceptionHandling {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     ProblemDetail handleValidation(ConstraintViolationException exception) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
         problemDetail.setTitle("Invalid data provided");
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         problemDetail.setProperty("errors", exception.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList());
