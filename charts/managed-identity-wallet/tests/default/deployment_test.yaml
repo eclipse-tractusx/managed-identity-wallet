@@ -119,7 +119,7 @@ tests:
             - name: AUTHORITY_WALLET_DID
               value: did:web:RELEASE-NAME-managed-identity-wallet%3A8080:BPNL000000000000
             - name: ENFORCE_HTTPS_IN_DID_RESOLUTION
-              value: "false"
+              value: "true"
             - name: APPLICATION_ENVIRONMENT
               value: dev
             - name: KEYCLOAK_REALM
