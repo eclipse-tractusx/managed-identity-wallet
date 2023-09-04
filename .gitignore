@@ -71,3 +71,9 @@ dev-assets/docker-environment/postgres/db.sh
 # it shouldn't be added to version control
 # if the filename changes, this section MUST be updated
 dash.jar
+# An intermediate file used to store the dependencies as a
+# flat list, used by the `dashLicenseCheck` gradle task
+deps.txt
+# Ignore .env files, the root .env is used in the gradle build
+# script, when not using `task`
+.env
