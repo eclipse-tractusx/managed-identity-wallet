@@ -27,28 +27,26 @@ Following tools the MIW development team used successfully:
 
 [Eclipse Dash Homepage](https://projects.eclipse.org/projects/technology.dash)
 
-The Eclipse Dash tool is used to analyze the dependencies used in the project and ensure all legal requirements are met.
-The easiest way to use it is to run the `update_dependencies.sh` script in the project root.
+The Eclipse Dash tool is used to analyze the dependencies used in the project
+and ensure all legal requirements are met. We've added a gradle tasks to
+download the latest version of Dash locally, resolve all project dependencies
+and then run the tool and update the summary in the DEPENDENCIES file.
+
+To run the license check:
 
 ```bash
-./update_dependencies.sh
+./gradlew dashLicenseCheck
 ```
 
-To run manually:
-
-1. Download the Dash jar to the root of the
-   project [Download Link](https://projects.eclipse.org/projects/technology.dash/downloads). You can name it anything,
-   but we'll go with `dash.jar`.
-2. Run the gradle command and pipe it's output to dash (note you'll need at least Java 11 to run it):
+To clean all files created by the dash tasks:
 
 ```bash
-./gradlew -q dashDependencies | java -jar dash.jar -summary DEPENDENCIES - | grep restricted
+./gradlew dashClean
 ```
 
-This command will output all dependencies, then pipe them into dash and finally search for any restricted ones. A
-committer can open and issue to resolve any problems with the dependencies. It would be best to do that during a Pull
-Request.
-
+This command will output all dependencies, save the to file `deps.txt`. Dash
+will read from the file and update the summary in the `DEPENDENCIES` file. A
+committer can open and issue to resolve any problems with the dependencies.
 
 # Administrator Documentation
 
