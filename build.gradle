@@ -110,9 +110,9 @@ tasks.register('dashClean') {
     description = "Clean all files used by the 'License' group"
     group = 'License'
     logger.lifecycle("Removing 'dash.jar'")
-    layout.projectDirectory.file('dash.jar').getAsFile().delete()
+    file('dash.jar').delete()
     logger.lifecycle("Removing 'deps.txt'")
-    layout.projectDirectory.file('deps.txt').getAsFile().delete()
+    file('deps.txt').delete()
 }
 
 // Usage: in the root of the project: `./gradlew -q dashDependencies`
@@ -135,7 +135,7 @@ tasks.register('dashDependencies') { dashDependencies ->
 
         def filtered = deps.findAll(d -> !d.startsWith('org.eclipse')).unique().sort()
         filtered.each { logger.quiet("{}", it) }
-        project.file("deps.txt").write(filtered.join('\n'))
+        file("deps.txt").write(filtered.join('\n'))
     }
 }
 
