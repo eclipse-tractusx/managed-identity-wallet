@@ -138,6 +138,22 @@ tasks.register('dashDependencies') { dashDependencies ->
         project.file("deps.txt").write(filtered.join('\n'))
     }
 }
+
+tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
+    description = "Run the Dash License Tool and save the summary in the 'DEPENDENCIES' file"
+    group = 'License'
+    dashLicenseCheck.dependsOn('dashDownload')
+    dashLicenseCheck.dependsOn('dashDependencies')
+    doFirst {
+        classpath = files('dash.jar')
+        args('-summary', 'DEPENDENCIES', 'deps.txt')
+    }
+    doLast {
+        logger.lifecycle("Removing 'deps.txt' now.")
+        file('deps.txt').delete()
+    }
+}
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
