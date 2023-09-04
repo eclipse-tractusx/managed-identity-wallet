@@ -104,6 +104,16 @@ tasks.register('dashDownload', Download) {
     // then manually delete the file yourself, or run `dashClean`
     overwrite false
 }
+
+// This task is primarily used by CIs
+tasks.register('dashClean') {
+    description = "Clean all files used by the 'License' group"
+    group = 'License'
+    logger.lifecycle("Removing 'dash.jar'")
+    layout.projectDirectory.file('dash.jar').getAsFile().delete()
+    logger.lifecycle("Removing 'deps.txt'")
+    layout.projectDirectory.file('deps.txt').getAsFile().delete()
+}
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
