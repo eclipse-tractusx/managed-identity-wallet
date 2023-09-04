@@ -45,6 +45,11 @@ repositories {
             password = "${githubToken}"
         }
     }
+    maven {
+        // Used to resolve Dash License Tool
+        // Dash has a maven plugin, BUT is not resolvable through mavenCentral()
+        url = uri("https://repo.eclipse.org/content/repositories/dash-licenses/")
+    }
 }
 
 ext {
