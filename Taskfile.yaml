@@ -46,7 +46,7 @@ tasks:
     desc: Generate Changelog
     cmds:
       - rm -f CHANGELOG.md
-      - git-changelog -o CHANGELOG.md -c conventional -t keepachangelog .
+      - git-changelog -o CHANGELOG.md -c conventional -t path:./CHANGELOG.md.jinja .
 
   clean-all:
     desc: Cleans everything...
