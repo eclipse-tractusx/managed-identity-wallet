@@ -114,6 +114,30 @@ tasks.register('dashClean') {
     logger.lifecycle("Removing 'deps.txt'")
     layout.projectDirectory.file('deps.txt').getAsFile().delete()
 }
+
+// Usage: in the root of the project: `./gradlew -q dashDependencies`
+// The `-q` option is important if you want to use the output in a pipe.
+tasks.register('dashDependencies') { dashDependencies ->
+    description = "Output all project dependencies as a flat list and save an intermediate file 'deps.txt'."
+    group = 'License'
+    dashDependencies.dependsOn('dashDownload')
+    doLast {
+        def deps = []
+        project.configurations.each { conf ->
+            // resolving 'archives' or 'default' is deprecated
+            if (conf.canBeResolved && conf.getName() != 'archives' && conf.getName() != 'default') {
+                deps.addAll(conf.incoming.resolutionResult.allDependencies.collect { dep ->
+                    def selected = dep.getSelected()
+                    "${selected}"
+                })
+            }
+        }
+
+        def filtered = deps.findAll(d -> !d.startsWith('org.eclipse')).unique().sort()
+        filtered.each { logger.quiet("{}", it) }
+        project.file("deps.txt").write(filtered.join('\n'))
+    }
+}
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
@@ -128,25 +152,6 @@ tasks.named('test') {
 build {
     archivesBaseName = "miw"
     version = "latest"
-}
-
-// Usage: in the root of the project: ./gradlew -q dashDependencies
-//
-// Description: This task gathers all available configurations and their dependencies
-// then filter anything belonging to 'org.eclipse' and outputs the dependencies, each on
-// a new line.
-tasks.register('dashDependencies') {
-    doLast {
-        def deps = []
-        project.configurations.each { conf ->
-            if (conf.canBeResolved) {
-                deps.addAll(conf.incoming.resolutionResult.allDependencies.collect { dep ->
-                    "${dep.selected}"
-                })
-            }
-        }
-        deps.findAll(d -> !d.startsWith('org.eclipse')).unique().sort().each { println it }
-    }
 }
 
 bootJar {
