@@ -17,6 +17,13 @@ plugins {
 group = "${groupName}"
 version = "${applicationVersion}"
 sourceCompatibility = JavaVersion.VERSION_17
+// Fetch the environment variables GITHUB_USERNAME, GITHUB_TOKEN
+// these can be set in <project_root>/.env
+// or export GITHUB_USERNAME=...
+//    export GITHUB_TOKEN=...
+// When using `task ...` this is not necessary
+githubUserName = "${githubUserName}" ? "${githubUserName}" : env.fetch('GITHUB_USERNAME')
+githubToken = "${githubToken}" ? "${githubToken}" : env.fetch('GITHUB_TOKEN')
 
 configurations {
     compileOnly {
