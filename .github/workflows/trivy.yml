@@ -44,7 +44,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.12.0
         with:
           # Path to Docker image
-          image-ref: "tractusx/managed-identity-wallet:main"
+          image-ref: "tractusx/managed-identity-wallet:latest"
           format: "sarif"
           output: "trivy-results2.sarif"
           exit-code: "1"
