@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
-## [managed-identity-wallet-0.1.0-rc.4] - 2023-09-06
+## [V0.1.1] - 2023-09-06
 
 ### Known Knowns
 
