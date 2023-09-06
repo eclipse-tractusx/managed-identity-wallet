@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [V0.1.1] - 2023-09-06
+
+### Known Knowns
+
+- By default the role "view_wallets" is exclusively foreseen for the issuer/authority. In case of an unintended
+  assignment of this role to any technical user, those are able to see the list of existing wallets with the current
+  code version. A suitable fix with a second validation step will be provided with the next update of MIW.
+
+### Security
+
+- update spring-boot to version 3.1.2, updating transitive dependency spring-security-core to 6.1.2 (by Boris Rizov)
+
 ## [managed-identity-wallet-0.1.0-rc.3](https://github.com/pmoscode/managed-identity-wallet/releases/tag/managed-identity-wallet-0.1.0-rc.3) - 2023-08-28
 
 <small>[Compare with managed-identity-wallet-0.1.0-rc.2](https://github.com/pmoscode/managed-identity-wallet/compare/managed-identity-wallet-0.1.0-rc.2...managed-identity-wallet-0.1.0-rc.3)</small>
