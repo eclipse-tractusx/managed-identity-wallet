@@ -16,14 +16,14 @@
 # SPDX-License-Identifier: Apache-2.0
 ---
 
-name: "KICS"
+name: "KICS Scan"
 
 on:
   push:
-    branches: [main, development]
+    branches: [main, develop]
   pull_request:
   # The branches below must be a subset of the branches above
-    branches: [main, development]
+    branches: [main, develop]
     paths:
       - "charts/managed-identity-wallet/**"
       - "dev-assets/docker-environment/**"
