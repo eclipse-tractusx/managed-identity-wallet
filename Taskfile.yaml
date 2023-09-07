@@ -45,8 +45,7 @@ tasks:
   changelog:
     desc: Generate Changelog
     cmds:
-      - rm -f CHANGELOG.md
-      - git-changelog -o CHANGELOG.md -c conventional -t path:./CHANGELOG.md.jinja .
+      - git-changelog -i -g '^## (?P<version>[v|V]?\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)' -o CHANGELOG.md -c conventional -t path:./CHANGELOG.md.jinja .
 
   clean-all:
     desc: Cleans everything...
