@@ -119,7 +119,7 @@ miw:
   environment: "dev"
   ssi:
     # -- Enable to use HTTPS in DID Web Resolution
-    enforceHttpsInDidWebResolution: false
+    enforceHttpsInDidWebResolution: true
     # -- Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year>
     vcExpiryDate: ""
   authorityWallet:
