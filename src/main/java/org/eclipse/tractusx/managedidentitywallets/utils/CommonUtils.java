@@ -22,8 +22,10 @@
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
 import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
@@ -42,15 +44,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * The type Common utils.
  */
+@UtilityClass
 public class CommonUtils {
 
-    private CommonUtils() {
-        throw new IllegalStateException("Utility class");
-    }
+    public static final Pattern BPN_NUMBER_PATTERN = Pattern.compile(StringPool.BPN_NUMBER_REGEX);
+
 
     /**
      * Gets identifier type.
@@ -62,6 +65,7 @@ public class CommonUtils {
         if (identifier.startsWith("did:web")) {
             return StringPool.DID;
         } else {
+            Validate.isFalse(BPN_NUMBER_PATTERN.matcher(identifier).matches()).launch(new BadDataException("Invalid BPN number - " + identifier));
             return StringPool.BPN;
         }
     }
@@ -106,8 +110,9 @@ public class CommonUtils {
 
         // if the credential does not contain the JWS proof-context add it
         URI jwsUri = URI.create("https://w3id.org/security/suites/jws-2020/v1");
-        if (!contexts.contains(jwsUri))
+        if (!contexts.contains(jwsUri)) {
             contexts.add(jwsUri);
+        }
 
         URI id = URI.create(UUID.randomUUID().toString());
         VerifiableCredentialBuilder builder =

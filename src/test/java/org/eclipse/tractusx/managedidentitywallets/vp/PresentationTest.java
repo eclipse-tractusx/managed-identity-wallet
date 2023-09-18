@@ -85,7 +85,7 @@ class PresentationTest {
     @Test
     void validateVPAssJsonLd400() throws JsonProcessingException {
         //create VP
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
@@ -101,7 +101,7 @@ class PresentationTest {
 
     @Test
     void validateVPAsJwt() throws JsonProcessingException {
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
@@ -119,7 +119,7 @@ class PresentationTest {
     @Test
     void validateVPAsJwtWithInvalidSignatureAndInValidAudienceAndExpiryDateValidation() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
         //create VP
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
@@ -148,7 +148,7 @@ class PresentationTest {
     @Test
     void validateVPAsJwtWithValidAudienceAndDateValidation() throws JsonProcessingException {
         //create VP
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
         Map body = vpResponse.getBody();
@@ -165,7 +165,7 @@ class PresentationTest {
     @Test
     void validateVPAsJwtWithInValidVCDateValidation() throws JsonProcessingException {
         //create VP
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
 
         ResponseEntity<Map> vpResponse = getIssueVPRequestWithShortExpiry(bpn, audience);
@@ -182,7 +182,7 @@ class PresentationTest {
 
     @Test
     void createPresentationAsJWT201() throws JsonProcessingException, ParseException {
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String audience = "companyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
@@ -212,7 +212,7 @@ class PresentationTest {
     @Test
     void createPresentationAsJsonLD201() throws JsonProcessingException {
 
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String didWeb = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         Map<String, Object> request = getIssueVPRequest(bpn);
@@ -229,12 +229,12 @@ class PresentationTest {
 
     @Test
     void createPresentationWithInvalidBPNAccess403() throws JsonProcessingException {
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String didWeb = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         Map<String, Object> request = getIssueVPRequest(bpn);
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders("invalid bpn");
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(TestUtils.getRandomBpmNumber());
         headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON_VALUE));
 
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);

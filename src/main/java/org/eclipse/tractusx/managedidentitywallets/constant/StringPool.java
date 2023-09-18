@@ -89,4 +89,6 @@ public class StringPool {
     public static final String CLIENT_CREDENTIALS = "client_credentials";
     public static final String OPENID = "openid";
     public static final String BEARER_SPACE = "Bearer ";
+
+    public static final String BPN_NUMBER_REGEX = "^(BPN)(L|S|A)[0-9A-Z]{12}";
 }

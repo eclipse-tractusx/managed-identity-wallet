@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
-import com.nimbusds.jwt.SignedJWT;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -36,6 +35,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialServ
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
+import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -43,7 +43,10 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePres
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
 import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -79,8 +82,8 @@ class PresentationValidationTest {
     @Autowired
     private MIWSettings miwSettings;
 
-    private final String bpnTenant_1 = UUID.randomUUID().toString();
-    private final String bpnTenant_2 = UUID.randomUUID().toString();
+    private final String bpnTenant_1 = TestUtils.getRandomBpmNumber();
+    private final String bpnTenant_2 = TestUtils.getRandomBpmNumber();
     private String bpnOperator;
     private Did tenant_1;
     private Did tenant_2;
@@ -94,13 +97,13 @@ class PresentationValidationTest {
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();
         createWalletRequest.setBpn(bpnTenant_1);
         createWalletRequest.setName("My Test Tenant Wallet");
-        Wallet tenantWallet = walletService.createWallet(createWalletRequest,bpnOperator);
+        Wallet tenantWallet = walletService.createWallet(createWalletRequest, bpnOperator);
         tenant_1 = DidParser.parse(tenantWallet.getDid());
 
         CreateWalletRequest createWalletRequest2 = new CreateWalletRequest();
         createWalletRequest2.setBpn(bpnTenant_2);
         createWalletRequest2.setName("My Test Tenant Wallet");
-        Wallet tenantWallet2 = walletService.createWallet(createWalletRequest2,bpnOperator);
+        Wallet tenantWallet2 = walletService.createWallet(createWalletRequest2, bpnOperator);
         tenant_2 = DidParser.parse(tenantWallet2.getDid());
 
         IssueMembershipCredentialRequest issueMembershipCredentialRequest = new IssueMembershipCredentialRequest();
@@ -138,9 +141,9 @@ class PresentationValidationTest {
     @Test
     @SneakyThrows
     public void testSuccessfulValidationForMultipleVC() {
-        final Map<String, Object> creationResponse = createPresentationJwt(List.of(membershipCredential_1, membershipCredential_2), tenant_1);
+        Map<String, Object> creationResponse = createPresentationJwt(List.of(membershipCredential_1, membershipCredential_2), tenant_1);
         // get the payload of the json web token
-        final String encodedJwtPayload = ((String) creationResponse.get("vp")).split("\\.")[1];
+        String encodedJwtPayload = ((String) creationResponse.get("vp")).split("\\.")[1];
         Map<String, Object> decodedJwtPayload = OBJECT_MAPPER.readValue(Base64.getUrlDecoder().decode(encodedJwtPayload), Map.class);
         VerifiablePresentation presentation = new VerifiablePresentation((Map) decodedJwtPayload.get("vp"));
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(creationResponse);
@@ -167,10 +170,10 @@ class PresentationValidationTest {
     public void testValidationFailureOfCredentialWitInvalidExpirationDateInSecondCredential() {
         // test is related to this old issue where the signature check still succeeded
         // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
-        final VerifiableCredential copyCredential = new VerifiableCredential(membershipCredential_1);
+        VerifiableCredential copyCredential = new VerifiableCredential(membershipCredential_1);
         // e.g. an attacker tries to extend the validity of a verifiable credential
         copyCredential.put(VerifiableCredential.EXPIRATION_DATE, "2500-09-30T22:00:00Z");
-        final Map<String, Object> presentation = createPresentationJwt(List.of(membershipCredential_1, copyCredential), tenant_1);
+        Map<String, Object> presentation = createPresentationJwt(List.of(membershipCredential_1, copyCredential), tenant_1);
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(presentation);
         Assertions.assertFalse(response.valid);
     }
