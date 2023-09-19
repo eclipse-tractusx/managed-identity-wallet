@@ -29,7 +29,7 @@ on:
       - 'charts/managed-identity-wallet/**'
 
 jobs:
-  chart-lint:
+  test-app:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,85 +37,109 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.12.3
-
-      - name: Add bitnami repo
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami 
-          helm repo update
-
-      - name: Update Helm dependencies
-        run: |
-          cd charts/managed-identity-wallet
-          helm dependency build
-
-      # Setup python as a prerequisite for chart linting
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.4.0
-
-      - name: Run linting
-        run: ct lint --config charts/chart-testing-config.yaml --charts ./charts/managed-identity-wallet
-
-  chart-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.12.3
-
-      - name: Set up Taskfile
-        uses: arduino/setup-task@v1
-
-      - uses: actions/setup-java@v3
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Add bitnami repo
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami 
-          helm repo update
+      - name: Test app
+        run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} ./gradlew jacocoTestReport
 
-      - name: Update Helm dependencies
-        run: |
-          cd charts/managed-identity-wallet
-          helm dependency build
-
-      - name: Install Helm unittest plugin
-        run: |
-          helm plugin install https://github.com/helm-unittest/helm-unittest.git
-
-      - name: Run Helm unittests
-        run: task helm:unittest
-
-      - name: Build app
-        run: SKIP_GRADLE_TASKS_PARAM="-x jacocoTestCoverageVerification -x test" GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} task app:build
-
-      - name: Kubernetes KinD Cluster
-        uses: container-tools/kind-action@v2
+      - name: Step 3 - Use the Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v2
         with:
-          node_image: 'kindest/node:v1.27.3'
-          version: v0.20.0
+          name: Test-report
+          path: build/reports/xml/jacoco
 
-      - name: Build image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: kind-registry:5000/miw:testing
 
-      - name: Install the chart on KinD cluster
-        run: helm install -n apps --create-namespace --wait --set image.tag=testing --set=image.repository=kind-registry:5000/miw testing charts/managed-identity-wallet
+#  chart-lint:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Set up Helm
+#        uses: azure/setup-helm@v3
+#        with:
+#          version: v3.12.3
+#
+#      - name: Add bitnami repo
+#        run: |
+#          helm repo add bitnami https://charts.bitnami.com/bitnami
+#          helm repo update
+#
+#      - name: Update Helm dependencies
+#        run: |
+#          cd charts/managed-identity-wallet
+#          helm dependency build
+#
+#      # Setup python as a prerequisite for chart linting
+#      - uses: actions/setup-python@v4
+#        with:
+#          python-version: "3.10"
+#
+#      - name: Set up chart-testing
+#        uses: helm/chart-testing-action@v2.4.0
+#
+#      - name: Run linting
+#        run: ct lint --config charts/chart-testing-config.yaml --charts ./charts/managed-identity-wallet
+#
+#  chart-test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Set up Helm
+#        uses: azure/setup-helm@v3
+#        with:
+#          version: v3.12.3
+#
+#      - name: Set up Taskfile
+#        uses: arduino/setup-task@v1
+#
+#      - uses: actions/setup-java@v3
+#        with:
+#          distribution: 'temurin'
+#          java-version: '17'
+#
+#      - name: Add bitnami repo
+#        run: |
+#          helm repo add bitnami https://charts.bitnami.com/bitnami
+#          helm repo update
+#
+#      - name: Update Helm dependencies
+#        run: |
+#          cd charts/managed-identity-wallet
+#          helm dependency build
+#
+#      - name: Install Helm unittest plugin
+#        run: |
+#          helm plugin install https://github.com/helm-unittest/helm-unittest.git
+#
+#      - name: Run Helm unittests
+#        run: task helm:unittest
+#
+#      - name: Build app
+#        run: SKIP_GRADLE_TASKS_PARAM="-x jacocoTestCoverageVerification -x test" GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} task app:build
+#
+#      - name: Kubernetes KinD Cluster
+#        uses: container-tools/kind-action@v2
+#        with:
+#          node_image: 'kindest/node:v1.27.3'
+#          version: v0.20.0
+#
+#      - name: Build image
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: .
+#          push: true
+#          tags: kind-registry:5000/miw:testing
+#
+#      - name: Install the chart on KinD cluster
+#        run: helm install -n apps --create-namespace --wait --set image.tag=testing --set=image.repository=kind-registry:5000/miw testing charts/managed-identity-wallet

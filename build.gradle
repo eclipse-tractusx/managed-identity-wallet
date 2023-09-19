@@ -81,10 +81,6 @@ dependencyManagement {
     }
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 build {
     archivesBaseName = "miw"
     version = "latest"
@@ -100,6 +96,7 @@ bootJar {
 }
 
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 
@@ -111,9 +108,11 @@ jacocoTestReport {
     dependsOn test
 
     reports {
-        xml.required = false
-        csv.required = false
-        html.required = true
+        xml.enabled true
+        csv.enabled false
+        html.enabled true
+        html.destination file("${buildDir}/reports/html/jacoco")
+        xml.destination file("${buildDir}/reports/xml/jacoco")
     }
 
     afterEvaluate {
