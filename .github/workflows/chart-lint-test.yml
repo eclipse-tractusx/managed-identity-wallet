@@ -64,7 +64,7 @@ jobs:
 
       - name: Add coverage to PR
         id: jacoco_reporter_2
-        uses: juliusiglesia/jacoco-report-publisher@v1.0
+        uses: juliusiglesia/jacoco-report-publisher@0.0.2
         with:
           report-paths: ${{ github.workspace }}build/reports/xml/jacoco
           github-token: ${{ secrets.GITHUB_TOKEN }}
