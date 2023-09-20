@@ -44,6 +44,9 @@ jobs:
           java-version: '17'
 
       - name: Test app
+        run: GITHUB_TOKEN=${{ secrets.GH_TOKEN }} GITHUB_USERNAME=${{ vars.GH_USERNAME }} ./gradlew test
+
+      - name: Get coverage
         run: GITHUB_TOKEN=${{ secrets.GH_TOKEN }} GITHUB_USERNAME=${{ vars.GH_USERNAME }} ./gradlew jacocoTestReport
 
       - name: Step 3 - Use the Upload Artifact GitHub Action
