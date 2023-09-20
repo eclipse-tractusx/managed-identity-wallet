@@ -49,11 +49,29 @@ jobs:
       - name: Get coverage
         run: ORG_GRADLE_PROJECT_githubToken=${{ secrets.GH_TOKEN }} ORG_GRADLE_PROJECT_githubUserName=${{ vars.GH_USERNAME }} ./gradlew jacocoTestReport
 
+      - name: JaCoCo Code Coverage Report
+        id: jacoco_reporter
+        uses: PavanMudigonda/jacoco-reporter@v4.8
+        with:
+          coverage_results_path: build/reports/xml/jacoco
+          coverage_report_name: Coverage Report
+          coverage_report_title: JaCoCo
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_check_run: false
+          minimum_coverage: 80
+          fail_below_threshold: false
+          publish_only_summary: false
+
+      # Publish Coverage Job Summary  # Optional
+      - name: Add Coverage Job Summary
+        run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
+
+
       - name: Step 3 - Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
         with:
           name: Test-report
-          path: build/reports/xml/jacoco
+          path: "*/coverage-results.md"
 
 
 #  chart-lint:
