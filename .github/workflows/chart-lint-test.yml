@@ -44,10 +44,10 @@ jobs:
           java-version: '17'
 
       - name: Test app
-        run: GITHUB_TOKEN=${{ secrets.GH_TOKEN }} GITHUB_USERNAME=${{ vars.GH_USERNAME }} ./gradlew test
+        run: ORG_GRADLE_PROJECT_githubToken=${{ secrets.GH_TOKEN }} ORG_GRADLE_PROJECT_githubUserName=${{ vars.GH_USERNAME }} ./gradlew test
 
       - name: Get coverage
-        run: GITHUB_TOKEN=${{ secrets.GH_TOKEN }} GITHUB_USERNAME=${{ vars.GH_USERNAME }} ./gradlew jacocoTestReport
+        run: ORG_GRADLE_PROJECT_githubToken=${{ secrets.GH_TOKEN }} ORG_GRADLE_PROJECT_githubUserName=${{ vars.GH_USERNAME }} ./gradlew jacocoTestReport
 
       - name: Step 3 - Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
