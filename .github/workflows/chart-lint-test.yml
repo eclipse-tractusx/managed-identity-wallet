@@ -62,6 +62,27 @@ jobs:
           fail_below_threshold: false
           publish_only_summary: false
 
+      - name: Add coverage to PR
+        id: jacoco_reporter_2
+        uses: juliusiglesia/jacoco-report-publisher@v1.0
+        with:
+          report-paths: ${{ github.workspace }}build/reports/xml/jacoco
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          min-overall-instructions-coverage: 50
+          min-overall-branch-coverage: 50
+          min-modified-files-instructions-coverage: 70
+          min-modified-files-branch-coverage: 70
+
+      - name: Add coverage to PR
+        id: jacoco_reporter_3
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}build/reports/xml/jacoco
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+
 #      # Publish Coverage Job Summary  # Optional
 #      - name: Add Coverage Job Summary
 #        run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
