@@ -68,7 +68,7 @@ jobs:
         id: jacoco_reporter_2
         uses: juliusiglesia/jacoco-report-publisher@0.0.2
         with:
-          report-paths: ${{ github.workspace }}build/reports/xml/jacoco
+          report-paths: ${{ github.workspace }}/build/reports/xml/jacoco
           github-token: ${{ secrets.GITHUB_TOKEN }}
           min-overall-instructions-coverage: 50
           min-overall-branch-coverage: 50
@@ -80,7 +80,7 @@ jobs:
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
-            ${{ github.workspace }}build/reports/xml/jacoco
+            ${{ github.workspace }}/build/reports/xml/jacoco
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
           min-coverage-changed-files: 60
