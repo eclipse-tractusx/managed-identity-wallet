@@ -72,6 +72,26 @@ jobs:
           path: 'build/test-results/test/*.xml'
           reporter: java-junit
 
+      - name: Setup .NET Core # Required to execute ReportGenerator
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.x
+          dotnet-quality: 'ga'
+
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.1.25
+        id: report_generator
+        with:
+          reports: build/reports/xml/jacoco
+          targetdir: coveragereport
+          reporttypes: MarkdownSummaryGithub
+          sourcedirs: src/main/java
+          title: 'Code Coverage'
+
+      - name: Add Coverage Job Summary
+        run: |
+          ls -lrt coveragereport
+          cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
 #  chart-lint:
 #    runs-on: ubuntu-latest
