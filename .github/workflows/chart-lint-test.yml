@@ -50,19 +50,6 @@ jobs:
 
       - name: Get coverage
         run: ORG_GRADLE_PROJECT_githubToken=${{ secrets.GH_TOKEN }} ORG_GRADLE_PROJECT_githubUserName=${{ vars.GH_USERNAME }} ./gradlew jacocoTestReport
-#
-#      - name: JaCoCo Code Coverage Report
-#        id: jacoco_reporter
-#        uses: PavanMudigonda/jacoco-reporter@v4.8
-#        with:
-#          coverage_results_path: build/reports/xml/jacoco
-#          coverage_report_name: Coverage Report
-#          coverage_report_title: JaCoCo
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          skip_check_run: false
-#          minimum_coverage: 80
-#          fail_below_threshold: false
-#          publish_only_summary: false
 
       - uses: dorny/test-reporter@v1
         if: success() || failure()
@@ -89,9 +76,17 @@ jobs:
           title: 'Code Coverage'
 
       - name: Add Coverage Job Summary
-        run: |
-          ls -lrt coveragereport
-          cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+        run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Add coverage to PR
+        if: github.event_name == 'pull_request'
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}build/reports/xml/jacoco
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
 
 #  chart-lint:
 #    runs-on: ubuntu-latest
