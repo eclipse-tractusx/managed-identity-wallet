@@ -25,6 +25,8 @@ on:
     paths:
       - 'charts/managed-identity-wallet/**'
   push:
+    branches:
+      - feat/action-report-upload
 #    paths:
 #      - 'charts/managed-identity-wallet/**'
 
