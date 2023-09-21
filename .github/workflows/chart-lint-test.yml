@@ -50,7 +50,7 @@ jobs:
 
       - name: Get coverage
         run: ORG_GRADLE_PROJECT_githubToken=${{ secrets.GH_TOKEN }} ORG_GRADLE_PROJECT_githubUserName=${{ vars.GH_USERNAME }} ./gradlew jacocoTestReport
-
+#
 #      - name: JaCoCo Code Coverage Report
 #        id: jacoco_reporter
 #        uses: PavanMudigonda/jacoco-reporter@v4.8
@@ -64,37 +64,13 @@ jobs:
 #          fail_below_threshold: false
 #          publish_only_summary: false
 
-      - name: Add coverage to PR
-        id: jacoco_reporter_2
-        uses: juliusiglesia/jacoco-report-publisher@0.0.2
+      - uses: dorny/test-reporter@v1
+        if: success() || failure()
         with:
-          report-paths: ${{ github.workspace }}/build/reports/xml/jacoco
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          min-overall-instructions-coverage: 50
-          min-overall-branch-coverage: 50
-          min-modified-files-instructions-coverage: 70
-          min-modified-files-branch-coverage: 70
-
-#      - name: Add coverage to PR
-#        id: jacoco_reporter_3
-#        uses: madrapps/jacoco-report@v1.6.1
-#        with:
-#          paths: |
-#            ${{ github.workspace }}/build/reports/xml/jacoco
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          min-coverage-overall: 40
-#          min-coverage-changed-files: 60
-
-#      # Publish Coverage Job Summary  # Optional
-#      - name: Add Coverage Job Summary
-#        run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
-#
-#
-#      - name: Step 3 - Use the Upload Artifact GitHub Action
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: Test-report
-#          path: "*/coverage-results.md"
+          artifact: test-results
+          name: Jacoco Tests
+          path: 'build/reports/xml/jacoco'
+          reporter: java-junit
 
 
 #  chart-lint:
