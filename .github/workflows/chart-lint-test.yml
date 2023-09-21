@@ -25,8 +25,8 @@ on:
     paths:
       - 'charts/managed-identity-wallet/**'
   push:
-    paths:
-      - 'charts/managed-identity-wallet/**'
+#    paths:
+#      - 'charts/managed-identity-wallet/**'
 
 jobs:
   test-app:
