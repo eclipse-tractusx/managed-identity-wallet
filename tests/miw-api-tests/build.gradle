@@ -1,0 +1,123 @@
+plugins {
+    id 'java'
+    id 'groovy'
+}
+
+group 'org.eclipse.tractusx.managedidentitywallets.test'
+version '1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+    maven {
+        url = uri("https://repo.danubetech.com/repository/maven-public")
+    }
+    maven { url 'https://jitpack.io' }
+    maven {
+        url = uri("https://maven.pkg.github.com/catenax-ng/product-lab-ssi")
+        credentials {
+            username = "${githubUserName}"
+            password = "${githubToken}"
+        }
+    }
+}
+
+dependencies {
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
+
+    //added explicitly to mitigate CVE-2023-3635
+    implementation group: 'com.squareup.okio', name: 'okio', version: '3.5.0'
+    
+    implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.11.0'
+    implementation group: 'io.cucumber', name: 'cucumber-testng', version: '7.11.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.13.0'
+    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.16'
+    implementation 'org.testng:testng:7.7.1'
+    implementation group: 'com.github.curious-odd-man', name: 'rgxgen', version: '1.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    testImplementation 'org.projectlombok:lombok:1.18.28'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.9'
+}
+
+
+tasks.register('aggregatReport', JavaExec) {
+    println("Running aggregatReport task")
+    description 'Combine multiple cucumber report json file into one json file'
+    classpath sourceSets.main.runtimeClasspath
+    mainClass = "org.eclipse.tractusx.managedidentitywallets.test.utils.ReportAggregator"
+    def reportFolderPath = "./build/cucumber-reports/"
+    File file = file(reportFolderPath)
+    args file.toPath().toAbsolutePath().toString()
+}
+
+
+test {
+    println("Running test task")
+    useTestNG() {
+        suites 'src/test/testng.xml'
+    }
+    testLogging {
+        showStandardStreams = true
+    }
+    finalizedBy aggregatReport
+}
+
+
+tasks.register('importJunitResultsToXrayCloud') {
+    dependsOn 'test'
+    description 'Imports Cucumber test results to Xray Test Management for Jira Cloud.'
+    def xrayApiBaseUrl = 'https://xray.cloud.getxray.app/api/v2'
+
+    doLast {
+        def fileName = "./build/cucumber-reports/final.json"
+        new ByteArrayOutputStream().withStream { os ->
+            def result = exec {
+                ignoreExitValue = true
+                commandLine 'curl', '--silent', '--fail-with-body', '-H', 'Content-Type: application/json', '-X', 'POST', '--data', "{ \"client_id\": \"${clientId}\",\"client_secret\": \"${clientSecret}\" }", "${xrayApiBaseUrl}/authenticate"
+                standardOutput = os
+            }
+            if (result.getExitValue() != 0) {
+                println "ERROR: problem authenticating"
+            } else {
+                def token = os.toString().replaceAll("\"", "")
+                println "Authenticated with Xray!"
+
+                new ByteArrayOutputStream().withStream { os2 ->
+                    def result2 = exec {
+                        ignoreExitValue = true
+
+                        def url = "${xrayApiBaseUrl}/import/execution/${reportFormat}?"
+                        if (projectKey?.trim()) {
+                            url += "&projectKey=${projectKey}"
+                        }
+
+                        if (testPlanKey?.trim()) {
+                            url += "&testPlanKey=${testPlanKey}"
+                        }
+                        if (testExecKey?.trim()) {
+                            url += "&testExecKey=${testExecKey}"
+                        }
+                        if (testEnvironment?.trim()) {
+                            url += "&testEnvironments=${testEnvironment}"
+                        }
+
+                        commandLine 'curl', '--fail-with-body', '-H', 'Content-Type: application/json', '-X', 'POST', '-H', "Authorization: Bearer ${token}", '--data', "@$fileName", url
+                        standardOutput = os2
+                    }
+                    if (result2.getExitValue() != 0) {
+                        println "ERROR: problem importing results to Xray"
+                        println os2.toString()
+                    } else {
+                        println "Resuls imported to Xray!"
+                        println os2.toString()
+                    }
+                }
+            }
+        }
+    }
+}

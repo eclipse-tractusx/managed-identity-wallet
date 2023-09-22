@@ -1,0 +1,16 @@
+**/.gradle/
+**/build/
+**/bin/
+**/.project/
+**/.settings/
+.classpath
+.project
+**/.project
+**/.settings
+**.idea/**
+.idea/**
+**/out/
+*.iml
+.scannerwork/**
+.scannerwork/*
+**/logs/*
