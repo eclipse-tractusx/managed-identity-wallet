@@ -137,10 +137,17 @@ directory, but without ".dist" at the end.
 
 Description of the env files:
 
-- **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords. Everything else can
-  remain as it is.
-- **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords. Everything else
-  can remain as it is.
+- **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords. 
+- **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords.
+
+> **IMPORTANT**: ssi-lib is resolving DID documents over network. There are two endpoints that rely on this resolution:
+> - Verifiable Credentials - Validation
+> - Verifiable Presentations - Validation
+>   
+> The following parameters must be added or changed in env.local or env.docker file to ensure that these endpoints work as intended in local development environment:
+> Add: ENFORCE_HTTPS_IN_DID_RESOLUTION=false
+> Change: MIW_HOST_NAME from miw to localhost
+> Change: APPLICATION_PORT from 8000 to 80
 
 > **IMPORTANT**: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start
 > at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker
