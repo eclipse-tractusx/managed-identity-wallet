@@ -93,6 +93,7 @@ jobs:
 
           kubectl --namespace apps port-forward $POD_NAME 8080:$CONTAINER_PORT --address 0.0.0.0 &
 
+        # Sleep for 4 seconds to ensure, that the port-forward is established
       - name: Sleep for 4s
         uses: juliangruber/sleep-action@v1
         with:
