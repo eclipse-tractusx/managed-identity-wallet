@@ -61,7 +61,7 @@ jobs:
           java-version: '17'
 
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2Ï
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: build -PgithubToken=${{ secrets.GITHUB_TOKEN }}
 
