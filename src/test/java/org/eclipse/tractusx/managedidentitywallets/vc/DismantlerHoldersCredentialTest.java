@@ -54,7 +54,6 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
@@ -79,7 +78,7 @@ class DismantlerHoldersCredentialTest {
 
     @Test
     void issueDismantlerCredentialTest403() {
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
 
         HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
 
@@ -110,12 +109,12 @@ class DismantlerHoldersCredentialTest {
     @Test
     void issueDismantlerCredentialTest201() throws JsonProcessingException, JSONException {
 
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String baseBpn = miwSettings.authorityWalletBpn();
 
         //create wallet
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate,baseBpn).getBody());
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         ResponseEntity<String> response = issueDismantlerCredential(bpn, did);
@@ -153,7 +152,7 @@ class DismantlerHoldersCredentialTest {
 
     @Test
     void issueDismantlerCredentialWithInvalidBpnAccess409() {
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
 
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
@@ -178,7 +177,7 @@ class DismantlerHoldersCredentialTest {
 
     @Test
     void issueDismantlerCredentialWithoutAllowedVehicleBrands() {
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
 
@@ -200,7 +199,7 @@ class DismantlerHoldersCredentialTest {
     @Test
     void issueDismantlerCredentialWithDuplicateBpn409() {
 
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
         //create entry

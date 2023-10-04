@@ -27,8 +27,9 @@ maven/mavencentral/com.fasterxml.jackson/jackson-bom/2.15.2, Apache-2.0, approve
 maven/mavencentral/com.fasterxml.woodstox/woodstox-core/6.5.1, Apache-2.0, approved, #7950
 maven/mavencentral/com.fasterxml/classmate/1.5.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.github.ben-manes.caffeine/caffeine/3.1.6, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.curious-odd-man/rgxgen/1.4, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.github.dasniko/testcontainers-keycloak/2.5.0, Apache-2.0, approved, #9175
-maven/mavencentral/com.github.docker-java/docker-java-api/3.3.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.docker-java/docker-java-api/3.3.0, Apache-2.0, approved, #10346
 maven/mavencentral/com.github.docker-java/docker-java-transport-zerodep/3.3.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #7946
 maven/mavencentral/com.github.docker-java/docker-java-transport/3.3.0, Apache-2.0, approved, #7942
 maven/mavencentral/com.github.java-json-tools/btf/1.3, Apache-2.0 OR LGPL-3.0-or-later, approved, #2721
@@ -57,7 +58,6 @@ maven/mavencentral/com.opencsv/opencsv/5.7.1, Apache-2.0, approved, clearlydefin
 maven/mavencentral/com.smartsensesolutions/commons-dao/0.0.5, Apache-2.0, approved, #9176
 maven/mavencentral/com.squareup.okhttp3/okhttp/4.10.0, Apache-2.0 AND MPL-2.0, approved, #3057
 maven/mavencentral/com.squareup.okio/okio-jvm/3.0.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.squareup.okio/okio/3.0.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.sun.activation/jakarta.activation/1.2.1, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 maven/mavencentral/com.sun.istack/istack-commons-runtime/4.1.2, BSD-3-Clause, approved, #2590
 maven/mavencentral/com.sun.mail/jakarta.mail/1.6.5, EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, ee4j.mail
@@ -150,6 +150,10 @@ maven/mavencentral/org.checkerframework/checker-compat-qual/2.5.5, MIT, approved
 maven/mavencentral/org.checkerframework/checker-qual/3.31.0, MIT, approved, clearlydefined
 maven/mavencentral/org.checkerframework/checker-qual/3.33.0, MIT, approved, clearlydefined
 maven/mavencentral/org.codehaus.woodstox/stax2-api/4.2.1, BSD-2-Clause, approved, #2670
+maven/mavencentral/org.eclipse.angus/angus-activation/2.0.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.angus
+maven/mavencentral/org.eclipse.microprofile.config/microprofile-config-api/2.0, Apache-2.0, approved, technology.microprofile
+maven/mavencentral/org.eclipse.parsson/parsson/1.1.3, EPL-2.0, approved, ee4j.parsson
+maven/mavencentral/org.eclipse.tractusx.ssi/cx-ssi-lib/0.0.16, Apache-2.0, approved, automotive.tractusx
 maven/mavencentral/org.glassfish.jaxb/jaxb-core/4.0.3, BSD-3-Clause, approved, ee4j.jaxb
 maven/mavencentral/org.glassfish.jaxb/jaxb-runtime/2.3.3-b02, BSD-3-Clause, approved, ee4j.jaxb
 maven/mavencentral/org.glassfish.jaxb/jaxb-runtime/4.0.2, BSD-3-Clause, approved, ee4j.jaxb
@@ -197,7 +201,6 @@ maven/mavencentral/org.junit.jupiter/junit-jupiter-params/5.9.3, EPL-2.0, approv
 maven/mavencentral/org.junit.jupiter/junit-jupiter/5.9.3, EPL-2.0, approved, #6972
 maven/mavencentral/org.junit.platform/junit-platform-commons/1.9.3, EPL-2.0, approved, #3130
 maven/mavencentral/org.junit.platform/junit-platform-engine/1.9.3, EPL-2.0, approved, #3128
-maven/mavencentral/org.junit/junit-bom/5.9.3, EPL-2.0, approved, #4711
 maven/mavencentral/org.keycloak/keycloak-admin-client/21.0.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.keycloak/keycloak-common/21.0.0, Apache-2.0 AND LicenseRef-scancode-public-domain-disclaimer, approved, #7287
 maven/mavencentral/org.keycloak/keycloak-core/21.0.0, Apache-2.0, approved, #7293

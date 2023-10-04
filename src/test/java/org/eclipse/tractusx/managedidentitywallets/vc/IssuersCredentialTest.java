@@ -79,7 +79,7 @@ class IssuersCredentialTest {
     @Test
     void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
         String baseBPN = miwSettings.authorityWalletBpn();
-        String holderBpn = UUID.randomUUID().toString();
+        String holderBpn = TestUtils.getRandomBpmNumber();
         String holderDID = "did:web:localhost:" + holderBpn;
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseBPN);
         //save wallet
@@ -161,7 +161,7 @@ class IssuersCredentialTest {
 
     @Test
     void issueCredentialsWithoutBaseWalletBPN403() throws JsonProcessingException {
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String holderDid = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
@@ -192,7 +192,7 @@ class IssuersCredentialTest {
     @Test
     void issueSummaryCredentials400() throws com.fasterxml.jackson.core.JsonProcessingException {
 
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
@@ -204,7 +204,7 @@ class IssuersCredentialTest {
     @Test
     void issueCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
 
-        String bpn = UUID.randomUUID().toString();
+        String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String type = "TestCredential";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
@@ -231,7 +231,7 @@ class IssuersCredentialTest {
     private ResponseEntity<String> issueVC(String bpn, String holderDid, String issuerDid, String type, HttpHeaders headers) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
         //save wallet
-        TestUtils.createWallet(bpn, holderDid, restTemplate,baseBpn);
+        TestUtils.createWallet(bpn, holderDid, restTemplate, baseBpn);
 
         // Create VC without proof
         //VC Bulider

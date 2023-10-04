@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.curiousoddman.rgxgen.RgxGen;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
@@ -56,7 +57,7 @@ import java.util.Map;
 
 public class TestUtils {
 
-    public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate,String baseBPN) {
+    public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate, String baseBPN) {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseBPN);
 
         CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
@@ -198,5 +199,10 @@ public class TestUtils {
             credentialList.add(new VerifiableCredential(stringObjectMap));
         }
         return credentialList;
+    }
+
+    public static String getRandomBpmNumber() {
+        RgxGen rgxGen = new RgxGen(StringPool.BPN_NUMBER_REGEX);
+        return rgxGen.generate();
     }
 }
