@@ -25,9 +25,19 @@ on:
     paths:
       - 'src/**'
 
+permissions:
+  id-token: write
+  statuses: write
+  checks: write
+  # may also be read
+  contents: write
+  pull-requests: write
+  actions: write
+
 jobs:
   test-app:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -55,7 +65,7 @@ jobs:
         run: ORG_GRADLE_PROJECT_githubToken=${{ secrets.GITHUB_TOKEN }} ./gradlew jacocoTestReport
 
       - name: Generate test report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v1.6.0
         if: success() || failure()
         with:
           name: Test results
