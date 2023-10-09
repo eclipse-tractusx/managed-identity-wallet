@@ -114,6 +114,7 @@ spec:
               containerPort: 8080
               protocol: TCP
           {{- with .Values.livenessProbe }}
+          {{- if .enabled }}
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -124,7 +125,9 @@ spec:
             periodSeconds: {{ .periodSeconds }}
             timeoutSeconds: {{ .timeoutSeconds }}
           {{- end }}
+          {{- end }}
           {{- with .Values.readinessProbe }}
+          {{- if .enabled }}
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -135,6 +138,7 @@ spec:
             periodSeconds: {{ .periodSeconds }}
             successThreshold: {{ .successThreshold }}
             timeoutSeconds: {{ .timeoutSeconds }}
+          {{- end }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

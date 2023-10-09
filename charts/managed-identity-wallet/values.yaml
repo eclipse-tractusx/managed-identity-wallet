@@ -84,6 +84,8 @@ securityContext:
 
 # -- Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 livenessProbe:
+  # -- Enables/Disables the livenessProbe at all
+  enabled: true
   # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container.
   failureThreshold: 3
   # -- Number of seconds after the container has started before readiness probe are initiated.
@@ -95,6 +97,8 @@ livenessProbe:
 
 # -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 readinessProbe:
+  # -- Enables/Disables the readinessProbe at all
+  enabled: true
   # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready.
   failureThreshold: 3
   # -- Number of seconds after the container has started before readiness probe are initiated.
