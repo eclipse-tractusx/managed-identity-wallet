@@ -19,17 +19,9 @@
 # Depending on the location of your Docker container
 # you need to change the path to the specific Docker registry.
 #
-name: "Trivy"
+name: "Daily Trivy Scan"
 
 on:
-  push:
-    branches: [main, development]
-  # pull_request:
-  # The branches below must be a subset of the branches above
-  # branches: [ main, develop ]
-  # paths-ignore:
-  #   - "**/*.md"
-  #   - "**/*.txt"
   schedule:
     # Once a day
     - cron: "0 0 * * *"
@@ -37,7 +29,7 @@ on:
   # Trigger manually
 
 jobs:
-  analyze-config:
+  analyze-managed-identity-wallet:
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -48,87 +40,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.11.2
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.12.0
         with:
-          scan-type: "config"
-          # ignore-unfixed: true
-          exit-code: "1"
-          hide-progress: false
+          # Path to Docker image
+          image-ref: "tractusx/managed-identity-wallet:latest"
           format: "sarif"
-          output: "trivy-results1.sarif"
+          output: "trivy-results2.sarif"
+          exit-code: "1"
           severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
         if: always()
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: "trivy-results1.sarif"
-#
-#  analyze-managed-identity-wallet-service:
-#    runs-on: ubuntu-latest
-#    if: github.ref == 'refs/heads/main'
-#    permissions:
-#      actions: read
-#      contents: read
-#      security-events: write
-#
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v3
-#
-#      # It's also possible to scan your private registry with Trivy's built-in image scan.
-#      # All you have to do is set ENV vars.
-#      # Docker Hub needs TRIVY_USERNAME and TRIVY_PASSWORD.
-#      # You don't need to set ENV vars when downloading from a public repository.
-#      # For public images, no ENV vars must be set.
-#      - name: Run Trivy vulnerability scanner
-#        if: always()
-#        uses: aquasecurity/trivy-action@0.11.2
-#        with:
-#          # Path to Docker image
-#          image-ref: "ghcr.io/catenax-ng/tx-managed-identity-wallets_service:latest"
-#          format: "sarif"
-#          output: "trivy-results3.sarif"
-#          exit-code: "1"
-#          severity: "CRITICAL,HIGH"
-#
-#      - name: Upload Trivy scan results to GitHub Security tab
-#        if: always()
-#        uses: github/codeql-action/upload-sarif@v2
-#        with:
-#          sarif_file: "trivy-results3.sarif"
-#
-#  analyze-managed-identity-wallet-service-development:
-#    runs-on: ubuntu-latest
-#    if: github.ref == 'refs/heads/development'
-#    permissions:
-#      actions: read
-#      contents: read
-#      security-events: write
-#
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v3
-#
-#      # It's also possible to scan your private registry with Trivy's built-in image scan.
-#      # All you have to do is set ENV vars.
-#      # Docker Hub needs TRIVY_USERNAME and TRIVY_PASSWORD.
-#      # You don't need to set ENV vars when downloading from a public repository.
-#      # For public images, no ENV vars must be set.
-#      - name: Run Trivy vulnerability scanner
-#        if: always()
-#        uses: aquasecurity/trivy-action@0.11.2
-#        with:
-#          # Path to Docker image
-#          image-ref: "ghcr.io/catenax-ng/tx-managed-identity-wallets_service:latest-develop"
-#          format: "sarif"
-#          output: "trivy-results3.sarif"
-#          exit-code: "1"
-#          severity: "CRITICAL,HIGH"
-#
-#      - name: Upload Trivy scan results to GitHub Security tab
-#        if: always()
-#        uses: github/codeql-action/upload-sarif@v2
-#        with:
-#          sarif_file: "trivy-results3.sarif"
+          sarif_file: "trivy-results2.sarif"

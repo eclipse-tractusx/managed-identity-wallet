@@ -21,16 +21,21 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import com.apicatalog.jsonld.JsonLdError;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.exception.*;
+import org.eclipse.tractusx.ssi.lib.exception.NoVerificationKeyFoundExcpetion;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -114,7 +119,7 @@ public class ExceptionHandling {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ProblemDetail handleValidation(MethodArgumentNotValidException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(e));
         problemDetail.setTitle("Invalid data provided");
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         problemDetail.setProperty("errors", handleValidationError(e.getFieldErrors()));
@@ -129,7 +134,7 @@ public class ExceptionHandling {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     ProblemDetail handleValidation(ConstraintViolationException exception) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
         problemDetail.setTitle("Invalid data provided");
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         problemDetail.setProperty("errors", exception.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList());
@@ -164,6 +169,82 @@ public class ExceptionHandling {
         return problemDetail;
     }
 
+
+    /**
+     * Handle illegal argument exception problem detail.
+     *
+     * @param exception the exception
+     * @return the problem detail
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    ProblemDetail handleIllegalArgumentException(IllegalArgumentException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
+        problemDetail.setTitle(ExceptionUtils.getMessage(exception));
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
+    /**
+     * Handle method argument type mismatch exception problem detail.
+     *
+     * @param exception the exception
+     * @return the problem detail
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ProblemDetail handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
+        problemDetail.setTitle(ExceptionUtils.getMessage(exception));
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        problemDetail.setProperty("invalidArgument", exception.getName());
+        return problemDetail;
+    }
+
+    /**
+     * Handle no verification key found exception problem detail.
+     *
+     * @param exception the exception
+     * @return the problem detail
+     */
+    @ExceptionHandler(NoVerificationKeyFoundExcpetion.class)
+    ProblemDetail handleNoVerificationKeyFoundException(NoVerificationKeyFoundExcpetion exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
+        problemDetail.setTitle(ExceptionUtils.getMessage(exception));
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
+
+    /**
+     * Handle property reference exception problem detail.
+     *
+     * @param exception the exception
+     * @return the problem detail
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    ProblemDetail handlePropertyReferenceException(PropertyReferenceException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
+        problemDetail.setTitle(ExceptionUtils.getMessage(exception));
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        problemDetail.setProperty("invalidProperty", exception.getPropertyName());
+        return problemDetail;
+    }
+
+    /**
+     * Handle json ld error problem detail.
+     *
+     * @param exception the exception
+     * @return the problem detail
+     */
+    @ExceptionHandler(JsonLdError.class)
+    ProblemDetail handleJsonLdError(JsonLdError exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
+        problemDetail.setTitle(ExceptionUtils.getMessage(exception));
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        problemDetail.setProperty("error", "Can not parse data on JSON-LD");
+        return problemDetail;
+    }
+
+
     /**
      * Handle exception problem detail.
      *
@@ -173,7 +254,12 @@ public class ExceptionHandling {
     @ExceptionHandler(Exception.class)
     ProblemDetail handleException(Exception e) {
         log.error("Error ", e);
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        ProblemDetail problemDetail;
+        if (e.getCause() instanceof JsonLdError) { //in case of invalid context of VC/VP, ssi-lid is giving RuntimeException cause bt JsonLdError, considering as bad data
+            problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        } else {
+            problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
         problemDetail.setTitle(e.getMessage());
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
         return problemDetail;

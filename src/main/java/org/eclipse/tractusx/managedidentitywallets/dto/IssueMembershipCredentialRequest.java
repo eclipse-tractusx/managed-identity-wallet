@@ -22,8 +22,9 @@
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 
 /**
  * The type Issue membership credential request.
@@ -36,7 +37,7 @@ import lombok.*;
 public class IssueMembershipCredentialRequest {
 
     @NotBlank(message = "Please provide BPN")
-    @Size(min = 5, max = 255, message = "Please provide valid BPN")
+    @Pattern(regexp = StringPool.BPN_NUMBER_REGEX, message = "Please provide valid BPN")
     private String bpn;
 }
 

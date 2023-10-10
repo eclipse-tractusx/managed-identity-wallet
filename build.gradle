@@ -50,7 +50,7 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
     implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.15'
+    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.16'
 
     //Added explicitly to mitigate CVE 2022-1471
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
@@ -72,6 +72,8 @@ dependencies {
     testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
     testImplementation group: 'org.json', name: 'json', version: '20230227'
+    testImplementation group: 'com.github.curious-odd-man', name: 'rgxgen', version: '1.4'
+
 }
 
 dependencyManagement {
@@ -88,6 +90,15 @@ tasks.named('test') {
 build {
     archivesBaseName = "miw"
     version = "latest"
+}
+
+bootJar {
+	metaInf {
+		from 'DEPENDENCIES'
+		from 'SECURITY.md'
+		from 'NOTICE.md'
+		from 'LICENSE'
+	}
 }
 
 test {

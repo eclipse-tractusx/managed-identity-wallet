@@ -1,0 +1,98 @@
+
+{#
+# /********************************************************************************
+# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# *
+# * See the NOTICE file(s) distributed with this work for additional
+# * information regarding copyright ownership.
+# *
+# * This program and the accompanying materials are made available under the
+# * terms of the Apache License, Version 2.0 which is available at
+# * https://www.apache.org/licenses/LICENSE-2.0.
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# * License for the specific language governing permissions and limitations
+# * under the License.
+# *
+# * SPDX-License-Identifier: Apache-2.0
+# ********************************************************************************/
+#}
+
+{#- macro: render_commit -#}
+{%- macro render_commit(commit) -%}
+- {{ commit.convention.subject|default(commit.subject) }} (by {{ commit.author_name }}).
+{%- if commit.text_refs.issues_not_in_subject %} Related issues/PRs: {% for issue in commit.text_refs.issues_not_in_subject -%}
+{% if issue.url %}[{{ issue.ref }}]({{ issue.url }}){% else %}{{ issue.ref }}{% endif %}{% if not loop.last %}, {% endif -%}
+{%- endfor -%}{%- endif -%}
+{%- for trailer_name, trailer_value in commit.trailers.items() -%}
+{%- if trailer_value|is_url %} [{{ trailer_name }}]({{ trailer_value }})
+{%- else %} {{ trailer_name }}: {{ trailer_value }}{% endif %}
+{%- if not loop.last %},{% endif %}
+{%- endfor -%}
+{%- endmacro -%}
+
+{#- macro: render_section -#}
+{%- macro render_section(section) -%}
+### {{ section.type or "Misc" }}
+
+{% for commit in section.commits|sort(attribute='author_date',reverse=true)|unique(attribute='subject') -%}
+{{ render_commit(commit) }}
+{% endfor %}
+{%- endmacro -%}
+
+{#- macro: render_version -#}
+{%- macro render_version(version) -%}
+{%- if version.tag or version.planned_tag -%}
+## {{ version.tag or version.planned_tag }}{% if version.date %} - {{ version.date }}{% endif %}
+
+{%- else -%}
+## Unreleased
+
+{%- endif %}
+{% for type in changelog.sections %}
+{%- if type in version.sections_dict %}
+{%- with section = version.sections_dict[type] %}
+{{ render_section(section) }}
+{%- endwith %}
+{%- endif %}
+{%- endfor %}
+{%- if not (version.tag or version.planned_tag) %}
+<!-- insertion marker -->{% endif %}
+{% endmacro -%}
+
+{#- template -#}
+{%- if not in_place -%}
+<!---
+/********************************************************************************
+* Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+*
+* See the NOTICE file(s) distributed with this work for additional
+* information regarding copyright ownership.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Apache License, Version 2.0 which is available at
+* https://www.apache.org/licenses/LICENSE-2.0.
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+* License for the specific language governing permissions and limitations
+* under the License.
+*
+* SPDX-License-Identifier: Apache-2.0
+********************************************************************************/
+--->
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+{% endif %}<!-- insertion marker -->
+{% for version in changelog.versions_list -%}
+{{ render_version(version) }}
+{%- endfor -%}

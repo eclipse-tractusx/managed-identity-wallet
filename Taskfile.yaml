@@ -45,8 +45,11 @@ tasks:
   changelog:
     desc: Generate Changelog
     cmds:
-      - rm -f CHANGELOG.md
-      - git-changelog -o CHANGELOG.md -c conventional -t keepachangelog .
+      - git-changelog -i -g '^## (?P<version>[v|V]?\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)' -o CHANGELOG.md -c conventional -t path:./CHANGELOG.md.jinja .
+  # Explanation of Regex:
+  #   Semantic versioning named group: ?P<version>[v|V]?\d+\.\d+\.\d+
+  #   Pre-release candidates group (e.g. -rc.2): ?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*
+  #   Optional build information group: ?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?
 
   clean-all:
     desc: Cleans everything...

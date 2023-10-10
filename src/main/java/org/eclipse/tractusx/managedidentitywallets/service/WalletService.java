@@ -55,11 +55,16 @@ import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.StringWriter;
 import java.net.URI;
@@ -96,6 +101,9 @@ public class WalletService extends BaseService<Wallet, Long> {
     private final IssuersCredentialService issuersCredentialService;
 
     private final CommonService commonService;
+
+    @Qualifier("transactionManager")
+    private final PlatformTransactionManager transactionManager;
 
 
     @Override
@@ -276,18 +284,23 @@ public class WalletService extends BaseService<Wallet, Long> {
      * Create authority wallet on application start up, skip if already created.
      */
     @PostConstruct
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public void createAuthorityWallet() {
-        if (!walletRepository.existsByBpn(miwSettings.authorityWalletBpn())) {
-            CreateWalletRequest request = CreateWalletRequest.builder()
-                    .name(miwSettings.authorityWalletName())
-                    .bpn(miwSettings.authorityWalletBpn())
-                    .build();
-            createWallet(request, true, miwSettings.authorityWalletBpn());
-            log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
-        } else {
-            log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
-        }
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                if (!walletRepository.existsByBpn(miwSettings.authorityWalletBpn())) {
+                    CreateWalletRequest request = CreateWalletRequest.builder()
+                            .name(miwSettings.authorityWalletName())
+                            .bpn(miwSettings.authorityWalletBpn())
+                            .build();
+                    createWallet(request, true, miwSettings.authorityWalletBpn());
+                    log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
+                } else {
+                    log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
+                }
+            }
+        });
     }
 
     private void validateCreateWallet(CreateWalletRequest request, String callerBpn) {
