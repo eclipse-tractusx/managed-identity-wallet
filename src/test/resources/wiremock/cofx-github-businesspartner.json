@@ -1,0 +1,41 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@protected": true,
+    "BpnCredential": {
+      "@id": "https://raw.githubusercontent.com/Cofinity-X/schema-registry/main/v1.1/businessPartnerData#BpnCredential",
+      "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "id": "@id",
+        "type": "@type",
+        "bpn": "http://schema.org/identifier"
+      }
+    },
+    "MembershipCredential": {
+      "@id": "https://raw.githubusercontent.com/Cofinity-X/schema-registry/main/v1.1/businessPartnerData#MembershipCredential",
+      "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "id": "@id",
+        "type": "@type",
+        "ex": "https://example.org/examples#",
+        "startTime": {
+          "@id": "https://schema.org/startTime",
+          "@type": "https://schema.org/DateTime"
+        },
+        "memberOf": {
+          "@id": "https://schema.org/memberOf",
+          "@type": "https://schema.org/Text"
+        },
+        "status": {
+          "@id": "ex:status",
+          "@type": "https://schema.org/Text"
+        },
+        "holderIdentifier": {
+          "@id": "http://schema.org/identifier"
+        }
+      }
+    }
+  }
+}
