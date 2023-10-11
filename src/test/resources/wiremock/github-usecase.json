@@ -1,0 +1,40 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@protected": true,
+    "BpnCredential": {
+      "@id": "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/businessPartnerData#BpnCredential",
+      "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "id": "@id",
+        "type": "@type",
+        "bpn": "http://schema.org/identifier"
+      }
+    }
+  },
+  "UsecaseAgreement":{
+    "@id": "https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/UserCaseVC#UsecaseAgreement",
+    "@context": {
+      "@version": 1.1,
+      "@protected": true,
+      "id": "@id",
+      "type": "@type",
+      "value": {
+        "@id": "ex:value",
+        "@type": "https://schema.org/Text"
+      },
+      "contract-template":{
+        "@id": "ex:contract-template",
+        "@type": "https://schema.org/Text"
+      },
+      "contract-version":{
+        "@id": "ex:contract-version",
+        "@type": "https://schema.org/Float"
+      },
+      "holderIdentifier": {
+        "@id": "ctx:holderIdentifier"
+      }
+    }
+  }
+}

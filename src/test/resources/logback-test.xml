@@ -29,9 +29,9 @@
     </appender>
 
     <!-- Turning down the wiremock logging -->
-    <logger name="com.github.tomakehurst" level="TRACE"/>
-    <logger name="wiremock.org" level="TRACE"/>
-    <logger name="WireMock" level="TRACE"/>
+    <logger name="com.github.tomakehurst" level="WARN"/>
+    <logger name="wiremock.org" level="WARN"/>
+    <logger name="WireMock" level="WARN"/>
     <logger name="org.eclipse.tractusx" level="DEBUG">
         <appender-ref ref="STDOUT" />
     </logger>
