@@ -20,7 +20,7 @@
 # ********************************************************************************/
 #
 
-curl --location 'http://localhost:8080/realms/miw_test/protocol/openid-connect/token' \
+curl --location 'http://localhost:$APPLICATION_PORT/realms/miw_test/protocol/openid-connect/token' \
      --header 'Content-Type: application/x-www-form-urlencoded' \
      --data-urlencode 'client_id=miw_private_client' \
      --data-urlencode 'client_secret=miw_private_client' \
