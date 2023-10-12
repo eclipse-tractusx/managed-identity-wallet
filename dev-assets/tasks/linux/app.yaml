@@ -29,7 +29,7 @@ tasks:
     desc: Obtain a BEARER token from Keycloak to access the MIW API
     dir: dev-assets/scripts
     cmds:
-      - echo "BAERER $(./get_Token.sh)"
+      - echo "Bearer $(./get_Token.sh)"
 
   test-report:
     desc: Generates the test report for MIW
