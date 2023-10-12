@@ -61,6 +61,10 @@ ingress:
   annotations: {}
   # -- Ingress accepted hostnames
   hosts: []
+  #   - host: chart-example.local
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
   # -- Ingress TLS configuration
   tls: []
   #  - secretName: chart-example-tls
