@@ -5,19 +5,39 @@ plugins {
     id "jacoco"
     id 'project-report'
 
+    // used to download the 'dash.jar' for license checks
+    // docs: https://github.com/michel-kraemer/gradle-download-task
+    id "de.undercouch.download" version "5.5.0"
+
+    // used to convert .env variables to gradle env variables
+    // docs: https://github.com/uzzu/dotenv-gradle
+    id "co.uzzu.dotenv.gradle" version "2.0.0"
 }
 
 group = "${groupName}"
 version = "${applicationVersion}"
 sourceCompatibility = JavaVersion.VERSION_17
+// Fetch the environment variables GITHUB_USERNAME, GITHUB_TOKEN
+// these can be set in <project_root>/.env
+// or export GITHUB_USERNAME=...
+//    export GITHUB_TOKEN=...
+// When using `task ...` this is not necessary
+def githubUserName = "${githubUserName}" ? "${githubUserName}" : env.fetch('GITHUB_USERNAME')
+def githubToken = "${githubToken}" ? "${githubToken}" : env.fetch('GITHUB_TOKEN')
 
+// alias for Project.getConfigurations()
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+    // add a custom config to avoid applying the dev-tools to a production app
+    developmentOnly
+    runtimeClasspath.extendsFrom(developmentOnly)
+
+    // adding a configuration 'compileOnly' which extends from annotationProcessor
+    compileOnly.extendsFrom(annotaionProcessor)
 }
 
 repositories {
+    // delegate is RepositoryHandler
+    // docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.dsl.RepositoryHandler.html
     mavenLocal()
     mavenCentral()
     maven {
@@ -31,13 +51,22 @@ repositories {
             password = "${githubToken}"
         }
     }
+    maven {
+        // Used to resolve Dash License Tool
+        // Dash has a maven plugin, BUT is not resolvable through mavenCentral()
+        url = uri("https://repo.eclipse.org/content/repositories/dash-licenses/")
+    }
 }
 
 ext {
 
 }
 
+// comes from gradle directly
 dependencies {
+    // 'implementation', 'testImplementation', 'runtimeOnly', 'compileOnly', 'annotationProcessor' and
+    // 'testAnnotationProcessor' configuration come from the java-plugin
+    // docs: https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -50,7 +79,7 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
     implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.16'
+    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.17'
 
     //Added explicitly to mitigate CVE 2022-1471
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
@@ -58,13 +87,14 @@ dependencies {
     //Added explicitly to mitigate CVE 2023-24998
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
 
-
-    testImplementation 'org.projectlombok:lombok:1.18.28'
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
+    // custom 'developmentOnly' config
+    // https://docs.spring.io/spring-boot/docs/2.0.6.RELEASE/reference/html/using-boot-devtools.html#using-boot-devtools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.projectlombok:lombok:1.18.28'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "org.testcontainers:testcontainers"
     testImplementation 'com.h2database:h2:2.2.220'
@@ -76,39 +106,119 @@ dependencies {
 
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        mavenBom("org.testcontainers:testcontainers-bom:${testContainerVersion}")
+// uses the 'download' plugin
+// docs: https://plugins.gradle.org/plugin/de.undercouch.download
+tasks.register('dashDownload', Download) {
+    description = 'Download the Dash License Tool standalone jar'
+    group = 'License'
+    src 'https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST'
+    dest layout.projectDirectory.file('dash.jar')
+    // will not replace an existing file. If you know you need a new version
+    // then manually delete the file yourself, or run `dashClean`
+    overwrite false
+}
+
+// This task is primarily used by CIs
+tasks.register('dashClean') {
+    description = "Clean all files used by the 'License' group"
+    group = 'License'
+    logger.lifecycle("Removing 'dash.jar'")
+    file('dash.jar').delete()
+    logger.lifecycle("Removing 'deps.txt'")
+    file('deps.txt').delete()
+}
+
+// Usage: in the root of the project: `./gradlew -q dashDependencies`
+// The `-q` option is important if you want to use the output in a pipe.
+tasks.register('dashDependencies') { dashDependencies ->
+    description = "Output all project dependencies as a flat list and save an intermediate file 'deps.txt'."
+    group = 'License'
+    dashDependencies.dependsOn('dashDownload')
+    doLast {
+        def deps = []
+        project.configurations.each { conf ->
+            // resolving 'archives' or 'default' is deprecated
+            if (conf.canBeResolved && conf.getName() != 'archives' && conf.getName() != 'default') {
+                deps.addAll(conf.incoming.resolutionResult.allDependencies
+                        // the 'allDependencies' method return a 'DependencyResult'
+                        // we're only interested in the 'ResolvedDependencyResult' sub-interface
+                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolutionResult.html#allDependencies-groovy.lang.Closure-
+                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/DependencyResult.html
+                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolvedDependencyResult.html
+                        .findAll({ it instanceof ResolvedDependencyResult })
+                        .collect { ResolvedDependencyResult dep ->
+                            "${dep.selected}"
+                        })
+            }
+        }
+
+        def filtered = deps.findAll(d -> !d.startsWith('org.eclipse')).unique().sort()
+        filtered.each { logger.quiet("{}", it) }
+        file("deps.txt").write(filtered.join('\n'))
     }
 }
 
-tasks.named('test') {
+tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
+    description = "Run the Dash License Tool and save the summary in the 'DEPENDENCIES' file"
+    group = 'License'
+    dashLicenseCheck.dependsOn('dashDownload')
+    dashLicenseCheck.dependsOn('dashDependencies')
+    doFirst {
+        classpath = files('dash.jar')
+        args('-summary', 'DEPENDENCIES', 'deps.txt')
+    }
+    doLast {
+        logger.lifecycle("Removing 'deps.txt' now.")
+        file('deps.txt').delete()
+    }
+}
+
+// 'dependencyManagement' comes from the 'io.spring.dependency-management' plugin
+// docs: https://docs.spring.io/dependency-management-plugin/docs/current/reference/html/
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.testcontainers:testcontainers-bom:${testContainerVersion}"
+    }
+}
+
+tasks.named('test', Test) {
     useJUnitPlatform()
 }
 
+// 'build' task comes from the 'java' plugin
+// docs: https://docs.gradle.org/current/userguide/java_plugin.html
 build {
     archivesBaseName = "miw"
     version = "latest"
 }
 
+// 'bootJar' comes from the 'org.springframework.boot' plugin
+// 'bootJar' is a subclass of the 'jar' task type
+// docs: https://docs.gradle.org/current/dsl/org.gradle.jvm.tasks.Jar.html#org.gradle.jvm.tasks.Jar
 bootJar {
-	metaInf {
-		from 'DEPENDENCIES'
-		from 'SECURITY.md'
-		from 'NOTICE.md'
-		from 'LICENSE'
-	}
+    metaInf {
+        from 'DEPENDENCIES'
+        from 'SECURITY.md'
+        from 'NOTICE.md'
+        from 'LICENSE'
+    }
 }
 
+// 'test' comes from the 'java' plugin
+// docs: https://docs.gradle.org/current/userguide/java_plugin.html
 test {
     finalizedBy jacocoTestReport
 }
 
+// standard gradle class
+// docs: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.dependencies.HtmlDependencyReportTask.html
 htmlDependencyReport {
     projects = project.allprojects
 }
 
+// 'jacocoTestReport' is provided by the 'jacoco' plugin
+// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html
 jacocoTestReport {
     dependsOn test
 
@@ -130,12 +240,16 @@ jacocoTestReport {
     }
 }
 
+// 'jacoco' is provided by the 'jacoco' plugin
+// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:configuring_the_jacoco_plugin
 jacoco {
     toolVersion = "${jacocoVersion}"
 
 }
 
 
+// 'jacocoTestCoverageVerification' is provided by the 'jacoco' plugin
+// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:jacoco_report_violation_rules
 jacocoTestCoverageVerification {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
