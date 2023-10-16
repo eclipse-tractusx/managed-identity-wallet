@@ -1,6 +1,6 @@
-# Managed Identity Wallets `<a id="introduction"></a>`
+# Managed Identity Wallets
 
-The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using did:web
+The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using `did:web`.
 
 # Developer Documentation
 
@@ -8,7 +8,8 @@ To run MIW locally, this section describes the tooling as well as the local deve
 
 There are two possible flows, which can be used for development:
 
-1. **local**: Run the postgresql and keycloak server inside docker. Start MIW from within your IDE (recommended for actual development)
+1. **local**: Run the postgresql and keycloak server inside docker. Start MIW from within your IDE (recommended for
+   actual development)
 2. **docker**: Run everything inside docker (use to test or check behavior inside a docker environment)
 
 ## Tooling
@@ -76,29 +77,30 @@ The available scopes/roles are:
 1. Role `add_wallets` to create a new wallet
 2. Role `view_wallets`:
 
-   * to get a list of all wallets
-   * to retrieve one wallet by its identifier
-   * to validate a Verifiable Credential
-   * to validate a Verifiable Presentation
-   * to get all stored Verifiable Credentials
+    * to get a list of all wallets
+    * to retrieve one wallet by its identifier
+    * to validate a Verifiable Credential
+    * to validate a Verifiable Presentation
+    * to get all stored Verifiable Credentials
 3. Role `update_wallets` for the following actions:
 
-   * to store Verifiable Credential
-   * to issue a Verifiable Credential
-   * to issue a Verifiable Presentation
+    * to store Verifiable Credential
+    * to issue a Verifiable Credential
+    * to issue a Verifiable Presentation
 4. Role `update_wallet`:
 
-   * to remove a Verifiable Credential
-   * to store a Verifiable Credential
-   * to issue a Verifiable Credential
-   * to issue a Verifiable Presentation
+    * to remove a Verifiable Credential
+    * to store a Verifiable Credential
+    * to issue a Verifiable Credential
+    * to issue a Verifiable Presentation
 5. Role `view_wallet` requires the BPN of Caller and it can be used:
 
-   * to get the Wallet of the related BPN
-   * to get stored Verifiable Credentials of the related BPN
-   * to validate any Verifiable Credential
-   * to validate any Verifiable Presentation
-6. Role `manage_app` used to change the log level of the application at runtime. Check Logging in the application section for more
+    * to get the Wallet of the related BPN
+    * to get stored Verifiable Credentials of the related BPN
+    * to validate any Verifiable Credential
+    * to validate any Verifiable Presentation
+6. Role `manage_app` used to change the log level of the application at runtime. Check Logging in the application
+   section for more
    details
 
 Overview by Endpoint
@@ -123,8 +125,6 @@ Overview by Endpoint
 | **DIDDocument**                           | Read   | GET                | /{bpn}/did.json                       | N/A                                          |                                                            |
 | **DIDDocument**                           | Read   | GET                | /api/didDocuments/{identifier}        | N/A                                          |                                                            |
 
-
-
 Additionally, a Token mapper can be created under *Clients* &gt;
 *ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
 configuration (using as an example `BPNL000000001`):
@@ -148,7 +148,8 @@ keycloak admin and within *Clients > Credentials* recreate the secret.
 
 ### Prerequisites
 
-To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a task executor. You have to install it first.
+To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a task executor. You have to install it
+first.
 
 > **IMPORTANT**: Before executing any of th tasks, you have to choose your flow (_local_ or _docker_). _local_ is
 > default.
@@ -162,20 +163,22 @@ directory, but without ".dist" at the end.
 
 Description of the env files:
 
-- **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords. 
+- **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords.
 - **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords.
 
 > **IMPORTANT**: ssi-lib is resolving DID documents over network. There are two endpoints that rely on this resolution:
 > - Verifiable Credentials - Validation
 > - Verifiable Presentations - Validation
->   
-> The following parameters must be added or changed in env.local or env.docker file to ensure that these endpoints work as intended in local development environment:
+>
+> The following parameters must be added or changed in env.local or env.docker file to ensure that these endpoints work
+> as intended in local development environment:
 > Add: ENFORCE_HTTPS_IN_DID_RESOLUTION=false
 > Change: MIW_HOST_NAME from miw to localhost
 > Change: APPLICATION_PORT from 8000 to 80
 
 > **IMPORTANT**: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start
-> at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your Docker
+> at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your
+> Docker
 > settings (under "features in development"). This should fix the issue.
 
 In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to
@@ -184,18 +187,24 @@ The access token need to have `read:packages` access. (ref: https://github.com/s
 
 Note: _SKIP_GRADLE_TASKS_PARAM_ is used to pass parameters to the build process of the MIW jar. Currently, it skips the
 tests and code coverage, but speeds up the build time.
-If you want to activate it, just comment it out like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
+If you want to activate it, just comment it out
+like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
 
-After every execution (either _local_ or _docker_ flow), run the matching "stop" task (e.g.: `task docker:start-app` -> `task docker:stop-app`)
+After every execution (either _local_ or _docker_ flow), run the matching "stop" task (
+e.g.: `task docker:start-app` -> `task docker:stop-app`)
 
 When you just run `task` without parameters, you will see all tasks available.
 
 ### local
 
-1. Run `task docker:start-middleware` and wait until it shows "(main) Running the server in development mode. DO NOT use this configuration in production." in the terminal
+1. Run `task docker:start-middleware` and wait until it shows "(main) Running the server in development mode. DO NOT use
+   this configuration in production." in the terminal
 2. Run `task app:build` to build the MIW application
-3. Run [ManagedIdentityWalletsApplication.java](src/main/java/org/eclipse/tractusx/managedidentitywallets/ManagedIdentityWalletsApplication.java) via IDE and use the local.env file to populate environment vars (e.g. EnvFile plugin for IntelliJ)
-4. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their clipboard :) )
+3.
+Run [ManagedIdentityWalletsApplication.java](src/main/java/org/eclipse/tractusx/managedidentitywallets/ManagedIdentityWalletsApplication.java)
+via IDE and use the local.env file to populate environment vars (e.g. EnvFile plugin for IntelliJ)
+4. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their
+   clipboard :) )
 5. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
 6. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
 7. Click on "Authorize" and "close"
@@ -204,7 +213,8 @@ When you just run `task` without parameters, you will see all tasks available.
 ### docker
 
 1. Run `task docker:start-app` and wait until it shows "Started ManagedIdentityWalletsApplication in ... seconds"
-2. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their clipboard :) )
+2. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their
+   clipboard :) )
 3. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
 4. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
 5. Click on "Authorize" and "close"
@@ -265,7 +275,7 @@ In case you encounter any database-related issues, you can resolve them by follo
 
 This process ensures that any issues with the database schema are resolved by recreating it in a fresh state.
 
-# Environment Variables `<a id= "environmentVariables"></a>`
+# Environment Variables
 
 | name                            | description                                                                                  | default value                                                                                                                                       |
 |---------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -330,7 +340,9 @@ curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
 --header 'Authorization: Bearer access_token' \
 --data '{"configuredLevel":"INFO"}'
 ```
+
 i.e.
+
 ```bash
 curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
 --header 'Content-Type: application/json' \
