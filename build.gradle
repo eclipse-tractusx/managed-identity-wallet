@@ -165,7 +165,8 @@ tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
     dashLicenseCheck.dependsOn('dashDependencies')
     doFirst {
         classpath = files('dash.jar')
-        args('-summary', 'DEPENDENCIES', 'deps.txt')
+        // docs: https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-04
+        args('-project', 'automotive.tractusx',  '-summary', 'DEPENDENCIES', 'deps.txt')
     }
     doLast {
         logger.lifecycle("Removing 'deps.txt' now.")
