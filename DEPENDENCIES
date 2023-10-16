@@ -9,7 +9,7 @@ maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.15.
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.15.2, Apache-2.0, approved, #8802
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.15.2, Apache-2.0, approved, #8808
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.15.2, Apache-2.0, approved, #7930
-maven/mavencentral/com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.15.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.15.2, Apache-2.0, approved, #11061
 maven/mavencentral/com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.15.2, Apache-2.0, approved, #9101
 maven/mavencentral/com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.15.2, Apache-2.0, approved, #9100
 maven/mavencentral/com.fasterxml.jackson.module/jackson-module-parameter-names/2.15.2, Apache-2.0, approved, #8803
