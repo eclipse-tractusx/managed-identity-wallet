@@ -28,10 +28,9 @@ Following tools the MIW development team used successfully:
 
 [Eclipse Dash Homepage](https://projects.eclipse.org/projects/technology.dash)
 
-The Eclipse Dash tool is used to analyze the dependencies used in the project
-and ensure all legal requirements are met. We've added a gradle tasks to
-download the latest version of Dash locally, resolve all project dependencies
-and then run the tool and update the summary in the DEPENDENCIES file.
+The Eclipse Dash tool is used to analyze the dependencies used in the project and ensure all legal requirements are met.
+We've added a gradle tasks to download the latest version of Dash locally, resolve all project dependencies and then run
+the tool and update the summary in the DEPENDENCIES file.
 
 To run the license check:
 
@@ -45,20 +44,17 @@ To clean all files created by the dash tasks:
 ./gradlew dashClean
 ```
 
-This command will output all dependencies, save the to file `deps.txt`. Dash
-will read from the file and update the summary in the `DEPENDENCIES` file. A
-committer can open and issue to resolve any problems with the dependencies.
+This command will output all dependencies, save the to file `deps.txt`. Dash will read from the file and update the
+summary in the `DEPENDENCIES` file. A committer can open and issue to resolve any problems with the dependencies.
 
 # Administrator Documentation
 
 ## Manual Keycloak Configuration
 
-Within the development setup the Keycloak instance is initially prepared with the
-values in `./dev-assets/docker-environment/keycloak`. The realm could also be
-manually added and configured at http://localhost:8080 via the "Add realm"
-button. It can be for example named `localkeycloak`. Also add an additional client,
-e.g. named `miw_private_client` with *valid redirect url* set to
-`http://localhost:8080/*`. The roles
+Within the development setup the Keycloak instance is initially prepared with the values
+in `./dev-assets/docker-environment/keycloak`. The realm could also be manually added and configured
+at http://localhost:8080 via the "Add realm" button. It can be for example named `localkeycloak`. Also add an additional
+client, e.g. named `miw_private_client` with *valid redirect url* set to `http://localhost:8080/*`. The roles
 
 * add_wallets
 * view_wallets
@@ -68,9 +64,8 @@ e.g. named `miw_private_client` with *valid redirect url* set to
 * update_wallet
 * manage_app
 
-Roles can be added under *Clients > miw_private_client > Roles* and then
-assigned to the client using *Clients > miw_private_client > Client Scopes*
-*> Service Account Roles > Client Roles > miw_private_client*.
+Roles can be added under *Clients > miw_private_client > Roles* and then assigned to the client using *Clients >
+miw_private_client > Client Scopes* *> Service Account Roles > Client Roles > miw_private_client*.
 
 The available scopes/roles are:
 
@@ -82,26 +77,29 @@ The available scopes/roles are:
     * to validate a Verifiable Credential
     * to validate a Verifiable Presentation
     * to get all stored Verifiable Credentials
+
 3. Role `update_wallets` for the following actions:
 
     * to store Verifiable Credential
     * to issue a Verifiable Credential
     * to issue a Verifiable Presentation
+
 4. Role `update_wallet`:
 
     * to remove a Verifiable Credential
     * to store a Verifiable Credential
     * to issue a Verifiable Credential
     * to issue a Verifiable Presentation
+
 5. Role `view_wallet` requires the BPN of Caller and it can be used:
 
     * to get the Wallet of the related BPN
     * to get stored Verifiable Credentials of the related BPN
     * to validate any Verifiable Credential
     * to validate any Verifiable Presentation
+
 6. Role `manage_app` used to change the log level of the application at runtime. Check Logging in the application
-   section for more
-   details
+   section for more details
 
 Overview by Endpoint
 
@@ -125,9 +123,8 @@ Overview by Endpoint
 | **DIDDocument**                           | Read   | GET                | /{bpn}/did.json                       | N/A                                          |                                                            |
 | **DIDDocument**                           | Read   | GET                | /api/didDocuments/{identifier}        | N/A                                          |                                                            |
 
-Additionally, a Token mapper can be created under *Clients* &gt;
-*ManagedIdentityWallets* &gt; *Mappers* &gt; *create* with the following
-configuration (using as an example `BPNL000000001`):
+Additionally, a Token mapper can be created under *Clients* &gt; *ManagedIdentityWallets* &gt; *Mappers* &gt; *create*
+with the following configuration (using as an example `BPNL000000001`):
 
 | Key                                | Value           |
 |------------------------------------|-----------------|
@@ -141,8 +138,8 @@ configuration (using as an example `BPNL000000001`):
 | Add to userinfo                    | OFF             |
 | includeInAccessTokenResponse.label | ON              |
 
-If you receive an error message that the client secret is not valid, please go into
-keycloak admin and within *Clients > Credentials* recreate the secret.
+If you receive an error message that the client secret is not valid, please go into keycloak admin and within *Clients >
+Credentials* recreate the secret.
 
 ## Development Setup
 
@@ -152,8 +149,7 @@ To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a t
 first.
 
 > **IMPORTANT**: Before executing any of th tasks, you have to choose your flow (_local_ or _docker_). _local_ is
-> default.
-> To change that, you need to edit the variable **ENV** in the _Taskfile.yaml_. (see below)
+> default. To change that, you need to edit the variable **ENV** in the _Taskfile.yaml_. (see below)
 
 After that, run `task check-prereqs` to see, if any other required tool is installed or missing. If something is
 missing, a link to the install docs is provided.
@@ -178,16 +174,14 @@ Description of the env files:
 
 > **IMPORTANT**: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start
 > at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your
-> Docker
-> settings (under "features in development"). This should fix the issue.
+> Docker settings (under "features in development"). This should fix the issue.
 
 In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to
 build the app, because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
 The access token need to have `read:packages` access. (ref: https://github.com/settings/tokens/new)
 
 Note: _SKIP_GRADLE_TASKS_PARAM_ is used to pass parameters to the build process of the MIW jar. Currently, it skips the
-tests and code coverage, but speeds up the build time.
-If you want to activate it, just comment it out
+tests and code coverage, but speeds up the build time. If you want to activate it, just comment it out
 like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
 
 After every execution (either _local_ or _docker_ flow), run the matching "stop" task (
@@ -200,11 +194,11 @@ When you just run `task` without parameters, you will see all tasks available.
 1. Run `task docker:start-middleware` and wait until it shows "(main) Running the server in development mode. DO NOT use
    this configuration in production." in the terminal
 2. Run `task app:build` to build the MIW application
-3.
-Run [ManagedIdentityWalletsApplication.java](src/main/java/org/eclipse/tractusx/managedidentitywallets/ManagedIdentityWalletsApplication.java)
-via IDE and use the local.env file to populate environment vars (e.g. EnvFile plugin for IntelliJ)
+3. Run
+   [ManagedIdentityWalletsApplication.java](src/main/java/org/eclipse/tractusx/managedidentitywallets/ManagedIdentityWalletsApplication.java)
+   via IDE and use the local.env file to populate environment vars (e.g. EnvFile plugin for IntelliJ)
 4. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their
-   clipboard :) )
+   clipboard)
 5. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
 6. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
 7. Click on "Authorize" and "close"
@@ -214,7 +208,7 @@ via IDE and use the local.env file to populate environment vars (e.g. EnvFile pl
 
 1. Run `task docker:start-app` and wait until it shows "Started ManagedIdentityWalletsApplication in ... seconds"
 2. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their
-   clipboard :) )
+   clipboard)
 3. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
 4. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
 5. Click on "Authorize" and "close"
@@ -222,25 +216,24 @@ via IDE and use the local.env file to populate environment vars (e.g. EnvFile pl
 
 # End Users
 
-See OpenAPI documentation, which is automatically created from
-the source and available on each deployment at the `/docs/api-docs/docs` endpoint
-(e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
+See OpenAPI documentation, which is automatically created from the source and available on each deployment at
+the `/docs/api-docs/docs` endpoint (e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
 document can be also found in [docs/openapi_v001.json](docs/openapi_v001.json).
 
 # Test Coverage
 
-Jacoco is used to generate the coverage report. The report generation
-and the coverage verification are automatically executed after tests.
+Jacoco is used to generate the coverage report. The report generation and the coverage verification are automatically
+executed after tests.
 
 The generated HTML report can be found under `jacoco-report/html/`
 
-To generate the report run the command
+To generate the report run the command:
 
 ```
 task app:test-report
 ```
 
-To check the coverage run the command
+To check the coverage run the command:
 
 ```
 task app:coverage
@@ -309,8 +302,7 @@ This process ensures that any issues with the database schema are resolved by re
 # Technical Debts and Known issue
 
 1. Keys are stored in database in encrypted format, need to store keys in more secure place ie. Vault
-2. Policies can be validated dynamically as per
-   request while validating VP and
+2. Policies can be validated dynamically as per request while validating VP and
    VC. [Check this for more details](https://docs.walt.id/v/ssikit/concepts/verification-policies)
 
 # Logging in application
@@ -327,28 +319,28 @@ role ``manage_app``. We can add this role to authority wallet client using keycl
 
 1. API to get current log settings
 
-```bash
-curl --location 'http://localhost:8090/actuator/loggers' \
---header 'Authorization: Bearer access_token'
-```
+    ```bash
+    curl --location 'http://localhost:8090/actuator/loggers' \
+    --header 'Authorization: Bearer access_token'
+    ```
 
 2. Change log level at runtime
 
-```bash
-curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer access_token' \
---data '{"configuredLevel":"INFO"}'
-```
+    ```bash
+    curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
+    --header 'Content-Type: application/json' \
+    --header 'Authorization: Bearer access_token' \
+    --data '{"configuredLevel":"INFO"}'
+    ```
 
-i.e.
+   i.e.
 
-```bash
-curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer access_token' \
---data '{"configuredLevel":"INFO"}'
-```
+    ```bash
+    curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
+    --header 'Content-Type: application/json' \
+    --header 'Authorization: Bearer access_token' \
+    --data '{"configuredLevel":"INFO"}'
+    ```
 
 ## Reference of external lib
 
