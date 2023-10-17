@@ -56,13 +56,13 @@ in `./dev-assets/docker-environment/keycloak`. The realm could also be manually 
 at http://localhost:8080 via the "Add realm" button. It can be for example named `localkeycloak`. Also add an additional
 client, e.g. named `miw_private_client` with *valid redirect url* set to `http://localhost:8080/*`. The roles
 
-* add_wallets
-* view_wallets
-* update_wallets
-* delete_wallets
-* view_wallet
-* update_wallet
-* manage_app
+- add_wallets
+- view_wallets
+- update_wallets
+- delete_wallets
+- view_wallet
+- update_wallet
+- manage_app
 
 Roles can be added under *Clients > miw_private_client > Roles* and then assigned to the client using *Clients >
 miw_private_client > Client Scopes* *> Service Account Roles > Client Roles > miw_private_client*.
@@ -71,33 +71,25 @@ The available scopes/roles are:
 
 1. Role `add_wallets` to create a new wallet
 2. Role `view_wallets`:
-
-    * to get a list of all wallets
-    * to retrieve one wallet by its identifier
-    * to validate a Verifiable Credential
-    * to validate a Verifiable Presentation
-    * to get all stored Verifiable Credentials
-
+    - to get a list of all wallets
+    - to retrieve one wallet by its identifier
+    - to validate a Verifiable Credential
+    - to validate a Verifiable Presentation
+    - to get all stored Verifiable Credentials
 3. Role `update_wallets` for the following actions:
-
-    * to store Verifiable Credential
-    * to issue a Verifiable Credential
-    * to issue a Verifiable Presentation
-
+    - to store Verifiable Credential
+    - to issue a Verifiable Credential
+    - to issue a Verifiable Presentation
 4. Role `update_wallet`:
-
-    * to remove a Verifiable Credential
-    * to store a Verifiable Credential
-    * to issue a Verifiable Credential
-    * to issue a Verifiable Presentation
-
+    - to remove a Verifiable Credential
+    - to store a Verifiable Credential
+    - to issue a Verifiable Credential
+    - to issue a Verifiable Presentation
 5. Role `view_wallet` requires the BPN of Caller and it can be used:
-
-    * to get the Wallet of the related BPN
-    * to get stored Verifiable Credentials of the related BPN
-    * to validate any Verifiable Credential
-    * to validate any Verifiable Presentation
-
+    - to get the Wallet of the related BPN
+    - to get stored Verifiable Credentials of the related BPN
+    - to validate any Verifiable Credential
+    - to validate any Verifiable Presentation
 6. Role `manage_app` used to change the log level of the application at runtime. Check Logging in the application
    section for more details
 
@@ -318,23 +310,18 @@ role ``manage_app``. We can add this role to authority wallet client using keycl
 ![manage_app.png](docs%2Fmanage_app.png)
 
 1. API to get current log settings
-
     ```bash
     curl --location 'http://localhost:8090/actuator/loggers' \
     --header 'Authorization: Bearer access_token'
     ```
-
 2. Change log level at runtime
-
     ```bash
     curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
     --header 'Content-Type: application/json' \
     --header 'Authorization: Bearer access_token' \
     --data '{"configuredLevel":"INFO"}'
     ```
-
    i.e.
-
     ```bash
     curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
     --header 'Content-Type: application/json' \
