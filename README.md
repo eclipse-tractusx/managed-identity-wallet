@@ -235,7 +235,7 @@ Currently, the minimum is 80% coverage.
 
 # Common issues and solutions during local setup
 
-#### 1. Can not build with test cases
+## 1. Can not build with test cases
 
 Test cases are written using the Spring Boot integration test frameworks. These test frameworks start the Spring Boot
 test context, which allows us to perform integration testing. In our tests, we utilize the Testcontainers
@@ -247,7 +247,7 @@ permissions to run containers.
 
 Alternative, you can skip test during the build with `` ./gradlew clean build -x test``
 
-#### 2. Database migration related issue
+## 2. Database migration related issue
 
 We have implemented database migration using Liquibase (https://www.liquibase.org/). Liquibase allows us to manage
 database schema changes effectively.
@@ -302,7 +302,7 @@ This process ensures that any issues with the database schema are resolved by re
 Log level in application can be set using environment variable ``APP_LOG_LEVEL``. Possible values
 are ``OFF, ERROR, WARN, INFO, DEBUG, TRACE`` and default value set to ``INFO``
 
-### Change log level at runtime using Spring actuator
+## Change log level at runtime using Spring actuator
 
 We can use ``/actuator/loggers`` API endpoint of actuator for log related things. This end point can be accessible with
 role ``manage_app``. We can add this role to authority wallet client using keycloak as below:
