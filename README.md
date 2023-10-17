@@ -310,24 +310,24 @@ role ``manage_app``. We can add this role to authority wallet client using keycl
 ![manage_app.png](docs%2Fmanage_app.png)
 
 1. API to get current log settings
-    ```bash
-    curl --location 'http://localhost:8090/actuator/loggers' \
-    --header 'Authorization: Bearer access_token'
-    ```
+   ```bash
+   curl --location 'http://localhost:8090/actuator/loggers' \
+   --header 'Authorization: Bearer access_token'
+   ```
 2. Change log level at runtime
-    ```bash
-    curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
-    --header 'Content-Type: application/json' \
-    --header 'Authorization: Bearer access_token' \
-    --data '{"configuredLevel":"INFO"}'
-    ```
+   ```bash
+   curl --location 'http://localhost:8090/actuator/loggers/{java package name}' \
+   --header 'Content-Type: application/json' \
+   --header 'Authorization: Bearer access_token' \
+   --data '{"configuredLevel":"INFO"}'
+   ```
    i.e.
-    ```bash
-    curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
-    --header 'Content-Type: application/json' \
-    --header 'Authorization: Bearer access_token' \
-    --data '{"configuredLevel":"INFO"}'
-    ```
+   ```bash
+   curl --location 'http://localhost:8090/actuator/loggers/org.eclipse.tractusx.managedidentitywallets' \
+   --header 'Content-Type: application/json' \
+   --header 'Authorization: Bearer access_token' \
+   --data '{"configuredLevel":"INFO"}'
+   ```
 
 ## Reference of external lib
 
