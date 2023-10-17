@@ -140,13 +140,13 @@ Credentials* recreate the secret.
 To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a task executor. You have to install it
 first.
 
-> **IMPORTANT**: Before executing any of th tasks, you have to choose your flow (_local_ or _docker_). _local_ is
-> default. To change that, you need to edit the variable **ENV** in the _Taskfile.yaml_. (see below)
+> **IMPORTANT**: Before executing any of th tasks, you have to choose your flow (*local* or *docker*). *local* is
+> default. To change that, you need to edit the variable **ENV** in the *Taskfile.yaml*. (see below)
 
 After that, run `task check-prereqs` to see, if any other required tool is installed or missing. If something is
 missing, a link to the install docs is provided.
 
-Now, you have to adjust the _env_ files (located in _dev-assets/env-files_). To do that, copy every file to the same
+Now, you have to adjust the *env* files (located in *dev-assets/env-files*). To do that, copy every file to the same
 directory, but without ".dist" at the end.
 
 Description of the env files:
@@ -168,15 +168,15 @@ Description of the env files:
 > at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your
 > Docker settings (under "features in development"). This should fix the issue.
 
-In both env files (env.local and env.docker) you need to set _GITHUB_USERNAME_ and _GITHUB_TOKEN_ in order to be able to
+In both env files (env.local and env.docker) you need to set *GITHUB_USERNAME* and *GITHUB_TOKEN* in order to be able to
 build the app, because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
 The access token need to have `read:packages` access. (ref: https://github.com/settings/tokens/new)
 
-Note: _SKIP_GRADLE_TASKS_PARAM_ is used to pass parameters to the build process of the MIW jar. Currently, it skips the
+Note: *SKIP_GRADLE_TASKS_PARAM* is used to pass parameters to the build process of the MIW jar. Currently, it skips the
 tests and code coverage, but speeds up the build time. If you want to activate it, just comment it out
 like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
 
-After every execution (either _local_ or _docker_ flow), run the matching "stop" task (
+After every execution (either *local* or *docker* flow), run the matching "stop" task (
 e.g.: `task docker:start-app` -> `task docker:stop-app`)
 
 When you just run `task` without parameters, you will see all tasks available.
@@ -191,7 +191,7 @@ When you just run `task` without parameters, you will see all tasks available.
    via IDE and use the local.env file to populate environment vars (e.g. EnvFile plugin for IntelliJ)
 4. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their
    clipboard)
-5. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
+5. Open API doc on http://localhost:8000 (or what port you configured in the *env.local* file)
 6. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
 7. Click on "Authorize" and "close"
 8. MIW is up and running
@@ -201,7 +201,7 @@ When you just run `task` without parameters, you will see all tasks available.
 1. Run `task docker:start-app` and wait until it shows "Started ManagedIdentityWalletsApplication in ... seconds"
 2. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their
    clipboard)
-3. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
+3. Open API doc on http://localhost:8000 (or what port you configured in the *env.local* file)
 4. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
 5. Click on "Authorize" and "close"
 6. MIW is up and running
