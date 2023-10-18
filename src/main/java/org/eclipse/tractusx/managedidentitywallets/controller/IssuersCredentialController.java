@@ -31,6 +31,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
@@ -52,6 +53,7 @@ import java.util.Map;
  */
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class IssuersCredentialController extends BaseController {
 
     /**
@@ -257,6 +259,7 @@ public class IssuersCredentialController extends BaseController {
                                                                                  }
                                                                          ) @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
                                                                          @Parameter(name = "sortTpe", description = "Sort order", examples = {@ExampleObject(value = "desc", name = "Descending order"), @ExampleObject(value = "asc", name = "Ascending order")}) @RequestParam(required = false, defaultValue = "desc") String sortTpe, Principal principal) {
+        log.debug("Received request to get credentials. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.getCredentials(credentialId, holderIdentifier, type, sortColumn, sortTpe, pageNumber, size, getBPNFromToken(principal)));
     }
 
@@ -381,6 +384,7 @@ public class IssuersCredentialController extends BaseController {
     @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest, Principal principal) {
+        log.debug("Received request to issue membership credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, getBPNFromToken(principal)));
     }
 
@@ -513,6 +517,7 @@ public class IssuersCredentialController extends BaseController {
     @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_DISMANTLER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request, Principal principal) {
+        log.debug("Received request to issue dismantler credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueDismantlerCredential(request, getBPNFromToken(principal)));
     }
 
@@ -844,6 +849,7 @@ public class IssuersCredentialController extends BaseController {
     })
     @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
+        log.debug("Received request to issue framework credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueFrameworkCredential(request, getBPNFromToken(principal)));
     }
 
@@ -1015,7 +1021,6 @@ public class IssuersCredentialController extends BaseController {
     })
     @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials")
     @PostMapping(path = RestURI.CREDENTIALS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
@@ -1051,6 +1056,7 @@ public class IssuersCredentialController extends BaseController {
     })
     public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data,
                                                                      @Parameter(description = "Check expiry of VC") @RequestParam(name = "withCredentialExpiryDate", defaultValue = "false", required = false) boolean withCredentialExpiryDate) {
+        log.debug("Received request to validate verifiable credentials");
         return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.credentialsValidation(data, withCredentialExpiryDate));
     }
 
@@ -1151,7 +1157,6 @@ public class IssuersCredentialController extends BaseController {
     })
     @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
     @PostMapping(path = RestURI.ISSUERS_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
@@ -1179,6 +1184,7 @@ public class IssuersCredentialController extends BaseController {
                     """))
     })
     public ResponseEntity<VerifiableCredential> issueCredentialUsingBaseWallet(@Parameter(description = "Holder DID", examples = {@ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @RequestParam(name = "holderDid") String holderDid, @RequestBody Map<String, Object> data, Principal principal) {
+        log.debug("Received request to issue verifiable credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, getBPNFromToken(principal)));
     }
 }
