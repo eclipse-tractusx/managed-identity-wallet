@@ -70,7 +70,7 @@ jobs:
 
       - uses: addnab/docker-run-action@v3
         with:
-          image: jnorwood/helm-docs:v1.10.0
+          image: jnorwood/helm-docs:v1.11.3
           options: -v ${{ github.workspace }}/charts:/helm-docs
           run: helm-docs
 
