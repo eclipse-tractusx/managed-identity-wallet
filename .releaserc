@@ -1,20 +1,50 @@
 {
-  "branches": ["main"],
-
+  "branches": [
+    "main",
+    {
+      "name": "develop",
+      "prerelease": true
+    }
+  ],
   "plugins": [
-    "gradle-semantic-release-plugin",
-    ["semantic-release-helm", {
-        chartPath: './charts/managed-identity-wallet',
-        onlyUpdateVersion: true,
-    }],
     "@semantic-release/commit-analyzer",
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "sed -i  's/applicationVersion=.*/applicationVersion=${nextRelease.version}/g' gradle.properties"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "sed -i  's/appVersion:.*/appVersion: ${nextRelease.version}/g' ./charts/managed-identity-wallet/Chart.yaml"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./gradlew dashLicenseCheck"
+      }
+    ],
     "@semantic-release/release-notes-generator",
-    ["@semantic-release/changelog", {
-      "changelogFile": "CHANGELOG.md"
-    }],
-    ["@semantic-release/git", {
-      "assets": ["CHANGELOG.md", "gradle.properties", "./charts/managed-identity-wallet/Chart.yaml"],
-      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-    }]
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md",
+          "DEPENDENCIES",
+          "gradle.properties",
+          "./charts/managed-identity-wallet/Chart.yaml"
+        ],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    "@semantic-release/github"
   ]
 }
