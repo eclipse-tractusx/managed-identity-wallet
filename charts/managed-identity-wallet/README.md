@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0-develop.1](https://img.shields.io/badge/AppVersion-0.2.0--develop.1-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
@@ -100,8 +100,11 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | keycloak.auth.adminPassword | string | `""` | Keycloak admin password |
 | keycloak.auth.adminUser | string | `"admin"` | Keycloak admin user |
 | keycloak.enabled | bool | `true` | Enable to deploy Keycloak |
-| keycloak.extraEnvVars[0].name | string | `"KEYCLOAK_HOSTNAME"` |  |
-| keycloak.extraEnvVars[0].value | string | `"{{ .Release.Name }}-keycloak"` |  |
+| keycloak.extraEnvVars | list | `[]` |  |
+| keycloak.ingress.annotations | object | `{}` |  |
+| keycloak.ingress.enabled | bool | `false` |  |
+| keycloak.ingress.hosts | list | `[]` |  |
+| keycloak.ingress.tls | list | `[]` |  |
 | keycloak.keycloakConfigCli.backoffLimit | int | `2` | Number of retries before considering a Job as failed |
 | keycloak.keycloakConfigCli.enabled | bool | `true` | Enable to create the miw playground realm |
 | keycloak.keycloakConfigCli.existingConfigmap | string | `"keycloak-realm-config"` | Existing configmap name for the realm configuration |
