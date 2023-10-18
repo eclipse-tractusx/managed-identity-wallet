@@ -164,10 +164,10 @@ miw:
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
-  extraEnvVars:
-    # - Extra environment variables. (default 'KEYCLOAK_HOSTNAME :{{ .Release.Name }}-keycloak')
-    - name: KEYCLOAK_HOSTNAME
-      value: "{{ .Release.Name }}-keycloak"
+  extraEnvVars: []
+  # - Extra environment variables. (default 'KEYCLOAK_HOSTNAME :{{ .Release.Name }}-keycloak')
+  #    - name: KEYCLOAK_HOSTNAME
+  #      value: "{{ .Release.Name }}-keycloak"
   postgresql:
     # -- Name of the PostgreSQL chart to deploy. Mandatory when the MIW deploys a PostgreSQL chart, too.
     nameOverride: "keycloak-postgresql"
@@ -180,6 +180,11 @@ keycloak:
       password: ""
       # -- Database name
       database: "miw_keycloak"
+  ingress:
+    enabled: false
+    annotations: {}
+    hosts: []
+    tls: []
   auth:
     # -- Keycloak admin user
     adminUser: "admin"

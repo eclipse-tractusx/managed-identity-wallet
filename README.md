@@ -339,3 +339,9 @@ role ``manage_app``. We can add this role to authority wallet client using keycl
 ## Notice for Docker image
 
 See [Docker-hub-notice.md](./Docker-hub-notice.md)
+
+## Acknowledgments
+
+We would like to give credit to these projects, which we use in our project.
+
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
