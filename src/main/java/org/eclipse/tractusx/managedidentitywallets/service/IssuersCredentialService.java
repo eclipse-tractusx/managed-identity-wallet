@@ -430,17 +430,9 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
 
-        String proofTye = verifiableCredential.getProof().get(StringPool.TYPE).toString();
-        LinkedDataProofValidation proofValidation;
-        if (SignatureType.ED21559.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.ED21559, didResolver);
-        } else if (SignatureType.JWS.toString().equals(proofTye)) {
-            proofValidation = LinkedDataProofValidation.newInstance(SignatureType.JWS, didResolver);
-        } else {
-            throw new BadDataException(String.format("Invalid proof type: %s", proofTye));
-        }
+        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
 
-        boolean valid = proofValidation.verifyProof(verifiableCredential);
+        boolean valid = proofValidation.verifiy(verifiableCredential);
 
         Map<String, Object> response = new TreeMap<>();
 

@@ -194,7 +194,7 @@ class PresentationValidationTest {
         // replace with credential of another tenant
         VerifiablePresentation newPresentation = new VerifiablePresentationBuilder()
                 .context(List.of(VerifiablePresentation.DEFAULT_CONTEXT))
-                .id(URI.create(UUID.randomUUID().toString()))
+                .id(URI.create("did:test:" + UUID.randomUUID()))
                 .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
                 .verifiableCredentials(List.of(membershipCredential_2))
                 .build();

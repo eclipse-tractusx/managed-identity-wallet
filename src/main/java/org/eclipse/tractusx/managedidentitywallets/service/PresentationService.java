@@ -21,11 +21,13 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.ctc.wstx.shaded.msv_core.util.Uri;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -36,19 +38,19 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519Key;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
-import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
-import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidJsonLdException;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
+import org.eclipse.tractusx.ssi.lib.exception.JwtExpiredException;
 import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
@@ -64,7 +66,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.util.*;
 
 /**
@@ -85,6 +86,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     private final WalletKeyService walletKeyService;
 
     private final MIWSettings miwSettings;
+
+    private final DidDocumentResolverService didDocumentResolverService;
 
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {
@@ -131,8 +134,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                     new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), vpIssuerDid);
 
             //Build JWT
-            Ed25519Key ed25519Key = walletKeyService.getPrivateKeyByWalletIdentifier(callerWallet.getId());
-            x21559PrivateKey privateKey = new x21559PrivateKey(ed25519Key.getEncoded());
+            x21559PrivateKey ed25519Key = walletKeyService.getPrivateKeyByWalletIdentifier(callerWallet.getId());
+            x21559PrivateKey privateKey = new x21559PrivateKey(ed25519Key.asByte());
             SignedJWT presentation = presentationFactory.createPresentation(vpIssuerDid
                     , verifiableCredentials, audience, privateKey);
 
@@ -203,7 +206,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                     }
                 }
             } catch (InvalidJsonLdException e) {
-                throw new BadDataException(String.format("Validation of VP in form of JSON-LD is not supported. Invalid Json-LD: %s", e.getMessage()));
+                throw new BadDataException(String.format("Invalid Json-LD: %s", e.getMessage()));
             }
 
             response.put(StringPool.VALID, (validateSignature && validateAudience && validateExpiryDate && validCredential && validateJWTExpiryDate));
@@ -224,9 +227,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     private boolean validateSignature(SignedJWT signedJWT) {
         //validate jwt signature
         try {
-            DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
-
-            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didResolver);
+            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didDocumentResolverService.getCompositeDidResolver());
             return jwtVerifier.verify(signedJWT);
         } catch (Exception e) {
             log.error("Can not verify signature of jwt", e);
@@ -240,7 +241,9 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             jwtValidator.validateDate(signedJWT);
             return true;
         } catch (Exception e) {
-            log.error("Can not expiry date ", e);
+            if (!(e instanceof JwtExpiredException)) {
+                log.error("Can not validate jwt expiry date ", e);
+            }
             return false;
         }
     }
@@ -262,25 +265,10 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     @SneakyThrows
     private boolean validateCredential(VerifiableCredential credential) {
-        DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
+        final DidResolver resolver = didDocumentResolverService.getCompositeDidResolver();
+        final LinkedDataProofValidation linkedDataProofValidation = LinkedDataProofValidation.newInstance(resolver);
+        final boolean isValid = linkedDataProofValidation.verifiy(credential);
 
-        String proofType = credential.getProof().getType();
-        LinkedDataProofValidation linkedDataProofValidation;
-        if (SignatureType.ED21559.toString().equals(proofType)) {
-            linkedDataProofValidation = LinkedDataProofValidation.newInstance(
-                    SignatureType.ED21559,
-                    didResolver
-            );
-        } else if (SignatureType.JWS.toString().equals(proofType)) {
-            linkedDataProofValidation = LinkedDataProofValidation.newInstance(
-                    SignatureType.JWS,
-                    didResolver
-            );
-        } else {
-            throw new UnsupportedSignatureTypeException(proofType);
-        }
-
-        boolean isValid = linkedDataProofValidation.verifyProof(credential);
         if (isValid) {
             log.debug("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
         } else {

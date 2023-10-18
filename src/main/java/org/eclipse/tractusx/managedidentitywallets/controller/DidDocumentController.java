@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.DidDocumentService;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -44,7 +45,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "DIDDocument")
-public class DidDocumentController {
+@Slf4j
+public class DidDocumentController extends BaseController {
     private final DidDocumentService service;
 
     /**
@@ -109,6 +111,7 @@ public class DidDocumentController {
     @Operation(description = "Resolve the DID document for a given DID or BPN", summary = "Resolve DID Document")
     @GetMapping(path = RestURI.DID_DOCUMENTS, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DidDocument> getDidDocument(@Parameter(description = "Did or BPN",examples = {@ExampleObject(name = "bpn", value = "BPNL000000000000", description = "bpn"), @ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @PathVariable(name = "identifier") String identifier) {
+        log.debug("Received request to get DID document for identifier: {}", identifier);
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(identifier));
     }
 
@@ -174,6 +177,7 @@ public class DidDocumentController {
     @Operation(description = "Resolve the DID document for a given BPN", summary = "Resolve DID Document")
     @GetMapping(path = RestURI.DID_RESOLVE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DidDocument> getDidResolve(@Parameter(description = "BPN",examples = {@ExampleObject(name = "bpn", value = "BPNL000000000000", description = "bpn")}) @PathVariable(name = "bpn") String bpn) {
+        log.debug("Received request to get DID document for identifier: {}", bpn);
         return ResponseEntity.status(HttpStatus.OK).body(service.getDidDocument(bpn));
     }
 }
