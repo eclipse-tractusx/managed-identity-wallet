@@ -107,6 +107,8 @@ affinity: {}
 # -- PodAnnotation configuration
 podAnnotations: {}
 
+initContainers: []
+
 ## @section Managed Identity Wallet Primary Parameters
 ##
 miw:
