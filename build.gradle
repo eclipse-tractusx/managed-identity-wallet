@@ -183,10 +183,6 @@ dependencyManagement {
     }
 }
 
-tasks.named('test', Test) {
-    useJUnitPlatform()
-}
-
 // 'build' task comes from the 'java' plugin
 // docs: https://docs.gradle.org/current/userguide/java_plugin.html
 build {
@@ -209,6 +205,7 @@ bootJar {
 // 'test' comes from the 'java' plugin
 // docs: https://docs.gradle.org/current/userguide/java_plugin.html
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 
@@ -221,12 +218,13 @@ htmlDependencyReport {
 // 'jacocoTestReport' is provided by the 'jacoco' plugin
 // docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html
 jacocoTestReport {
-    dependsOn test
 
     reports {
-        xml.required = false
-        csv.required = false
-        html.required = true
+        xml.enabled true
+        csv.enabled false
+        html.enabled true
+        html.destination file("${buildDir}/reports/html/jacoco")
+        xml.destination file("${buildDir}/reports/xml/jacoco")
     }
 
     afterEvaluate {
