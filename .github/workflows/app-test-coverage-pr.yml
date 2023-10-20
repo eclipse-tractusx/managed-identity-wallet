@@ -47,7 +47,7 @@ jobs:
         run: ./gradlew test
 
       - name: Get coverage
-        if: success() || failure()
+        if: always()
         env:
           GITHUB_USERNAME: ${{ vars.GITHUB_ACTOR }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,14 +55,14 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
-        if: success() || failure()
+        if: always()
         with:
           name: test-results
           path: ${{ github.workspace }}/build/
 
       - name: Publish code coverage report as PR comment
         uses: madrapps/jacoco-report@v1.6.1
-        if: success() || failure()
+        if: always()
         with:
           paths: |
             ${{ github.workspace }}/build/reports/xml/jacoco
