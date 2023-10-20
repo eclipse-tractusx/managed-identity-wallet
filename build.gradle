@@ -221,10 +221,12 @@ jacocoTestReport {
 
     reports {
         xml.enabled true
+        xml.outputLocation = layout.buildDirectory.dir("${buildDir}/reports/xml/jacoco")
+
         csv.enabled false
+
         html.enabled true
-        html.destination file("${buildDir}/reports/html/jacoco")
-        xml.destination file("${buildDir}/reports/xml/jacoco")
+        html.outputLocation = layout.buildDirectory.dir("${buildDir}/reports/html/jacoco")
     }
 
     afterEvaluate {
