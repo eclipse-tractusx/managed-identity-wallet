@@ -55,7 +55,7 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      - name: Generate code coverage report
+      - name: Generate code coverage report as Markdown
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.25
         with:
           reports: reports/xml/jacoco
