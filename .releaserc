@@ -17,7 +17,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "sed -i  's/appVersion:.*/appVersion: ${nextRelease.version}/g' ./charts/managed-identity-wallet/Chart.yaml"
+        "prepareCmd": "sed -i  's/appVersion:.*/appVersion: ${nextRelease.version}/g' ./charts/managed-identity-wallet/Chart.yaml && sed -i  '0,/version:.*/s//version: ${nextRelease.version}/g' ./charts/managed-identity-wallet/Chart.yaml"
       }
     ],
     [
