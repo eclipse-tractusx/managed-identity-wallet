@@ -208,7 +208,7 @@ jobs:
         run: |
           chart_yaml_path="./charts/managed-identity-wallet/Chart.yaml"
           
-          # Use grep to find the line containing appVersion, awk to split by ":" and cut to remove leading/trailing spaces
+          # Use grep to find the line containing appVersion, awk to split by ":" and gsub (awk) to remove leading/trailing spaces
           app_version=$(grep 'appVersion:' "$chart_yaml_path" | awk -F: '{gsub(/^[ \t]+|[ \t]+$/,"", $2); print $2}')
     
           echo "RELEASE_VERSION=$app_version" >> $GITHUB_ENV
