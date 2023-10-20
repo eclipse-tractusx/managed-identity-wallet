@@ -55,7 +55,7 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      - name: Generate code coverage report as Markdown
+      - name: Create Markdown from code coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.25
         with:
           reports: reports/xml/jacoco
@@ -64,5 +64,5 @@ jobs:
           sourcedirs: src/main/java
           title: 'Code Coverage'
 
-      - name: Publish code coverage report as job summary
+      - name: Publish Markdown code coverage report as job summary
         run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
