@@ -1,3 +1,10 @@
+# [0.2.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.1...v0.2.0-develop.2) (2023-10-20)
+
+
+### Bug Fixes
+
+* **ci:** helm chart release ([c2bd166](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c2bd166f25c4488e1bc0d7bb5215d92602ad9f96))
+
 # [0.2.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.1.1...v0.2.0-develop.1) (2023-10-18)
 
 
