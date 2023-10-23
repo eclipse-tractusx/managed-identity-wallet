@@ -31,7 +31,7 @@ import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.ssi.lib.crypt.ed25519.Ed25519Key;
+import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
@@ -68,7 +68,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      */
     @SneakyThrows
     public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
-        return getPrivateKeyByWalletIdentifier(walletId).getEncoded();
+        return getPrivateKeyByWalletIdentifier(walletId).asByte();
     }
 
     /**
@@ -79,11 +79,11 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      */
     @SneakyThrows
 
-    public Ed25519Key getPrivateKeyByWalletIdentifier(long walletId) {
+    public x21559PrivateKey getPrivateKeyByWalletIdentifier(long walletId) {
         WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
-        return Ed25519Key.asPrivateKey(content);
+        return new x21559PrivateKey(content);
     }
 
 }

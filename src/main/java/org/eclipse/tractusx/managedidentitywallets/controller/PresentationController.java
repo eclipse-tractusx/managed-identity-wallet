@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,7 @@ import java.util.Map;
  */
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class PresentationController extends BaseController {
 
     public static final String API_TAG_VERIFIABLE_PRESENTATIONS_GENERATION = "Verifiable Presentations - Generation";
@@ -147,7 +149,6 @@ public class PresentationController extends BaseController {
             })
     })
     @PostMapping(path = RestURI.API_PRESENTATIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
@@ -190,6 +191,7 @@ public class PresentationController extends BaseController {
                                                                   @RequestParam(name = "audience", required = false) String audience,
                                                                   @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Principal principal
     ) {
+        log.debug("Received request to create presentation. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, getBPNFromToken(principal)));
     }
 
@@ -265,7 +267,6 @@ public class PresentationController extends BaseController {
             })
     })
     @PostMapping(path = RestURI.API_PRESENTATIONS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = {
             @Content(examples = {
 
@@ -331,6 +332,7 @@ public class PresentationController extends BaseController {
                                                                     @Parameter(description = "Pass true in case of VP is in JWT format") @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt,
                                                                     @Parameter(description = "Check expiry of VC(Only supported in case of JWT formatted VP)") @RequestParam(name = "withCredentialExpiryDate", required = false, defaultValue = "false") boolean withCredentialExpiryDate
     ) {
+        log.debug("Received request to validate presentation");
         return ResponseEntity.status(HttpStatus.OK).body(presentationService.validatePresentation(data, asJwt, withCredentialExpiryDate, audience));
     }
 }
