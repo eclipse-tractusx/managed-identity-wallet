@@ -66,15 +66,18 @@ jobs:
   verify-helm-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: addnab/docker-run-action@v3
+      - name: Run helm docs command
+        uses: addnab/docker-run-action@v3
         with:
           image: jnorwood/helm-docs:v1.11.3
           options: -v ${{ github.workspace }}/charts:/helm-docs
           run: helm-docs
 
-      - run: |
+      - name: Verify that no changes are required
+        run: |
           if $(git diff --quiet --exit-code); then
             echo "Helm chart docs up to date"
           else
