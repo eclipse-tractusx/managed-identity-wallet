@@ -206,6 +206,27 @@ When you just run `task` without parameters, you will see all tasks available.
 5. Click on "Authorize" and "close"
 6. MIW is up and running
 
+### pgAdmin
+
+This local environment contains [pgAdmin](https://www.pgadmin.org/), which is also started (default: http://localhost:8888). 
+The default login is:
+
+``` 
+user: pg@admin.com (you can change it in the env.* files)
+password: the one you set for "POSTGRES_PASSWORD" in the env.* files
+```
+
+#### DB connection password
+
+When you log in into pgAdmin, the local Postgresql server is already configured.
+But you will be asked to enter the DB password on the first time you connect to the DB.
+(password: POSTGRES_PASSWORD in the env.* files)
+
+#### Storage folder
+
+The storage folder of pgAdmin is mounted to `dev-assets/docker-environment/pgAdmin/storage/`.
+For example, You can save DB backups there, so you can access them on your local machine.
+
 # End Users
 
 See OpenAPI documentation, which is automatically created from the source and available on each deployment at
