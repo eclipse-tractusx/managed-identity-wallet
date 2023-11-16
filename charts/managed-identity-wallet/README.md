@@ -97,6 +97,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | ingress.enabled | bool | `false` | Enable ingress controller resource |
 | ingress.hosts | list | `[]` | Ingress accepted hostnames |
 | ingress.tls | list | `[]` | Ingress TLS configuration |
+| initContainers | list | `[]` | add initContainers to the miw deployment |
 | keycloak.auth.adminPassword | string | `""` | Keycloak admin password |
 | keycloak.auth.adminUser | string | `"admin"` | Keycloak admin user |
 | keycloak.enabled | bool | `true` | Enable to deploy Keycloak |
