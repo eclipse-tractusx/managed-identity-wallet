@@ -17,6 +17,7 @@ plugins {
 group = "${groupName}"
 version = "${applicationVersion}"
 sourceCompatibility = JavaVersion.VERSION_17
+
 // Fetch the environment variables GITHUB_USERNAME, GITHUB_TOKEN
 // these can be set in <project_root>/.env
 // or export GITHUB_USERNAME=...
@@ -221,12 +222,12 @@ jacocoTestReport {
 
     reports {
         xml.enabled true
-        xml.outputLocation = layout.buildDirectory.dir("${buildDir}/reports/xml/jacoco")
+        xml.outputLocation = file("./build/reports/xml/jacoco.xml")
 
         csv.enabled false
 
         html.enabled true
-        html.outputLocation = layout.buildDirectory.dir("${buildDir}/reports/html/jacoco")
+        html.outputLocation = file("./build/reports/html/jacoco")
     }
 
     afterEvaluate {
@@ -245,7 +246,6 @@ jacocoTestReport {
 // docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:configuring_the_jacoco_plugin
 jacoco {
     toolVersion = "${jacocoVersion}"
-
 }
 
 

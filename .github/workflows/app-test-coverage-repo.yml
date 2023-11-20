@@ -58,7 +58,7 @@ jobs:
       - name: Create Markdown from code coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.25
         with:
-          reports: reports/xml/jacoco
+          reports: reports/xml/jacoco.xml
           targetdir: coveragereport
           reporttypes: MarkdownSummaryGithub
           sourcedirs: src/main/java

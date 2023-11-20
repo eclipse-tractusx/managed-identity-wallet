@@ -65,7 +65,7 @@ jobs:
         if: always()
         with:
           paths: |
-            ${{ github.workspace }}/build/reports/xml/jacoco
+            ${{ github.workspace }}/build/reports/xml/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80
