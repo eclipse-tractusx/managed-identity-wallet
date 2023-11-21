@@ -46,7 +46,7 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- if .Values.initContainers }}
       initContainers:
-        {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+        {{- tpl (.Values.initContainers | toYaml) $ | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
