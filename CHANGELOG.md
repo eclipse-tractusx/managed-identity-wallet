@@ -1,3 +1,10 @@
+# [0.2.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.4...v0.2.0-develop.5) (2023-11-22)
+
+
+### Features
+
+* **helm:** Make liveness & readiness probes configurable ([#99](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/99)) ([252eed1](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/252eed1b15289740ba953861076de86ddc99fe4a))
+
 # [0.2.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.3...v0.2.0-develop.4) (2023-11-22)
 
 
