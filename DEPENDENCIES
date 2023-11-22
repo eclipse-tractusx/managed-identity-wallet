@@ -123,7 +123,7 @@ maven/mavencentral/org.assertj/assertj-core/3.24.2, Apache-2.0, approved, #6161
 maven/mavencentral/org.bouncycastle/bcpkix-jdk15on/1.69, MIT, approved, clearlydefined
 maven/mavencentral/org.bouncycastle/bcprov-jdk15on/1.70, MIT, approved, #1712
 maven/mavencentral/org.bouncycastle/bcutil-jdk15on/1.69, MIT, approved, clearlydefined
-maven/mavencentral/org.checkerframework/checker-compat-qual/2.5.5, MIT, approved, clearlydefined
+maven/mavencentral/org.checkerframework/checker-compat-qual/2.5.5, GPL-2.0-only with Classpath-Exception-2.0, approved, #11598
 maven/mavencentral/org.checkerframework/checker-qual/3.33.0, MIT, approved, clearlydefined
 maven/mavencentral/org.codehaus.woodstox/stax2-api/4.2.1, BSD-2-Clause, approved, #2670
 maven/mavencentral/org.glassfish.jaxb/jaxb-core/4.0.3, BSD-3-Clause, approved, ee4j.jaxb

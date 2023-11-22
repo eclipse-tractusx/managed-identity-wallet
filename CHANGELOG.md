@@ -1,3 +1,11 @@
+# [0.2.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.2...v0.2.0-develop.3) (2023-11-22)
+
+
+### Bug Fixes
+
+* **ci:** separate workflow "Test application (test + coverage)" for PR and repo ([6de785b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6de785b670bdede6e55559ce461fb76d05f2ecc8))
+* **dev:** add file extension and refactor called method in gradle ([6811a8b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6811a8b025b76f5998b1c2fd65b5f679e28468d3))
+
 # [0.2.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.1...v0.2.0-develop.2) (2023-10-20)
 
 
