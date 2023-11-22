@@ -17,6 +17,7 @@ plugins {
 group = "${groupName}"
 version = "${applicationVersion}"
 sourceCompatibility = JavaVersion.VERSION_17
+
 // Fetch the environment variables GITHUB_USERNAME, GITHUB_TOKEN
 // these can be set in <project_root>/.env
 // or export GITHUB_USERNAME=...
@@ -183,10 +184,6 @@ dependencyManagement {
     }
 }
 
-tasks.named('test', Test) {
-    useJUnitPlatform()
-}
-
 // 'build' task comes from the 'java' plugin
 // docs: https://docs.gradle.org/current/userguide/java_plugin.html
 build {
@@ -209,6 +206,7 @@ bootJar {
 // 'test' comes from the 'java' plugin
 // docs: https://docs.gradle.org/current/userguide/java_plugin.html
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 
@@ -221,12 +219,15 @@ htmlDependencyReport {
 // 'jacocoTestReport' is provided by the 'jacoco' plugin
 // docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html
 jacocoTestReport {
-    dependsOn test
 
     reports {
-        xml.required = false
-        csv.required = false
-        html.required = true
+        xml.enabled true
+        xml.outputLocation = file("./build/reports/xml/jacoco.xml")
+
+        csv.enabled false
+
+        html.enabled true
+        html.outputLocation = file("./build/reports/html/jacoco")
     }
 
     afterEvaluate {
@@ -245,7 +246,6 @@ jacocoTestReport {
 // docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:configuring_the_jacoco_plugin
 jacoco {
     toolVersion = "${jacocoVersion}"
-
 }
 
 

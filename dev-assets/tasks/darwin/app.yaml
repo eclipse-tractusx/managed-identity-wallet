@@ -38,12 +38,15 @@ tasks:
 
   test-report:
     desc: Generates the test report for MIW
+    ignore_error: true
     cmds:
+      - ./gradlew test
       - ./gradlew jacocoTestReport
 
   coverage:
     desc: Runs the coverage check
     cmds:
+      - task: test-report
       - ./gradlew jacocoTestCoverageVerification
 
   clean:
