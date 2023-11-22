@@ -320,4 +320,138 @@ public class IssuersCredentialControllerApiDocs {
     public @interface IssueMembershipCredentialApiDoc {
     }
 
+    
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @RequestBody(content = {
+            @Content(examples = @ExampleObject("""
+                                {
+                                   "bpn": "BPNL000000000000",
+                                   "activityType": "vehicleDismantle",
+                                   "allowedVehicleBrands": [
+                                     "Audi", "Abarth", "Alfa Romeo", "Chrysler"
+                                   ]
+                                 }
+                    """))
+    })
+    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {
+                    @Content(examples = {}) }),
+            @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden access", content = {
+                    @Content(examples = {}) }),
+            @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {
+                    @Content(examples = {
+                            @ExampleObject(name = "Internal server error", value = """
+                                    {
+                                      "type": "about:blank",
+                                      "title": "Error Title",
+                                      "status": 500,
+                                      "detail": "Error Details",
+                                      "instance": "API endpoint",
+                                      "properties": {
+                                        "timestamp": 1689762476720
+                                      }
+                                    }
+                                    """)
+                    }) }),
+            @ApiResponse(responseCode = "409", description = "The request could not be completed due to a conflict.", content = {
+                    @Content(examples = {
+                            @ExampleObject(name = "DismantlerCredential already exist", value = """
+                                    {
+                                      "type": "about:blank",
+                                      "title": "Credential of type DismantlerCredential is already exists ",
+                                      "status": 409,
+                                      "detail": "Credential of type DismantlerCredential is already exists ",
+                                      "instance": "/api/credentials/issuer/dismantler",
+                                      "properties": {
+                                        "timestamp": 1689773804746
+                                      }
+                                    }
+                                    """)
+                    }) }),
+            @ApiResponse(responseCode = "404", description = "Wallet not found with provided identifier", content = {
+                    @Content(examples = {
+                            @ExampleObject(name = "Wallet not found with provided identifier", value = """
+                                    {
+                                      "type": "about:blank",
+                                      "title": "Error Title",
+                                      "status": 404,
+                                      "detail": "Error Details",
+                                      "instance": "API endpoint",
+                                      "properties": {
+                                        "timestamp": 1689762476720
+                                      }
+                                    }
+                                    """)
+                    }) }),
+            @ApiResponse(responseCode = "400", description = "The input does not comply to the syntax requirements", content = {
+                    @Content(examples = {
+                            @ExampleObject(name = "Response in case of invalid data provided", value = """
+                                     {
+                                         "type": "about:blank",
+                                         "title": "Invalid data provided",
+                                         "status": 400,
+                                         "detail": "details",
+                                         "instance": "API endpoint",
+                                         "properties":
+                                         {
+                                             "timestamp": 1689760833962,
+                                             "errors":
+                                             {
+                                                 "filed": "filed error message"
+                                             }
+                                         }
+                                     }
+                                    """)
+                    })
+            }),
+            @ApiResponse(responseCode = "201", description = "Dismantler Credential", content = {
+                    @Content(examples = {
+                            @ExampleObject(name = "Dismantler Credential", value = """
+                                     {
+                                        "@context": [
+                                          "https://www.w3.org/2018/credentials/v1",
+                                          "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                          "https://w3id.org/security/suites/jws-2020/v1"
+                                        ],
+                                        "id": "did:web:localhost:BPNL000000000000#5caac86c-8ef8-4aab-9d2b-fb18c62560a9",
+                                        "type": [
+                                          "VerifiableCredential",
+                                          "DismantlerCredential"
+                                        ],
+                                        "issuer": "did:web:localhost:BPNL000000000000",
+                                        "issuanceDate": "2023-07-19T13:35:33Z",
+                                        "expirationDate": "2024-12-31T18:30:00Z",
+                                        "credentialSubject": [
+                                          {
+                                            "holderIdentifier": "BPNL000000000000",
+                                            "allowedVehicleBrands": [
+                                              "Audi",
+                                              "Abarth",
+                                              "Alfa Romeo",
+                                              "Chrysler"
+                                            ],
+                                            "id": "did:web:localhost:BPNL000000000000",
+                                            "activityType": "vehicleDismantle",
+                                            "type": "DismantlerCredential"
+                                          }
+                                        ],
+                                        "proof": {
+                                          "proofPurpose": "proofPurpose",
+                                          "verificationMethod": "did:web:localhost:BPNL000000000000#",
+                                          "type": "JsonWebSignature2020",
+                                          "created": "2023-07-19T13:35:38Z",
+                                          "jws": "eyJhbGciOiJFZERTQSJ9..UI82uq6iyqoaKjZIhJiV24v_Bqnj_7EqWiqZ3VWjqkoHLnr7JDtW5KVywWPl27j_baLBxxnM5jqjQdSK4rfbBg"
+                                        }
+                                      }
+                                    """)
+                    })
+            })
+    })
+    @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
+    public @interface IssueDismantlerCredentialApiDoc {
+    }
+
+
 }
