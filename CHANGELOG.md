@@ -1,3 +1,10 @@
+# [0.2.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.3...v0.2.0-develop.4) (2023-11-22)
+
+
+### Features
+
+* add tpl to miw ingress ([#143](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/143)) ([c56d133](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c56d1330f2df1a3468c1e680bcc4fe50898ca6bd))
+
 # [0.2.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.2...v0.2.0-develop.3) (2023-11-22)
 
 
