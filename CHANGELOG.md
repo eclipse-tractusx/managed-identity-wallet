@@ -1,3 +1,10 @@
+# [0.2.0-develop.7](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.6...v0.2.0-develop.7) (2023-11-23)
+
+
+### Features
+
+* **dev:** add pgAdmin to local dev env ([#144](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/144)) ([d7f2bbe](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/d7f2bbe2900322bb5ecba94aa1ab4fafad5cf21c))
+
 # [0.2.0-develop.6](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.5...v0.2.0-develop.6) (2023-11-23)
 
 
