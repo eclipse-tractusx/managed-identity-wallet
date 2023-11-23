@@ -1,4 +1,4 @@
-# [0.2.0](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.1.1...v0.2.0) (2023-10-23)
+# [0.2.0-develop.7](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.6...v0.2.0-develop.7) (2023-11-23)
 
 
 ### Bug Fixes
