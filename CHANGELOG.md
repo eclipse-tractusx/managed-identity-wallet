@@ -1,3 +1,10 @@
+# [0.2.0-develop.6](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.5...v0.2.0-develop.6) (2023-11-23)
+
+
+### Features
+
+* add initContainers ([#142](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/142)) ([7317800](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/731780075ca5e1a707c8834013c4c98348e9c269))
+
 # [0.2.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.4...v0.2.0-develop.5) (2023-11-22)
 
 
