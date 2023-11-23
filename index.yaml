@@ -41,7 +41,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 0.2.0
-    created: "2023-11-23T07:44:12.256830725Z"
+    created: "2023-11-23T07:47:31.668933247Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -78,8 +78,49 @@ entries:
     - https://eclipse-tractusx.github.io/managed-identity-wallet/helm-charts/managed-identity-wallet-0.2.0.tgz
     version: 0.2.0
   - apiVersion: v2
+    appVersion: 0.2.0-develop.7
+    created: "2023-11-23T07:47:31.657192818Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.1.6
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    - condition: postgresql.internal.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 11.9.13
+    description: 'Managed Identity Wallet is supposed to supply a secure data source
+      and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign
+      Identity founding on those DIDs. And at the same it shall support an uninterrupted
+      tracking and tracing and documenting the usage of those DIDs, e.g. within logistical
+      supply chains. '
+    digest: 7acefd3a6c9eca7a741e2582f915f1fb87e6aaa0fd9c4a57a44ccbe8fda10a01
+    home: https://github.com/eclipse-tractusx/managed-identity-wallet
+    keywords:
+    - Managed Identity Wallet
+    - eclipse-tractusx
+    maintainers:
+    - email: dominik.pinsel@mercedes-benz.com
+      name: Dominik Pinsel
+      url: https://github.com/DominikPinsel
+    - email: peter.motzko@volkswagen.de
+      name: Peter Motzko
+      url: https://github.com/pmoscode
+    name: managed-identity-wallet
+    sources:
+    - https://github.com/eclipse-tractusx/managed-identity-wallet
+    type: application
+    urls:
+    - https://eclipse-tractusx.github.io/managed-identity-wallet/helm-charts/managed-identity-wallet-0.2.0-develop.7.tgz
+    version: 0.2.0-develop.7
+  - apiVersion: v2
     appVersion: 0.2.0-develop.6
-    created: "2023-11-23T07:44:12.24467836Z"
+    created: "2023-11-23T07:47:31.647045413Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -120,7 +161,7 @@ entries:
     version: 0.2.0-develop.6
   - apiVersion: v2
     appVersion: 0.2.0-develop.5
-    created: "2023-11-23T07:44:12.232228616Z"
+    created: "2023-11-23T07:47:31.636267242Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -161,7 +202,7 @@ entries:
     version: 0.2.0-develop.5
   - apiVersion: v2
     appVersion: 0.2.0-develop.4
-    created: "2023-11-23T07:44:12.221153662Z"
+    created: "2023-11-23T07:47:31.625233962Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -202,7 +243,7 @@ entries:
     version: 0.2.0-develop.4
   - apiVersion: v2
     appVersion: 0.2.0-develop.3
-    created: "2023-11-23T07:44:12.20995188Z"
+    created: "2023-11-23T07:47:31.614291653Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -243,7 +284,7 @@ entries:
     version: 0.2.0-develop.3
   - apiVersion: v2
     appVersion: 0.2.0-develop.2
-    created: "2023-11-23T07:44:12.198497627Z"
+    created: "2023-11-23T07:47:31.602958176Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -393,4 +434,4 @@ entries:
     urls:
     - https://github.com/eclipse-tractusx/managed-identity-wallet/releases/download/managed-identity-wallet-0.1.0-rc.2/managed-identity-wallet-0.1.0-rc.2.tgz
     version: 0.1.0-rc.2
-generated: "2023-11-23T07:44:12.186298716Z"
+generated: "2023-11-23T07:47:31.591582084Z"
