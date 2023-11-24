@@ -30,4 +30,4 @@ tasks:
     desc: Rebuilds the readme of the Helm chart
     dir: charts/managed-identity-wallet
     cmds:
-      - helm-docs .
+      - helm-docs -i charts/managed-identity-wallet/.helmdocsignore .
