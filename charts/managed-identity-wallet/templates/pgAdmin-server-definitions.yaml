@@ -1,0 +1,11 @@
+{{- if and .Values.pgadmin4.enabled .Values.pgadmin4.extraServerDefinitions.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-pgadmin4-server-definitions
+  labels:
+    {{- include "pgadmin.labels" . | nindent 4 }}
+data:
+  servers.json: |-
+{{- include "common.tplvalues.render" (dict "value" (include "managed-identity-wallet.pgadminServerDefinitions" .) "context" $) | nindent 4 }}
+{{- end }}
