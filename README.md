@@ -4,26 +4,7 @@ The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identit
 
 # Usage
 
-If you just want to try out MIW (without any developer setup), then you can find a quick start guide here:
-
-(It will only work on macOS or GNU/Linux - For Windows,
-you need to use the [WSL](https://learn.microsoft.com/de-de/windows/wsl/install))
-
-- You need to install these tools:
-   - [Docker](https://docs.docker.com/desktop/) (or from your package manager) 
-      -> Configure it to run without root permission
-   - Docker [compose plugin](https://docs.docker.com/compose/) 
-   - [Taskfile](https://taskfile.dev)
-   - [jq](https://jqlang.github.io/jq/)
-- Clone this repo
-- (Optional) Checkout main, if not already checked out
-- Follow the "docker" path of the "Development setup":
-   1. Run `task docker:start-app` and wait until it shows "Started ManagedIdentityWalletsApplication in ... seconds"
-   2. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their clipboard :) )
-   3. Open API doc on http://localhost:8000 (or what port you configured in the _env.local_ file)
-   4. Click on Authorize on swagger UI and on the dialog paste the token into the "value" input
-   5. Click on "Authorize" and "close"
-   6. MIW is up and running
+See [INSTALL.md](INSTALL.md) 
 
 # Developer Documentation
 
