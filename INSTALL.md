@@ -23,11 +23,12 @@ you need to use the [WSL](https://learn.microsoft.com/de-de/windows/wsl/install)
     - GITHUB_TOKEN
 - Follow the "docker" path of the "Development setup" to get it up and running:
     1. Run `task docker:start-app` and wait until it shows "Started ManagedIdentityWalletsApplication in ... seconds"
-    2. Run `task app:get-token` and copy the token (including "BEARER" prefix) (Mac users have the token already in their clipboard :) )
+    2. Run `task app:get-token` in another shell and copy the token (including "BEARER" prefix) (Mac users have the token already in their clipboard :) )
     3. Open API doc on http://localhost:8000
     4. Click on Authorize on Swagger UI and on the dialog paste the token (incl. "Bearer") into the "value" input
     5. Click on "Authorize" and "close"
     6. MIW is up, running, and you are authorized to fire requests in the Swagger UI
+    7. If you're done, then run `task docker:stop-app` to clean up everything
 
 > [!IMPORTANT]  
 > To compile MIW,
