@@ -2,6 +2,10 @@
 
 The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using `did:web`.
 
+# Usage
+
+See [INSTALL.md](INSTALL.md) 
+
 # Developer Documentation
 
 To run MIW locally, this section describes the tooling as well as the local development setup.
@@ -151,26 +155,27 @@ directory, but without ".dist" at the end.
 
 Description of the env files:
 
-- **env.local**: Setup everything to get ready for flow "local". You need to fill in the passwords.
-- **env.docker**: Setup everything to get ready for flow "docker". You need to fill in the passwords.
+- **env.local**: Set up everything to get ready for flow "local". You need to fill in the passwords. 
+- **env.docker**: Set up everything to get ready for flow "docker". You need to fill in the passwords.
 
-> **IMPORTANT**: ssi-lib is resolving DID documents over network. There are two endpoints that rely on this resolution:
+> **IMPORTANT**: ssi-lib is resolving DID documents over the network. There are two endpoints that rely on this resolution:
 > - Verifiable Credentials - Validation
 > - Verifiable Presentations - Validation
->
-> The following parameters must be added or changed in env.local or env.docker file to ensure that these endpoints work
-> as intended in local development environment:
-> Add: ENFORCE_HTTPS_IN_DID_RESOLUTION=false
-> Change: MIW_HOST_NAME from miw to localhost
-> Change: APPLICATION_PORT from 8000 to 80
+>   
+> The following parameters are set in env.local or env.docker file per default:
+> ENFORCE_HTTPS_IN_DID_RESOLUTION=false
+> MIW_HOST_NAME=localhost
+> APPLICATION_PORT=80
+> If you intend to change them, the DID resolving may not work properly anymore!
 
-> **IMPORTANT**: When you are using MacOS and the MIW docker container won't start up (stuck somewhere or doesn't start
+> **IMPORTANT**: When you are using macOS and the MIW docker container won't start up (stuck somewhere or doesn't start
 > at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your
 > Docker settings (under "features in development"). This should fix the issue.
 
 In both env files (env.local and env.docker) you need to set *GITHUB_USERNAME* and *GITHUB_TOKEN* in order to be able to
 build the app, because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
-The access token need to have `read:packages` access. (ref: https://github.com/settings/tokens/new)
+The access token need to have `read:packages` access.
+(Ref: https://github.com/settings/tokens/new)
 
 Note: *SKIP_GRADLE_TASKS_PARAM* is used to pass parameters to the build process of the MIW jar. Currently, it skips the
 tests and code coverage, but speeds up the build time. If you want to activate it, just comment it out
