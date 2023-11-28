@@ -38,3 +38,11 @@ you need to use the [WSL](https://learn.microsoft.com/de-de/windows/wsl/install)
 
 > [!IMPORTANT]  
 > You need to use Java 17!
+
+> [!WARNING]
+> If you encounter some kind of database connection errors, then execute `task docker:stop-app`.
+> This will remove all existing Docker volumes, which may cause this error.
+
+> [!IMPORTANT]
+> Ensure you have exactly 32 random alphanumeric characters set 
+> for `ENCRYPTION_KEY` in `dev-assets/env-files/env.docker`
