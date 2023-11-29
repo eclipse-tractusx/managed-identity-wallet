@@ -172,11 +172,6 @@ Description of the env files:
 > at all), you can enable the docker-desktop feature "Use Rosetta for x86/amd64 emulation on Apple Silicon" in your
 > Docker settings (under "features in development"). This should fix the issue.
 
-In both env files (env.local and env.docker) you need to set *GITHUB_USERNAME* and *GITHUB_TOKEN* in order to be able to
-build the app, because the SSI lib is stored in a private repo (you also need the proper rights to access the repo).
-The access token need to have `read:packages` access.
-(Ref: https://github.com/settings/tokens/new)
-
 Note: *SKIP_GRADLE_TASKS_PARAM* is used to pass parameters to the build process of the MIW jar. Currently, it skips the
 tests and code coverage, but speeds up the build time. If you want to activate it, just comment it out
 like `SKIP_GRADLE_TASKS_PARAM="" #"-x jacocoTestCoverageVerification -x test"`
