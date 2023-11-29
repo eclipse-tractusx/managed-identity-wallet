@@ -41,9 +41,9 @@ public class HoldersCredentialControllerApiDocs {
                             @ExampleObject(name = "Wallet not found with caller BPN", value = """
                                     {
                                         "type": "about:blank",
-                                        "title": "Wallet not found for BPN did:web:localhost:BPNL0000000",
+                                        "title": "Wallet not found for identifier did:web:localhost:BPNL0000000",
                                         "status": 404,
-                                        "detail": "Wallet not found for BPN did:web:localhost:BPNL0000000",
+                                        "detail": "Wallet not found for identifier did:web:localhost:BPNL0000000",
                                         "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000/credentials",
                                         "properties": {
                                           "timestamp": 1689765541959
@@ -199,9 +199,9 @@ public class HoldersCredentialControllerApiDocs {
                             @ExampleObject(name = "Wallet not found with caller BPN", value = """
                                     {
                                        "type": "about:blank",
-                                       "title": "Wallet not found for BPN did:web:localhost:BPNL0000000501",
+                                       "title": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                                        "status": 404,
-                                       "detail": "Wallet not found for BPN did:web:localhost:BPNL0000000501",
+                                       "detail": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                                        "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000501",
                                        "properties": {
                                          "timestamp": 1689764377224
