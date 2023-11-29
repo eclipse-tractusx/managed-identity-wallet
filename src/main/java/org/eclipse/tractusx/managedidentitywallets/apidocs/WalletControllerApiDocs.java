@@ -126,7 +126,7 @@ public class WalletControllerApiDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Store Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given BPN")
+    @Operation(summary = "Store Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier")
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                  {
@@ -212,14 +212,14 @@ public class WalletControllerApiDocs {
                                     """)
                     })
             }),
-            @ApiResponse(responseCode = "404", description = "Wallet not found with provided BPN", content = {
+            @ApiResponse(responseCode = "404", description = "Wallet not found with provided identifier", content = {
                     @Content(examples = {
-                            @ExampleObject(name = "Wallet not found with provided BPN", value = """
+                            @ExampleObject(name = "Wallet not found with provided identifier", value = """
                                     {
                                         "type": "about:blank",
-                                        "title": "Wallet not found for BPN did:web:localhost:BPNL000000044001",
+                                        "title": "Wallet not found for identifier did:web:localhost:BPNL000000044001",
                                         "status": 404,
-                                        "detail": "Wallet not found for BPN did:web:localhost:BPNL000000044001",
+                                        "detail": "Wallet not found for identifier did:web:localhost:BPNL000000044001",
                                         "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000/credentials",
                                         "properties": {
                                           "timestamp": 1689765541959
@@ -281,14 +281,14 @@ public class WalletControllerApiDocs {
                                     """)
                     })
             }),
-            @ApiResponse(responseCode = "404", description = "Wallet not found with provided BPN", content = {
+            @ApiResponse(responseCode = "404", description = "Wallet not found with provided identifier", content = {
                     @Content(examples = {
-                            @ExampleObject(name = "Wallet not found with provided BPN", value = """
+                            @ExampleObject(name = "Wallet not found with provided identifier", value = """
                                     {
                                        "type": "about:blank",
-                                       "title": "Wallet not found for BPN did:web:localhost:BPNL0000000501",
+                                       "title": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                                        "status": 404,
-                                       "detail": "Wallet not found for BPN did:web:localhost:BPNL0000000501",
+                                       "detail": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                                        "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000501",
                                        "properties": {
                                          "timestamp": 1689764377224
@@ -396,7 +396,7 @@ public class WalletControllerApiDocs {
                                         }
                             """)
             }) }) })
-    @Operation(summary = "Retrieve wallet by BPN", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller or Base wallet, authority wallet can see all wallets) \n\n Retrieve single wallet by BPN, with or without its credentials")
+    @Operation(summary = "Retrieve wallet by BPN", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller or Base wallet, authority wallet can see all wallets) \n\n Retrieve single wallet by identifier, with or without its credentials")
     public @interface RetrieveWalletApiDoc {
     }
 
