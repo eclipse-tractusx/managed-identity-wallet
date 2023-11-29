@@ -37,9 +37,9 @@ public class DidDocumentControllerApiDocs {
                             @ExampleObject(name = "Wallet not found with provided bpn", value = """
                                     {
                                       "type": "about:blank",
-                                      "title": "Wallet not found for BPN BPNL00000000000",
+                                      "title": "Wallet not found for identifier BPNL00000000000",
                                       "status": 404,
-                                      "detail": "Wallet not found for BPN BPNL00000000000",
+                                      "detail": "Wallet not found for identifier BPNL00000000000",
                                       "instance": "/BPNL00000000000/did.json",
                                       "properties": {
                                         "timestamp": 1689767698010
@@ -99,9 +99,9 @@ public class DidDocumentControllerApiDocs {
                             @ExampleObject(name = "Wallet not found with provided bpn", value = """
                                     {
                                       "type": "about:blank",
-                                      "title": "Wallet not found for BPN BPNL00000000000",
+                                      "title": "Wallet not found for identifier BPNL00000000000",
                                       "status": 404,
-                                      "detail": "Wallet not found for BPN BPNL00000000000",
+                                      "detail": "Wallet not found for identifier BPNL00000000000",
                                       "instance": "/BPNL00000000000/did.json",
                                       "properties": {
                                         "timestamp": 1689767698010
