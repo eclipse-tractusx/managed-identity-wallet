@@ -1,3 +1,40 @@
+# [0.2.0-develop.9](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.8...v0.2.0-develop.9) (2023-11-30)
+
+
+### Bug Fixes
+
+* method name from the cx-ssi-lib has been renamed ([b46d084](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b46d0846f6b9ccc6b439c82ffec783cd8b933e08))
+
+# [0.2.0-develop.8](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.7...v0.2.0-develop.8) (2023-11-28)
+
+
+### Bug Fixes
+
+* **dev:** add important notes to INSTALL.md ([a7c1b71](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a7c1b711ac402cbead4e10e5c79d6ba318eaacdb))
+* **dev:** adjust port to request against keycloak ([4a3d317](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/4a3d317363690c78897c5db77a60fc716cd91b42))
+* **dev:** small adjustment to INSTALL.md ([59b6df4](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/59b6df484bd31905f43d8bc9c83e44f0992839fb))
+
+
+### Features
+
+* **devel:** make application port dynamic (parameter) ([8816c89](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8816c899e8aa2170e753f3250c74552d898520c2))
+* **dev:** update README.md and introduce INSTALL.md for usage ([54b8d4a](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/54b8d4ae9c859db2216ac3f85cbc56ab3cf6b950))
+* **readme:** add "usage" section [WIP] ([6919b71](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6919b71870e9265ae09a66e3354ec43bf7d1d088))
+
+# [0.2.0-develop.7](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.6...v0.2.0-develop.7) (2023-11-23)
+
+
+### Features
+
+* **dev:** add pgAdmin to local dev env ([#144](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/144)) ([d7f2bbe](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/d7f2bbe2900322bb5ecba94aa1ab4fafad5cf21c))
+
+# [0.2.0-develop.6](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.5...v0.2.0-develop.6) (2023-11-23)
+
+
+### Features
+
+* add initContainers ([#142](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/142)) ([7317800](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/731780075ca5e1a707c8834013c4c98348e9c269))
+
 # [0.2.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.4...v0.2.0-develop.5) (2023-11-22)
 
 
