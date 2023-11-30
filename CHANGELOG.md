@@ -1,3 +1,10 @@
+# [0.2.0-develop.9](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.8...v0.2.0-develop.9) (2023-11-30)
+
+
+### Bug Fixes
+
+* method name from the cx-ssi-lib has been renamed ([b46d084](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b46d0846f6b9ccc6b439c82ffec783cd8b933e08))
+
 # [0.2.0-develop.8](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.7...v0.2.0-develop.8) (2023-11-28)
 
 
