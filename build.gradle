@@ -8,23 +8,11 @@ plugins {
     // used to download the 'dash.jar' for license checks
     // docs: https://github.com/michel-kraemer/gradle-download-task
     id "de.undercouch.download" version "5.5.0"
-
-    // used to convert .env variables to gradle env variables
-    // docs: https://github.com/uzzu/dotenv-gradle
-    id "co.uzzu.dotenv.gradle" version "2.0.0"
 }
 
 group = "${groupName}"
 version = "${applicationVersion}"
 sourceCompatibility = JavaVersion.VERSION_17
-
-// Fetch the environment variables GITHUB_USERNAME, GITHUB_TOKEN
-// these can be set in <project_root>/.env
-// or export GITHUB_USERNAME=...
-//    export GITHUB_TOKEN=...
-// When using `task ...` this is not necessary
-def githubUserName = "${githubUserName}" ? "${githubUserName}" : env.fetch('GITHUB_USERNAME')
-def githubToken = "${githubToken}" ? "${githubToken}" : env.fetch('GITHUB_TOKEN')
 
 // alias for Project.getConfigurations()
 configurations {
@@ -45,13 +33,6 @@ repositories {
         url = uri("https://repo.danubetech.com/repository/maven-public")
     }
     maven { url 'https://jitpack.io' }
-    maven {
-        url = uri("https://maven.pkg.github.com/catenax-ng/product-lab-ssi")
-        credentials {
-            username = "${githubUserName}"
-            password = "${githubToken}"
-        }
-    }
     maven {
         // Used to resolve Dash License Tool
         // Dash has a maven plugin, BUT is not resolvable through mavenCentral()
