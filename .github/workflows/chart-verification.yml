@@ -74,7 +74,7 @@ jobs:
         with:
           image: jnorwood/helm-docs:v1.11.3
           options: -v ${{ github.workspace }}/charts:/helm-docs
-          run: helm-docs
+          run: helm-docs -i managed-identity-wallet/.helmdocsignore
 
       - name: Verify that no changes are required
         run: |
@@ -119,7 +119,7 @@ jobs:
 
       - name: Install Helm unittest plugin
         run: |
-          helm plugin install https://github.com/helm-unittest/helm-unittest.git
+          helm plugin install https://github.com/helm-unittest/helm-unittest.git --version 0.3.5
 
       - name: Run Helm unittests
         run: task helm:unittest
