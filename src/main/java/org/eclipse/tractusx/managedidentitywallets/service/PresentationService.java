@@ -31,11 +31,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import org.eclipse.tractusx.managedidentitywallets.adapter.did.DidDocumentResolverService;
+import org.eclipse.tractusx.managedidentitywallets.adapter.persistence.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.adapter.persistence.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.adapter.persistence.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;

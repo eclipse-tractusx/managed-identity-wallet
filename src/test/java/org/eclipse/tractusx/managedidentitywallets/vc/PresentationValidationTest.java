@@ -23,13 +23,13 @@ package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.adapter.controller.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.adapter.controller.dto.IssueMembershipCredentialRequest;
+import org.eclipse.tractusx.managedidentitywallets.adapter.persistence.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;

@@ -22,11 +22,11 @@
 package org.eclipse.tractusx.managedidentitywallets.did;
 
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.adapter.controller.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.adapter.persistence.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
