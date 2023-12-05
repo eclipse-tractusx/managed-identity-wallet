@@ -24,6 +24,22 @@ configurations {
     compileOnly.extendsFrom(annotaionProcessor)
 }
 
+// this needs to be done, as we're using the org.springframework.boot plugin
+// with native Gradle bom resolution
+// docs: https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#managing-dependencies.gradle-bom-support.customizing
+// docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.ResolutionStrategy.html
+configurations.configureEach {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'ch.qos.logback') {
+                details.useVersion '1.4.12'
+            }
+            // avoid a license issue
+            if (details.requested.name == 'spring-boot-devtools') {
+                details.useVersion '3.1.5'
+            }
+    }
+}
+
 repositories {
     // delegate is RepositoryHandler
     // docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.dsl.RepositoryHandler.html
@@ -61,7 +77,7 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
     implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.17'
+    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.18'
 
     //Added explicitly to mitigate CVE 2022-1471
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
