@@ -67,32 +67,6 @@ strategy: {}
   #   maxSurge: 0
   #   maxUnavailable: 1
 
-## Server definitions will be loaded at launch time. This allows connection
-## information to be pre-loaded into the instance of pgAdmin4 in the container.
-## Ref: https://www.pgadmin.org/docs/pgadmin4/latest/import_export_servers.html
-##
-serverDefinitions:
-  ## If true, server definitions will be created
-  ##
-  enabled: false
-
-  ## The resource type to use for deploying server definitions.
-  ## Can either be ConfigMap or Secret
-  resourceType: ConfigMap
-
-  servers:
-  #  firstServer:
-  #    Name: "Minimally Defined Server"
-  #    Group: "Servers"
-  #    Port: 5432
-  #    Username: "postgres"
-  #    Host: "localhost"
-  #    SSLMode: "prefer"
-  #    MaintenanceDB: "postgres"
-
-networkPolicy:
-  enabled: true
-
 ## Ingress
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
@@ -265,10 +239,6 @@ VolumePermissions:
   ##
   enabled: false
 
-## @param extraDeploy list of extra manifests to deploy
-##
-extraDeploy: []
-
 ## Additional InitContainers to initialize the pod
 ##
 extraInitContainers: |
@@ -295,16 +265,6 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
-## Horizontal Pod Autoscaling
-## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-#
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
 
 ## Node labels for pgAdmin4 pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
