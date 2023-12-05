@@ -142,10 +142,6 @@ spec:
             - name: SCRIPT_NAME
               value: {{ .Values.env.contextPath }}
           {{- end }}
-          {{- if .Values.serverDefinitions.enabled }}
-            - name: PGADMIN_SERVER_JSON_FILE
-              value: /pgadmin4/servers.json
-          {{- end }}
           {{- range .Values.env.variables }}
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
@@ -165,11 +161,6 @@ spec:
             - name: pgadmin-data
               mountPath: /var/lib/pgadmin
               subPath: {{ .Values.persistentVolume.subPath | default "" }}
-          {{- if .Values.serverDefinitions.enabled }}
-            - name: definitions
-              mountPath: /pgadmin4/servers.json
-              subPath: servers.json
-          {{- end }}
           {{- range .Values.extraConfigmapMounts }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
@@ -212,19 +203,6 @@ spec:
       {{- end }}
       {{- if .Values.extraVolumes }}
         {{- .Values.extraVolumes | toYaml | nindent 8 }}
-      {{- end }}
-      {{- if .Values.serverDefinitions.enabled }}
-        - name: definitions
-          {{- if eq .Values.serverDefinitions.resourceType "Secret" }}
-          secret:
-            secretName: {{ $fullName }}-server-definitions
-          {{- else }}
-          configMap:
-            name: {{ $fullName }}-server-definitions
-          {{- end }}
-            items:
-            - key: servers.json
-              path: servers.json
       {{- end }}
     {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
