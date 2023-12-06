@@ -17,17 +17,14 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
-version: '3'
-
-tasks:
-  unittest:
-    desc: Executes helm unittests
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm unittest -f 'tests/**/*.yaml' -f 'tests/**/**/*.yaml' .
-
-  readme:
-    desc: Rebuilds the readme of the Helm chart
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm-docs -i charts/managed-identity-wallet/.helmdocsignore .
+{{- if and .Values.pgadmin4.enabled .Values.pgadmin4.extraServerDefinitions.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-pgadmin4-server-definitions
+  labels:
+    {{- include "pgadmin.labels" . | nindent 4 }}
+data:
+  servers.json: |-
+{{- include "common.tplvalues.render" (dict "value" (include "managed-identity-wallet.pgadminServerDefinitions" .) "context" $) | nindent 4 }}
+{{- end }}
