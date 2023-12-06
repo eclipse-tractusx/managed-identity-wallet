@@ -4,6 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version "${springDependencyVersion}"
     id "jacoco"
     id 'project-report'
+    id 'org.openapi.generator' version '7.1.0'
 
     // used to download the 'dash.jar' for license checks
     // docs: https://github.com/michel-kraemer/gradle-download-task
@@ -13,6 +14,14 @@ plugins {
 group = "${groupName}"
 version = "${applicationVersion}"
 sourceCompatibility = JavaVersion.VERSION_17
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
 
 // alias for Project.getConfigurations()
 configurations {
@@ -245,6 +254,21 @@ jacoco {
     toolVersion = "${jacocoVersion}"
 }
 
+openApiGenerate {
+    generatorName.set('spring')
+    inputSpec.set("$rootDir/docs/secure-token-service-openapi.yml")
+    outputDir.set("$buildDir/generated")
+
+    apiPackage.set('org.eclipse.tractusx.managedidentitywallets.adapter.controller')
+    modelPackage.set('org.eclipse.tractusx.managedidentitywallets.adapter.controller.dto')
+
+    configOptions.set([
+        interfaceOnly: "true",
+        requestMappingMode: "api_interface",
+        useSpringBoot3: "true",
+        skipDefaultInterface: "true"
+    ])
+}
 
 // 'jacocoTestCoverageVerification' is provided by the 'jacoco' plugin
 // docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:jacoco_report_violation_rules

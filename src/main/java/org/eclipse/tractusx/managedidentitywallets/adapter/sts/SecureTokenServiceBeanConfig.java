@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SecureTokenBeanConfig {
+public class SecureTokenServiceBeanConfig {
 
   @Bean
-  public SecureTokenService secureTokenService(WalletRepository repo, SecureTokenIssuer issuer) {
-    return new SecureTokenServiceImpl(repo, issuer);
+  public  SecureTokenService secureTokenService(WalletRepository walletRepo, SecureTokenIssuer issuer) {
+    return new SecureTokenServiceImpl(walletRepo, issuer);
   }
 
 }

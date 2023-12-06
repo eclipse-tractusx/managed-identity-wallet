@@ -2,6 +2,8 @@ package org.eclipse.tractusx.managedidentitywallets.adapter.sts;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
@@ -28,19 +30,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SecureTokenIssuerImpl implements SecureTokenIssuer {
+public class SecureTokenIssuerAdapter implements SecureTokenIssuer {
 
   private static final String ACCESS_TOKEN = "access_token";
 
   private final SecureTokenConfigurationProperties properties;
 
   @Override
-  public JWT issueIdToken(DID self, DID partner, KeyPair keyPair) {
+  public JWT issueIdToken(DID self, DID partner, KeyPair keyPair, Set<String> scopes) {
     log.info("Requested ID token for us: '{}' and partner '{}'", self, partner);
     Instant expirationTime = Instant.now().plus(properties.tokenDuration());
-    JWT accessToken = createAccessToken(keyPair, self, partner, expirationTime);
-    log.info("Access token created for us: '{}' expiring at '{}'", self, expirationTime);
-    return createIdToken(keyPair, self, partner, expirationTime, accessToken);
+
+    return createAccessToken(keyPair, self, partner, expirationTime, scopes)
+        .map(accessToken -> createIdToken(keyPair, self, partner, expirationTime, accessToken))
+        .orElseGet(() -> createIdToken(keyPair, self, partner, expirationTime));
   }
 
   @Override
@@ -48,6 +51,14 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
     log.info("Requested ID token for us: '{}' and partner '{}' with existing access token.", self, partner);
     Instant expirationTime = Instant.now().plus(properties.tokenDuration());
     return createIdToken(keyPair, self, partner, expirationTime, accessToken);
+  }
+
+  private JWT createIdToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime) {
+    return createToken(keyPair, new JWTClaimsSet.Builder()
+        .issuer(self.toString())
+        .audience(partner.toString())
+        .subject(self.toString())
+        .expirationTime(Date.from(expirationTime)));
   }
 
   private JWT createIdToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime, JWT accessToken) {
@@ -59,12 +70,18 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
         .claim(ACCESS_TOKEN, accessToken));
   }
 
-  private JWT createAccessToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime) {
-    return createToken(keyPair, new JWTClaimsSet.Builder()
+  private Optional<JWT> createAccessToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime,
+      Set<String> scopes) {
+    log.info("Access token created for us: '{}' expiring at '{}'", self, expirationTime);
+    if (scopes.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(createToken(keyPair, new JWTClaimsSet.Builder()
         .issuer(self.toString())
         .audience(partner.toString())
         .subject(partner.toString())
-        .expirationTime(Date.from(expirationTime)));
+        .claim("", scopes) // TODO how to map scopes to claims??
+        .expirationTime(Date.from(expirationTime))));
   }
 
   @SneakyThrows
@@ -73,10 +90,10 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
         builder.getClaims().get("sub"));
     JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
         .type(JOSEObjectType.JWT)
-        .keyID(UUID.fromString(keyPair.publicKey()).toString())
+        .keyID(keyPair.keyId())
         .build();
 
-    log.debug("Creating JWS body for issuer '{}' and holder '{}'", builder.getClaims().get("iss"),
+    log.debug("Creating JWT body for issuer '{}' and holder '{}'", builder.getClaims().get("iss"),
         builder.getClaims().get("sub"));
     JWTClaimsSet body = builder
         .issueTime(Date.from(Instant.now()))
@@ -88,7 +105,7 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
     SignedJWT signedJWT = new SignedJWT(header, body);
     OctetKeyPair jwk = new OctetKeyPair.Builder(Curve.Ed25519, new Base64URL(keyPair.publicKey()))
         .keyUse(KeyUse.SIGNATURE)
-        .keyID(UUID.fromString(keyPair.publicKey()).toString())
+        .keyID(keyPair.keyId())
         .d(new Base64URL(keyPair.privateKey()))
         .build();
 

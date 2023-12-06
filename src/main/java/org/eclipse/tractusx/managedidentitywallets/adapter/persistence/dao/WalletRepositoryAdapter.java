@@ -10,16 +10,18 @@ import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 import org.eclipse.tractusx.managedidentitywallets.domain.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.domain.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class WalletRepositoryImpl implements WalletRepository {
+public class WalletRepositoryAdapter implements WalletRepository {
 
   private final org.eclipse.tractusx.managedidentitywallets.adapter.persistence.dao.repository.WalletRepository walletRepo;
   private final WalletKeyRepository keyRepo;
+  private final EncryptionUtils encryptionUtils;
 
   @Override
   public Optional<Wallet> findWallet(DID did) {
@@ -39,7 +41,7 @@ public class WalletRepositoryImpl implements WalletRepository {
         .businessPartnerNumber(new BusinessPartnerNumber(wallet.getBpn()))
         .did(new DID(wallet.getDid()))
         .keys(List.of(
-            new KeyPair(key.getPrivateKey(), key.getPublicKey())))
+            new KeyPair(key.getKeyId(), encryptionUtils.decrypt(key.getPrivateKey()), encryptionUtils.decrypt(key.getPublicKey()))))
         .build();
   }
 }
