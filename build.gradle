@@ -150,9 +150,9 @@ tasks.register('dashDependencies') { dashDependencies ->
             }
         }
 
-        def filtered = deps.findAll(d -> !d.startsWith('org.eclipse')).unique().sort()
-        filtered.each { logger.quiet("{}", it) }
-        file("deps.txt").write(filtered.join('\n'))
+        def uniqueSorted = deps.unique().sort()
+        uniqueSorted.each { logger.quiet("{}", it) }
+        file("deps.txt").write(uniqueSorted.join('\n'))
     }
 }
 
