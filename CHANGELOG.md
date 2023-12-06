@@ -1,3 +1,10 @@
+# [0.2.0-develop.11](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.10...v0.2.0-develop.11) (2023-12-06)
+
+
+### Bug Fixes
+
+* remove filter for org.eclipse packages ([af9a9e5](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/af9a9e50a9c15b16c8346561bc7ccb87a45df39d))
+
 # [0.2.0-develop.10](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.9...v0.2.0-develop.10) (2023-12-05)
 
 
