@@ -65,10 +65,6 @@ The command removes nearly all the Kubernetes components associated with the cha
 | `serviceAccount.name` | The name of the service account. Otherwise uses the fullname. | `` |
 | `serviceAccount.automountServiceAccountToken` | Opt out of API credential automounting. | `false` |
 | `strategy` | Specifies the strategy used to replace old Pods by new ones | `{}` |
-| `serverDefinitions.enabled` | Enables Server Definitions | `false` |
-| `serverDefinitions.resourceType` | The type of resource to deploy server definitions (either `ConfigMap` or `Secret`) | `ConfigMap` |
-| `serverDefinitions.servers` | Pre-configured server parameters | `{}` |
-| `networkPolicy.enabled` | Enables Network Policy | `true` |
 | `ingress.enabled` | Enables Ingress | `false` |
 | `ingress.annotations` | Ingress annotations | `{}` |
 | `ingress.ingressClassName` | Ingress class name | `""` |
@@ -100,14 +96,9 @@ The command removes nearly all the Kubernetes components associated with the cha
 | `startupProbe` | [startup probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) initial delay and timeout | `` |
 | `readinessProbe` | [readiness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) initial delay and timeout | `` |
 | `VolumePermissions.enabled` | Enables init container that changes volume permissions in the data directory  | `false` |
-| `extraDeploy` | list of extra manifests to deploy | `[]` |
 | `extraInitContainers` | Init containers to launch alongside the app | `[]` |
 | `containerPorts.http` | Sets http port inside pgadmin container | `80` |
 | `resources` | CPU/memory resource requests/limits | `{}` |
-| `autoscaling.enabled` | Enables Autoscaling | `false` |
-| `autoscaling.minReplicas` | Minimum amount of Replicas | `1` |
-| `autoscaling.maxReplicas` | Maximum amount of Replicas| `100` |
-| `autoscaling.targetCPUUtilizationPercentage` | Target CPU Utilization in percentage | `80` |
 | `nodeSelector` | Node labels for pod assignment | `{}` |
 | `tolerations` | Node tolerations for pod assignment | `[]` |
 | `affinity` | Node affinity for pod assignment | `{}` |
@@ -115,11 +106,6 @@ The command removes nearly all the Kubernetes components associated with the cha
 | `podLabels` | Labels for pod | `{}` |
 | `namespace` | Namespace where to deploy resources | `null` |
 | `init.resources` | Init container CPU/memory resource requests/limits | `{}` |
-| `test.image.registry` | Docker image registry for test | `docker.io` |
-| `test.image.repository` | Docker image for test | `busybox` |
-| `test.image.tag` | Docker image tag for test| `latest` |
-| `test.resources` | CPU/memory resource requests/limits for test | `{}` |
-| `test.securityContext` | Custom [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for test Pod | `` |
 
 > The values for "extraConfigmapMounts.[].configMap" and "extraSecretMounts.[].secret" can be either a simple string
 > or a template string.
