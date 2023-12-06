@@ -263,7 +263,7 @@ postgresql:
 # For more information on how to configure the pgadmin chart see https://artifacthub.io/packages/helm/runix/pgadmin4.
 pgadmin4:
   # -- Enable to deploy pgAdmin
-  enabled: true
+  enabled: false
   env:
     # -- Preset the admin user email
     email: admin@miw.com
