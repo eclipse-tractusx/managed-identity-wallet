@@ -56,6 +56,7 @@ repositories {
         // Dash has a maven plugin, BUT is not resolvable through mavenCentral()
         url = uri("https://repo.eclipse.org/content/repositories/dash-licenses/")
     }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
 ext {
@@ -79,7 +80,7 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
     implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.17'
+    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.18-SNAPSHOT'
 
     //Added explicitly to mitigate CVE 2022-1471
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
