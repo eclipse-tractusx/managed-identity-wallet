@@ -1,3 +1,10 @@
+# [0.3.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0-develop.1...v0.3.0-develop.2) (2023-12-07)
+
+
+### Reverts
+
+* Revert "chore(release): 0.3.0-develop.1 [skip ci]" ([b96ed75](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b96ed75a686ce89f27b077b82128630d71504869))
+
 # [0.2.0-develop.11](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.10...v0.2.0-develop.11) (2023-12-06)
 
 
