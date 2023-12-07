@@ -21,12 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config.security;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,12 +29,16 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * The type Custom authentication converter.
  */
 public class CustomAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
-
-    private static final String ROLE_PREFIX = "ROLE_";
 
     private final JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter;
     private final String resourceId;
@@ -65,15 +63,17 @@ public class CustomAuthenticationConverter implements Converter<Jwt, AbstractAut
     }
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt, String resourceId) {
-        return Optional.ofNullable(jwt.getClaim("resource_access"))
-        .filter(resourceAccess -> resourceAccess instanceof Map)
-            .map(resourceAccess -> ((Map<String, Object>) resourceAccess).get(resourceId))
-            .filter(resource -> resource instanceof Map)
-            .map(resource -> ((Map<String, Object>) resource).get("roles"))
-            .filter(resourceRoles -> resourceRoles instanceof Collection)
-            .map(resourceRoles -> ((Collection<String>) resourceRoles).stream()
-                .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role))
-                .collect(Collectors.toSet()))
-            .orElse(Set.of());
+        Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+        Map<String, Object> resource = (Map<String, Object>) resourceAccess.get(resourceId);
+        if (Objects.isNull(resource)) {
+            return Set.of();
+        }
+        Collection<String> resourceRoles = (Collection<String>) resource.get("roles");
+        if (Objects.isNull(resourceRoles)) {
+            return Set.of();
+        }
+        return resourceRoles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .collect(Collectors.toSet());
     }
 }

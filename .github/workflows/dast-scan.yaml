@@ -62,6 +62,8 @@ jobs:
 
       - name: Build app
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ github.actor }}
           SKIP_GRADLE_TASKS_PARAM: "-x jacocoTestCoverageVerification -x test"
         run: task app:build
 

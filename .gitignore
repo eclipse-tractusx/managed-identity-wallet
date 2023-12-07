@@ -64,8 +64,6 @@ dev-assets/env-files/env.local
 dev-assets/env-files/env.docker
 dev-assets/env-files/env.environment
 dev-assets/docker-environment/postgres/db.sh
-dev-assets/docker-environment/pgAdmin/servers.json
-dev-assets/docker-environment/pgAdmin/storage/*
 
 .java-version
 
