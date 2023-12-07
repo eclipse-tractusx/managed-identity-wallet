@@ -266,7 +266,8 @@ openApiGenerate {
         interfaceOnly: "true",
         requestMappingMode: "api_interface",
         useSpringBoot3: "true",
-        skipDefaultInterface: "true"
+        skipDefaultInterface: "true",
+        openApiNullable: "false",
     ])
 }
 
