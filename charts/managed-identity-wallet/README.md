@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 0.1.0-rc.2](https://img.shields.io/badge/Version-0.1.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0-rc.2](https://img.shields.io/badge/AppVersion-0.1.0--rc.2-informational?style=flat-square)
+![Version: 0.2.0-develop.11](https://img.shields.io/badge/Version-0.2.0--develop.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0-develop.11](https://img.shields.io/badge/AppVersion-0.2.0--develop.11-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
@@ -97,11 +97,15 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | ingress.enabled | bool | `false` | Enable ingress controller resource |
 | ingress.hosts | list | `[]` | Ingress accepted hostnames |
 | ingress.tls | list | `[]` | Ingress TLS configuration |
+| initContainers | list | `[]` | add initContainers to the miw deployment |
 | keycloak.auth.adminPassword | string | `""` | Keycloak admin password |
 | keycloak.auth.adminUser | string | `"admin"` | Keycloak admin user |
 | keycloak.enabled | bool | `true` | Enable to deploy Keycloak |
-| keycloak.extraEnvVars[0].name | string | `"KEYCLOAK_HOSTNAME"` |  |
-| keycloak.extraEnvVars[0].value | string | `"{{ .Release.Name }}-keycloak"` |  |
+| keycloak.extraEnvVars | list | `[]` |  |
+| keycloak.ingress.annotations | object | `{}` |  |
+| keycloak.ingress.enabled | bool | `false` |  |
+| keycloak.ingress.hosts | list | `[]` |  |
+| keycloak.ingress.tls | list | `[]` |  |
 | keycloak.keycloakConfigCli.backoffLimit | int | `2` | Number of retries before considering a Job as failed |
 | keycloak.keycloakConfigCli.enabled | bool | `true` | Enable to create the miw playground realm |
 | keycloak.keycloakConfigCli.existingConfigmap | string | `"keycloak-realm-config"` | Existing configmap name for the realm configuration |
@@ -110,6 +114,12 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | keycloak.postgresql.auth.username | string | `"miw_keycloak"` | Keycloak PostgreSQL user |
 | keycloak.postgresql.enabled | bool | `true` | Enable to deploy PostgreSQL |
 | keycloak.postgresql.nameOverride | string | `"keycloak-postgresql"` | Name of the PostgreSQL chart to deploy. Mandatory when the MIW deploys a PostgreSQL chart, too. |
+| livenessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":20,"periodSeconds":5,"timeoutSeconds":15}` | Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
+| livenessProbe.enabled | bool | `true` | Enables/Disables the livenessProbe at all |
+| livenessProbe.failureThreshold | int | `3` | When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container. |
+| livenessProbe.initialDelaySeconds | int | `20` | Number of seconds after the container has started before readiness probe are initiated. |
+| livenessProbe.periodSeconds | int | `5` | How often (in seconds) to perform the probe |
+| livenessProbe.timeoutSeconds | int | `15` | Number of seconds after which the probe times out. |
 | miw.authorityWallet.bpn | string | `"BPNL000000000000"` | Authority Wallet BPNL |
 | miw.authorityWallet.name | string | `""` | Authority Wallet Name |
 | miw.database.encryptionKey.secret | string | `""` | Existing secret for database encryption key |
@@ -128,7 +138,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | miw.keycloak.realm | string | `"miw_test"` | Keycloak realm |
 | miw.keycloak.url | string | `"http://{{ .Release.Name }}-keycloak"` | Keycloak URL |
 | miw.logging.level | string | `"INFO"` | Log level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE. |
-| miw.ssi.enforceHttpsInDidWebResolution | bool | `false` | Enable to use HTTPS in DID Web Resolution |
+| miw.ssi.enforceHttpsInDidWebResolution | bool | `true` | Enable to use HTTPS in DID Web Resolution |
 | miw.ssi.vcExpiryDate | string | `""` | Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year> |
 | nameOverride | string | `""` | String to partially override common.names.fullname template (will maintain the release name) |
 | nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
@@ -144,6 +154,13 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | postgresql.backup.conjob.storage.size | string | `"8Gi"` | PVC Storage Request for the backup data volume |
 | postgresql.backup.enabled | bool | `false` | Enable to create a backup cronjob |
 | postgresql.enabled | bool | `true` | Enable to deploy Postgresql |
+| readinessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":30,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":5}` | Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
+| readinessProbe.enabled | bool | `true` | Enables/Disables the readinessProbe at all |
+| readinessProbe.failureThreshold | int | `3` | When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready. |
+| readinessProbe.initialDelaySeconds | int | `30` | Number of seconds after the container has started before readiness probe are initiated. |
+| readinessProbe.periodSeconds | int | `5` | How often (in seconds) to perform the probe |
+| readinessProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
+| readinessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
 | replicaCount | int | `1` | The amount of replicas to run |
 | resources.limits.cpu | int | `2` | CPU resource limits |
 | resources.limits.memory | string | `"1Gi"` | Memory resource limits |
@@ -230,9 +247,10 @@ when deploying the MIW in a production environment:
 
 | Name | Email | Url |
 | ---- | ------ | --- |
+| Dominik Pinsel | <dominik.pinsel@mercedes-benz.com> | <https://github.com/DominikPinsel> |
 | Peter Motzko | <peter.motzko@volkswagen.de> | <https://github.com/pmoscode> |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
+Autogenerated from chart metadata using [helm-docs](https://github.com/norwoodj/helm-docs/)

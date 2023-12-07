@@ -25,8 +25,8 @@ description: |
 
 type: application
 
-version: 0.2.0
-appVersion: 0.2.0
+version: 0.3.0-develop.1
+appVersion: 0.3.0-develop.1
 
 home: https://github.com/eclipse-tractusx/managed-identity-wallet
 keywords:
@@ -37,6 +37,9 @@ sources:
   - https://github.com/eclipse-tractusx/managed-identity-wallet
 
 maintainers:
+  - name: Dominik Pinsel
+    email: dominik.pinsel@mercedes-benz.com
+    url: https://github.com/DominikPinsel
   - name: Peter Motzko
     email: peter.motzko@volkswagen.de
     url: https://github.com/pmoscode

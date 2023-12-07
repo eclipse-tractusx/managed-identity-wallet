@@ -32,9 +32,10 @@ tasks:
     ignore_error: true
     vars:
       OPTIONS: '{{ default "" .OPTIONS }}'
-      CONTAINERS: '{{ default "postgres keycloak" .CONTAINERS }}'
+      CONTAINERS: '{{ default "postgres keycloak pgadmin" .CONTAINERS }}'
     cmds:
       - cat postgres/db.sh.tpl | envsubst > postgres/db.sh
+      - cat pgAdmin/servers.json.tpl | envsubst > pgAdmin/servers.json
       - chmod +x postgres/db.sh
       - "docker compose up {{.OPTIONS}} {{.CONTAINERS}}"
 
@@ -43,9 +44,10 @@ tasks:
     dir: dev-assets/docker-environment
     cmds:
       - docker compose down
-      - cmd: docker volume remove docker-environment_postgres_data
+      - cmd: docker volume remove docker-environment_postgres_data docker-environment_pgadmin_data
         ignore_error: true
       - rm -f postgres/db.sh
+      - rm -f pgAdmin/servers.json
 
   start-app:
     desc: Run the app in a container environment (including middleware aka Postgresql and Keycloak)

@@ -36,13 +36,6 @@ This project leverages the following third party content.
 
 See DEPENDENCIES file.
 
-cx-ssi-lib-0.0.16.jar (0.0.16)  
-    - License:   Apache-2.0  
-    - Licence Path: <https://github.com/catenax-ng/product-lab-ssi/blob/main/cx-ssi-lib/LICENSE>  
-    - Project URL:  <https://github.com/catenax-ng/product-lab-ssi>  
-    - Source URL:   <https://github.com/catenax-ng/product-lab-ssi/tree/main/cx-ssi-lib>  
-    - Download URL: <https://github.com/catenax-ng/product-lab-ssi/packages/1842305?version=0.0.16>
-
 ## Cryptography
 
 Content may contain encryption software. The country in which you are currently
