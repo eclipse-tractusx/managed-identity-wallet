@@ -1,3 +1,10 @@
+# [0.3.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0-develop.2...v0.3.0-develop.3) (2023-12-07)
+
+
+### Reverts
+
+* Revert "Release MIW 0.3.0 (#190)" (#193) ([28978a8](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/28978a8139b0bebe064224bfc29fccea795613af)), closes [#190](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/190) [#193](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/193)
+
 # [0.3.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0-develop.1...v0.3.0-develop.2) (2023-12-07)
 
 ## [0.2.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0...v0.2.1) (2023-12-07)
