@@ -64,6 +64,8 @@ jobs:
       - name: Run semantic release
         if: github.event_name != 'pull_request'
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx --yes -p @semantic-release/exec -p @semantic-release/changelog -p @semantic-release/git -p @semantic-release/commit-analyzer -p @semantic-release/release-notes-generator semantic-release
@@ -71,11 +73,16 @@ jobs:
       - name: Run semantic release (dry run)
         if: github.event_name == 'pull_request'
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx --yes -p @semantic-release/exec -p @semantic-release/github -p @semantic-release/changelog -p @semantic-release/git -p @semantic-release/commit-analyzer -p @semantic-release/release-notes-generator semantic-release --dry-run
 
       - name: Execute Gradle build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ github.actor }}
         run: ./gradlew build
 
       - name: Upload build artifact
