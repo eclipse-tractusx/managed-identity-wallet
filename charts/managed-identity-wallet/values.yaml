@@ -61,6 +61,10 @@ ingress:
   annotations: {}
   # -- Ingress accepted hostnames
   hosts: []
+  #   - host: chart-example.local
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
   # -- Ingress TLS configuration
   tls: []
   #  - secretName: chart-example-tls
@@ -81,6 +85,34 @@ securityContext:
   runAsGroup: 11111
   # -- Enable to run the container as a non-root user
   runAsNonRoot: true
+
+# -- Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+livenessProbe:
+  # -- Enables/Disables the livenessProbe at all
+  enabled: true
+  # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container.
+  failureThreshold: 3
+  # -- Number of seconds after the container has started before readiness probe are initiated.
+  initialDelaySeconds: 20
+  # -- Number of seconds after which the probe times out.
+  timeoutSeconds: 15
+  # -- How often (in seconds) to perform the probe
+  periodSeconds: 5
+
+# -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+readinessProbe:
+  # -- Enables/Disables the readinessProbe at all
+  enabled: true
+  # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready.
+  failureThreshold: 3
+  # -- Number of seconds after the container has started before readiness probe are initiated.
+  initialDelaySeconds: 30
+  # -- How often (in seconds) to perform the probe
+  periodSeconds: 5
+  # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+  successThreshold: 1
+  # -- Number of seconds after which the probe times out.
+  timeoutSeconds: 5
 
 resources:
   requests:
@@ -106,6 +138,9 @@ affinity: {}
 
 # -- PodAnnotation configuration
 podAnnotations: {}
+
+# -- add initContainers to the miw deployment
+initContainers: []
 
 ## @section Managed Identity Wallet Primary Parameters
 ##

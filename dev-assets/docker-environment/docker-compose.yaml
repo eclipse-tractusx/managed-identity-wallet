@@ -28,13 +28,13 @@ services:
     env_file:
       - ../env-files/env.$DEV_ENVIRONMENT
     ports:
-      - "8000:8000"
+      - "$APPLICATION_PORT:$APPLICATION_PORT"
       - "8090:8090"
     networks:
       - miw-net
 
   postgres:
-    image: postgres:15.3-alpine3.18
+    image: postgres:14.5-alpine3.16
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/db.sh:/docker-entrypoint-initdb.d/init-database.sh
@@ -63,8 +63,28 @@ services:
     networks:
       - miw-net
 
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "8888:80"
+    user: root # If removed, the storage mount won't work
+    env_file:
+      - ../env-files/env.$DEV_ENVIRONMENT
+    environment:
+      PGADMIN_DISABLE_POSTFIX: true
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgAdmin/servers.json:/pgadmin4/servers.json
+      - ./pgAdmin/storage/:/var/lib/pgadmin/storage/pg_admin.com/
+    depends_on:
+      - postgres
+    networks:
+      - miw-net
+
 volumes:
   postgres_data:
+    driver: local
+  pgadmin_data:
     driver: local
 
 networks:
