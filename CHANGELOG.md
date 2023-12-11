@@ -1,3 +1,10 @@
+# [0.4.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0...v0.4.0-develop.1) (2023-12-11)
+
+
+### Features
+
+* merge release 0.3.0 from main ([3305d2f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/3305d2fe6bc303aebc6ea4b971318a102e60a202))
+
 # [0.3.0](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.1...v0.3.0) (2023-12-07)
 
 
