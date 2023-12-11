@@ -178,3 +178,9 @@ jobs:
           if [[ -n "$changed" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
+
+        # TODO: update the ci/all-values.yaml file before enabling this step
+      - name: Run chart-testing (install)
+        run: ct install --charts charts/managed-identity-wallet
+        # if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
+        if: false
