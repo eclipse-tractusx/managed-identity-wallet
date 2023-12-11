@@ -202,3 +202,35 @@ jobs:
             --create-namespace \
             --wait \
             --version ${{ github.event.inputs.upgrade_from || '0.2.0' }}
+
+        # command breakdown
+        # helm dependency update: update chart dependencies based on the content of Chart.yaml
+        # update arg1 (charts/managed-identity-wallet): the location of Chart.yaml
+        # -n/--namespace apps: run in the `apps` namespace
+        # ---
+        # helm upgrade: upgrade a release
+        # upgrade arg1 (testing): the name of the release to upgrade
+        # upgrade arg2 (charts/managed-identity-wallet): the location of Chart.yaml
+        # -n/--namespace apps: run in the `apps` namespace
+        # --wait: wait for all pods, services etc. ro run
+        # --set image.tag=testing: overwrite the image.tag value to be `testing`
+        # --set image.repository=kind-registry:5000/miw: overwrite the image.repository value to be `kind-registry:5000/miw`
+        # ---
+        # NOTE: the overwritten values for the image are used to ensure we use the latest chart version, which was
+        #       built during the workflow run.
+      - name: Run helm upgrade
+        run: |
+          helm dependency \
+            update \
+            charts/managed-identity-wallet \
+            -n apps
+          
+          helm upgrade \
+            testing \
+            charts/managed-identity-wallet \
+            -n apps \
+            --wait \
+            --set image.tag=testing \
+            --set image.repository=kind-registry:5000/miw
+        # only run if this is not a PR -OR- if there are new versions available
+        if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
