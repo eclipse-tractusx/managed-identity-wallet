@@ -120,9 +120,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Add bitnami repo
+      - name: Add bitnami and tractusx-dev repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/dev
           helm repo update
 
       - name: Update Helm dependencies
