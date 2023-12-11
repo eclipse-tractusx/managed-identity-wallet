@@ -184,3 +184,21 @@ jobs:
         run: ct install --charts charts/managed-identity-wallet
         # if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
         if: false
+
+        # command breakdown
+        # install: install the chart effectively creating a release
+        # install arg 1 (testing): the name of the release
+        # install arg 2 (tractusx-dev/managed-identity-wallet): the chart to install (in this case the official one from the dev repo)
+        # -n/--namespace: the namespace to use when installing
+        # --create-namespace: create the release namespace if it doesn't exist
+        # --wait: wait for all resources to start
+        # --version: The chart version to install
+      - name: Install the default chart on KinD cluster
+        run: |
+          helm install \
+            testing \
+            tractusx-dev/managed-identity-wallet \
+            -n apps \
+            --create-namespace \
+            --wait \
+            --version ${{ github.event.inputs.upgrade_from || '0.2.0' }}
