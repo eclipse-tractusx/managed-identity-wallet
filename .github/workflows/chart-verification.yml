@@ -157,5 +157,24 @@ jobs:
           push: true
           tags: kind-registry:5000/miw:testing
 
-      - name: Install the chart on KinD cluster
-        run: helm install -n apps --create-namespace --wait --set image.tag=testing --set=image.repository=kind-registry:5000/miw testing charts/managed-identity-wallet
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          check-latest: true
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.3.1
+
+        # ct list-changed will output all charts which have changed compared to the target-branch
+        # Example:
+        # Our branch has update the charts/managed-identity-wallet
+        # When we compare with main/develop
+        # We get the output
+        # > charts/managed-identity-wallet
+        # and subsequently set the variable `changed=true`
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
