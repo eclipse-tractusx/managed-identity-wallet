@@ -264,7 +264,7 @@ postgresql:
 # (Here we're using a stripped-down version of the pgadmin chart, to just )
 pgadmin4:
   # -- Enable to deploy pgAdmin
-  enabled: true
+  enabled: false
   env:
     # -- Preset the admin user email
     email: admin@miw.com
