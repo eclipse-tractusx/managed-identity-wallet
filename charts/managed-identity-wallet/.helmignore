@@ -26,4 +26,3 @@ values-*.yaml
 README.md.gotmpl
 .helmdocsignore
 ci/
-charts/pgadmin4
