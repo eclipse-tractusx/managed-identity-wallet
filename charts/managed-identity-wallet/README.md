@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 0.4.0-develop.1](https://img.shields.io/badge/Version-0.4.0--develop.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.1](https://img.shields.io/badge/AppVersion-0.4.0--develop.1-informational?style=flat-square)
+![Version: 0.4.0-develop.2](https://img.shields.io/badge/Version-0.4.0--develop.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.2](https://img.shields.io/badge/AppVersion-0.4.0--develop.2-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
@@ -143,7 +143,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | miw.ssi.vcExpiryDate | string | `""` | Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year> |
 | nameOverride | string | `""` | String to partially override common.names.fullname template (will maintain the release name) |
 | nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
-| pgadmin4.enabled | bool | `true` | Enable to deploy pgAdmin |
+| pgadmin4.enabled | bool | `false` | Enable to deploy pgAdmin |
 | pgadmin4.env.email | string | `"admin@miw.com"` | Preset the admin user email |
 | pgadmin4.env.password | string | `"very-secret-password"` | preset password (there is no auto-generated password) |
 | pgadmin4.extraServerDefinitions.enabled | bool | `true` | enable the predefined server for pgadmin |
