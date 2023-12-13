@@ -24,5 +24,6 @@
 tests/
 values-*.yaml
 README.md.gotmpl
+.helmdocsignore
 ci/
-argocd/
+charts/pgadmin4
