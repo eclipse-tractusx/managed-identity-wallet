@@ -23,9 +23,13 @@ package org.eclipse.tractusx.managedidentitywallets.config.security;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.eclipse.tractusx.managedidentitywallets.adapter.sts.SecureTokenWebFilter;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -36,6 +40,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -52,7 +57,8 @@ import static org.springframework.http.HttpMethod.POST;
 public class SecurityConfig {
 
     private final SecurityConfigProperties securityConfigProperties;
-
+    private final OAuth2ResourceServerProperties oauth2props;
+    private final RestTemplateBuilder restTemplateBuilder;
     /**
      * Filter chain security filter chain.
      *
@@ -67,6 +73,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.xssProtection(Customizer.withDefaults()).contentSecurityPolicy(contentSecurityPolicyConfig -> contentSecurityPolicyConfig.policyDirectives("script-src 'self'")))
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new SecureTokenWebFilter(oauth2props, restTemplateBuilder), AuthenticationFilter.class)
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests.requestMatchers(new AntPathRequestMatcher("/")).permitAll() // forwards to swagger
                         .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
