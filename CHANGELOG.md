@@ -1,3 +1,11 @@
+# [0.4.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.1...v0.4.0-develop.2) (2023-12-13)
+
+
+### Features
+
+* **helm:** add pgadmin4 as dependency to the chart ([6c68928](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6c689280f33107268f0789c243db1f3dca561485))
+* **helm:** add pgadmin4 as dependency to the chart PR [#208](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/208) ([8c5c32f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8c5c32f4f3d1e1cfd16b7f2e529ad25ca466df2e))
+
 # [0.4.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0...v0.4.0-develop.1) (2023-12-11)
 
 
