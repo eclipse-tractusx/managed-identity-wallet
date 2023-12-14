@@ -2,44 +2,6 @@ apiVersion: v1
 entries:
   managed-identity-wallet:
   - apiVersion: v2
-    appVersion: 0.0.1
-    created: "2023-08-24T08:24:46.785055176Z"
-    dependencies:
-    - condition: keycloak.enabled
-      name: keycloak
-      repository: https://charts.bitnami.com/bitnami
-      version: 15.1.6
-    - name: common
-      repository: https://charts.bitnami.com/bitnami
-      tags:
-      - bitnami-common
-      version: 2.x.x
-    - condition: postgresql.internal.enabled
-      name: postgresql
-      repository: https://charts.bitnami.com/bitnami
-      version: 11.9.13
-    description: 'Managed Identity Wallet is supposed to supply a secure data source
-      and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign
-      Identity founding on those DIDs. And at the same it shall support an uninterrupted
-      tracking and tracing and documenting the usage of those DIDs, e.g. within logistical
-      supply chains. '
-    digest: 9e8ad11e94e6bbcefbad3c07950c829ff9fd177bc9a76a0f0aa4f6cc46ae0602
-    home: https://github.com/eclipse-tractusx/managed-identity-wallet
-    keywords:
-    - Managed Identity Wallet
-    - eclipse-tractusx
-    maintainers:
-    - email: peter.motzko@volkswagen.de
-      name: Peter Motzko
-      url: https://github.com/pmoscode
-    name: managed-identity-wallet
-    sources:
-    - https://github.com/eclipse-tractusx/managed-identity-wallet
-    type: application
-    urls:
-    - https://github.com/eclipse-tractusx/managed-identity-wallet/releases/download/managed-identity-wallet-1.1.0/managed-identity-wallet-1.1.0.tgz
-    version: 1.1.0
-  - apiVersion: v2
     appVersion: 0.4.0-develop.3
     created: "2023-12-14T11:34:14.834441553Z"
     dependencies:
