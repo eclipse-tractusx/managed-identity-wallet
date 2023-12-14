@@ -58,3 +58,8 @@ dependencies:
     version: 11.9.13
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.internal.enabled
+  - name: pgadmin4
+    repository: file://charts/pgadmin4  # https://helm.runix.net
+    # License: https://github.com/rowanruseler/helm-charts/blob/main/LICENSE
+    version: 1.19.0
+    condition: pgadmin4.enabled

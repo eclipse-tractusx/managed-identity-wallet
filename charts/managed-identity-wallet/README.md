@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 0.4.0-develop.1](https://img.shields.io/badge/Version-0.4.0--develop.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.1](https://img.shields.io/badge/AppVersion-0.4.0--develop.1-informational?style=flat-square)
+![Version: 0.4.0-develop.2](https://img.shields.io/badge/Version-0.4.0--develop.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.2](https://img.shields.io/badge/AppVersion-0.4.0--develop.2-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
@@ -77,6 +77,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 | Repository | Name | Version |
 |------------|------|---------|
+| file://charts/pgadmin4 | pgadmin4 | 1.19.0 |
 | https://charts.bitnami.com/bitnami | common | 2.x.x |
 | https://charts.bitnami.com/bitnami | keycloak | 15.1.6 |
 | https://charts.bitnami.com/bitnami | postgresql | 11.9.13 |
@@ -142,6 +143,15 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | miw.ssi.vcExpiryDate | string | `""` | Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year> |
 | nameOverride | string | `""` | String to partially override common.names.fullname template (will maintain the release name) |
 | nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
+| pgadmin4.enabled | bool | `false` | Enable to deploy pgAdmin |
+| pgadmin4.env.email | string | `"admin@miw.com"` | Preset the admin user email |
+| pgadmin4.env.password | string | `"very-secret-password"` | preset password (there is no auto-generated password) |
+| pgadmin4.extraServerDefinitions.enabled | bool | `true` | enable the predefined server for pgadmin |
+| pgadmin4.extraServerDefinitions.servers | object | `{}` | See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L84) how to configure the predefined servers |
+| pgadmin4.ingress.annotations | object | `{}` |  |
+| pgadmin4.ingress.enabled | bool | `false` | Enagle pgAdmin ingress |
+| pgadmin4.ingress.hosts | list | `[]` | See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L104) how to configure the ingress host(s) |
+| pgadmin4.ingress.tls | list | `[]` | See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L109) how to configure tls for the ingress host(s) |
 | podAnnotations | object | `{}` | PodAnnotation configuration |
 | podSecurityContext | object | `{}` | PodSecurityContext |
 | postgresql.auth.database | string | `"miw_app"` | Postgresql database to create |
