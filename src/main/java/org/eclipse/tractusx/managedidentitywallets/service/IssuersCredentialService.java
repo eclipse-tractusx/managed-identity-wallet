@@ -432,7 +432,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
 
-        boolean valid = proofValidation.verifiy(verifiableCredential);
+        boolean valid = proofValidation.verify(verifiableCredential);
 
         Map<String, Object> response = new TreeMap<>();
 

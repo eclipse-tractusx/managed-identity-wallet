@@ -1,3 +1,88 @@
+# [0.4.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.2...v0.4.0-develop.3) (2023-12-14)
+
+
+### Features
+
+* **helm:** configure MIW Helm chart to use pgadmin4 subchart ([fc2f211](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/fc2f211abfa7ffedc2e66778c05eb10e3a2df366))
+* **helm:** configure MIW Helm chart to use pgadmin4 subchart PR [#209](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/209) ([8d18845](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8d18845ef841b791c13597af0398ee10b752b7e9))
+
+# [0.4.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.1...v0.4.0-develop.2) (2023-12-13)
+
+
+### Features
+
+* **helm:** add pgadmin4 as dependency to the chart ([6c68928](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6c689280f33107268f0789c243db1f3dca561485))
+* **helm:** add pgadmin4 as dependency to the chart PR [#208](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/208) ([8c5c32f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8c5c32f4f3d1e1cfd16b7f2e529ad25ca466df2e))
+
+# [0.4.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0...v0.4.0-develop.1) (2023-12-11)
+
+
+### Features
+
+* merge release 0.3.0 from main ([3305d2f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/3305d2fe6bc303aebc6ea4b971318a102e60a202))
+
+# [0.3.0](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.1...v0.3.0) (2023-12-07)
+
+
+### Bug Fixes
+
+* **ci:** separate workflow "Test application (test + coverage)" for PR and repo ([6de785b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6de785b670bdede6e55559ce461fb76d05f2ecc8))
+* **dev:** add file extension and refactor called method in gradle ([6811a8b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6811a8b025b76f5998b1c2fd65b5f679e28468d3))
+* **dev:** add important notes to INSTALL.md ([a7c1b71](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a7c1b711ac402cbead4e10e5c79d6ba318eaacdb))
+* **dev:** adjust port to request against keycloak ([4a3d317](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/4a3d317363690c78897c5db77a60fc716cd91b42))
+* **dev:** small adjustment to INSTALL.md ([59b6df4](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/59b6df484bd31905f43d8bc9c83e44f0992839fb))
+* manually change the Helm chart version ([1ad16ed](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/1ad16ed064d69214bc87d65f76740c2ecaa6b539))
+* method name from the cx-ssi-lib has been renamed ([b46d084](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b46d0846f6b9ccc6b439c82ffec783cd8b933e08))
+* remove filter for org.eclipse packages ([af9a9e5](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/af9a9e50a9c15b16c8346561bc7ccb87a45df39d))
+
+
+### Features
+
+* add initContainers ([#142](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/142)) ([7317800](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/731780075ca5e1a707c8834013c4c98348e9c269))
+* add tpl to miw ingress ([#143](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/143)) ([c56d133](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c56d1330f2df1a3468c1e680bcc4fe50898ca6bd))
+* **dev:** add pgAdmin to local dev env ([#144](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/144)) ([d7f2bbe](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/d7f2bbe2900322bb5ecba94aa1ab4fafad5cf21c))
+* **devel:** make application port dynamic (parameter) ([8816c89](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8816c899e8aa2170e753f3250c74552d898520c2))
+* **dev:** update README.md and introduce INSTALL.md for usage ([54b8d4a](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/54b8d4ae9c859db2216ac3f85cbc56ab3cf6b950))
+* **helm:** Make liveness & readiness probes configurable ([#99](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/99)) ([252eed1](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/252eed1b15289740ba953861076de86ddc99fe4a))
+* **readme:** add "usage" section [WIP] ([6919b71](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6919b71870e9265ae09a66e3354ec43bf7d1d088))
+
+# [0.3.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0-develop.2...v0.3.0-develop.3) (2023-12-07)
+
+
+### Reverts
+
+* Revert "Release MIW 0.3.0 (#190)" (#193) ([28978a8](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/28978a8139b0bebe064224bfc29fccea795613af)), closes [#190](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/190) [#193](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/193)
+
+# [0.3.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.3.0-develop.1...v0.3.0-develop.2) (2023-12-07)
+
+## [0.2.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0...v0.2.1) (2023-12-07)
+
+
+### Reverts
+
+* Revert "Release MIW 0.3.0 (#190)" (#193) ([28978a8](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/28978a8139b0bebe064224bfc29fccea795613af)), closes [#190](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/190) [#193](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/193)
+
+# [0.2.0-develop.11](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.10...v0.2.0-develop.11) (2023-12-06)
+
+
+### Bug Fixes
+
+* remove filter for org.eclipse packages ([af9a9e5](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/af9a9e50a9c15b16c8346561bc7ccb87a45df39d))
+
+# [0.2.0-develop.10](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.9...v0.2.0-develop.10) (2023-12-05)
+
+
+### Bug Fixes
+
+* manually change the Helm chart version ([1ad16ed](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/1ad16ed064d69214bc87d65f76740c2ecaa6b539))
+
+# [0.2.0-develop.9](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.8...v0.2.0-develop.9) (2023-11-30)
+
+
+### Bug Fixes
+
+* method name from the cx-ssi-lib has been renamed ([b46d084](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b46d0846f6b9ccc6b439c82ffec783cd8b933e08))
+
 # [0.2.0-develop.8](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.7...v0.2.0-develop.8) (2023-11-28)
 
 
@@ -49,6 +134,27 @@
 
 * **ci:** separate workflow "Test application (test + coverage)" for PR and repo ([6de785b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6de785b670bdede6e55559ce461fb76d05f2ecc8))
 * **dev:** add file extension and refactor called method in gradle ([6811a8b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6811a8b025b76f5998b1c2fd65b5f679e28468d3))
+
+# [0.2.0](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.1.1...v0.2.0) (2023-10-23)
+
+
+### Bug Fixes
+
+* CGD-468: Application starts with corrupted data in case of invalid AES key ([c734946](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c734946abfc1c34f1710f74e1329505dafa2fa00))
+* **ci:** helm chart release ([c2bd166](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c2bd166f25c4488e1bc0d7bb5215d92602ad9f96))
+* missing env variables in release workflow ([#111](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/111)) ([0f99498](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/0f9949899eb218e0b3b1b3742c0ea5ee82d19701))
+* rate limit during json-ld context loading ([#100](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/100)) ([09d1f1a](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/09d1f1a4f5a8a2bbaf7e328efea4ed60d232d778))
+* typo in Bearer ([754b90a](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/754b90a9fa90a308584949a6bf8085b6b27d8a19))
+* Typo in Bearer ([#102](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/102)) ([3765c68](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/3765c689fcadc29f663c0521c3b9cc072ee8e779))
+
+
+### Features
+
+* add Eclipse Copyright header to CHANGELOG.md.jinja ([dd53533](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/dd53533bc6ccb9a160e4c51c46438321ed2b2be7))
+* add GH Action workflow to test the app (incl. coverage) ([1e16b04](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/1e16b0418825ea402dd4a690d760b367a5c0ce8b))
+* BPN validation added in issue dismantler VC ([5a04a2e](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/5a04a2ef41e48feb42c2db5baa54ea0e54833a3f))
+* **ci:** semantic releases from develop branch ([#87](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/87)) ([fda8ee6](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/fda8ee6ae864aa86823a7ebfdce9702f372a9ded))
+* error msg updated ([2b305d2](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/2b305d2d488a7ed1c63022ff4241ad5fa588822d))
 
 # [0.2.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.2.0-develop.1...v0.2.0-develop.2) (2023-10-20)
 

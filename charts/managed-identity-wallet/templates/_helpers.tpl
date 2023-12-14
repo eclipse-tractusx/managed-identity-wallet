@@ -79,3 +79,9 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "managed-identity-wallet.pgadminServerDefinitions" -}}
+{
+  "Servers": {{ .Values.pgadmin4.extraServerDefinitions.servers | toJson }}
+}
+{{- end -}}

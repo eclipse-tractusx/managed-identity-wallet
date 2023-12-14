@@ -41,16 +41,10 @@ jobs:
           java-version: '17'
 
       - name: Test app
-        env:
-          GITHUB_USERNAME: ${{ vars.GITHUB_ACTOR }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew test
 
       - name: Get coverage
         if: always()
-        env:
-          GITHUB_USERNAME: ${{ vars.GITHUB_ACTOR }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew jacocoTestReport
 
       - name: Upload test results
