@@ -1,3 +1,11 @@
+# [0.4.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.2...v0.4.0-develop.3) (2023-12-14)
+
+
+### Features
+
+* **helm:** configure MIW Helm chart to use pgadmin4 subchart ([fc2f211](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/fc2f211abfa7ffedc2e66778c05eb10e3a2df366))
+* **helm:** configure MIW Helm chart to use pgadmin4 subchart PR [#209](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/209) ([8d18845](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8d18845ef841b791c13597af0398ee10b752b7e9))
+
 # [0.4.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.1...v0.4.0-develop.2) (2023-12-13)
 
 
