@@ -26,6 +26,12 @@
         "prepareCmd": "./gradlew dashLicenseCheck"
       }
     ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "cd charts/managed-identity-wallet && helm-docs -i .helmdocsignore ."
+      }
+    ],
     "@semantic-release/release-notes-generator",
     [
       "@semantic-release/changelog",
@@ -40,7 +46,8 @@
           "CHANGELOG.md",
           "DEPENDENCIES",
           "gradle.properties",
-          "./charts/managed-identity-wallet/Chart.yaml"
+          "./charts/managed-identity-wallet/Chart.yaml",
+          "./charts/managed-identity-wallet/README.md"
         ],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
