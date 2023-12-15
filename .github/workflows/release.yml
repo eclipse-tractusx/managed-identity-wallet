@@ -63,6 +63,7 @@ jobs:
 
         # setup helm-docs as it is needed during semantic-release
       - uses: gabe565/setup-helm-docs-action@v1
+        name: Setup helm-docs
         if: github.event_name != 'pull_request'
 
       - name: Run semantic release
