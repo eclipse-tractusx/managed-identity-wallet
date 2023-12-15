@@ -1,3 +1,11 @@
+# [0.4.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.3...v0.4.0-develop.4) (2023-12-15)
+
+
+### Bug Fixes
+
+* **helm:** use correct value for psql dependency condition ([d8bb09a](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/d8bb09a97c5a60c902180e4bb1fc54f1801adc72))
+* **helm:** use correct value for psql dependency condition PR [#177](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/177) ([f880d9a](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/f880d9a0536bf7821baa9aa90ac37db614907c0c))
+
 # [0.4.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.2...v0.4.0-develop.3) (2023-12-14)
 
 
