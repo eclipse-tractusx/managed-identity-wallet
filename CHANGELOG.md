@@ -1,3 +1,10 @@
+# [0.4.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.4...v0.4.0-develop.5) (2023-12-15)
+
+
+### Features
+
+* adds VVP Flow to architecture section ([32c5b9c](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/32c5b9c4ece4a82fc799405e699ecd281c600e14))
+
 # [0.4.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.3...v0.4.0-develop.4) (2023-12-15)
 
 
