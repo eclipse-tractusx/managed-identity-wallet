@@ -61,6 +61,13 @@ jobs:
         with:
           node-version: 18 # Replace with your desired Node.js version
 
+        # setup helm-docs as it is needed during semantic-release
+      - uses: gabe565/setup-helm-docs-action@v1
+        name: Setup helm-docs
+        if: github.event_name != 'pull_request'
+        with:
+          version: 1.11.3
+
       - name: Run semantic release
         if: github.event_name != 'pull_request'
         env:
