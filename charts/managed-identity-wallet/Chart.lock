@@ -11,5 +11,5 @@ dependencies:
 - name: pgadmin4
   repository: file://charts/pgadmin4
   version: 1.19.0
-digest: sha256:30c1e41f2c5f35829f68dd52ecc80005b4edf726d9e472801f6bfb834b8be512
-generated: "2023-11-22T12:12:48.461495+01:00"
+digest: sha256:fb94864221b4fed31894b48ac56b72a2324da0dc1cb1d6888cc52c3490685df7
+generated: "2023-12-15T10:30:41.880265+01:00"
