@@ -66,7 +66,7 @@ jobs:
         name: Setup helm-docs
         if: github.event_name != 'pull_request'
         with:
-          version: 1.11.3
+          version: v1.11.3
 
       - name: Run semantic release
         if: github.event_name != 'pull_request'
