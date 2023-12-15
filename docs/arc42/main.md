@@ -879,6 +879,35 @@ requirements where relevant and applicable:
 - CX-Credentials are not consistent
 - Only Summary Credential will be used because of the http header limition of 8KB
 
+## Verifiable Presentation Protocol (VVP)
+
+The *Verifiable Presentation Protocol (VPP)* is designed to address the problem of resolving Verifiable Presentations
+and other claims when they cannot be passed as part of a client request.
+The *VPP* is represented
+The *Data Consumer* wants exchange data with a yet *foreign* *Data Provider*.
+Hence, the *Data Consumer* creates a *permission* for the *Data Provider*
+containing all grants and information needed.
+The *Data Consumer* wants exchange data with a yet *foreign* *Data Provider*.
+Hence, the *Data Consumer* creates a *permission* for the *Data Provider*
+containing all grants and information needed.
+
+REMARK:
+*Self-issued:* no external CA involved in creation and/ or validation of exchanged tokens!
+
+### Secure Token Service (STS)
+The *Secure Token Service* is supposed the supply the tokens required to realise the VVP.
+
+### Example Use Case Illustrated
+The example requested demanding the preparing grant is:
+*GET catalog*
+And data consumer wants to issue that request against the data provider.
+
+Image:
+![VPP Flow Diagram](images/VPP-Flow.png)
+
+Declaring file:
+[VVP Flow Declaration](images/VVP-Flow.puml)
+
 ## SSI Library
   
 - No validation for JsonWebSignature2020 with RSA key
