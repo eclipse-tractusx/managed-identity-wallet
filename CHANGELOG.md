@@ -1,3 +1,18 @@
+# [0.4.0-develop.6](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.5...v0.4.0-develop.6) (2023-12-15)
+
+
+### Bug Fixes
+
+* missing helm docs during semantic release PR [#218](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/218) ([afad988](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/afad988253aa4a1bbc59603ce7bf706d0f158fd4))
+* **release:** missing helm-docs during semantic release ([8f4d7f4](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8f4d7f4cfa2f6d5efb9cc4503c6f3bddf606f691))
+* wrong helm docs version in ci PR [#219](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/219) ([3f1ed66](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/3f1ed6628854900a28ab87d54582a037986ed5c2))
+* wrong helm-docs version in pipeline ([f5ba466](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/f5ba466329452a8f21cdbe50821652cc6f7c4408))
+
+
+### Features
+
+* add helm-docs cmd to semantic-release ([ad46396](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/ad46396f35a51d7f56e62fbe49b3692e0f69cf50))
+
 # [0.4.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.4...v0.4.0-develop.5) (2023-12-15)
 
 
