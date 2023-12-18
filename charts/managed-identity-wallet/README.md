@@ -258,7 +258,6 @@ when deploying the MIW in a production environment:
 | Name | Email | Url |
 | ---- | ------ | --- |
 | Dominik Pinsel | <dominik.pinsel@mercedes-benz.com> | <https://github.com/DominikPinsel> |
-| Peter Motzko | <peter.motzko@volkswagen.de> | <https://github.com/pmoscode> |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
