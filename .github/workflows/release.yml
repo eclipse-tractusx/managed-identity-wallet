@@ -219,7 +219,8 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           # Package MIW chart
-          helm package -u -d helm-charts ./charts/managed-identity-wallet
+          helm_package_path=$(helm package -u -d helm-charts ./charts/managed-identity-wallet | grep -o 'to: .*' | cut -d' ' -f2-)
+          echo "HELM_PACKAGE_PATH=$helm_package_path" >> $GITHUB_ENV
           
           # Commit and push to gh-pages
           git add helm-charts
@@ -236,3 +237,13 @@ jobs:
           git commit -s -m "Release ${{ env.RELEASE_VERSION }}"
           
           git push origin gh-pages
+
+      - name: Upload chart to GitHub release
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+          HELM_PACKAGE_PATH: ${{ env.HELM_PACKAGE_PATH }}
+        run: |
+          echo "::notice::Uploading chart to GitHub release"
+          gh release upload "v$RELEASE_VERSION" "$HELM_PACKAGE_PATH"
