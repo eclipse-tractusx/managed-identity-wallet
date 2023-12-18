@@ -1,3 +1,10 @@
+# [0.4.0-develop.7](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.6...v0.4.0-develop.7) (2023-12-18)
+
+
+### Features
+
+* upload helm chart asset to GitHub release ([f7a1043](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/f7a1043d47b9da19c8030b3e5c16fcb8ee79eccd))
+
 # [0.4.0-develop.6](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.5...v0.4.0-develop.6) (2023-12-15)
 
 
