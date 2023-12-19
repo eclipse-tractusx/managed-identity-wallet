@@ -40,9 +40,6 @@ maintainers:
   - name: Dominik Pinsel
     email: dominik.pinsel@mercedes-benz.com
     url: https://github.com/DominikPinsel
-  - name: Peter Motzko
-    email: peter.motzko@volkswagen.de
-    url: https://github.com/pmoscode
 
 dependencies:
   - name: keycloak
