@@ -103,6 +103,11 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+      - name: Report semantic-release outputs
+        run: |
+          echo "::notice::${{ env.next_release }}"
+          echo "::notice::${{ env.will_create_new_release }}"
+
   docker:
     name: Docker Release
     needs: semantic_release
