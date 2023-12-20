@@ -41,6 +41,9 @@ jobs:
       contents: write
       pull-requests: write
       packages: write
+    outputs:
+      next_release: ${{ steps.semantic-release.outputs.next_release }}
+      will_create_new_release: ${{ steps.semantic-release.outputs.will_create_new_release }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -69,6 +72,7 @@ jobs:
           version: v1.11.3
 
       - name: Run semantic release
+        id: semantic-release
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -221,7 +225,7 @@ jobs:
           echo "RELEASE_VERSION=$app_version" >> $GITHUB_ENV
 
       - name: Release chart
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && needs.semantic_release.outputs.will_create_new_release == 'true'
         run: |
           # Package MIW chart
           helm_package_path=$(helm package -u -d helm-charts ./charts/managed-identity-wallet | grep -o 'to: .*' | cut -d' ' -f2-)
