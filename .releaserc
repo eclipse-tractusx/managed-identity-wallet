@@ -11,6 +11,18 @@
     [
       "@semantic-release/exec",
       {
+        "verifyReleaseCmd": "echo next_release=${nextRelease.version} >> $GITHUB_ENV"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "verifyReleaseCmd": "echo will_create_new_version=$([[ ${lastRelease.version} = ${nextRelease.version} ]] && echo false || echo true) >> $GITHUB_ENV"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
         "prepareCmd": "sed -i  's/applicationVersion=.*/applicationVersion=${nextRelease.version}/g' gradle.properties"
       }
     ],
