@@ -216,7 +216,7 @@ jobs:
           echo "RELEASE_VERSION=$app_version" >> $GITHUB_ENV
 
       - name: Release chart
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && env.will_create_new_version == true
         run: |
           # Package MIW chart
           helm_package_path=$(helm package -u -d helm-charts ./charts/managed-identity-wallet | grep -o 'to: .*' | cut -d' ' -f2-)
