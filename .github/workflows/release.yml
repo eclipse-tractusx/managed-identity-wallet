@@ -131,15 +131,6 @@ jobs:
           name: charts
           path: ./charts
 
-      - name: Extract new app version from Chart.yaml
-        run: |
-          chart_yaml_path="./charts/managed-identity-wallet/Chart.yaml"
-          
-          # Use grep to find the line containing appVersion, awk to split by ":" and cut to remove leading/trailing spaces
-          app_version=$(grep 'appVersion:' "$chart_yaml_path" | awk -F: '{gsub(/^[ \t]+|[ \t]+$/,"", $2); print $2}')
-
-          echo "RELEASE_VERSION=$app_version" >> $GITHUB_ENV
-
       # Create SemVer or ref tags dependent of trigger event
       - name: Docker meta
         id: meta
@@ -152,9 +143,9 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}},value=${{ env.RELEASE_VERSION }}
-            type=semver,pattern={{major}},value=${{ env.RELEASE_VERSION }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ env.RELEASE_VERSION }}
+            type=semver,pattern={{version}},value=${{ needs.semantic_release.outputs.next_release }}
+            type=semver,pattern={{major}},value=${{ needs.semantic_release.outputs.next_release }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.semantic_release.outputs.next_release }}
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
 
       - name: DockerHub login
@@ -215,15 +206,6 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Extract new app version from Chart.yaml
-        run: |
-          chart_yaml_path="./charts/managed-identity-wallet/Chart.yaml"
-          
-          # Use grep to find the line containing appVersion, awk to split by ":" and gsub (awk) to remove leading/trailing spaces
-          app_version=$(grep 'appVersion:' "$chart_yaml_path" | awk -F: '{gsub(/^[ \t]+|[ \t]+$/,"", $2); print $2}')
-    
-          echo "RELEASE_VERSION=$app_version" >> $GITHUB_ENV
-
       - name: Release chart
         if: github.event_name != 'pull_request' && needs.semantic_release.outputs.will_create_new_release == 'true'
         run: |
@@ -243,15 +225,15 @@ jobs:
           helm repo index . --merge index.yaml --url https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/
           git add index.yaml
           
-          git commit -s -m "Release ${{ env.RELEASE_VERSION }}"
+          git commit -s -m "Release ${{ needs.semantic_release.outputs.next_release }}"
           
           git push origin gh-pages
 
       - name: Upload chart to GitHub release
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && needs.semantic_release.outputs.will_create_new_release == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+          RELEASE_VERSION: ${{ needs.semantic_release.outputs.next_release }}
           HELM_PACKAGE_PATH: ${{ env.HELM_PACKAGE_PATH }}
         run: |
           echo "::notice::Uploading chart to GitHub release"
