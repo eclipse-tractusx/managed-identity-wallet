@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 0.2.0-develop.11](https://img.shields.io/badge/Version-0.2.0--develop.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0-develop.11](https://img.shields.io/badge/AppVersion-0.2.0--develop.11-informational?style=flat-square)
+![Version: 0.4.0-develop.9](https://img.shields.io/badge/Version-0.4.0--develop.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.9](https://img.shields.io/badge/AppVersion-0.4.0--develop.9-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
@@ -126,12 +126,12 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | miw.database.encryptionKey.secretKey | string | `""` | Existing secret key for database encryption key |
 | miw.database.encryptionKey.value | string | `""` | Database encryption key for confidential data.  Ignored if `secret` is set. If empty a secret with 32 random alphanumeric chars is generated. |
 | miw.database.host | string | `"{{ .Release.Name }}-postgresql"` | Database host |
-| miw.database.name | string | `"miw_app"` | Database name |
+| miw.database.name | string | `"miw_app"` | Database name. If it does not exist it will be created |
 | miw.database.port | int | `5432` | Database port |
-| miw.database.secret | string | `"{{ .Release.Name }}-postgresql"` | Existing secret name for the database password |
-| miw.database.secretPasswordKey | string | `"password"` | Existing secret key for the database password |
+| miw.database.secret | string | `"{{ .Release.Name }}-postgresql"` | Existing secret name for the postgres admin user password. Will be used to configure MIW user & password |
+| miw.database.secretPasswordKey | string | `"postgres-password"` | Existing secret key for the postgres admin user password. Will be used to configure MIW user & password |
 | miw.database.useSSL | bool | `false` | Set to true to enable SSL connection to the database |
-| miw.database.user | string | `"miw"` | Database user |
+| miw.database.user | string | `"miw"` | Database owner name. If it does not exist it will be created |
 | miw.environment | string | `"dev"` | Runtime environment. Should be ether local, dev, int or prod |
 | miw.host | string | `"{{ .Release.Name }}-managed-identity-wallet:8080"` | Host name |
 | miw.keycloak.clientId | string | `"miw_private_client"` | Keycloak client id |
@@ -144,10 +144,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
 | podAnnotations | object | `{}` | PodAnnotation configuration |
 | podSecurityContext | object | `{}` | PodSecurityContext |
-| postgresql.auth.database | string | `"miw_app"` | Postgresql database to create |
-| postgresql.auth.enablePostgresUser | bool | `false` | Enable postgresql admin user |
-| postgresql.auth.password | string | `""` | Postgresql password to set (if empty one is generated) |
-| postgresql.auth.username | string | `"miw"` | Postgresql user to create |
+| postgresql.backup | object | `{"conjob":{"schedule":"* */6 * * *","storage":{"existingClaim":"","resourcePolicy":"keep","size":"8Gi"}},"enabled":false}` | Backup configuration |
 | postgresql.backup.conjob.schedule | string | `"* */6 * * *"` | Backup schedule |
 | postgresql.backup.conjob.storage.existingClaim | string | `""` | Name of an existing PVC to use |
 | postgresql.backup.conjob.storage.resourcePolicy | string | `"keep"` | Set resource policy to "keep" to avoid removing PVCs during a helm delete operation |

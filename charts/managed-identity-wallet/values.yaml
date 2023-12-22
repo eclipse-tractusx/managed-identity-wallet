@@ -172,14 +172,14 @@ miw:
     port: 5432
     # -- Database host
     host: "{{ .Release.Name }}-postgresql"
-    # -- Database user
+    # -- Database owner name. If it does not exist it will be created
     user: "miw"
-    # -- Database name
+    # -- Database name. If it does not exist it will be created
     name: "miw_app"
-    # -- Existing secret name for the database password
+    # -- Existing secret name for the postgres admin user password. Will be used to configure MIW user & password
     secret: "{{ .Release.Name }}-postgresql"
-    # -- Existing secret key for the database password
-    secretPasswordKey: "password"
+    # -- Existing secret key for the postgres admin user password. Will be used to configure MIW user & password
+    secretPasswordKey: "postgres-password"
     encryptionKey:
       # -- Database encryption key for confidential data.  Ignored if `secret` is set. If empty a secret with 32 random alphanumeric chars is generated.
       value: ""
@@ -237,15 +237,7 @@ keycloak:
 postgresql:
   # -- Enable to deploy Postgresql
   enabled: true
-  auth:
-    # -- Enable postgresql admin user
-    enablePostgresUser: false
-    # -- Postgresql user to create
-    username: "miw"
-    # -- Postgresql password to set (if empty one is generated)
-    password: ""
-    # -- Postgresql database to create
-    database: "miw_app"
+  # -- Backup configuration
   backup:
     # -- Enable to create a backup cronjob
     enabled: false
