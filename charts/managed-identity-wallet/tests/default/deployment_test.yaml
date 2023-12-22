@@ -111,7 +111,7 @@ tests:
               valueFrom:
                 secretKeyRef:
                   key: encryption-key
-                  name: RELEASE-NAME-managed-identity-wallet-encryption-key
+                  name: RELEASE-NAME-managed-identity-wallet-secret
             - name: AUTHORITY_WALLET_BPN
               value: BPNL000000000000
             - name: AUTHORITY_WALLET_NAME
@@ -141,12 +141,12 @@ tests:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: password
-                  name: RELEASE-NAME-postgresql
+                  key: database-user-password
+                  name: RELEASE-NAME-managed-identity-wallet-secret
             - name: APPLICATION_PORT
               value: "8080"
             - name: VC_EXPIRY_DATE
-              value: 31-12-2023
+              value: 31-12-2024
 
   - it: should have empty values
     asserts:

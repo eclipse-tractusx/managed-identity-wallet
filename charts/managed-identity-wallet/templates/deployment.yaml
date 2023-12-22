@@ -44,10 +44,51 @@ spec:
       serviceAccountName: {{ include "managed-identity-wallet.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.initContainers }}
       initContainers:
-        {{- tpl (.Values.initContainers | toYaml) $ | nindent 8 }}
-      {{- end }}
+        {{- if .Values.initContainers }}
+            {{- tpl (.Values.initContainers | toYaml) $ | nindent 8 }}
+        {{- end }}
+        - name: create-db
+          image: postgres:13
+          env:
+            - name: HOST
+              value: "{{ tpl .Values.miw.database.host . | required "Database host is required" }}"
+            - name: PORT
+              value: "{{ .Values.miw.database.port | required "Database port is required" }}"
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ tpl .Values.miw.database.secret . | required "Secret name is required"  }}"
+                  key: "{{ tpl .Values.miw.database.secretPasswordKey . | required "Secret password key is required" }}"
+            - name: USER_NAME
+              value: "{{ .Values.miw.database.user }}"
+            - name: USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "managed-identity-wallet.fullname" . }}-secret"
+                  key: database-user-password
+            - name: DBName
+              value: "{{ tpl .Values.miw.database.name . | required "Database name is required" }}"
+          command: [ "bash", "-c", "--" ]
+          args:
+            - |
+              echo "Waiting for postgres to start";
+              while ! psql -h $HOST -p $PORT -U postgres -c "select 1" > /dev/null 2>&1; do
+                  sleep 1
+              done
+
+              echo "Create user $USER_NAME if not exist"
+              (psql -h $HOST -p $PORT -U postgres -tc "SELECT 1 FROM pg_user WHERE usename = '$USER_NAME'" | grep -q 1 && \
+              psql -h $HOST -p $PORT -U postgres -c "ALTER USER $USER_NAME PASSWORD '$USER_PASSWORD';" ) || \
+              psql -h $HOST -p $PORT -U postgres -c "CREATE USER $USER_NAME PASSWORD '$USER_PASSWORD';"
+              echo "Create database $DBName if not exist"
+              psql -h $HOST -p $PORT -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$DBName'" | grep -q 1 && \
+              psql -h $HOST -p $PORT -U postgres -c "ALTER DATABASE $DBName OWNER TO $USER_NAME;" || \
+              psql -h $HOST -p $PORT -U postgres -c "CREATE DATABASE $DBName OWNER $USER_NAME;"
+              echo "done."
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 1001
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -63,7 +104,7 @@ spec:
             - name: ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ default .Values.miw.database.encryptionKey.secret (printf "%s-encryption-key" ( include "managed-identity-wallet.fullname" . )) }}
+                  name: {{ default .Values.miw.database.encryptionKey.secret (printf "%s-secret" ( include "managed-identity-wallet.fullname" . )) }}
                   key: {{ default .Values.miw.database.encryptionKey.secretKey "encryption-key" }}
             - name: AUTHORITY_WALLET_BPN
               value: {{ tpl  .Values.miw.authorityWallet.bpn . }}
@@ -94,8 +135,8 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .Values.miw.database.secret . }}
-                  key: {{  tpl .Values.miw.database.secretPasswordKey . }}
+                  name: "{{ include "managed-identity-wallet.fullname" . }}-secret"
+                  key: database-user-password
             - name: APPLICATION_PORT
               value: "8080"
             - name: VC_EXPIRY_DATE
