@@ -179,7 +179,7 @@ miw:
     # -- Existing secret name for the database password
     secret: "{{ .Release.Name }}-postgresql"
     # -- Existing secret key for the database password
-    secretPasswordKey: "password"
+    secretPasswordKey: "postgres-password"
     encryptionKey:
       # -- Database encryption key for confidential data.  Ignored if `secret` is set. If empty a secret with 32 random alphanumeric chars is generated.
       value: ""
@@ -240,6 +240,8 @@ postgresql:
   auth:
     # -- Enable postgresql admin user
     enablePostgresUser: false
+    # -- Postgresql admin user password
+    postgresPassword: ""
     # -- Postgresql user to create
     username: "miw"
     # -- Postgresql password to set (if empty one is generated)
@@ -249,7 +251,7 @@ postgresql:
   backup:
     # -- Enable to create a backup cronjob
     enabled: false
-    conjob:
+    cronjob:
       # -- Backup schedule
       schedule: "* */6 * * *"
       storage:
