@@ -1,3 +1,11 @@
+# [0.4.0-develop.9](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.8...v0.4.0-develop.9) (2024-01-10)
+
+
+### Bug Fixes
+
+* **release:** add missing author, committer emails ([6d49d27](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6d49d272b74b1d43cf48584492215f44b90f1bcf))
+* **release:** use correct syntax for github actor ([86976a6](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/86976a6e51c828b723722b730dda19547434cffe))
+
 # [0.4.0-develop.8](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.7...v0.4.0-develop.8) (2024-01-10)
 
 

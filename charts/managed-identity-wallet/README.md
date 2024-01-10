@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 0.4.0-develop.8](https://img.shields.io/badge/Version-0.4.0--develop.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.8](https://img.shields.io/badge/AppVersion-0.4.0--develop.8-informational?style=flat-square)
+![Version: 0.4.0-develop.9](https://img.shields.io/badge/Version-0.4.0--develop.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.9](https://img.shields.io/badge/AppVersion-0.4.0--develop.9-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
