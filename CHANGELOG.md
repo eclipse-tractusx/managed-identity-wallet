@@ -1,3 +1,10 @@
+# [0.4.0-develop.8](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.7...v0.4.0-develop.8) (2024-01-10)
+
+
+### Features
+
+* add outputs to workflow environment ([859b748](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/859b7485c973b08039e95407e2372a30774289ff))
+
 # [0.4.0-develop.7](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.6...v0.4.0-develop.7) (2023-12-18)
 
 
