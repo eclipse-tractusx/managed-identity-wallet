@@ -21,8 +21,6 @@ image:
   tag: "latest-java-did-web"
 
 secrets:
-  DB_USER_NAME: postgres
-  DB_PASSWORD: pg_test_ci
   ENCRYPTION_KEY: d6aab34fb68e090c2789a9b1a67648d3
   KEYCLOAK_CLIENT_ID: mit_ci_test
 
