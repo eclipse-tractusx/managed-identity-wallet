@@ -25,8 +25,8 @@ description: |
 
 type: application
 
-version: 0.3.0-develop.3
-appVersion: 0.3.0-develop.3
+version: 0.4.0-develop.9
+appVersion: 0.4.0-develop.9
 
 home: https://github.com/eclipse-tractusx/managed-identity-wallet
 keywords:
@@ -40,9 +40,6 @@ maintainers:
   - name: Dominik Pinsel
     email: dominik.pinsel@mercedes-benz.com
     url: https://github.com/DominikPinsel
-  - name: Peter Motzko
-    email: peter.motzko@volkswagen.de
-    url: https://github.com/pmoscode
 
 dependencies:
   - name: keycloak
@@ -57,4 +54,9 @@ dependencies:
   - name: postgresql
     version: 11.9.13
     repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.internal.enabled
+    condition: postgresql.enabled
+  - name: pgadmin4
+    repository: file://charts/pgadmin4  # https://helm.runix.net
+    # License: https://github.com/rowanruseler/helm-charts/blob/main/LICENSE
+    version: 1.19.0
+    condition: pgadmin4.enabled
