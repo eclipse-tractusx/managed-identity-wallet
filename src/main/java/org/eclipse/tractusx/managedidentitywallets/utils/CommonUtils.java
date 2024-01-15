@@ -115,6 +115,7 @@ public class CommonUtils {
         }
 
         // check if the expiryDate is set
+        // if its null then it will be ignored from the SSI Lib (VerifiableCredentialBuilder) and will not be added to the VC
         Instant expiryInstant = null;
         if (expiryDate != null) {
             expiryInstant = expiryDate.toInstant();
