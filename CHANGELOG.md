@@ -1,3 +1,11 @@
+# [0.4.0-develop.11](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.10...v0.4.0-develop.11) (2024-01-16)
+
+
+### Bug Fixes
+
+* add a comment to the expiryInstant ([21ac648](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/21ac64813d31d031766cbf3cb6efd8bfc6bcb670))
+* add if statement for creating VC ([0092728](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/00927284a50041f210bb66896c9688b89cf8ff49))
+
 # [0.4.0-develop.10](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.9...v0.4.0-develop.10) (2024-01-16)
 
 
