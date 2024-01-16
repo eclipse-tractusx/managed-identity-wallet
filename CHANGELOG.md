@@ -1,3 +1,10 @@
+# [0.4.0-develop.10](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.9...v0.4.0-develop.10) (2024-01-16)
+
+
+### Bug Fixes
+
+* **ci:** update node version to 20 ([263e88b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/263e88b07e6e9bd3846ea8a37e6e8a2c8ede3b04))
+
 # [0.4.0-develop.9](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.8...v0.4.0-develop.9) (2024-01-10)
 
 
