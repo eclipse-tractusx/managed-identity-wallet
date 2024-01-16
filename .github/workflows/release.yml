@@ -60,9 +60,9 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 18 # Replace with your desired Node.js version
+          node-version: 20
 
         # setup helm-docs as it is needed during semantic-release
       - uses: gabe565/setup-helm-docs-action@v1
