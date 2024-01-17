@@ -1,3 +1,10 @@
+# [0.4.0-develop.12](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.11...v0.4.0-develop.12) (2024-01-17)
+
+
+### Bug Fixes
+
+* **validation:** credential signer must be equal issuer ([12abe09](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/12abe0993fab42cc01fa673ea4b01b9773004636))
+
 # [0.4.0-develop.11](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.10...v0.4.0-develop.11) (2024-01-16)
 
 
