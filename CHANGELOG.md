@@ -1,3 +1,10 @@
+# [0.4.0-develop.14](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.13...v0.4.0-develop.14) (2024-01-18)
+
+
+### Bug Fixes
+
+* **helm:** vc expiration date ([e056108](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e056108ed84ae016b3ad348580d4d6d5de7b6322))
+
 # [0.4.0-develop.13](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.12...v0.4.0-develop.13) (2024-01-18)
 
 
