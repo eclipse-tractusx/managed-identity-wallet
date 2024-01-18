@@ -199,7 +199,7 @@ miw:
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
-  # -- Extra environment variables.
+  # -- Extra environment variables
   extraEnvVars: []
   #    - name: KEYCLOAK_HOSTNAME
   #      value: "{{ .Release.Name }}-keycloak"
