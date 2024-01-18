@@ -157,11 +157,12 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | postgresql.auth.database | string | `"miw_app"` | Postgresql database to create |
 | postgresql.auth.enablePostgresUser | bool | `false` | Enable postgresql admin user |
 | postgresql.auth.password | string | `""` | Postgresql password to set (if empty one is generated) |
+| postgresql.auth.postgresPassword | string | `""` | Postgresql admin user password |
 | postgresql.auth.username | string | `"miw"` | Postgresql user to create |
-| postgresql.backup.conjob.schedule | string | `"* */6 * * *"` | Backup schedule |
-| postgresql.backup.conjob.storage.existingClaim | string | `""` | Name of an existing PVC to use |
-| postgresql.backup.conjob.storage.resourcePolicy | string | `"keep"` | Set resource policy to "keep" to avoid removing PVCs during a helm delete operation |
-| postgresql.backup.conjob.storage.size | string | `"8Gi"` | PVC Storage Request for the backup data volume |
+| postgresql.backup.cronjob.schedule | string | `"* */6 * * *"` | Backup schedule |
+| postgresql.backup.cronjob.storage.existingClaim | string | `""` | Name of an existing PVC to use |
+| postgresql.backup.cronjob.storage.resourcePolicy | string | `"keep"` | Set resource policy to "keep" to avoid removing PVCs during a helm delete operation |
+| postgresql.backup.cronjob.storage.size | string | `"8Gi"` | PVC Storage Request for the backup data volume |
 | postgresql.backup.enabled | bool | `false` | Enable to create a backup cronjob |
 | postgresql.enabled | bool | `true` | Enable to deploy Postgresql |
 | readinessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":30,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":5}` | Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
