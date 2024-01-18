@@ -1,3 +1,10 @@
+# [0.4.0-develop.13](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.12...v0.4.0-develop.13) (2024-01-18)
+
+
+### Bug Fixes
+
+* **helm:** minor fixes ([49b5530](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/49b553096fa621429e0df916f61d0e311c7f840a))
+
 # [0.4.0-develop.12](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.11...v0.4.0-develop.12) (2024-01-17)
 
 
