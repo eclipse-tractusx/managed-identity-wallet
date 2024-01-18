@@ -199,8 +199,8 @@ miw:
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
+  # -- Extra environment variables.
   extraEnvVars: []
-  # - Extra environment variables. (default 'KEYCLOAK_HOSTNAME :{{ .Release.Name }}-keycloak')
   #    - name: KEYCLOAK_HOSTNAME
   #      value: "{{ .Release.Name }}-keycloak"
   postgresql:
