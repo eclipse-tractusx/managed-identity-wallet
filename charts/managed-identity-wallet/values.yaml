@@ -240,6 +240,8 @@ postgresql:
   auth:
     # -- Enable postgresql admin user
     enablePostgresUser: false
+    # -- Postgresql admin user password
+    postgresPassword: ""
     # -- Postgresql user to create
     username: "miw"
     # -- Postgresql password to set (if empty one is generated)
@@ -249,7 +251,7 @@ postgresql:
   backup:
     # -- Enable to create a backup cronjob
     enabled: false
-    conjob:
+    cronjob:
       # -- Backup schedule
       schedule: "* */6 * * *"
       storage:
