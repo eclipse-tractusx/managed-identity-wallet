@@ -56,6 +56,11 @@ public class SecureTokenController implements TokenApi {
             throw new UnsupportedGrantTypeException("Selected GrantType is not supported.");
         }
 
+        // Authentication is handled in {@link
+        // org.eclipse.tractusx.managedidentitywallets.adapter.controller.filter.ClientCredentialsFilter}
+        // and {@link
+        // org.eclipse.tractusx.managedidentitywallets.adapter.controller.filter.FilterConfig}
+
         JWT jwt;
         if (accessToken != null && !accessToken.isBlank()) {
             jwt = tokenService.issueToken(new DID(clientId), new DID(audience), JWTParser.parse(accessToken));
