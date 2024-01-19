@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.service.impl;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
@@ -43,13 +44,13 @@ public class SecureTokenServiceImpl implements SecureTokenService {
     }
 
     @Override
-    public JWT issueToken(final DID self, final DID partner) {
+    public JWT issueToken(final DID self, final DID partner, Set<String> scopes) {
         Optional<Wallet> wallet = repo.findWallet(self);
         KeyPair keyPair = wallet.map(w -> w.getKeys())
                 .flatMap(k -> k.stream().findFirst())
                 .orElseThrow();
 
-        return this.tokenIssuer.issueIdToken(self, partner, keyPair);
+        return this.tokenIssuer.issueIdToken(self, partner, keyPair, scopes);
     }
 
     @Override

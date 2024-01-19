@@ -19,7 +19,13 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.domain;
+package org.eclipse.tractusx.managedidentitywallets;
 
-public record KeyPair(String keyId, String privateKey, String publicKey) {
+public class UnsupportedGrantTypeException extends RuntimeException {
+
+    public UnsupportedGrantTypeException(String message) {
+        super(message);
+    }
+
 }
+

@@ -1,0 +1,68 @@
+/*
+ * *******************************************************************************
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
+ *
+ *  See the NOTICE file(s) distributed with this work for additional
+ *  information regarding copyright ownership.
+ *
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Apache License, Version 2.0 which is available at
+ *  https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  License for the specific language governing permissions and limitations
+ *  under the License.
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ * ******************************************************************************
+ */
+
+package org.eclipse.tractusx.managedidentitywallets.dao;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
+import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
+import org.eclipse.tractusx.managedidentitywallets.domain.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.domain.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+
+@Component
+@RequiredArgsConstructor
+public class WalletRepositoryAdapter implements WalletRepository {
+
+    private final org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository walletRepo;
+    private final WalletKeyRepository keyRepo;
+    private final EncryptionUtils encryptionUtils;
+
+    @Override
+    public Optional<Wallet> findWallet(DID did) {
+        return Optional.ofNullable(walletRepo.getByDid(did.toString()))
+                .map(this::buildWallet);
+    }
+
+    @Override
+    public Optional<Wallet> findWallet(BusinessPartnerNumber bpn) {
+        return Optional.ofNullable(walletRepo.getByBpn(bpn.toString()))
+                .map(this::buildWallet);
+    }
+
+    private Wallet buildWallet(org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet wallet) {
+        WalletKey key = keyRepo.getByWalletId(wallet.getId());
+        return Wallet.builder()
+                .businessPartnerNumber(new BusinessPartnerNumber(wallet.getBpn()))
+                .did(new DID(wallet.getDid()))
+                .keys(List.of(
+                        new KeyPair(key.getKeyId(), encryptionUtils.decrypt(key.getPrivateKey()), encryptionUtils.decrypt(key.getPublicKey()))))
+                .build();
+    }
+}
