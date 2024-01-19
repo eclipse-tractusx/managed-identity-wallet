@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
+                        .requestMatchers("/token").permitAll() // no token needed, as we use the SecureWebTokenFilter instead
                         .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
 
                         //did document resolve APIs
