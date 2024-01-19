@@ -102,7 +102,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | keycloak.auth.adminPassword | string | `""` | Keycloak admin password |
 | keycloak.auth.adminUser | string | `"admin"` | Keycloak admin user |
 | keycloak.enabled | bool | `true` | Enable to deploy Keycloak |
-| keycloak.extraEnvVars | list | `[]` |  |
+| keycloak.extraEnvVars | list | `[]` | Extra environment variables |
 | keycloak.ingress.annotations | object | `{}` |  |
 | keycloak.ingress.enabled | bool | `false` |  |
 | keycloak.ingress.hosts | list | `[]` |  |

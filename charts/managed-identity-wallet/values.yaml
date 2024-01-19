@@ -1,5 +1,5 @@
 # /********************************************************************************
-# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# * Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
 # *
 # * See the NOTICE file(s) distributed with this work for additional
 # * information regarding copyright ownership.
@@ -199,8 +199,8 @@ miw:
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
+  # -- Extra environment variables
   extraEnvVars: []
-  # - Extra environment variables. (default 'KEYCLOAK_HOSTNAME :{{ .Release.Name }}-keycloak')
   #    - name: KEYCLOAK_HOSTNAME
   #      value: "{{ .Release.Name }}-keycloak"
   postgresql:
