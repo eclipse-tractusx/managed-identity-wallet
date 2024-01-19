@@ -21,33 +21,32 @@
 
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
-import java.util.Optional;
-import java.util.Set;
-
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.UnsupportedGrantTypeException;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import org.eclipse.tractusx.managedidentitywallets.dto.StsTokenErrorResponse;
+import org.eclipse.tractusx.managedidentitywallets.dto.StsTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.service.SecureTokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
-public class SecureTokenController implements TokenApi {
+public class SecureTokenController extends BaseController {
 
     private static final String CLIENT_CREDENTIALS = "client_credentials";
     private static final String TOKEN_TYPE_BEARER = "Bearer";
 
     private final SecureTokenService tokenService;
 
-    @Override
     @SneakyThrows
     public ResponseEntity<StsTokenResponse> token(
             @Valid String audience, @Valid String clientId, @Valid String clientSecret, @Valid String grantType,

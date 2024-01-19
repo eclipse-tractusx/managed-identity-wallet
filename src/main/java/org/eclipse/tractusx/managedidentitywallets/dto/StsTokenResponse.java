@@ -19,25 +19,39 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.controller;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import org.eclipse.tractusx.managedidentitywallets.service.SecureTokenService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
+public class StsTokenResponse {
+    protected String accessToken;
+    protected long expiresIn;
+    protected String tokenType;
 
-import com.nimbusds.jwt.JWT;
-
-import lombok.RequiredArgsConstructor;
-
-@RestController
-@RequiredArgsConstructor
-public class SecureTokenControllerImpl implements SecureTokenController {
-
-    private final SecureTokenService tokenService;
-
-    public ResponseEntity<JWT> createToken() {
-        tokenService.issueToken(null, null);
-        return ResponseEntity.of(null);
+    public String getAccessToken() {
+        return accessToken;
     }
 
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(long expiresIn) {
+        this.expiresIn = expiresIn;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
+    public StsTokenResponse() {
+    }
+
+    ;
 }

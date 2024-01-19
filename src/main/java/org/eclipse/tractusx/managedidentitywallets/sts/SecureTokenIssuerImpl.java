@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.sts;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
@@ -56,7 +57,7 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
     private final SecureTokenConfigurationProperties properties;
 
     @Override
-    public JWT issueIdToken(DID self, DID partner, KeyPair keyPair) {
+    public JWT issueIdToken(DID self, DID partner, KeyPair keyPair, Set<String> scopes) {
         log.info("Requested ID token for us: '{}' and partner '{}'", self, partner);
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         JWT accessToken = createAccessToken(keyPair, self, partner, expirationTime);
