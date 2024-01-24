@@ -142,6 +142,8 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | miw.ssi.enforceHttpsInDidWebResolution | bool | `true` | Enable to use HTTPS in DID Web Resolution |
 | miw.ssi.vcExpiryDate | string | `""` | Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year> |
 | nameOverride | string | `""` | String to partially override common.names.fullname template (will maintain the release name) |
+| networkPolicy.enabled | bool | `false` | If `true` network policy will be created to restrict access to managed-identity-wallet |
+| networkPolicy.from | list | `[{"namespaceSelector":{}}]` | Specify from rule network policy for miw (defaults to all namespaces) |
 | nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
 | pgadmin4.enabled | bool | `false` | Enable to deploy pgAdmin |
 | pgadmin4.env.email | string | `"admin@miw.com"` | Preset the admin user email |
