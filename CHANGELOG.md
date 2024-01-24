@@ -1,3 +1,10 @@
+# [0.4.0-develop.15](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.14...v0.4.0-develop.15) (2024-01-24)
+
+
+### Features
+
+* **helm:** add networkPolicy for miw ([502b633](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/502b633c0ff4f533f36b96a0f10b2eaa5f9e1954))
+
 # [0.4.0-develop.14](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.13...v0.4.0-develop.14) (2024-01-18)
 
 
