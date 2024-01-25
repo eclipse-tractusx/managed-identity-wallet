@@ -90,6 +90,8 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity configuration |
 | envs | object | `{}` | envs Parameters for the application (will be provided as environment variables) |
+| extraVolumeMounts | list | `[]` | add volume mounts to the miw deployment |
+| extraVolumes | list | `[]` | add volumes to the miw deployment |
 | fullnameOverride | string | `""` | String to fully override common.names.fullname template |
 | image.pullPolicy | string | `"Always"` | PullPolicy |
 | image.repository | string | `"tractusx/managed-identity-wallet"` | Image repository |
