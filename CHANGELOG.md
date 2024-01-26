@@ -1,3 +1,10 @@
+# [0.4.0-develop.16](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.15...v0.4.0-develop.16) (2024-01-26)
+
+
+### Features
+
+* **chart:** add extra volume/-mounts ([0f6252f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/0f6252f8900ba4a5e7b5f6fa2e531274df615a31))
+
 # [0.4.0-develop.15](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.14...v0.4.0-develop.15) (2024-01-24)
 
 
