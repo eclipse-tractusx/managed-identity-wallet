@@ -149,6 +149,12 @@ networkPolicy:
   from:
   - namespaceSelector: {}
 
+# -- add volumes to the miw deployment
+extraVolumes: []
+
+# -- add volume mounts to the miw deployment
+extraVolumeMounts: []
+
 ## @section Managed Identity Wallet Primary Parameters
 ##
 miw:

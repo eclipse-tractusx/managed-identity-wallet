@@ -146,6 +146,8 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -159,3 +161,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
