@@ -31,7 +31,7 @@ spec:
   - Ingress
   ingress:
   - from:
-    {{- toYaml .Values.networkPolicy.from | nindent 4 }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.networkPolicy.from "context" $) | nindent 4 }}
     ports:
     - protocol: TCP
       port: 8080
