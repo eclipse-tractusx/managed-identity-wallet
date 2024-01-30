@@ -1,3 +1,10 @@
+# [0.4.0-develop.17](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.16...v0.4.0-develop.17) (2024-01-30)
+
+
+### Features
+
+* **helm:** allow networkPolicy to template values ([acddcff](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/acddcffc73e87b9eb9f7b752ca508b8a50058c5d))
+
 # [0.4.0-develop.16](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0-develop.15...v0.4.0-develop.16) (2024-01-26)
 
 
