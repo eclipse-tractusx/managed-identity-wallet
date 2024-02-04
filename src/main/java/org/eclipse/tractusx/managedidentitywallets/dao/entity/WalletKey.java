@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,6 +70,7 @@ public class WalletKey extends MIWBaseEntity {
     @ManyToOne
     @MapsId
     @JoinColumn(name = "walletId", columnDefinition = "bigint")
+    @JsonBackReference
     private Wallet wallet;
 
     private String keyId;

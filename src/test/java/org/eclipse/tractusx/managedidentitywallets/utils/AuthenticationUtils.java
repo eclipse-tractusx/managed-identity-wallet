@@ -28,9 +28,12 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.ProtocolMapperRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpHeaders;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -105,6 +108,45 @@ public class AuthenticationUtils {
         userRepresentation.setAttributes(Map.of(attributeName, List.of(bpn)));
         userResource.update(userRepresentation);
         return getJwtToken(username);
+    }
+
+    public static void setupKeycloakClient(String clientId, String clientSecret, String bpn) {
+        Keycloak keycloakAdmin = KeycloakBuilder.builder()
+                .serverUrl(TestContextInitializer.getAuthServerUrl())
+                .realm("master") // Use the master realm for admin operations
+                .clientId("admin-cli")
+                .username("admin")
+                .password("admin")
+                .build();
+
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("BPN", bpn);
+
+        ClientRepresentation clientRepresentation = new ClientRepresentation();
+        clientRepresentation.setEnabled(true);
+        clientRepresentation.setServiceAccountsEnabled(true);
+        clientRepresentation.setClientId(clientId);
+        clientRepresentation.setSecret(clientSecret);
+        clientRepresentation.setConsentRequired(false);
+        clientRepresentation.setAttributes(attributes);
+
+        ProtocolMapperRepresentation propertyMapper = new ProtocolMapperRepresentation();
+        propertyMapper.setName("BPN mapper");
+        propertyMapper.setProtocol("openid-connect");
+        propertyMapper.setProtocolMapper("oidc-hardcoded-claim-mapper");
+        propertyMapper.setConfig(Map.of(
+                "claim.name", "BPN",
+                "user.attribute", "BPN",
+                "claim.value", bpn,
+                "id.token.claim", "true",
+                "access.token.claim", "true",
+                "jsonType.label", "String",
+                "userinfo.token.claim", "true"
+        ));
+
+        // Set the updated list of protocol mappers back to the client representation
+        clientRepresentation.setProtocolMappers(List.of(propertyMapper));
+        keycloakAdmin.realm(StringPool.REALM).clients().create(clientRepresentation);
     }
 
     private static String getJwtToken(String username) {
