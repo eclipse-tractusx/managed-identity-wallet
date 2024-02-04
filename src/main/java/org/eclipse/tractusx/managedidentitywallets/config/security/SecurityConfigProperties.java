@@ -29,6 +29,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("miw.security")
 public record SecurityConfigProperties(Boolean enabled,
                                        String clientId,
+                                       String realm,
+                                       String authServerUrl,
                                        String authUrl,
                                        String tokenUrl,
                                        String refreshTokenUrl) {
