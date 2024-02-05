@@ -77,6 +77,7 @@ public class Wallet extends MIWBaseEntity {
     private DidDocument didDocument;
 
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<WalletKey> walletKeys;
 
     @Transient
