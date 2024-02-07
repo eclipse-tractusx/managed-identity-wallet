@@ -76,9 +76,7 @@ public class SecureTokenRequest {
         return "SecureTokenRequest{" +
                 "audience='" + audience + '\'' +
                 ", clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
                 ", grantType='" + grantType + '\'' +
-                ", accessToken='" + accessToken + '\'' +
                 ", bearerAccessAlias='" + bearerAccessAlias + '\'' +
                 ", bearerAccessScope='" + bearerAccessScope + '\'' +
                 '}';
