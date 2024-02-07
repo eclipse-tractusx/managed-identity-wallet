@@ -53,20 +53,20 @@ public class TokenValidationUtils {
     public Optional<String> checkIfIssuerEqualsSubject(JWTClaimsSet claims) {
         String iss = claims.getIssuer();
         String sub = claims.getSubject();
-        if (!(iss != null && Objects.equals(iss, sub))) {
-            return Optional.of("The 'iss' and 'sub' claims must be non-null and identical.");
+        if (iss != null && Objects.equals(iss, sub)) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of("The 'iss' and 'sub' claims must be non-null and identical.");
     }
 
     public Optional<String> checkIfSubjectValidAndEqualsDid(JWTClaimsSet claims) {
         String sub = claims.getSubject();
-        if ((sub != null && sub.startsWith(DID_FORMAT))) {
+        if (sub != null && sub.startsWith(DID_FORMAT)) {
             URI id = service.getDidDocument(sub).getId();
-            if (!(id != null && Objects.equals(id.toString(), sub))) {
-                return Optional.of("The 'sub' claim must be identical to the id of existing DID document.");
+            if (id != null && Objects.equals(id.toString(), sub)) {
+                return Optional.empty();
             }
-            return Optional.empty();
+            return Optional.of("The 'sub' claim must be identical to the id of existing DID document.");
         }
         return Optional.of("The 'sub' claim must be in did format.");
     }
@@ -99,15 +99,15 @@ public class TokenValidationUtils {
     public Optional<String> checkIfAudienceClaimsEquals(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
         List<String> audienceSI = claimsSI.getAudience();
         List<String> audienceAccess = claimsAT.getAudience();
-        if (!(audienceSI.isEmpty()) && !(audienceAccess.isEmpty())) {
+        if (audienceSI.isEmpty() || audienceAccess.isEmpty()) {
+            return Optional.of("The 'aud' claim must not be empty.");
+        } else {
             String audSI = audienceSI.get(0);
             String audAT = audienceAccess.get(0);
-            if (!(audSI.equals(audAT))) {
-                return Optional.of("The 'aud' claims must be equals in SI and Access tokens.");
+            if (audSI.equals(audAT)) {
+                return Optional.empty();
             }
-            return Optional.empty();
-        } else {
-            return Optional.of("The 'aud' claim must not be empty.");
+            return Optional.of("The 'aud' claims must be equals in SI and Access tokens.");
         }
     }
 
@@ -115,14 +115,12 @@ public class TokenValidationUtils {
         try {
             String nonceSI = claimsSI.getStringClaim(NONCE);
             String nonceAccess = claimsAT.getStringClaim(NONCE);
-            if (!(nonceSI == null) && !(nonceAccess == null)) {
-                if (!(nonceSI.equals(nonceAccess))) {
-                    return Optional.of("The 'nonce' claims must be equals in SI and Access tokens.");
-                }
-                return Optional.empty();
-            } else {
+            if (nonceSI == null || nonceAccess == null) {
                 return Optional.of("The 'nonce' claim must not be empty.");
+            } else if (nonceSI.equals(nonceAccess)) {
+                return Optional.empty();
             }
+            return Optional.of("The 'nonce' claims must be equals in SI and Access tokens.");
         } catch (ParseException e) {
             throw new BadDataException("Could not parse 'nonce' claim in token", e);
         }
