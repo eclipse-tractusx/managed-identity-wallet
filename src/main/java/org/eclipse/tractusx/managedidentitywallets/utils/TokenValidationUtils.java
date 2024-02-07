@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -48,7 +48,7 @@ public class TokenValidationUtils {
 
     public static final String NONCE = "nonce";
     public static final String DID_FORMAT = "did:";
-    private static final int MAX_TOKEN_AGE = 60;
+    private static final int IAT_LEEWAY = 5;
 
     public Optional<String> checkIfIssuerEqualsSubject(JWTClaimsSet claims) {
         String iss = claims.getIssuer();
@@ -75,18 +75,18 @@ public class TokenValidationUtils {
         Instant now = Instant.now();
         Date expires = claims.getExpirationTime();
         if (expires == null) {
-            return Optional.of("Required expiration time (exp) claim is missing in token");
+            return Optional.of("Required expiration time 'exp' claim is missing in token");
         } else if (now.isAfter(convertDateToUtcTime(expires))) {
-            return Optional.of("Token has expired (exp)");
+            return Optional.of("Token has expired 'exp'");
         }
 
         Date issuedAt = claims.getIssueTime();
         if (issuedAt != null) {
             Instant issuedAtInst = convertDateToUtcTime(issuedAt);
             if (issuedAtInst.isAfter(convertDateToUtcTime(expires))) {
-                return Optional.of("Issued at (iat) claim is after expiration time (exp) claim in token");
-            } else if (now.plusSeconds(MAX_TOKEN_AGE).isBefore(issuedAtInst)) {
-                return Optional.of("Current date/time before issued at (iat) claim in token");
+                return Optional.of("Issued at 'iat' claim is after expiration time 'exp' claim in token");
+            } else if (now.plusSeconds(IAT_LEEWAY).isBefore(issuedAtInst)) {
+                return Optional.of("Current date/time before issued at 'iat' claim in token");
             }
         }
         return Optional.empty();
@@ -99,7 +99,7 @@ public class TokenValidationUtils {
     public Optional<String> checkIfAudienceClaimsEquals(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
         List<String> audienceSI = claimsSI.getAudience();
         List<String> audienceAccess = claimsAT.getAudience();
-        if (!(audienceSI.isEmpty() && audienceAccess.isEmpty())) {
+        if (!(audienceSI.isEmpty()) && !(audienceAccess.isEmpty())) {
             String audSI = audienceSI.get(0);
             String audAT = audienceAccess.get(0);
             if (!(audSI.equals(audAT))) {
