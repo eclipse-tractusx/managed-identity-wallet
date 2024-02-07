@@ -68,8 +68,6 @@ class SecureTokenControllerTest {
         TestUtils.createWallet(partnerBpn, didPartner, testTemplate, miwSettings.authorityWalletBpn());
 
         // when
-        // String requestBody = "{\"audience\": \"" + bpn + "\", \"client_id\": \"" + clientId + "\", \"client_secret\": \"" + clientSecret + "\", \"grant_type\": \"client_credentials\", \"bearer_access_scope\": \"org.eclipse.tractusx.vc.type:BpnCredential:read\"}";
-
         String body = """
                 {
                     "audience": "%s",
