@@ -62,7 +62,7 @@ public class SecureTokenController {
     @SneakyThrows
     @PostMapping(path = "/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
     @SecureTokenControllerApiDoc.PostSecureTokenDoc
-    public ResponseEntity<StsTokenResponse> store(
+    public ResponseEntity<StsTokenResponse> token(
             @Valid @RequestBody SecureTokenRequest secureTokenRequest
     ) {
         // handle idp authorization
