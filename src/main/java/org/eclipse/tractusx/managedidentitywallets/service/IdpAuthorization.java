@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.CLIENT_CREDENTIALS;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.CLIENT_ID;
@@ -51,13 +52,12 @@ public class IdpAuthorization {
 
     @Autowired
     public IdpAuthorization(final SecurityConfigProperties properties, final RestTemplateBuilder restTemplateBuilder) {
-        String authServerUrl = properties.authServerUrl();
-        if (StringUtils.endsWith(authServerUrl, "/")) {
-            authServerUrl = authServerUrl.substring(0, authServerUrl.length() - 1);
-        }
-        String idpRootUrl = authServerUrl + "/realms/" + properties.realm();
+        String url = UriComponentsBuilder.fromUriString(properties.authServerUrl())
+                .pathSegment("realms", properties.realm())
+                .build()
+                .toString();
         this.rest = restTemplateBuilder
-                .rootUri(idpRootUrl)
+                .rootUri(url)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .build();
     }
