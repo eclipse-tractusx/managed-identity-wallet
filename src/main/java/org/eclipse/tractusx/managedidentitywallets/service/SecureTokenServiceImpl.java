@@ -80,9 +80,9 @@ public class SecureTokenServiceImpl implements SecureTokenService {
         DID partnerDid = new DID(Optional.ofNullable(walletRepository.getByBpn(partner.toString()))
                 .orElseThrow(() -> new UnknownBusinessPartnerNumber(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());
-        Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         // IMPORTANT: we re-use the expiration time intentionally to mitigate any kind of timing attacks,
         // as we're signing two tokens.
+        Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         JWT accessToken = this.tokenIssuer.createAccessToken(keyPair, selfDid, partnerDid, expirationTime, scopes);
         return this.tokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
     }
