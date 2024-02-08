@@ -92,6 +92,14 @@ public class SecureTokenControllerApiDoc {
                                     """
                             ),
 
+                            @ExampleObject(name = "Invalid idp Token Response", value = """
+                                    {
+                                      "error": "InvalidIdpTokenResponse",
+                                      "errorDescription": "The idp response cannot be null. Possible causes for this are: the 'clientId' is invalid, the 'client' is not enabled."
+                                    }
+                                    """
+                            ),
+
                             @ExampleObject(name = "Invalid Secure Token Request", value = """
                                     {
                                       "error": "InvalidSecureTokenRequest",
