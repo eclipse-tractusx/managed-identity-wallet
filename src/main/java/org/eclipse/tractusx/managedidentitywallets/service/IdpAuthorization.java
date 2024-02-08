@@ -22,11 +22,11 @@
 package org.eclipse.tractusx.managedidentitywallets.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.security.SecurityConfigProperties;
 import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
+import org.eclipse.tractusx.managedidentitywallets.exceptions.InvalidIdpTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
@@ -62,7 +62,7 @@ public class IdpAuthorization {
                 .build();
     }
 
-    public IdpTokenResponse fromSecureTokenRequest(SecureTokenRequest secureTokenRequest) throws UnsupportedGrantTypeException {
+    public IdpTokenResponse fromSecureTokenRequest(SecureTokenRequest secureTokenRequest) throws UnsupportedGrantTypeException, InvalidIdpTokenResponse {
         // we're ignoring the input, but the protocol requires us to check.
         if (!secureTokenRequest.getGrantType().equals(CLIENT_CREDENTIALS)) {
             throw new UnsupportedGrantTypeException("The provided 'grant_type' is not valid. Use 'client_credentials'.");
@@ -78,7 +78,9 @@ public class IdpAuthorization {
                 tokenRequest,
                 IdpTokenResponse.class
         );
-        assert idpResponse != null;
+        if (idpResponse == null) {
+            throw new InvalidIdpTokenResponse("The idp response cannot be null. Possible causes for this are: the 'clientId' is invalid, the 'client' is not enabled.");
+        }
         return idpResponse;
     }
 }
