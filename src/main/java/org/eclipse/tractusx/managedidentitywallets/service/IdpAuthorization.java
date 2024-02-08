@@ -72,7 +72,7 @@ public class IdpAuthorization {
         tokenRequest.add(SCOPE, OPENID);
         tokenRequest.add(CLIENT_ID, secureTokenRequest.getClientId());
         tokenRequest.add(CLIENT_SECRET, secureTokenRequest.getClientSecret());
-        log.debug("OAuth Token request for '{}' during secure token request flow.", secureTokenRequest.getClientId());
+        log.debug("Doing OAuth token request for '{}' during secure token request flow.", secureTokenRequest.getClientId());
         IdpTokenResponse idpResponse = rest.postForObject(
                 "/protocol/openid-connect/token",
                 tokenRequest,
