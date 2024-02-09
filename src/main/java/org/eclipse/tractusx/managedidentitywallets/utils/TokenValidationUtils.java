@@ -38,7 +38,7 @@ import java.util.Optional;
 import static java.time.ZoneOffset.UTC;
 
 /**
- * Methods for validating token claims.
+ * Contains methods for validating token claims.
  */
 @Component
 @RequiredArgsConstructor
@@ -53,27 +53,25 @@ public class TokenValidationUtils {
     public Optional<String> checkIfIssuerEqualsSubject(JWTClaimsSet claims) {
         String iss = claims.getIssuer();
         String sub = claims.getSubject();
-        if (iss != null && Objects.equals(iss, sub)) {
-            return Optional.empty();
-        }
-        return Optional.of("The 'iss' and 'sub' claims must be non-null and identical.");
+        return (iss != null && Objects.equals(iss, sub)) ?
+                Optional.empty() : Optional.of("The 'iss' and 'sub' claims must be non-null and identical.");
     }
 
     public Optional<String> checkIfSubjectValidAndEqualsDid(JWTClaimsSet claims) {
         String sub = claims.getSubject();
         if (sub != null && sub.startsWith(DID_FORMAT)) {
             URI id = service.getDidDocument(sub).getId();
-            if (id != null && Objects.equals(id.toString(), sub)) {
-                return Optional.empty();
-            }
-            return Optional.of("The 'sub' claim must be identical to the id of existing DID document.");
+            return (id != null && Objects.equals(id.toString(), sub)) ?
+                    Optional.empty() : Optional.of("The 'sub' claim must be identical to the id of existing DID document.");
+        } else {
+            return Optional.of("The 'sub' claim must be in did format.");
         }
-        return Optional.of("The 'sub' claim must be in did format.");
     }
 
     public Optional<String> checkTokenExpiry(JWTClaimsSet claims) {
         Instant now = Instant.now();
         Date expires = claims.getExpirationTime();
+
         if (expires == null) {
             return Optional.of("Required expiration time 'exp' claim is missing in token");
         } else if (now.isAfter(convertDateToUtcTime(expires))) {
@@ -86,7 +84,7 @@ public class TokenValidationUtils {
             if (issuedAtInst.isAfter(convertDateToUtcTime(expires))) {
                 return Optional.of("Issued at 'iat' claim is after expiration time 'exp' claim in token");
             } else if (now.plusSeconds(IAT_LEEWAY).isBefore(issuedAtInst)) {
-                return Optional.of("Current date/time before issued at 'iat' claim in token");
+                return Optional.of("Current date/time is before issued at 'iat' claim in token");
             }
         }
         return Optional.empty();
@@ -96,31 +94,32 @@ public class TokenValidationUtils {
         return date.toInstant().atOffset(UTC).toInstant();
     }
 
-    public Optional<String> checkIfAudienceClaimsEquals(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
+    public Optional<String> checkIfAudienceClaimsAreEqual(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
         List<String> audienceSI = claimsSI.getAudience();
         List<String> audienceAccess = claimsAT.getAudience();
+
         if (audienceSI.isEmpty() || audienceAccess.isEmpty()) {
             return Optional.of("The 'aud' claim must not be empty.");
+        } else if (audienceSI.contains(audienceAccess.get(0))) {
+            return (audienceAccess.get(0).startsWith(DID_FORMAT)) ?
+                    Optional.empty() : Optional.of("The 'aud' claims must have did format.");
         } else {
-            String audSI = audienceSI.get(0);
-            String audAT = audienceAccess.get(0);
-            if (audSI.equals(audAT)) {
-                return Optional.empty();
-            }
-            return Optional.of("The 'aud' claims must be equals in SI and Access tokens.");
+            return Optional.of("The 'aud' claims must be equal in SI and Access tokens.");
         }
     }
 
-    public Optional<String> checkIfNonceClaimsEquals(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
+    public Optional<String> checkIfNonceClaimsAreEqual(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
         try {
             String nonceSI = claimsSI.getStringClaim(NONCE);
             String nonceAccess = claimsAT.getStringClaim(NONCE);
+
             if (nonceSI == null || nonceAccess == null) {
                 return Optional.of("The 'nonce' claim must not be empty.");
             } else if (nonceSI.equals(nonceAccess)) {
                 return Optional.empty();
+            } else {
+                return Optional.of("The 'nonce' claims must be equal in SI and Access tokens.");
             }
-            return Optional.of("The 'nonce' claims must be equals in SI and Access tokens.");
         } catch (ParseException e) {
             throw new BadDataException("Could not parse 'nonce' claim in token", e);
         }

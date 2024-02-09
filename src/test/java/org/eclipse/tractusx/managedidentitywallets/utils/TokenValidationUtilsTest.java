@@ -33,7 +33,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_1;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_2;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_1;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_2;
 
 @ExtendWith(MockitoExtension.class)
 class TokenValidationUtilsTest {
@@ -47,14 +53,14 @@ class TokenValidationUtilsTest {
     //checkIfIssuerEqualsSubject
     @Test
     void checkIfIssuerEqualsSubjectSuccessTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().issuer("did:web:localhost:BPNL001").subject("did:web:localhost:BPNL001").build();
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().issuer(DID_BPN_1).subject(DID_BPN_1).build();
         Optional<String> result = tokenValidationUtils.checkIfIssuerEqualsSubject(claimsSet);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     void checkIfIssuerEqualsSubjectFailureTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().issuer("did:web:localhost:BPNL001").subject("did:web:localhost:BPNL002").build();
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().issuer(DID_BPN_1).subject(DID_BPN_2).build();
         Optional<String> result = tokenValidationUtils.checkIfIssuerEqualsSubject(claimsSet);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("The 'iss' and 'sub' claims must be non-null and identical.", result.get());
@@ -63,20 +69,18 @@ class TokenValidationUtilsTest {
     //checkIfSubjectValidAndEqualsDid
     @Test
     void checkIfSubjectValidAndEqualsDidSuccessTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001").build();
-        String didJsonString = "{\"@context\": [\"https://www.w3.org/ns/did/v1\",\"https://w3c.github.io/vc-jws-2020/contexts/v1\"],\"id\": \"did:web:localhost:BPNL001\",\"verificationMethod\": [{\"publicKeyJwk\": {\"kty\": \"OKP\",\"crv\": \"Ed25519\",\"x\": \"ieqJhxmXsxk_weI4zuGzaYHINzDwqxnxLvkVyK8ukwk\"},\"controller\": \"did:web:localhost:BPNL001\",\"id\": \"did:web:localhost:BPNL001\",\"type\": \"JsonWebKey2020\"}]}";
-        DidDocument doc = DidDocument.fromJson(didJsonString);
-        Mockito.when(didDocumentService.getDidDocument("did:web:localhost:BPNL001")).thenReturn(doc);
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(DID_BPN_1).build();
+        DidDocument doc = DidDocument.fromJson(DID_JSON_STRING_1);
+        Mockito.when(didDocumentService.getDidDocument(DID_BPN_1)).thenReturn(doc);
         Optional<String> result = tokenValidationUtils.checkIfSubjectValidAndEqualsDid(claimsSet);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     void checkIfSubjectValidAndEqualsDidFailureWrongDidTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001").build();
-        String didJsonString = "{\"@context\": [\"https://www.w3.org/ns/did/v1\",\"https://w3c.github.io/vc-jws-2020/contexts/v1\"],\"id\": \"did:web:localhost:BPNL000000000000\",\"verificationMethod\": [{\"publicKeyJwk\": {\"kty\": \"OKP\",\"crv\": \"Ed25519\",\"x\": \"ieqJhxmXsxk_weI4zuGzaYHINzDwqxnxLvkVyK8ukwk\"},\"controller\": \"did:web:localhost:BPNL000000000000\",\"id\": \"did:web:localhost:BPNL000000000000#58cb4b32-c2e4-46f0-a3ad-3286e34765ed\",\"type\": \"JsonWebKey2020\"}]}";
-        DidDocument doc = DidDocument.fromJson(didJsonString);
-        Mockito.when(didDocumentService.getDidDocument("did:web:localhost:BPNL001")).thenReturn(doc);
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(DID_BPN_1).build();
+        DidDocument doc = DidDocument.fromJson(DID_JSON_STRING_2);
+        Mockito.when(didDocumentService.getDidDocument(DID_BPN_1)).thenReturn(doc);
         Optional<String> result = tokenValidationUtils.checkIfSubjectValidAndEqualsDid(claimsSet);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("The 'sub' claim must be identical to the id of existing DID document.", result.get());
@@ -93,7 +97,7 @@ class TokenValidationUtilsTest {
     //checkTokenExpiry
     @Test
     void checkTokenExpirySuccessTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001")
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(DID_BPN_1)
                 .expirationTime(new Date(Long.parseLong("2559397136000")))
                 .issueTime(new Date(Long.parseLong("1707317488000")))
                 .build();
@@ -103,7 +107,7 @@ class TokenValidationUtilsTest {
 
     @Test
     void checkTokenExpiryFailureNoExpClaimTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001").build();
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(DID_BPN_1).build();
         Optional<String> result = tokenValidationUtils.checkTokenExpiry(claimsSet);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("Required expiration time 'exp' claim is missing in token", result.get());
@@ -111,7 +115,7 @@ class TokenValidationUtilsTest {
 
     @Test
     void checkTokenExpiryFailureAlreadyExpiredTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001")
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(DID_BPN_1)
                 .expirationTime(new Date(Long.parseLong("1707320002664"))).build();
         Optional<String> result = tokenValidationUtils.checkTokenExpiry(claimsSet);
         Assertions.assertTrue(result.isPresent());
@@ -120,7 +124,7 @@ class TokenValidationUtilsTest {
 
     @Test
     void checkTokenExpiryFailureIatIsAfterExpTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001")
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(DID_BPN_1)
                 .expirationTime(new Date(Long.parseLong("2527861136000")))
                 .issueTime(new Date(Long.parseLong("2559397136000")))
                 .build();
@@ -131,66 +135,75 @@ class TokenValidationUtilsTest {
 
     @Test
     void checkTokenExpiryFailureIatInTheFutureTest() {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001")
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(DID_BPN_1)
                 .expirationTime(new Date(Long.parseLong("2559397136000")))
                 .issueTime(new Date(Long.parseLong("2527861136000")))
                 .build();
         Optional<String> result = tokenValidationUtils.checkTokenExpiry(claimsSet);
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals("Current date/time before issued at 'iat' claim in token", result.get());
+        Assertions.assertEquals("Current date/time is before issued at 'iat' claim in token", result.get());
     }
 
-    //checkIfAudienceClaimsEquals
+    //checkIfAudienceClaimsAreEqual
     @Test
-    void checkIfAudienceClaimsEqualsSuccessTest() {
-        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().audience("did:web:localhost:BPNL001").build();
-        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience("did:web:localhost:BPNL001").build();
-        Optional<String> result = tokenValidationUtils.checkIfAudienceClaimsEquals(claimsSetSI, claimsSetAccess);
+    void checkIfAudienceClaimsAreEqualSuccessTest() {
+        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().audience(List.of(DID_BPN_1, DID_BPN_2)).build();
+        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience(DID_BPN_1).build();
+        Optional<String> result = tokenValidationUtils.checkIfAudienceClaimsAreEqual(claimsSetSI, claimsSetAccess);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
-    void checkIfAudienceClaimsEqualsFailureNoAudClaimTest() {
-        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().subject("did:web:localhost:BPNL001").build();
-        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience("did:web:localhost:BPNL001").build();
-        Optional<String> result = tokenValidationUtils.checkIfAudienceClaimsEquals(claimsSetSI, claimsSetAccess);
+    void checkIfAudienceClaimsAreEqualFailureNoAudClaimTest() {
+        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().subject(DID_BPN_1).build();
+        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience(DID_BPN_1).build();
+        Optional<String> result = tokenValidationUtils.checkIfAudienceClaimsAreEqual(claimsSetSI, claimsSetAccess);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("The 'aud' claim must not be empty.", result.get());
     }
 
     @Test
-    void checkIfAudienceClaimsEqualsClaimsFailureMismatchTest() {
-        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().audience("did:web:localhost:BPNL001").build();
-        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience("did:web:localhost:BPNL002").build();
-        Optional<String> result = tokenValidationUtils.checkIfAudienceClaimsEquals(claimsSetSI, claimsSetAccess);
+    void checkIfAudienceClaimsAreEqualFailureMismatchTest() {
+        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().audience(DID_BPN_1).build();
+        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience(DID_BPN_2).build();
+        Optional<String> result = tokenValidationUtils.checkIfAudienceClaimsAreEqual(claimsSetSI, claimsSetAccess);
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals("The 'aud' claims must be equals in SI and Access tokens.", result.get());
+        Assertions.assertEquals("The 'aud' claims must be equal in SI and Access tokens.", result.get());
     }
 
-    //checkIfNonceClaimsEquals
     @Test
-    void checkIfNonceClaimsEqualsSuccessTest() {
+    void checkIfAudienceClaimsAreEqualFailureWrongformatTest() {
+        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().audience("localhost:BPNL001").build();
+        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience("localhost:BPNL001").build();
+        Optional<String> result = tokenValidationUtils.checkIfAudienceClaimsAreEqual(claimsSetSI, claimsSetAccess);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals("The 'aud' claims must have did format.", result.get());
+    }
+
+    //checkIfNonceClaimsAreEqual
+    @Test
+    void checkIfNonceClaimsAreEqualSuccessTest() {
         JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().claim("nonce", "123456").build();
         JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().claim("nonce", "123456").build();
-        Optional<String> result = tokenValidationUtils.checkIfNonceClaimsEquals(claimsSetSI, claimsSetAccess);
+        Optional<String> result = tokenValidationUtils.checkIfNonceClaimsAreEqual(claimsSetSI, claimsSetAccess);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
-    void checkIfNonceClaimsEqualsFailureNoNonceClaimTest() {
-        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().audience("did:web:localhost:BPNL001").build();
-        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience("did:web:localhost:BPNL001").build();
-        Optional<String> result = tokenValidationUtils.checkIfNonceClaimsEquals(claimsSetSI, claimsSetAccess);
+    void checkIfNonceClaimsAreEqualFailureNoNonceClaimTest() {
+        JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().audience(DID_BPN_1).build();
+        JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().audience(DID_BPN_1).build();
+        Optional<String> result = tokenValidationUtils.checkIfNonceClaimsAreEqual(claimsSetSI, claimsSetAccess);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("The 'nonce' claim must not be empty.", result.get());
     }
 
     @Test
-    void checkIfNonceClaimsEqualsFailureMismatchTest() {
+    void checkIfNonceClaimsAreEqualFailureMismatchTest() {
         JWTClaimsSet claimsSetSI = new JWTClaimsSet.Builder().claim("nonce", "123456").build();
         JWTClaimsSet claimsSetAccess = new JWTClaimsSet.Builder().claim("nonce", "123456789").build();
-        Optional<String> result = tokenValidationUtils.checkIfNonceClaimsEquals(claimsSetSI, claimsSetAccess);
+        Optional<String> result = tokenValidationUtils.checkIfNonceClaimsAreEqual(claimsSetSI, claimsSetAccess);
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals("The 'nonce' claims must be equals in SI and Access tokens.", result.get());
+        Assertions.assertEquals("The 'nonce' claims must be equal in SI and Access tokens.", result.get());
     }
 }
