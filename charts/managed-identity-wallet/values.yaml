@@ -1,5 +1,5 @@
 # /********************************************************************************
-# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# * Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
 # *
 # * See the NOTICE file(s) distributed with this work for additional
 # * information regarding copyright ownership.
@@ -41,7 +41,7 @@ secrets: {}
 envs: {}
 
 serviceAccount:
-  # --  Enable creation of ServiceAccount
+  # -- Enable creation of ServiceAccount
   create: true
   # -- Annotations to add to the ServiceAccount
   annotations: {}
@@ -142,6 +142,19 @@ podAnnotations: {}
 # -- add initContainers to the miw deployment
 initContainers: []
 
+networkPolicy:
+  # -- If `true` network policy will be created to restrict access to managed-identity-wallet
+  enabled: false
+  # -- Specify from rule network policy for miw (defaults to all namespaces)
+  from:
+  - namespaceSelector: {}
+
+# -- add volumes to the miw deployment
+extraVolumes: []
+
+# -- add volume mounts to the miw deployment
+extraVolumeMounts: []
+
 ## @section Managed Identity Wallet Primary Parameters
 ##
 miw:
@@ -199,8 +212,8 @@ miw:
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
+  # -- Extra environment variables
   extraEnvVars: []
-  # - Extra environment variables. (default 'KEYCLOAK_HOSTNAME :{{ .Release.Name }}-keycloak')
   #    - name: KEYCLOAK_HOSTNAME
   #      value: "{{ .Release.Name }}-keycloak"
   postgresql:
@@ -240,6 +253,8 @@ postgresql:
   auth:
     # -- Enable postgresql admin user
     enablePostgresUser: false
+    # -- Postgresql admin user password
+    postgresPassword: ""
     # -- Postgresql user to create
     username: "miw"
     # -- Postgresql password to set (if empty one is generated)
@@ -249,7 +264,7 @@ postgresql:
   backup:
     # -- Enable to create a backup cronjob
     enabled: false
-    conjob:
+    cronjob:
       # -- Backup schedule
       schedule: "* */6 * * *"
       storage:
@@ -259,3 +274,47 @@ postgresql:
         resourcePolicy: "keep"
         # -- PVC Storage Request for the backup data volume
         size: "8Gi"
+
+# For more information on how to configure the pgadmin chart see https://artifacthub.io/packages/helm/runix/pgadmin4.
+# (Here we're using a stripped-down version of the pgadmin chart, to just )
+pgadmin4:
+  # -- Enable to deploy pgAdmin
+  enabled: false
+  env:
+    # -- Preset the admin user email
+    email: admin@miw.com
+    # -- preset password (there is no auto-generated password)
+    password: very-secret-password
+    # @ignore
+    variables:
+      - name: PGADMIN_SERVER_JSON_FILE
+        value: /pgadmin4/servers.json
+  ingress:
+    # -- Enagle pgAdmin ingress
+    enabled: false
+    annotations: {}
+    # -- See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L104) how to configure the ingress host(s)
+    hosts: []
+    # -- See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L109) how to configure tls for the ingress host(s)
+    tls: []
+  extraServerDefinitions:
+    # -- enable the predefined server for pgadmin
+    enabled: true
+    # -- See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L84) how to configure the predefined servers
+    servers:
+      # @ignore
+      miw-internal-postgresql:
+        Name: "MIW internal Postgresql DB"
+        Group: "Servers"
+        Port: 5432
+        Username: "miw"
+        Host: "{{ .Release.Name }}-postgresql"
+        SSLMode: "prefer"
+        MaintenanceDB: "postgres"
+  # @ignore
+  extraConfigmapMounts:
+    - name: server-definitions
+      configMap: "{{ .Release.Name }}-pgadmin4-server-definitions"
+      subPath: servers.json
+      mountPath: "/pgadmin4/servers.json"
+      readOnly: true

@@ -1,5 +1,5 @@
 # /********************************************************************************
-# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# * Copyright (c) 2024 Contributors to the Eclipse Foundation
 # *
 # * See the NOTICE file(s) distributed with this work for additional
 # * information regarding copyright ownership.
@@ -16,18 +16,23 @@
 # *
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
-
-version: '3'
-
-tasks:
-  unittest:
-    desc: Executes helm unittests
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm unittest -f 'tests/**/*.yaml' -f 'tests/**/**/*.yaml' .
-
-  readme:
-    desc: Rebuilds the readme of the Helm chart
-    dir: charts/managed-identity-wallet
-    cmds:
-      - helm-docs -i charts/managed-identity-wallet/.helmdocsignore .
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "managed-identity-wallet.fullname" . }}
+  labels:
+    {{- include "managed-identity-wallet.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "managed-identity-wallet.selectorLabels" . | nindent 6 }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    {{- include "common.tplvalues.render" (dict "value" .Values.networkPolicy.from "context" $) | nindent 4 }}
+    ports:
+    - protocol: TCP
+      port: 8080
+{{- end }}

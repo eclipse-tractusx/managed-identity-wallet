@@ -99,7 +99,7 @@ spec:
             - name: APPLICATION_PORT
               value: "8080"
             - name: VC_EXPIRY_DATE
-              value: {{ (default .Values.miw.ssi.vcExpiryDate (printf "31-12-%s" (now | date "2006"))) | quote }}
+              value: {{ .Values.miw.ssi.vcExpiryDate | default (printf "31-12-%s" (now | date "2006")) | quote }}
           {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
             - name: {{ $key }}
@@ -146,6 +146,8 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -159,3 +161,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        {{- toYaml .Values.extraVolumes | nindent 8 }}

@@ -65,3 +65,11 @@ The threats and risks identified during this security assessment can be found in
 * eclipse-tractusx/managed-identity-wallet#166
 
 Security-relevant threats are reported as security advisories and thus only visible to contributers.
+
+# NOTICE
+
+This work is licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+- SPDX-License-Identifier: Apache-2.0
+- SPDX-FileCopyrightText: 2021,2023 Contributors to the Eclipse Foundation
+- Source URL: https://github.com/eclipse-tractusx/managed-identity-wallet

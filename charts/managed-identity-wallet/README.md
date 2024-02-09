@@ -2,7 +2,7 @@
 
 # managed-identity-wallet
 
-![Version: 0.2.0-develop.11](https://img.shields.io/badge/Version-0.2.0--develop.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0-develop.11](https://img.shields.io/badge/AppVersion-0.2.0--develop.11-informational?style=flat-square)
+![Version: 0.4.0-develop.17](https://img.shields.io/badge/Version-0.4.0--develop.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0-develop.17](https://img.shields.io/badge/AppVersion-0.4.0--develop.17-informational?style=flat-square)
 
 Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
 And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
@@ -77,6 +77,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 | Repository | Name | Version |
 |------------|------|---------|
+| file://charts/pgadmin4 | pgadmin4 | 1.19.0 |
 | https://charts.bitnami.com/bitnami | common | 2.x.x |
 | https://charts.bitnami.com/bitnami | keycloak | 15.1.6 |
 | https://charts.bitnami.com/bitnami | postgresql | 11.9.13 |
@@ -89,6 +90,8 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity configuration |
 | envs | object | `{}` | envs Parameters for the application (will be provided as environment variables) |
+| extraVolumeMounts | list | `[]` | add volume mounts to the miw deployment |
+| extraVolumes | list | `[]` | add volumes to the miw deployment |
 | fullnameOverride | string | `""` | String to fully override common.names.fullname template |
 | image.pullPolicy | string | `"Always"` | PullPolicy |
 | image.repository | string | `"tractusx/managed-identity-wallet"` | Image repository |
@@ -101,7 +104,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | keycloak.auth.adminPassword | string | `""` | Keycloak admin password |
 | keycloak.auth.adminUser | string | `"admin"` | Keycloak admin user |
 | keycloak.enabled | bool | `true` | Enable to deploy Keycloak |
-| keycloak.extraEnvVars | list | `[]` |  |
+| keycloak.extraEnvVars | list | `[]` | Extra environment variables |
 | keycloak.ingress.annotations | object | `{}` |  |
 | keycloak.ingress.enabled | bool | `false` |  |
 | keycloak.ingress.hosts | list | `[]` |  |
@@ -141,17 +144,29 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | miw.ssi.enforceHttpsInDidWebResolution | bool | `true` | Enable to use HTTPS in DID Web Resolution |
 | miw.ssi.vcExpiryDate | string | `""` | Verifiable Credential expiry date. Format 'dd-MM-yyyy'. If empty it is set to 31-12-<current year> |
 | nameOverride | string | `""` | String to partially override common.names.fullname template (will maintain the release name) |
+| networkPolicy.enabled | bool | `false` | If `true` network policy will be created to restrict access to managed-identity-wallet |
+| networkPolicy.from | list | `[{"namespaceSelector":{}}]` | Specify from rule network policy for miw (defaults to all namespaces) |
 | nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector configuration |
+| pgadmin4.enabled | bool | `false` | Enable to deploy pgAdmin |
+| pgadmin4.env.email | string | `"admin@miw.com"` | Preset the admin user email |
+| pgadmin4.env.password | string | `"very-secret-password"` | preset password (there is no auto-generated password) |
+| pgadmin4.extraServerDefinitions.enabled | bool | `true` | enable the predefined server for pgadmin |
+| pgadmin4.extraServerDefinitions.servers | object | `{}` | See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L84) how to configure the predefined servers |
+| pgadmin4.ingress.annotations | object | `{}` |  |
+| pgadmin4.ingress.enabled | bool | `false` | Enagle pgAdmin ingress |
+| pgadmin4.ingress.hosts | list | `[]` | See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L104) how to configure the ingress host(s) |
+| pgadmin4.ingress.tls | list | `[]` | See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L109) how to configure tls for the ingress host(s) |
 | podAnnotations | object | `{}` | PodAnnotation configuration |
 | podSecurityContext | object | `{}` | PodSecurityContext |
 | postgresql.auth.database | string | `"miw_app"` | Postgresql database to create |
 | postgresql.auth.enablePostgresUser | bool | `false` | Enable postgresql admin user |
 | postgresql.auth.password | string | `""` | Postgresql password to set (if empty one is generated) |
+| postgresql.auth.postgresPassword | string | `""` | Postgresql admin user password |
 | postgresql.auth.username | string | `"miw"` | Postgresql user to create |
-| postgresql.backup.conjob.schedule | string | `"* */6 * * *"` | Backup schedule |
-| postgresql.backup.conjob.storage.existingClaim | string | `""` | Name of an existing PVC to use |
-| postgresql.backup.conjob.storage.resourcePolicy | string | `"keep"` | Set resource policy to "keep" to avoid removing PVCs during a helm delete operation |
-| postgresql.backup.conjob.storage.size | string | `"8Gi"` | PVC Storage Request for the backup data volume |
+| postgresql.backup.cronjob.schedule | string | `"* */6 * * *"` | Backup schedule |
+| postgresql.backup.cronjob.storage.existingClaim | string | `""` | Name of an existing PVC to use |
+| postgresql.backup.cronjob.storage.resourcePolicy | string | `"keep"` | Set resource policy to "keep" to avoid removing PVCs during a helm delete operation |
+| postgresql.backup.cronjob.storage.size | string | `"8Gi"` | PVC Storage Request for the backup data volume |
 | postgresql.backup.enabled | bool | `false` | Enable to create a backup cronjob |
 | postgresql.enabled | bool | `true` | Enable to deploy Postgresql |
 | readinessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":30,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":5}` | Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
@@ -248,7 +263,6 @@ when deploying the MIW in a production environment:
 | Name | Email | Url |
 | ---- | ------ | --- |
 | Dominik Pinsel | <dominik.pinsel@mercedes-benz.com> | <https://github.com/DominikPinsel> |
-| Peter Motzko | <peter.motzko@volkswagen.de> | <https://github.com/pmoscode> |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

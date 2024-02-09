@@ -11,6 +11,18 @@
     [
       "@semantic-release/exec",
       {
+        "verifyReleaseCmd": "echo next_release=${nextRelease.version} >> $GITHUB_OUTPUT"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "verifyReleaseCmd": "echo will_create_new_release=$([ ${lastRelease.version} = ${nextRelease.version} ] && echo false || echo true) >> $GITHUB_OUTPUT"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
         "prepareCmd": "sed -i  's/applicationVersion=.*/applicationVersion=${nextRelease.version}/g' gradle.properties"
       }
     ],
@@ -24,6 +36,12 @@
       "@semantic-release/exec",
       {
         "prepareCmd": "./gradlew dashLicenseCheck"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "cd charts/managed-identity-wallet && helm-docs -i .helmdocsignore ."
       }
     ],
     "@semantic-release/release-notes-generator",
@@ -40,7 +58,8 @@
           "CHANGELOG.md",
           "DEPENDENCIES",
           "gradle.properties",
-          "./charts/managed-identity-wallet/Chart.yaml"
+          "./charts/managed-identity-wallet/Chart.yaml",
+          "./charts/managed-identity-wallet/README.md"
         ],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
