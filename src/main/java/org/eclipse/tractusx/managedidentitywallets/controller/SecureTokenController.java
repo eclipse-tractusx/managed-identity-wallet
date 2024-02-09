@@ -28,8 +28,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.SecureTokenControllerApiDoc;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
+import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenErrorResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenResponse;
@@ -49,6 +53,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @RestController
 @Slf4j
@@ -60,6 +65,8 @@ public class SecureTokenController {
 
     private final IdpAuthorization idpAuthorization;
 
+    private final WalletRepository walletRepo;
+
     @SneakyThrows
     @PostMapping(path = "/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
     @SecureTokenControllerApiDoc.PostSecureTokenDoc
@@ -69,23 +76,30 @@ public class SecureTokenController {
         // handle idp authorization
         IdpTokenResponse idpResponse = idpAuthorization.fromSecureTokenRequest(secureTokenRequest);
         BusinessPartnerNumber bpn = idpResponse.bpn();
-        // todo bri: accept did & bpn
-        BusinessPartnerNumber partnerBpn = new BusinessPartnerNumber(secureTokenRequest.getAudience());
+        DID selfDid = new DID(walletRepo.getByBpn(bpn.toString()).getDid());
+        DID partnerDid;
+        if (Pattern.compile(StringPool.BPN_NUMBER_REGEX).matcher(secureTokenRequest.getAudience()).matches()) {
+            partnerDid = new DID(walletRepo.getByBpn(secureTokenRequest.getAudience()).getDid());
+        } else if (StringUtils.startsWith(secureTokenRequest.getAudience(), "did:")) {
+            partnerDid = new DID(secureTokenRequest.getAudience());
+        } else {
+            throw new InvalidSecureTokenRequest("You must provide an audience either as a BPN or DID.");
+        }
 
         // create the SI token and put/create the access_token inside
         JWT responseJwt;
         if (secureTokenRequest.assertValidWithAccessToken()) {
             log.debug("Signing si token.");
             responseJwt = tokenService.issueToken(
-                    bpn,
-                    partnerBpn,
+                    selfDid,
+                    partnerDid,
                     JWTParser.parse(secureTokenRequest.getAccessToken())
             );
         } else if (secureTokenRequest.assertValidWithScopes()) {
             log.debug("Creating access token and signing si token.");
             responseJwt = tokenService.issueToken(
-                    bpn,
-                    partnerBpn,
+                    selfDid,
+                    partnerDid,
                     Set.of(secureTokenRequest.getBearerAccessScope())
             );
         } else {
