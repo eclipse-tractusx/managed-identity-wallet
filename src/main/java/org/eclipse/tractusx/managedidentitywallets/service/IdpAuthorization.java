@@ -79,7 +79,7 @@ public class IdpAuthorization {
                 IdpTokenResponse.class
         );
         if (idpResponse == null) {
-            throw new InvalidIdpTokenResponse("The idp response cannot be null. Possible causes for this are: the 'clientId' is invalid, the 'client' is not enabled.");
+            throw new InvalidIdpTokenResponse("The idp response cannot be null. Possible causes for this are: the 'clientId' is invalid, or the 'client' is not enabled.");
         }
         return idpResponse;
     }
