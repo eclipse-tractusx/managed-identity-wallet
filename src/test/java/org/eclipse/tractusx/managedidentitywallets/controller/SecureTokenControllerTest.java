@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -82,7 +83,13 @@ class SecureTokenControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON_VALUE));
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<Map> response = testTemplate.exchange("/token", HttpMethod.POST, entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = testTemplate.exchange(
+                "/token",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<>() {
+                }
+        );
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getHeaders().getContentType().toString(), MediaType.APPLICATION_JSON_VALUE);
         Assertions.assertNotNull(response.getBody().getOrDefault("token", null));
