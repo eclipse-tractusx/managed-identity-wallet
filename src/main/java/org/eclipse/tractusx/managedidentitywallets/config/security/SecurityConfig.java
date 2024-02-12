@@ -73,6 +73,8 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/token", POST.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/wallets/validate", POST.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/token", POST.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
 

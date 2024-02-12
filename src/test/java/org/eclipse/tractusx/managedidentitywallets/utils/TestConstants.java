@@ -63,7 +63,7 @@ public class TestConstants {
                     "x": "Z-8DEkN6pw2E01niDWqrp1kROLF-syIPIpFgmyrVUOU"
                   },
                   "controller": "did:web:localhost:BPNL000000000002",
-                  "id": "did:web:localhost:BPNL000000000001#58cb4b32-c2e4-46f0-a3ad-3286e34765ed",
+                  "id": "did:web:localhost:BPNL000000000001#58cb4b32-c2e4-46f0-a3ad-3286e34765ty",
                   "type": "JsonWebKey2020"
                 }
               ]

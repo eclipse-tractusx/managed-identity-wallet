@@ -21,15 +21,18 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.utils.CustomSignedJWTVerifier;
 import org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +42,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class STSTokenValidationService {
 
+    private final DidDocumentResolverService didDocumentResolverService;
+    private final CustomSignedJWTVerifier customSignedJWTverifier;
     private final TokenValidationUtils tokenValidationUtils;
     private static final String ACCESS_TOKEN = "access_token";
 
@@ -50,19 +55,26 @@ public class STSTokenValidationService {
      */
     public boolean validateToken(String token) {
         List<String> errors = new ArrayList<>();
+        SignedJWT jwtSI = parseToken(token);
+        JWTClaimsSet claimsSI = getClaimsSet(jwtSI);
 
-        JWTClaimsSet claimsSI = getClaimsSet(token);
-
+        tokenValidationUtils.checkIfSubjectValidAndEqualsDid(claimsSI).ifPresent(errors::add);
         tokenValidationUtils.checkIfIssuerEqualsSubject(claimsSI).ifPresent(errors::add);
         tokenValidationUtils.checkTokenExpiry(claimsSI).ifPresent(errors::add);
-        tokenValidationUtils.checkIfSubjectValidAndEqualsDid(claimsSI).ifPresent(errors::add);
 
         Optional<String> accessToken = getAccessToken(claimsSI);
         if (accessToken.isPresent()) {
-            String accessTokenValue = accessToken.get();
-            JWTClaimsSet claimsAT = getClaimsSet(accessTokenValue);
+            SignedJWT jwtAT = parseToken(accessToken.get());
+            JWTClaimsSet claimsAT = getClaimsSet(jwtAT);
+
             tokenValidationUtils.checkIfAudienceClaimsAreEqual(claimsSI, claimsAT).ifPresent(errors::add);
             tokenValidationUtils.checkIfNonceClaimsAreEqual(claimsSI, claimsAT).ifPresent(errors::add);
+
+            String didForOuter = claimsAT.getAudience().get(0);
+            verifySignature(didForOuter, jwtSI).ifPresent(errors::add);
+
+            String didForInner = claimsAT.getIssuer();
+            verifySignature(didForInner, jwtAT).ifPresent(errors::add);
         } else {
             errors.add("The '%s' claim must not be null.".formatted(ACCESS_TOKEN));
         }
@@ -70,38 +82,43 @@ public class STSTokenValidationService {
         if (errors.isEmpty()) {
             return true;
         } else {
-            log.error(errors.toString());
+            log.debug(errors.toString());
             return false;
         }
     }
 
-    /**
-     * Parses the token and gets claim set from it.
-     *
-     * @param token token in a String format
-     * @return the set of JWT claims
-     */
-    private JWTClaimsSet getClaimsSet(String token) {
+    private JWTClaimsSet getClaimsSet(SignedJWT tokenParsed) {
         try {
-            SignedJWT tokenParsed = SignedJWT.parse(token);
             return tokenParsed.getJWTClaimsSet();
         } catch (ParseException e) {
             throw new BadDataException("Could not parse jwt token", e);
         }
     }
 
-    /**
-     * Gets access token from SI token.
-     *
-     * @param claims set of claims of SI token
-     * @return the value of token
-     */
+    private SignedJWT parseToken(String token) {
+        try {
+            return SignedJWT.parse(token);
+        } catch (ParseException e) {
+            throw new BadDataException("Could not parse jwt token", e);
+        }
+    }
+
     private Optional<String> getAccessToken(JWTClaimsSet claims) {
         try {
             String accessTokenValue = claims.getStringClaim(ACCESS_TOKEN);
             return accessTokenValue == null ? Optional.empty() : Optional.of(accessTokenValue);
         } catch (ParseException e) {
             throw new BadDataException("Could not parse jwt token", e);
+        }
+    }
+
+    private Optional<String> verifySignature(String did, SignedJWT signedJWT) {
+        try {
+            customSignedJWTverifier.setDidResolver(didDocumentResolverService.getCompositeDidResolver());
+            return customSignedJWTverifier.verify(did, signedJWT) ? Optional.empty()
+                    : Optional.of("Signature of jwt is not verified");
+        } catch (JOSEException ex) {
+            throw new BadDataException("Can not verify signature of jwt", ex);
         }
     }
 }

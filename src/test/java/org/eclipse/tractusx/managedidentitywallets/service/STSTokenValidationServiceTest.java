@@ -22,7 +22,9 @@
 package org.eclipse.tractusx.managedidentitywallets.service;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
@@ -40,9 +42,11 @@ import org.springframework.test.context.ContextConfiguration;
 
 import static com.nimbusds.jose.jwk.Curve.Ed25519;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_1;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_2;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_1;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_2;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_1;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_2;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.addAccessTokenToClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildJWTToken;
@@ -55,11 +59,13 @@ class STSTokenValidationServiceTest {
     private static final OctetKeyPair JWK_OUTER = new OctetKeyPair
             .Builder(Ed25519, new Base64URL("4Q5HCXPyutfcj7gLmbAKlYttlJPkykIkRjh7DH2NtZ0"))
             .d(new Base64URL("Ktp0sv9dKr_gnzRxpH5V9qpiTgZ1WbkMSv8WtWodewg"))
+            .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ed")
             .build();
 
     private static final OctetKeyPair JWK_INNER = new OctetKeyPair
             .Builder(Ed25519, new Base64URL("Z-8DEkN6pw2E01niDWqrp1kROLF-syIPIpFgmyrVUOU"))
             .d(new Base64URL("MLYxSai_oFzuqEfnB2diA3oDuixLg3kQzZKMyW31-2o"))
+            .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ty")
             .build();
 
     @Autowired
@@ -98,11 +104,39 @@ class STSTokenValidationServiceTest {
     }
 
     @Test
-    void validateTokenSuccessTest() throws JOSEException {
-        Wallet wallet = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
-        walletRepository.save(wallet);
+    void validateTokenFailureWrongSignatureInnerTokenTest() throws JOSEException {
 
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_1, DID_BPN_2, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        OctetKeyPair jwkRandom = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ty")
+                .generate();
+
+        Wallet wallet1 = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
+        walletRepository.save(wallet1);
+
+        Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
+        walletRepository.save(wallet2);
+
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        String accessToken = buildJWTToken(jwkRandom, innerSet);
+
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
+        String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
+
+        boolean isValid = stsTokenValidationService.validateToken(siToken);
+
+        Assertions.assertFalse(isValid);
+    }
+
+    @Test
+    void validateTokenSuccessTest() throws JOSEException {
+        Wallet wallet1 = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
+        walletRepository.save(wallet1);
+
+        Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
+        walletRepository.save(wallet2);
+
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
         JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
