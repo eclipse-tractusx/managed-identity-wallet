@@ -23,17 +23,16 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors;
+import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.service.DidDocumentService;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.time.ZoneOffset.UTC;
 
@@ -50,78 +49,117 @@ public class TokenValidationUtils {
     public static final String DID_FORMAT = "did:";
     private static final int IAT_LEEWAY = 5;
 
-    public Optional<String> checkIfIssuerEqualsSubject(JWTClaimsSet claims) {
+    public ValidationResult checkIfIssuerEqualsSubject(JWTClaimsSet claims) {
         String iss = claims.getIssuer();
         String sub = claims.getSubject();
         return (iss != null && Objects.equals(iss, sub)) ?
-                Optional.empty() : Optional.of("The 'iss' and 'sub' claims must be non-null and identical.");
+                getValidResult() : getInvalidResult(TokenValidationErrors.ISS_AND_SUB_NOT_EQUAL);
     }
 
-    public Optional<String> checkIfSubjectValidAndEqualsDid(JWTClaimsSet claims) {
+    public ValidationResult getValidResult() {
+        return ValidationResult.builder().isValid(true).build();
+    }
+
+    public ValidationResult getInvalidResult(TokenValidationErrors error) {
+        return ValidationResult.builder().isValid(false).errors(List.of(error)).build();
+    }
+
+    public ValidationResult checkIfSubjectValidAndEqualsDid(JWTClaimsSet claims) {
         String sub = claims.getSubject();
-        if (sub != null && sub.startsWith(DID_FORMAT)) {
-            URI id = service.getDidDocument(sub).getId();
-            return (id != null && Objects.equals(id.toString(), sub)) ?
-                    Optional.empty() : Optional.of("The 'sub' claim must be identical to the id of existing DID document.");
-        } else {
-            return Optional.of("The 'sub' claim must be in did format.");
-        }
+        return checkIfSubPresent(sub)
+                ? checkIfDidPresent(sub)
+                ? getValidResult()
+                : getInvalidResult(TokenValidationErrors.SUB_NOT_MATCH_ANY_DID)
+                : getInvalidResult(TokenValidationErrors.SUB_NOT_DID);
     }
 
-    public Optional<String> checkTokenExpiry(JWTClaimsSet claims) {
-        Instant now = Instant.now();
-        Date expires = claims.getExpirationTime();
+    private boolean checkIfSubPresent(String sub) {
+        return sub != null && sub.startsWith(DID_FORMAT);
+    }
 
-        if (expires == null) {
-            return Optional.of("Required expiration time 'exp' claim is missing in token");
-        } else if (now.isAfter(convertDateToUtcTime(expires))) {
-            return Optional.of("Token has expired 'exp'");
-        }
+    private boolean checkIfDidPresent(String sub) {
+        URI id = service.getDidDocument(sub).getId();
+        return id != null && Objects.equals(id.toString(), sub);
+    }
 
-        Date issuedAt = claims.getIssueTime();
-        if (issuedAt != null) {
-            Instant issuedAtInst = convertDateToUtcTime(issuedAt);
-            if (issuedAtInst.isAfter(convertDateToUtcTime(expires))) {
-                return Optional.of("Issued at 'iat' claim is after expiration time 'exp' claim in token");
-            } else if (now.plusSeconds(IAT_LEEWAY).isBefore(issuedAtInst)) {
-                return Optional.of("Current date/time is before issued at 'iat' claim in token");
-            }
-        }
-        return Optional.empty();
+    public ValidationResult checkTokenExpiry(JWTClaimsSet claims) {
+        return !checkIfExpirationIsPresent(claims.getExpirationTime())
+                ? getInvalidResult(TokenValidationErrors.EXP_MISSING)
+                : checkIfTokenIsExpired(claims.getExpirationTime())
+                ? getInvalidResult(TokenValidationErrors.TOKEN_ALREADY_EXPIRED)
+                : checkIssAt(claims);
+    }
+
+    private boolean checkIfExpirationIsPresent(Date expirationTime) {
+        return null != expirationTime;
+    }
+
+    private boolean checkIfTokenIsExpired(Date expirationTime) {
+        return Instant.now().isAfter(convertDateToUtcTime(expirationTime));
     }
 
     private Instant convertDateToUtcTime(Date date) {
         return date.toInstant().atOffset(UTC).toInstant();
     }
 
-    public Optional<String> checkIfAudienceClaimsAreEqual(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
-        List<String> audienceSI = claimsSI.getAudience();
-        List<String> audienceAccess = claimsAT.getAudience();
-
-        if (audienceSI.isEmpty() || audienceAccess.isEmpty()) {
-            return Optional.of("The 'aud' claim must not be empty.");
-        } else if (audienceSI.contains(audienceAccess.get(0))) {
-            return (audienceAccess.get(0).startsWith(DID_FORMAT)) ?
-                    Optional.empty() : Optional.of("The 'aud' claims must have did format.");
-        } else {
-            return Optional.of("The 'aud' claims must be equal in SI and Access tokens.");
-        }
+    private ValidationResult checkIssAt(JWTClaimsSet claimsSet) {
+        return !checkIfIssuedAtIsPresent(claimsSet.getIssueTime())
+                ? getInvalidResult(TokenValidationErrors.IAT_MISSING)
+                : checkIfIssuedAtIsAfterExpires(claimsSet)
+                ? getInvalidResult(TokenValidationErrors.IAT_AFTER_EXPIRATION)
+                : checkIssuedAtIsAfterCurrentDateTime(claimsSet.getIssueTime())
+                ? getInvalidResult(TokenValidationErrors.CURRENT_TIME_BEFORE_IAT)
+                : getValidResult();
     }
 
-    public Optional<String> checkIfNonceClaimsAreEqual(JWTClaimsSet claimsSI, JWTClaimsSet claimsAT) {
-        try {
-            String nonceSI = claimsSI.getStringClaim(NONCE);
-            String nonceAccess = claimsAT.getStringClaim(NONCE);
+    private boolean checkIfIssuedAtIsPresent(Date issueTime) {
+        return null != issueTime;
+    }
 
-            if (nonceSI == null || nonceAccess == null) {
-                return Optional.of("The 'nonce' claim must not be empty.");
-            } else if (nonceSI.equals(nonceAccess)) {
-                return Optional.empty();
-            } else {
-                return Optional.of("The 'nonce' claims must be equal in SI and Access tokens.");
-            }
-        } catch (ParseException e) {
-            throw new BadDataException("Could not parse 'nonce' claim in token", e);
-        }
+    private boolean checkIfIssuedAtIsAfterExpires(JWTClaimsSet claims) {
+        Date expires = claims.getExpirationTime();
+        Date issuedAt = claims.getIssueTime();
+        Instant issuedAtInst = convertDateToUtcTime(issuedAt);
+        return issuedAtInst.isAfter(convertDateToUtcTime(expires));
+    }
+
+    private boolean checkIssuedAtIsAfterCurrentDateTime(Date issuedAt) {
+        Instant issuedAtInst = convertDateToUtcTime(issuedAt);
+        Instant now = Instant.now();
+        return now.plusSeconds(IAT_LEEWAY).isBefore(issuedAtInst);
+    }
+
+    public ValidationResult checkIfAudienceClaimsAreEqual(List<String> audienceSI, List<String> audienceAccess) {
+        return checkIfAudsAreMissing(audienceSI, audienceAccess)
+                ? getInvalidResult(TokenValidationErrors.AUD_MISSING)
+                : checkAudEquality(audienceSI, audienceAccess)
+                ? checkAudFormat(audienceAccess)
+                ? getValidResult()
+                : getInvalidResult(TokenValidationErrors.AUD_NOT_DID)
+                : getInvalidResult(TokenValidationErrors.AUD_CLAIMS_NOT_EQUAL);
+    }
+
+    private boolean checkAudFormat(List<String> audienceAccess) {
+        return audienceAccess.get(0).startsWith(DID_FORMAT);
+    }
+
+    private boolean checkAudEquality(List<String> audienceSI, List<String> audienceAccess) {
+        return audienceSI.contains(audienceAccess.get(0));
+    }
+
+    private boolean checkIfAudsAreMissing(List<String> audienceSI, List<String> audienceAccess) {
+        return audienceSI.isEmpty() || audienceAccess.isEmpty();
+    }
+
+    public ValidationResult checkIfNonceClaimsAreEqual(String nonceSI, String nonceAccess) {
+        return checkIfNoncesAreMissing(nonceSI, nonceAccess)
+                ? getInvalidResult(TokenValidationErrors.NONCE_MISSING)
+                : !nonceSI.equals(nonceAccess)
+                ? getInvalidResult(TokenValidationErrors.NONCE_CLAIMS_NOT_EQUAL)
+                : getValidResult();
+    }
+
+    private boolean checkIfNoncesAreMissing(String nonceSI, String nonceAccess) {
+        return nonceSI == null || nonceAccess == null;
     }
 }

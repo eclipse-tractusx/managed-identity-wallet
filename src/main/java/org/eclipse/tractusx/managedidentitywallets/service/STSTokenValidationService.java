@@ -22,20 +22,23 @@
 package org.eclipse.tractusx.managedidentitywallets.service;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors;
+import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CustomSignedJWTVerifier;
 import org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils.NONCE;
 
 @Service
 @Slf4j
@@ -53,38 +56,38 @@ public class STSTokenValidationService {
      * @param token token in a String format
      * @return boolean result of validation
      */
-    public boolean validateToken(String token) {
-        List<String> errors = new ArrayList<>();
+    public ValidationResult validateToken(String token) {
+        List<ValidationResult> validationResults = new ArrayList<>();
+
         SignedJWT jwtSI = parseToken(token);
         JWTClaimsSet claimsSI = getClaimsSet(jwtSI);
 
-        tokenValidationUtils.checkIfSubjectValidAndEqualsDid(claimsSI).ifPresent(errors::add);
-        tokenValidationUtils.checkIfIssuerEqualsSubject(claimsSI).ifPresent(errors::add);
-        tokenValidationUtils.checkTokenExpiry(claimsSI).ifPresent(errors::add);
+        validationResults.add(tokenValidationUtils.checkIfSubjectValidAndEqualsDid(claimsSI));
+        validationResults.add(tokenValidationUtils.checkIfIssuerEqualsSubject(claimsSI));
+        validationResults.add(tokenValidationUtils.checkTokenExpiry(claimsSI));
 
         Optional<String> accessToken = getAccessToken(claimsSI);
         if (accessToken.isPresent()) {
             SignedJWT jwtAT = parseToken(accessToken.get());
             JWTClaimsSet claimsAT = getClaimsSet(jwtAT);
 
-            tokenValidationUtils.checkIfAudienceClaimsAreEqual(claimsSI, claimsAT).ifPresent(errors::add);
-            tokenValidationUtils.checkIfNonceClaimsAreEqual(claimsSI, claimsAT).ifPresent(errors::add);
+            validationResults.add(tokenValidationUtils.checkIfAudienceClaimsAreEqual(claimsSI.getAudience(), claimsAT.getAudience()));
+            try {
+                validationResults.add(tokenValidationUtils.checkIfNonceClaimsAreEqual(claimsSI.getStringClaim(NONCE),
+                        claimsAT.getStringClaim(NONCE)));
+            } catch (ParseException e) {
+                throw new BadDataException("Could not parse 'nonce' claim in token", e);
+            }
 
             String didForOuter = claimsAT.getAudience().get(0);
-            verifySignature(didForOuter, jwtSI).ifPresent(errors::add);
+            validationResults.add(verifySignature(didForOuter, jwtSI));
 
             String didForInner = claimsAT.getIssuer();
-            verifySignature(didForInner, jwtAT).ifPresent(errors::add);
+            validationResults.add(verifySignature(didForInner, jwtAT));
         } else {
-            errors.add("The '%s' claim must not be null.".formatted(ACCESS_TOKEN));
+            validationResults.add(tokenValidationUtils.getInvalidResult(TokenValidationErrors.ACCESS_TOKEN_MISSING));
         }
-
-        if (errors.isEmpty()) {
-            return true;
-        } else {
-            log.debug(errors.toString());
-            return false;
-        }
+        return combineValidationResults(validationResults);
     }
 
     private JWTClaimsSet getClaimsSet(SignedJWT tokenParsed) {
@@ -112,13 +115,27 @@ public class STSTokenValidationService {
         }
     }
 
-    private Optional<String> verifySignature(String did, SignedJWT signedJWT) {
+    private ValidationResult verifySignature(String did, SignedJWT signedJWT) {
         try {
             customSignedJWTverifier.setDidResolver(didDocumentResolverService.getCompositeDidResolver());
-            return customSignedJWTverifier.verify(did, signedJWT) ? Optional.empty()
-                    : Optional.of("Signature of jwt is not verified");
+            return customSignedJWTverifier.verify(did, signedJWT)
+                    ? tokenValidationUtils.getValidResult()
+                    : tokenValidationUtils.getInvalidResult(TokenValidationErrors.SIGNATURE_NOT_VERIFIED);
         } catch (JOSEException ex) {
             throw new BadDataException("Can not verify signature of jwt", ex);
         }
+    }
+
+    private ValidationResult combineValidationResults(List<ValidationResult> validationResults) {
+        List<TokenValidationErrors> errorsList = new ArrayList<>();
+        for (ValidationResult result : validationResults) {
+            List<TokenValidationErrors> errors = result.getErrors();
+            if (null != errors) {
+                errorsList.add(errors.get(0));
+            }
+        }
+        ValidationResult finalResult = ValidationResult.builder().errors(errorsList).build();
+        finalResult.setValid(errorsList.isEmpty());
+        return finalResult;
     }
 }

@@ -30,8 +30,10 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
+import org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -39,6 +41,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.Date;
 
 import static com.nimbusds.jose.jwk.Curve.Ed25519;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_1;
@@ -68,6 +72,12 @@ class STSTokenValidationServiceTest {
             .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ty")
             .build();
 
+    private static final Date EXP_VALID_DATE = new Date(Long.parseLong("2559397136000"));
+
+    private static final Date ALREADY_EXP_DATE = new Date(Long.parseLong("1707582883000"));
+
+    private static final Date IAT_VALID_DATE = new Date(Long.parseLong("1707496483000"));
+
     @Autowired
     private STSTokenValidationService stsTokenValidationService;
 
@@ -96,11 +106,13 @@ class STSTokenValidationServiceTest {
         Wallet wallet = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
         walletRepository.save(wallet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         String siToken = buildJWTToken(JWK_OUTER, outerSet);
-        boolean isValid = stsTokenValidationService.validateToken(siToken);
 
-        Assertions.assertFalse(isValid);
+        ValidationResult result = stsTokenValidationService.validateToken(siToken);
+
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertEquals(TokenValidationErrors.ACCESS_TOKEN_MISSING, result.getErrors().get(0));
     }
 
     @Test
@@ -116,16 +128,39 @@ class STSTokenValidationServiceTest {
         Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
         walletRepository.save(wallet2);
 
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(jwkRandom, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, ALREADY_EXP_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
-        boolean isValid = stsTokenValidationService.validateToken(siToken);
+        ValidationResult result = stsTokenValidationService.validateToken(siToken);
 
-        Assertions.assertFalse(isValid);
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertEquals(TokenValidationErrors.SIGNATURE_NOT_VERIFIED, result.getErrors().get(0));
+    }
+
+    @Test
+    void validateTokenFailureExpiredTokenIssNotEqualsSubTest() throws JOSEException {
+        Wallet wallet1 = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
+        walletRepository.save(wallet1);
+
+        Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
+        walletRepository.save(wallet2);
+
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
+        String accessToken = buildJWTToken(JWK_INNER, innerSet);
+
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_2, DID_BPN_1, "123456", ALREADY_EXP_DATE, IAT_VALID_DATE);
+        JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
+        String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
+
+        ValidationResult result = stsTokenValidationService.validateToken(siToken);
+
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertTrue(result.getErrors().contains(TokenValidationErrors.ISS_AND_SUB_NOT_EQUAL));
+        Assertions.assertTrue(result.getErrors().contains(TokenValidationErrors.TOKEN_ALREADY_EXPIRED));
     }
 
     @Test
@@ -136,15 +171,15 @@ class STSTokenValidationServiceTest {
         Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
         walletRepository.save(wallet2);
 
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", Long.parseLong("2559397136000"));
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
-        boolean isValid = stsTokenValidationService.validateToken(siToken);
+        ValidationResult result = stsTokenValidationService.validateToken(siToken);
 
-        Assertions.assertTrue(isValid);
+        Assertions.assertTrue(result.isValid());
     }
 }

@@ -226,12 +226,13 @@ public class TestUtils {
         return signedJWT.serialize();
     }
 
-    public static JWTClaimsSet buildClaimsSet(String issuer, String subject, String audience, String nonce, long expiration) {
+    public static JWTClaimsSet buildClaimsSet(String issuer, String subject, String audience, String nonce, Date expiration, Date issuance) {
         return new JWTClaimsSet.Builder()
-                .subject(subject)
                 .issuer(issuer)
+                .subject(subject)
                 .audience(audience)
-                .expirationTime(new Date(expiration))
+                .expirationTime(expiration)
+                .issueTime(issuance)
                 .claim("nonce", nonce)
                 .build();
     }
