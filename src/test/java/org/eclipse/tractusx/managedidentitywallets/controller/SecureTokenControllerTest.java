@@ -84,7 +84,7 @@ class SecureTokenControllerTest {
         headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON_VALUE));
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<Map<String, Object>> response = testTemplate.exchange(
-                "/token",
+                "/api/token",
                 HttpMethod.POST,
                 entity,
                 new ParameterizedTypeReference<>() {

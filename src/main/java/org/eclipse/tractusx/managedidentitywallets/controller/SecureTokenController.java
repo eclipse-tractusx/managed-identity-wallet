@@ -68,7 +68,7 @@ public class SecureTokenController {
     private final WalletRepository walletRepo;
 
     @SneakyThrows
-    @PostMapping(path = "/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
     @SecureTokenControllerApiDoc.PostSecureTokenDoc
     public ResponseEntity<StsTokenResponse> token(
             @Valid @RequestBody SecureTokenRequest secureTokenRequest
