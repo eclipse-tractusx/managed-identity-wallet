@@ -23,10 +23,10 @@ package org.eclipse.tractusx.managedidentitywallets.exception;
 
 import java.io.Serial;
 
-public class InvalidIdpTokenResponse extends RuntimeException {
+public class InvalidIdpTokenResponseException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
-    public InvalidIdpTokenResponse(String message) {
+    public InvalidIdpTokenResponseException(String message) {
         super(message);
     }
 }

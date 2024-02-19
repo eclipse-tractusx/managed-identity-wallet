@@ -23,11 +23,11 @@ package org.eclipse.tractusx.managedidentitywallets.exception;
 
 import java.io.Serial;
 
-public class InvalidSecureTokenRequest extends RuntimeException {
+public class InvalidSecureTokenRequestException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public InvalidSecureTokenRequest(String message) {
+    public InvalidSecureTokenRequestException(String message) {
         super(message);
     }
 }

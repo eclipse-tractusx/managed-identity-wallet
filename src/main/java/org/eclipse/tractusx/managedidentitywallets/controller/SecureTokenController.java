@@ -38,10 +38,10 @@ import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenErrorResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
-import org.eclipse.tractusx.managedidentitywallets.exception.InvalidSecureTokenRequest;
-import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumber;
+import org.eclipse.tractusx.managedidentitywallets.exception.InvalidSecureTokenRequestException;
+import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumberException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
-import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponse;
+import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponseException;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.service.IdpAuthorization;
 import org.springframework.http.HttpStatus;
@@ -83,7 +83,7 @@ public class SecureTokenController {
         } else if (StringUtils.startsWith(secureTokenRequest.getAudience(), "did:")) {
             partnerDid = new DID(secureTokenRequest.getAudience());
         } else {
-            throw new InvalidSecureTokenRequest("You must provide an audience either as a BPN or DID.");
+            throw new InvalidSecureTokenRequestException("You must provide an audience either as a BPN or DID.");
         }
 
         // create the SI token and put/create the access_token inside
@@ -103,7 +103,7 @@ public class SecureTokenController {
                     Set.of(secureTokenRequest.getBearerAccessScope())
             );
         } else {
-            throw new InvalidSecureTokenRequest("The provided data could not be used to create and sign a token.");
+            throw new InvalidSecureTokenRequestException("The provided data could not be used to create and sign a token.");
         }
 
         // create the response
@@ -115,7 +115,7 @@ public class SecureTokenController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @ExceptionHandler({ UnsupportedGrantTypeException.class, InvalidSecureTokenRequest.class, UnknownBusinessPartnerNumber.class, InvalidIdpTokenResponse.class })
+    @ExceptionHandler({ UnsupportedGrantTypeException.class, InvalidSecureTokenRequestException.class, UnknownBusinessPartnerNumberException.class, InvalidIdpTokenResponseException.class })
     public ResponseEntity<StsTokenErrorResponse> getErrorResponse(RuntimeException e) {
         StsTokenErrorResponse response = new StsTokenErrorResponse();
         response.setError(e.getClass().getSimpleName());

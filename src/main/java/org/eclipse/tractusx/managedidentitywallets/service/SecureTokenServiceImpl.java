@@ -30,7 +30,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletReposito
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
-import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumber;
+import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumberException;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenIssuer;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.sts.SecureTokenConfigurationProperties;
@@ -74,11 +74,11 @@ public class SecureTokenServiceImpl implements SecureTokenService {
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes) {
         log.debug("'issueToken' using scopes and BPN.");
         WalletKey walletKey = Optional.of(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumber(String.format("The provided BPN '%s' is unknown", self)));
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
         KeyPair keyPair = walletKey.toDto();
         DID selfDid = new DID(walletKey.getWallet().getDid());
         DID partnerDid = new DID(Optional.ofNullable(walletRepository.getByBpn(partner.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumber(String.format("The provided BPN '%s' is unknown", partner)))
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());
         // IMPORTANT: we re-use the expiration time intentionally to mitigate any kind of timing attacks,
         // as we're signing two tokens.
@@ -91,11 +91,11 @@ public class SecureTokenServiceImpl implements SecureTokenService {
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken) {
         log.debug("'issueToken' using an access_token and BPN.");
         WalletKey walletKey = Optional.ofNullable(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumber(String.format("The provided BPN '%s' is unknown", self)));
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
         KeyPair keyPair = walletKey.toDto();
         DID selfDid = new DID(walletKey.getWallet().getDid());
         DID partnerDid = new DID(Optional.of(walletRepository.getByBpn(partner.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumber(String.format("The provided BPN '%s' is unknown", partner)))
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         return this.tokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);

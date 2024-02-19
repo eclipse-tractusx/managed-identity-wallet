@@ -23,16 +23,16 @@ package org.eclipse.tractusx.managedidentitywallets.exception;
 
 import java.io.Serial;
 
-public class UnknownBusinessPartnerNumber extends RuntimeException {
+public class UnknownBusinessPartnerNumberException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public UnknownBusinessPartnerNumber(String message) {
+    public UnknownBusinessPartnerNumberException(String message) {
         super(message);
     }
 
-    public UnknownBusinessPartnerNumber(String message, Throwable cause) {
+    public UnknownBusinessPartnerNumberException(String message, Throwable cause) {
         super(message, cause);
     }
 }
