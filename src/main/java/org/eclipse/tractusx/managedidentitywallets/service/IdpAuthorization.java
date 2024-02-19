@@ -26,7 +26,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.security.SecurityConfi
 import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
-import org.eclipse.tractusx.managedidentitywallets.exceptions.InvalidIdpTokenResponse;
+import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;

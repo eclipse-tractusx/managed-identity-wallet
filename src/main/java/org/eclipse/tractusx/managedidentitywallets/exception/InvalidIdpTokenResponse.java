@@ -19,7 +19,7 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.exceptions;
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
 import java.io.Serial;
 

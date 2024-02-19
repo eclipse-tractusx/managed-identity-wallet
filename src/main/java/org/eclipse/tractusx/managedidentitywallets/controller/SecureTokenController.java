@@ -41,7 +41,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.InvalidSecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
-import org.eclipse.tractusx.managedidentitywallets.exceptions.InvalidIdpTokenResponse;
+import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.service.IdpAuthorization;
 import org.springframework.http.HttpStatus;
