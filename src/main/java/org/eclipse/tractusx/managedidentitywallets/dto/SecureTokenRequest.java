@@ -22,8 +22,6 @@
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,21 +34,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SecureTokenRequest {
-    @NotBlank
     private String audience;
 
-    @NotBlank
-    @NotNull
     @JsonProperty("client_id")
     private String clientId;
 
-    @NotBlank
-    @NotNull
     @JsonProperty("client_secret")
     private String clientSecret;
 
-    @NotBlank
-    @NotNull
     @JsonProperty("grant_type")
     private String grantType;
 

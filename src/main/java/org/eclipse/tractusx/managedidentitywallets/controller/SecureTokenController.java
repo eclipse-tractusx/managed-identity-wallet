@@ -44,10 +44,13 @@ import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTyp
 import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponseException;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.service.IdpAuthorization;
+import org.eclipse.tractusx.managedidentitywallets.validator.SecureTokenRequestValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,6 +69,11 @@ public class SecureTokenController {
     private final IdpAuthorization idpAuthorization;
 
     private final WalletRepository walletRepo;
+
+    @InitBinder
+    void initBinder(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(new SecureTokenRequestValidator());
+    }
 
     @SneakyThrows
     @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
