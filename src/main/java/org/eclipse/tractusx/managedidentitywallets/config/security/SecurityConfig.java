@@ -25,6 +25,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +38,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -50,6 +53,9 @@ import static org.springframework.http.HttpMethod.POST;
 @Configuration
 @AllArgsConstructor
 public class SecurityConfig {
+
+    @Autowired
+    private final STSTokenValidationService validationService;
 
     private final SecurityConfigProperties securityConfigProperties;
 
@@ -74,6 +80,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/token", POST.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/presentations/iatp", GET.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
 
                         //did document resolve APIs
@@ -110,6 +117,9 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
                         jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()))));
+
+        http.addFilterAfter(new PresentationIatpFilter(validationService), BasicAuthenticationFilter.class);
+
         return http.build();
     }
 
