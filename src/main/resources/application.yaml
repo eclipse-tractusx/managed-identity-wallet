@@ -90,3 +90,6 @@ miw:
     auth-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/auth
     token-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/token
     refresh-token-url: ${miw.security.token-url}
+
+sts:
+  token-duration: 60000

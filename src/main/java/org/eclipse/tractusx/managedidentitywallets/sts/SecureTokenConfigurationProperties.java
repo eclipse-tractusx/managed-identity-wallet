@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -19,27 +19,12 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.sts;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.springframework.stereotype.Repository;
+import java.time.Duration;
 
-/**
- * The interface Wallet key repository.
- */
-@Repository
-public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
-    /**
-     * Gets by wallet id.
-     *
-     * @param id the id
-     * @return the by wallet id
-     */
-    WalletKey getByWalletId(Long id);
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-    WalletKey findFirstByWallet_Bpn(String bpn);
-
-    WalletKey findFirstByWallet_Did(String did);
+@ConfigurationProperties(prefix = "sts")
+public record SecureTokenConfigurationProperties(Duration tokenDuration) {
 }

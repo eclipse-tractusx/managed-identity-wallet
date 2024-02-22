@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -19,27 +19,17 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.interfaces;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.springframework.stereotype.Repository;
+import com.nimbusds.jwt.JWT;
+import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 
-/**
- * The interface Wallet key repository.
- */
-@Repository
-public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
-    /**
-     * Gets by wallet id.
-     *
-     * @param id the id
-     * @return the by wallet id
-     */
-    WalletKey getByWalletId(Long id);
+import java.time.Instant;
+import java.util.Set;
 
-    WalletKey findFirstByWallet_Bpn(String bpn);
+public interface SecureTokenIssuer {
+    JWT createAccessToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime, Set<String> scopes);
 
-    WalletKey findFirstByWallet_Did(String did);
+    JWT createIdToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime, JWT accessToken);
 }

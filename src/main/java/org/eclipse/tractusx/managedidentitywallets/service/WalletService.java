@@ -263,7 +263,7 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         //Save key
         walletKeyService.getRepository().save(WalletKey.builder()
-                .walletId(wallet.getId())
+                .wallet(wallet)
                 .keyId(keyId)
                 .referenceKey("dummy ref key, removed once vault setup is ready")
                 .vaultAccessToken("dummy vault access token, removed once vault setup is ready")

@@ -21,9 +21,22 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 
 /**
  * The type Wallet key.
@@ -43,9 +56,6 @@ public class WalletKey extends MIWBaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Long walletId;
-
-    @Column(nullable = false)
     private String vaultAccessToken;
 
     @Column(nullable = false)
@@ -57,5 +67,15 @@ public class WalletKey extends MIWBaseEntity {
     @Column(nullable = false)
     private String publicKey;
 
+    @ManyToOne
+    @MapsId
+    @JoinColumn(name = "walletId", columnDefinition = "bigint")
+    @JsonBackReference
+    private Wallet wallet;
+
     private String keyId;
+
+    public KeyPair toDto() {
+        return new KeyPair(keyId, privateKey, publicKey);
+    }
 }
