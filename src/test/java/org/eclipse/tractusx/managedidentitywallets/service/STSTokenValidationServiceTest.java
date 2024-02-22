@@ -37,6 +37,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -96,16 +97,24 @@ class STSTokenValidationServiceTest {
     @Autowired
     private MIWSettings miwSettings;
 
+    private final Wallet wallet1 = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
+
+    private final Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
+
+    @BeforeEach
+    public void initWallets() {
+        walletRepository.save(wallet1);
+        walletRepository.save(wallet2);
+    }
+
     @AfterEach
     public void cleanWallets() {
-        walletRepository.deleteAll();
+        walletRepository.deleteById(wallet1.getId());
+        walletRepository.deleteById(wallet2.getId());
     }
 
     @Test
     void validateTokenFailureAccessTokenMissingTest() throws JOSEException {
-        Wallet wallet = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
-        walletRepository.save(wallet);
-
         JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         String siToken = buildJWTToken(JWK_OUTER, outerSet);
 
@@ -122,12 +131,6 @@ class STSTokenValidationServiceTest {
                 .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ty")
                 .generate();
 
-        Wallet wallet1 = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
-        walletRepository.save(wallet1);
-
-        Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
-        walletRepository.save(wallet2);
-
         JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(jwkRandom, innerSet);
 
@@ -143,12 +146,6 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenFailureExpiredTokenIssNotEqualsSubTest() throws JOSEException {
-        Wallet wallet1 = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
-        walletRepository.save(wallet1);
-
-        Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
-        walletRepository.save(wallet2);
-
         JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
@@ -165,12 +162,6 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenSuccessTest() throws JOSEException {
-        Wallet wallet1 = buildWallet(BPN_1, DID_BPN_1, DID_JSON_STRING_1);
-        walletRepository.save(wallet1);
-
-        Wallet wallet2 = buildWallet(BPN_2, DID_BPN_2, DID_JSON_STRING_2);
-        walletRepository.save(wallet2);
-
         JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
