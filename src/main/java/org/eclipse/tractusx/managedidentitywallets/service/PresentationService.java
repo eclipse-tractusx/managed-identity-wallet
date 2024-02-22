@@ -69,6 +69,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.BLANK_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COMA_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getScope;
 
@@ -292,17 +295,17 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         JWTClaimsSet jwtClaimsSet = getClaimsSet(innerJWT);
         String scopeValue = getScope(jwtClaimsSet);
-        String[] scopes = scopeValue.split(" ");
+        String[] scopes = scopeValue.split(BLANK_SEPARATOR);
 
         for (String scope : scopes) {
-            String[] scopeParts = scope.split(":");
+            String[] scopeParts = scope.split(COLON_SEPARATOR);
             String vcType = scopeParts[1];
             checkReadPermission(scopeParts[2]);
 
             List<HoldersCredential> credentials =
                     holdersCredentialRepository.getByHolderDidAndType(jwtClaimsSet.getIssuer(), vcType);
             if ((null == credentials) || credentials.isEmpty()) {
-                missingVCTypes.add(String.format("%s MISSING", vcType));
+                missingVCTypes.add(vcType);
             } else {
                 holdersCredentials.addAll(credentials);
             }
@@ -326,7 +329,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private void checkMissingVcs(List<String> missingVCTypes) {
         if (!missingVCTypes.isEmpty()) {
-            throw new MissingVcTypesException(String.format("MissingVCs of types: %s", missingVCTypes));
+            throw new MissingVcTypesException(String.format("Missing VC types: %s",
+                    String.join(COMA_SEPARATOR, missingVCTypes)));
         }
     }
 }

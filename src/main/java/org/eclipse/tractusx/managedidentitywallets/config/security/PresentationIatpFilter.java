@@ -29,7 +29,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors;
 import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -37,8 +36,10 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COMA_SEPARATOR;
 
 public class PresentationIatpFilter extends GenericFilterBean {
 
@@ -53,7 +54,6 @@ public class PresentationIatpFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
@@ -64,8 +64,10 @@ public class PresentationIatpFilter extends GenericFilterBean {
             } else {
                 ValidationResult result = validationService.validateToken(authHeader);
                 if (!result.isValid()) {
-                    List<TokenValidationErrors> errors = result.getErrors();
-                    String content = Arrays.toString(errors.toArray());
+                    List<String> errorValues = new ArrayList<>();
+                    result.getErrors().forEach(c -> errorValues.add(c.name()));
+                    String content = String.join(COMA_SEPARATOR, errorValues);
+
                     httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     httpServletResponse.setContentLength(content.length());
                     httpServletResponse.getWriter().write(content);
@@ -73,6 +75,8 @@ public class PresentationIatpFilter extends GenericFilterBean {
                     chain.doFilter(request, response);
                 }
             }
+        } else {
+            chain.doFilter(request, response);
         }
     }
 }
