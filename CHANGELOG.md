@@ -1,3 +1,23 @@
+# [0.5.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.1...v0.5.0-develop.2) (2024-02-22)
+
+
+### Bug Fixes
+
+* add missing JSON properties ([5330f64](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/5330f64dd51669d4bfd337a656c6151512ad915a))
+
+
+### Features
+
+* add domain objects needed by sts infrastructure ([effb480](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/effb4801b8788c9221f6a64b4a71c990d05f3a64))
+* add dto objects for sts infrastructure ([103e7f2](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/103e7f2100b2613a5ab82038795c9d8f3bf06d02))
+* add exceptions for sts infrastructure ([b4bb9b7](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b4bb9b78be41c721e968e1a350bd22920467b8fe))
+* add missing relationships to entities ([56a48eb](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/56a48eb6b4eb8a6a451512d772bf4298fce8f4f4))
+* add sts properties ([018d9c0](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/018d9c03430ecb15a73e753837a7a838eb7cca81))
+* add token endpoint happy-path test ([d6c30bf](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/d6c30bff5cec4f31498c512ecf06ed8237741d30))
+* extend 'miw.security' properties ([e982919](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e9829195245780605a97e1cee5d22439c2f44c64))
+* implement token endpoint ([4227f3e](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/4227f3e2d147f71de84e4db6c0540e1e60849078))
+* use a spring validator for SecureTokenRequest ([accc0d2](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/accc0d20404852035876cb7cb4ce5ce7b5da6e64))
+
 # [0.5.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0...v0.5.0-develop.1) (2024-02-09)
 
 
