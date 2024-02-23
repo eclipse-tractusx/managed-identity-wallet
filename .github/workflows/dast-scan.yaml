@@ -120,12 +120,6 @@ jobs:
           
           echo "... done."
 
-      - name: Add Summary
-        if: success() || failure()
-        run: |
-          echo "Publishing Job summary... "
-          cat report_md.md >> $GITHUB_STEP_SUMMARY
-
       - name: Upload HTML report
         if: success() || failure()
         uses: actions/upload-artifact@v3
