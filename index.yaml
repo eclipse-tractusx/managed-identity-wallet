@@ -2,8 +2,50 @@ apiVersion: v1
 entries:
   managed-identity-wallet:
   - apiVersion: v2
+    appVersion: 0.5.0-develop.4
+    created: "2024-02-23T12:44:03.98196437Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.1.6
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 11.9.13
+    - condition: pgadmin4.enabled
+      name: pgadmin4
+      repository: file://charts/pgadmin4
+      version: 1.19.0
+    description: 'Managed Identity Wallet is supposed to supply a secure data source
+      and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign
+      Identity founding on those DIDs. And at the same it shall support an uninterrupted
+      tracking and tracing and documenting the usage of those DIDs, e.g. within logistical
+      supply chains. '
+    digest: bcb657897371557995449fef0625f95fd6daf136773931ce58fa73274a583988
+    home: https://github.com/eclipse-tractusx/managed-identity-wallet
+    keywords:
+    - Managed Identity Wallet
+    - eclipse-tractusx
+    maintainers:
+    - email: dominik.pinsel@mercedes-benz.com
+      name: Dominik Pinsel
+      url: https://github.com/DominikPinsel
+    name: managed-identity-wallet
+    sources:
+    - https://github.com/eclipse-tractusx/managed-identity-wallet
+    type: application
+    urls:
+    - https://eclipse-tractusx.github.io/managed-identity-wallet/helm-charts/managed-identity-wallet-0.5.0-develop.4.tgz
+    version: 0.5.0-develop.4
+  - apiVersion: v2
     appVersion: 0.5.0-develop.3
-    created: "2024-02-23T10:55:01.468842231Z"
+    created: "2024-02-23T12:44:03.969593319Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -45,7 +87,7 @@ entries:
     version: 0.5.0-develop.3
   - apiVersion: v2
     appVersion: 0.5.0-develop.2
-    created: "2024-02-23T10:55:01.457372721Z"
+    created: "2024-02-23T12:44:03.957360119Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -87,7 +129,7 @@ entries:
     version: 0.5.0-develop.2
   - apiVersion: v2
     appVersion: 0.5.0-develop.1
-    created: "2024-02-23T10:55:01.446039546Z"
+    created: "2024-02-23T12:44:03.945913634Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -129,7 +171,7 @@ entries:
     version: 0.5.0-develop.1
   - apiVersion: v2
     appVersion: 0.4.0
-    created: "2024-02-23T10:55:01.434541766Z"
+    created: "2024-02-23T12:44:03.934761255Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -171,7 +213,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 0.4.0-develop.17
-    created: "2024-02-23T10:55:01.329411775Z"
+    created: "2024-02-23T12:44:03.829303858Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -213,7 +255,7 @@ entries:
     version: 0.4.0-develop.17
   - apiVersion: v2
     appVersion: 0.4.0-develop.16
-    created: "2024-02-23T10:55:01.316956031Z"
+    created: "2024-02-23T12:44:03.817878133Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -255,7 +297,7 @@ entries:
     version: 0.4.0-develop.16
   - apiVersion: v2
     appVersion: 0.4.0-develop.15
-    created: "2024-02-23T10:55:01.305581301Z"
+    created: "2024-02-23T12:44:03.805950461Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -297,7 +339,7 @@ entries:
     version: 0.4.0-develop.15
   - apiVersion: v2
     appVersion: 0.4.0-develop.14
-    created: "2024-02-23T10:55:01.294111658Z"
+    created: "2024-02-23T12:44:03.793667226Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -339,7 +381,7 @@ entries:
     version: 0.4.0-develop.14
   - apiVersion: v2
     appVersion: 0.4.0-develop.13
-    created: "2024-02-23T10:55:01.282685255Z"
+    created: "2024-02-23T12:44:03.78179559Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -381,7 +423,7 @@ entries:
     version: 0.4.0-develop.13
   - apiVersion: v2
     appVersion: 0.4.0-develop.12
-    created: "2024-02-23T10:55:01.271279796Z"
+    created: "2024-02-23T12:44:03.76948901Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -423,7 +465,7 @@ entries:
     version: 0.4.0-develop.12
   - apiVersion: v2
     appVersion: 0.4.0-develop.11
-    created: "2024-02-23T10:55:01.259345777Z"
+    created: "2024-02-23T12:44:03.75725856Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -465,7 +507,7 @@ entries:
     version: 0.4.0-develop.11
   - apiVersion: v2
     appVersion: 0.4.0-develop.10
-    created: "2024-02-23T10:55:01.247489908Z"
+    created: "2024-02-23T12:44:03.745905673Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -507,7 +549,7 @@ entries:
     version: 0.4.0-develop.10
   - apiVersion: v2
     appVersion: 0.4.0-develop.9
-    created: "2024-02-23T10:55:01.422258191Z"
+    created: "2024-02-23T12:44:03.92347658Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -549,7 +591,7 @@ entries:
     version: 0.4.0-develop.9
   - apiVersion: v2
     appVersion: 0.4.0-develop.8
-    created: "2024-02-23T10:55:01.409927182Z"
+    created: "2024-02-23T12:44:03.911616689Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -591,7 +633,7 @@ entries:
     version: 0.4.0-develop.8
   - apiVersion: v2
     appVersion: 0.4.0-develop.7
-    created: "2024-02-23T10:55:01.398771279Z"
+    created: "2024-02-23T12:44:03.899150672Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -636,7 +678,7 @@ entries:
     version: 0.4.0-develop.7
   - apiVersion: v2
     appVersion: 0.4.0-develop.6
-    created: "2024-02-23T10:55:01.387465818Z"
+    created: "2024-02-23T12:44:03.887896415Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -681,7 +723,7 @@ entries:
     version: 0.4.0-develop.6
   - apiVersion: v2
     appVersion: 0.4.0-develop.5
-    created: "2024-02-23T10:55:01.375290131Z"
+    created: "2024-02-23T12:44:03.876544327Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -726,7 +768,7 @@ entries:
     version: 0.4.0-develop.5
   - apiVersion: v2
     appVersion: 0.4.0-develop.4
-    created: "2024-02-23T10:55:01.363048632Z"
+    created: "2024-02-23T12:44:03.865076344Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -771,7 +813,7 @@ entries:
     version: 0.4.0-develop.4
   - apiVersion: v2
     appVersion: 0.4.0-develop.3
-    created: "2024-02-23T10:55:01.351726958Z"
+    created: "2024-02-23T12:44:03.853341315Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -816,7 +858,7 @@ entries:
     version: 0.4.0-develop.3
   - apiVersion: v2
     appVersion: 0.4.0-develop.2
-    created: "2024-02-23T10:55:01.340425759Z"
+    created: "2024-02-23T12:44:03.840759838Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -857,7 +899,7 @@ entries:
     version: 0.4.0-develop.2
   - apiVersion: v2
     appVersion: 0.4.0-develop.1
-    created: "2024-02-23T10:55:01.236337869Z"
+    created: "2024-02-23T12:44:03.734396666Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -898,7 +940,7 @@ entries:
     version: 0.4.0-develop.1
   - apiVersion: v2
     appVersion: 0.3.0
-    created: "2024-02-23T10:55:01.225584919Z"
+    created: "2024-02-23T12:44:03.724131267Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -939,7 +981,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 0.3.0-develop.3
-    created: "2024-02-23T10:55:01.214566563Z"
+    created: "2024-02-23T12:44:03.713778892Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -980,7 +1022,7 @@ entries:
     version: 0.3.0-develop.3
   - apiVersion: v2
     appVersion: 0.3.0-develop.2
-    created: "2024-02-23T10:55:01.204306745Z"
+    created: "2024-02-23T12:44:03.703274989Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1021,7 +1063,7 @@ entries:
     version: 0.3.0-develop.2
   - apiVersion: v2
     appVersion: 0.3.0-develop.1
-    created: "2024-02-23T10:55:01.193930365Z"
+    created: "2024-02-23T12:44:03.692392665Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1062,7 +1104,7 @@ entries:
     version: 0.3.0-develop.1
   - apiVersion: v2
     appVersion: 0.2.0
-    created: "2024-02-23T10:55:01.183535112Z"
+    created: "2024-02-23T12:44:03.681237135Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1100,7 +1142,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 0.2.0-develop.11
-    created: "2024-02-23T10:55:01.086175589Z"
+    created: "2024-02-23T12:44:03.585627553Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1141,7 +1183,7 @@ entries:
     version: 0.2.0-develop.11
   - apiVersion: v2
     appVersion: 0.2.0-develop.10
-    created: "2024-02-23T10:55:01.074652565Z"
+    created: "2024-02-23T12:44:03.5743889Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1182,7 +1224,7 @@ entries:
     version: 0.2.0-develop.10
   - apiVersion: v2
     appVersion: 0.2.0-develop.9
-    created: "2024-02-23T10:55:01.172161999Z"
+    created: "2024-02-23T12:44:03.671160097Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1223,7 +1265,7 @@ entries:
     version: 0.2.0-develop.9
   - apiVersion: v2
     appVersion: 0.2.0-develop.8
-    created: "2024-02-23T10:55:01.161081329Z"
+    created: "2024-02-23T12:44:03.660862578Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1264,7 +1306,7 @@ entries:
     version: 0.2.0-develop.8
   - apiVersion: v2
     appVersion: 0.2.0-develop.7
-    created: "2024-02-23T10:55:01.150468397Z"
+    created: "2024-02-23T12:44:03.649754524Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1305,7 +1347,7 @@ entries:
     version: 0.2.0-develop.7
   - apiVersion: v2
     appVersion: 0.2.0-develop.6
-    created: "2024-02-23T10:55:01.14027778Z"
+    created: "2024-02-23T12:44:03.637405416Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1346,7 +1388,7 @@ entries:
     version: 0.2.0-develop.6
   - apiVersion: v2
     appVersion: 0.2.0-develop.5
-    created: "2024-02-23T10:55:01.129105278Z"
+    created: "2024-02-23T12:44:03.627205468Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1387,7 +1429,7 @@ entries:
     version: 0.2.0-develop.5
   - apiVersion: v2
     appVersion: 0.2.0-develop.4
-    created: "2024-02-23T10:55:01.11794497Z"
+    created: "2024-02-23T12:44:03.616930517Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1428,7 +1470,7 @@ entries:
     version: 0.2.0-develop.4
   - apiVersion: v2
     appVersion: 0.2.0-develop.3
-    created: "2024-02-23T10:55:01.10780847Z"
+    created: "2024-02-23T12:44:03.606828247Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1469,7 +1511,7 @@ entries:
     version: 0.2.0-develop.3
   - apiVersion: v2
     appVersion: 0.2.0-develop.2
-    created: "2024-02-23T10:55:01.097556683Z"
+    created: "2024-02-23T12:44:03.596344321Z"
     dependencies:
     - condition: keycloak.enabled
       name: keycloak
@@ -1619,4 +1661,4 @@ entries:
     urls:
     - https://github.com/eclipse-tractusx/managed-identity-wallet/releases/download/managed-identity-wallet-0.1.0-rc.2/managed-identity-wallet-0.1.0-rc.2.tgz
     version: 0.1.0-rc.2
-generated: "2024-02-23T10:55:01.063667024Z"
+generated: "2024-02-23T12:44:03.563833937Z"
