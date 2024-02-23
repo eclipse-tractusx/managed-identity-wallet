@@ -1,3 +1,10 @@
+# [0.5.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.3...v0.5.0-develop.4) (2024-02-23)
+
+
+### Bug Fixes
+
+* Add missing gradle validation PR [#257](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/257) ([f9acf55](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/f9acf55fd7998895f463225eb6a8ed8a621d734b))
+
 # [0.5.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.2...v0.5.0-develop.3) (2024-02-23)
 
 
