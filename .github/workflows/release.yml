@@ -48,6 +48,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
+
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
