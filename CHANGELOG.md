@@ -1,3 +1,10 @@
+# [0.5.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.2...v0.5.0-develop.3) (2024-02-23)
+
+
+### Bug Fixes
+
+* DAST scan PR [#256](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/256) ([1c1f1fb](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/1c1f1fb3eacf0e34887ec78acdc4f51464c3f4de))
+
 # [0.5.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.1...v0.5.0-develop.2) (2024-02-22)
 
 
