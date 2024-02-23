@@ -126,3 +126,4 @@ jobs:
         with:
           name: ZAP scan report
           path: ./report_html.html
+          retention-days: 1
