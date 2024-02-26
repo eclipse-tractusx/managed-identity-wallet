@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 public class HoldersCredentialControllerApiDocs {
 
@@ -148,7 +149,7 @@ public class HoldersCredentialControllerApiDocs {
                                     """)
                     })
             }) })
-    @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
+    @Operation(description = "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface GetCredentialsApiDocs {
     }
 
@@ -278,7 +279,7 @@ public class HoldersCredentialControllerApiDocs {
                                 }
                     """))
     })
-    @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
+    @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface IssueCredentialApiDoc {
     }
 

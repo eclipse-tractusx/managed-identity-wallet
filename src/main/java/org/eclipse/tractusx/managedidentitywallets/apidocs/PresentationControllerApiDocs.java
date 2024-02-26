@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.lang.annotation.ElementType;
@@ -20,7 +21,7 @@ public class PresentationControllerApiDocs {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @Tag(name = API_TAG_VERIFIABLE_PRESENTATIONS_GENERATION)
-    @Operation(summary = "Create Verifiable Presentation", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller) \n\n Create a verifiable presentation from a list of verifiable credentials, signed by the holder")
+    @Operation(summary = "Create Verifiable Presentation", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller) \n\n Create a verifiable presentation from a list of verifiable credentials, signed by the holder", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     @ApiResponses(value = {
 
             @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {
@@ -155,7 +156,7 @@ public class PresentationControllerApiDocs {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @Tag(name = API_TAG_VERIFIABLE_PRESENTATIONS_VALIDATION)
-    @Operation(summary = "Validate Verifiable Presentation", description = "Permission: **view_wallets** OR **view_wallet**  \n\n Validate Verifiable Presentation with all included credentials")
+    @Operation(summary = "Validate Verifiable Presentation", description = "Permission: **view_wallets** OR **view_wallet**  \n\n Validate Verifiable Presentation with all included credentials", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {
                     @Content(examples = {}) }),
@@ -289,12 +290,10 @@ public class PresentationControllerApiDocs {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @Tag(name = API_TAG_VERIFIABLE_PRESENTATIONS_GENERATION)
-    @Operation(summary = "Create Verifiable Presentation", description = "Create a verifiable presentation for the verifiable credential types listed in STS token")
+    @Operation(summary = "Create Verifiable Presentation", description = "Create a verifiable presentation for the verifiable credential types listed in STS token", security = { @SecurityRequirement(name = "sts_token") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {
-                    @Content(examples = {
-                            @ExampleObject(name = "The following errors were found on token validation", value = "TOKEN_ALREADY_EXPIRED, NONCE_MISSING")
-                    }) }),
+                    @Content(examples = {}) }),
             @ApiResponse(responseCode = "403", description = "The request could not be completed due to a forbidden scope value", content = {
                     @Content(examples = {}) }),
             @ApiResponse(responseCode = "500", description = "Any other internal server error", content = {

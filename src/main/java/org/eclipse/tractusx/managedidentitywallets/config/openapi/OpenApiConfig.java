@@ -106,8 +106,23 @@ public class OpenApiConfig {
                                 "\n" +
                                 "Example: Bearer 12345abcdef")
                         .type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name(HttpHeaders.AUTHORIZATION));
+
+        //Auth using sts_token
+        String stsTokenAuth = "sts_token";
+        components.addSecuritySchemes(stsTokenAuth,
+                new SecurityScheme().name(stsTokenAuth)
+                        .description("**STS token** \n" +
+                                "JWT Authorization header\n" +
+                                "\n" +
+                                "Enter your token in the text input below.\n" +
+                                "\n" +
+                                "Example: 12345abcdef")
+                        .type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name(HttpHeaders.AUTHORIZATION));
+
         return openAPI.components(components)
                 .addSecurityItem(new SecurityRequirement()
-                        .addList(accessTokenAuth, Collections.emptyList()));
+                        .addList(accessTokenAuth, Collections.emptyList()))
+                .addSecurityItem(new SecurityRequirement()
+                        .addList(stsTokenAuth, Collections.emptyList()));
     }
 }

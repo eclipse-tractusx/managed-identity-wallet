@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 public class WalletControllerApiDocs {
 
@@ -120,13 +121,13 @@ public class WalletControllerApiDocs {
                     })
             })
     })
-    @Operation(summary = "Create Wallet", description = "Permission: **add_wallets** (The BPN of the base wallet must equal BPN of caller)\n\n Create a wallet and store it")
+    @Operation(summary = "Create Wallet", description = "Permission: **add_wallets** (The BPN of the base wallet must equal BPN of caller)\n\n Create a wallet and store it", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface CreateWalletApiDoc {
     }
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Store Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier")
+    @Operation(summary = "Store Verifiable Credential", description = "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                  {
@@ -396,7 +397,7 @@ public class WalletControllerApiDocs {
                                         }
                             """)
             }) }) })
-    @Operation(summary = "Retrieve wallet by BPN", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller or Base wallet, authority wallet can see all wallets) \n\n Retrieve single wallet by identifier, with or without its credentials")
+    @Operation(summary = "Retrieve wallet by BPN", description = "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller or Base wallet, authority wallet can see all wallets) \n\n Retrieve single wallet by identifier, with or without its credentials", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface RetrieveWalletApiDoc {
     }
 
@@ -503,7 +504,7 @@ public class WalletControllerApiDocs {
                     })
             })
     })
-    @Operation(summary = "List of wallets", description = "Permission: **view_wallets** \n\n Retrieve list of registered wallets")
+    @Operation(summary = "List of wallets", description = "Permission: **view_wallets** \n\n Retrieve list of registered wallets", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface RetrieveWalletsApiDoc {
     }
 

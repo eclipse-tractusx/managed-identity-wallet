@@ -99,13 +99,14 @@ public class PresentationController extends BaseController {
     /**
      * Create presentation response entity for VC types provided in STS token.
      *
-     * @param stsToken the STS token with required scopes
+     * @param stsToken  the STS token with required scopes
+     * @param asJwt     as JWT VP response
      * @return the VP response entity
      */
 
     @GetMapping(path = RestURI.API_PRESENTATIONS_IATP, produces = { MediaType.APPLICATION_JSON_VALUE })
     @GetVerifiablePresentationIATPApiDocs
-    public ResponseEntity<Map<String, Object>> createPresentation(@RequestHeader(name = "Authorization") String stsToken,
+    public ResponseEntity<Map<String, Object>> createPresentation(@Parameter(hidden = true) @RequestHeader(name = "Authorization") String stsToken,
                                                                   @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt) {
         SignedJWT accessToken = getAccessToken(stsToken);
         Map<String, Object> vp = presentationService.createVpWithRequiredScopes(accessToken, asJwt);

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 public class IssuersCredentialControllerApiDocs {
@@ -192,7 +193,7 @@ public class IssuersCredentialControllerApiDocs {
                     })
             }),
     })
-    @Operation(description = "Permission: **view_wallets** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials")
+    @Operation(description = "Permission: **view_wallets** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria", summary = "Query Verifiable Credentials", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface GetCredentialsApiDocs {
     }
 
@@ -315,7 +316,7 @@ public class IssuersCredentialControllerApiDocs {
                                     """)
                     })
             }) })
-    @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
+    @Operation(summary = "Issue a Membership Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface IssueMembershipCredentialApiDoc {
     }
 
@@ -447,7 +448,7 @@ public class IssuersCredentialControllerApiDocs {
                     })
             })
     })
-    @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
+    @Operation(summary = "Issue a Dismantler Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface IssueDismantlerCredentialApiDoc {
     }
 
@@ -515,7 +516,7 @@ public class IssuersCredentialControllerApiDocs {
             })
     })
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
-    @Operation(summary = "Issue a Use Case Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet")
+    @Operation(summary = "Issue a Use Case Verifiable Credential with base wallet issuer", description = "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {
                     @Content(examples = {}) }),
@@ -943,7 +944,7 @@ public class IssuersCredentialControllerApiDocs {
                                     """)
                     })
             }) })
-    @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials")
+    @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
@@ -1074,7 +1075,7 @@ public class IssuersCredentialControllerApiDocs {
                                     """)
                     })
             }) })
-    @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID")
+    @Operation(summary = "Issue Verifiable Credential", description = "Permission: **update_wallets** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
