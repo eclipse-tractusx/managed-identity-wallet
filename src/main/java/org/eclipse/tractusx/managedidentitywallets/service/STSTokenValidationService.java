@@ -49,6 +49,7 @@ public class STSTokenValidationService {
     private final CustomSignedJWTVerifier customSignedJWTverifier;
     private final TokenValidationUtils tokenValidationUtils;
     private static final String ACCESS_TOKEN = "access_token";
+    private static final String PARSING_TOKEN_ERROR = "Could not parse jwt token";
 
     /**
      * Validates SI token and Access token.
@@ -94,7 +95,7 @@ public class STSTokenValidationService {
         try {
             return tokenParsed.getJWTClaimsSet();
         } catch (ParseException e) {
-            throw new BadDataException("Could not parse jwt token", e);
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
     }
 
@@ -102,7 +103,7 @@ public class STSTokenValidationService {
         try {
             return SignedJWT.parse(token);
         } catch (ParseException e) {
-            throw new BadDataException("Could not parse jwt token", e);
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
     }
 
@@ -111,7 +112,7 @@ public class STSTokenValidationService {
             String accessTokenValue = claims.getStringClaim(ACCESS_TOKEN);
             return accessTokenValue == null ? Optional.empty() : Optional.of(accessTokenValue);
         } catch (ParseException e) {
-            throw new BadDataException("Could not parse jwt token", e);
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
     }
 
@@ -122,7 +123,7 @@ public class STSTokenValidationService {
                     ? tokenValidationUtils.getValidResult()
                     : tokenValidationUtils.getInvalidResult(TokenValidationErrors.SIGNATURE_NOT_VERIFIED);
         } catch (JOSEException ex) {
-            throw new BadDataException("Can not verify signature of jwt", ex);
+            throw new BadDataException("Could not verify signature of jwt", ex);
         }
     }
 

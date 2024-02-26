@@ -154,9 +154,9 @@ public class TokenValidationUtils {
     public ValidationResult checkIfNonceClaimsAreEqual(String nonceSI, String nonceAccess) {
         return checkIfNoncesAreMissing(nonceSI, nonceAccess)
                 ? getInvalidResult(TokenValidationErrors.NONCE_MISSING)
-                : !nonceSI.equals(nonceAccess)
-                ? getInvalidResult(TokenValidationErrors.NONCE_CLAIMS_NOT_EQUAL)
-                : getValidResult();
+                : nonceSI.equals(nonceAccess)
+                ? getValidResult()
+                : getInvalidResult(TokenValidationErrors.NONCE_CLAIMS_NOT_EQUAL);
     }
 
     private boolean checkIfNoncesAreMissing(String nonceSI, String nonceAccess) {

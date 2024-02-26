@@ -47,40 +47,33 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Data
 public class CustomSignedJWTVerifier {
-        private DidResolver didResolver;
-        private final DidDocumentService didDocumentService;
-        public static final String KID = "kid";
+    private DidResolver didResolver;
+    private final DidDocumentService didDocumentService;
+    public static final String KID = "kid";
 
-        public boolean verify(String did, SignedJWT jwt) throws JOSEException {
-            try {
-                 VerificationMethod verificationMethod = checkVerificationMethod(did, jwt);
-                    if (JWKVerificationMethod.isInstance(verificationMethod)) {
-                        JWKVerificationMethod method = new JWKVerificationMethod(verificationMethod);
-                        String kty = method.getPublicKeyJwk().getKty();
-                        String crv = method.getPublicKeyJwk().getCrv();
-                        String x = method.getPublicKeyJwk().getX();
-                            if (!kty.equals("OKP") || !crv.equals("Ed25519")) {
-                                throw new UnsupportedVerificationMethodException(method, "only kty:OKP with crv:Ed25519 is supported");
-                            }
-
-                            OctetKeyPair keyPair = (new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.from(x))).build();
-                            if (jwt.verify(new Ed25519Verifier(keyPair))) {
-                                return true;
-                            }
-                    } else if (Ed25519VerificationMethod.isInstance(verificationMethod)) {
-                        Ed25519VerificationMethod method = new Ed25519VerificationMethod(verificationMethod);
-                        MultibaseString multibase = method.getPublicKeyBase58();
-                        Ed25519PublicKeyParameters publicKeyParameters = new Ed25519PublicKeyParameters(multibase.getDecoded(), 0);
-                        OctetKeyPair keyPair = (new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(publicKeyParameters.getEncoded()))).build();
-                        if (jwt.verify(new Ed25519Verifier(keyPair))) {
-                            return true;
-                        }
-                    }
-                } catch (JOSEException var15) {
-                throw var15;
+    public boolean verify(String did, SignedJWT jwt) throws JOSEException {
+        VerificationMethod verificationMethod = checkVerificationMethod(did, jwt);
+        if (JWKVerificationMethod.isInstance(verificationMethod)) {
+            JWKVerificationMethod method = new JWKVerificationMethod(verificationMethod);
+            String kty = method.getPublicKeyJwk().getKty();
+            String crv = method.getPublicKeyJwk().getCrv();
+            String x = method.getPublicKeyJwk().getX();
+            if (!kty.equals("OKP") || !crv.equals("Ed25519")) {
+                throw new UnsupportedVerificationMethodException(method, "Only kty:OKP with crv:Ed25519 is supported");
             }
-            return false;
+
+            OctetKeyPair keyPair = (new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.from(x))).build();
+            return jwt.verify(new Ed25519Verifier(keyPair));
+
+        } else if (Ed25519VerificationMethod.isInstance(verificationMethod)) {
+            Ed25519VerificationMethod method = new Ed25519VerificationMethod(verificationMethod);
+            MultibaseString multibase = method.getPublicKeyBase58();
+            Ed25519PublicKeyParameters publicKeyParameters = new Ed25519PublicKeyParameters(multibase.getDecoded(), 0);
+            OctetKeyPair keyPair = (new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(publicKeyParameters.getEncoded()))).build();
+            return jwt.verify(new Ed25519Verifier(keyPair));
         }
+        return false;
+    }
 
     public VerificationMethod checkVerificationMethod(String did, SignedJWT jwt) {
         Map<String, Object> headers = jwt.getHeader().toJSONObject();
