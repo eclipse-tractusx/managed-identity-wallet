@@ -24,8 +24,8 @@ package org.eclipse.tractusx.managedidentitywallets.controller;
 import com.nimbusds.jwt.SignedJWT;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.GetVerifiablePresentationIATPApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.PostVerifiablePresentationApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.PostVerifiablePresentationValidationApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
@@ -102,12 +102,13 @@ public class PresentationController extends BaseController {
      * @param stsToken the STS token with required scopes
      * @return the VP response entity
      */
-    @SneakyThrows
+
     @GetMapping(path = RestURI.API_PRESENTATIONS_IATP, produces = { MediaType.APPLICATION_JSON_VALUE })
-    // @SecureTokenControllerApiDoc.PostSecureTokenDoc TODO create API docs
-    public ResponseEntity<Map<String, Object>> createPresentation(@RequestHeader(name = "Authorization") String stsToken) {
+    @GetVerifiablePresentationIATPApiDocs
+    public ResponseEntity<Map<String, Object>> createPresentation(@RequestHeader(name = "Authorization") String stsToken,
+                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt) {
         SignedJWT accessToken = getAccessToken(stsToken);
-        Map<String, Object> vp = presentationService.createVpWithRequiredScopes(accessToken);
+        Map<String, Object> vp = presentationService.createVpWithRequiredScopes(accessToken, asJwt);
         return ResponseEntity.ok(vp);
     }
 }

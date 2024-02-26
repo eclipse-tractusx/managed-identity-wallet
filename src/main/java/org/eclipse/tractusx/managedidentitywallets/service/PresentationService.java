@@ -288,7 +288,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return isValid;
     }
 
-    public Map<String, Object> createVpWithRequiredScopes(SignedJWT innerJWT) {
+    public Map<String, Object> createVpWithRequiredScopes(SignedJWT innerJWT, boolean asJwt) {
         List<HoldersCredential> holdersCredentials = new ArrayList<>();
         List<String> missingVCTypes = new ArrayList<>();
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>();
@@ -317,7 +317,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         holdersCredentials.forEach(c -> verifiableCredentials.add(c.getData()));
 
-        return buildVP(false, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
+        return buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
                 callerWallet, verifiableCredentials);
     }
 
