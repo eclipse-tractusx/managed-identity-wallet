@@ -38,6 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getAccessToken;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.parseToken;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils.NONCE;
 
 @Service
@@ -48,8 +51,6 @@ public class STSTokenValidationService {
     private final DidDocumentResolverService didDocumentResolverService;
     private final CustomSignedJWTVerifier customSignedJWTverifier;
     private final TokenValidationUtils tokenValidationUtils;
-    private static final String ACCESS_TOKEN = "access_token";
-    private static final String PARSING_TOKEN_ERROR = "Could not parse jwt token";
 
     /**
      * Validates SI token and Access token.
@@ -89,31 +90,6 @@ public class STSTokenValidationService {
             validationResults.add(tokenValidationUtils.getInvalidResult(TokenValidationErrors.ACCESS_TOKEN_MISSING));
         }
         return combineValidationResults(validationResults);
-    }
-
-    private JWTClaimsSet getClaimsSet(SignedJWT tokenParsed) {
-        try {
-            return tokenParsed.getJWTClaimsSet();
-        } catch (ParseException e) {
-            throw new BadDataException(PARSING_TOKEN_ERROR, e);
-        }
-    }
-
-    private SignedJWT parseToken(String token) {
-        try {
-            return SignedJWT.parse(token);
-        } catch (ParseException e) {
-            throw new BadDataException(PARSING_TOKEN_ERROR, e);
-        }
-    }
-
-    private Optional<String> getAccessToken(JWTClaimsSet claims) {
-        try {
-            String accessTokenValue = claims.getStringClaim(ACCESS_TOKEN);
-            return accessTokenValue == null ? Optional.empty() : Optional.of(accessTokenValue);
-        } catch (ParseException e) {
-            throw new BadDataException(PARSING_TOKEN_ERROR, e);
-        }
     }
 
     private ValidationResult verifySignature(String did, SignedJWT signedJWT) {

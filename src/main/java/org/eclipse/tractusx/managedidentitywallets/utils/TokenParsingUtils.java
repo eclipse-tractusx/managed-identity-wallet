@@ -33,6 +33,7 @@ import java.util.Optional;
 public class TokenParsingUtils {
 
     public static final String ACCESS_TOKEN = "access_token";
+    public static final String PARSING_TOKEN_ERROR = "Could not parse jwt token";
     public static final String SCOPE = "scope";
     public static final String BEARER_ACCESS_SCOPE = "bearer_access_scope";
 
@@ -40,7 +41,7 @@ public class TokenParsingUtils {
         try {
             return tokenParsed.getJWTClaimsSet();
         } catch (ParseException e) {
-            throw new BadDataException("Could not parse jwt token", e);
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
     }
 
@@ -48,7 +49,7 @@ public class TokenParsingUtils {
         try {
             return SignedJWT.parse(token);
         } catch (ParseException e) {
-            throw new BadDataException("Could not parse jwt token", e);
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
     }
 
@@ -57,9 +58,10 @@ public class TokenParsingUtils {
             String accessTokenValue = claims.getStringClaim(ACCESS_TOKEN);
             return accessTokenValue == null ? Optional.empty() : Optional.of(accessTokenValue);
         } catch (ParseException e) {
-            throw new BadDataException("Could not parse jwt token", e);
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
     }
+
     public static SignedJWT getAccessToken(String outerToken) {
         SignedJWT jwtOuter = parseToken(outerToken);
         JWTClaimsSet claimsSet = getClaimsSet(jwtOuter);
