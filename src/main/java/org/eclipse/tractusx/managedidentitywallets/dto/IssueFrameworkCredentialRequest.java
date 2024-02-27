@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -19,36 +19,41 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dto;
+ package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.*;
-
-
-/**
- * The type Issue framework credential request.
- */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class IssueFrameworkCredentialRequest {
-
-    @NotBlank(message = "Please provide holder identifier")
-    @Size(min = 5, max = 255, message = "Please provide valid identifier")
-    private String holderIdentifier;
-
-    @NotBlank(message = "Please provide type")
-    private String type;
-
-    @NotBlank(message = "Please provide contract-template")
-    @JsonProperty("contract-template")
-    private String contractTemplate;
-
-    @NotBlank(message = "Please provide contract-template")
-    @JsonProperty("contract-version")
-    private String contractVersion;
-}
+ import com.fasterxml.jackson.annotation.JsonProperty;
+ import jakarta.validation.constraints.NotBlank;
+ import jakarta.validation.constraints.Size;
+ import lombok.*;
+ 
+ 
+ /**
+  * The type Issue framework credential request.
+  */
+ @Getter
+ @Setter
+ @NoArgsConstructor
+ @AllArgsConstructor
+ @Builder
+ public class IssueFrameworkCredentialRequest {
+ 
+     @NotBlank(message = "Please provide holder identifier")
+     @Size(min = 5, max = 255, message = "Please provide valid identifier")
+     private String holderIdentifier;
+ 
+     @NotBlank(message = "Please provide type")
+     private String type;
+ 
+     @NotBlank(message = "Please provide contract-template")
+     @JsonProperty("contract-template")
+     private String contractTemplate;
+ 
+     @NotBlank(message = "Please provide contract-template")
+     @JsonProperty("contract-version")
+     private String contractVersion;
+ 
+     @JsonProperty("asJwt")
+     private boolean asJwt;
+     
+ }
+ 

@@ -36,6 +36,8 @@ import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialCont
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.IssueVerifiableCredentialUsingBaseWalletApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.ValidateVerifiableCredentialApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
@@ -113,7 +115,7 @@ public class IssuersCredentialController extends BaseController {
      */
     @IssueMembershipCredentialApiDoc
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerifiableCredential> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest, Principal principal) {
+    public ResponseEntity<CredentialsResponse> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest, Principal principal) {
         log.debug("Received request to issue membership credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, getBPNFromToken(principal)));
     }
@@ -127,7 +129,7 @@ public class IssuersCredentialController extends BaseController {
      */
     @IssueDismantlerCredentialApiDoc
     @PostMapping(path = RestURI.CREDENTIALS_ISSUER_DISMANTLER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerifiableCredential> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request, Principal principal) {
+    public ResponseEntity<CredentialsResponse> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request, Principal principal) {
         log.debug("Received request to issue dismantler credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueDismantlerCredential(request, getBPNFromToken(principal)));
     }
@@ -141,7 +143,7 @@ public class IssuersCredentialController extends BaseController {
      */
     @IssueFrameworkCredentialApiDocs
     @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerifiableCredential> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
+    public ResponseEntity<CredentialsResponse> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request, Principal principal) {
         log.debug("Received request to issue framework credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueFrameworkCredential(request, getBPNFromToken(principal)));
     }
@@ -155,10 +157,10 @@ public class IssuersCredentialController extends BaseController {
      */
     @PostMapping(path = RestURI.CREDENTIALS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ValidateVerifiableCredentialApiDocs
-    public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody Map<String, Object> data,
+    public ResponseEntity<Map<String, Object>> credentialsValidation(@RequestBody CredentialVerificationRequest credentialVerificationRequest,
                                                                      @Parameter(description = "Check expiry of VC") @RequestParam(name = "withCredentialExpiryDate", defaultValue = "false", required = false) boolean withCredentialExpiryDate) {
         log.debug("Received request to validate verifiable credentials");
-        return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.credentialsValidation(data, withCredentialExpiryDate));
+        return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.credentialsValidation(credentialVerificationRequest, withCredentialExpiryDate));
     }
 
     /**
@@ -171,8 +173,10 @@ public class IssuersCredentialController extends BaseController {
      */
     @PostMapping(path = RestURI.ISSUERS_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @IssueVerifiableCredentialUsingBaseWalletApiDocs
-    public ResponseEntity<VerifiableCredential> issueCredentialUsingBaseWallet(@Parameter(description = "Holder DID", examples = {@ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @RequestParam(name = "holderDid") String holderDid, @RequestBody Map<String, Object> data, Principal principal) {
+    public ResponseEntity<CredentialsResponse> issueCredentialUsingBaseWallet(@Parameter(description = "Holder DID", examples = {@ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @RequestParam(name = "holderDid") String holderDid,
+                                                                                 @RequestBody Map<String, Object> data, Principal principal,
+                                                                                 @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt) {
         log.debug("Received request to issue verifiable credential. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, getBPNFromToken(principal) , asJwt));
     }
 }

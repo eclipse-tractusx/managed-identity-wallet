@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.HoldersCredentialControllerApiDocs.GetCredentialsApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.HoldersCredentialControllerApiDocs.IssueCredentialApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.service.HoldersCredentialService;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.domain.PageImpl;
@@ -101,8 +102,10 @@ public class HoldersCredentialController extends BaseController {
    
     @IssueCredentialApiDoc
     @PostMapping(path = RestURI.CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerifiableCredential> issueCredential(@RequestBody Map<String, Object> data, Principal principal) {
+    public ResponseEntity<CredentialsResponse> issueCredential(@RequestBody Map<String, Object> data, Principal principal,
+                                                                @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt
+    ) {
         log.debug("Received request to issue credential. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, getBPNFromToken(principal) , asJwt));
     }
 }

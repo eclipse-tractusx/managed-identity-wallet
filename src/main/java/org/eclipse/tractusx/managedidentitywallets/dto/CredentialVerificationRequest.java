@@ -21,29 +21,20 @@
 
  package org.eclipse.tractusx.managedidentitywallets.dto;
 
- import jakarta.validation.constraints.NotBlank;
- import jakarta.validation.constraints.Pattern;
- import lombok.*;
  import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
  
- /**
-  * The type Issue membership credential request.
-  */
- @Getter
- @Setter
- @NoArgsConstructor
- @Builder
- @AllArgsConstructor
- public class IssueMembershipCredentialRequest {
+ import java.util.LinkedHashMap;
+ import java.util.Map;
  
-     @NotBlank(message = "Please provide BPN")
-     @Pattern(regexp = StringPool.BPN_NUMBER_REGEX, message = "Please provide valid BPN")
-     private String bpn;
+ public class CredentialVerificationRequest extends LinkedHashMap<String, Object> {
  
-     @JsonProperty("asJwt")
-     private boolean asJwt;
+ 
+     public void setJwt(String jwt) {
+         put(StringPool.VC_JWT_KEY, jwt);
+     }
+ 
+     public void setVc(Map<String,Object> vc) {
+         putAll(vc);
+     }
  }
- 
  

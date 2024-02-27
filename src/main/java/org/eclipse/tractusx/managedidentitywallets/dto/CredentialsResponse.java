@@ -21,37 +21,19 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import java.util.Set;
+public class CredentialsResponse extends LinkedHashMap<String, Object> {
 
-/**
- * The type Issue dismantler credential request.
- */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class IssueDismantlerCredentialRequest {
+    public void setJwt(String jwt) {
+        put(StringPool.VC_JWT_KEY, jwt);
+    }
 
-    @NotBlank(message = "Please provide BPN")
-    @Pattern(regexp = StringPool.BPN_NUMBER_REGEX, message = "Please provide valid BPN")
-    private String bpn;
-
-    @NotBlank(message = "Please provide activity type")
-    @Size(min = 1, message = "Please provide valid activity type")
-    private String activityType;
-
-    @Builder.Default
-    private Set<@NotBlank String> allowedVehicleBrands = Set.of();
-
-    @JsonProperty("asJwt")
-    private boolean asJwt;
+    public void setVc(Map<String,Object> vc) {
+        putAll(vc);
+    }
+    
 }

@@ -202,7 +202,8 @@ public class IssuersCredentialControllerApiDocs {
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                   "bpn": "BPNL000000000000"
+                                   "bpn": "BPNL000000000000",
+                                   "asJwt": false
                                  }
                     """))
     })
@@ -329,7 +330,8 @@ public class IssuersCredentialControllerApiDocs {
                                    "activityType": "vehicleDismantle",
                                    "allowedVehicleBrands": [
                                      "Audi", "Abarth", "Alfa Romeo", "Chrysler"
-                                   ]
+                                   ],
+                                    "asJwt": false
                                  }
                     """))
     })
@@ -461,7 +463,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "PcfCredential", value = """
@@ -469,7 +472,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "PcfCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "SustainabilityCredential", value = """
@@ -477,7 +481,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "SustainabilityCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "QualityCredential", value = """
@@ -485,7 +490,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "QualityCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "TraceabilityCredential", value = """
@@ -493,7 +499,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "TraceabilityCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "BehaviorTwinCredential", value = """
@@ -501,7 +508,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "ResiliencyCredential", value = """
@@ -509,7 +517,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "ResiliencyCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """)
 
@@ -908,45 +917,101 @@ public class IssuersCredentialControllerApiDocs {
                                        }
                                      }
                                     """),
+                            @ExampleObject(name = "Revocable Verifiable credentials with check expiry ", value = """
+                                     {
+                                        "credentialStatus": "active",
+                                        "valid": true,
+                                        "validateExpiryDate": true,
+                                        "vc": {
+                                          "credentialSubject": [
+                                            {
+                                              "holderIdentifier": "BPNL000000000001",
+                                              "allowedVehicleBrands": [
+                                                "Audi",
+                                                "Abarth",
+                                                "Alfa Romeo",
+                                                "Chrysler"
+                                              ],
+                                              "id": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000001",
+                                              "activityType": "vehicleDismantle",
+                                              "type": "DismantlerCredential"
+                                            }
+                                          ],
+                                          "issuanceDate": "2024-01-05T05:42:53Z",
+                                          "id": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000#8507aa50-b2a4-4532-8e45-f50e7654b23b",
+                                          "proof": {
+                                            "proofPurpose": "assertionMethod",
+                                            "verificationMethod": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000#a39d8ccf-2a66-488d-bfec-916768082e91",
+                                            "type": "JsonWebSignature2020",
+                                            "created": "2024-01-05T05:42:53Z",
+                                            "jws": "eyJhbGciOiJFZERTQSJ9..15NdxA8L_Iw7Igxevm7YGMAQA-Kt6PMOpix6p0jaYHCtfQnTy3q61SDvsnsltGT6fzM90JOubOuig2WFy-GPDg"
+                                          },
+                                          "type": [
+                                            "VerifiableCredential",
+                                            "DismantlerCredential"
+                                          ],
+                                          "@context": [
+                                            "https://www.w3.org/2018/credentials/v1",
+                                            "https://cofinity-x.github.io/schema-registry/v1.1/DismantlerVC.json",
+                                            "https://w3id.org/security/suites/jws-2020/v1",
+                                            "https://w3id.org/vc/status-list/2021/v1"
+                                          ],
+                                          "issuer": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000",
+                                          "credentialStatus": {
+                                            "id": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000#0",
+                                            "statusPurpose": "revocation",
+                                            "statusListIndex": "0",
+                                            "statusListCredential": "https://ae96-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials?issuerId=did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000",
+                                            "type": "StatusList2021Entry"
+                                          },
+                                          "expirationDate": "2024-12-31T18:30:00Z"
+                                        }
+                                      }
+                                    """),
                             @ExampleObject(name = "Verifiable Credentials with invalid signature", value = """
                                      {
-                                       "valid": false,
-                                       "vc": {
-                                       "@context": [
-                                           "https://www.w3.org/2018/credentials/v1",
-                                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                                           "https://w3id.org/security/suites/jws-2020/v1"
-                                         ],
-                                         "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                                         "type": [
-                                           "VerifiableCredential",
-                                           "BpnCredential"
-                                         ],
-                                         "issuer": "did:web:localhost:BPNL000000000000",
-                                         "expirationDate": "2024-12-31T18:30:00Z"
-                                         "issuanceDate": "2023-07-19T09:11:34Z",
-                                         "credentialSubject": [
-                                           {
-                                             "bpn": "BPNL000000000000",
-                                             "id": "did:web:localhost:BPNL000000000000",
-                                             "type": "BpnCredential"
-                                           }
-                                         ],
-                                         "proof": {
-                                           "created": "2023-07-19T09:11:39Z",
-                                           "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhf",
-                                           "proofPurpose": "proofPurpose",
-                                           "type": "JsonWebSignature2020",
-                                           "verificationMethod": "did:web:localhost:BPNL000000000000#"
-                                         },
-                                       }
+                                         "valid": false,
+                                         "vc":
+                                         {
+                                             "@context":
+                                             [
+                                                 "https://www.w3.org/2018/credentials/v1",
+                                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                 "https://w3id.org/security/suites/jws-2020/v1"
+                                             ],
+                                             "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
+                                             "type":
+                                             [
+                                                 "VerifiableCredential",
+                                                 "BpnCredential"
+                                             ],
+                                             "issuer": "did:web:localhost:BPNL000000000000",
+                                             "expirationDate": "2024-12-31T18:30:00Z",
+                                             "issuanceDate": "2023-07-19T09:11:34Z",
+                                             "credentialSubject":
+                                             [
+                                                 {
+                                                     "bpn": "BPNL000000000000",
+                                                     "id": "did:web:localhost:BPNL000000000000",
+                                                     "type": "BpnCredential"
+                                                 }
+                                             ],
+                                             "proof":
+                                             {
+                                                 "created": "2023-07-19T09:11:39Z",
+                                                 "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhf",
+                                                 "proofPurpose": "proofPurpose",
+                                                 "type": "JsonWebSignature2020",
+                                                 "verificationMethod": "did:web:localhost:BPNL000000000000#"
+                                             }
+                                         }
                                      }
                                     """)
                     })
             }) })
     @Operation(summary = "Validate Verifiable Credentials", description = "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     @RequestBody(content = {
-            @Content(examples = @ExampleObject("""
+            @Content(examples = { @ExampleObject(name = "Validate credential in JSON-LD format", value = """
                                 {
                                   "@context": [
                                     "https://www.w3.org/2018/credentials/v1",
@@ -976,11 +1041,18 @@ public class IssuersCredentialControllerApiDocs {
                                     "verificationMethod": "did:web:localhost:BPNL000000000000#"
                                   }
                                 }
-                    """))
+                    """),
+                    @ExampleObject(name = "Validate credential in JWT format", value = """
+                                        {
+                                            "jwt": "eyJraWQiOiJkaWQ6d2ViOmFmODgtMjAzLTEyOS0yMTMtMTA3Lm5ncm9rLWZyZWUuYXBwOkJQTkwwMDAwMDAwMDAwMDAjOGYyZWU5ZDItYTM2Yy00MTM4LWJlMWYtYjZmZWZiNmY4MDI0IiwidHlwIjoiSldUIiwiYWxnIjoiRWREU0EifQ.eyJpc3MiOiJkaWQ6d2ViOmFmODgtMjAzLTEyOS0yMTMtMTA3Lm5ncm9rLWZyZWUuYXBwOkJQTkwwMDAwMDAwMDAwMDAiLCJzdWIiOiJkaWQ6d2ViOmFmODgtMjAzLTEyOS0yMTMtMTA3Lm5ncm9rLWZyZWUuYXBwOkJQTkwwMDAwMDAwMDAwMTEiLCJleHAiOjE3MzU2Njk4MDAsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9jb2Zpbml0eS14LmdpdGh1Yi5pby9zY2hlbWEtcmVnaXN0cnkvdjEuMS9Vc2VDYXNlVkMuanNvbiIsImh0dHBzOi8vdzNpZC5vcmcvc2VjdXJpdHkvc3VpdGVzL2p3cy0yMDIwL3YxIl0sImlkIjoiZGlkOndlYjphZjg4LTIwMy0xMjktMjEzLTEwNy5uZ3Jvay1mcmVlLmFwcDpCUE5MMDAwMDAwMDAwMDAwI2Q4Y2ZjZDBiLWY0NGQtNDVkMC05OGEzLTA4ZDZkNmU5Y2E5NSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJVc2VDYXNlRnJhbWV3b3JrQ29uZGl0aW9uIl0sImlzc3VlciI6ImRpZDp3ZWI6YWY4OC0yMDMtMTI5LTIxMy0xMDcubmdyb2stZnJlZS5hcHA6QlBOTDAwMDAwMDAwMDAwMCIsImNyZWRlbnRpYWxTdWJqZWN0IjpbeyJob2xkZXJJZGVudGlmaWVyIjoiQlBOTDAwMDAwMDAwMDAxMSIsImlkIjoiZGlkOndlYjphZjg4LTIwMy0xMjktMjEzLTEwNy5uZ3Jvay1mcmVlLmFwcDpCUE5MMDAwMDAwMDAwMDExIiwidHlwZSI6IkJlaGF2aW9yVHdpbkNyZWRlbnRpYWwiLCJjb250cmFjdFRlbXBsYXRlIjoiaHR0cHM6Ly9wdWJsaWMuY2F0ZW5hLXgub3JnL2NvbnRyYWN0cy90cmFjZWFiaWx0eS52MS5wZGYiLCJjb250cmFjdFZlcnNpb24iOiIxLjAuMCJ9XSwiY3JlZGVudGlhbFN0YXR1cyI6bnVsbCwiaXNzdWFuY2VEYXRlIjoiMjAyNC0wMi0wOFQxNDowMjo1M1oiLCJleHBpcmF0aW9uRGF0ZSI6IjIwMjQtMTItMzFUMTg6MzA6MDBaIn0sImp0aSI6IjliYWFhMjIzLTAxMjctNDEyZS05NjZhLTA3ZTJmZGU4NGNlNCJ9.X3rkj8Gv4OD5nEaeFG5pSA-dogbcYA91YEPmHiKT4FhAiIr7QAdSEULGXHYOn8-eK0jSDHNdAxNYIK1UwYRsCA"
+                                        }
+                            """)
+            }
+            )
     })
     public @interface ValidateVerifiableCredentialApiDocs {
     }
-
+    
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
