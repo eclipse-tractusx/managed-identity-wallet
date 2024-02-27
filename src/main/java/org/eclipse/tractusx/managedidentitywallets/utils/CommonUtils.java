@@ -186,7 +186,7 @@ public class CommonUtils {
 
         Did issuerDid = DidParser.parse(issuerWallet.getDid());
         Did holderDid = DidParser.parse(holderWallet.getDid());
-        
+
         // JWT Factory
         SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()));
