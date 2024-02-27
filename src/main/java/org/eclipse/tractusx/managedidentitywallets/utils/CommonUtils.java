@@ -25,11 +25,18 @@ import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
+import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
 import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -37,6 +44,8 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
 import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
+
+import com.nimbusds.jwt.SignedJWT;
 
 import java.net.URI;
 import java.time.Instant;
@@ -54,7 +63,6 @@ public class CommonUtils {
 
     public static final Pattern BPN_NUMBER_PATTERN = Pattern.compile(StringPool.BPN_NUMBER_REGEX);
 
-
     /**
      * Gets identifier type.
      *
@@ -65,11 +73,11 @@ public class CommonUtils {
         if (identifier.startsWith("did:web")) {
             return StringPool.DID;
         } else {
-            Validate.isFalse(BPN_NUMBER_PATTERN.matcher(identifier).matches()).launch(new BadDataException("Invalid BPN number - " + identifier));
+            Validate.isFalse(BPN_NUMBER_PATTERN.matcher(identifier).matches())
+                    .launch(new BadDataException("Invalid BPN number - " + identifier));
             return StringPool.BPN;
         }
     }
-
 
     /**
      * Gets credential.
@@ -81,8 +89,9 @@ public class CommonUtils {
      * @param holderDid       the holder did
      * @return the credential
      */
-    public static HoldersCredential getHoldersCredential(VerifiableCredentialSubject subject, List<String> types, DidDocument issuerDoc,
-                                                         byte[] privateKeyBytes, String holderDid, List<URI> contexts, Date expiryDate, boolean selfIssued) {
+    public static HoldersCredential getHoldersCredential(VerifiableCredentialSubject subject, List<String> types,
+            DidDocument issuerDoc,
+            byte[] privateKeyBytes, String holderDid, List<URI> contexts, Date expiryDate, boolean selfIssued) {
         List<String> cloneTypes = new ArrayList<>(types);
 
         // Create VC
@@ -102,11 +111,12 @@ public class CommonUtils {
                 .build();
     }
 
-    @SneakyThrows({UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class})
-    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
-                                                                   VerifiableCredentialSubject verifiableCredentialSubject,
-                                                                   byte[] privateKey, List<URI> contexts, Date expiryDate) {
-        //VC Builder
+    @SneakyThrows({ UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class })
+    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc,
+            List<String> verifiableCredentialType,
+            VerifiableCredentialSubject verifiableCredentialSubject,
+            byte[] privateKey, List<URI> contexts, Date expiryDate) {
+        // VC Builder
 
         // if the credential does not contain the JWS proof-context add it
         URI jwsUri = URI.create("https://w3id.org/security/suites/jws-2020/v1");
@@ -115,7 +125,8 @@ public class CommonUtils {
         }
 
         // check if the expiryDate is set
-        // if its null then it will be ignored from the SSI Lib (VerifiableCredentialBuilder) and will not be added to the VC
+        // if its null then it will be ignored from the SSI Lib
+        // (VerifiableCredentialBuilder) and will not be added to the VC
         Instant expiryInstant = null;
         if (expiryDate != null) {
             expiryInstant = expiryDate.toInstant();
@@ -131,18 +142,37 @@ public class CommonUtils {
                 .issuanceDate(Instant.now())
                 .credentialSubject(verifiableCredentialSubject);
 
-
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
 
-        JWSSignature2020 proof =
-                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKey));
+        JWSSignature2020 proof = (JWSSignature2020) generator.createProof(builder.build(), verificationMethod,
+                new x21559PrivateKey(privateKey));
 
-
-        //Adding Proof to VC
+        // Adding Proof to VC
         builder.proof(proof);
 
-        //Create Credential
+        // Create Credential
         return builder.build();
+    }
+
+    public static String vcAsJwt(Wallet issuerWallet, Wallet holderWallet, VerifiableCredential vc , WalletKeyService walletKeyService) {
+
+        Did issuerDid = DidParser.parse(issuerWallet.getDid());
+        Did holderDid = DidParser.parse(holderWallet.getDid());
+
+        WalletKey walletKey = walletKeyService.get(issuerWallet.getId());
+
+        // JWT Factory
+        SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
+                new SignedJwtFactory(new OctetKeyPairFactory()));
+
+        x21559PrivateKey privateKey = walletKeyService.getPrivateKeyByWalletIdentifier(walletKey.getId());
+        // JWT Factory
+
+        SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, Date.from(vc.getExpirationDate()), vc,
+                privateKey,
+                walletKey.getKeyId());
+
+        return vcJWT.serialize();
     }
 }

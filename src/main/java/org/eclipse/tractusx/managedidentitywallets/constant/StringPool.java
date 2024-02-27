@@ -96,4 +96,6 @@ public class StringPool {
     public static final String BLANK_SEPARATOR = " ";
     public static final String COLON_SEPARATOR = ":";
     public static final String UNDERSCORE = "_";
+    public static final String VC_JWT_KEY = "jwt";
+
 }

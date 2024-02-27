@@ -36,6 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
@@ -143,7 +144,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      * @param callerBpn the caller bpn
      * @return the verifiable credential
      */
-    public VerifiableCredential issueCredential(Map<String, Object> data, String callerBpn) {
+    public CredentialsResponse issueCredential(Map<String, Object> data, String callerBpn , boolean asJwt) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
@@ -167,9 +168,18 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         //Store Credential in holder table
         credential = create(credential);
 
-        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(callerBpn));
+        final CredentialsResponse cr = new CredentialsResponse();
+
         // Return VC
-        return credential.getData();
+        if (asJwt) {
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, commonService.getWalletByIdentifier(callerBpn), credential.getData() , walletKeyService));
+        } else {
+            cr.setVc(credential.getData());
+        }
+
+        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(callerBpn));
+
+        return cr;
     }
 
     private void isCredentialExistWithId(String holderDid, String credentialId) {
