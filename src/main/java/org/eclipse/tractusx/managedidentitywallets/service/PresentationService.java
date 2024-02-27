@@ -72,6 +72,7 @@ import java.util.UUID;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.BLANK_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COMA_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.UNDERSCORE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getScope;
 
@@ -301,11 +302,12 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             String[] scopeParts = scope.split(COLON_SEPARATOR);
             String vcType = scopeParts[1];
             checkReadPermission(scopeParts[2]);
+            String vcTypeNoVersion = removeVersion(vcType);
 
             List<HoldersCredential> credentials =
-                    holdersCredentialRepository.getByHolderDidAndType(jwtClaimsSet.getIssuer(), vcType);
+                    holdersCredentialRepository.getByHolderDidAndType(jwtClaimsSet.getIssuer(), vcTypeNoVersion);
             if ((null == credentials) || credentials.isEmpty()) {
-                missingVCTypes.add(vcType);
+                missingVCTypes.add(vcTypeNoVersion);
             } else {
                 holdersCredentials.addAll(credentials);
             }
@@ -332,5 +334,10 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             throw new MissingVcTypesException(String.format("Missing VC types: %s",
                     String.join(COMA_SEPARATOR, missingVCTypes)));
         }
+    }
+
+    private String removeVersion(String vcType) {
+        String[] parts = vcType.split(UNDERSCORE);
+        return (parts.length > 1) ? parts[0] : vcType;
     }
 }

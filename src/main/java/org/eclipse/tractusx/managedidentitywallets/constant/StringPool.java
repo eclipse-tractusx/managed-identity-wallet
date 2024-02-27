@@ -95,4 +95,5 @@ public class StringPool {
     public static final String COMA_SEPARATOR = ", ";
     public static final String BLANK_SEPARATOR = " ";
     public static final String COLON_SEPARATOR = ":";
+    public static final String UNDERSCORE = "_";
 }
