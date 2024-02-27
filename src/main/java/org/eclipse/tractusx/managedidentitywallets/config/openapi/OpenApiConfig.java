@@ -99,24 +99,24 @@ public class OpenApiConfig {
         String accessTokenAuth = "Authenticate using access_token";
         components.addSecuritySchemes(accessTokenAuth,
                 new SecurityScheme().name(accessTokenAuth)
-                        .description("**Bearer (apiKey)** \n" +
-                                "JWT Authorization header using the Bearer scheme.\n" +
-                                "\n" +
-                                "Enter **Bearer** [space] and then your token in the text input below.\n" +
-                                "\n" +
-                                "Example: Bearer 12345abcdef")
+                        .description("""
+                                **Bearer (apiKey)**
+                                JWT Authorization header using the Bearer scheme.
+                                Enter **Bearer** [space] and then your token in the text input below:
+                                Example: Bearer 12345abcdef
+                                """)
                         .type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name(HttpHeaders.AUTHORIZATION));
 
         //Auth using sts_token
         String stsTokenAuth = "sts_token";
         components.addSecuritySchemes(stsTokenAuth,
                 new SecurityScheme().name(stsTokenAuth)
-                        .description("**STS token** \n" +
-                                "JWT Authorization header\n" +
-                                "\n" +
-                                "Enter your token in the text input below.\n" +
-                                "\n" +
-                                "Example: 12345abcdef")
+                        .description("""
+                                **STS token**
+                                JWT Authorization header.
+                                Enter your token in the text input below:
+                                Example: 12345abcdef
+                                """)
                         .type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name(HttpHeaders.AUTHORIZATION));
 
         return openAPI.components(components)

@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,7 +53,6 @@ import static org.springframework.http.HttpMethod.POST;
 @AllArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
     private final STSTokenValidationService validationService;
 
     private final SecurityConfigProperties securityConfigProperties;
@@ -116,9 +114,8 @@ public class SecurityConfig {
                         //error
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
-                        jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()))));
-
-        http.addFilterAfter(new PresentationIatpFilter(validationService), BasicAuthenticationFilter.class);
+                        jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()))))
+                .addFilterAfter(new PresentationIatpFilter(validationService), BasicAuthenticationFilter.class);
 
         return http.build();
     }
