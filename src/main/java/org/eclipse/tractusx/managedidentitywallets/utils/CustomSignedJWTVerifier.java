@@ -29,11 +29,12 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.DidDocumentService;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
-import org.eclipse.tractusx.ssi.lib.exception.UnsupportedVerificationMethodException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedVerificationMethodException;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.Ed25519VerificationMethod;
@@ -51,6 +52,7 @@ public class CustomSignedJWTVerifier {
     private final DidDocumentService didDocumentService;
     public static final String KID = "kid";
 
+    @SneakyThrows({UnsupportedVerificationMethodException.class})
     public boolean verify(String did, SignedJWT jwt) throws JOSEException {
         VerificationMethod verificationMethod = checkVerificationMethod(did, jwt);
         if (JWKVerificationMethod.isInstance(verificationMethod)) {
