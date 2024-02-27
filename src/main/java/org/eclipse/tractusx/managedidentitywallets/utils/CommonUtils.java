@@ -34,6 +34,11 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.exception.json.TransformJsonLdException;
+import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureGenerateFailedException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -46,6 +51,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
 import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.springframework.util.MultiValueMap;
+import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtVCFactoryImpl;
 
 import java.io.StringWriter;
 import com.nimbusds.jwt.SignedJWT;
@@ -115,11 +121,12 @@ public class CommonUtils {
                 .build();
     }
 
-    @SneakyThrows({ UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class })
-    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
-                                                                   VerifiableCredentialSubject verifiableCredentialSubject,
-                                                                   byte[] privateKey, List<URI> contexts, Date expiryDate) {
-        //VC Builder
+    @SneakyThrows({UnsupportedSignatureTypeException.class , InvalidPrivateKeyFormatException.class , SignatureGenerateFailedException.class , TransformJsonLdException.class})
+    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc,
+            List<String> verifiableCredentialType,
+            VerifiableCredentialSubject verifiableCredentialSubject,
+            byte[] privateKey, List<URI> contexts, Date expiryDate) {
+        // VC Builder
 
         // if the credential does not contain the JWS proof-context add it
         URI jwsUri = URI.create("https://w3id.org/security/suites/jws-2020/v1");
@@ -149,7 +156,7 @@ public class CommonUtils {
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
 
         JWSSignature2020 proof = (JWSSignature2020) generator.createProof(builder.build(), verificationMethod,
-                new x21559PrivateKey(privateKey));
+                new x25519PrivateKey(privateKey));
 
         // Adding Proof to VC
         builder.proof(proof);
@@ -185,7 +192,7 @@ public class CommonUtils {
         SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()));
 
-        x21559PrivateKey privateKey = walletKeyService.getPrivateKeyByWalletIdentifier(walletKey.getId());
+        x25519PrivateKey privateKey = walletKeyService.getPrivateKeyByWalletIdentifier(walletKey.getId());
         // JWT Factory
 
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, Date.from(vc.getExpirationDate()), vc,

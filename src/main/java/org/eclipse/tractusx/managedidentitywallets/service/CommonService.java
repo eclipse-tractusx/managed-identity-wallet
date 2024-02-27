@@ -30,7 +30,6 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletReposito
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.exception.DidParseException;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +56,7 @@ public class CommonService {
         } else {
             try {
                 wallet = walletRepository.getByDid(identifier);
-            } catch (DidParseException e) {
+            } catch (Exception e) {
                 log.error("Error while parsing did {}", StringEscapeUtils.escapeJava(identifier), e);
                 throw new WalletNotFoundProblem("Error while parsing did " + identifier);
             }

@@ -26,14 +26,13 @@ import com.smartsensesolutions.java.commons.base.service.BaseService;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
@@ -45,7 +44,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
  * The type Wallet key service.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class WalletKeyService extends BaseService<WalletKey, Long> {
 
