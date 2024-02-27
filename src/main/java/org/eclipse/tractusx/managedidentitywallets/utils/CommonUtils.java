@@ -31,7 +31,6 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
@@ -187,16 +186,13 @@ public class CommonUtils {
 
         Did issuerDid = DidParser.parse(issuerWallet.getDid());
         Did holderDid = DidParser.parse(holderWallet.getDid());
-
-        WalletKey walletKey = walletKeyService.get(issuerWallet.getId());
-
+        
         // JWT Factory
         SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()));
 
         X25519PrivateKey privateKey = (X25519PrivateKey) walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(issuerWallet.getId(), SupportedAlgorithms.ED25519);
         // JWT Factory
-
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, vc,
                 privateKey,
                 walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId())
