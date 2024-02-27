@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -29,8 +30,9 @@ import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
@@ -51,12 +53,10 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
 import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
-import org.springframework.util.MultiValueMap;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtVCFactoryImpl;
+import org.springframework.util.MultiValueMap;
 
 import java.io.StringWriter;
-import com.nimbusds.jwt.SignedJWT;
-
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -181,12 +181,14 @@ public class CommonUtils {
         Map<String, String> singleValueMap = map.toSingleValueMap();
         return objectMapper.convertValue(singleValueMap, SecureTokenRequest.class);
     }
-    
+
     @SneakyThrows({DidParseException.class})
     public static String vcAsJwt(Wallet issuerWallet, Wallet holderWallet, VerifiableCredential vc , WalletKeyService walletKeyService){
 
         Did issuerDid = DidParser.parse(issuerWallet.getDid());
         Did holderDid = DidParser.parse(holderWallet.getDid());
+
+        WalletKey walletKey = walletKeyService.get(issuerWallet.getId());
 
         // JWT Factory
         SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
@@ -198,10 +200,8 @@ public class CommonUtils {
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, vc,
                 privateKey,
                 walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId())
-                
-                );
+
+        );
         return vcJWT.serialize();
     }
-
-
 }

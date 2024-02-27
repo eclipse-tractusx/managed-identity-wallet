@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -27,6 +27,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Set;
 
 /**
@@ -49,4 +51,7 @@ public class IssueDismantlerCredentialRequest {
 
     @Builder.Default
     private Set<@NotBlank String> allowedVehicleBrands = Set.of();
+
+    @JsonProperty("asJwt")
+    private boolean asJwt;
 }

@@ -203,7 +203,8 @@ public class IssuersCredentialControllerApiDocs {
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                   "bpn": "BPNL000000000000"
+                                   "bpn": "BPNL000000000000",
+                                   "asJwt": false
                                  }
                     """))
     })
@@ -330,7 +331,8 @@ public class IssuersCredentialControllerApiDocs {
                                    "activityType": "vehicleDismantle",
                                    "allowedVehicleBrands": [
                                      "Audi", "Abarth", "Alfa Romeo", "Chrysler"
-                                   ]
+                                   ],
+                                    "asJwt": false
                                  }
                     """))
     })
@@ -462,7 +464,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "PcfCredential", value = """
@@ -470,7 +473,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "PcfCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "SustainabilityCredential", value = """
@@ -478,7 +482,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "SustainabilityCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "QualityCredential", value = """
@@ -486,7 +491,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "QualityCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "TraceabilityCredential", value = """
@@ -494,7 +500,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "TraceabilityCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "BehaviorTwinCredential", value = """
@@ -502,7 +509,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """),
                     @ExampleObject(name = "ResiliencyCredential", value = """
@@ -510,7 +518,8 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "ResiliencyCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0"
+                                                              "contract-version": "1.0.0",
+                                                              "asJwt": false
                                                             }
                             """)
 
@@ -1044,7 +1053,7 @@ public class IssuersCredentialControllerApiDocs {
     })
     public @interface ValidateVerifiableCredentialApiDocs {
     }
-    
+
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_ISSUER)
@@ -1169,7 +1178,7 @@ public class IssuersCredentialControllerApiDocs {
     public @interface IssueVerifiableCredentialUsingBaseWalletApiDocs {
     }
 
-    
+
     @Parameter(description = "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). "
             +
             "If set to true, the VC will be generated in JWT format"

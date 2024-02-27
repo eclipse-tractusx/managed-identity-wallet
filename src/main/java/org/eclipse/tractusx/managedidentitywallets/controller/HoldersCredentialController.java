@@ -115,13 +115,13 @@ public class HoldersCredentialController extends BaseController {
      * @param principal the principal
      * @return the response entity
      */
-   
+
     @IssueCredentialApiDoc
     @PostMapping(path = RestURI.CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CredentialsResponse> issueCredential(@RequestBody Map<String, Object> data, Principal principal,
                                                                 @AsJwtParam @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt
     ) {
         log.debug("Received request to issue credential. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, asJwt, getBPNFromToken(principal)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, getBPNFromToken(principal) , asJwt));
     }
 }

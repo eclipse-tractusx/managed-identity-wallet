@@ -87,14 +87,9 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
 
     /**
-     * Gets list of holder's credentials
+     * Gets credentials.
      *
-     * @param credentialId     the credentialId
-     * @param issuerIdentifier the issuer identifier
-     * @param type             the type
-     * @param sortColumn       the sort column
-     * @param sortType         the sort type
-     * @param callerBPN        the caller bpn
+     * @param command the command
      * @return the credentials
      */
     public PageImpl<CredentialsResponse> getCredentials(GetCredentialsCommand command) {
@@ -150,9 +145,10 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      *
      * @param data      the data
      * @param callerBpn the caller bpn
+     * @param asJwt     the as jwt
      * @return the verifiable credential
      */
-    public CredentialsResponse issueCredential(Map<String, Object> data, boolean asJwt,  String callerBpn) {
+    public CredentialsResponse issueCredential(Map<String, Object> data, String callerBpn, boolean asJwt) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
@@ -167,7 +163,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         if (verifiableCredential.getExpirationDate() != null) {
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
-        
+
         // Create Credential
         HoldersCredential credential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),

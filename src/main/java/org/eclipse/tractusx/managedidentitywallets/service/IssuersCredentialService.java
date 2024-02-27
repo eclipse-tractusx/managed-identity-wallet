@@ -31,7 +31,6 @@ import com.smartsensesolutions.java.commons.operator.Operator;
 import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
-
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +79,12 @@ import java.io.IOException;
 import java.net.http.HttpClient;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * The type Issuers credential service.
@@ -123,14 +127,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     /**
      * Gets credentials.
      *
-     * @param credentialId     the credential id
-     * @param holderIdentifier the issuer identifier
-     * @param type             the type
-     * @param sortColumn       the sort column
-     * @param sortType         the sort type
-     * @param pageNumber       the page number
-     * @param size             the size
-     * @param callerBPN        the caller bpn
+     * @param command the command
      * @return the credentials
      */
     public PageImpl<CredentialsResponse> getCredentials(GetCredentialsCommand command) {
@@ -217,6 +214,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * Issue framework credential verifiable credential.
      *
      * @param request   the request
+     * @param asJwt     the as jwt
      * @param callerBPN the caller bpn
      * @return the verifiable credential
      */
@@ -276,6 +274,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * Issue dismantler credential verifiable credential.
      *
      * @param request   the request
+     * @param asJwt     the as jwt
      * @param callerBPN the caller bpn
      * @return the verifiable credential
      */
@@ -316,7 +315,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         //update summery VC
         updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
-        
+
         final CredentialsResponse cr = new CredentialsResponse();
 
         // Return VC
@@ -335,6 +334,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * Issue membership credential verifiable credential.
      *
      * @param issueMembershipCredentialRequest the issue membership credential request
+     * @param asJwt                            the as jwt
      * @param callerBPN                        the caller bpn
      * @return the verifiable credential
      */
@@ -399,6 +399,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      *
      * @param holderDid the holder did
      * @param data      the data
+     * @param asJwt     the as jwt
      * @param callerBpn the caller bpn
      * @return the verifiable credential
      */
@@ -449,7 +450,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         return cr;
     }
-    
+
 
     private JWTVerificationResult verifyVCAsJWT(String jwt, DidResolver didResolver, boolean withCredentialsValidation, boolean withCredentialExpiryDate) throws IOException, ParseException {
         SignedJWT signedJWT = SignedJWT.parse(jwt);
@@ -496,6 +497,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         }
     }
 
+
     /**
      * Credentials validation map.
      *
@@ -508,10 +510,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     }
 
     /**
-    * Credentials validation map.
+     * Credentials validation map.
      *
-     * @param data                     the data
-     * @param withCredentialExpiryDate the with credential expiry date
+     * @param verificationRequest       the verification request
+     * @param withCredentialsValidation the with credentials validation
+     * @param withCredentialExpiryDate  the with credential expiry date
      * @return the map
      */
     @SneakyThrows
