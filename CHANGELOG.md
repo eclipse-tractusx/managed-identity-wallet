@@ -1,3 +1,20 @@
+# [0.5.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.4...v0.5.0-develop.5) (2024-02-27)
+
+
+### Bug Fixes
+
+* fix integration test ([d8084ee](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/d8084eee8a4b562ce1242af1689791963b277783))
+
+
+### Features
+
+* add JWT verification and extend tests ([d83ce91](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/d83ce91b2e04b131ef3a83983bbd79331be6cac9))
+* add JWT verification and extend tests ([5ae223d](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/5ae223d61f23e71bf426d36ea3255f508abd254b))
+* adding draft for integration test, refactoring ([ce75056](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/ce75056a475ce39970de998376a91dcdc95e4065))
+* create initial class ([061faa7](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/061faa72591550d3a7a93cd2e492aaf8ace82ec2))
+* create initial classes with validation ([fc5db81](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/fc5db81092991da9686aa7f7855d30ae4f4e2e83))
+* Merge PR [#255](https://github.com/eclipse-tractusx/managed-identity-wallet/issues/255) ([a0d9bdf](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a0d9bdfd1246c684156795523d64210fd828925f))
+
 # [0.5.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.3...v0.5.0-develop.4) (2024-02-23)
 
 
