@@ -108,7 +108,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameWorkVCToBaseWalletTest201() throws JSONException, JsonProcessingException {
+    void issueFrameWorkVCToBaseWalletTest201() throws JSONException {
         String bpn = miwSettings.authorityWalletBpn();
         String type = "PcfCredential";
         //create wallet
@@ -135,6 +135,28 @@ class FrameworkHoldersCredentialTest {
 
         //check summary credential
         TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, type, oldSummaryCredentialId);
+    }
+
+    @Test
+    void issueFrameWorkVCToBaseWalletTest409() throws JSONException {
+        String bpn = miwSettings.authorityWalletBpn();
+        String type = "PcfCredential";
+
+        //create wallet
+        /*Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);*/
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
+
+        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
+        ResponseEntity<String> conflictResponse = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), conflictResponse.getStatusCode().value());
     }
 
     @ParameterizedTest
