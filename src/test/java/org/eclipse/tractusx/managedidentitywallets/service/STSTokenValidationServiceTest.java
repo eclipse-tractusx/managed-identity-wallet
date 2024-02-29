@@ -45,15 +45,18 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Date;
 
-import static com.nimbusds.jose.jwk.Curve.Ed25519;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_1;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_2;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_READ;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_1;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_2;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_1;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_2;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.EXP_VALID_DATE;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.IAT_VALID_DATE;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.JWK_INNER;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.JWK_OUTER;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.NONCE;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.READ_SCOPE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.addAccessTokenToClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildJWTToken;
@@ -63,23 +66,7 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildW
 @ContextConfiguration(initializers = { TestContextInitializer.class })
 class STSTokenValidationServiceTest {
 
-    private static final OctetKeyPair JWK_OUTER = new OctetKeyPair
-            .Builder(Ed25519, new Base64URL("4Q5HCXPyutfcj7gLmbAKlYttlJPkykIkRjh7DH2NtZ0"))
-            .d(new Base64URL("Ktp0sv9dKr_gnzRxpH5V9qpiTgZ1WbkMSv8WtWodewg"))
-            .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ed")
-            .build();
-
-    private static final OctetKeyPair JWK_INNER = new OctetKeyPair
-            .Builder(Ed25519, new Base64URL("Z-8DEkN6pw2E01niDWqrp1kROLF-syIPIpFgmyrVUOU"))
-            .d(new Base64URL("MLYxSai_oFzuqEfnB2diA3oDuixLg3kQzZKMyW31-2o"))
-            .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ty")
-            .build();
-
-    private static final Date EXP_VALID_DATE = new Date(Long.parseLong("2559397136000"));
-
     private static final Date ALREADY_EXP_DATE = new Date(Long.parseLong("1707582883000"));
-
-    private static final Date IAT_VALID_DATE = new Date(Long.parseLong("1707496483000"));
 
     @Autowired
     private STSTokenValidationService stsTokenValidationService;
@@ -117,7 +104,7 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenFailureAccessTokenMissingTest() throws JOSEException {
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, BPN_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
         String siToken = buildJWTToken(JWK_OUTER, outerSet);
 
         ValidationResult result = stsTokenValidationService.validateToken(siToken);
@@ -133,10 +120,10 @@ class STSTokenValidationServiceTest {
                 .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ty")
                 .generate();
 
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, BPN_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(jwkRandom, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, ALREADY_EXP_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, BPN_CREDENTIAL_READ, EXP_VALID_DATE, ALREADY_EXP_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
@@ -148,10 +135,10 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenFailureExpiredTokenIssNotEqualsSubTest() throws JOSEException {
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, BPN_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_2, DID_BPN_1, NONCE, READ_SCOPE, ALREADY_EXP_DATE, IAT_VALID_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_2, DID_BPN_1, NONCE, BPN_CREDENTIAL_READ, ALREADY_EXP_DATE, IAT_VALID_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
@@ -164,10 +151,10 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenSuccessTest() throws JOSEException {
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, BPN_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, BPN_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
