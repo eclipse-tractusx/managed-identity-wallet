@@ -138,21 +138,25 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameWorkVCToBaseWalletTest409() throws JSONException {
-        String bpn = miwSettings.authorityWalletBpn();
-        String type = "PcfCredential";
+    void issueFrameWorkVCToWalletTest409() throws JSONException {
+        String bpn = TestUtils.getRandomBpmNumber();
+        String name = "Sample Wallet";
+        String baseBpn = miwSettings.authorityWalletBpn();
 
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
-
-        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
-
-        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, name, restTemplate, baseBpn);
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        ResponseEntity<String> conflictResponse = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-        Assertions.assertEquals(HttpStatus.CONFLICT.value(), conflictResponse.getStatusCode().value());
+        String type = "PcfCredential";
+        IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
+
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
+
+        response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
+        response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), response.getStatusCode().value());
     }
 
     @ParameterizedTest

@@ -233,10 +233,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(request.getHolderIdentifier());
 
-        //check duplicate
-        doesFrameworkCredentialExist(holderWallet.getDid(), request.getType());
-
         Wallet baseWallet = commonService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
+
+        //check duplicate
+        doesFrameworkCredentialExist(holderWallet.getDid(), baseWallet.getDid(), request.getType());
+
 
         validateAccess(callerBPN, baseWallet);
         // get Key
@@ -472,8 +473,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param holderDid             holder's DID
      * @param credentialSubjectType UseCaseFrameworkCredential type
      */
-    private void doesFrameworkCredentialExist(String holderDid, String credentialSubjectType) {
-        List<HoldersCredential> holdersCredentialList = holdersCredentialRepository.getByHolderDidAndType(holderDid, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
+    private void doesFrameworkCredentialExist(String holderDid, String issuerDid, String credentialSubjectType) {
+        List<HoldersCredential> holdersCredentialList = holdersCredentialRepository.getByHolderDidAndIssuerDidAndTypeAndStored(holderDid, issuerDid, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION, false);
 
         if (CollectionUtils.isEmpty(holdersCredentialList)) {
             return;
