@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -471,6 +471,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * Check if UseCaseFrameworkCredential of given type already exists for holder
      *
      * @param holderDid             holder's DID
+     * @param issuerDid             issuer's DID
      * @param credentialSubjectType UseCaseFrameworkCredential type
      */
     private void doesFrameworkCredentialExist(String holderDid, String issuerDid, String credentialSubjectType) {
