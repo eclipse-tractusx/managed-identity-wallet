@@ -142,10 +142,6 @@ class FrameworkHoldersCredentialTest {
         String bpn = miwSettings.authorityWalletBpn();
         String type = "PcfCredential";
 
-        //create wallet
-        /*Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-        String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);*/
-
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
 
         IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
