@@ -471,6 +471,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * Check if UseCaseFrameworkCredential of given type already exists for holder
      *
      * @param holderDid             holder's DID
+     * @param issuerDid             issuer's DID
      * @param credentialSubjectType UseCaseFrameworkCredential type
      */
     private void doesFrameworkCredentialExist(String holderDid, String issuerDid, String credentialSubjectType) {
