@@ -235,11 +235,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         Wallet baseWallet = commonService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
 
+        validateAccess(callerBPN, baseWallet);
+
         //check duplicate
         doesFrameworkCredentialExist(holderWallet.getDid(), baseWallet.getDid(), request.getType());
 
-
-        validateAccess(callerBPN, baseWallet);
         // get Key
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId(), baseWallet.getAlgorithm());
 
