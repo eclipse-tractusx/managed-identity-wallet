@@ -27,6 +27,10 @@ public class TestConstants {
     public static final String DID_BPN_2 = "did:web:localhost:BPNL000000000002";
     public static final String BPN_1 = "BPNL000000000001";
     public static final String BPN_2 = "BPNL000000000002";
+    public static final String READ_SCOPE = "org.eclipse.tractusx.vc.type:BpnCredential:read";
+    public static final String WRITE_SCOPE = "org.eclipse.tractusx.vc.type:BpnCredential:write";
+    public static final String VERIFIABLE_PRESENTATION = "vp";
+    public static final String NONCE = "123456";
     public static final String DID_JSON_STRING_1 = """
             {
               "@context": [

@@ -52,6 +52,8 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DI
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_2;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_1;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_2;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.NONCE;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.READ_SCOPE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.addAccessTokenToClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildJWTToken;
@@ -115,7 +117,7 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenFailureAccessTokenMissingTest() throws JOSEException {
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
         String siToken = buildJWTToken(JWK_OUTER, outerSet);
 
         ValidationResult result = stsTokenValidationService.validateToken(siToken);
@@ -131,10 +133,10 @@ class STSTokenValidationServiceTest {
                 .keyID("58cb4b32-c2e4-46f0-a3ad-3286e34765ty")
                 .generate();
 
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(jwkRandom, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, ALREADY_EXP_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, ALREADY_EXP_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
@@ -146,10 +148,10 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenFailureExpiredTokenIssNotEqualsSubTest() throws JOSEException {
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_2, DID_BPN_1, "123456", ALREADY_EXP_DATE, IAT_VALID_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_2, DID_BPN_1, NONCE, READ_SCOPE, ALREADY_EXP_DATE, IAT_VALID_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
@@ -162,10 +164,10 @@ class STSTokenValidationServiceTest {
 
     @Test
     void validateTokenSuccessTest() throws JOSEException {
-        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet innerSet = buildClaimsSet(DID_BPN_2, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
         String accessToken = buildJWTToken(JWK_INNER, innerSet);
 
-        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, "123456", EXP_VALID_DATE, IAT_VALID_DATE);
+        JWTClaimsSet outerSet = buildClaimsSet(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE, READ_SCOPE, EXP_VALID_DATE, IAT_VALID_DATE);
         JWTClaimsSet outerSetFull = addAccessTokenToClaimsSet(accessToken, outerSet);
         String siToken = buildJWTToken(JWK_OUTER, outerSetFull);
 
