@@ -21,7 +21,11 @@
 
 package org.eclipse.tractusx.managedidentitywallets.exception;
 
+import java.io.Serial;
+
 public class PermissionViolationException extends RuntimeException {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public PermissionViolationException(String message) {
         super(message);
