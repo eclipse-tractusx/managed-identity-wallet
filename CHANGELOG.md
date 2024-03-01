@@ -1,3 +1,13 @@
+# [0.5.0-develop.6](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.5...v0.5.0-develop.6) (2024-03-01)
+
+
+### Features
+
+* add api docs, option asJwt ([9dc628b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/9dc628b3ff4812759e9762f984f0406073191e40))
+* add ignoring version ([1785080](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/1785080a7f3585ecf6fcb89cd94d91701c4906b9))
+* add service method, controller, config for scope matching ([4feebd4](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/4feebd40dabe45e94f73cafcec410c2e51016758))
+* improve filter, add exception handling ([579a5ec](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/579a5ec547d486f04fca4336545cd9f5bb0dc216))
+
 # [0.5.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.4...v0.5.0-develop.5) (2024-02-27)
 
 
