@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -37,6 +38,7 @@ public class SecureTokenControllerApiDoc {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
+    @SecurityRequirements
     @RequestBody(content = {
             @Content(examples = {
                     @ExampleObject(name = "Request Secure Token using Scopes", value = """

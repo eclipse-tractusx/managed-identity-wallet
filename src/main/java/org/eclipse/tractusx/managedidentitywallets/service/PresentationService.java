@@ -21,13 +21,12 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.ctc.wstx.shaded.msv_core.util.Uri;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -37,27 +36,25 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
+import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidJsonLdException;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
 import org.eclipse.tractusx.ssi.lib.exception.JwtExpiredException;
-import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
@@ -66,7 +63,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.BLANK_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COMA_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.UNDERSCORE;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getScope;
 
 /**
  * The type Presentation service.
@@ -108,7 +116,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
      * @param callerBpn the caller bpn
      * @return the map
      */
-    @SneakyThrows({InvalidePrivateKeyFormat.class})
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
         List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
 
@@ -121,6 +128,11 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             verifiableCredentials.add(verifiableCredential);
         });
 
+        return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials);
+    }
+
+    @SneakyThrows({ InvalidePrivateKeyFormat.class })
+    private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials) {
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
             log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
@@ -275,5 +287,57 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             log.info("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
         }
         return isValid;
+    }
+
+    public Map<String, Object> createVpWithRequiredScopes(SignedJWT innerJWT, boolean asJwt) {
+        List<HoldersCredential> holdersCredentials = new ArrayList<>();
+        List<String> missingVCTypes = new ArrayList<>();
+        List<VerifiableCredential> verifiableCredentials = new ArrayList<>();
+
+        JWTClaimsSet jwtClaimsSet = getClaimsSet(innerJWT);
+        String scopeValue = getScope(jwtClaimsSet);
+        String[] scopes = scopeValue.split(BLANK_SEPARATOR);
+
+        for (String scope : scopes) {
+            String[] scopeParts = scope.split(COLON_SEPARATOR);
+            String vcType = scopeParts[1];
+            checkReadPermission(scopeParts[2]);
+            String vcTypeNoVersion = removeVersion(vcType);
+
+            List<HoldersCredential> credentials =
+                    holdersCredentialRepository.getByHolderDidAndType(jwtClaimsSet.getIssuer(), vcTypeNoVersion);
+            if ((null == credentials) || credentials.isEmpty()) {
+                missingVCTypes.add(vcTypeNoVersion);
+            } else {
+                holdersCredentials.addAll(credentials);
+            }
+        }
+
+        checkMissingVcs(missingVCTypes);
+
+        Wallet callerWallet = commonService.getWalletByIdentifier(jwtClaimsSet.getIssuer());
+
+        holdersCredentials.forEach(c -> verifiableCredentials.add(c.getData()));
+
+        return buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
+                callerWallet, verifiableCredentials);
+    }
+
+    private void checkReadPermission(String permission) {
+        if (!"read".equals(permission)) {
+            throw new PermissionViolationException("Scopes must have only READ permission");
+        }
+    }
+
+    private void checkMissingVcs(List<String> missingVCTypes) {
+        if (!missingVCTypes.isEmpty()) {
+            throw new MissingVcTypesException(String.format("Missing VC types: %s",
+                    String.join(COMA_SEPARATOR, missingVCTypes)));
+        }
+    }
+
+    private String removeVersion(String vcType) {
+        String[] parts = vcType.split(UNDERSCORE);
+        return (parts.length > 1) ? parts[0] : vcType;
     }
 }

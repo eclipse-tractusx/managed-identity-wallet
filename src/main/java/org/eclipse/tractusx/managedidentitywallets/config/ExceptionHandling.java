@@ -244,6 +244,21 @@ public class ExceptionHandling {
         return problemDetail;
     }
 
+    @ExceptionHandler(MissingVcTypesException.class)
+    ProblemDetail handleMissingVcTypesException(MissingVcTypesException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ExceptionUtils.getMessage(exception));
+        problemDetail.setTitle(ExceptionUtils.getMessage(exception));
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(PermissionViolationException.class)
+    ProblemDetail handlePermissionViolationException(PermissionViolationException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ExceptionUtils.getMessage(exception));
+        problemDetail.setTitle(ExceptionUtils.getMessage(exception));
+        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
+        return problemDetail;
+    }
 
     /**
      * Handle exception problem detail.

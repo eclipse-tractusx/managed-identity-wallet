@@ -21,10 +21,11 @@
 
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
+import com.nimbusds.jwt.SignedJWT;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.GetVerifiablePresentationIATPApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.PostVerifiablePresentationApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.PostVerifiablePresentationValidationApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
@@ -32,13 +33,17 @@ import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 import java.util.Map;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getAccessToken;
 
 /**
  * The type Presentation controller.
@@ -89,5 +94,22 @@ public class PresentationController extends BaseController {
     ) {
         log.debug("Received request to validate presentation");
         return ResponseEntity.status(HttpStatus.OK).body(presentationService.validatePresentation(data, asJwt, withCredentialExpiryDate, audience));
+    }
+
+    /**
+     * Create presentation response entity for VC types provided in STS token.
+     *
+     * @param stsToken  the STS token with required scopes
+     * @param asJwt     as JWT VP response
+     * @return the VP response entity
+     */
+
+    @GetMapping(path = RestURI.API_PRESENTATIONS_IATP, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetVerifiablePresentationIATPApiDocs
+    public ResponseEntity<Map<String, Object>> createPresentation(@Parameter(hidden = true) @RequestHeader(name = "Authorization") String stsToken,
+                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt) {
+        SignedJWT accessToken = getAccessToken(stsToken);
+        Map<String, Object> vp = presentationService.createVpWithRequiredScopes(accessToken, asJwt);
+        return ResponseEntity.ok(vp);
     }
 }

@@ -91,4 +91,9 @@ public class StringPool {
     public static final String BEARER_SPACE = "Bearer ";
 
     public static final String BPN_NUMBER_REGEX = "^(BPN)(L|S|A)[0-9A-Z]{12}";
+
+    public static final String COMA_SEPARATOR = ", ";
+    public static final String BLANK_SEPARATOR = " ";
+    public static final String COLON_SEPARATOR = ":";
+    public static final String UNDERSCORE = "_";
 }

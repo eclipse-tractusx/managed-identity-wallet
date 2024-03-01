@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 public class DidDocumentControllerApiDocs {
 
@@ -72,7 +73,7 @@ public class DidDocumentControllerApiDocs {
                                     """)
                     })
             }) })
-    @Operation(description = "Resolve the DID document for a given DID or BPN", summary = "Resolve DID Document")
+    @Operation(description = "Resolve the DID document for a given DID or BPN", summary = "Resolve DID Document", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface GetDidDocumentApiDocs {
     }
 
@@ -135,7 +136,7 @@ public class DidDocumentControllerApiDocs {
                     })
             })
     })
-    @Operation(description = "Resolve the DID document for a given BPN", summary = "Resolve DID Document")
+    @Operation(description = "Resolve the DID document for a given BPN", summary = "Resolve DID Document", security = { @SecurityRequirement(name = "Authenticate using access_token") })
     public @interface GetDidResolveApiDocs {
     }
 
