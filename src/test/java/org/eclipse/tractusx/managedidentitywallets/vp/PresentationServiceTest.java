@@ -34,6 +34,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
+import org.eclipse.tractusx.managedidentitywallets.utils.TestConstants;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -46,7 +47,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.Date;
 import java.util.Map;
 
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_READ;
@@ -56,7 +56,6 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.EX
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.IAT_VALID_DATE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.INVALID_CREDENTIAL_READ;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.JWK_INNER;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.NONCE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.VERIFIABLE_PRESENTATION;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.buildJWTToken;
@@ -77,21 +76,17 @@ public class PresentationServiceTest {
     private TestRestTemplate restTemplate;
 
     @SneakyThrows
-    public String generateWalletAndSetDid(String bpn) {
-        Wallet wallet = generateWallet(bpn);
-        return wallet.getDid();
-    }
-
-    @SneakyThrows
     @Test
     void createPresentation200ResponseAsJWT() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndSetDid(bpn);
-        String accessToken = generateAccessToken(did, did, did, NONCE, BPN_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
+        String did = generateWalletAndGetDid(bpn);
+        String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ);
+
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
         String vpAsJwt = String.valueOf(presentation.get(VERIFIABLE_PRESENTATION));
         JWT jwt = JWTParser.parse(vpAsJwt);
+
         Assertions.assertNotNull(presentation);
         Assertions.assertEquals(did, jwt.getJWTClaimsSet().getSubject());
         Assertions.assertEquals(did, jwt.getJWTClaimsSet().getIssuer());
@@ -102,11 +97,12 @@ public class PresentationServiceTest {
     void createPresentation200ResponseAsJsonLD() {
         boolean asJwt = false;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndSetDid(bpn);
-        String accessToken = generateAccessToken(did, did, did, NONCE,
-                BPN_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
+        String did = generateWalletAndGetDid(bpn);
+        String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ);
+
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
         Assertions.assertNotNull(presentation);
+
         VerifiablePresentation vp = (VerifiablePresentation) presentation.get(VERIFIABLE_PRESENTATION);
         Assertions.assertNotNull(vp.getVerifiableCredentials());
         VerifiableCredential verifiableCredential = vp.getVerifiableCredentials().get(0);
@@ -121,9 +117,9 @@ public class PresentationServiceTest {
     void createPresentationIncorrectVcTypeResponse() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndSetDid(bpn);
-        String accessToken = generateAccessToken(did, did, did, "12345",
-                INVALID_CREDENTIAL_READ, EXP_VALID_DATE, IAT_VALID_DATE);
+        String did = generateWalletAndGetDid(bpn);
+        String accessToken = generateAccessToken(did, did, did, INVALID_CREDENTIAL_READ);
+
         Assertions.assertThrows(MissingVcTypesException.class, () ->
                 presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
     }
@@ -132,22 +128,22 @@ public class PresentationServiceTest {
     @Test
     void createPresentationIncorrectRightsRequested() {
         boolean asJwt = true;
-        String accessToken = generateAccessToken(DID_BPN_1, DID_BPN_1, DID_BPN_1, NONCE,
-                BPN_CREDENTIAL_WRITE, EXP_VALID_DATE, IAT_VALID_DATE);
+        String accessToken = generateAccessToken(DID_BPN_1, DID_BPN_1, DID_BPN_1, BPN_CREDENTIAL_WRITE);
+
         Assertions.assertThrows(PermissionViolationException.class, () ->
                 presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
     }
 
     @SneakyThrows
-    private Wallet generateWallet(String bpn) {
+    private String generateWalletAndGetDid(String bpn) {
         String baseBpn = miwSettings.authorityWalletBpn();
         ResponseEntity<String> createWalletResponse = createWallet(bpn, "name", restTemplate, baseBpn);
-        return TestUtils.getWalletFromString(createWalletResponse.getBody());
+        Wallet wallet = TestUtils.getWalletFromString(createWalletResponse.getBody());
+        return wallet.getDid();
     }
 
-
-    private String generateAccessToken(String issUrl, String sub, String aud, String nonce, String scope, Date expDate, Date issDate) throws JOSEException {
-        JWTClaimsSet innerSet = buildClaimsSet(issUrl, sub, aud, nonce, scope, expDate, issDate);
+    private String generateAccessToken(String issUrl, String sub, String aud, String scope) throws JOSEException {
+        JWTClaimsSet innerSet = buildClaimsSet(issUrl, sub, aud, TestConstants.NONCE, scope, EXP_VALID_DATE, IAT_VALID_DATE);
         return buildJWTToken(JWK_INNER, innerSet);
     }
 }
