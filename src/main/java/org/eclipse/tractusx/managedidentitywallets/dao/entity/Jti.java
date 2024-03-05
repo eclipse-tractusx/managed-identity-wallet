@@ -48,6 +48,6 @@ public class Jti extends MIWBaseEntity {
     @Column(nullable = false)
     private String jti;
 
-    @Column(nullable = false)
+    @Column(name = "is_used_status", nullable = false)
     private boolean isUsedStatus;
 }
