@@ -34,12 +34,14 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -96,7 +98,7 @@ class PresentationValidationTest {
     private VerifiableCredential membershipCredential_2;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DidParseException {
         bpnOperator = miwSettings.authorityWalletBpn();
 
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();
@@ -117,11 +119,13 @@ class PresentationValidationTest {
 
         IssueMembershipCredentialRequest issueMembershipCredentialRequest = new IssueMembershipCredentialRequest();
         issueMembershipCredentialRequest.setBpn(bpnTenant_1);
-        membershipCredential_1 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, bpnOperator);
 
+        CredentialsResponse rs1 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, false, bpnOperator);
+        membershipCredential_1 = new ObjectMapper().convertValue(rs1, VerifiableCredential.class);
         IssueMembershipCredentialRequest issueMembershipCredentialRequest2 = new IssueMembershipCredentialRequest();
         issueMembershipCredentialRequest2.setBpn(bpnTenant_2);
-        membershipCredential_2 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest2, bpnOperator);
+        CredentialsResponse rs2 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest2, false, bpnOperator);
+        membershipCredential_2 = new ObjectMapper().convertValue(rs2, VerifiableCredential.class);
     }
 
     @Test
