@@ -33,8 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Jti;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
@@ -67,6 +69,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.BLANK_SEPARATOR;
@@ -75,6 +78,7 @@ import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.CO
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.UNDERSCORE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getScope;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getStringClaim;
 
 /**
  * The type Presentation service.
@@ -96,6 +100,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     private final MIWSettings miwSettings;
 
     private final DidDocumentResolverService didDocumentResolverService;
+
+    private final JtiRepository jtiRepository;
 
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {
@@ -290,11 +296,14 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     }
 
     public Map<String, Object> createVpWithRequiredScopes(SignedJWT innerJWT, boolean asJwt) {
+
+        JWTClaimsSet jwtClaimsSet = getClaimsSet(innerJWT);
+        Jti jti = getJtiRecord(jwtClaimsSet);
+
         List<HoldersCredential> holdersCredentials = new ArrayList<>();
         List<String> missingVCTypes = new ArrayList<>();
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>();
 
-        JWTClaimsSet jwtClaimsSet = getClaimsSet(innerJWT);
         String scopeValue = getScope(jwtClaimsSet);
         String[] scopes = scopeValue.split(BLANK_SEPARATOR);
 
@@ -319,8 +328,10 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         holdersCredentials.forEach(c -> verifiableCredentials.add(c.getData()));
 
-        return buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
+        Map<String, Object> vp = buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
                 callerWallet, verifiableCredentials);
+        changeJtiStatus(jti);
+        return vp;
     }
 
     private void checkReadPermission(String permission) {
@@ -339,5 +350,22 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     private String removeVersion(String vcType) {
         String[] parts = vcType.split(UNDERSCORE);
         return (parts.length > 1) ? parts[0] : vcType;
+    }
+
+    private Jti getJtiRecord(JWTClaimsSet jwtClaimsSet) {
+        String jtiValue = getStringClaim(jwtClaimsSet, "jti");
+        Jti jti = jtiRepository.getByJti(jtiValue);
+        if (Objects.isNull(jti)) {
+            throw new BadDataException("Jti record does not exist");
+        } else if (jti.isUsedStatus()) {
+            throw new BadDataException("The token was already used");
+        } else {
+            return jti;
+        }
+    }
+
+    private void changeJtiStatus(Jti jti) {
+        jti.setUsedStatus(true);
+        jtiRepository.save(jti);
     }
 }
