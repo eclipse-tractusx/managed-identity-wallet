@@ -221,7 +221,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public CredentialsResponse issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
+    public CredentialsResponse issueFrameworkCredential(IssueFrameworkCredentialRequest request, boolean asJwt, String callerBPN) {
 
         //validate type
         Validate.isFalse(miwSettings.supportedFrameworkVCTypes().contains(request.getType())).launch(new BadDataException("Framework credential of type " + request.getType() + " is not supported, supported values are " + miwSettings.supportedFrameworkVCTypes()));
@@ -261,7 +261,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         final CredentialsResponse cr = new CredentialsResponse();
 
         // Return VC
-        if (request.isAsJwt()) {
+        if (asJwt) {
             cr.setJwt(CommonUtils.vcAsJwt(baseWallet, holderWallet, issuersCredential.getData() , walletKeyService));
         } else {
             cr.setVc(issuersCredential.getData());
@@ -280,7 +280,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public CredentialsResponse issueDismantlerCredential(IssueDismantlerCredentialRequest request, String callerBPN) {
+    public CredentialsResponse issueDismantlerCredential(IssueDismantlerCredentialRequest request, boolean asJwt,  String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(request.getBpn());
@@ -320,7 +320,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         final CredentialsResponse cr = new CredentialsResponse();
 
         // Return VC
-        if (request.isAsJwt()) {
+        if (asJwt) {
             cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
         } else {
             cr.setVc(issuersCredential.getData());
@@ -339,7 +339,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public CredentialsResponse issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, String callerBPN) {
+    public CredentialsResponse issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, boolean asJwt, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
@@ -382,7 +382,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         final CredentialsResponse cr = new CredentialsResponse();
 
         // Return VC
-        if (issueMembershipCredentialRequest.isAsJwt()) {
+        if (asJwt) {
             cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
         } else {
             cr.setVc(issuersCredential.getData());
@@ -403,7 +403,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public CredentialsResponse issueCredentialUsingBaseWallet(String holderDid, Map<String, Object> data, String callerBpn , boolean asJwt) {
+    public CredentialsResponse issueCredentialUsingBaseWallet(String holderDid, Map<String, Object> data, boolean asJwt, String callerBpn) {
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(holderDid);
 

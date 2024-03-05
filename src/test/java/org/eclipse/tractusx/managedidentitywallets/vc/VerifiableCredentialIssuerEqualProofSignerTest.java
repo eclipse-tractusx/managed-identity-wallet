@@ -11,7 +11,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.CommonService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -114,7 +114,7 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(signerWallet.getId(), signerWallet.getAlgorithm());
 
         JWSSignature2020 proof =
-                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKeyBytes));
+                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x25519PrivateKey(privateKeyBytes));
 
         //Adding Proof to VC
         builder.proof(proof);

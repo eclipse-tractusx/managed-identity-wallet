@@ -186,19 +186,19 @@ public class CommonUtils {
         Did issuerDid = DidParser.parse(issuerWallet.getDid());
         Did holderDid = DidParser.parse(holderWallet.getDid());
 
-        WalletKey walletKey = walletKeyService.get(issuerWallet.getId());
-
         // JWT Factory
         SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()));
 
-        x25519PrivateKey privateKey = walletKeyService.getPrivateKeyByWalletIdentifier(walletKey.getId());
+        x25519PrivateKey privateKey = walletKeyService.getPrivateKeyByWalletId(issuerWallet.getId());
         // JWT Factory
 
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, Date.from(vc.getExpirationDate()), vc,
                 privateKey,
-                walletKey.getKeyId());
+                walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId()));
 
         return vcJWT.serialize();
     }
+
+
 }

@@ -102,4 +102,5 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
             throw new UnsupportedAlgorithmException("Unsupported algorithm: " + algorithm);
         }
     }
+
 }
