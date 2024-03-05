@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class TestUtils {
 
@@ -226,7 +227,7 @@ public class TestUtils {
         return signedJWT.serialize();
     }
 
-    public static JWTClaimsSet buildClaimsSet(String issuer, String subject, String audience, String nonce, String scope, Date expiration, Date issuance) {
+    public static JWTClaimsSet buildClaimsSet(String issuer, String subject, String audience, String nonce, String scope, Date expiration, Date issuance, String jti) {
         return new JWTClaimsSet.Builder()
                 .issuer(issuer)
                 .subject(subject)
@@ -235,7 +236,12 @@ public class TestUtils {
                 .issueTime(issuance)
                 .claim("nonce", nonce)
                 .claim("scope", scope)
+                .claim("jti", jti)
                 .build();
+    }
+
+    public static String generateUuid() {
+        return UUID.randomUUID().toString();
     }
 
     public static JWTClaimsSet addAccessTokenToClaimsSet(String accessToken, JWTClaimsSet initialSet) {

@@ -24,6 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.controller;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
@@ -53,6 +54,9 @@ class SecureTokenControllerTest {
 
     @Autowired
     private TestRestTemplate testTemplate;
+
+    @Autowired
+    private JtiRepository jtiRepository;
 
     @Test
     void token() {

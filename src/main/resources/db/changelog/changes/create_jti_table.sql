@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS public.jti
     id                bigserial     NOT NULL,
     jti               uuid          NOT NULL,
     is_used_status    bool          NOT NULL,
+    created_at    timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified_at   timestamp(6) NULL,
+    modified_from varchar(255) NULL,
     CONSTRAINT jti_pkey PRIMARY KEY (id)
 );
 COMMENT ON TABLE public.jti IS 'This table will store jti field statuses';
