@@ -25,6 +25,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+
+import lombok.SneakyThrows;
+
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
@@ -55,6 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
@@ -125,7 +129,8 @@ class PresentationTest {
     }
 
     @Test
-    void validateVPAsJwtWithInvalidSignatureAndInValidAudienceAndExpiryDateValidation() throws JsonProcessingException, DidDocumentResolverNotRegisteredException, JwtException, InterruptedException {
+    @SneakyThrows
+    void validateVPAsJwtWithInvalidSignatureAndInValidAudienceAndExpiryDateValidation() {
         //create VP
         String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
