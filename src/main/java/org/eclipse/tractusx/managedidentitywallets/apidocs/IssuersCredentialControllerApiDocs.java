@@ -1,10 +1,5 @@
 package org.eclipse.tractusx.managedidentitywallets.apidocs;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +9,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 public class IssuersCredentialControllerApiDocs {
     /**
@@ -1177,7 +1177,6 @@ public class IssuersCredentialControllerApiDocs {
     })
     public @interface IssueVerifiableCredentialUsingBaseWalletApiDocs {
     }
-
 
     @Parameter(description = "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). "
             +

@@ -196,7 +196,6 @@ public class CommonUtils {
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, vc,
                 privateKey,
                 walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId())
-
         );
         return vcJWT.serialize();
     }

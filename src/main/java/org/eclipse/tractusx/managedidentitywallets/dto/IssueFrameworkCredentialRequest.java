@@ -55,7 +55,6 @@ import lombok.Setter;
     @NotBlank(message = "Please provide contract-template")
      @JsonProperty("contract-version")
      private String contractVersion;
-
     @JsonProperty("asJwt")
     private boolean asJwt;
 

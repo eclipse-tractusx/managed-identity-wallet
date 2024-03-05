@@ -163,7 +163,6 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         if (verifiableCredential.getExpirationDate() != null) {
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
-
         // Create Credential
         HoldersCredential credential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),

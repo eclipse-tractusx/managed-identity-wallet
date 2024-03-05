@@ -105,7 +105,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     }
 
        /**
-     * Gets wallet key by wallet identifier.
+        * Gets wallet key by wallet id.
      *
      * @param walletId the wallet id
      * @return the wallet key by wallet identifier
@@ -114,6 +114,5 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     public String getWalletKeyIdByWalletId(long walletId) {
         return walletKeyRepository.getByWalletId(walletId).getKeyId();
     }
-
 
 }
