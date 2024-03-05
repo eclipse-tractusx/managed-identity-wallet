@@ -52,8 +52,6 @@
      @JsonProperty("contract-version")
      private String contractVersion;
  
-     @JsonProperty("asJwt")
-     private boolean asJwt;
      
  }
  

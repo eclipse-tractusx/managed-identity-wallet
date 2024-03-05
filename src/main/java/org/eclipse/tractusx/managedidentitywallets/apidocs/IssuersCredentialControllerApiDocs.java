@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -1175,5 +1176,20 @@ public class IssuersCredentialControllerApiDocs {
                     """))
     })
     public @interface IssueVerifiableCredentialUsingBaseWalletApiDocs {
+    }
+
+    
+    @Parameter(description = "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). "
+            +
+            "If set to true, the VC will be generated in JWT format"
+            +
+            "Setting this parameter to false will result in the VC being created as JSON-LD " +
+            "Defaults to false if not specified.", examples = {
+                    @ExampleObject(name = "Create VC as JWT", value = "true"),
+                    @ExampleObject(name = "Do not create VC as JWT", value = "false")
+            })
+    @Target(ElementType.PARAMETER)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface AsJwtParam {
     }
 }

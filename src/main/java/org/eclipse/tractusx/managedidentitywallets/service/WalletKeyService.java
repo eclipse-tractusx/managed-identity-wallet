@@ -66,7 +66,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      */
     @SneakyThrows
     public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
-        return getPrivateKeyByWalletIdentifier(walletId).asByte();
+        return getPrivateKeyByWalletId(walletId).asByte();
     }
 
     /**
@@ -76,12 +76,22 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * @return the private key by wallet identifier
      */
     @SneakyThrows
-
-    public x25519PrivateKey getPrivateKeyByWalletIdentifier(long walletId) {
+    public x25519PrivateKey getPrivateKeyByWalletId(long walletId) {
         WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
         return new x25519PrivateKey(content);
+    }
+
+    /**
+     * Gets wallet key by wallet identifier.
+     *
+     * @param walletId the wallet id
+     * @return the wallet key by wallet identifier
+     */
+    @SneakyThrows
+    public String getWalletKeyIdByWalletId(long walletId) {
+        return walletKeyRepository.getByWalletId(walletId).getKeyId();
     }
 
 }

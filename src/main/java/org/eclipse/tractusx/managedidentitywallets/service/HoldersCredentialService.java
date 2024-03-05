@@ -144,7 +144,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      * @param callerBpn the caller bpn
      * @return the verifiable credential
      */
-    public CredentialsResponse issueCredential(Map<String, Object> data, String callerBpn , boolean asJwt) {
+    public CredentialsResponse issueCredential(Map<String, Object> data, boolean asJwt,  String callerBpn) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
@@ -159,6 +159,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         if (verifiableCredential.getExpirationDate() != null) {
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
+        
         // Create Credential
         HoldersCredential credential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),

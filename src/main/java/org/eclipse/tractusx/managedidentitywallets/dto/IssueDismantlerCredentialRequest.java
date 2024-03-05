@@ -27,8 +27,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Set;
 
 /**
@@ -52,6 +50,4 @@ public class IssueDismantlerCredentialRequest {
     @Builder.Default
     private Set<@NotBlank String> allowedVehicleBrands = Set.of();
 
-    @JsonProperty("asJwt")
-    private boolean asJwt;
 }

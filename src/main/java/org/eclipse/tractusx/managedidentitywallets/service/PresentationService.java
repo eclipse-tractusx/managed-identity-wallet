@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -159,7 +159,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                     new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), vpIssuerDid);
 
             //Build JWT
-            x25519PrivateKey ed25519Key = walletKeyService.getPrivateKeyByWalletIdentifier(callerWallet.getId());
+            x25519PrivateKey ed25519Key = walletKeyService.getPrivateKeyByWalletId(callerWallet.getId());
             x25519PrivateKey privateKey = new x25519PrivateKey(ed25519Key.asByte());
             SignedJWT presentation = presentationFactory.createPresentation(vpIssuerDid
                     , verifiableCredentials, audience, privateKey, walletKey.getKeyId());

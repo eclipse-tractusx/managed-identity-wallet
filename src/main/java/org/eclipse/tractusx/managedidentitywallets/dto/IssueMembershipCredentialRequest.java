@@ -26,7 +26,6 @@
  import lombok.*;
  import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
  
  /**
   * The type Issue membership credential request.
@@ -41,9 +40,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
      @NotBlank(message = "Please provide BPN")
      @Pattern(regexp = StringPool.BPN_NUMBER_REGEX, message = "Please provide valid BPN")
      private String bpn;
- 
-     @JsonProperty("asJwt")
-     private boolean asJwt;
+     
  }
  
  
