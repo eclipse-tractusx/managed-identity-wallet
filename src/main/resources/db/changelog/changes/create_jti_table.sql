@@ -19,6 +19,9 @@
  * ******************************************************************************
  */
 
+-- liquibase formatted sql
+-- changeset andreibogus:create-jti-table
+
 CREATE TABLE IF NOT EXISTS public.jti
 (
     id                bigserial     NOT NULL,
