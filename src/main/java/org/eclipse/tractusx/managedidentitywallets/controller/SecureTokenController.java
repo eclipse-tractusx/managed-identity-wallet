@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.SecureTokenControllerApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Jti;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
@@ -59,6 +59,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getJtiAccessToken;
@@ -124,8 +125,8 @@ public class SecureTokenController {
         // store jti info in repository
         JWTClaimsSet jwtClaimsSet = responseJwt.getJWTClaimsSet();
         String jtiValue = getJtiAccessToken(jwtClaimsSet);
-        Jti jti = Jti.builder().jti(jtiValue).isUsedStatus(false).build();
-        jtiRepository.save(jti);
+        JtiRecord jtiRecord = JtiRecord.builder().jti(UUID.fromString(jtiValue)).isUsedStatus(false).build();
+        jtiRepository.save(jtiRecord);
 
         // create the response
         log.debug("Preparing StsTokenResponse.");

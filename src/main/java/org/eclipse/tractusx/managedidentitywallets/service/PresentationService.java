@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Jti;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
@@ -298,7 +298,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     public Map<String, Object> createVpWithRequiredScopes(SignedJWT innerJWT, boolean asJwt) {
 
         JWTClaimsSet jwtClaimsSet = getClaimsSet(innerJWT);
-        Jti jti = getJtiRecord(jwtClaimsSet);
+        JtiRecord jtiRecord = getJtiRecord(jwtClaimsSet);
 
         List<HoldersCredential> holdersCredentials = new ArrayList<>();
         List<String> missingVCTypes = new ArrayList<>();
@@ -330,7 +330,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         Map<String, Object> vp = buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
                 callerWallet, verifiableCredentials);
-        changeJtiStatus(jti);
+        changeJtiStatus(jtiRecord);
         return vp;
     }
 
@@ -352,20 +352,20 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return (parts.length > 1) ? parts[0] : vcType;
     }
 
-    private Jti getJtiRecord(JWTClaimsSet jwtClaimsSet) {
+    private JtiRecord getJtiRecord(JWTClaimsSet jwtClaimsSet) {
         String jtiValue = getStringClaim(jwtClaimsSet, "jti");
-        Jti jti = jtiRepository.getByJti(jtiValue);
-        if (Objects.isNull(jti)) {
+        JtiRecord jtiRecord = jtiRepository.getByJti(UUID.fromString(jtiValue));
+        if (Objects.isNull(jtiRecord)) {
             throw new BadDataException("Jti record does not exist");
-        } else if (jti.isUsedStatus()) {
+        } else if (jtiRecord.isUsedStatus()) {
             throw new BadDataException("The token was already used");
         } else {
-            return jti;
+            return jtiRecord;
         }
     }
 
-    private void changeJtiStatus(Jti jti) {
-        jti.setUsedStatus(true);
-        jtiRepository.save(jti);
+    private void changeJtiStatus(JtiRecord jtiRecord) {
+        jtiRecord.setUsedStatus(true);
+        jtiRepository.save(jtiRecord);
     }
 }

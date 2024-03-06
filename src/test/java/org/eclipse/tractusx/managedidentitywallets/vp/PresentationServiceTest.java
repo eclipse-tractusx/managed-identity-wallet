@@ -30,7 +30,7 @@ import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Jti;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
@@ -51,6 +51,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_READ;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_WRITE;
@@ -90,8 +91,8 @@ public class PresentationServiceTest {
         String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
-        Jti jti = buildJti(jtiValue, false);
-        jtiRepository.save(jti);
+        JtiRecord jtiRecord = buildJti(jtiValue, false);
+        jtiRepository.save(jtiRecord);
 
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
         String vpAsJwt = String.valueOf(presentation.get(VERIFIABLE_PRESENTATION));
@@ -110,8 +111,8 @@ public class PresentationServiceTest {
         String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
-        Jti jti = buildJti(jtiValue, false);
-        jtiRepository.save(jti);
+        JtiRecord jtiRecord = buildJti(jtiValue, false);
+        jtiRepository.save(jtiRecord);
 
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
         Assertions.assertNotNull(presentation);
@@ -133,8 +134,8 @@ public class PresentationServiceTest {
         String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, INVALID_CREDENTIAL_READ, jtiValue);
-        Jti jti = buildJti(jtiValue, false);
-        jtiRepository.save(jti);
+        JtiRecord jtiRecord = buildJti(jtiValue, false);
+        jtiRepository.save(jtiRecord);
 
         Assertions.assertThrows(MissingVcTypesException.class, () ->
                 presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
@@ -146,8 +147,8 @@ public class PresentationServiceTest {
         boolean asJwt = true;
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(DID_BPN_1, DID_BPN_1, DID_BPN_1, BPN_CREDENTIAL_WRITE, jtiValue);
-        Jti jti = buildJti(jtiValue, false);
-        jtiRepository.save(jti);
+        JtiRecord jtiRecord = buildJti(jtiValue, false);
+        jtiRepository.save(jtiRecord);
 
         Assertions.assertThrows(PermissionViolationException.class, () ->
                 presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
@@ -173,8 +174,8 @@ public class PresentationServiceTest {
         String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
-        Jti jti = buildJti(jtiValue, true);
-        jtiRepository.save(jti);
+        JtiRecord jtiRecord = buildJti(jtiValue, true);
+        jtiRepository.save(jtiRecord);
 
         BadDataException ex = Assertions.assertThrows(BadDataException.class, () -> presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
         Assertions.assertEquals("The token was already used", ex.getMessage());
@@ -188,8 +189,8 @@ public class PresentationServiceTest {
         return wallet.getDid();
     }
 
-    private Jti buildJti(String value, boolean isUsed) {
-        return Jti.builder().jti(value).isUsedStatus(isUsed).build();
+    private JtiRecord buildJti(String value, boolean isUsed) {
+        return JtiRecord.builder().jti(UUID.fromString(value)).isUsedStatus(isUsed).build();
     }
 
     private String generateAccessToken(String issUrl, String sub, String aud, String scope, String jwt) throws JOSEException {

@@ -27,7 +27,6 @@ import lombok.experimental.UtilityClass;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 
 import java.text.ParseException;
-import java.util.Objects;
 import java.util.Optional;
 
 @UtilityClass
@@ -37,6 +36,7 @@ public class TokenParsingUtils {
     public static final String PARSING_TOKEN_ERROR = "Could not parse jwt token";
     public static final String SCOPE = "scope";
     public static final String BEARER_ACCESS_SCOPE = "bearer_access_scope";
+    public static final String ACCESS_TOKEN_ERROR = "Access token not present";
     public static final String JTI = "jti";
 
     public static JWTClaimsSet getClaimsSet(SignedJWT tokenParsed) {
@@ -76,7 +76,7 @@ public class TokenParsingUtils {
         SignedJWT jwtOuter = parseToken(outerToken);
         JWTClaimsSet claimsSet = getClaimsSet(jwtOuter);
         Optional<String> accessToken = getAccessToken(claimsSet);
-        return accessToken.map(TokenParsingUtils::parseToken).orElse(null);
+        return accessToken.map(TokenParsingUtils::parseToken).orElseThrow(() -> new BadDataException(ACCESS_TOKEN_ERROR));
     }
 
     public static String getScope(JWTClaimsSet jwtClaimsSet) {
@@ -93,7 +93,7 @@ public class TokenParsingUtils {
 
     public static String getJtiAccessToken(JWTClaimsSet jwtClaimsSet) {
         Optional<String> token = getAccessToken(jwtClaimsSet);
-        String accessToken = Objects.requireNonNull(token.get());
+        String accessToken = token.orElseThrow(() -> new BadDataException(ACCESS_TOKEN_ERROR));
         SignedJWT accessTokenJwt = parseToken(accessToken);
         JWTClaimsSet accessTokenClaimsSet = getClaimsSet(accessTokenJwt);
         return getStringClaim(accessTokenClaimsSet, JTI);

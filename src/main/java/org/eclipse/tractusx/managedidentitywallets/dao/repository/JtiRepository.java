@@ -22,11 +22,13 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Jti;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
-public interface JtiRepository extends BaseRepository<Jti, Long> {
+public interface JtiRepository extends BaseRepository<JtiRecord, Long> {
 
     /**
      * Gets by jti.
@@ -34,5 +36,5 @@ public interface JtiRepository extends BaseRepository<Jti, Long> {
      * @param jtiNumber the jti
      * @return the by jti
      */
-    Jti getByJti(String jtiNumber);
+    JtiRecord getByJti(UUID jtiNumber);
 }
