@@ -1,3 +1,15 @@
+# [0.5.0-develop.7](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.6...v0.5.0-develop.7) (2024-03-07)
+
+
+### Bug Fixes
+
+* fix bug with token re-wrapping ([e047550](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e04755016aecdf6d6ade0eebae065f36ce80d429))
+
+
+### Features
+
+* add logic regarding jti info store and check ([6809578](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6809578d208bc0380fa8a34bf119227e12ea1ecd))
+
 # [0.5.0-develop.6](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.5...v0.5.0-develop.6) (2024-03-01)
 
 
