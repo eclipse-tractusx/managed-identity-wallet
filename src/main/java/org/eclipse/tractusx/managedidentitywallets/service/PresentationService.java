@@ -79,6 +79,7 @@ import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.UN
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getScope;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getStringClaim;
+import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
 
 /**
  * The type Presentation service.
@@ -353,7 +354,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     }
 
     private JtiRecord getJtiRecord(JWTClaimsSet jwtClaimsSet) {
-        String jtiValue = getStringClaim(jwtClaimsSet, "jti");
+        String jtiValue = getStringClaim(jwtClaimsSet, JTI);
         JtiRecord jtiRecord = jtiRepository.getByJti(UUID.fromString(jtiValue));
         if (Objects.isNull(jtiRecord)) {
             throw new BadDataException("Jti record does not exist");

@@ -65,6 +65,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.SCOPE;
+import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
+import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
+
 public class TestUtils {
 
     public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate, String baseBPN) {
@@ -234,9 +239,9 @@ public class TestUtils {
                 .audience(audience)
                 .expirationTime(expiration)
                 .issueTime(issuance)
-                .claim("nonce", nonce)
-                .claim("scope", scope)
-                .claim("jti", jti)
+                .claim(NONCE, nonce)
+                .claim(SCOPE, scope)
+                .claim(JTI, jti)
                 .build();
     }
 
@@ -245,7 +250,7 @@ public class TestUtils {
     }
 
     public static JWTClaimsSet addAccessTokenToClaimsSet(String accessToken, JWTClaimsSet initialSet) {
-        return new JWTClaimsSet.Builder(initialSet).claim("access_token", accessToken).build();
+        return new JWTClaimsSet.Builder(initialSet).claim(ACCESS_TOKEN, accessToken).build();
     }
 
     public static Wallet buildWallet(String bpn, String did, String didJson) {

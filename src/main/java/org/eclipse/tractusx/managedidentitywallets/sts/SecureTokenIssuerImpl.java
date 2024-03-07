@@ -45,8 +45,10 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getNonceAccessToken;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.SCOPE;
+import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
 
 @Slf4j
 @Component
@@ -63,6 +65,7 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
                 .audience(partner.toString())
                 .subject(self.toString())
                 .expirationTime(Date.from(expirationTime))
+                .claim(NONCE, getNonceAccessToken(accessToken))
                 .claim(ACCESS_TOKEN, accessToken.serialize()));
     }
 
@@ -74,6 +77,7 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
                 .audience(self.toString())
                 .subject(partner.toString())
                 .expirationTime(Date.from(expirationTime))
+                .claim(NONCE, UUID.randomUUID().toString())
                 .claim(SCOPE, String.join(" ", scopes)));
     }
 

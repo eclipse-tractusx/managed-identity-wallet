@@ -41,7 +41,7 @@ import java.util.Optional;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getAccessToken;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.parseToken;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils.NONCE;
+import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
 
 @Service
 @Slf4j

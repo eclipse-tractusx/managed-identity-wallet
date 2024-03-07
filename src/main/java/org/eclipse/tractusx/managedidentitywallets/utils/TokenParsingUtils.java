@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.experimental.UtilityClass;
@@ -29,15 +30,17 @@ import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import java.text.ParseException;
 import java.util.Optional;
 
+import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
+import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.SCOPE;
+
 @UtilityClass
 public class TokenParsingUtils {
 
-    public static final String ACCESS_TOKEN = "access_token";
     public static final String PARSING_TOKEN_ERROR = "Could not parse jwt token";
-    public static final String SCOPE = "scope";
     public static final String BEARER_ACCESS_SCOPE = "bearer_access_scope";
     public static final String ACCESS_TOKEN_ERROR = "Access token not present";
-    public static final String JTI = "jti";
 
     public static JWTClaimsSet getClaimsSet(SignedJWT tokenParsed) {
         try {
@@ -97,5 +100,14 @@ public class TokenParsingUtils {
         SignedJWT accessTokenJwt = parseToken(accessToken);
         JWTClaimsSet accessTokenClaimsSet = getClaimsSet(accessTokenJwt);
         return getStringClaim(accessTokenClaimsSet, JTI);
+    }
+
+    public static String getNonceAccessToken(JWT accessToken) {
+        try {
+            JWTClaimsSet claimsSet = accessToken.getJWTClaimsSet();
+            return claimsSet.getStringClaim(NONCE);
+        } catch (ParseException e) {
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
+        }
     }
 }

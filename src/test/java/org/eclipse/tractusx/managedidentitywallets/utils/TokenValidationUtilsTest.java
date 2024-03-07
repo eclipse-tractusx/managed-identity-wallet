@@ -42,7 +42,7 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DI
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_2;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_1;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_JSON_STRING_2;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils.NONCE;
+import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
 
 @ExtendWith(MockitoExtension.class)
 class TokenValidationUtilsTest {

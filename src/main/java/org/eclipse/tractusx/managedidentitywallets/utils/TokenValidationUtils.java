@@ -45,7 +45,6 @@ public class TokenValidationUtils {
 
     private final DidDocumentService service;
 
-    public static final String NONCE = "nonce";
     public static final String DID_FORMAT = "did:";
     private static final int IAT_LEEWAY = 5;
 
