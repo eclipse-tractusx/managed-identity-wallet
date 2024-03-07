@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.sts;
 
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenIssuer;
@@ -37,9 +38,10 @@ public class SecureTokenBeanConfig {
             WalletKeyRepository keyRepository,
             WalletRepository walletRepository,
             SecureTokenIssuer issuer,
-            SecureTokenConfigurationProperties properties
+            SecureTokenConfigurationProperties properties,
+            JtiRepository jtiRepository
     ) {
-        return new SecureTokenServiceImpl(keyRepository, walletRepository, issuer, properties);
+        return new SecureTokenServiceImpl(keyRepository, walletRepository, issuer, properties, jtiRepository);
     }
 
 }

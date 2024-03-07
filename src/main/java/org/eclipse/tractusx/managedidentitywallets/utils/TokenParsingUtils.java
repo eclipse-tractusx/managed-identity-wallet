@@ -94,18 +94,17 @@ public class TokenParsingUtils {
         }
     }
 
-    public static String getJtiAccessToken(JWTClaimsSet jwtClaimsSet) {
-        Optional<String> token = getAccessToken(jwtClaimsSet);
-        String accessToken = token.orElseThrow(() -> new BadDataException(ACCESS_TOKEN_ERROR));
-        SignedJWT accessTokenJwt = parseToken(accessToken);
-        JWTClaimsSet accessTokenClaimsSet = getClaimsSet(accessTokenJwt);
-        return getStringClaim(accessTokenClaimsSet, JTI);
+    public static String getJtiAccessToken(JWT accessToken) {
+        try {
+            return getStringClaim(accessToken.getJWTClaimsSet(), JTI);
+        } catch (ParseException e) {
+            throw new BadDataException(PARSING_TOKEN_ERROR, e);
+        }
     }
 
     public static String getNonceAccessToken(JWT accessToken) {
         try {
-            JWTClaimsSet claimsSet = accessToken.getJWTClaimsSet();
-            return claimsSet.getStringClaim(NONCE);
+            return accessToken.getJWTClaimsSet().getStringClaim(NONCE);
         } catch (ParseException e) {
             throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }

@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vp;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -128,6 +127,23 @@ public class PresentationServiceTest {
 
     @SneakyThrows
     @Test
+    void createPresentation200ResponseNoJtiRecord() {
+        boolean asJwt = true;
+        String bpn = TestUtils.getRandomBpmNumber();
+        String did = generateWalletAndGetDid(bpn);
+        String jtiValue = generateUuid();
+        String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
+
+        Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
+        String vpAsJwt = String.valueOf(presentation.get(VERIFIABLE_PRESENTATION));
+        JWT jwt = JWTParser.parse(vpAsJwt);
+
+        Assertions.assertNotNull(presentation);
+        Assertions.assertEquals(did, jwt.getJWTClaimsSet().getSubject());
+        Assertions.assertEquals(did, jwt.getJWTClaimsSet().getIssuer());
+    }
+
+    @Test
     void createPresentationIncorrectVcTypeResponse() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
@@ -141,7 +157,6 @@ public class PresentationServiceTest {
                 presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
     }
 
-    @SneakyThrows
     @Test
     void createPresentationIncorrectRightsRequested() {
         boolean asJwt = true;
@@ -154,19 +169,6 @@ public class PresentationServiceTest {
                 presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
     }
 
-    @SneakyThrows
-    @Test
-    void createPresentationIncorrectNoJtiRecord() {
-        boolean asJwt = false;
-        String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndGetDid(bpn);
-        String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, generateUuid());
-
-        BadDataException ex = Assertions.assertThrows(BadDataException.class, () -> presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt));
-        Assertions.assertEquals("Jti record does not exist", ex.getMessage());
-    }
-
-    @SneakyThrows
     @Test
     void createPresentationIncorrectJtiAlreadyUsed() {
         boolean asJwt = false;
@@ -193,7 +195,8 @@ public class PresentationServiceTest {
         return JtiRecord.builder().jti(UUID.fromString(value)).isUsedStatus(isUsed).build();
     }
 
-    private String generateAccessToken(String issUrl, String sub, String aud, String scope, String jwt) throws JOSEException {
+    @SneakyThrows
+    private String generateAccessToken(String issUrl, String sub, String aud, String scope, String jwt)  {
         JWTClaimsSet innerSet = buildClaimsSet(issUrl, sub, aud, TestConstants.NONCE, scope, EXP_VALID_DATE, IAT_VALID_DATE, jwt);
         return buildJWTToken(JWK_INNER, innerSet);
     }

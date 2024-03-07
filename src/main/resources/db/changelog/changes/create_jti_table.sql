@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS public.jti
     created_at    timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modified_at   timestamp(6) NULL,
     modified_from varchar(255) NULL,
-    CONSTRAINT jti_pkey PRIMARY KEY (id)
+    CONSTRAINT jti_pkey PRIMARY KEY (id),
+    CONSTRAINT uk_jti UNIQUE (jti)
 );
 COMMENT ON TABLE public.jti IS 'This table will store jti field statuses';

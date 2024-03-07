@@ -357,7 +357,9 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         String jtiValue = getStringClaim(jwtClaimsSet, JTI);
         JtiRecord jtiRecord = jtiRepository.getByJti(UUID.fromString(jtiValue));
         if (Objects.isNull(jtiRecord)) {
-            throw new BadDataException("Jti record does not exist");
+            JtiRecord jtiToAdd = JtiRecord.builder().jti(UUID.fromString(jtiValue)).isUsedStatus(false).build();
+            jtiRepository.save(jtiToAdd);
+            return jtiToAdd;
         } else if (jtiRecord.isUsedStatus()) {
             throw new BadDataException("The token was already used");
         } else {

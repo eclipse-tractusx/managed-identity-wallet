@@ -22,7 +22,6 @@
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,8 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.SecureTokenControllerApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
@@ -59,10 +56,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getJtiAccessToken;
 
 @RestController
 @Slf4j
@@ -75,8 +70,6 @@ public class SecureTokenController {
     private final IdpAuthorization idpAuthorization;
 
     private final WalletRepository walletRepo;
-
-    private final JtiRepository jtiRepository;
 
     @InitBinder
     void initBinder(WebDataBinder webDataBinder) {
@@ -122,17 +115,11 @@ public class SecureTokenController {
             throw new InvalidSecureTokenRequestException("The provided data could not be used to create and sign a token.");
         }
 
-        // store jti info in repository
-        JWTClaimsSet jwtClaimsSet = responseJwt.getJWTClaimsSet();
-        String jtiValue = getJtiAccessToken(jwtClaimsSet);
-        JtiRecord jtiRecord = JtiRecord.builder().jti(UUID.fromString(jtiValue)).isUsedStatus(false).build();
-        jtiRepository.save(jtiRecord);
-
         // create the response
         log.debug("Preparing StsTokenResponse.");
         StsTokenResponse response = StsTokenResponse.builder()
                 .token(responseJwt.serialize())
-                .expiresAt(jwtClaimsSet.getExpirationTime().getTime())
+                .expiresAt(responseJwt.getJWTClaimsSet().getExpirationTime().getTime())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
