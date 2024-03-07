@@ -38,10 +38,10 @@ import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenErrorResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
+import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponseException;
 import org.eclipse.tractusx.managedidentitywallets.exception.InvalidSecureTokenRequestException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumberException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
-import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponseException;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.service.IdpAuthorization;
 import org.eclipse.tractusx.managedidentitywallets.validator.SecureTokenRequestValidator;
@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
 import java.util.regex.Pattern;
+
 
 @RestController
 @Slf4j

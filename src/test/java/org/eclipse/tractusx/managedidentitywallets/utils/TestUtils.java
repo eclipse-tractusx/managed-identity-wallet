@@ -63,6 +63,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.SCOPE;
+import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
+import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
 
 public class TestUtils {
 
@@ -226,20 +232,25 @@ public class TestUtils {
         return signedJWT.serialize();
     }
 
-    public static JWTClaimsSet buildClaimsSet(String issuer, String subject, String audience, String nonce, String scope, Date expiration, Date issuance) {
+    public static JWTClaimsSet buildClaimsSet(String issuer, String subject, String audience, String nonce, String scope, Date expiration, Date issuance, String jti) {
         return new JWTClaimsSet.Builder()
                 .issuer(issuer)
                 .subject(subject)
                 .audience(audience)
                 .expirationTime(expiration)
                 .issueTime(issuance)
-                .claim("nonce", nonce)
-                .claim("scope", scope)
+                .claim(NONCE, nonce)
+                .claim(SCOPE, scope)
+                .claim(JTI, jti)
                 .build();
     }
 
+    public static String generateUuid() {
+        return UUID.randomUUID().toString();
+    }
+
     public static JWTClaimsSet addAccessTokenToClaimsSet(String accessToken, JWTClaimsSet initialSet) {
-        return new JWTClaimsSet.Builder(initialSet).claim("access_token", accessToken).build();
+        return new JWTClaimsSet.Builder(initialSet).claim(ACCESS_TOKEN, accessToken).build();
     }
 
     public static Wallet buildWallet(String bpn, String did, String didJson) {

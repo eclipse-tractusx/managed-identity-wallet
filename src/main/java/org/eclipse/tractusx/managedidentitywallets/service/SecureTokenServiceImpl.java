@@ -24,7 +24,9 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 import com.nimbusds.jwt.JWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
@@ -36,8 +38,12 @@ import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService
 import org.eclipse.tractusx.managedidentitywallets.sts.SecureTokenConfigurationProperties;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getJtiAccessToken;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -51,6 +57,8 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 
     private final SecureTokenConfigurationProperties properties;
 
+    private final JtiRepository jtiRepository;
+
     @Override
     public JWT issueToken(final DID self, final DID partner, final Set<String> scopes) {
         log.debug("'issueToken' using scopes and DID.");
@@ -59,6 +67,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
         // as we're signing two tokens.
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         JWT accessToken = this.tokenIssuer.createAccessToken(keyPair, self, partner, expirationTime, scopes);
+        checkAndStoreJti(accessToken);
         return this.tokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
     }
 
@@ -67,7 +76,17 @@ public class SecureTokenServiceImpl implements SecureTokenService {
         log.debug("'issueToken' using an access_token and DID.");
         KeyPair keyPair = walletKeyRepository.findFirstByWallet_Did(self.toString()).toDto();
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
+        checkAndStoreJti(accessToken);
         return this.tokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
+    }
+
+    private void checkAndStoreJti(JWT accessToken) {
+        String jtiValue = getJtiAccessToken(accessToken);
+        JtiRecord jti = jtiRepository.getByJti(UUID.fromString(jtiValue));
+        if (Objects.isNull(jti)) {
+            JtiRecord jtiRecord = JtiRecord.builder().jti(UUID.fromString(jtiValue)).isUsedStatus(false).build();
+            jtiRepository.save(jtiRecord);
+        }
     }
 
     @Override
