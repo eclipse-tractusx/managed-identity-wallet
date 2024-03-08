@@ -139,6 +139,8 @@ Credentials* recreate the secret.
 
 ## Development Setup
 
+NOTE: The MIW requires access to the internet in order to validate the JSON-LD schema of DID documents.
+
 ### Prerequisites
 
 To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a task executor. You have to install it
