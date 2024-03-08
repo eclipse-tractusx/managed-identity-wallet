@@ -51,14 +51,14 @@ jobs:
       - name: Set outputs
         id: vars
         run: |
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "{sha_short}=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Show version
         run: echo ${APP_VERSION}.${SHORT_SHA}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
