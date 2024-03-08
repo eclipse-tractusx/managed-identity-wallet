@@ -1,3 +1,10 @@
+# [0.5.0-develop.9](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.8...v0.5.0-develop.9) (2024-03-08)
+
+
+### Features
+
+* add logging of auth failures ([ec60117](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/ec60117e68e7e139afb1f1f24179237bae03762c))
+
 # [0.5.0-develop.8](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.7...v0.5.0-develop.8) (2024-03-08)
 
 
