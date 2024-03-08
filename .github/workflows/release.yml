@@ -115,6 +115,15 @@ jobs:
           echo "::notice::${{ env.next_release }}"
           echo "::notice::${{ env.will_create_new_release }}"
 
+      - name: Upload jar to GitHub release
+        if: github.event_name != 'pull_request' && steps.semantic-release.outputs.will_create_new_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ steps.semantic-release.outputs.next_release }}
+        run: |
+          echo "::notice::Uploading jar to GitHub release"
+          gh release upload "v$RELEASE_VERSION" ./build/libs/miw-latest.jar
+
   docker:
     name: Docker Release
     needs: semantic_release
