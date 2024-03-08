@@ -1,3 +1,10 @@
+# [0.5.0-develop.10](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.9...v0.5.0-develop.10) (2024-03-08)
+
+
+### Features
+
+* upload miw jar to gh release ([a7d6aa6](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a7d6aa66b3468e4975711c72f1cfdbf3055dcd20))
+
 # [0.5.0-develop.9](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.8...v0.5.0-develop.9) (2024-03-08)
 
 

@@ -25,8 +25,8 @@ description: |
 
 type: application
 
-version: 0.5.0-develop.9
-appVersion: 0.5.0-develop.9
+version: 0.5.0-develop.10
+appVersion: 0.5.0-develop.10
 
 home: https://github.com/eclipse-tractusx/managed-identity-wallet
 keywords:
