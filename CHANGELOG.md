@@ -1,3 +1,10 @@
+# [0.5.0-develop.8](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.7...v0.5.0-develop.8) (2024-03-08)
+
+
+### Bug Fixes
+
+* possible caching vulnerability in action ([eb2e38f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/eb2e38f6c6650491fcc81b70d1cf6f6fc5a0886f))
+
 # [0.5.0-develop.7](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.6...v0.5.0-develop.7) (2024-03-07)
 
 
