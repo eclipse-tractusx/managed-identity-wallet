@@ -52,7 +52,7 @@ dependencies:
       - bitnami-common
     version: 2.x.x
   - name: postgresql
-    version: 11.9.13
+    version: 12.12.9
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
   - name: pgadmin4

@@ -4,12 +4,12 @@ dependencies:
   version: 15.1.6
 - name: common
   repository: https://charts.bitnami.com/bitnami
-  version: 2.13.3
+  version: 2.14.1
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 11.9.13
+  version: 12.12.9
 - name: pgadmin4
   repository: file://charts/pgadmin4
   version: 1.19.0
-digest: sha256:fb94864221b4fed31894b48ac56b72a2324da0dc1cb1d6888cc52c3490685df7
-generated: "2023-12-15T10:30:41.880265+01:00"
+digest: sha256:bb38e6f088e43dcf33065b7997e18ce4df65ce481da54e45f603f2b16b2a108f
+generated: "2024-01-15T15:49:47.53335592+01:00"
