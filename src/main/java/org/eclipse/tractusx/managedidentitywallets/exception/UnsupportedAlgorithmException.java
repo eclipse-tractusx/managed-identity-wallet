@@ -19,7 +19,15 @@
  * ******************************************************************************
  */
 
--- liquibase formatted sql
--- changeset andreibogus: add column algorithm to wallet_key table
+package org.eclipse.tractusx.managedidentitywallets.exception;
 
-ALTER TABLE public.wallet_key ADD algorithm varchar(255) NOT NULL;
+import java.io.Serial;
+
+public class UnsupportedAlgorithmException extends RuntimeException {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    public UnsupportedAlgorithmException(String message) {
+        super(message);
+    }
+}

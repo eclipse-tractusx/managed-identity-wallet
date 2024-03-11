@@ -41,6 +41,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -227,7 +228,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     private Wallet createWallet(CreateWalletRequest request, boolean authority, String callerBpn) {
         validateCreateWallet(request, callerBpn);
 
-        //create private key pair
+        //create private key pair EdDSA
         IKeyGenerator keyGenerator = new x21559Generator();
         KeyPair keyPair = keyGenerator.generateKey();
         // create additional key pair ES256K
@@ -271,28 +272,36 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .algorithm(StringPool.ED_25519)
                 .build());
 
-
-        WalletKey walletKey = WalletKey.builder()
+        WalletKey walletKeyED25519 = WalletKey.builder()
                 .wallet(wallet)
-                .keyId(keyId)
+                .keyId(UUID.randomUUID().toString())
                 .referenceKey("dummy ref key, removed once vault setup is ready")
                 .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
                 .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
                 .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey().asByte())))
+                .algorithm(SupportedAlgorithms.ED25519.toString())
                 .build();
 
-        //Save key
-        walletKeyService.getRepository().save(walletKey);
+        //Save key EdDSA
+        walletKeyService.getRepository().save(walletKeyED25519);
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
 
-        walletKey.setPrivateKey(encryptionUtils.encrypt(getPrivateKeyString(ecJwk.toECPrivateKey().getEncoded())));
-        walletKey.setPublicKey(encryptionUtils.encrypt(getPublicKeyString(ecJwk.toECPublicKey().getEncoded())));
-        // save second key
-        walletKeyService.getRepository().save(walletKey);
+        WalletKey walletKeyES256K = WalletKey.builder()
+                .wallet(wallet)
+                .keyId(UUID.randomUUID().toString())
+                .referenceKey("dummy ref key, removed once vault setup is ready")
+                .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
+                .privateKey(encryptionUtils.encrypt(getPrivateKeyString(ecJwk.toECPrivateKey().getEncoded())))
+                .publicKey(encryptionUtils.encrypt(getPublicKeyString(ecJwk.toECPublicKey().getEncoded())))
+                .algorithm(SupportedAlgorithms.ES256K.toString())
+                .build();
+
+        //Save key ES256K
+        walletKeyService.getRepository().save(walletKeyES256K);
 
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
-        //issue BPN credentials ES256K
+        //issue BPN credentials
         issuersCredentialService.issueBpnCredential(issuerWallet, wallet, authority);
 
         return wallet;

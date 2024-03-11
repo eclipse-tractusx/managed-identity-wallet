@@ -19,12 +19,12 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.utils;
+package org.eclipse.tractusx.managedidentitywallets.constant;
 
 public enum SupportedAlgorithms {
 
-    ECDSA("EcDSA"),
-    ES256K("ES256K (secp256k1)");
+    ED25519("ED25519"),
+    ES256K("ES256K");
 
     private String value;
 

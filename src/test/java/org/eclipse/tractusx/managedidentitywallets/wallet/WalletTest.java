@@ -174,7 +174,7 @@ class WalletTest {
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
         Assertions.assertEquals(walletFromDB.getName(), name);
         Assertions.assertNotNull(walletFromDB);
-        WalletKey walletKey = walletKeyRepository.getByWalletId(walletFromDB.getId());
+        WalletKey walletKey = walletKeyRepository.getByWalletIdAndAlgorithm(walletFromDB.getId(), walletFromDB.getAlgorithm());
         Assertions.assertNotNull(walletKey);
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
 
