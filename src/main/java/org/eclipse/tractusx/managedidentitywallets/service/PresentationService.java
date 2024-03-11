@@ -30,6 +30,7 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -40,6 +41,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
+import org.eclipse.tractusx.managedidentitywallets.utils.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
@@ -64,7 +66,9 @@ import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresen
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.net.URI;
+import java.security.interfaces.ECPrivateKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,31 +139,45 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             verifiableCredentials.add(verifiableCredential);
         });
 
-        return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials);
+        return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials, false);
     }
 
     @SneakyThrows({ InvalidePrivateKeyFormat.class })
-    private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials) {
+    private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet,
+                                        List<VerifiableCredential> verifiableCredentials, boolean fromIatp) {
         Map<String, Object> response = new HashMap<>();
-        if (asJwt) {
-            log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
-            Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
+        String algo;
+        if (asJwt && fromIatp) {
+            algo = SupportedAlgorithms.ES256K.name();
+            Pair<Did, Object> result = getPKey(callerWallet, algo, audience, callerBpn);
+            ECPrivateKey ecPrivateKey = (ECPrivateKey) result;
 
-            //Issuer of VP is holder of VC
-            Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
+            //JWT Factory
+            JwtPresentationFactoryService presentationFactory = new JwtPresentationFactoryService(new JsonLdSerializerImpl(), result.getLeft());
+            SignedJWT presentation;
+            try {
+                presentation = presentationFactory.createPresentation(result.getLeft()
+                        , verifiableCredentials, audience, ecPrivateKey);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            response.put(StringPool.VP, presentation.serialize());
+        } else if (asJwt && !fromIatp){
+            algo = SupportedAlgorithms.ECDSA.name();
+            Pair<Did, Object> result = getPKey(callerWallet, algo, audience, callerBpn);
 
             //JWT Factory
             SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
-                    new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), vpIssuerDid);
+                    new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), result.getKey());
 
-            //Build JWT
-            x21559PrivateKey ed25519Key = walletKeyService.getPrivateKeyByWalletIdentifier(callerWallet.getId());
+            x21559PrivateKey ed25519Key = (x21559PrivateKey) result.getRight();
             x21559PrivateKey privateKey = new x21559PrivateKey(ed25519Key.asByte());
-            SignedJWT presentation = presentationFactory.createPresentation(vpIssuerDid
-                    , verifiableCredentials, audience, privateKey);
+            SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey);
 
             response.put(StringPool.VP, presentation.serialize());
-        } else {
+        }
+        else {
             log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
             VerifiablePresentationBuilder verifiablePresentationBuilder =
                     new VerifiablePresentationBuilder();
@@ -174,6 +192,17 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             response.put(StringPool.VP, verifiablePresentation);
         }
         return response;
+    }
+
+    private Pair<Did, Object> getPKey (Wallet callerWallet, String algorithm, String audience, String callerBpn) {
+        log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
+            Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
+
+        //Issuer of VP is holder of VC
+        Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
+
+        //Build JWT
+        return Pair.of(vpIssuerDid, walletKeyService.getPrivateKeyByWalletIdentifierAndAlgorithm(callerWallet.getId(), algorithm));
     }
 
 
@@ -329,8 +358,9 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         holdersCredentials.forEach(c -> verifiableCredentials.add(c.getData()));
 
+        // if as JWT true -> get key ES256K and sign with it
         Map<String, Object> vp = buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
-                callerWallet, verifiableCredentials);
+                callerWallet, verifiableCredentials, true);
         changeJtiStatus(jtiRecord);
         return vp;
     }

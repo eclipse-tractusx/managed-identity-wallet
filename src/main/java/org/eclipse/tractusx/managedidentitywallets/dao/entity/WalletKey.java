@@ -75,6 +75,9 @@ public class WalletKey extends MIWBaseEntity {
 
     private String keyId;
 
+    @Column(nullable = false)
+    private String algorithm;
+
     public KeyPair toDto() {
         return new KeyPair(keyId, privateKey, publicKey);
     }

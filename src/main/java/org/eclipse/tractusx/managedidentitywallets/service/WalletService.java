@@ -21,6 +21,11 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -225,6 +230,12 @@ public class WalletService extends BaseService<Wallet, Long> {
         //create private key pair
         IKeyGenerator keyGenerator = new x21559Generator();
         KeyPair keyPair = keyGenerator.generateKey();
+        // create additional key pair ES256K
+        ECKey ecJwk = new ECKeyGenerator(Curve.SECP256K1)
+                .keyUse(KeyUse.SIGNATURE)
+                .keyID(UUID.randomUUID().toString())
+                .provider(BouncyCastleProviderSingleton.getInstance())
+                .generate();
 
         //create did json
         Did did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), request.getBpn());
@@ -261,20 +272,27 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .build());
 
 
-        //Save key
-        walletKeyService.getRepository().save(WalletKey.builder()
+        WalletKey walletKey = WalletKey.builder()
                 .wallet(wallet)
                 .keyId(keyId)
                 .referenceKey("dummy ref key, removed once vault setup is ready")
                 .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
                 .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
                 .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey().asByte())))
-                .build());
+                .build();
+
+        //Save key
+        walletKeyService.getRepository().save(walletKey);
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
+
+        walletKey.setPrivateKey(encryptionUtils.encrypt(getPrivateKeyString(ecJwk.toECPrivateKey().getEncoded())));
+        walletKey.setPublicKey(encryptionUtils.encrypt(getPublicKeyString(ecJwk.toECPublicKey().getEncoded())));
+        // save second key
+        walletKeyService.getRepository().save(walletKey);
 
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
-        //issue BPN credentials
+        //issue BPN credentials ES256K
         issuersCredentialService.issueBpnCredential(issuerWallet, wallet, authority);
 
         return wallet;

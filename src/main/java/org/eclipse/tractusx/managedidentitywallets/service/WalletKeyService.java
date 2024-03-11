@@ -30,11 +30,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
+import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
+import org.eclipse.tractusx.managedidentitywallets.utils.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
+import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 /**
  * The type Wallet key service.
@@ -67,10 +72,14 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * @return the byte [ ]
      */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
-        return getPrivateKeyByWalletIdentifier(walletId).asByte();
+    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId, String algorithm) {
+        Object privateKey = getPrivateKeyByWalletIdentifierAndAlgorithm(walletId, algorithm);
+        if (privateKey instanceof x21559PrivateKey) {
+            return ((x21559PrivateKey) privateKey).asByte();
+        } else {
+            return ((ECPrivateKey) privateKey).getEncoded();
+        }
     }
-
     /**
      * Gets private key by wallet identifier.
      *
@@ -79,11 +88,18 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      */
     @SneakyThrows
 
-    public x21559PrivateKey getPrivateKeyByWalletIdentifier(long walletId) {
-        WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
+    public Object getPrivateKeyByWalletIdentifierAndAlgorithm(long walletId, String algorithm) {
+        WalletKey wallet = walletKeyRepository.getByWalletIdAndAlgorithm(walletId, algorithm);
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
-        return new x21559PrivateKey(content);
+        if(SupportedAlgorithms.ECDSA.name().equals(algorithm)){
+            return new x21559PrivateKey(content);
+        } else if (SupportedAlgorithms.ES256K.name().equals(algorithm)){
+            KeyFactory kf = KeyFactory.getInstance("EC");
+            return kf.generatePrivate(new PKCS8EncodedKeySpec(content));
+        } else {
+            throw new BadDataException("not supported algorithm");
+        }
     }
 
 }
