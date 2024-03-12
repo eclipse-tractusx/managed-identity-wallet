@@ -21,6 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.SignedJWT;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -29,6 +31,8 @@ import com.smartsensesolutions.java.commons.operator.Operator;
 import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
@@ -40,6 +44,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
@@ -52,11 +57,15 @@ import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
+import org.eclipse.tractusx.ssi.lib.exception.proof.JwtExpiredException;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
+import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -66,7 +75,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.net.http.HttpClient;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 
@@ -75,6 +86,7 @@ import java.util.*;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class IssuersCredentialService extends BaseService<IssuersCredential, Long> {
 
     /**
@@ -93,26 +105,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
     private final CommonService commonService;
 
-    /**
-     * Instantiates a new Issuers credential service.
-     *
-     * @param issuersCredentialRepository the issuers credential repository
-     * @param miwSettings                 the miw settings
-     * @param credentialSpecificationUtil the credential specification util
-     * @param walletKeyService            the wallet key service
-     * @param holdersCredentialRepository the holders credential repository
-     * @param commonService               the common service
-     */
-    public IssuersCredentialService(IssuersCredentialRepository issuersCredentialRepository, MIWSettings miwSettings,
-                                    SpecificationUtil<IssuersCredential> credentialSpecificationUtil,
-                                    WalletKeyService walletKeyService, HoldersCredentialRepository holdersCredentialRepository, CommonService commonService) {
-        this.issuersCredentialRepository = issuersCredentialRepository;
-        this.miwSettings = miwSettings;
-        this.credentialSpecificationUtil = credentialSpecificationUtil;
-        this.walletKeyService = walletKeyService;
-        this.holdersCredentialRepository = holdersCredentialRepository;
-        this.commonService = commonService;
-    }
+    private final ObjectMapper objectMapper;
 
 
     @Override
@@ -449,31 +442,105 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         return cr;
     }
+    
+
+    private JWTVerificationResult verifyVCAsJWT(String jwt, DidResolver didResolver, boolean withCredentialsValidation, boolean withCredentialExpiryDate) throws IOException, ParseException {
+        SignedJWT signedJWT = SignedJWT.parse(jwt);
+        Map<String, Object> claims = objectMapper.readValue(signedJWT.getPayload().toBytes(), Map.class);
+        String vcClaim = objectMapper.writeValueAsString(claims.get("vc"));
+        Map<String, Object> map = SerializeUtil.fromJson(vcClaim);
+        VerifiableCredential verifiableCredential = new VerifiableCredential(map);
+
+        //took this approach to avoid issues in sonarQube
+        return new JWTVerificationResult(validateSignature(withCredentialsValidation , signedJWT, didResolver) && validateJWTExpiryDate(withCredentialExpiryDate, signedJWT), verifiableCredential);
+
+        }
+
+        private record JWTVerificationResult(boolean valid, VerifiableCredential verifiableCredential) {
+
+        }
+
+        private boolean validateSignature(boolean withValidateSignature, SignedJWT signedJWT, DidResolver didResolver) {
+            if(!withValidateSignature) {
+                return true;
+            }
+            //validate jwt signature
+            try {
+                SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didResolver);
+                return jwtVerifier.verify(signedJWT);
+            } catch (Exception e) {
+                log.error("Can not verify signature of jwt", e);
+                return false;
+            }
+        }
+    private boolean validateJWTExpiryDate(boolean withExpiryDate , SignedJWT signedJWT) {
+        if(!withExpiryDate) {
+            return true;
+        }
+        try {
+            SignedJwtValidator jwtValidator = new SignedJwtValidator();
+            jwtValidator.validateDate(signedJWT);
+            return true;
+        } catch (Exception e) {
+            if (!(e instanceof JwtExpiredException)) {
+                log.error("Can not validate jwt expiry date ", e);
+            }
+            return false;
+        }
+    }
 
     /**
      * Credentials validation map.
+     *
+     * @param verificationRequest      the verifiable credential
+     * @param withCredentialExpiryDate the with credential expiry date
+     * @return the map
+     */
+    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialExpiryDate) {
+        return credentialsValidation(verificationRequest, true, withCredentialExpiryDate);
+    }
+
+    /**
+    * Credentials validation map.
      *
      * @param data                     the data
      * @param withCredentialExpiryDate the with credential expiry date
      * @return the map
      */
     @SneakyThrows
-    public Map<String, Object> credentialsValidation(Map<String, Object> data, boolean withCredentialExpiryDate) {
-        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialsValidation , boolean withCredentialExpiryDate) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
 
-        DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
-
-        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
-
-        boolean valid = proofValidation.verify(verifiableCredential);
-
+        DidResolver didResolver = new DidWebResolver(httpClient, new DidWebParser(), miwSettings.enforceHttps());
         Map<String, Object> response = new TreeMap<>();
+        boolean valid;
+        VerifiableCredential verifiableCredential;
+        boolean dateValidation = true;
 
-        //check expiry
-        boolean dateValidation = CommonService.validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
+        if (verificationRequest.containsKey(StringPool.VC_JWT_KEY)) {
+            JWTVerificationResult result = verifyVCAsJWT((String) verificationRequest.get(StringPool.VC_JWT_KEY), didResolver, withCredentialsValidation, withCredentialExpiryDate);
+            verifiableCredential = result.verifiableCredential;
+            valid = result.valid;
+        } else {
+
+            verifiableCredential = new VerifiableCredential(verificationRequest);
+            LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
+
+
+            if (withCredentialsValidation) {
+                valid = proofValidation.verify(verifiableCredential);
+            } else {
+                valid = true;
+            }
+
+            dateValidation = CommonService.validateExpiry(withCredentialExpiryDate, verifiableCredential,
+                    response);
+        }
 
         response.put(StringPool.VALID, valid && dateValidation);
-        response.put("vc", verifiableCredential);
+        response.put(StringPool.VC, verificationRequest);
 
         return response;
     }
