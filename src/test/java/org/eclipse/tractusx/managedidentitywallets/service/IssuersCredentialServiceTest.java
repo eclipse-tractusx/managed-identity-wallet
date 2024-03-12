@@ -26,9 +26,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.SignedJWT;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
-
 import lombok.SneakyThrows;
-
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
@@ -291,6 +289,7 @@ class IssuersCredentialServiceTest {
             Map<String, Object> wallets = mockBaseAndHolderWallet();
             Wallet baseWallet = (Wallet) wallets.get("base");
             String baseWalletBpn = baseWallet.getBpn();
+            String baseWalletDid = baseWallet.getDid();
             Wallet holderWallet = (Wallet) wallets.get("holder");
             String holderWalletBpn = holderWallet.getBpn();
             String walletKeyId = "key-1";

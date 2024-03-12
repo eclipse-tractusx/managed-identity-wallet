@@ -460,29 +460,30 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
 
         //took this approach to avoid issues in sonarQube
-        return new JWTVerificationResult(validateSignature(withCredentialsValidation , signedJWT, didResolver) && validateJWTExpiryDate(withCredentialExpiryDate, signedJWT), verifiableCredential);
+        return new JWTVerificationResult(validateSignature(withCredentialsValidation, signedJWT, didResolver) && validateJWTExpiryDate(withCredentialExpiryDate, signedJWT), verifiableCredential);
 
+    }
+
+    private record JWTVerificationResult(boolean valid, VerifiableCredential verifiableCredential) {
+
+    }
+
+    private boolean validateSignature(boolean withValidateSignature, SignedJWT signedJWT, DidResolver didResolver) {
+        if (!withValidateSignature) {
+            return true;
         }
-
-        private record JWTVerificationResult(boolean valid, VerifiableCredential verifiableCredential) {
-
+        //validate jwt signature
+        try {
+            SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didResolver);
+            return jwtVerifier.verify(signedJWT);
+        } catch (Exception e) {
+            log.error("Can not verify signature of jwt", e);
+            return false;
         }
+    }
 
-        private boolean validateSignature(boolean withValidateSignature, SignedJWT signedJWT, DidResolver didResolver) {
-            if(!withValidateSignature) {
-                return true;
-            }
-            //validate jwt signature
-            try {
-                SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didResolver);
-                return jwtVerifier.verify(signedJWT);
-            } catch (Exception e) {
-                log.error("Can not verify signature of jwt", e);
-                return false;
-            }
-        }
-    private boolean validateJWTExpiryDate(boolean withExpiryDate , SignedJWT signedJWT) {
-        if(!withExpiryDate) {
+    private boolean validateJWTExpiryDate(boolean withExpiryDate, SignedJWT signedJWT) {
+        if (!withExpiryDate) {
             return true;
         }
         try {
@@ -501,7 +502,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     /**
      * Credentials validation map.
      *
-     * @param verificationRequest      the verifiable credential
      * @param withCredentialExpiryDate the with credential expiry date
      * @return the map
      */
