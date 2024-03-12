@@ -33,6 +33,7 @@ public class StringPool {
     public static final String ALLOWED_VEHICLE_BRANDS = "allowedVehicleBrands";
     public static final String VERIFIABLE_CREDENTIALS = "verifiableCredentials";
     public static final String VP = "vp";
+    public static final String VC = "vc";
     public static final String VALID = "valid";
     public static final String VALIDATE_AUDIENCE = "validateAudience";
     public static final String VALIDATE_EXPIRY_DATE = "validateExpiryDate";

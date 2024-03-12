@@ -55,6 +55,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -171,7 +172,7 @@ public class CommonUtils {
         x25519PrivateKey privateKey = walletKeyService.getPrivateKeyByWalletId(issuerWallet.getId());
         // JWT Factory
 
-        SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, Date.from(vc.getExpirationDate()), vc,
+        SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, vc,
                 privateKey,
                 walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId()));
 

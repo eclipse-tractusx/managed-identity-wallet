@@ -65,7 +65,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * @return the byte [ ]
      */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
+    public byte[] getPrivateKeyByWalletIdAsBytes(long walletId) {
         return getPrivateKeyByWalletId(walletId).asByte();
     }
 
