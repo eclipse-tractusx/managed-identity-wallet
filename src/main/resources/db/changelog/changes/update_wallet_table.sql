@@ -22,4 +22,4 @@
 -- liquibase formatted sql
 -- changeset andreibogus: add column algorithm to wallet_key table
 
-ALTER TABLE public.wallet_key ADD algorithm varchar(255) NOT NULL;
+ALTER TABLE public.wallet_key ADD algorithm varchar(255) NOT NULL DEFAULT 'ED25519';

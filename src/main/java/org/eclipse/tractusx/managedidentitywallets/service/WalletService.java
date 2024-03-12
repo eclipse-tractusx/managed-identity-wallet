@@ -21,11 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -66,9 +61,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -110,6 +102,8 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     @Qualifier("transactionManager")
     private final PlatformTransactionManager transactionManager;
+
+    private final JwtPresentationES256KService jwtPresentationES256KService;
 
 
     @Override
@@ -213,9 +207,27 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the wallet
      */
     @SneakyThrows
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
-        return createWallet(request, false, callerBpn);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(0);
+        transactionTemplate.setIsolationLevel(1);
+
+        final Wallet[] wallets = new Wallet[1];
+        transactionTemplate.execute(new TransactionCallbackWithoutResult(){
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+               wallets[0] = createWallet(request, false, callerBpn);
+            }
+        });
+
+        transactionTemplate.execute(new TransactionCallbackWithoutResult(){
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                jwtPresentationES256KService.storeWalletKeyES256K(wallets[0]);
+            }
+        });
+
+        return wallets[0];
     }
 
     /**
@@ -231,12 +243,6 @@ public class WalletService extends BaseService<Wallet, Long> {
         //create private key pair EdDSA
         IKeyGenerator keyGenerator = new x21559Generator();
         KeyPair keyPair = keyGenerator.generateKey();
-        // create additional key pair ES256K
-        ECKey ecJwk = new ECKeyGenerator(Curve.SECP256K1)
-                .keyUse(KeyUse.SIGNATURE)
-                .keyID(UUID.randomUUID().toString())
-                .provider(BouncyCastleProviderSingleton.getInstance())
-                .generate();
 
         //create did json
         Did did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), request.getBpn());
@@ -286,19 +292,6 @@ public class WalletService extends BaseService<Wallet, Long> {
         walletKeyService.getRepository().save(walletKeyED25519);
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
 
-        WalletKey walletKeyES256K = WalletKey.builder()
-                .wallet(wallet)
-                .keyId(UUID.randomUUID().toString())
-                .referenceKey("dummy ref key, removed once vault setup is ready")
-                .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
-                .privateKey(encryptionUtils.encrypt(getPrivateKeyString(ecJwk.toECPrivateKey().getEncoded())))
-                .publicKey(encryptionUtils.encrypt(getPublicKeyString(ecJwk.toECPublicKey().getEncoded())))
-                .algorithm(SupportedAlgorithms.ES256K.toString())
-                .build();
-
-        //Save key ES256K
-        walletKeyService.getRepository().save(walletKeyES256K);
-
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
         //issue BPN credentials
@@ -313,6 +306,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     @PostConstruct
     public void createAuthorityWallet() {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        final Wallet[] wallet = new Wallet[1];
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -321,10 +315,19 @@ public class WalletService extends BaseService<Wallet, Long> {
                             .name(miwSettings.authorityWalletName())
                             .bpn(miwSettings.authorityWalletBpn())
                             .build();
-                    createWallet(request, true, miwSettings.authorityWalletBpn());
+                    wallet[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
                     log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
                 } else {
                     log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
+                }
+            }
+        });
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @SneakyThrows
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                if (wallet[0] != null) {
+                    jwtPresentationES256KService.storeWalletKeyES256K(wallet[0]);
                 }
             }
         });

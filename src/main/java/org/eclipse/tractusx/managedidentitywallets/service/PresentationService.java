@@ -184,9 +184,9 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private void buildVPJwtES256K(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) {
         Pair<Did, Object> result = getPrivateKey(callerWallet, algorithm, audience, callerBpn);
-        ECPrivateKey ecPrivateKey = (ECPrivateKey) result;
+        ECPrivateKey ecPrivateKey = (ECPrivateKey) result.getRight();
 
-        JwtPresentationES256KService presentationFactory = new JwtPresentationES256KService(new JsonLdSerializerImpl(), result.getLeft());
+        JwtPresentationES256KService presentationFactory = new JwtPresentationES256KService(result.getLeft(), new JsonLdSerializerImpl());
         SignedJWT presentation;
         presentation = presentationFactory.createPresentation(result.getLeft()
                 , verifiableCredentials, audience, ecPrivateKey);
