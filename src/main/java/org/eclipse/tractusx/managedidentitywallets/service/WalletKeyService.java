@@ -58,7 +58,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     private final EncryptionUtils encryptionUtils;
 
     @Override
-    protected BaseRepository<WalletKey, Long> getRepository() {
+    public BaseRepository<WalletKey, Long> getRepository() {
         return walletKeyRepository;
     }
 

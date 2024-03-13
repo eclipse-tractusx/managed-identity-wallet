@@ -55,6 +55,9 @@ import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializer;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -102,6 +105,7 @@ public class JwtPresentationES256KService {
         return createSignedJwt(verifiablePresentation.getId(), issuer, audience, serializedVerifiablePresentation, ecPrivateKey);
     }
 
+    @Transactional(isolation =  Isolation.READ_UNCOMMITTED, propagation =  Propagation.REQUIRES_NEW)
     public void storeWalletKeyES256K(Wallet wallet) {
         WalletKey walletKeyES256K;
         try {
