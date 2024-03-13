@@ -177,6 +177,7 @@ public class JwtPresentationES256KService {
     private static SignedJWT createSignedES256KJwt(ECPrivateKey ecPrivateKey, JWTClaimsSet claimsSet, String issuer) {
         try {
             JWSSigner signer = new ECDSASigner(ecPrivateKey);
+            signer.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
             if (!signer.supportedJWSAlgorithms().contains(JWSAlgorithm.ES256K)) {
                 throw new UnsupportedAlgorithmException(String.format("Invalid signing method. Supported signing methods: %s",
                         signer.supportedJWSAlgorithms().stream().map(Algorithm::getName).collect(Collectors.joining(", "))));
