@@ -109,17 +109,18 @@ public class JwtPresentationES256KService {
     public void storeWalletKeyES256K(Wallet wallet) {
         WalletKey walletKeyES256K;
         try {
+            String keyId = UUID.randomUUID().toString();
             // create additional key pair ES256K
             ECKey ecJwk = new ECKeyGenerator(Curve.SECP256K1)
                     .keyUse(KeyUse.SIGNATURE)
-                    .keyID(UUID.randomUUID().toString())
+                    .keyID(keyId)
                     .provider(BouncyCastleProviderSingleton.getInstance())
                     .generate();
 
             Wallet walletFromDB = walletRepository.getByDid(wallet.getDid());
             walletKeyES256K = WalletKey.builder()
                     .wallet(walletFromDB)
-                    .keyId(UUID.randomUUID().toString())
+                    .keyId(keyId)
                     .referenceKey("dummy ref key, removed once vault setup is ready")
                     .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
                     .privateKey(encryptionUtils.encrypt(getPrivateKeyString(ecJwk.toECPrivateKey().getEncoded())))

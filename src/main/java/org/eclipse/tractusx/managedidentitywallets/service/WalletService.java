@@ -280,7 +280,7 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         WalletKey walletKeyED25519 = WalletKey.builder()
                 .wallet(wallet)
-                .keyId(UUID.randomUUID().toString())
+                .keyId(keyId)
                 .referenceKey("dummy ref key, removed once vault setup is ready")
                 .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
                 .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
