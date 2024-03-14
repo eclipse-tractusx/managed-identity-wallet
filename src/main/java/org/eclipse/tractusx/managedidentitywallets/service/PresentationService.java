@@ -187,9 +187,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         ECPrivateKey ecPrivateKey = (ECPrivateKey) result.getRight();
 
         JwtPresentationES256KService presentationFactory = new JwtPresentationES256KService(result.getLeft(), new JsonLdSerializerImpl());
-        SignedJWT presentation;
-        presentation = presentationFactory.createPresentation(result.getLeft()
-                , verifiableCredentials, audience, ecPrivateKey);
+        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, ecPrivateKey);
 
         response.put(StringPool.VP, presentation.serialize());
     }

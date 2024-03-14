@@ -96,4 +96,10 @@ public class StringPool {
     public static final String BLANK_SEPARATOR = " ";
     public static final String COLON_SEPARATOR = ":";
     public static final String UNDERSCORE = "_";
+
+    public static final String REFERENCE_KEY = "dummy ref key, removed once vault setup is ready";
+    public static final String VAULT_ACCESS_TOKEN = "dummy vault access token, removed once vault setup is ready";
+
+    public static final String PRIVATE_KEY = "PRIVATE KEY";
+    public static final String PUBLIC_KEY = "PUBLIC KEY";
 }

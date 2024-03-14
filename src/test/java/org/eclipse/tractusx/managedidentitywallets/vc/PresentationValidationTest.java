@@ -68,7 +68,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
-@ContextConfiguration(initializers = { TestContextInitializer.class })
+@ContextConfiguration(initializers = {TestContextInitializer.class})
 class PresentationValidationTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()

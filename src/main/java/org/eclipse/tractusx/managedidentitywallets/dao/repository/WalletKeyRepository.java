@@ -22,7 +22,6 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.springframework.stereotype.Repository;
 
@@ -37,7 +36,7 @@ public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
      * @param id the id
      * @return the by wallet id
      */
-    WalletKey getByWalletIdAndAlgorithm(Long id, String alg);
+    WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
 
     WalletKey findFirstByWallet_Bpn(String bpn);
 

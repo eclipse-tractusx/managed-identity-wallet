@@ -32,8 +32,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
@@ -53,7 +51,11 @@ import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.did.*;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
+import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
+import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethodBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,12 +66,16 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
+import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
 
 /**
  * The type Wallet service.
@@ -209,18 +215,14 @@ public class WalletService extends BaseService<Wallet, Long> {
     @SneakyThrows
     public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
-        transactionTemplate.setPropagationBehavior(0);
-        transactionTemplate.setIsolationLevel(1);
-
         final Wallet[] wallets = new Wallet[1];
-        transactionTemplate.execute(new TransactionCallbackWithoutResult(){
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-               wallets[0] = createWallet(request, false, callerBpn);
+                wallets[0] = createWallet(request, false, callerBpn);
             }
         });
-
-        transactionTemplate.execute(new TransactionCallbackWithoutResult(){
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 jwtPresentationES256KService.storeWalletKeyES256K(wallets[0]);
@@ -275,16 +277,16 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .bpn(request.getBpn())
                 .name(request.getName())
                 .did(did.toUri().toString())
-                .algorithm(StringPool.ED_25519)
+                .algorithm(ED_25519)
                 .build());
 
         WalletKey walletKeyED25519 = WalletKey.builder()
                 .wallet(wallet)
                 .keyId(keyId)
-                .referenceKey("dummy ref key, removed once vault setup is ready")
-                .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
-                .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
-                .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey().asByte())))
+                .referenceKey(REFERENCE_KEY)
+                .vaultAccessToken(VAULT_ACCESS_TOKEN)
+                .privateKey(encryptionUtils.encrypt(getKeyString(keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
+                .publicKey(encryptionUtils.encrypt(getKeyString(keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
                 .algorithm(SupportedAlgorithms.ED25519.toString())
                 .build();
 
@@ -343,25 +345,4 @@ public class WalletService extends BaseService<Wallet, Long> {
             throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBpn());
         }
     }
-
-    @SneakyThrows
-    private String getPrivateKeyString(byte[] privateKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PRIVATE KEY", privateKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
-
-    @SneakyThrows
-    private String getPublicKeyString(byte[] publicKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
-
 }

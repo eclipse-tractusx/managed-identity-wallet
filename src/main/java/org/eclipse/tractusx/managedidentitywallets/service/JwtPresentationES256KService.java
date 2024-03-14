@@ -36,9 +36,6 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import lombok.SneakyThrows;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -60,7 +57,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URI;
 import java.security.interfaces.ECPrivateKey;
 import java.util.Date;
@@ -69,6 +65,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PRIVATE_KEY;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PUBLIC_KEY;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
+import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
 
 
 @Service
@@ -105,7 +107,7 @@ public class JwtPresentationES256KService {
         return createSignedJwt(verifiablePresentation.getId(), issuer, audience, serializedVerifiablePresentation, ecPrivateKey);
     }
 
-    @Transactional(isolation =  Isolation.READ_UNCOMMITTED, propagation =  Propagation.REQUIRES_NEW)
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRES_NEW)
     public void storeWalletKeyES256K(Wallet wallet) {
         WalletKey walletKeyES256K;
         try {
@@ -121,10 +123,10 @@ public class JwtPresentationES256KService {
             walletKeyES256K = WalletKey.builder()
                     .wallet(walletFromDB)
                     .keyId(keyId)
-                    .referenceKey("dummy ref key, removed once vault setup is ready")
-                    .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
-                    .privateKey(encryptionUtils.encrypt(getPrivateKeyString(ecJwk.toECPrivateKey().getEncoded())))
-                    .publicKey(encryptionUtils.encrypt(getPublicKeyString(ecJwk.toECPublicKey().getEncoded())))
+                    .referenceKey(REFERENCE_KEY)
+                    .vaultAccessToken(VAULT_ACCESS_TOKEN)
+                    .privateKey(encryptionUtils.encrypt(getKeyString(ecJwk.toECPrivateKey().getEncoded(), PRIVATE_KEY)))
+                    .publicKey(encryptionUtils.encrypt(getKeyString(ecJwk.toECPublicKey().getEncoded(), PUBLIC_KEY)))
                     .algorithm(SupportedAlgorithms.ES256K.toString())
                     .build();
         } catch (JOSEException e) {
@@ -133,26 +135,6 @@ public class JwtPresentationES256KService {
 
         //Save key ES256K
         walletKeyService.getRepository().save(walletKeyES256K);
-    }
-
-    @SneakyThrows
-    private String getPrivateKeyString(byte[] privateKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PRIVATE KEY", privateKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
-
-    @SneakyThrows
-    private String getPublicKeyString(byte[] publicKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
     }
 
     public SignedJWT createSignedJwt(URI id, Did didIssuer, String audience, SerializedVerifiablePresentation serializedPresentation, ECPrivateKey ecPrivateKey) {
