@@ -76,8 +76,8 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     @SneakyThrows
     public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId, String algorithm) {
         Object privateKey = getPrivateKeyByWalletIdentifierAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
-        if (privateKey instanceof x21559PrivateKey) {
-            return ((x21559PrivateKey) privateKey).asByte();
+        if (privateKey instanceof x21559PrivateKey x21559PrivateKey) {
+            return x21559PrivateKey.asByte();
         } else {
             return ((ECPrivateKey) privateKey).getEncoded();
         }
