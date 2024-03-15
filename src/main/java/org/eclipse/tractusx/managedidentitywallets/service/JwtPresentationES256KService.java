@@ -166,7 +166,7 @@ public class JwtPresentationES256KService {
             } else {
                 JWSAlgorithm algorithm = JWSAlgorithm.ES256K;
                 JOSEObjectType type = JOSEObjectType.JWT;
-                JWSHeader header = new JWSHeader(algorithm, type, null, null, null, null, null, null, null, null, issuer, true, null, null);
+                JWSHeader header = new JWSHeader.Builder(algorithm).type(type).keyID(issuer).base64URLEncodePayload(true).build();
                 SignedJWT vc = new SignedJWT(header, claimsSet);
                 vc.sign(signer);
                 return vc;
