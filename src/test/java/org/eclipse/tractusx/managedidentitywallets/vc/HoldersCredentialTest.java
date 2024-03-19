@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -45,6 +45,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
+import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -203,6 +204,56 @@ class HoldersCredentialTest {
             Assertions.assertTrue(itemList.contains(jsonObject.get(StringPool.TYPE).toString()));
         }
 
+    }
+
+
+    @Test
+    @DisplayName("Get Credentials as JWT")
+    void getCredentialsAsJWT200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
+
+        String baseDID = miwSettings.authorityWalletDid();
+        String bpn = TestUtils.getRandomBpmNumber();
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+        // save wallet
+        TestUtils.createWallet(bpn, did, walletRepository);
+        TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
+        String vcList = """
+                [
+                {"type":"TraceabilityCredential"},
+                {"type":"SustainabilityCredential"},
+                {"type":"ResiliencyCredential"},
+                {"type":"QualityCredential"},
+                {"type":"PcfCredential"}
+                ]
+                """;
+        JSONArray jsonArray = new JSONArray(vcList);
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn,
+                    jsonObject.get(StringPool.TYPE).toString());
+            HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request,
+                    AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); // ony base wallet
+                                                                                                    // can issue VC
+            ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK,
+                    HttpMethod.POST, entity, String.class);
+            Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
+        }
+
+        HttpEntity<Map> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}&asJwt=true",
+                HttpMethod.GET, entity, String.class, baseDID);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Map<String,Object> responseMap = SerializeUtil.fromJson(response.getBody());
+        List<Map<String,Object>> vcsAsJwt = (ArrayList<Map<String,Object>>)  responseMap.get("content");
+        // 5 framework + 1 BPN + 1 Summary
+        Assertions.assertEquals(7 , vcsAsJwt.size());
+        vcsAsJwt.forEach(vc -> {
+            Assertions.assertNotNull(vc.get(StringPool.VC_JWT_KEY));
+        });
     }
 
 
