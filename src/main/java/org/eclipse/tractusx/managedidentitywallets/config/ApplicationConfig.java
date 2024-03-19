@@ -28,6 +28,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.tractusx.managedidentitywallets.KeyStorageService;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,9 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Application config.
@@ -97,5 +102,12 @@ public class ApplicationConfig implements WebMvcConfigurer {
         LocalValidatorFactoryBean beanValidatorFactory = new LocalValidatorFactoryBean();
         beanValidatorFactory.setValidationMessageSource(messageSource());
         return beanValidatorFactory;
+    }
+
+    @Bean
+    public Map<KeyStorageType, KeyStorageService> availableKeyStorages(List<KeyStorageService> storages){
+        Map<KeyStorageType, KeyStorageService> available = new HashMap<>();
+        storages.forEach(s -> available.put(s.getSupportedStorageType(),s));
+        return available;
     }
 }

@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -19,33 +19,19 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dto;
+package org.eclipse.tractusx.managedidentitywallets;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
+import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
+import org.eclipse.tractusx.ssi.lib.exception.KeyGenerationException;
 
+public interface KeyStorageService {
+    HoldersCredential createHoldersCredential(HoldersCredentialCreationConfig config);
+    KeyPair getKey() throws KeyGenerationException;
+    KeyStorageType getSupportedStorageType();
 
-/**
- * The type Create wallet request.
- */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class CreateWalletRequest {
-
-    @NotBlank(message = "Please provide BPN")
-    @Pattern(regexp = StringPool.BPN_NUMBER_REGEX, message = "Please provide valid BPN")
-    private String bpn;
-
-    @NotBlank(message = "Please provide name")
-    @Size(min = 1, max = 255, message = "Please provide valid name")
-    private String name;
-
-    private KeyStorageType storageType = KeyStorageType.DB;
+    String createPresentation(PresentationCreationConfig config);
 }
