@@ -38,6 +38,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepos
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
+import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
@@ -75,6 +76,9 @@ class DismantlerHoldersCredentialTest {
     @Autowired
     private IssuersCredentialRepository issuersCredentialRepository;
 
+    @Autowired
+    private IssuersCredentialService issuersCredentialService;
+
 
     @Test
     void issueDismantlerCredentialTest403() {
@@ -94,6 +98,7 @@ class DismantlerHoldersCredentialTest {
     @Test
     void issueDismantlerCredentialToBaseWalletTest201() throws JSONException {
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        issuersCredentialService.issueBpnCredential(wallet, wallet, true);
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
         ResponseEntity<String> response = issueDismantlerCredential(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
@@ -115,6 +120,7 @@ class DismantlerHoldersCredentialTest {
 
         //create wallet
         Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
+        generateBpnCredential(wallet);
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         ResponseEntity<String> response = issueDismantlerCredential(bpn, did);
@@ -228,5 +234,10 @@ class DismantlerHoldersCredentialTest {
         HttpEntity<IssueDismantlerCredentialRequest> entity = new HttpEntity<>(request, headers);
 
         return restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_DISMANTLER, HttpMethod.POST, entity, String.class);
+    }
+
+    private void generateBpnCredential(Wallet holderWallet) {
+        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        issuersCredentialService.issueBpnCredential(issuerWallet, holderWallet, false);
     }
 }

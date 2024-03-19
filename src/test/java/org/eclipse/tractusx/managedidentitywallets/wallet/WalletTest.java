@@ -37,12 +37,11 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,6 +88,9 @@ class WalletTest {
     @Autowired
     private WalletService walletService;
 
+    @Autowired
+    private IssuersCredentialService issuersCredentialService;
+
 
     @Test
     void createDuplicateAuthorityWalletTest() {
@@ -100,6 +102,7 @@ class WalletTest {
     @Test
     void authorityWalletExistTest() {
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        issuersCredentialService.issueBpnCredential(wallet, wallet, true);
         Assertions.assertNotNull(wallet);
         Assertions.assertEquals(wallet.getBpn(), miwSettings.authorityWalletBpn());
         Assertions.assertEquals(wallet.getName(), miwSettings.authorityWalletName());
@@ -195,7 +198,7 @@ class WalletTest {
         Assertions.assertNotNull(walletKey2.getKeyId());
         Assertions.assertEquals(walletKey2.getKeyId(), keyId2);
 
-        //check if BPN and Summary credentials is issued
+        //check that BPN and Summary credentials are not automatically issued on creation
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(headers);
@@ -408,7 +411,7 @@ class WalletTest {
         Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(HttpStatus.OK.value(), getWalletResponse.getStatusCode().value());
         Assertions.assertNotNull(getWalletResponse.getBody());
-        Assertions.assertEquals(3, body.getVerifiableCredentials().size()); //BPN VC + Summery VC + Stored VC
+        Assertions.assertEquals(1, body.getVerifiableCredentials().size()); //BPN VC + Summery VC + Stored VC
         Assertions.assertEquals(body.getBpn(), bpn);
     }
 
