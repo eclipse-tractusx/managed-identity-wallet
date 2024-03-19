@@ -98,14 +98,14 @@ class PresentationValidationTest {
         bpnOperator = miwSettings.authorityWalletBpn();
 
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();
-        createWalletRequest.setBpn(bpnTenant_1);
-        createWalletRequest.setName("My Test Tenant Wallet");
+        createWalletRequest.setBusinessPartnerNumber(bpnTenant_1);
+        createWalletRequest.setCompanyName("My Test Tenant Wallet");
         Wallet tenantWallet = walletService.createWallet(createWalletRequest, bpnOperator);
         tenant_1 = DidParser.parse(tenantWallet.getDid());
 
         CreateWalletRequest createWalletRequest2 = new CreateWalletRequest();
-        createWalletRequest2.setBpn(bpnTenant_2);
-        createWalletRequest2.setName("My Test Tenant Wallet");
+        createWalletRequest2.setBusinessPartnerNumber(bpnTenant_2);
+        createWalletRequest2.setCompanyName("My Test Tenant Wallet");
         Wallet tenantWallet2 = walletService.createWallet(createWalletRequest2, bpnOperator);
         tenant_2 = DidParser.parse(tenantWallet2.getDid());
 

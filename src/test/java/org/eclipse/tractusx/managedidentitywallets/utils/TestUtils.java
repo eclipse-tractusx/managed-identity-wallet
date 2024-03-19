@@ -75,7 +75,7 @@ public class TestUtils {
     public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate, String baseBPN) {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseBPN);
 
-        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+        CreateWalletRequest request = CreateWalletRequest.builder().businessPartnerNumber(bpn).companyName(name).build();
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
 

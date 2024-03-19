@@ -86,8 +86,8 @@ class DidDocumentsTest {
 
     private Wallet createWallet(String bpn) {
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();
-        createWalletRequest.setBpn(bpn);
-        createWalletRequest.setName("wallet_" + bpn);
+        createWalletRequest.setBusinessPartnerNumber(bpn);
+        createWalletRequest.setCompanyName("wallet_" + bpn);
         return walletService.createWallet(createWalletRequest, miwSettings.authorityWalletBpn());
     }
 }

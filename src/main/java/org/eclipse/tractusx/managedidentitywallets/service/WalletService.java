@@ -53,6 +53,7 @@ import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethodBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -65,6 +66,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -253,8 +255,8 @@ public class WalletService extends BaseService<Wallet, Long> {
         //Save wallet
         Wallet wallet = create(Wallet.builder()
                 .didDocument(didDocument)
-                .bpn(request.getBpn())
-                .name(request.getName())
+                .bpn(request.getBusinessPartnerNumber())
+                .name(request.getCompanyName())
                 .did(did.toUri().toString())
                 .algorithm(ED_25519)
                 .build());
@@ -271,18 +273,18 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         //Save key EdDSA
         walletKeyService.getRepository().save(walletKeyED25519);
-        log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
+        log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBusinessPartnerNumber()));
 
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
-        //TODO: issue BPN credentials omitted, will be implemented in a separate step
+        //credentials issuance will be moved to the issuer component
 
         return wallet;
     }
 
     private Did createDidJson(CreateWalletRequest request) {
         String didUrl = request.getDidUrl();
-        String bpn = request.getBpn();
+        String bpn = request.getBusinessPartnerNumber();
         didUrl = Objects.isNull(didUrl) ? miwSettings.host() : didUrl;
         return DidWebFactory.fromHostnameAndPath(didUrl, bpn);
     }
@@ -299,8 +301,8 @@ public class WalletService extends BaseService<Wallet, Long> {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 if (!walletRepository.existsByBpn(miwSettings.authorityWalletBpn())) {
                     CreateWalletRequest request = CreateWalletRequest.builder()
-                            .name(miwSettings.authorityWalletName())
-                            .bpn(miwSettings.authorityWalletBpn())
+                            .companyName(miwSettings.authorityWalletName())
+                            .businessPartnerNumber(miwSettings.authorityWalletBpn())
                             .build();
                     wallets[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
                     log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
@@ -331,9 +333,9 @@ public class WalletService extends BaseService<Wallet, Long> {
         Validate.isFalse(callerBpn.equalsIgnoreCase(miwSettings.authorityWalletBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // check wallet already exists
-        boolean exist = walletRepository.existsByBpn(request.getBpn());
+        boolean exist = walletRepository.existsByBpn(request.getBusinessPartnerNumber());
         if (exist) {
-            throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBpn());
+            throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBusinessPartnerNumber());
         }
     }
 }

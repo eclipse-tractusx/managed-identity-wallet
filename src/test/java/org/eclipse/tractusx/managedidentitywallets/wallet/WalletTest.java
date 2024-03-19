@@ -121,7 +121,7 @@ class WalletTest {
         String name = "Sample Wallet";
         HttpHeaders headers = AuthenticationUtils.getInvalidUserHttpHeaders();
 
-        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+        CreateWalletRequest request = CreateWalletRequest.builder().businessPartnerNumber(bpn).companyName(name).build();
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
 
@@ -135,7 +135,7 @@ class WalletTest {
         String name = "Sample Wallet";
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
 
-        CreateWalletRequest request = CreateWalletRequest.builder().bpn(bpn).name(name).build();
+        CreateWalletRequest request = CreateWalletRequest.builder().businessPartnerNumber(bpn).companyName(name).build();
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
 
