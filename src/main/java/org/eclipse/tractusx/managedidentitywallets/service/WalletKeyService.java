@@ -26,12 +26,11 @@ import com.smartsensesolutions.java.commons.base.service.BaseService;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
@@ -40,7 +39,6 @@ import java.io.StringReader;
  * The type Wallet key service.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class WalletKeyService extends BaseService<WalletKey, Long> {
 
@@ -67,8 +65,8 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * @return the byte [ ]
      */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
-        return getPrivateKeyByWalletIdentifier(walletId).asByte();
+    public byte[] getPrivateKeyByWalletIdAsBytes(long walletId) {
+        return getPrivateKeyByWalletId(walletId).asByte();
     }
 
     /**
@@ -78,12 +76,22 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * @return the private key by wallet identifier
      */
     @SneakyThrows
-
-    public x21559PrivateKey getPrivateKeyByWalletIdentifier(long walletId) {
+    public x25519PrivateKey getPrivateKeyByWalletId(long walletId) {
         WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
-        return new x21559PrivateKey(content);
+        return new x25519PrivateKey(content);
+    }
+
+    /**
+     * Gets wallet key by wallet identifier.
+     *
+     * @param walletId the wallet id
+     * @return the wallet key by wallet identifier
+     */
+    @SneakyThrows
+    public String getWalletKeyIdByWalletId(long walletId) {
+        return walletKeyRepository.getByWalletId(walletId).getKeyId();
     }
 
 }

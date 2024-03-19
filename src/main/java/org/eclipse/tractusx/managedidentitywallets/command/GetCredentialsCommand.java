@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -19,28 +19,25 @@
  * ******************************************************************************
  */
 
- package org.eclipse.tractusx.managedidentitywallets.dto;
+package org.eclipse.tractusx.managedidentitywallets.command;
 
- import jakarta.validation.constraints.NotBlank;
- import jakarta.validation.constraints.Pattern;
- import lombok.*;
- import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import java.util.List;
 
- 
- /**
-  * The type Issue membership credential request.
-  */
- @Getter
- @Setter
- @NoArgsConstructor
- @Builder
- @AllArgsConstructor
- public class IssueMembershipCredentialRequest {
- 
-     @NotBlank(message = "Please provide BPN")
-     @Pattern(regexp = StringPool.BPN_NUMBER_REGEX, message = "Please provide valid BPN")
-     private String bpn;
-     
- }
- 
- 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Builder
+@Getter
+@Setter
+public class GetCredentialsCommand {
+    private String credentialId;
+    private String identifier;
+    private List<String> type;
+    private String sortColumn;
+    private String sortType;
+    private int pageNumber;
+    private int size;
+    private boolean asJwt;
+    private String callerBPN;
+}

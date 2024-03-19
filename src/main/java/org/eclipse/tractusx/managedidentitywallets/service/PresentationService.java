@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -35,18 +35,21 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
-import org.eclipse.tractusx.ssi.lib.exception.InvalidJsonLdException;
-import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
-import org.eclipse.tractusx.ssi.lib.exception.JwtExpiredException;
+import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
+import org.eclipse.tractusx.ssi.lib.exception.json.InvalidJsonLdException;
+import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.JwtExpiredException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
@@ -91,6 +94,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private final HoldersCredentialRepository holdersCredentialRepository;
 
+    private final WalletKeyRepository walletKeyRepository;
 
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
@@ -123,6 +127,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
      * @param callerBpn the caller bpn
      * @return the map
      */
+    @SneakyThrows()
     public Map<String, Object> createPresentation(Map<String, Object> data, boolean asJwt, String audience, String callerBpn) {
         List<Map<String, Object>> verifiableCredentialList = (List<Map<String, Object>>) data.get(StringPool.VERIFIABLE_CREDENTIALS);
 
@@ -138,12 +143,13 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials);
     }
 
-    @SneakyThrows({ InvalidePrivateKeyFormat.class })
+    @SneakyThrows()
     private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials) {
         Map<String, Object> response = new HashMap<>();
         if (asJwt) {
             log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
+            WalletKey walletKey = walletKeyRepository.getByWalletId(callerWallet.getId());
 
             //Issuer of VP is holder of VC
             Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
@@ -153,10 +159,10 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                     new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), vpIssuerDid);
 
             //Build JWT
-            x21559PrivateKey ed25519Key = walletKeyService.getPrivateKeyByWalletIdentifier(callerWallet.getId());
-            x21559PrivateKey privateKey = new x21559PrivateKey(ed25519Key.asByte());
+            x25519PrivateKey ed25519Key = walletKeyService.getPrivateKeyByWalletId(callerWallet.getId());
+            x25519PrivateKey privateKey = new x25519PrivateKey(ed25519Key.asByte());
             SignedJWT presentation = presentationFactory.createPresentation(vpIssuerDid
-                    , verifiableCredentials, audience, privateKey);
+                    , verifiableCredentials, audience, privateKey, walletKey.getKeyId());
 
             response.put(StringPool.VP, presentation.serialize());
         } else {

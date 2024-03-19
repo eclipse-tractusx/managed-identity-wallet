@@ -21,37 +21,20 @@
 
  package org.eclipse.tractusx.managedidentitywallets.dto;
 
- import com.fasterxml.jackson.annotation.JsonProperty;
- import jakarta.validation.constraints.NotBlank;
- import jakarta.validation.constraints.Size;
- import lombok.*;
+ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+ 
+ import java.util.LinkedHashMap;
+ import java.util.Map;
+ 
+ public class CredentialVerificationRequest extends LinkedHashMap<String, Object> {
  
  
- /**
-  * The type Issue framework credential request.
-  */
- @Getter
- @Setter
- @NoArgsConstructor
- @AllArgsConstructor
- @Builder
- public class IssueFrameworkCredentialRequest {
+     public void setJwt(String jwt) {
+         put(StringPool.VC_JWT_KEY, jwt);
+     }
  
-     @NotBlank(message = "Please provide holder identifier")
-     @Size(min = 5, max = 255, message = "Please provide valid identifier")
-     private String holderIdentifier;
- 
-     @NotBlank(message = "Please provide type")
-     private String type;
- 
-     @NotBlank(message = "Please provide contract-template")
-     @JsonProperty("contract-template")
-     private String contractTemplate;
- 
-     @NotBlank(message = "Please provide contract-template")
-     @JsonProperty("contract-version")
-     private String contractVersion;
- 
-     
+     public void setVc(Map<String,Object> vc) {
+         putAll(vc);
+     }
  }
  

@@ -21,6 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.SignedJWT;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -29,9 +31,12 @@ import com.smartsensesolutions.java.commons.operator.Operator;
 import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
@@ -40,6 +45,8 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
@@ -51,12 +58,15 @@ import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
+import org.eclipse.tractusx.ssi.lib.exception.proof.JwtExpiredException;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
+import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
+import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -66,7 +76,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.net.http.HttpClient;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 
@@ -75,6 +87,7 @@ import java.util.*;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class IssuersCredentialService extends BaseService<IssuersCredential, Long> {
 
     /**
@@ -93,26 +106,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
     private final CommonService commonService;
 
-    /**
-     * Instantiates a new Issuers credential service.
-     *
-     * @param issuersCredentialRepository the issuers credential repository
-     * @param miwSettings                 the miw settings
-     * @param credentialSpecificationUtil the credential specification util
-     * @param walletKeyService            the wallet key service
-     * @param holdersCredentialRepository the holders credential repository
-     * @param commonService               the common service
-     */
-    public IssuersCredentialService(IssuersCredentialRepository issuersCredentialRepository, MIWSettings miwSettings,
-                                    SpecificationUtil<IssuersCredential> credentialSpecificationUtil,
-                                    WalletKeyService walletKeyService, HoldersCredentialRepository holdersCredentialRepository, CommonService commonService) {
-        this.issuersCredentialRepository = issuersCredentialRepository;
-        this.miwSettings = miwSettings;
-        this.credentialSpecificationUtil = credentialSpecificationUtil;
-        this.walletKeyService = walletKeyService;
-        this.holdersCredentialRepository = holdersCredentialRepository;
-        this.commonService = commonService;
-    }
+    private final ObjectMapper objectMapper;
 
 
     @Override
@@ -139,42 +133,48 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
+    public PageImpl<CredentialsResponse> getCredentials(GetCredentialsCommand command) {
         FilterRequest filterRequest = new FilterRequest();
-        filterRequest.setSize(size);
-        filterRequest.setPage(pageNumber);
+        filterRequest.setSize(command.getSize());
+        filterRequest.setPage(command.getPageNumber());
 
         //Issuer must be caller of API
-        Wallet issuerWallet = commonService.getWalletByIdentifier(callerBPN);
+        Wallet issuerWallet = commonService.getWalletByIdentifier(command.getCallerBPN());
         filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid());
 
-        if (StringUtils.hasText(holderIdentifier)) {
-            Wallet holderWallet = commonService.getWalletByIdentifier(holderIdentifier);
+        if (StringUtils.hasText(command.getIdentifier())) {
+            Wallet holderWallet = commonService.getWalletByIdentifier(command.getIdentifier());
             filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid());
         }
 
-        if (StringUtils.hasText(credentialId)) {
-            filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, credentialId);
+        if (StringUtils.hasText(command.getCredentialId())) {
+            filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, command.getCredentialId());
         }
         FilterRequest request = new FilterRequest();
-        if (!CollectionUtils.isEmpty(type)) {
+        if (!CollectionUtils.isEmpty(command.getType())) {
             request.setPage(filterRequest.getPage());
             request.setSize(filterRequest.getSize());
             request.setCriteriaOperator(CriteriaOperator.OR);
-            for (String str : type) {
+            for (String str : command.getType()) {
                 request.appendCriteria(StringPool.TYPE, Operator.CONTAIN, str);
             }
         }
 
         Sort sort = new Sort();
-        sort.setColumn(sortColumn);
-        sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
+        sort.setColumn(command.getSortColumn());
+        sort.setSortType(SortType.valueOf(command.getSortType().toUpperCase()));
         filterRequest.setSort(sort);
         Page<IssuersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
-        List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
+        List<CredentialsResponse> list = new ArrayList<>(filter.getContent().size());
         for (IssuersCredential credential : filter.getContent()) {
-            list.add(credential.getData());
+            CredentialsResponse cr = new CredentialsResponse();
+            if (command.isAsJwt()) {
+                cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : issuerWallet, credential.getData(), walletKeyService));
+            } else {
+                cr.setVc(credential.getData());
+            }
+            list.add(cr);
         }
         return new PageImpl<>(list, filter.getPageable(), filter.getTotalElements());
     }
@@ -190,7 +190,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL);
         VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
@@ -221,7 +221,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
+    public CredentialsResponse issueFrameworkCredential(IssueFrameworkCredentialRequest request, boolean asJwt, String callerBPN) {
 
         //validate type
         Validate.isFalse(miwSettings.supportedFrameworkVCTypes().contains(request.getType())).launch(new BadDataException("Framework credential of type " + request.getType() + " is not supported, supported values are " + miwSettings.supportedFrameworkVCTypes()));
@@ -233,7 +233,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         validateAccess(callerBPN, baseWallet);
         // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId());
 
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
@@ -257,10 +257,19 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //update summery cred
         updateSummeryCredentials(baseWallet.getDidDocument(), privateKeyBytes, baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType());
 
-        log.debug("Framework VC of type ->{} issued to bpn ->{}", StringEscapeUtils.escapeJava(request.getType()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
+
+        final CredentialsResponse cr = new CredentialsResponse();
 
         // Return VC
-        return issuersCredential.getData();
+        if (asJwt) {
+            cr.setJwt(CommonUtils.vcAsJwt(baseWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+        } else {
+            cr.setVc(issuersCredential.getData());
+        }
+
+        log.debug("Framework VC of type ->{} issued to bpn ->{}", StringEscapeUtils.escapeJava(request.getType()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
+
+        return cr;
     }
 
     /**
@@ -271,7 +280,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request, String callerBPN) {
+    public CredentialsResponse issueDismantlerCredential(IssueDismantlerCredentialRequest request, boolean asJwt,  String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(request.getBpn());
@@ -284,7 +293,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //check duplicate
         isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId());
 
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(request.getBpn());
@@ -307,11 +316,19 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         //update summery VC
         updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
+        
+        final CredentialsResponse cr = new CredentialsResponse();
+
+        // Return VC
+        if (asJwt) {
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+        } else {
+            cr.setVc(issuersCredential.getData());
+        }
 
         log.debug("Dismantler VC issued to bpn -> {}", StringEscapeUtils.escapeJava(request.getBpn()));
 
-        // Return VC
-        return issuersCredential.getData();
+        return cr;
     }
 
     /**
@@ -322,7 +339,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, String callerBPN) {
+    public CredentialsResponse issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, boolean asJwt, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
@@ -335,7 +352,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         validateAccess(callerBPN, issuerWallet);
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
         //if base wallet issue credentials to itself
@@ -362,10 +379,18 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //update summery VC
         updateSummeryCredentials(issuerWallet.getDidDocument(), privateKeyBytes, issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
-        log.debug("Membership VC issued to bpn ->{}", StringEscapeUtils.escapeJava(issueMembershipCredentialRequest.getBpn()));
+        final CredentialsResponse cr = new CredentialsResponse();
 
         // Return VC
-        return issuersCredential.getData();
+        if (asJwt) {
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+        } else {
+            cr.setVc(issuersCredential.getData());
+        }
+
+        log.debug("Membership VC issued to bpn ->{}", StringEscapeUtils.escapeJava(issueMembershipCredentialRequest.getBpn()));
+
+        return cr;
     }
 
 
@@ -378,7 +403,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueCredentialUsingBaseWallet(String holderDid, Map<String, Object> data, String callerBpn) {
+    public CredentialsResponse issueCredentialUsingBaseWallet(String holderDid, Map<String, Object> data, boolean asJwt, String callerBpn) {
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(holderDid);
 
@@ -392,7 +417,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         validateAccess(callerBpn, issuerWallet);
 
         // get issuer Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId());
 
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
@@ -411,36 +436,118 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         IssuersCredential issuersCredential = IssuersCredential.of(holdersCredential);
         issuersCredential = create(issuersCredential);
 
-        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
+        final CredentialsResponse cr = new CredentialsResponse();
 
         // Return VC
-        return issuersCredential.getData();
+        if (asJwt) {
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+        } else {
+            cr.setVc(issuersCredential.getData());
+        }
+
+        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
+
+        return cr;
+    }
+    
+
+    private JWTVerificationResult verifyVCAsJWT(String jwt, DidResolver didResolver, boolean withCredentialsValidation, boolean withCredentialExpiryDate) throws IOException, ParseException {
+        SignedJWT signedJWT = SignedJWT.parse(jwt);
+        Map<String, Object> claims = objectMapper.readValue(signedJWT.getPayload().toBytes(), Map.class);
+        String vcClaim = objectMapper.writeValueAsString(claims.get("vc"));
+        Map<String, Object> map = SerializeUtil.fromJson(vcClaim);
+        VerifiableCredential verifiableCredential = new VerifiableCredential(map);
+
+        //took this approach to avoid issues in sonarQube
+        return new JWTVerificationResult(validateSignature(withCredentialsValidation , signedJWT, didResolver) && validateJWTExpiryDate(withCredentialExpiryDate, signedJWT), verifiableCredential);
+
+        }
+
+        private record JWTVerificationResult(boolean valid, VerifiableCredential verifiableCredential) {
+
+        }
+
+        private boolean validateSignature(boolean withValidateSignature, SignedJWT signedJWT, DidResolver didResolver) {
+            if(!withValidateSignature) {
+                return true;
+            }
+            //validate jwt signature
+            try {
+                SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(didResolver);
+                return jwtVerifier.verify(signedJWT);
+            } catch (Exception e) {
+                log.error("Can not verify signature of jwt", e);
+                return false;
+            }
+        }
+    private boolean validateJWTExpiryDate(boolean withExpiryDate , SignedJWT signedJWT) {
+        if(!withExpiryDate) {
+            return true;
+        }
+        try {
+            SignedJwtValidator jwtValidator = new SignedJwtValidator();
+            jwtValidator.validateDate(signedJWT);
+            return true;
+        } catch (Exception e) {
+            if (!(e instanceof JwtExpiredException)) {
+                log.error("Can not validate jwt expiry date ", e);
+            }
+            return false;
+        }
     }
 
     /**
      * Credentials validation map.
+     *
+     * @param verificationRequest      the verifiable credential
+     * @param withCredentialExpiryDate the with credential expiry date
+     * @return the map
+     */
+    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialExpiryDate) {
+        return credentialsValidation(verificationRequest, true, withCredentialExpiryDate);
+    }
+
+    /**
+    * Credentials validation map.
      *
      * @param data                     the data
      * @param withCredentialExpiryDate the with credential expiry date
      * @return the map
      */
     @SneakyThrows
-    public Map<String, Object> credentialsValidation(Map<String, Object> data, boolean withCredentialExpiryDate) {
-        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialsValidation , boolean withCredentialExpiryDate) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
 
-        DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
-
-        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
-
-        boolean valid = proofValidation.verify(verifiableCredential);
-
+        DidResolver didResolver = new DidWebResolver(httpClient, new DidWebParser(), miwSettings.enforceHttps());
         Map<String, Object> response = new TreeMap<>();
+        boolean valid;
+        VerifiableCredential verifiableCredential;
+        boolean dateValidation = true;
 
-        //check expiry
-        boolean dateValidation = CommonService.validateExpiry(withCredentialExpiryDate, verifiableCredential, response);
+        if (verificationRequest.containsKey(StringPool.VC_JWT_KEY)) {
+            JWTVerificationResult result = verifyVCAsJWT((String) verificationRequest.get(StringPool.VC_JWT_KEY), didResolver, withCredentialsValidation, withCredentialExpiryDate);
+            verifiableCredential = result.verifiableCredential;
+            valid = result.valid;
+        } else {
+
+            verifiableCredential = new VerifiableCredential(verificationRequest);
+            LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
+
+
+            if (withCredentialsValidation) {
+                valid = proofValidation.verify(verifiableCredential);
+            } else {
+                valid = true;
+            }
+
+            dateValidation = CommonService.validateExpiry(withCredentialExpiryDate, verifiableCredential,
+                    response);
+        }
 
         response.put(StringPool.VALID, valid && dateValidation);
-        response.put("vc", verifiableCredential);
+        response.put(StringPool.VC, verificationRequest);
 
         return response;
     }

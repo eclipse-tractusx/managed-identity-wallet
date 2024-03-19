@@ -37,7 +37,7 @@ import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenIssuer;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -103,7 +103,7 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
         SignedJWT signedJWT = new SignedJWT(header, body);
         String privateKey = encryptionUtils.decrypt(keyPair.privateKey());
         // todo bri: this should become dynamic in the future, as we want to support more key algos.
-        OctetKeyPair jwk = new OctetKeyPairFactory().fromPrivateKey(new x21559PrivateKey(privateKey, true));
+        OctetKeyPair jwk = new OctetKeyPairFactory().fromPrivateKey(new x25519PrivateKey(privateKey, true));
         Ed25519Signer signer = new Ed25519Signer(jwk);
         signedJWT.sign(signer);
         log.debug("JWT signed for issuer '{}' and holder '{}'", builder.getClaims().get("iss"),
