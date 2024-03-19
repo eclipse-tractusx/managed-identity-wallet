@@ -68,6 +68,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
@@ -239,7 +240,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         KeyPair keyPair = keyGenerator.generateKey();
 
         //create did json
-        Did did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), request.getBpn());
+        Did did = createDidJson(request);
 
         String keyId = UUID.randomUUID().toString();
 
@@ -274,10 +275,16 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
 
-        //issue BPN credentials
-        issuersCredentialService.issueBpnCredential(issuerWallet, wallet, authority);
+        //TODO: issue BPN credentials omitted, will be implemented in a separate step
 
         return wallet;
+    }
+
+    private Did createDidJson(CreateWalletRequest request) {
+        String didUrl = request.getDidUrl();
+        String bpn = request.getBpn();
+        didUrl = Objects.isNull(didUrl) ? miwSettings.host() : didUrl;
+        return DidWebFactory.fromHostnameAndPath(didUrl, bpn);
     }
 
     /**
