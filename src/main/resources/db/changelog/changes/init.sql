@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS public.wallet
     algorithm     varchar(255) NOT NULL DEFAULT 'ED25519'::character varying,
     did_document  text         NOT NULL,
     created_at    timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       key_storage_type VARCHAR(255) NOT NULL,
     modified_at   timestamp(6) NULL,
     modified_from varchar(255) NULL,
     CONSTRAINT uk_bpn UNIQUE (bpn),

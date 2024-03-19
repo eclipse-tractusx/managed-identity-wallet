@@ -108,10 +108,11 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * Gets wallet key by wallet id.
      *
      * @param walletId the wallet id
+     * @param supportedAlgorithms the algorithm  of private key
      * @return the wallet key by wallet identifier
      */
     @SneakyThrows
-    public String getWalletKeyIdByWalletId(long walletId) {
-        return walletKeyRepository.getByWalletId(walletId).getKeyId();
+    public String getWalletKeyIdByWalletId(long walletId, SupportedAlgorithms supportedAlgorithms) {
+        return walletKeyRepository.getByWalletIdAndAlgorithm(walletId, supportedAlgorithms.name()).getKeyId();
     }
 }

@@ -132,10 +132,8 @@ class IssuersCredentialServiceTest {
                 issuersCredentialRepository,
                 miwSettings,
                 new SpecificationUtil<IssuersCredential>(),
-                walletKeyService,
-                holdersCredentialRepository,
-                commonService,
-                objectMapper);
+                holdersCredentialRepository, commonService, objectMapper,
+                walletKeyService);
     }
 
     @BeforeEach
@@ -175,7 +173,7 @@ class IssuersCredentialServiceTest {
             when(baseWallet.getAlgorithm()).thenReturn("ED25519");
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId(), SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
-            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
+            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
             when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), "ED25519")).thenReturn(keyPair.getPrivateKey()
                     .asByte());
             CredentialsResponse credentialsResponse = assertDoesNotThrow(
@@ -228,7 +226,7 @@ class IssuersCredentialServiceTest {
                     .asByte());
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId(), SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
-            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
+            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
 
             CredentialsResponse credentialsResponse = assertDoesNotThrow(
                     () -> issuersCredentialService.issueFrameworkCredential(request, true, baseWalletBpn));
@@ -268,7 +266,7 @@ class IssuersCredentialServiceTest {
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId(), SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), "ED25519")).thenReturn(keyPair.getPrivateKey().asByte());
-            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
+            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
 
             CredentialsResponse credentialsResponse = assertDoesNotThrow(
                     () -> issuersCredentialService.issueDismantlerCredential(request, true, baseWalletBpn));
@@ -321,7 +319,7 @@ class IssuersCredentialServiceTest {
             when(walletKey.getId()).thenReturn(42L);
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId(), SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
-            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
+            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
 
             CredentialsResponse credentialsResponse = assertDoesNotThrow(
                     () -> issuersCredentialService.issueCredentialUsingBaseWallet(

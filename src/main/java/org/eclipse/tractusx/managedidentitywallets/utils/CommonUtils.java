@@ -190,7 +190,7 @@ public class CommonUtils {
         // JWT Factory
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, vc,
                 privateKey,
-                walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId())
+                walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId(), SupportedAlgorithms.ED25519)
         );
         return vcJWT.serialize();
     }
