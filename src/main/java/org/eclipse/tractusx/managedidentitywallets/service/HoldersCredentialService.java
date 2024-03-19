@@ -32,6 +32,7 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -96,42 +97,49 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
+    public PageImpl<CredentialsResponse> getCredentials(GetCredentialsCommand command) {
         FilterRequest filterRequest = new FilterRequest();
-        filterRequest.setPage(pageNumber);
-        filterRequest.setSize(size);
+        filterRequest.setPage(command.getPageNumber());
+        filterRequest.setSize(command.getSize());
 
         //Holder must be caller of API
-        Wallet holderWallet = commonService.getWalletByIdentifier(callerBPN);
+        Wallet holderWallet = commonService.getWalletByIdentifier(command.getCallerBPN());
         filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid());
 
-        if (StringUtils.hasText(issuerIdentifier)) {
-            Wallet issuerWallet = commonService.getWalletByIdentifier(issuerIdentifier);
+        if (StringUtils.hasText(command.getIdentifier())) {
+            Wallet issuerWallet = commonService.getWalletByIdentifier(command.getIdentifier());
             filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid());
         }
 
-        if (StringUtils.hasText(credentialId)) {
-            filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, credentialId);
+        if (StringUtils.hasText(command.getCredentialId())) {
+            filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, command.getCredentialId());
         }
         FilterRequest request = new FilterRequest();
-        if (!CollectionUtils.isEmpty(type)) {
+        if (!CollectionUtils.isEmpty(command.getType())) {
             request.setPage(filterRequest.getPage());
             request.setSize(filterRequest.getSize());
             request.setCriteriaOperator(CriteriaOperator.OR);
-            for (String str : type) {
+            for (String str : command.getType()) {
                 request.appendCriteria(StringPool.TYPE, Operator.CONTAIN, str);
             }
         }
 
         Sort sort = new Sort();
-        sort.setColumn(sortColumn);
-        sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
+        sort.setColumn(command.getSortColumn());
+        sort.setSortType(SortType.valueOf(command.getSortType().toUpperCase()));
         filterRequest.setSort(sort);
         Page<HoldersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
-        List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
+        List<CredentialsResponse> list = new ArrayList<>(filter.getContent().size());
+
         for (HoldersCredential credential : filter.getContent()) {
-            list.add(credential.getData());
+            CredentialsResponse cr = new CredentialsResponse();
+            if (command.isAsJwt()) {
+                cr.setJwt(CommonUtils.vcAsJwt(command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : holderWallet , holderWallet, credential.getData(), walletKeyService));
+            } else {
+                cr.setVc(credential.getData());
+            }
+            list.add(cr);
         }
 
         return new PageImpl<>(list, filter.getPageable(), filter.getTotalElements());

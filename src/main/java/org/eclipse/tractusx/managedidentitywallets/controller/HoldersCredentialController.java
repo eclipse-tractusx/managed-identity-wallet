@@ -29,10 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.HoldersCredentialControllerApiDocs.GetCredentialsApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.HoldersCredentialControllerApiDocs.IssueCredentialApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.AsJwtParam;
+import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.service.HoldersCredentialService;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -71,7 +72,7 @@ public class HoldersCredentialController extends BaseController {
     */
     @GetCredentialsApiDocs
     @GetMapping(path = RestURI.CREDENTIALS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageImpl<VerifiableCredential>> getCredentials(@Parameter(name = "credentialId", description = "Credential Id", examples = {@ExampleObject(name = "Credential Id", value = "did:web:localhost:BPNL000000000000#12528899-160a-48bd-ba15-f396c3959ae9")}) @RequestParam(required = false) String credentialId,
+    public ResponseEntity<PageImpl<CredentialsResponse>> getCredentials(@Parameter(name = "credentialId", description = "Credential Id", examples = {@ExampleObject(name = "Credential Id", value = "did:web:localhost:BPNL000000000000#12528899-160a-48bd-ba15-f396c3959ae9")}) @RequestParam(required = false) String credentialId,
                                                                          @Parameter(name = "issuerIdentifier", description = "Issuer identifier(did of BPN)", examples = {@ExampleObject(name = "bpn", value = "BPNL000000000000", description = "bpn"), @ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @RequestParam(required = false) String issuerIdentifier,
                                                                          @Parameter(name = "type", description = "Type of VC", examples = {@ExampleObject(name = "SummaryCredential", value = "SummaryCredential", description = "SummaryCredential"), @ExampleObject(description = "BpnCredential", name = "BpnCredential", value = "BpnCredential")}) @RequestParam(required = false) List<String> type,
                                                                          @Parameter(name = "sortColumn", description = "Sort column name",
@@ -87,9 +88,23 @@ public class HoldersCredentialController extends BaseController {
                                                                          @Parameter(name = "sortTpe", description = "Sort order", examples = {@ExampleObject(value = "desc", name = "Descending order"), @ExampleObject(value = "asc", name = "Ascending order")}) @RequestParam(required = false, defaultValue = "desc") String sortTpe,
                                                                          @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Page number, Page number start with zero") @RequestParam(required = false, defaultValue = "0") int pageNumber,
                                                                          @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Number of records per page") @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
+                                                                         @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt,
+
                                                                          Principal principal) {
         log.debug("Received request to get credentials. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.OK).body(holdersCredentialService.getCredentials(credentialId, issuerIdentifier, type, sortColumn, sortTpe, pageNumber, size, getBPNFromToken(principal)));
+        final GetCredentialsCommand command;
+        command = GetCredentialsCommand.builder()
+                .credentialId(credentialId)
+                .identifier(issuerIdentifier)
+                .type(type)
+                .sortColumn(sortColumn)
+                .sortType(sortTpe)
+                .pageNumber(pageNumber)
+                .size(size)
+                .asJwt(asJwt)
+                .callerBPN(getBPNFromToken(principal))
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(holdersCredentialService.getCredentials(command));
     }
 
 
