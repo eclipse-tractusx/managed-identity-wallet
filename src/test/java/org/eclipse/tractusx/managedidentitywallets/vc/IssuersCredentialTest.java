@@ -57,6 +57,8 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class IssuersCredentialTest {
@@ -231,7 +233,8 @@ class IssuersCredentialTest {
     private ResponseEntity<String> issueVC(String bpn, String holderDid, String issuerDid, String type, HttpHeaders headers) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
         //save wallet
-        TestUtils.createWallet(bpn, holderDid, restTemplate, baseBpn);
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        TestUtils.createWallet(bpn, holderDid, restTemplate, baseBpn, defaultLocation);
 
         // Create VC without proof
         //VC Bulider

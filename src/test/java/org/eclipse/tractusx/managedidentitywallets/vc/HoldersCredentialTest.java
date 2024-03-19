@@ -63,6 +63,8 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 @ExtendWith(MockitoExtension.class)
@@ -304,7 +306,8 @@ class HoldersCredentialTest {
     private Map<String, Object> issueVC() throws JsonProcessingException {
         String bpn = TestUtils.getRandomBpmNumber();
         String baseBpn = miwSettings.authorityWalletBpn();
-        TestUtils.createWallet(bpn, "Test", restTemplate, baseBpn);
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        TestUtils.createWallet(bpn, "Test", restTemplate, baseBpn, defaultLocation);
         ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
         Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
@@ -315,7 +318,8 @@ class HoldersCredentialTest {
     private ResponseEntity<String> issueVC(String bpn, String did, String type, HttpHeaders headers) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
         //save wallet
-        TestUtils.createWallet(bpn, did, restTemplate, baseBpn);
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        TestUtils.createWallet(bpn, did, restTemplate, baseBpn, defaultLocation);
 
         // Create VC without proof
         //VC Bulider

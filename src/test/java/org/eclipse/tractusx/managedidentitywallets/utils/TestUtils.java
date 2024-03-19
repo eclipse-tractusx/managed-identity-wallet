@@ -72,10 +72,14 @@ import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
 
 public class TestUtils {
 
-    public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate, String baseBPN) {
+    public static ResponseEntity<String> createWallet(String bpn, String name, TestRestTemplate testTemplate, String baseBPN, String didUrl) {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseBPN);
 
-        CreateWalletRequest request = CreateWalletRequest.builder().businessPartnerNumber(bpn).companyName(name).build();
+        CreateWalletRequest request = CreateWalletRequest.builder()
+                .businessPartnerNumber(bpn)
+                .companyName(name)
+                .didUrl(didUrl)
+                .build();
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
 

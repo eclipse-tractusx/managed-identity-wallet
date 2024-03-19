@@ -46,5 +46,7 @@ public class CreateWalletRequest {
     @Size(min = 1, max = 255, message = "Please provide valid name")
     private String companyName;
 
+    @NotBlank(message = "Please provide url")
+    @Size(min = 1, max = 255, message = "Please provide url")
     private String didUrl;
 }

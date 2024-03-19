@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class FrameworkHoldersCredentialTest {
@@ -192,7 +194,8 @@ class FrameworkHoldersCredentialTest {
     private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException {
         //create wallet
         String baseBpn = miwSettings.authorityWalletBpn();
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation).getBody());
         generateBpnCredential(wallet);
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 

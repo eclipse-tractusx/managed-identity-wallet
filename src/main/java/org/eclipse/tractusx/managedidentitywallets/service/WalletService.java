@@ -70,9 +70,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
@@ -242,7 +242,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         KeyPair keyPair = keyGenerator.generateKey();
 
         //create did json
-        Did did = createDidJson(request);
+        Did did = createDidJson(request.getDidUrl());
 
         String keyId = UUID.randomUUID().toString();
 
@@ -275,18 +275,22 @@ public class WalletService extends BaseService<Wallet, Long> {
         walletKeyService.getRepository().save(walletKeyED25519);
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBusinessPartnerNumber()));
 
-        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-
         //credentials issuance will be moved to the issuer component
 
         return wallet;
     }
 
-    private Did createDidJson(CreateWalletRequest request) {
-        String didUrl = request.getDidUrl();
-        String bpn = request.getBusinessPartnerNumber();
-        didUrl = Objects.isNull(didUrl) ? miwSettings.host() : didUrl;
-        return DidWebFactory.fromHostnameAndPath(didUrl, bpn);
+    private Did createDidJson(String didUrl) {
+        String[] split = didUrl.split(COLON_SEPARATOR);
+        if (split.length == 1) {
+            return DidWebFactory.fromHostname(didUrl);
+        } else if (split.length == 2) {
+            return DidWebFactory.fromHostnameAndPath(split[0], split[1]);
+        } else {
+            int i = didUrl.lastIndexOf(COLON_SEPARATOR);
+            String[] splitByLast = { didUrl.substring(0, i), didUrl.substring(i + 1) };
+            return DidWebFactory.fromHostnameAndPath(splitByLast[0], splitByLast[1]);
+        }
     }
 
     /**
@@ -303,6 +307,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                     CreateWalletRequest request = CreateWalletRequest.builder()
                             .companyName(miwSettings.authorityWalletName())
                             .businessPartnerNumber(miwSettings.authorityWalletBpn())
+                            .didUrl(miwSettings.host() + COLON_SEPARATOR + miwSettings.authorityWalletBpn())
                             .build();
                     wallets[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
                     log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));

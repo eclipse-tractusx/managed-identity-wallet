@@ -54,6 +54,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_READ;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_WRITE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_1;
@@ -194,7 +195,8 @@ public class PresentationServiceTest {
     @SneakyThrows
     private String generateWalletAndBpnCredentialAndGetDid(String bpn) {
         String baseBpn = miwSettings.authorityWalletBpn();
-        ResponseEntity<String> createWalletResponse = createWallet(bpn, "name", restTemplate, baseBpn);
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        ResponseEntity<String> createWalletResponse = createWallet(bpn, "name", restTemplate, baseBpn, defaultLocation);
         Wallet wallet = TestUtils.getWalletFromString(createWalletResponse.getBody());
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
         issuersCredentialService.issueBpnCredential(issuerWallet, wallet, false);

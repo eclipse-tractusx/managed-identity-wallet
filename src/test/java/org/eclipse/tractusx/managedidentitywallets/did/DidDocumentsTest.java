@@ -38,6 +38,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class DidDocumentsTest {
@@ -88,6 +90,7 @@ class DidDocumentsTest {
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();
         createWalletRequest.setBusinessPartnerNumber(bpn);
         createWalletRequest.setCompanyName("wallet_" + bpn);
+        createWalletRequest.setDidUrl(miwSettings.host() + COLON_SEPARATOR + bpn);
         return walletService.createWallet(createWalletRequest, miwSettings.authorityWalletBpn());
     }
 }

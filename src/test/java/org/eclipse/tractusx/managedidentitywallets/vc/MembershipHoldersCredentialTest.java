@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class MembershipHoldersCredentialTest {
@@ -102,7 +104,8 @@ class MembershipHoldersCredentialTest {
         String baseBpn = miwSettings.authorityWalletBpn();
 
         // create wallet, in background bpn and summary credential generated
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation).getBody());
         generateBpnCredential(wallet);
         List<HoldersCredential> byHolderDid = holdersCredentialRepository.getByHolderDid(did);
 
@@ -131,7 +134,8 @@ class MembershipHoldersCredentialTest {
         String baseBpn = miwSettings.authorityWalletBpn();
 
         // create wallet, in background bpn and summary credential generated
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation).getBody());
 
 
         String vc = """
@@ -193,7 +197,8 @@ class MembershipHoldersCredentialTest {
         String baseBpn = miwSettings.authorityWalletBpn();
 
         // create wallet, in background bpn and summary credential generated
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation).getBody());
         generateBpnCredential(wallet);
         //add 2 subject in VC for testing
         List<IssuersCredential> vcs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), wallet.getDid(), MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
@@ -287,7 +292,8 @@ class MembershipHoldersCredentialTest {
         String baseBpn = miwSettings.authorityWalletBpn();
 
         //create wallet
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation).getBody());
         generateBpnCredential(wallet);
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 

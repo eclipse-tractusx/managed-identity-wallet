@@ -44,6 +44,8 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
 class SecureTokenControllerTest {
@@ -65,8 +67,10 @@ class SecureTokenControllerTest {
         AuthenticationUtils.setupKeycloakClient("partner", "partner", partnerBpn);
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String didPartner = DidWebFactory.fromHostnameAndPath(miwSettings.host(), partnerBpn).toString();
-        TestUtils.createWallet(bpn, did, testTemplate, miwSettings.authorityWalletBpn());
-        TestUtils.createWallet(partnerBpn, didPartner, testTemplate, miwSettings.authorityWalletBpn());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        TestUtils.createWallet(bpn, did, testTemplate, miwSettings.authorityWalletBpn(), defaultLocation);
+        String defaultLocationPartner = miwSettings.host() + COLON_SEPARATOR + partnerBpn;
+        TestUtils.createWallet(partnerBpn, didPartner, testTemplate, miwSettings.authorityWalletBpn(), defaultLocationPartner);
 
         // when
         String body = """
