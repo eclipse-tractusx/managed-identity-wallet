@@ -153,11 +153,16 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         // get Key
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
 
+        // check if the expiryDate is set
+        Date expiryDate = null;
+        if (verifiableCredential.getExpirationDate() != null) {
+            expiryDate = Date.from(verifiableCredential.getExpirationDate());
+        }
         // Create Credential
         HoldersCredential credential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
                 verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
                 privateKeyBytes, issuerWallet.getDid(),
-                verifiableCredential.getContext(), Date.from(verifiableCredential.getExpirationDate()), true);
+                verifiableCredential.getContext(), expiryDate, true);
 
         //Store Credential in holder table
         credential = create(credential);

@@ -1,0 +1,236 @@
+# /********************************************************************************
+# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# *
+# * See the NOTICE file(s) distributed with this work for additional
+# * information regarding copyright ownership.
+# *
+# * This program and the accompanying materials are made available under the
+# * terms of the Apache License, Version 2.0 which is available at
+# * https://www.apache.org/licenses/LICENSE-2.0.
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# * License for the specific language governing permissions and limitations
+# * under the License.
+# *
+# * SPDX-License-Identifier: Apache-2.0
+# ********************************************************************************/
+
+name: Verify and Test Helm Chart
+
+on:
+  workflow_dispatch:
+    inputs:
+      node_image:
+        description: 'kindest/node image for k8s kind cluster'
+        # k8s version from 3.1 release as default
+        default: 'kindest/node:v1.27.3'
+        required: false
+        type: string
+      upgrade_from:
+        description: 'chart version to upgrade from'
+        # chart version from 3.1 release as default
+        default: '0.2.0'
+        required: false
+        type: string
+  pull_request:
+    paths:
+      - 'charts/managed-identity-wallet/**'
+  push:
+    paths:
+      - 'charts/managed-identity-wallet/**'
+
+jobs:
+  chart-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.3
+
+      - name: Add bitnami repo
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+
+      - name: Update Helm dependencies
+        run: |
+          cd charts/managed-identity-wallet
+          helm dependency build
+
+      # Setup python as a prerequisite for chart linting
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2
+
+      - name: Run linting
+        run: ct lint --config charts/chart-testing-config.yaml --charts ./charts/managed-identity-wallet
+
+  verify-helm-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run helm docs command
+        uses: addnab/docker-run-action@v3
+        with:
+          image: jnorwood/helm-docs:v1.11.3
+          options: -v ${{ github.workspace }}/charts:/helm-docs
+          run: helm-docs -i managed-identity-wallet/.helmdocsignore
+
+      - name: Verify that no changes are required
+        run: |
+          if $(git diff --quiet --exit-code); then
+            echo "Helm chart docs up to date"
+          else
+            echo "Helm chart docs not up to date:"
+            git diff
+            exit 1
+          fi
+
+  chart-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.3
+
+      - name: Set up Taskfile
+        uses: arduino/setup-task@v1
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Add bitnami and tractusx-dev repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/dev
+          helm repo update
+
+      - name: Update Helm dependencies
+        run: |
+          cd charts/managed-identity-wallet
+          helm dependency build
+
+      - name: Install Helm unittest plugin
+        run: |
+          helm plugin install https://github.com/helm-unittest/helm-unittest.git --version 0.3.5
+
+      - name: Run Helm unittests
+        run: task helm:unittest
+
+      - name: Build app
+        env:
+          SKIP_GRADLE_TASKS_PARAM: "-x jacocoTestCoverageVerification -x test"
+        run: task app:build
+
+      - name: Kubernetes KinD Cluster
+        uses: container-tools/kind-action@v2
+        with:
+          # default value for event_name != workflow_dispatch
+          node_image: ${{ github.event.inputs.node_image || 'kindest/node:v1.27.3' }}
+          version: v0.20.0
+
+      - name: Build image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: kind-registry:5000/miw:testing
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          check-latest: true
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.3.1
+
+        # ct list-changed will output all charts which have changed compared to the target-branch
+        # Example:
+        # Our branch has update the charts/managed-identity-wallet
+        # When we compare with main/develop
+        # We get the output
+        # > charts/managed-identity-wallet
+        # and subsequently set the variable `changed=true`
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+        # TODO: update the ci/all-values.yaml file before enabling this step
+      - name: Run chart-testing (install)
+        run: ct install --charts charts/managed-identity-wallet
+        # if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
+        if: false
+
+        # command breakdown
+        # install: install the chart effectively creating a release
+        # install arg 1 (testing): the name of the release
+        # install arg 2 (tractusx-dev/managed-identity-wallet): the chart to install (in this case the official one from the dev repo)
+        # -n/--namespace: the namespace to use when installing
+        # --create-namespace: create the release namespace if it doesn't exist
+        # --wait: wait for all resources to start
+        # --version: The chart version to install
+      - name: Install the default chart on KinD cluster
+        run: |
+          helm install \
+            testing \
+            tractusx-dev/managed-identity-wallet \
+            -n apps \
+            --create-namespace \
+            --wait \
+            --version ${{ github.event.inputs.upgrade_from || '0.2.0' }}
+
+        # command breakdown
+        # helm dependency update: update chart dependencies based on the content of Chart.yaml
+        # update arg1 (charts/managed-identity-wallet): the location of Chart.yaml
+        # -n/--namespace apps: run in the `apps` namespace
+        # ---
+        # helm upgrade: upgrade a release
+        # upgrade arg1 (testing): the name of the release to upgrade
+        # upgrade arg2 (charts/managed-identity-wallet): the location of Chart.yaml
+        # -n/--namespace apps: run in the `apps` namespace
+        # --wait: wait for all pods, services etc. ro run
+        # --set image.tag=testing: overwrite the image.tag value to be `testing`
+        # --set image.repository=kind-registry:5000/miw: overwrite the image.repository value to be `kind-registry:5000/miw`
+        # ---
+        # NOTE: the overwritten values for the image are used to ensure we use the latest chart version, which was
+        #       built during the workflow run.
+      - name: Run helm upgrade
+        run: |
+          helm dependency \
+            update \
+            charts/managed-identity-wallet \
+            -n apps
+          
+          helm upgrade \
+            testing \
+            charts/managed-identity-wallet \
+            -n apps \
+            --wait \
+            --set image.tag=testing \
+            --set image.repository=kind-registry:5000/miw
+        # only run if this is not a PR -OR- if there are new versions available
+        if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'

@@ -1,5 +1,5 @@
 # /********************************************************************************
-# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# * Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
 # *
 # * See the NOTICE file(s) distributed with this work for additional
 # * information regarding copyright ownership.
@@ -41,7 +41,7 @@ secrets: {}
 envs: {}
 
 serviceAccount:
-  # --  Enable creation of ServiceAccount
+  # -- Enable creation of ServiceAccount
   create: true
   # -- Annotations to add to the ServiceAccount
   annotations: {}
@@ -61,6 +61,10 @@ ingress:
   annotations: {}
   # -- Ingress accepted hostnames
   hosts: []
+  #   - host: chart-example.local
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
   # -- Ingress TLS configuration
   tls: []
   #  - secretName: chart-example-tls
@@ -81,6 +85,34 @@ securityContext:
   runAsGroup: 11111
   # -- Enable to run the container as a non-root user
   runAsNonRoot: true
+
+# -- Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+livenessProbe:
+  # -- Enables/Disables the livenessProbe at all
+  enabled: true
+  # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container.
+  failureThreshold: 3
+  # -- Number of seconds after the container has started before readiness probe are initiated.
+  initialDelaySeconds: 20
+  # -- Number of seconds after which the probe times out.
+  timeoutSeconds: 15
+  # -- How often (in seconds) to perform the probe
+  periodSeconds: 5
+
+# -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+readinessProbe:
+  # -- Enables/Disables the readinessProbe at all
+  enabled: true
+  # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready.
+  failureThreshold: 3
+  # -- Number of seconds after the container has started before readiness probe are initiated.
+  initialDelaySeconds: 30
+  # -- How often (in seconds) to perform the probe
+  periodSeconds: 5
+  # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+  successThreshold: 1
+  # -- Number of seconds after which the probe times out.
+  timeoutSeconds: 5
 
 resources:
   requests:
@@ -106,6 +138,22 @@ affinity: {}
 
 # -- PodAnnotation configuration
 podAnnotations: {}
+
+# -- add initContainers to the miw deployment
+initContainers: []
+
+networkPolicy:
+  # -- If `true` network policy will be created to restrict access to managed-identity-wallet
+  enabled: false
+  # -- Specify from rule network policy for miw (defaults to all namespaces)
+  from:
+  - namespaceSelector: {}
+
+# -- add volumes to the miw deployment
+extraVolumes: []
+
+# -- add volume mounts to the miw deployment
+extraVolumeMounts: []
 
 ## @section Managed Identity Wallet Primary Parameters
 ##
@@ -164,8 +212,8 @@ miw:
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
+  # -- Extra environment variables
   extraEnvVars: []
-  # - Extra environment variables. (default 'KEYCLOAK_HOSTNAME :{{ .Release.Name }}-keycloak')
   #    - name: KEYCLOAK_HOSTNAME
   #      value: "{{ .Release.Name }}-keycloak"
   postgresql:
@@ -205,6 +253,8 @@ postgresql:
   auth:
     # -- Enable postgresql admin user
     enablePostgresUser: false
+    # -- Postgresql admin user password
+    postgresPassword: ""
     # -- Postgresql user to create
     username: "miw"
     # -- Postgresql password to set (if empty one is generated)
@@ -214,7 +264,7 @@ postgresql:
   backup:
     # -- Enable to create a backup cronjob
     enabled: false
-    conjob:
+    cronjob:
       # -- Backup schedule
       schedule: "* */6 * * *"
       storage:
@@ -224,3 +274,47 @@ postgresql:
         resourcePolicy: "keep"
         # -- PVC Storage Request for the backup data volume
         size: "8Gi"
+
+# For more information on how to configure the pgadmin chart see https://artifacthub.io/packages/helm/runix/pgadmin4.
+# (Here we're using a stripped-down version of the pgadmin chart, to just )
+pgadmin4:
+  # -- Enable to deploy pgAdmin
+  enabled: false
+  env:
+    # -- Preset the admin user email
+    email: admin@miw.com
+    # -- preset password (there is no auto-generated password)
+    password: very-secret-password
+    # @ignore
+    variables:
+      - name: PGADMIN_SERVER_JSON_FILE
+        value: /pgadmin4/servers.json
+  ingress:
+    # -- Enagle pgAdmin ingress
+    enabled: false
+    annotations: {}
+    # -- See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L104) how to configure the ingress host(s)
+    hosts: []
+    # -- See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L109) how to configure tls for the ingress host(s)
+    tls: []
+  extraServerDefinitions:
+    # -- enable the predefined server for pgadmin
+    enabled: true
+    # -- See [here](https://github.com/rowanruseler/helm-charts/blob/9b970b2e419c2300dfbb3f827a985157098a0287/charts/pgadmin4/values.yaml#L84) how to configure the predefined servers
+    servers:
+      # @ignore
+      miw-internal-postgresql:
+        Name: "MIW internal Postgresql DB"
+        Group: "Servers"
+        Port: 5432
+        Username: "miw"
+        Host: "{{ .Release.Name }}-postgresql"
+        SSLMode: "prefer"
+        MaintenanceDB: "postgres"
+  # @ignore
+  extraConfigmapMounts:
+    - name: server-definitions
+      configMap: "{{ .Release.Name }}-pgadmin4-server-definitions"
+      subPath: servers.json
+      mountPath: "/pgadmin4/servers.json"
+      readOnly: true

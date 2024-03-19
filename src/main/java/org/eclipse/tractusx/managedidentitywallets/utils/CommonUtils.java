@@ -114,16 +114,22 @@ public class CommonUtils {
             contexts.add(jwsUri);
         }
 
+        // check if the expiryDate is set
+        // if its null then it will be ignored from the SSI Lib (VerifiableCredentialBuilder) and will not be added to the VC
+        Instant expiryInstant = null;
+        if (expiryDate != null) {
+            expiryInstant = expiryDate.toInstant();
+        }
+
         URI id = URI.create(UUID.randomUUID().toString());
-        VerifiableCredentialBuilder builder =
-                new VerifiableCredentialBuilder()
-                        .context(contexts)
-                        .id(URI.create(issuerDoc.getId() + "#" + id))
-                        .type(verifiableCredentialType)
-                        .issuer(issuerDoc.getId())
-                        .expirationDate(expiryDate.toInstant())
-                        .issuanceDate(Instant.now())
-                        .credentialSubject(verifiableCredentialSubject);
+        VerifiableCredentialBuilder builder = new VerifiableCredentialBuilder()
+                .context(contexts)
+                .id(URI.create(issuerDoc.getId() + "#" + id))
+                .type(verifiableCredentialType)
+                .issuer(issuerDoc.getId())
+                .expirationDate(expiryInstant)
+                .issuanceDate(Instant.now())
+                .credentialSubject(verifiableCredentialSubject);
 
 
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);

@@ -23,7 +23,7 @@ tasks:
   build:
     desc: Build the whole app
     cmds:
-      - ./gradlew build -PgithubToken=$GITHUB_TOKEN $SKIP_GRADLE_TASKS_PARAM
+      - ./gradlew build $SKIP_GRADLE_TASKS_PARAM
 
   get-token:
     desc: Obtain a BEARER token from Keycloak to access the MIW API
@@ -38,12 +38,15 @@ tasks:
 
   test-report:
     desc: Generates the test report for MIW
+    ignore_error: true
     cmds:
+      - ./gradlew test
       - ./gradlew jacocoTestReport
 
   coverage:
     desc: Runs the coverage check
     cmds:
+      - task: test-report
       - ./gradlew jacocoTestCoverageVerification
 
   clean:

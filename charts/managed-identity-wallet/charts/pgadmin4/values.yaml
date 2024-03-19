@@ -1,0 +1,202 @@
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: dpage/pgadmin4
+  tag: ""
+  pullPolicy: IfNotPresent
+
+annotations: {}
+
+priorityClassName: ""
+
+service:
+  type: ClusterIP
+  clusterIP: ""
+  loadBalancerIP: ""
+  port: 80
+  targetPort: 80
+  portName: http
+
+  annotations: {}
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+  automountServiceAccountToken: false
+
+strategy: {}
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+extraConfigmapMounts: []
+  # - name: certs-configmap
+  #   mountPath: /etc/ssl/certs
+  #   subPath: ca-certificates.crt # (optional)
+  #   configMap: certs-configmap
+  #   readOnly: true
+
+extraSecretMounts: []
+  # - name: pgpassfile
+  #   secret: pgpassfile
+  #   subPath: pgpassfile
+  #   mountPath: "/var/lib/pgadmin/storage/pgadmin/file.pgpass"
+  #   readOnly: true
+
+extraVolumeMounts: []
+
+extraContainers: |
+# - name: proxy
+#   image: quay.io/gambol99/keycloak-proxy:latest
+#   args:
+#   - -provider=github
+#   - -client-id=
+#   - -client-secret=
+#   - -github-org=<ORG_NAME>
+#   - -email-domain=*
+#   - -cookie-secret=
+#   - -http-address=http://0.0.0.0:4181
+#   - -upstream-url=http://127.0.0.1:3000
+#   ports:
+#     - name: proxy-web
+#       containerPort: 4181
+
+existingSecret: ""
+secretKeys:
+  pgadminPasswordKey: password
+
+env:
+  email: chart@domain.com
+  password: SuperSecret
+  # pgpassfile: /var/lib/pgadmin/storage/pgadmin/file.pgpass
+
+  # set context path for application (e.g. /pgadmin4/*)
+  # contextPath: /pgadmin4
+
+  ## If True, allows pgAdmin4 to create session cookies based on IP address
+  ## Ref: https://www.pgadmin.org/docs/pgadmin4/latest/config_py.html
+  ##
+  enhanced_cookie_protection: "False"
+
+  ## Add custom environment variables that will be injected to deployment
+  ## Ref: https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+  ##
+  variables: []
+  # - name: PGADMIN_LISTEN_ADDRESS
+  #   value: "0.0.0.0"
+  # - name: PGADMIN_LISTEN_PORT
+  #   value: "8080"
+
+envVarsFromConfigMaps: []
+  # - array-of
+  # - config-map-names
+
+envVarsFromSecrets: []
+  # - array-of
+  # - secret-names
+
+persistentVolume:
+  ## If true, pgAdmin4 will create/use a Persistent Volume Claim
+  ## If false, use emptyDir
+  ##
+  enabled: true
+
+  ## pgAdmin4 Persistent Volume Claim annotations
+  ##
+  annotations: {}
+
+  ## pgAdmin4 Persistent Volume access modes
+  ## Must match those of existing PV or dynamic provisioner
+  ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  accessModes:
+    - ReadWriteOnce
+
+  ## pgAdmin4 Persistent Volume Size
+  ##
+  size: 10Gi
+
+  ## pgAdmin4 Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  # existingClaim: ""
+  ## Sub-directory of the PV to mount
+  # subPath: ""
+
+extraVolumes: []
+
+securityContext:
+  runAsUser: 5050
+  runAsGroup: 5050
+  fsGroup: 5050
+
+containerSecurityContext:
+  enabled: false
+  allowPrivilegeEscalation: false
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 60
+  timeoutSeconds: 15
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 60
+  timeoutSeconds: 15
+  successThreshold: 1
+  failureThreshold: 3
+
+VolumePermissions:
+  ## If true, enables an InitContainer to set permissions on /var/lib/pgadmin.
+  ##
+  enabled: false
+
+extraInitContainers: |
+#   - name: add-folder-for-pgpass
+#     image: "dpage/pgadmin4:latest"
+#     command: ["/bin/mkdir", "-p", "/var/lib/pgadmin/storage/pgadmin"]
+#     volumeMounts:
+#       - name: pgadmin-data
+#         mountPath: /var/lib/pgadmin
+#     securityContext:
+#       runAsUser: 5050
+
+containerPorts:
+  http: 80
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podAnnotations: {}
+
+podLabels: {}
+  # key1: value1
+  # key2: value2
+
+namespace: null
+
+init:
+  resources: {}

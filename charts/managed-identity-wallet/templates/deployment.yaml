@@ -44,6 +44,10 @@ spec:
       serviceAccountName: {{ include "managed-identity-wallet.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- tpl (.Values.initContainers | toYaml) $ | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -95,7 +99,7 @@ spec:
             - name: APPLICATION_PORT
               value: "8080"
             - name: VC_EXPIRY_DATE
-              value: {{ (default .Values.miw.ssi.vcExpiryDate (printf "31-12-%s" (now | date "2006"))) | quote }}
+              value: {{ .Values.miw.ssi.vcExpiryDate | default (printf "31-12-%s" (now | date "2006")) | quote }}
           {{- if or .Values.envs .Values.secrets }}
           {{- range $key, $val := .Values.envs }}
             - name: {{ $key }}
@@ -113,28 +117,37 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          {{- with .Values.livenessProbe }}
+          {{- if .enabled }}
           livenessProbe:
-            failureThreshold: 3
             httpGet:
               path: /actuator/health/liveness
               port: 8090
               scheme: HTTP
-            periodSeconds: 5
-            successThreshold: 1
-            timeoutSeconds: 5
-            initialDelaySeconds: 30
+            failureThreshold: {{ .failureThreshold }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          {{- if .enabled }}
           readinessProbe:
-            failureThreshold: 3
             httpGet:
               path: /actuator/health/readiness
               port: 8090
               scheme: HTTP
-            periodSeconds: 5
-            successThreshold: 1
-            timeoutSeconds: 5
-            initialDelaySeconds: 30
+            failureThreshold: {{ .failureThreshold }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            successThreshold: {{ .successThreshold }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+          {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -148,3 +161,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        {{- toYaml .Values.extraVolumes | nindent 8 }}

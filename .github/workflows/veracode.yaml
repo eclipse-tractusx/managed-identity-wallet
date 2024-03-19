@@ -63,7 +63,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build -PgithubToken=${{ secrets.GITHUB_TOKEN }}
+          arguments: build
 
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.6
