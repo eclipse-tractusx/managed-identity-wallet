@@ -26,6 +26,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 
 
 /**
@@ -49,4 +50,6 @@ public class CreateWalletRequest {
     @NotBlank(message = "Please provide url")
     @Size(min = 1, max = 2000, message = "Please provide url")
     private String didUrl;
+
+    private KeyStorageType storageType = KeyStorageType.DB;
 }

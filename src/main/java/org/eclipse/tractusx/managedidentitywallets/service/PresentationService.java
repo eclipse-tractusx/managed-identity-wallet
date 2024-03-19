@@ -30,6 +30,7 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.KeyStorageService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
@@ -38,6 +39,8 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
@@ -47,7 +50,6 @@ import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.exception.InvalidJsonLdException;
-import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
 import org.eclipse.tractusx.ssi.lib.exception.JwtExpiredException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
@@ -56,12 +58,8 @@ import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
-import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
-import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -99,11 +97,12 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private final CommonService commonService;
 
-    private final WalletKeyService walletKeyService;
 
     private final MIWSettings miwSettings;
 
     private final DidDocumentResolverService didDocumentResolverService;
+
+    private final Map<KeyStorageType, KeyStorageService> availableKeyStorage;
 
     private final JtiRepository jtiRepository;
 
@@ -138,48 +137,38 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             verifiableCredentials.add(verifiableCredential);
         });
 
-        return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials, SupportedAlgorithms.ED25519);
-    }
+        // TODO copied code must be implemented in VP creation
+        //return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials, SupportedAlgorithms.ED25519);
 
-    @SneakyThrows({ InvalidePrivateKeyFormat.class })
-    private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet,
-                                        List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm) {
+        KeyStorageService keyStorageService = availableKeyStorage.get(callerWallet.getKeyStorageType());
+        PresentationCreationConfig presentationConfig = null;
         Map<String, Object> response = new HashMap<>();
-        if (asJwt && algorithm.equals(SupportedAlgorithms.ES256K)) {
-            buildVPJwtES256K(audience, callerBpn, callerWallet, verifiableCredentials, algorithm, response);
-        } else if (asJwt && algorithm.equals(SupportedAlgorithms.ED25519)) {
-            buildVPJwtEdDSA(audience, callerBpn, callerWallet, verifiableCredentials, algorithm, response);
+        Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
+        if (asJwt) {
+            log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
+            Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
+
+            //Issuer of VP is holder of VC
+            presentationConfig = PresentationCreationConfig.builder()
+                    .type(PresentationCreationConfig.PresentationType.JWT)
+                    .audience(audience)
+                    .verifiableCredentials(verifiableCredentials)
+                    .walletId(callerWallet.getId())
+                    .vpIssuerDid(vpIssuerDid).build();
+
         } else {
-            buildVPJsonLd(callerBpn, verifiableCredentials, response);
+            log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
+            presentationConfig = PresentationCreationConfig.builder()
+                    .type(PresentationCreationConfig.PresentationType.JSON_LD)
+                    .verifiableCredentials(verifiableCredentials)
+                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
+                    .walletId(callerWallet.getId())
+                    .vpIssuerDid(vpIssuerDid).build();
         }
+
+        response.put(StringPool.VP, keyStorageService.createPresentation(presentationConfig));
+
         return response;
-    }
-
-    private void buildVPJsonLd(String callerBpn, List<VerifiableCredential> verifiableCredentials, Map<String, Object> response) {
-        log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
-        VerifiablePresentationBuilder verifiablePresentationBuilder =
-                new VerifiablePresentationBuilder();
-
-        VerifiablePresentation verifiablePresentation =
-                verifiablePresentationBuilder
-                        .id(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID()))
-                        .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
-                        .verifiableCredentials(verifiableCredentials)
-                        .build();
-        response.put(StringPool.VP, verifiablePresentation);
-    }
-
-    private void buildVPJwtEdDSA(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) throws InvalidePrivateKeyFormat {
-        Pair<Did, Object> result = getPrivateKey(callerWallet, algorithm, audience, callerBpn);
-
-        SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
-                new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), result.getKey());
-
-        x21559PrivateKey ed25519Key = (x21559PrivateKey) result.getRight();
-        x21559PrivateKey privateKey = new x21559PrivateKey(ed25519Key.asByte());
-        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey);
-
-        response.put(StringPool.VP, presentation.serialize());
     }
 
     private void buildVPJwtES256K(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) {

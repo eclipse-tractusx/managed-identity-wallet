@@ -23,6 +23,9 @@ package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -71,6 +74,10 @@ public class Wallet extends MIWBaseEntity {
 
     @Column(nullable = false)
     private String algorithm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="key_storage_type",nullable = false)
+    private KeyStorageType keyStorageType;
 
     @Column(nullable = false)
     @Convert(converter = StringToDidDocumentConverter.class)
