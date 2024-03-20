@@ -41,7 +41,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
@@ -50,6 +50,7 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredential
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
@@ -146,7 +147,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
+    public PageImpl<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
         filterRequest.setSize(size);
         filterRequest.setPage(pageNumber);
@@ -179,7 +180,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         filterRequest.setSort(sort);
         Page<IssuersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
-        List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
+        List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
         for (IssuersCredential credential : filter.getContent()) {
             list.add(credential.getData());
         }
@@ -196,15 +197,14 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
+    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL);
         VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
                 StringPool.BPN, holderWallet.getBpn()));
 
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(verifiableCredentialSubject)
                 .types(types)
                 .issuerDoc(baseWallet.getDidDocument())
@@ -215,7 +215,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .walletId(baseWallet.getId())
                 .build();
 
-        HoldersCredential holdersCredential = availableKeyStorage.get(baseWallet.getKeyStorageType()).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(baseWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential holdersCredential = CommonUtils.convertVerifiableCredential(vc,holdersCredentialCreationConfig);
 
         //Store Credential in holder wallet
         holdersCredential = holdersCredentialRepository.save(holdersCredential);
@@ -240,7 +241,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
+    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
 
         //validate type
         Validate.isFalse(miwSettings.supportedFrameworkVCTypes().contains(request.getType())).launch(new BadDataException("Framework credential of type " + request.getType() + " is not supported, supported values are " + miwSettings.supportedFrameworkVCTypes()));
@@ -263,8 +264,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.CONTRACT_VERSION, request.getContractVersion()));
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
 
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(subject)
                 .types(types)
                 .issuerDoc(baseWallet.getDidDocument())
@@ -276,7 +276,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .build();
 
 
-        HoldersCredential holdersCredential = availableKeyStorage.get(baseWallet.getKeyStorageType()).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(baseWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential holdersCredential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
 
         //save in holder wallet
         holdersCredential = holdersCredentialRepository.save(holdersCredential);
@@ -302,7 +303,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request, String callerBPN) {
+    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(request.getBpn());
@@ -328,8 +329,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
 
 
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(subject)
                 .types(types)
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -340,7 +340,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .selfIssued(isSelfIssued)
                 .build();
 
-        HoldersCredential holdersCredential = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential holdersCredential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
 
 
         //save in holder wallet
@@ -367,7 +368,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public VerifiableCredential issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, String callerBPN) {
+    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
@@ -395,8 +396,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 StringPool.START_TIME, Instant.now().toString()));
 
 
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(verifiableCredentialSubject)
                 .types(types)
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -407,7 +407,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .selfIssued(isSelfIssued)
                 .build();
 
-        HoldersCredential holdersCredential = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential holdersCredential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
 
 
         //save in holder wallet
@@ -456,8 +457,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -470,7 +470,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
 
         // Create Credential
-        HoldersCredential holdersCredential = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential holdersCredential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
 
 
         //save in holder wallet
@@ -495,7 +496,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     @SneakyThrows
     public Map<String, Object> credentialsValidation(Map<String, Object> data, boolean withCredentialExpiryDate) {
-        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(data);
 
         DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
 
@@ -593,8 +594,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
 
         // TODO KEYVAULT refactor this into KeyService
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(subject)
                 .types(types)
                 .issuerDoc(issuerDidDocument)
@@ -605,7 +605,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .selfIssued(isSelfIssued)
                 .build();
 
-        HoldersCredential holdersCredential = availableKeyStorage.get(storageType).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(storageType).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential holdersCredential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
 
         //save in holder wallet
         holdersCredentialRepository.save(holdersCredential);

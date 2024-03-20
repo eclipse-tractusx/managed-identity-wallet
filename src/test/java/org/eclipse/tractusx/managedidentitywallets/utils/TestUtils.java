@@ -47,7 +47,6 @@ import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -116,7 +115,7 @@ public class TestUtils {
         return walletRepository.save(wallet);
     }
 
-    public static void checkVC(VerifiableCredential verifiableCredential, MIWSettings miwSettings) {
+    public static void checkVC(org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential, MIWSettings miwSettings) {
         //text context URL
         Assertions.assertEquals(verifiableCredential.getContext().size(), miwSettings.vcContexts().size());
         for (URI link : verifiableCredential.getContext()) {
@@ -164,10 +163,10 @@ public class TestUtils {
 
         //convert VC
         if (credentialArray != null) {
-            List<VerifiableCredential> verifiableCredentials = new ArrayList<>(credentialArray.length());
+            List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> verifiableCredentials = new ArrayList<>(credentialArray.length());
             for (int i = 0; i < credentialArray.length(); i++) {
                 JSONObject object = credentialArray.getJSONObject(i);
-                verifiableCredentials.add(new VerifiableCredential(objectMapper.readValue(object.toString(), Map.class)));
+                verifiableCredentials.add(new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(objectMapper.readValue(object.toString(), Map.class)));
             }
             wallet1.setVerifiableCredentials(verifiableCredentials);
         }
@@ -188,7 +187,7 @@ public class TestUtils {
         //get VC from holder of Summary type
         List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(holderDID, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
         Assertions.assertEquals(1, holderVCs.size());
-        VerifiableCredential vc = holderVCs.get(0).getData();
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential vc = holderVCs.get(0).getData();
         VerifiableCredentialSubject subject = vc.getCredentialSubject().get(0);
 
         //check if type is in items
@@ -210,14 +209,14 @@ public class TestUtils {
 
 
     @NotNull
-    public static List<VerifiableCredential> getVerifiableCredentials(ResponseEntity<String> response, ObjectMapper objectMapper) throws JsonProcessingException {
+    public static List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> getVerifiableCredentials(ResponseEntity<String> response, ObjectMapper objectMapper) throws JsonProcessingException {
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
 
         List<Map<String, Object>> vcs = (List<Map<String, Object>>) map.get("content");
 
-        List<VerifiableCredential> credentialList = new ArrayList<>();
+        List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> credentialList = new ArrayList<>();
         for (Map<String, Object> stringObjectMap : vcs) {
-            credentialList.add(new VerifiableCredential(stringObjectMap));
+            credentialList.add(new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(stringObjectMap));
         }
         return credentialList;
     }

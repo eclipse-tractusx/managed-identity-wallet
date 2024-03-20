@@ -134,7 +134,7 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the map
      */
     public Map<String, String> storeCredential(Map<String, Object> data, String identifier, String callerBpn) {
-        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(data);
         Wallet wallet = getWalletByIdentifier(identifier);
 
         //validate BPN access

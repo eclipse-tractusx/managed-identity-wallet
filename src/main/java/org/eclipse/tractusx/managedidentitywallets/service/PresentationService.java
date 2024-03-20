@@ -57,7 +57,6 @@ import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
@@ -132,9 +131,9 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         //check if holder wallet is in the system
         Wallet callerWallet = commonService.getWalletByIdentifier(callerBpn);
 
-        List<VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
+        List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> verifiableCredentials = new ArrayList<>(verifiableCredentialList.size());
         verifiableCredentialList.forEach(map -> {
-            VerifiableCredential verifiableCredential = new VerifiableCredential(map);
+            org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(map);
             verifiableCredentials.add(verifiableCredential);
         });
 
@@ -235,7 +234,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                 JsonLdSerializerImpl jsonLdSerializer = new JsonLdSerializerImpl();
                 VerifiablePresentation presentation = jsonLdSerializer.deserializePresentation(new SerializedVerifiablePresentation(vpClaim));
 
-                for (VerifiableCredential credential : presentation.getVerifiableCredentials()) {
+                for (org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential credential : presentation.getVerifiableCredentials()) {
                     validateExpiryDate = CommonService.validateExpiry(withCredentialExpiryDate, credential, response);
                     if (!validateCredential(credential)) {
                         validCredential = false;
@@ -300,7 +299,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     }
 
     @SneakyThrows
-    private boolean validateCredential(VerifiableCredential credential) {
+    private boolean validateCredential(org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential credential) {
         final DidResolver resolver = didDocumentResolverService.getCompositeDidResolver();
         final LinkedDataProofValidation linkedDataProofValidation = LinkedDataProofValidation.newInstance(resolver);
         final boolean isValid = linkedDataProofValidation.verify(credential);

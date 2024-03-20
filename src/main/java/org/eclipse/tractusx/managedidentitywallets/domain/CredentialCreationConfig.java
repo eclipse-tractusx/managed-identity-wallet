@@ -34,7 +34,7 @@ import java.util.Objects;
 
 @Builder
 @Getter
-public class HoldersCredentialCreationConfig {
+public class CredentialCreationConfig {
     private VerifiableCredentialSubject subject;
     private VerifiableCredentialStatus verifiableCredentialStatus;
     private DidDocument issuerDoc;
@@ -44,13 +44,12 @@ public class HoldersCredentialCreationConfig {
     private URI vcId;
     private Date expiryDate;
     private boolean selfIssued;
-    private VerifiableEncoding encoding;
 
     // this will be used by the DB-Impl of storage to retrieve privateKey
     private long walletId;
 
-    public static class HoldersCredentialCreationConfigBuilder {
-        public HoldersCredentialCreationConfigBuilder vcId(Object object) {
+    public static class CredentialCreationConfigBuilder {
+        public CredentialCreationConfigBuilder vcId(Object object) {
             if (!(object instanceof URI) && !(object instanceof String)) {
                 throw new IllegalArgumentException("vcId must be of type String or URI, argument has type%s".formatted(object.getClass().getName()));
             }
@@ -65,14 +64,7 @@ public class HoldersCredentialCreationConfig {
 
         }
 
-        public HoldersCredentialCreationConfig build() {
-
-            try {
-                Objects.requireNonNull(encoding);
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException("encoding type must not be null");
-            }
-
+        public CredentialCreationConfig build() {
 
             try {
                 Objects.requireNonNull(subject);
@@ -105,7 +97,7 @@ public class HoldersCredentialCreationConfig {
                 throw new IllegalArgumentException("contexts must not be null");
             }
 
-            return new HoldersCredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, encoding, walletId);
+            return new CredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, walletId);
         }
     }
 }
