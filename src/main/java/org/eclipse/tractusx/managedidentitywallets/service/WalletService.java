@@ -134,7 +134,7 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the map
      */
     public Map<String, String> storeCredential(Map<String, Object> data, String identifier, String callerBpn) {
-        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(data);
+        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet wallet = getWalletByIdentifier(identifier);
 
         //validate BPN access
@@ -372,7 +372,5 @@ public class WalletService extends BaseService<Wallet, Long> {
         pemWriter.close();
         return stringWriter.toString();
     }
-
-
 
 }

@@ -218,7 +218,7 @@ class WalletTest {
         Wallet body = TestUtils.getWalletFromString(getWalletResponse.getBody());
         Assertions.assertEquals(2, body.getVerifiableCredentials().size());
 
-        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = body.getVerifiableCredentials().stream()
+        VerifiableCredential verifiableCredential = body.getVerifiableCredentials().stream()
                 .filter(vp -> vp.getTypes().contains(MIWVerifiableCredentialType.BPN_CREDENTIAL))
                 .findFirst()
                 .orElse(null);
@@ -226,7 +226,7 @@ class WalletTest {
         Assertions.assertEquals(verifiableCredential.getCredentialSubject().get(0).get(StringPool.BPN), wallet.getBpn());
         Assertions.assertEquals(MIWVerifiableCredentialType.BPN_CREDENTIAL, verifiableCredential.getCredentialSubject().get(0).get(StringPool.TYPE));
 
-        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential summaryVerifiableCredential = body.getVerifiableCredentials().stream()
+        VerifiableCredential summaryVerifiableCredential = body.getVerifiableCredentials().stream()
                 .filter(vc -> vc.getTypes().contains(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL)).findFirst()
                 .orElse(null);
         VerifiableCredentialSubject subject = summaryVerifiableCredential.getCredentialSubject().get(0);
