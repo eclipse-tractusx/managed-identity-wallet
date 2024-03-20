@@ -23,12 +23,14 @@ package org.eclipse.tractusx.managedidentitywallets;
 
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
@@ -70,8 +72,17 @@ public class DBKeyStorageService implements KeyStorageService {
     @Override
     public HoldersCredential createHoldersCredential(HoldersCredentialCreationConfig config) {
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(config.getWalletId(), SupportedAlgorithms.ED25519.name());
-        return CommonUtils.getHoldersCredential(config.getSubject(),
-                config.getTypes(), config.getIssuerDoc(), privateKeyBytes, config.getHolderDid(), config.getContexts(), config.getExpiryDate(), config.isSelfIssued());
+        VerifiableEncoding verifiableEncoding = Objects.requireNonNull(config.getEncoding());
+
+        switch (verifiableEncoding) {
+            case JSON_LD -> {
+                return CommonUtils.getHoldersCredential(config.getSubject(),
+                        config.getTypes(), config.getIssuerDoc(), privateKeyBytes, config.getHolderDid(), config.getContexts(), config.getExpiryDate(), config.isSelfIssued());
+            }
+            case JWT -> throw new NotImplementedException("JWT encoding is not implemented yet");
+            default ->
+                    throw new IllegalArgumentException("encoding %s is not supported".formatted(config.getEncoding()));
+        }
     }
 
     @Override
@@ -88,7 +99,7 @@ public class DBKeyStorageService implements KeyStorageService {
     @Override
     public String createPresentation(PresentationCreationConfig config) {
         Objects.requireNonNull(config);
-        switch (config.getType()) {
+        switch (config.getEncoding()) {
             case JWT -> {
                 return generateJwtPresentation(config).serialize();
             }
@@ -101,7 +112,7 @@ public class DBKeyStorageService implements KeyStorageService {
                 }
             }
             default ->
-                    throw new IllegalArgumentException("config type %s is not supported".formatted(config.getType()));
+                    throw new IllegalArgumentException("encoding %s is not supported".formatted(config.getEncoding()));
         }
     }
 

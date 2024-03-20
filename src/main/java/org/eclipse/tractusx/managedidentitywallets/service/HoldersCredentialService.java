@@ -40,6 +40,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
@@ -167,6 +168,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         }
 
         HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
                 .issuerDoc(issuerWallet.getDidDocument())
