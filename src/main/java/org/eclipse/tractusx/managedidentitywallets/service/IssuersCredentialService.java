@@ -597,6 +597,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // TODO KEYVAULT refactor this into KeyService
         HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(subject)
                 .types(types)
                 .issuerDoc(issuerDidDocument)
