@@ -21,30 +21,16 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
-import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
-import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
-import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
-import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
-import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 
-import java.net.URI;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**

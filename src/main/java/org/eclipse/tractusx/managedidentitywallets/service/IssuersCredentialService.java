@@ -43,7 +43,6 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
-import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
@@ -147,7 +146,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public PageImpl<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
+    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String holderIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
         filterRequest.setSize(size);
         filterRequest.setPage(pageNumber);
@@ -180,7 +179,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         filterRequest.setSort(sort);
         Page<IssuersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
-        List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
+        List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
         for (IssuersCredential credential : filter.getContent()) {
             list.add(credential.getData());
         }
@@ -197,7 +196,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
+    public VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL);
         VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
@@ -241,7 +240,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
+    public VerifiableCredential issueFrameworkCredential(IssueFrameworkCredentialRequest request, String callerBPN) {
 
         //validate type
         Validate.isFalse(miwSettings.supportedFrameworkVCTypes().contains(request.getType())).launch(new BadDataException("Framework credential of type " + request.getType() + " is not supported, supported values are " + miwSettings.supportedFrameworkVCTypes()));
@@ -306,7 +305,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request, String callerBPN) {
+    public VerifiableCredential issueDismantlerCredential(IssueDismantlerCredentialRequest request, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(request.getBpn());
@@ -371,7 +370,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, String callerBPN) {
+    public VerifiableCredential issueMembershipCredential(IssueMembershipCredentialRequest issueMembershipCredentialRequest, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(issueMembershipCredentialRequest.getBpn());
@@ -499,7 +498,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     @SneakyThrows
     public Map<String, Object> credentialsValidation(Map<String, Object> data, boolean withCredentialExpiryDate) {
-        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(data);
+        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
 
         DidResolver didResolver = new DidWebResolver(HttpClient.newHttpClient(), new DidWebParser(), miwSettings.enforceHttps());
 

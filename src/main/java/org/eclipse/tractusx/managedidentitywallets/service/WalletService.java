@@ -53,6 +53,7 @@ import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -126,7 +127,7 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the map
      */
     public Map<String, String> storeCredential(Map<String, Object> data, String identifier, String callerBpn) {
-        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(data);
+        VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet wallet = getWalletByIdentifier(identifier);
 
         //validate BPN access
@@ -341,7 +342,5 @@ public class WalletService extends BaseService<Wallet, Long> {
         pemWriter.close();
         return stringWriter.toString();
     }
-
-
 
 }
