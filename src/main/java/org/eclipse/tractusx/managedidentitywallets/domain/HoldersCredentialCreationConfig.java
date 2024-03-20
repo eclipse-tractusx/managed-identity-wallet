@@ -44,6 +44,7 @@ public class HoldersCredentialCreationConfig {
     private URI vcId;
     private Date expiryDate;
     private boolean selfIssued;
+    private VerifiableEncoding encoding;
 
     // this will be used by the DB-Impl of storage to retrieve privateKey
     private long walletId;
@@ -65,38 +66,46 @@ public class HoldersCredentialCreationConfig {
         }
 
         public HoldersCredentialCreationConfig build() {
+
+            try {
+                Objects.requireNonNull(encoding);
+            } catch (NullPointerException e) {
+                throw new IllegalArgumentException("encoding type must not be null");
+            }
+
+
             try {
                 Objects.requireNonNull(subject);
-            }catch(NullPointerException e){
+            } catch (NullPointerException e) {
                 throw new IllegalArgumentException("subject must not be null");
             }
 
             try {
                 Objects.requireNonNull(types);
-            }catch(NullPointerException e){
+            } catch (NullPointerException e) {
                 throw new IllegalArgumentException("types must not be null");
             }
 
 
             try {
                 Objects.requireNonNull(issuerDoc);
-            }catch(NullPointerException e){
+            } catch (NullPointerException e) {
                 throw new IllegalArgumentException("issuer did document must not be null");
             }
 
             try {
                 Objects.requireNonNull(holderDid);
-            }catch(NullPointerException e){
+            } catch (NullPointerException e) {
                 throw new IllegalArgumentException("holder did must not be null");
             }
 
             try {
                 Objects.requireNonNull(contexts);
-            }catch(NullPointerException e){
+            } catch (NullPointerException e) {
                 throw new IllegalArgumentException("contexts must not be null");
             }
 
-            return new HoldersCredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, walletId);
+            return new HoldersCredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, encoding, walletId);
         }
     }
 }

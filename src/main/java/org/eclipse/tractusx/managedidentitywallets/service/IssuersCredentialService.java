@@ -43,6 +43,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
@@ -111,7 +112,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     public IssuersCredentialService(IssuersCredentialRepository issuersCredentialRepository, MIWSettings miwSettings,
                                     SpecificationUtil<IssuersCredential> credentialSpecificationUtil,
-                                   HoldersCredentialRepository holdersCredentialRepository,
+                                    HoldersCredentialRepository holdersCredentialRepository,
                                     CommonService commonService) {
         this.issuersCredentialRepository = issuersCredentialRepository;
         this.miwSettings = miwSettings;
@@ -196,12 +197,14 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
+
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL);
         VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
                 StringPool.BPN, holderWallet.getBpn()));
 
         HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(verifiableCredentialSubject)
                 .types(types)
                 .issuerDoc(baseWallet.getDidDocument())
@@ -261,6 +264,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
 
         HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(subject)
                 .types(types)
                 .issuerDoc(baseWallet.getDidDocument())
@@ -325,6 +329,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
 
         HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(subject)
                 .types(types)
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -391,6 +396,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
 
         HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(verifiableCredentialSubject)
                 .types(types)
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -451,6 +457,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
         HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -530,7 +537,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * Update summery credentials.
      *
      * @param issuerDidDocument the issuer did document
-     * @param baseWalletId  the issuer base wallet id
+     * @param baseWalletId      the issuer base wallet id
      * @param holderBpn         the holder bpn
      * @param holderDid         the holder did
      * @param type              the type

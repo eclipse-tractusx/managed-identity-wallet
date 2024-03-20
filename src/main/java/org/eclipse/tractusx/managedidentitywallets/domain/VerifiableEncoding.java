@@ -21,27 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import lombok.Builder;
-import lombok.Getter;
-import org.eclipse.tractusx.ssi.lib.model.did.Did;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-
-import java.net.URI;
-import java.util.List;
-
-@Builder
-@Getter
-public class PresentationCreationConfig {
-
-    private VerifiableEncoding encoding;
-    private long walletId; //FIXME for DB to retrieve privateKey from DB, and retrieving keyVaultKey to retrieve publicKey
-    private List<VerifiableCredential> verifiableCredentials;
-    private Did vpIssuerDid;
-
-    // all for JWT
-    private String audience;
-
-    // all for JsonLD
-    URI verificationMethod;
-
+public enum VerifiableEncoding {
+    JWT,
+    JSON_LD
 }
