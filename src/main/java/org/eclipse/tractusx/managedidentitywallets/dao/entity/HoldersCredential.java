@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.utils.StringToCredentialConverter;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
 
 /**
@@ -56,7 +57,7 @@ public class HoldersCredential extends MIWBaseEntity {
 
     @Column(nullable = false, name="credential_data")
     @Convert(converter = StringToCredentialConverter.class)
-    private org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential data;
+    private VerifiableCredential data;
 
     @Column(nullable = false)
     private String credentialId;

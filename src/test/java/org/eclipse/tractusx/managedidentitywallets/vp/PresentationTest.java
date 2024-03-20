@@ -43,6 +43,7 @@ import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
@@ -333,7 +334,7 @@ class PresentationTest {
                 StringPool.BPN, bpn));
 
         //Using Builder
-        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential credentialWithoutProof =
+        VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
                         .id(URI.create(issuerDid + "#" + UUID.randomUUID()))
                         .context(contexts)
