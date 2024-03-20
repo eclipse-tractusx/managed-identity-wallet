@@ -40,7 +40,6 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredential
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -85,7 +84,7 @@ class FrameworkHoldersCredentialTest {
 
         HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<VerifiableCredential> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, VerifiableCredential.class);
+        ResponseEntity<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> response = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential.class);
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
@@ -127,7 +126,7 @@ class FrameworkHoldersCredentialTest {
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertFalse(credentials.isEmpty());
 
-        VerifiableCredential vcFromDB = credentials.get(0).getData();
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential vcFromDB = credentials.get(0).getData();
         TestUtils.checkVC(vcFromDB, miwSettings);
 
         Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
@@ -206,7 +205,7 @@ class FrameworkHoldersCredentialTest {
     private void validate(Wallet wallet, String type, ResponseEntity<String> response, MIWSettings miwSettings, String oldSummaryCredentialId) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
-        VerifiableCredential verifiableCredential = new VerifiableCredential(map);
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(map);
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION));
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
@@ -219,7 +218,7 @@ class FrameworkHoldersCredentialTest {
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertFalse(credentials.isEmpty());
 
-        VerifiableCredential vcFromDB = credentials.get(0).getData();
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential vcFromDB = credentials.get(0).getData();
         TestUtils.checkVC(vcFromDB, miwSettings);
 
         Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false

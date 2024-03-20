@@ -39,7 +39,6 @@ import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
@@ -108,7 +107,7 @@ class HoldersCredentialTest {
 
 
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
@@ -166,7 +165,7 @@ class HoldersCredentialTest {
 
         ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}"
                 , HttpMethod.GET, entity, String.class, baseDID);
-        List<VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
+        List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(7, Objects.requireNonNull(credentialList).size()); //5  framework + 1 BPN + 1 Summary
 
@@ -215,7 +214,7 @@ class HoldersCredentialTest {
             utils.when(() -> {
                 LinkedDataProofValidation.newInstance(Mockito.any(DidResolver.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(false);
+            Mockito.when(mock.verify(Mockito.any(org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential.class))).thenReturn(false);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -238,7 +237,7 @@ class HoldersCredentialTest {
             utils.when(() -> {
                 LinkedDataProofValidation.newInstance(Mockito.any(DidResolver.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+            Mockito.when(mock.verify(Mockito.any(org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -265,7 +264,7 @@ class HoldersCredentialTest {
             utils.when(() -> {
                 LinkedDataProofValidation.newInstance(Mockito.any(DidResolver.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+            Mockito.when(mock.verify(Mockito.any(org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -291,7 +290,7 @@ class HoldersCredentialTest {
             utils.when(() -> {
                 LinkedDataProofValidation.newInstance(Mockito.any(DidResolver.class));
             }).thenReturn(mock);
-            Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+            Mockito.when(mock.verify(Mockito.any(org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential.class))).thenReturn(true);
 
             Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
@@ -306,7 +305,7 @@ class HoldersCredentialTest {
         String baseBpn = miwSettings.authorityWalletBpn();
         TestUtils.createWallet(bpn, "Test", restTemplate, baseBpn);
         ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
         Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
         return map;
     }
@@ -327,7 +326,7 @@ class HoldersCredentialTest {
                 new VerifiableCredentialSubject(Map.of("test", "test"));
 
         //Using Builder
-        VerifiableCredential credentialWithoutProof =
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
                         .id(URI.create(did + "#" + UUID.randomUUID()))
                         .context(miwSettings.vcContexts())

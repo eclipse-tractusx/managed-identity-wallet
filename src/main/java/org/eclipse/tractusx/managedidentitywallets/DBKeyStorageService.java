@@ -23,10 +23,11 @@ package org.eclipse.tractusx.managedidentitywallets;
 
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
@@ -43,7 +44,10 @@ import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
 import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
+import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
@@ -55,6 +59,7 @@ import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationF
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -67,21 +72,9 @@ public class DBKeyStorageService implements KeyStorageService {
     private final WalletKeyService walletKeyService;
 
     @Override
-    public HoldersCredential createHoldersCredential(HoldersCredentialCreationConfig config) {
+    public VerifiableCredential createCredential(CredentialCreationConfig config) {
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(config.getWalletId());
-        VerifiableEncoding verifiableEncoding = Objects.requireNonNull(config.getEncoding());
-
-        switch (verifiableEncoding) { // TODO move code from CommonUtils here
-            case JSON_LD -> {
-                return CommonUtils.getHoldersCredential(config.getSubject(),
-                        config.getTypes(), config.getIssuerDoc(), privateKeyBytes, config.getHolderDid(), config.getContexts(), config.getExpiryDate(), config.isSelfIssued());
-            }
-            case JWT -> throw new NotImplementedException("JWT encoding is not implemented yet");
-            default ->
-                    throw new IllegalArgumentException("encoding %s is not supported".formatted(config.getEncoding()));
-        }
-
-
+        return createVerifiableCredential(config, privateKeyBytes);
     }
 
     @Override
@@ -153,4 +146,45 @@ public class DBKeyStorageService implements KeyStorageService {
         verifiablePresentation.put(Verifiable.PROOF, proof);
         return verifiablePresentation;
     }
+
+    @SneakyThrows({UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class})
+    private static org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential createVerifiableCredential(CredentialCreationConfig config, byte[] privateKeyBytes) {
+        //VC Builder
+
+        // if the credential does not contain the JWS proof-context add it
+        URI jwsUri = URI.create("https://w3id.org/security/suites/jws-2020/v1");
+        if (!config.getContexts().contains(jwsUri)) {
+            config.getContexts().add(jwsUri);
+        }
+
+        // check if the expiryDate is set
+        // if its null then it will be ignored from the SSI Lib (VerifiableCredentialBuilder) and will not be added to the VC
+        Instant expiryInstant = config.getExpiryDate().toInstant();
+
+
+        URI id = URI.create(UUID.randomUUID().toString());
+        VerifiableCredentialBuilder builder = new VerifiableCredentialBuilder()
+                .context(config.getContexts())
+                .id(URI.create(config.getIssuerDoc().getId() + "#" + id))
+                .type(config.getTypes())
+                .issuer(config.getIssuerDoc().getId())
+                .expirationDate(expiryInstant)
+                .issuanceDate(Instant.now())
+                .credentialSubject(config.getSubject());
+
+
+        LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
+        URI verificationMethod = config.getIssuerDoc().getVerificationMethods().get(0).getId();
+
+        JWSSignature2020 proof =
+                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKeyBytes));
+
+
+        //Adding Proof to VC
+        builder.proof(proof);
+
+        //Create Credential
+        return builder.build();
+    }
+
 }

@@ -37,11 +37,12 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.domain.Page;
@@ -98,7 +99,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      * @param callerBPN        the caller bpn
      * @return the credentials
      */
-    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
+    public PageImpl<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
         FilterRequest filterRequest = new FilterRequest();
         filterRequest.setPage(pageNumber);
         filterRequest.setSize(size);
@@ -131,7 +132,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         filterRequest.setSort(sort);
         Page<HoldersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
-        List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
+        List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
         for (HoldersCredential credential : filter.getContent()) {
             list.add(credential.getData());
         }
@@ -159,8 +160,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
 
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -172,7 +172,9 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
                 .build();
 
         // Create Credential
-        HoldersCredential credential = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc,holdersCredentialCreationConfig);
+
 
         //Store Credential in holder table
         credential = create(credential);

@@ -39,7 +39,6 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredential
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
@@ -87,7 +86,7 @@ class MembershipHoldersCredentialTest {
 
         HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<VerifiableCredential> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, VerifiableCredential.class);
+        ResponseEntity<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential.class);
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
@@ -229,7 +228,7 @@ class MembershipHoldersCredentialTest {
                       }
                     }
                 """;
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc, Map.class));
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(new ObjectMapper().readValue(vc, Map.class));
         vcs.get(0).setData(verifiableCredential);
 
         issuersCredentialRepository.save(vcs.get(0));
@@ -253,7 +252,7 @@ class MembershipHoldersCredentialTest {
         ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, miwSettings.authorityWalletBpn(), miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        VerifiableCredential verifiableCredential = getVerifiableCredential(response);
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = getVerifiableCredential(response);
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
@@ -288,7 +287,7 @@ class MembershipHoldersCredentialTest {
         ResponseEntity<String> response = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
 
-        VerifiableCredential verifiableCredential = getVerifiableCredential(response);
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = getVerifiableCredential(response);
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
 
@@ -349,12 +348,12 @@ class MembershipHoldersCredentialTest {
 
 
     @NotNull
-    private VerifiableCredential getVerifiableCredential(ResponseEntity<String> response) throws JsonProcessingException {
+    private org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential getVerifiableCredential(ResponseEntity<String> response) throws JsonProcessingException {
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
-        return new VerifiableCredential(map);
+        return new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(map);
     }
 
-    private void validateTypes(VerifiableCredential verifiableCredential) {
+    private void validateTypes(org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential) {
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
         Assertions.assertEquals("Test-X", verifiableCredential.getCredentialSubject().get(0).get(StringPool.MEMBER_OF));
     }

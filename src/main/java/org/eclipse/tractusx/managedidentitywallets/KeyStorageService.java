@@ -21,15 +21,15 @@
 
 package org.eclipse.tractusx.managedidentitywallets;
 
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.exception.KeyGenerationException;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
 public interface KeyStorageService {
-    HoldersCredential createHoldersCredential(HoldersCredentialCreationConfig config);
+    VerifiableCredential createCredential(CredentialCreationConfig config);
     KeyPair getKey() throws KeyGenerationException;
     KeyStorageType getSupportedStorageType();
 
