@@ -19,9 +19,15 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.domain;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-public enum KeyStorageType {
-    DB,
-    REMOTE
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+
+public interface KeyProvider {
+    byte[] getPrivateKey(String id);
+
+    void saveKeys(WalletKey walletKey);
+
+    KeyStorageType getKeyStorageType();
 }

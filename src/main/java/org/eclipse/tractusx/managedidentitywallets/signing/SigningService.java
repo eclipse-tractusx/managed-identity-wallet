@@ -19,9 +19,19 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.domain;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-public enum KeyStorageType {
-    DB,
-    REMOTE
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
+import org.eclipse.tractusx.ssi.lib.exception.KeyGenerationException;
+
+public interface SigningService {
+    SignerResult createCredential(CredentialCreationConfig config);
+    KeyPair getKey() throws KeyGenerationException;
+    SigningServiceType getSupportedServiceType();
+    SignerResult createPresentation(PresentationCreationConfig config);
+    void setKeyProvider(KeyProvider keyProvider);
 }

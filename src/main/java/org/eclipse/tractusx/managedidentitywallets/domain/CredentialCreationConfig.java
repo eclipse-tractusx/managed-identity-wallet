@@ -46,7 +46,9 @@ public class CredentialCreationConfig {
     private boolean selfIssued;
 
     // this will be used by the DB-Impl of storage to retrieve privateKey
-    private long walletId;
+    private String keyIdentifier;
+
+    private VerifiableEncoding encoding;
 
     public static class CredentialCreationConfigBuilder {
         public CredentialCreationConfigBuilder vcId(Object object) {
@@ -97,7 +99,13 @@ public class CredentialCreationConfig {
                 throw new IllegalArgumentException("contexts must not be null");
             }
 
-            return new CredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, walletId);
+            try {
+                Objects.requireNonNull(encoding);
+            } catch (NullPointerException e) {
+                throw new IllegalArgumentException("encoding must not be null");
+            }
+
+            return new CredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, keyIdentifier, encoding);
         }
     }
 }

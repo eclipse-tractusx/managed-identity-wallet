@@ -19,9 +19,19 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.domain;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-public enum KeyStorageType {
-    DB,
-    REMOTE
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
+
+@Getter
+@Setter
+@Builder
+public class SignerResult {
+    private VerifiableEncoding encoding;
+    private Verifiable jsonLd;
+    private String jwt;
 }

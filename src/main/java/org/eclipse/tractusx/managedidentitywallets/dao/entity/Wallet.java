@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.utils.StringToDidDocumentConverter;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -63,7 +64,7 @@ public class Wallet extends MIWBaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name="key_storage_type",nullable = false)
-    private KeyStorageType keyStorageType;
+    private SigningServiceType signingServiceType;
 
     @Column(nullable = false)
     @Convert(converter = StringToDidDocumentConverter.class)

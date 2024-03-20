@@ -28,8 +28,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
-import org.eclipse.tractusx.managedidentitywallets.KeyStorageService;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,11 +56,13 @@ public class ApplicationConfig implements WebMvcConfigurer {
 
     private final SwaggerUiConfigProperties properties;
     private final String resourceBundlePath;
+    private final MIWSettings miwSettings;
 
     @Autowired
-    public ApplicationConfig(@Value("${resource.bundle.path:classpath:i18n/language}") String resourceBundlePath, SwaggerUiConfigProperties properties) {
+    public ApplicationConfig(@Value("${resource.bundle.path:classpath:i18n/language}") String resourceBundlePath, SwaggerUiConfigProperties properties, MIWSettings miwSettings) {
         this.resourceBundlePath = resourceBundlePath;
         this.properties = properties;
+        this.miwSettings = miwSettings;
     }
 
     /**
@@ -105,9 +108,21 @@ public class ApplicationConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public Map<KeyStorageType, KeyStorageService> availableKeyStorages(List<KeyStorageService> storages){
-        Map<KeyStorageType, KeyStorageService> available = new HashMap<>();
-        storages.forEach(s -> available.put(s.getSupportedStorageType(),s));
+    public Map<SigningServiceType, SigningService> availableKeyStorages(List<SigningService> storages, List<KeyProvider> keyProviders) {
+        KeyProvider localSigningKeyProvider = keyProviders.stream().filter(s -> s.getKeyStorageType().equals(miwSettings.localSigningKeyStorageType()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("no key provider with type %s found".formatted(miwSettings.localSigningKeyStorageType())));
+
+        Map<SigningServiceType, SigningService> available = new HashMap<>();
+        storages.forEach(
+                s -> {
+                    if(s.getSupportedServiceType().equals(SigningServiceType.LOCAL)){
+                        s.setKeyProvider(localSigningKeyProvider);
+                    }
+                    available.put(s.getSupportedServiceType(), s);
+                }
+        );
+
         return available;
     }
 }
