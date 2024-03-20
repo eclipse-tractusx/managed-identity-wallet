@@ -41,7 +41,6 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
@@ -258,9 +257,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         validateAccess(callerBPN, baseWallet);
 
-        // TODO KEYVAULT refactor this into KeyService
-        // get Key
-
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
@@ -324,8 +320,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         //check duplicate
         isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
-
-        // TODO KEYVAULT refactor this into KeyService
 
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(request.getBpn());
@@ -392,7 +386,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         validateAccess(callerBPN, issuerWallet);
 
-        // TODO KEYVAULT refactor this into KeyService
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
         //if base wallet issue credentials to itself
@@ -463,10 +456,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
         validateAccess(callerBpn, issuerWallet);
-
-        // TODO KEYVAULT refactor this into KeyService
-        // get issuer Key
-
 
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
@@ -608,7 +597,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
 
-        // TODO KEYVAULT refactor this into KeyService
         CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .encoding(VerifiableEncoding.JSON_LD)
                 .subject(subject)
