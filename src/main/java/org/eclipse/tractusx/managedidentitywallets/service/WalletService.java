@@ -34,7 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
-import org.eclipse.tractusx.managedidentitywallets.KeyStorageService;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
@@ -107,7 +108,7 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final CommonService commonService;
 
-    private final Map<KeyStorageType, KeyStorageService> availableKeyStorage;
+    private final Map<SigningServiceType, SigningService> availableSigningServices;
 
     @Qualifier("transactionManager")
     private final PlatformTransactionManager transactionManager;
@@ -241,13 +242,13 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         // TODO KEYVAULT abstract into KeyService
         //create private key pair
-        KeyStorageType keyStorageType = null;
+        SigningServiceType signingServiceType = null;
         if(authority){
-            keyStorageType = miwSettings.authorityKeyStorageType();
+            signingServiceType = miwSettings.authoritySigningServiceType();
         }else{
-            keyStorageType = request.getStorageType();
+            signingServiceType = request.getSigningServiceType();
         }
-        KeyPair keyPair = availableKeyStorage.get(keyStorageType).getKey();;
+        KeyPair keyPair = availableSigningServices.get(signingServiceType).getKey();
 
         //create did json
         Did did = createDidJson(request.getDidUrl());
@@ -267,7 +268,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .name(request.getCompanyName())
                 .did(did.toUri().toString())
                 .algorithm(StringPool.ED_25519)
-                .keyStorageType(keyStorageType)
+                .signingServiceType(signingServiceType)
                 .build());
 
         WalletKey walletKeyED25519 = WalletKey.builder()

@@ -19,19 +19,10 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
-import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
-import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
-import org.eclipse.tractusx.ssi.lib.exception.KeyGenerationException;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-
-public interface KeyStorageService {
-    VerifiableCredential createCredential(CredentialCreationConfig config);
-    KeyPair getKey() throws KeyGenerationException;
-    KeyStorageType getSupportedStorageType();
-
-    String createPresentation(PresentationCreationConfig config);
+public enum SigningServiceType {
+    LOCAL,
+    AZURE,
+    REMOTE
 }

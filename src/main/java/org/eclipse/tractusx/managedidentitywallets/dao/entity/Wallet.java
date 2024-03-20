@@ -40,6 +40,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.utils.StringToDidDocumentConverter;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -77,7 +78,7 @@ public class Wallet extends MIWBaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name="key_storage_type",nullable = false)
-    private KeyStorageType keyStorageType;
+    private SigningServiceType signingServiceType;
 
     @Column(nullable = false)
     @Convert(converter = StringToDidDocumentConverter.class)
