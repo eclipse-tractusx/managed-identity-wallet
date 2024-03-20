@@ -37,6 +37,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
@@ -120,7 +121,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
             //Issuer of VP is holder of VC
             presentationConfig = PresentationCreationConfig.builder()
-                    .type(PresentationCreationConfig.PresentationType.JWT)
+                    .encoding(VerifiableEncoding.JWT)
                     .audience(audience)
                     .verifiableCredentials(verifiableCredentials)
                     .walletId(callerWallet.getId())
@@ -129,7 +130,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         } else {
             log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
             presentationConfig = PresentationCreationConfig.builder()
-                    .type(PresentationCreationConfig.PresentationType.JSON_LD)
+                    .encoding(VerifiableEncoding.JSON_LD)
                     .verifiableCredentials(verifiableCredentials)
                     .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
                     .walletId(callerWallet.getId())
