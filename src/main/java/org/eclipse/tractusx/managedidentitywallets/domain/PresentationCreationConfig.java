@@ -34,7 +34,7 @@ import java.util.List;
 public class PresentationCreationConfig {
 
     private VerifiableEncoding encoding;
-    private long walletId; //FIXME for DB to retrieve privateKey from DB, and retrieving keyVaultKey to retrieve publicKey
+    private String keyIdentifier;
     private List<VerifiableCredential> verifiableCredentials;
     private Did vpIssuerDid;
 

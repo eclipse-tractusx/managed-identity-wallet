@@ -19,36 +19,35 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
+import lombok.RequiredArgsConstructor;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.springframework.stereotype.Repository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
+import org.springframework.stereotype.Component;
 
-/**
- * The interface Wallet key repository.
- */
-@Repository
-public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
-    /**
-     * Gets by wallet id and algorithm.
-     *
-     * @param id the id
-     * param algorithm the algorithm
-     * @return the by wallet id
-     */
-    WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
+@Component
+@RequiredArgsConstructor
+public class LocalKeyProvider implements KeyProvider {
 
-    /**
-     * Gets by wallet id.
-     * @param id
-     * @return WalletKey
-     */
-    WalletKey getByWalletId(Long id);
+    private final WalletKeyService walletKeyService;
 
-    WalletKey findFirstByWallet_Bpn(String bpn);
+    private final WalletKeyRepository walletRepository;
 
-    WalletKey findFirstByWallet_Did(String did);
+    @Override
+    public byte[] getPrivateKey(String keyId) {
+        return walletKeyService.getPrivateJeyByKeyId(keyId);
+    }
 
-    WalletKey getByKeyId(String keyId);
+    @Override
+    public void saveKeys(WalletKey walletKey) {
+        walletRepository.save(walletKey);
+    }
+
+    @Override
+    public KeyStorageType getKeyStorageType() {
+        return KeyStorageType.DB;
+    }
 }

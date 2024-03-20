@@ -19,17 +19,17 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
-import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
@@ -45,7 +45,6 @@ import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
 import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
@@ -66,15 +65,24 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
-public class DBKeyStorageService implements KeyStorageService {
+public class LocalSigningService implements SigningService {
 
-    private final WalletKeyService walletKeyService;
+    private KeyProvider keyProvider;
 
     @Override
+    public SignerResult createCredential(CredentialCreationConfig config) {
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyIdentifier());
+        VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
+        SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
+        switch (encoding) {
+            case JSON_LD -> {
+                return resultBuilder.jsonLd(createVerifiableCredential(config, privateKeyBytes)).build();
+            }
+            case JWT -> throw new NotImplementedException("not implemented yet");
+            default ->
+                    throw new IllegalArgumentException("encoding %s is not supported".formatted(config.getEncoding()));
 
-    public VerifiableCredential createCredential(CredentialCreationConfig config) {
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(config.getWalletId(), SupportedAlgorithms.ED25519.name());
-        return createVerifiableCredential(config, privateKeyBytes);
+        }
     }
 
     @Override
@@ -84,22 +92,24 @@ public class DBKeyStorageService implements KeyStorageService {
     }
 
     @Override
-    public KeyStorageType getSupportedStorageType() {
-        return KeyStorageType.DB;
+    public SigningServiceType getSupportedServiceType() {
+        return SigningServiceType.LOCAL;
     }
 
     @Override
-    public String createPresentation(PresentationCreationConfig config) {
-        Objects.requireNonNull(config);
+    public SignerResult createPresentation(PresentationCreationConfig config) {
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyIdentifier());
+        VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
+        SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (config.getEncoding()) {
             case JWT -> {
-                return generateJwtPresentation(config).serialize();
+                return resultBuilder.jwt(generateJwtPresentation(config, privateKeyBytes).serialize()).build();
             }
             case JSON_LD -> {
                 try {
-                    return generateJsonLdPresentation(config).toJson();
-                } catch (UnsupportedSignatureTypeException | SignatureGenerateFailedException |
-                         TransformJsonLdException | InvalidPrivateKeyFormatException e) {
+                    return resultBuilder.jsonLd(generateJsonLdPresentation(config, privateKeyBytes)).build();
+                } catch (UnsupportedSignatureTypeException | InvalidPrivateKeyFormatException |
+                         SignatureGenerateFailedException | TransformJsonLdException e) {
                     throw new IllegalStateException(e);
                 }
             }
@@ -108,22 +118,27 @@ public class DBKeyStorageService implements KeyStorageService {
         }
     }
 
-    private SignedJWT generateJwtPresentation(PresentationCreationConfig config) {
+    @Override
+    public void setKeyProvider(KeyProvider keyProvider) {
+        this.keyProvider = Objects.requireNonNull(keyProvider);
+    }
+
+    private SignedJWT generateJwtPresentation(PresentationCreationConfig config, byte[] privateKeyBytes) {
         SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), config.getVpIssuerDid());
 
         //Build JWT
         X25519PrivateKey privateKey = null;
         try {
-            privateKey = new X25519PrivateKey(walletKeyService.getPrivateKeyByWalletIdAsBytes(config.getWalletId(), SupportedAlgorithms.ED25519.name()));
+            privateKey = new X25519PrivateKey(privateKeyBytes);
         } catch (InvalidPrivateKeyFormatException e) {
             throw new IllegalArgumentException(e);
         }
-        String keyId = walletKeyService.getWalletKeyIdByWalletId(config.getWalletId(), SupportedAlgorithms.ED25519);
-        return presentationFactory.createPresentation(config.getVpIssuerDid(), config.getVerifiableCredentials(), config.getAudience(), privateKey, keyId);
+
+        return presentationFactory.createPresentation(config.getVpIssuerDid(), config.getVerifiableCredentials(), config.getAudience(), privateKey, config.getKeyIdentifier());
     }
 
-    private VerifiablePresentation generateJsonLdPresentation(PresentationCreationConfig config) throws UnsupportedSignatureTypeException, SignatureGenerateFailedException, TransformJsonLdException, InvalidPrivateKeyFormatException {
+    private VerifiablePresentation generateJsonLdPresentation(PresentationCreationConfig config, byte[] privateKeyBytes) throws UnsupportedSignatureTypeException, InvalidPrivateKeyFormatException, SignatureGenerateFailedException, TransformJsonLdException {
         VerifiablePresentationBuilder verifiablePresentationBuilder =
                 new VerifiablePresentationBuilder().id(URI.create(config.getVpIssuerDid() + "#" + UUID.randomUUID().toString()))
                         .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
@@ -138,7 +153,7 @@ public class DBKeyStorageService implements KeyStorageService {
         verifiablePresentation.put(JsonLdObject.CONTEXT, contexts);
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
 
-        X25519PrivateKey privateKey = new X25519PrivateKey(walletKeyService.getPrivateKeyByWalletIdAsBytes(config.getWalletId(), SupportedAlgorithms.ED25519.name()));
+        X25519PrivateKey privateKey = new X25519PrivateKey(privateKeyBytes);
 
         Proof proof = generator.createProof(verifiablePresentation, config.getVerificationMethod(),
                 privateKey);

@@ -43,6 +43,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
@@ -112,7 +113,7 @@ public class TestUtils {
                 .didDocument(DidDocument.fromJson(didDocument))
                 .algorithm(StringPool.ED_25519)
                 .name(bpn)
-                .keyStorageType(KeyStorageType.DB)
+                .signingServiceType(SigningServiceType.LOCAL)
                 .build();
         return walletRepository.save(wallet);
     }

@@ -33,11 +33,15 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepos
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 /**
@@ -82,6 +86,17 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
         }
     }
 
+
+    @SneakyThrows
+    public byte[] getPrivateJeyByKeyId(String keyId) {
+        WalletKey wallet = walletKeyRepository.getByKeyId(keyId);
+        Object privateKey = getKeyObject(SupportedAlgorithms.valueOf(wallet.getAlgorithm()), encryptionUtils.decrypt(wallet.getPrivateKey()));
+        if (privateKey instanceof X25519PrivateKey X25519PrivateKey) {
+            return X25519PrivateKey.asByte();
+        } else {
+            return ((ECPrivateKey) privateKey).getEncoded();
+        }
+    }
     /**
      * Gets private key by wallet identifier.
      *
@@ -93,6 +108,10 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     public Object getPrivateKeyByWalletIdAndAlgorithm(long walletId, SupportedAlgorithms algorithm) {
         WalletKey wallet = walletKeyRepository.getByWalletIdAndAlgorithm(walletId, algorithm.toString());
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
+        return getKeyObject(algorithm, privateKey);
+    }
+
+    private static Object getKeyObject(SupportedAlgorithms algorithm, String privateKey) throws IOException, InvalidPrivateKeyFormatException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
         if (SupportedAlgorithms.ED25519.equals(algorithm)) {
             return new X25519PrivateKey(content);
@@ -115,4 +134,5 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     public String getWalletKeyIdByWalletId(long walletId, SupportedAlgorithms supportedAlgorithms) {
         return walletKeyRepository.getByWalletIdAndAlgorithm(walletId, supportedAlgorithms.name()).getKeyId();
     }
+
 }

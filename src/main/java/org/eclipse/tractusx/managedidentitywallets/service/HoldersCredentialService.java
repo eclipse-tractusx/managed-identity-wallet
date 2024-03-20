@@ -32,17 +32,20 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
-import org.eclipse.tractusx.managedidentitywallets.KeyStorageService;
 import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
+import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -76,7 +79,9 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
-    private final Map<KeyStorageType, KeyStorageService> availableKeyStorage;
+    private final Map<SigningServiceType, SigningService> availableSigningServices;
+
+    private final KeyProvider keyProvider;
 
     private final WalletKeyService walletKeyService;
 
@@ -167,6 +172,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         }
 
         CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -174,11 +180,13 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
                 .contexts(verifiableCredential.getContext())
                 .expiryDate(expiryDate)
                 .selfIssued(true)
-                .walletId(issuerWallet.getId())
+                .keyIdentifier(String.valueOf(issuerWallet.getId()))
                 .build();
 
         // Create Credential
-        VerifiableCredential vc = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+
+        SignerResult signerResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = (VerifiableCredential) signerResult.getJsonLd();
         HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
 
 
