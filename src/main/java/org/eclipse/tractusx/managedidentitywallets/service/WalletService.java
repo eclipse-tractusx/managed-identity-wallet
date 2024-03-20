@@ -239,9 +239,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     private Wallet createWallet(CreateWalletRequest request, boolean authority, String callerBpn) {
         validateCreateWallet(request, callerBpn);
 
-
         //create private key pair
-
         SigningServiceType signingServiceType = null;
         if (authority) {
             signingServiceType = miwSettings.authoritySigningServiceType();
@@ -271,7 +269,9 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .signingServiceType(signingServiceType)
                 .build());
 
-        WalletKey walletKeyED25519 = WalletKey.builder()
+
+        //Save key
+        WalletKey walletKeyED25519 = walletKeyService.getRepository().save(WalletKey.builder()
                 .wallet(wallet)
                 .keyId(keyId)
                 .referenceKey(REFERENCE_KEY)
@@ -279,7 +279,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .privateKey(encryptionUtils.encrypt(getKeyString(keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
                 .publicKey(encryptionUtils.encrypt(getKeyString(keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
                 .algorithm(SupportedAlgorithms.ED25519.toString())
-                .build();
+                .build());
 
         //Save key EdDSA
         walletKeyService.getRepository().save(walletKeyED25519);

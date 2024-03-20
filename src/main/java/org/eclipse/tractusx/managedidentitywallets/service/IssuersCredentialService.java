@@ -481,8 +481,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         validateAccess(callerBpn, issuerWallet);
 
-        // TODO KEYVAULT refactor this into KeyService
-
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
         CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
@@ -708,7 +706,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
 
-        // TODO KEYVAULT refactor this into KeyService
         CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .encoding(VerifiableEncoding.JSON_LD)
                 .subject(subject)
