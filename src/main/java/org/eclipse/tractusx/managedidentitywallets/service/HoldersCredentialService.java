@@ -38,9 +38,8 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.domain.HoldersCredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
-import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
@@ -167,8 +166,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
 
-        HoldersCredentialCreationConfig holdersCredentialCreationConfig = HoldersCredentialCreationConfig.builder()
-                .encoding(VerifiableEncoding.JSON_LD)
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
                 .issuerDoc(issuerWallet.getDidDocument())
@@ -180,7 +178,9 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
                 .build();
 
         // Create Credential
-        HoldersCredential credential = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createHoldersCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = availableKeyStorage.get(issuerWallet.getKeyStorageType()).createCredential(holdersCredentialCreationConfig);
+        HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
+
 
         //Store Credential in holder table
         credential = create(credential);

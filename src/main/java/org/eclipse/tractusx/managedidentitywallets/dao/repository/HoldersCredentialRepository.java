@@ -23,7 +23,6 @@ package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -48,7 +47,7 @@ public interface HoldersCredentialRepository extends BaseRepository<HoldersCrede
      * @return the credentials by holder
      */
     @Query("select data from HoldersCredential where holderDid=:holderDid")
-    List<VerifiableCredential> getCredentialsByHolder(@Param("holderDid") String holderDid);
+    List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> getCredentialsByHolder(@Param("holderDid") String holderDid);
 
     /**
      * Gets by holder did and type.

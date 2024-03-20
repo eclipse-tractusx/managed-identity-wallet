@@ -42,7 +42,6 @@ import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialServ
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -92,7 +91,7 @@ class DismantlerHoldersCredentialTest {
 
         HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<VerifiableCredential> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_DISMANTLER, HttpMethod.POST, entity, VerifiableCredential.class);
+        ResponseEntity<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> response = restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_DISMANTLER, HttpMethod.POST, entity, org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential.class);
         Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
     }
 
@@ -131,7 +130,7 @@ class DismantlerHoldersCredentialTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
-        VerifiableCredential verifiableCredential = new VerifiableCredential(map);
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(map);
         Assertions.assertTrue(verifiableCredential.getTypes().contains(MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL));
 
         TestUtils.checkVC(verifiableCredential, miwSettings);
@@ -145,7 +144,7 @@ class DismantlerHoldersCredentialTest {
         Assertions.assertFalse(credentials.get(0).isSelfIssued()); //self issued must be false
         Assertions.assertFalse(credentials.get(0).isStored()); //stored must be false
 
-        VerifiableCredential data = credentials.get(0).getData();
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential data = credentials.get(0).getData();
 
         Assertions.assertEquals(StringPool.VEHICLE_DISMANTLE, data.getCredentialSubject().get(0).get(StringPool.ACTIVITY_TYPE).toString());
 
@@ -244,3 +243,4 @@ class DismantlerHoldersCredentialTest {
         issuersCredentialService.issueBpnCredential(issuerWallet, holderWallet, false);
     }
 }
+

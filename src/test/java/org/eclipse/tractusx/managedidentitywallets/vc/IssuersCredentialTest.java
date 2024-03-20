@@ -40,7 +40,6 @@ import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialR
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
@@ -123,7 +122,7 @@ class IssuersCredentialTest {
         ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderIdentifier={did}"
                 , HttpMethod.GET, entity, String.class, holderDID);
 
-        List<VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
+        List<org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
 
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(12, Objects.requireNonNull(credentialList).size());  //5 framework CV + 1 membership + 6 Summary VC
@@ -155,7 +154,7 @@ class IssuersCredentialTest {
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(6, Objects.requireNonNull(credentialList).size()); //5 framework CV + 1 membership
 
-        for (VerifiableCredential vc : credentialList) {
+        for (org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential vc : credentialList) {
             Assertions.assertEquals(3, vc.getContext().size(), "Each credential requires 3 contexts");
         }
     }
@@ -235,7 +234,7 @@ class IssuersCredentialTest {
         ResponseEntity<String> response = issueVC(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), type, headers);
 
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), type);
@@ -268,7 +267,7 @@ class IssuersCredentialTest {
         ResponseEntity<String> response = issueVC(bpn, did, miwSettings.authorityWalletDid(), type, headers);
 
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential verifiableCredential = new org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
@@ -300,7 +299,7 @@ class IssuersCredentialTest {
                 new VerifiableCredentialSubject(Map.of("test", "test"));
 
         //Using Builder
-        VerifiableCredential credentialWithoutProof =
+        org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder
                         .id(URI.create(issuerDid + "#" + UUID.randomUUID()))
                         .context(miwSettings.vcContexts())
