@@ -216,19 +216,13 @@ public class WalletService extends BaseService<Wallet, Long> {
     public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         final Wallet[] wallets = new Wallet[1];
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                wallets[0] = createWallet(request, false, callerBpn);
-            }
-        });
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                jwtPresentationES256KService.storeWalletKeyES256K(wallets[0]);
-            }
-        });
-
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    wallets[0] = createWallet(request, false, callerBpn);
+                }
+            });
+        wallets[0] = updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
         return wallets[0];
     }
 
@@ -255,21 +249,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         JWKVerificationMethod jwkVerificationMethod =
                 new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
 
-        DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
-        didDocumentBuilder.id(did.toUri());
-        didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));
-        DidDocument didDocument = didDocumentBuilder.build();
-        //modify context URLs
-        List<URI> context = didDocument.getContext();
-        List<URI> mutableContext = new ArrayList<>(context);
-        miwSettings.didDocumentContextUrls().forEach(uri -> {
-            if (!mutableContext.contains(uri)) {
-                mutableContext.add(uri);
-            }
-        });
-        didDocument.put("@context", mutableContext);
-        didDocument = DidDocument.fromJson(didDocument.toJson());
-        log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
+        DidDocument didDocument = jwtPresentationES256KService.buildDidDocument(request.getBpn(), did, List.of(jwkVerificationMethod));
 
         //Save wallet
         Wallet wallet = create(Wallet.builder()
@@ -308,7 +288,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     @PostConstruct
     public void createAuthorityWallet() {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
-        final Wallet[] wallet = new Wallet[1];
+        final Wallet[] wallets = new Wallet[1];
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -317,22 +297,28 @@ public class WalletService extends BaseService<Wallet, Long> {
                             .name(miwSettings.authorityWalletName())
                             .bpn(miwSettings.authorityWalletBpn())
                             .build();
-                    wallet[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
+                    wallets[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
                     log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
                 } else {
                     log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
                 }
             }
         });
+        updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
+    }
+
+    private Wallet updateWalletWithWalletKeyES256K(TransactionTemplate transactionTemplate, Wallet[] wallets) {
+        String keyId = UUID.randomUUID().toString();
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @SneakyThrows
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-                if (wallet[0] != null) {
-                    jwtPresentationES256KService.storeWalletKeyES256K(wallet[0]);
-                }
+                // create additional key pair ES256K
+                    if (wallets[0] != null){
+                        wallets[0] = jwtPresentationES256KService.storeWalletKeyES256K(wallets[0], keyId);
+                    }
             }
         });
+        return wallets[0];
     }
 
     private void validateCreateWallet(CreateWalletRequest request, String callerBpn) {

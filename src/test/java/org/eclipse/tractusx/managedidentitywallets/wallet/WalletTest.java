@@ -29,6 +29,7 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -163,6 +164,7 @@ class WalletTest {
 
         Assertions.assertNotNull(response.getBody());
         Assertions.assertNotNull(wallet.getDidDocument());
+        Assertions.assertEquals(2, wallet.getDidDocument().getVerificationMethods().size());
         List<URI> context = wallet.getDidDocument().getContext();
         miwSettings.didDocumentContextUrls().forEach(uri -> {
             Assertions.assertTrue(context.contains(uri));
@@ -174,6 +176,7 @@ class WalletTest {
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
         Assertions.assertEquals(walletFromDB.getName(), name);
         Assertions.assertNotNull(walletFromDB);
+        // walletKey1
         WalletKey walletKey = walletKeyRepository.getByWalletIdAndAlgorithm(walletFromDB.getId(), walletFromDB.getAlgorithm());
         Assertions.assertNotNull(walletKey);
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
@@ -182,6 +185,15 @@ class WalletTest {
         String keyId = wallet.getDidDocument().getVerificationMethods().get(0).getId().toString().split("#")[1];
         Assertions.assertNotNull(walletKey.getKeyId());
         Assertions.assertEquals(walletKey.getKeyId(), keyId);
+
+        //walletKey2
+        WalletKey walletKey2 = walletKeyRepository.getByWalletIdAndAlgorithm(walletFromDB.getId(), SupportedAlgorithms.ES256K.name());
+        Assertions.assertNotNull(walletKey2);
+
+        //validate keyId2
+        String keyId2 = wallet.getDidDocument().getVerificationMethods().get(1).getId().toString().split("#")[1];
+        Assertions.assertNotNull(walletKey2.getKeyId());
+        Assertions.assertEquals(walletKey2.getKeyId(), keyId2);
 
         //check if BPN and Summary credentials is issued
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
