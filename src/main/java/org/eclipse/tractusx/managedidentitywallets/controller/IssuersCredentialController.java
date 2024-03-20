@@ -176,10 +176,4 @@ public class IssuersCredentialController extends BaseController {
         log.debug("Received request to issue verifiable credential. BPN: {}", getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, getBPNFromToken(principal)));
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public void handle(HttpMessageNotReadableException e) {
-        e.printStackTrace();
-    }
 }

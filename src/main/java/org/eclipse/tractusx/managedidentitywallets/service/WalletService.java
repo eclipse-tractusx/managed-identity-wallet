@@ -240,7 +240,6 @@ public class WalletService extends BaseService<Wallet, Long> {
     private Wallet createWallet(CreateWalletRequest request, boolean authority, String callerBpn) {
         validateCreateWallet(request, callerBpn);
 
-        // TODO KEYVAULT abstract into KeyService
         //create private key pair
         SigningServiceType signingServiceType = null;
         if(authority){
@@ -271,8 +270,11 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .signingServiceType(signingServiceType)
                 .build());
 
-        WalletKey walletKeyED25519 = WalletKey.builder()
-                .wallet(wallet)
+
+        // TODO decide if this should be done via KeyProvider/SigningService
+        //Save key
+        walletKeyService.getRepository().save(WalletKey.builder()
+                .walletId(wallet.getId())
                 .keyId(keyId)
                 .referenceKey(REFERENCE_KEY)
                 .vaultAccessToken(VAULT_ACCESS_TOKEN)

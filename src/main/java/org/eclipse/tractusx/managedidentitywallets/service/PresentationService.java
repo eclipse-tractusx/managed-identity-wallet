@@ -44,7 +44,6 @@ import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
-import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
 import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
@@ -113,7 +112,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private final Map<SigningServiceType, SigningService> availableSigningServices;
 
-    private final KeyProvider keyProvider;
 
     private final JtiRepository jtiRepository;
 
