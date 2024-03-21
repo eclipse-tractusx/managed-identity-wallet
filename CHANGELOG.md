@@ -1,3 +1,19 @@
+# [0.5.0-develop.11](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.10...v0.5.0-develop.11) (2024-03-21)
+
+
+### Bug Fixes
+
+* add "y" parameter and remove unused imports ([72b592c](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/72b592c0e09d1baef25ffd607a449ce8a9ca6589))
+* add WalletKey for ES256K algorithm to DidDocument ([9eb3294](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/9eb3294a9016befe7bcc469552a9266829bcba4b))
+* fix ES256K signature ([b33f8a6](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b33f8a621e7c6429e1c89285b0eefa942e9e8828))
+* fix kid parameter ([97437b4](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/97437b4ef8c1ca07fd16fdf3321e61b1fcab2db0))
+
+
+### Features
+
+* add extra transaction ([b694d19](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b694d19b591df8b460ba45351e7936ef24b84331))
+* support new algorithm (WIP) ([9dd6f27](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/9dd6f27f33311fc4e4467a412a4ee77eff617e18))
+
 # [0.5.0-develop.10](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.9...v0.5.0-develop.10) (2024-03-08)
 
 
