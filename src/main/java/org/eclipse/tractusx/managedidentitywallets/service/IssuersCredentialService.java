@@ -230,7 +230,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredentialRepository.save(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(baseWallet.getDidDocument(), baseWallet.getId(), baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL, baseWallet.getSigningServiceType());
+        updateSummeryCredentials(baseWallet.getDidDocument(), baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL, baseWallet.getSigningServiceType());
 
         log.debug("BPN credential issued for bpn -{}", StringEscapeUtils.escapeJava(holderWallet.getBpn()));
 
@@ -292,7 +292,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery cred
-        updateSummeryCredentials(baseWallet.getDidDocument(), baseWallet.getId(), baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType(), baseWallet.getSigningServiceType());
+        updateSummeryCredentials(baseWallet.getDidDocument(),  baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType(), baseWallet.getSigningServiceType());
 
         log.debug("Framework VC of type ->{} issued to bpn ->{}", StringEscapeUtils.escapeJava(request.getType()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
 
@@ -357,7 +357,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(), issuerWallet.getId(), issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL, issuerWallet.getSigningServiceType());
+        updateSummeryCredentials(issuerWallet.getDidDocument(),  issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL, issuerWallet.getSigningServiceType());
 
         log.debug("Dismantler VC issued to bpn -> {}", StringEscapeUtils.escapeJava(request.getBpn()));
 
@@ -426,7 +426,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(), issuerWallet.getId(), issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL, issuerWallet.getSigningServiceType());
+        updateSummeryCredentials(issuerWallet.getDidDocument(), issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL, issuerWallet.getSigningServiceType());
 
         log.debug("Membership VC issued to bpn ->{}", StringEscapeUtils.escapeJava(issueMembershipCredentialRequest.getBpn()));
 
@@ -547,7 +547,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param holderDid         the holder did
      * @param type              the type
      */
-    private void updateSummeryCredentials(DidDocument issuerDidDocument, long baseWalletId, String issuerDid, String holderBpn, String holderDid, String type, SigningServiceType signingServiceType) {
+    private void updateSummeryCredentials(DidDocument issuerDidDocument, String issuerDid, String holderBpn, String holderDid, String type, SigningServiceType signingServiceType) {
 
         //get last issued summary vc to holder to update items
         Page<IssuersCredential> filter = getLastIssuedSummaryCredential(issuerDid, holderDid);

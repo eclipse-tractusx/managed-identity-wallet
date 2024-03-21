@@ -24,7 +24,6 @@ package org.eclipse.tractusx.managedidentitywallets.signing;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
