@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatus;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -30,24 +31,39 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Builder
 @Getter
 public class CredentialCreationConfig {
+
+    @NonNull
     private VerifiableCredentialSubject subject;
+
     private VerifiableCredentialStatus verifiableCredentialStatus;
+
+    @NonNull
     private DidDocument issuerDoc;
+
+    @NonNull
     private String holderDid;
+
+    @NonNull
     private List<String> types;
+
+    @NonNull
     private List<URI> contexts;
+
     private URI vcId;
+
     private Date expiryDate;
+
     private boolean selfIssued;
 
     // this will be used by the DB-Impl of storage to retrieve privateKey
+    @NonNull
     private String keyName;
 
+    @NonNull
     private VerifiableEncoding encoding;
 
     public static class CredentialCreationConfigBuilder {
@@ -64,48 +80,6 @@ public class CredentialCreationConfig {
 
             return this;
 
-        }
-
-        public CredentialCreationConfig build() {
-
-            try {
-                Objects.requireNonNull(subject);
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException("subject must not be null");
-            }
-
-            try {
-                Objects.requireNonNull(types);
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException("types must not be null");
-            }
-
-
-            try {
-                Objects.requireNonNull(issuerDoc);
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException("issuer did document must not be null");
-            }
-
-            try {
-                Objects.requireNonNull(holderDid);
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException("holder did must not be null");
-            }
-
-            try {
-                Objects.requireNonNull(contexts);
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException("contexts must not be null");
-            }
-
-            try {
-                Objects.requireNonNull(encoding);
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException("encoding must not be null");
-            }
-
-            return new CredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, keyName, encoding);
         }
     }
 }
