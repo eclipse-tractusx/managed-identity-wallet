@@ -77,7 +77,7 @@ public class Wallet extends MIWBaseEntity {
     private String algorithm;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="key_storage_type",nullable = false)
+    @Column(name="signing_service_type", nullable = false)
     private SigningServiceType signingServiceType;
 
     @Column(nullable = false)
