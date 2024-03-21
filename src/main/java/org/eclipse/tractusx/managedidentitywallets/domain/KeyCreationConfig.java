@@ -21,28 +21,15 @@
 
 package org.eclipse.tractusx.managedidentitywallets.domain;
 
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.KeyType;
 import lombok.Builder;
 import lombok.Getter;
-import org.eclipse.tractusx.ssi.lib.model.did.Did;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-
-import java.net.URI;
-import java.util.List;
 
 @Builder
 @Getter
-public class PresentationCreationConfig {
-
-    private VerifiableEncoding encoding;
+public class KeyCreationConfig {
     private String keyName;
-    private List<VerifiableCredential> verifiableCredentials;
-    private Did vpIssuerDid;
-
-    // all for JWT
-    private String audience;
-
-    // all for JsonLD
-    URI verificationMethod;
-
-
+    private Curve curve;
+    private KeyType keyType;
 }

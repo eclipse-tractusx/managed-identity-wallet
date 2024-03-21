@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.nimbusds.jose.jwk.KeyType;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -42,6 +43,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
@@ -96,8 +98,6 @@ public class WalletService extends BaseService<Wallet, Long> {
     private final MIWSettings miwSettings;
 
     private final EncryptionUtils encryptionUtils;
-
-    private final WalletKeyService walletKeyService;
 
     private final HoldersCredentialRepository holdersCredentialRepository;
 
@@ -246,7 +246,13 @@ public class WalletService extends BaseService<Wallet, Long> {
         } else {
             signingServiceType = request.getSigningServiceType();
         }
-        KeyPair keyPair = availableSigningServices.get(signingServiceType).getKey();
+
+        KeyCreationConfig keyCreationConfig = KeyCreationConfig.builder()
+                .keyName(request.getBusinessPartnerNumber())
+                .keyType(KeyType.OCT)
+                .build();
+        SigningService signingService = availableSigningServices.get(signingServiceType);
+        KeyPair keyPair = signingService.getKey(keyCreationConfig);
 
         //create did json
         Did did = createDidJson(request.getDidUrl());
@@ -270,8 +276,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .build());
 
 
-        //Save key
-        WalletKey walletKeyED25519 = walletKeyService.getRepository().save(WalletKey.builder()
+        signingService.saveKey(WalletKey.builder()
                 .wallet(wallet)
                 .keyId(keyId)
                 .referenceKey(REFERENCE_KEY)
@@ -281,8 +286,6 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .algorithm(SupportedAlgorithms.ED25519.toString())
                 .build());
 
-        //Save key EdDSA
-        walletKeyService.getRepository().save(walletKeyED25519);
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBusinessPartnerNumber()));
 
         //credentials issuance will be moved to the issuer component

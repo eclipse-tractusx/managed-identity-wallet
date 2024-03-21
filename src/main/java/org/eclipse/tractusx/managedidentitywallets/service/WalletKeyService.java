@@ -88,7 +88,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
 
 
     @SneakyThrows
-    public byte[] getPrivateJeyByKeyId(String keyId) {
+    public byte[] getPrivateKeyByKeyId(String keyId) {
         WalletKey wallet = walletKeyRepository.getByKeyId(keyId);
         Object privateKey = getKeyObject(SupportedAlgorithms.valueOf(wallet.getAlgorithm()), encryptionUtils.decrypt(wallet.getPrivateKey()));
         if (privateKey instanceof X25519PrivateKey X25519PrivateKey) {

@@ -21,7 +21,9 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
@@ -30,7 +32,10 @@ import org.eclipse.tractusx.ssi.lib.exception.key.KeyGenerationException;
 
 public interface SigningService {
     SignerResult createCredential(CredentialCreationConfig config);
-    KeyPair getKey() throws KeyGenerationException;
+
+    KeyPair getKey(KeyCreationConfig config) throws KeyGenerationException;
+
+    void saveKey(WalletKey key);
     SigningServiceType getSupportedServiceType();
     SignerResult createPresentation(PresentationCreationConfig config);
     void setKeyProvider(KeyProvider keyProvider);

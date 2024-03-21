@@ -152,29 +152,29 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         //return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials, SupportedAlgorithms.ED25519);
 
         SigningService keyStorageService = availableSigningServices.get(callerWallet.getSigningServiceType());
-        PresentationCreationConfig presentationConfig = null;
+
         Map<String, Object> response = new HashMap<>();
         Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
+
+
+        PresentationCreationConfig.PresentationCreationConfigBuilder builder = PresentationCreationConfig.builder()
+                .verifiableCredentials(verifiableCredentials)
+                .keyName(callerWallet.getBpn())
+                .vpIssuerDid(vpIssuerDid);
+
         if (asJwt) {
             log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
             Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
             //Issuer of VP is holder of VC
-            presentationConfig = PresentationCreationConfig.builder()
-                    .encoding(VerifiableEncoding.JWT)
-                    .audience(audience)
-                    .verifiableCredentials(verifiableCredentials)
-                    .keyIdentifier(String.valueOf(callerWallet.getId()))
-                    .vpIssuerDid(vpIssuerDid).build();
+            builder.encoding(VerifiableEncoding.JWT)
+                    .audience(audience);
         } else {
             log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
-            presentationConfig = PresentationCreationConfig.builder()
-                    .encoding(VerifiableEncoding.JSON_LD)
-                    .verifiableCredentials(verifiableCredentials)
-                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
-                    .keyIdentifier(String.valueOf(callerWallet.getId()))
-                    .vpIssuerDid(vpIssuerDid).build();
+            builder.encoding(VerifiableEncoding.JSON_LD)
+                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()));
         }
 
+        PresentationCreationConfig presentationConfig = builder.build();
         SignerResult signerResult = keyStorageService.createPresentation(presentationConfig);
 
         response.put(StringPool.VP, asJwt ? signerResult.getJwt() : signerResult.getJsonLd().toJson());

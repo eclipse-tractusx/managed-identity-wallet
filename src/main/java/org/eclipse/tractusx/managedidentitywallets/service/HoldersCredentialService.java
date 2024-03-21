@@ -180,7 +180,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
                 .contexts(verifiableCredential.getContext())
                 .expiryDate(expiryDate)
                 .selfIssued(true)
-                .keyIdentifier(String.valueOf(issuerWallet.getId()))
+                .keyName(issuerWallet.getBpn())
                 .build();
 
         // Create Credential
