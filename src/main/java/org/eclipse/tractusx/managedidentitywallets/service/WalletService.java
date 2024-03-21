@@ -32,10 +32,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -52,7 +51,10 @@ import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
-import org.eclipse.tractusx.ssi.lib.model.did.*;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
+import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethodBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -60,18 +62,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.StringWriter;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
+import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
 
 /**
  * The type Wallet service.
@@ -104,6 +106,8 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     @Qualifier("transactionManager")
     private final PlatformTransactionManager transactionManager;
+
+    private final JwtPresentationES256KService jwtPresentationES256KService;
 
 
     @Override
@@ -207,9 +211,17 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the wallet
      */
     @SneakyThrows
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
-        return createWallet(request, false, callerBpn);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        final Wallet[] wallets = new Wallet[1];
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                wallets[0] = createWallet(request, false, callerBpn);
+            }
+        });
+        wallets[0] = updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
+        return wallets[0];
     }
 
     /**
@@ -222,7 +234,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     private Wallet createWallet(CreateWalletRequest request, boolean authority, String callerBpn) {
         validateCreateWallet(request, callerBpn);
 
-        //create private key pair
+        //create private key pair EdDSA
         IKeyGenerator keyGenerator = new x21559Generator();
         KeyPair keyPair = keyGenerator.generateKey();
 
@@ -235,21 +247,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         JWKVerificationMethod jwkVerificationMethod =
                 new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
 
-        DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
-        didDocumentBuilder.id(did.toUri());
-        didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));
-        DidDocument didDocument = didDocumentBuilder.build();
-        //modify context URLs
-        List<URI> context = didDocument.getContext();
-        List<URI> mutableContext = new ArrayList<>(context);
-        miwSettings.didDocumentContextUrls().forEach(uri -> {
-            if (!mutableContext.contains(uri)) {
-                mutableContext.add(uri);
-            }
-        });
-        didDocument.put("@context", mutableContext);
-        didDocument = DidDocument.fromJson(didDocument.toJson());
-        log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
+        DidDocument didDocument = jwtPresentationES256KService.buildDidDocument(request.getBpn(), did, List.of(jwkVerificationMethod));
 
         //Save wallet
         Wallet wallet = create(Wallet.builder()
@@ -257,19 +255,21 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .bpn(request.getBpn())
                 .name(request.getName())
                 .did(did.toUri().toString())
-                .algorithm(StringPool.ED_25519)
+                .algorithm(ED_25519)
                 .build());
 
-
-        //Save key
-        walletKeyService.getRepository().save(WalletKey.builder()
+        WalletKey walletKeyED25519 = WalletKey.builder()
                 .wallet(wallet)
                 .keyId(keyId)
-                .referenceKey("dummy ref key, removed once vault setup is ready")
-                .vaultAccessToken("dummy vault access token, removed once vault setup is ready")
-                .privateKey(encryptionUtils.encrypt(getPrivateKeyString(keyPair.getPrivateKey().asByte())))
-                .publicKey(encryptionUtils.encrypt(getPublicKeyString(keyPair.getPublicKey().asByte())))
-                .build());
+                .referenceKey(REFERENCE_KEY)
+                .vaultAccessToken(VAULT_ACCESS_TOKEN)
+                .privateKey(encryptionUtils.encrypt(getKeyString(keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
+                .publicKey(encryptionUtils.encrypt(getKeyString(keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
+                .algorithm(SupportedAlgorithms.ED25519.toString())
+                .build();
+
+        //Save key EdDSA
+        walletKeyService.getRepository().save(walletKeyED25519);
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
 
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
@@ -286,6 +286,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     @PostConstruct
     public void createAuthorityWallet() {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        final Wallet[] wallets = new Wallet[1];
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -294,13 +295,28 @@ public class WalletService extends BaseService<Wallet, Long> {
                             .name(miwSettings.authorityWalletName())
                             .bpn(miwSettings.authorityWalletBpn())
                             .build();
-                    createWallet(request, true, miwSettings.authorityWalletBpn());
+                    wallets[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
                     log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
                 } else {
                     log.info("Authority wallet exists with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
                 }
             }
         });
+        updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
+    }
+
+    private Wallet updateWalletWithWalletKeyES256K(TransactionTemplate transactionTemplate, Wallet[] wallets) {
+        String keyId = UUID.randomUUID().toString();
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                // create additional key pair ES256K
+                if (wallets[0] != null) {
+                    wallets[0] = jwtPresentationES256KService.storeWalletKeyES256K(wallets[0], keyId);
+                }
+            }
+        });
+        return wallets[0];
     }
 
     private void validateCreateWallet(CreateWalletRequest request, String callerBpn) {
@@ -313,25 +329,4 @@ public class WalletService extends BaseService<Wallet, Long> {
             throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBpn());
         }
     }
-
-    @SneakyThrows
-    private String getPrivateKeyString(byte[] privateKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PRIVATE KEY", privateKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
-
-    @SneakyThrows
-    private String getPublicKeyString(byte[] publicKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
-
 }

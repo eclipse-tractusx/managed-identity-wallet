@@ -151,7 +151,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
 
         // check if the expiryDate is set
         Date expiryDate = null;

@@ -23,6 +23,8 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
@@ -38,6 +40,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
 import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 
+import java.io.StringWriter;
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -144,5 +147,15 @@ public class CommonUtils {
 
         //Create Credential
         return builder.build();
+    }
+
+    @SneakyThrows
+    public static String getKeyString(byte[] privateKeyBytes, String keyType) {
+        StringWriter stringWriter = new StringWriter();
+        PemWriter pemWriter = new PemWriter(stringWriter);
+        pemWriter.writeObject(new PemObject(keyType, privateKeyBytes));
+        pemWriter.flush();
+        pemWriter.close();
+        return stringWriter.toString();
     }
 }

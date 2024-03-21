@@ -26,6 +26,7 @@ import lombok.SneakyThrows;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -36,6 +37,10 @@ public class TestContextInitializer implements ApplicationContextInitializer<Con
 
     private static final int port = findFreePort();
     private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer().withRealmImportFile("miw-test-realm.json");
+    private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.5")
+            .withDatabaseName("integration-tests-db")
+            .withUsername("sa")
+            .withPassword("sa");
 
     @SneakyThrows
     @Override
@@ -55,11 +60,11 @@ public class TestContextInitializer implements ApplicationContextInitializer<Con
                 "miw.authorityWalletBpn: BPNL000000000000",
                 "miw.authorityWalletName: Test-X",
                 "miw.authorityWalletDid: did:web:localhost%3A${server.port}:BPNL000000000000",
-                "spring.datasource.url=jdbc:h2:mem:testdb",
-                "spring.datasource.driverClassName=org.h2.Driver",
-                "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+                "spring.datasource.driver-class-name=org.testcontainers.jdbc.ContainerDatabaseDriver",
+                "spring.datasource.url=jdbc:tc:postgresql:14.5:///integration-tests-db",
+                "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
                 "spring.datasource.username=sa",
-                "spring.datasource.password=password",
+                "spring.datasource.password=sa",
                 "miw.security.auth-server-url=" + authServerUrl,
                 "miw.security.clientId=miw_private_client  ",
                 "miw.security.auth-url=${miw.security.auth-server-url}realms/${miw.security.realm}/protocol/openid-connect/auth",

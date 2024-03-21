@@ -26,4 +26,5 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <include file="/db/changelog/changes/init.sql"/>
     <include file="/db/changelog/changes/create_jti_table.sql"/>
+    <include file="/db/changelog/changes/update_wallet_table.sql"/>
 </databaseChangeLog>

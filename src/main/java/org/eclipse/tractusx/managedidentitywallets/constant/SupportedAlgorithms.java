@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -19,26 +19,21 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.constant;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.springframework.stereotype.Repository;
+public enum SupportedAlgorithms {
 
-/**
- * The interface Wallet key repository.
- */
-@Repository
-public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
-    /**
-     * Gets by wallet id.
-     *
-     * @param id the id
-     * @return the by wallet id
-     */
-    WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
+    ED25519("ED25519"),
+    ES256K("ES256K");
 
-    WalletKey findFirstByWallet_Bpn(String bpn);
+    private String value;
 
-    WalletKey findFirstByWallet_Did(String did);
+    SupportedAlgorithms(String value){
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

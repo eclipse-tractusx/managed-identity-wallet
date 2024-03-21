@@ -107,7 +107,7 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = signerWallet.getDidDocument().getVerificationMethods().get(0).getId();
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(signerWallet.getId());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(signerWallet.getId(), signerWallet.getAlgorithm());
 
         JWSSignature2020 proof =
                 (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKeyBytes));

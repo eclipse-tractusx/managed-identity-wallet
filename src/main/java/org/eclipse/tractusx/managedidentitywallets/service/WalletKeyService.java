@@ -30,11 +30,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
+import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
+import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 /**
  * The type Wallet key service.
@@ -44,6 +49,8 @@ import java.io.StringReader;
 @RequiredArgsConstructor
 public class WalletKeyService extends BaseService<WalletKey, Long> {
 
+    public static final String EC = "EC";
+
     private final WalletKeyRepository walletKeyRepository;
 
     private final SpecificationUtil<WalletKey> specificationUtil;
@@ -51,7 +58,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     private final EncryptionUtils encryptionUtils;
 
     @Override
-    protected BaseRepository<WalletKey, Long> getRepository() {
+    public BaseRepository<WalletKey, Long> getRepository() {
         return walletKeyRepository;
     }
 
@@ -67,8 +74,13 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * @return the byte [ ]
      */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId) {
-        return getPrivateKeyByWalletIdentifier(walletId).asByte();
+    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId, String algorithm) {
+        Object privateKey = getPrivateKeyByWalletIdentifierAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
+        if (privateKey instanceof x21559PrivateKey x21559PrivateKey) {
+            return x21559PrivateKey.asByte();
+        } else {
+            return ((ECPrivateKey) privateKey).getEncoded();
+        }
     }
 
     /**
@@ -79,11 +91,17 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      */
     @SneakyThrows
 
-    public x21559PrivateKey getPrivateKeyByWalletIdentifier(long walletId) {
-        WalletKey wallet = walletKeyRepository.getByWalletId(walletId);
+    public Object getPrivateKeyByWalletIdentifierAndAlgorithm(long walletId, SupportedAlgorithms algorithm) {
+        WalletKey wallet = walletKeyRepository.getByWalletIdAndAlgorithm(walletId, algorithm.toString());
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
-        return new x21559PrivateKey(content);
+        if (SupportedAlgorithms.ED25519.equals(algorithm)) {
+            return new x21559PrivateKey(content);
+        } else if (SupportedAlgorithms.ES256K.equals(algorithm)) {
+            KeyFactory kf = KeyFactory.getInstance(EC);
+            return kf.generatePrivate(new PKCS8EncodedKeySpec(content));
+        } else {
+            throw new UnsupportedAlgorithmException("Unsupported algorithm: " + algorithm);
+        }
     }
-
 }
