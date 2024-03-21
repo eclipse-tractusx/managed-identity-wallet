@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
+import org.eclipse.tractusx.managedidentitywallets.signing.LocalSigningService;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,11 +115,11 @@ public class ApplicationConfig implements WebMvcConfigurer {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("no key provider with type %s found".formatted(miwSettings.localSigningKeyStorageType())));
 
-        Map<SigningServiceType, SigningService> available = new HashMap<>();
+        Map<SigningServiceType, SigningService> available = new EnumMap<>(SigningServiceType.class);
         storages.forEach(
                 s -> {
-                    if(s.getSupportedServiceType().equals(SigningServiceType.LOCAL)){
-                        s.setKeyProvider(localSigningKeyProvider);
+                    if(s instanceof LocalSigningService local){
+                        local.setKeyProvider(localSigningKeyProvider);
                     }
                     available.put(s.getSupportedServiceType(), s);
                 }
