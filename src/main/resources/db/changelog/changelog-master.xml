@@ -25,8 +25,4 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <include file="/db/changelog/changes/init.sql"/>
-    <changeSet id="4" author="PManaras" runAlways="false" failOnError="true" dbms="postgresql">
-        <customChange class="org.eclipse.tractusx.managedidentitywallets.migration.SetSigningServiceTypeToExistingWallets">
-        </customChange>
-    </changeSet>
 </databaseChangeLog>
