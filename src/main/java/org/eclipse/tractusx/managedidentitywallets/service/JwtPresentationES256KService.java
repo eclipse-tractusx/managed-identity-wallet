@@ -99,6 +99,7 @@ public class JwtPresentationES256KService {
     private EncryptionUtils encryptionUtils;
     private WalletKeyService walletKeyService;
     private MIWSettings miwSettings;
+    public static final String JWK_Y = "y";
 
     @Autowired
     public JwtPresentationES256KService(WalletRepository walletRepository, EncryptionUtils encryptionUtils, WalletKeyService walletKeyService, MIWSettings miwSettings) {
@@ -166,7 +167,7 @@ public class JwtPresentationES256KService {
     private JWKVerificationMethod getJwkVerificationMethod(ECKey ecKey, Did did) {
         Map<String, Object> verificationMethodJson = new HashMap<>();
         Map<String, String> publicKeyJwk = Map.of(JWK_KEK_TYPE, ecKey.getKeyType().toString(), JWK_CURVE,
-                ecKey.getCurve().getName(), JWK_X, ecKey.getX().toString());
+                ecKey.getCurve().getName(), JWK_X, ecKey.getX().toString(), JWK_Y, ecKey.getY().toString());
         verificationMethodJson.put(ID, URI.create(did + "#" + ecKey.getKeyID()));
         verificationMethodJson.put(TYPE, JWKVerificationMethod.DEFAULT_TYPE);
         verificationMethodJson.put(CONTROLLER, did.toUri());

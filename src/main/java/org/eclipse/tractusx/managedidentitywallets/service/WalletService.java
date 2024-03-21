@@ -53,7 +53,6 @@ import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethodBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -66,7 +65,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
