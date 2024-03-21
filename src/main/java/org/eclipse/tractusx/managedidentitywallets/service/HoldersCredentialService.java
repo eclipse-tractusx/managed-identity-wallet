@@ -41,7 +41,6 @@ import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
-import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
 import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
@@ -78,8 +77,6 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
     private final Map<SigningServiceType, SigningService> availableSigningServices;
-
-    private final KeyProvider keyProvider;
 
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {

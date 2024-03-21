@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
@@ -33,9 +34,16 @@ import java.util.List;
 @Getter
 public class PresentationCreationConfig {
 
+    @NonNull
     private VerifiableEncoding encoding;
+
+    @NonNull
     private String keyName;
+
+    @NonNull
     private List<VerifiableCredential> verifiableCredentials;
+
+    @NonNull
     private Did vpIssuerDid;
 
     // all for JWT

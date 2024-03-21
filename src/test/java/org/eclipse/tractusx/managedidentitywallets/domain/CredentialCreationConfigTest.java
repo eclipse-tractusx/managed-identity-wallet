@@ -30,7 +30,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
-import org.mockito.internal.util.MockUtil;
 
 import java.net.URI;
 import java.util.Collections;
@@ -39,7 +38,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CredentialCreationConfigTest {
 
@@ -55,6 +57,7 @@ class CredentialCreationConfigTest {
                 .contexts(Collections.emptyList())
                 .verifiableCredentialStatus(Mockito.mock(VerifiableCredentialStatus.class))
                 .vcId(URI.create("yada://test.com"))
+                .keyName("keyName")
                 .build());
         assertNotNull(build);
         assertNotNull(build.getExpiryDate());
@@ -65,11 +68,13 @@ class CredentialCreationConfigTest {
         assertNotNull(build.getContexts());
         assertNotNull(build.getVerifiableCredentialStatus());
         assertNotNull(build.getVcId());
+        assertNotNull(build.getKeyName());
+        assertNotNull(build.getEncoding());
         assertFalse(build.isSelfIssued());
     }
 
     @Test
-    void shouldBuildWhenVcIdIsString(){
+    void shouldBuildWhenVcIdIsString() {
 
         CredentialCreationConfig build = assertDoesNotThrow(() -> CredentialCreationConfig.builder()
                 .encoding(VerifiableEncoding.JSON_LD)
@@ -80,39 +85,48 @@ class CredentialCreationConfigTest {
                 .holderDid(Mockito.mock(Did.class).toString())
                 .contexts(Collections.emptyList())
                 .verifiableCredentialStatus(Mockito.mock(VerifiableCredentialStatus.class))
-                .vcId("yada://test.com")
+                .keyName("keyName")
                 .build());
     }
 
     @ParameterizedTest
     @MethodSource("testConfigs")
     void shouldThrowIfRequiredAttributesMissing(TestConfig conf) {
-        CredentialCreationConfig.CredentialCreationConfigBuilder builder = CredentialCreationConfig
+        assertThrows(NullPointerException.class, () -> CredentialCreationConfig
                 .builder().expiryDate(conf.expiryDate)
                 .subject(conf.subject)
                 .types(conf.types)
                 .issuerDoc(conf.issuerDoc)
                 .holderDid(conf.holderDid)
-                .contexts(conf.contexts);
+                .contexts(conf.contexts)
+                .encoding(conf.encoding)
+                .keyName(conf.keyName));
 
-        assertThrows(IllegalArgumentException.class, builder::build);
+
     }
 
     @Test
-    void shouldThrowWhenSettingIllegalVcId(){
+    void shouldThrowWhenSettingIllegalVcId() {
         CredentialCreationConfig.CredentialCreationConfigBuilder builder = CredentialCreationConfig.builder();
         assertThrows(IllegalArgumentException.class, () -> builder.vcId(42));
     }
 
+    @Test
+    void shouldNotThrowWhenVcIdValid(){
+        CredentialCreationConfig.CredentialCreationConfigBuilder builder = CredentialCreationConfig.builder();
+        assertDoesNotThrow(() -> builder.vcId("https://test.com"));
+        assertDoesNotThrow(() -> builder.vcId(URI.create("https://test.com")));
+    }
+
     private static Stream<Arguments> testConfigs() {
         return Stream.of(
-                Arguments.of(new TestConfig(null, null, null, null, null, null, null, null,null )),
-                Arguments.of(new TestConfig(mockCredentialSubject(), null, null, null, null, null, null,null,null )),
-                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), null, null, null, null, null,null,null )),
-                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, null, null, null, null,null,null )),
-                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, Mockito.mock(DidDocument.class), null, null, null,null,null )),
-                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, Mockito.mock(DidDocument.class), Mockito.mock(Did.class).toString(), null, null,null,null )),
-                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, Mockito.mock(DidDocument.class), Mockito.mock(Did.class).toString(), Collections.emptyList(), null,null,null ))
+                Arguments.of(new TestConfig(null, null, null, null, null, null, null, null, null)),
+                Arguments.of(new TestConfig(mockCredentialSubject(), null, null, null, null, null, null, null, null)),
+                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), null, null, null, null, null, null, null)),
+                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, null, null, null, null, null, null)),
+                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, Mockito.mock(DidDocument.class), null, null, null, null, null)),
+                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, Mockito.mock(DidDocument.class), Mockito.mock(Did.class).toString(), null, null, null, null)),
+                Arguments.of(new TestConfig(mockCredentialSubject(), Collections.emptyList(), new byte[]{}, Mockito.mock(DidDocument.class), Mockito.mock(Did.class).toString(), Collections.emptyList(), null, null, null))
         );
     }
 
@@ -133,8 +147,8 @@ class CredentialCreationConfigTest {
     }
 
 
-    private static VerifiableCredentialSubject mockCredentialSubject(){
+    private static VerifiableCredentialSubject mockCredentialSubject() {
         return new VerifiableCredentialSubject(Map.of("id", "42"));
     }
-    
+
 }
