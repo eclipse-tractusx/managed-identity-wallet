@@ -22,8 +22,10 @@
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
 import lombok.RequiredArgsConstructor;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.springframework.stereotype.Component;
@@ -34,16 +36,19 @@ public class LocalKeyProvider implements KeyProvider {
 
     private final WalletKeyService walletKeyService;
 
-    private final WalletKeyRepository walletRepository;
+    private final WalletKeyRepository walletKeyRepository;
+
+    private final WalletRepository walletRepository;
 
     @Override
-    public byte[] getPrivateKey(String id) {
-        return walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(Long.parseLong(id));
+    public byte[] getPrivateKey(String keyName) { //
+        Wallet wallet = walletRepository.getByBpn(keyName);
+        return walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(wallet.getId());
     }
 
     @Override
     public void saveKeys(WalletKey walletKey) {
-        walletRepository.save(walletKey);
+        walletKeyRepository.save(walletKey);
     }
 
     @Override

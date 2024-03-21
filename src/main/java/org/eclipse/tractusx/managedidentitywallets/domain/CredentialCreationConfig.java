@@ -46,7 +46,7 @@ public class CredentialCreationConfig {
     private boolean selfIssued;
 
     // this will be used by the DB-Impl of storage to retrieve privateKey
-    private String keyIdentifier;
+    private String keyName;
 
     private VerifiableEncoding encoding;
 
@@ -105,7 +105,7 @@ public class CredentialCreationConfig {
                 throw new IllegalArgumentException("encoding must not be null");
             }
 
-            return new CredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, keyIdentifier, encoding);
+            return new CredentialCreationConfig(subject, verifiableCredentialStatus, issuerDoc, holderDid, types, contexts, vcId, expiryDate, selfIssued, keyName, encoding);
         }
     }
 }

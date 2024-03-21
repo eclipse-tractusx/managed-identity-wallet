@@ -21,12 +21,15 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
+import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
@@ -69,7 +72,7 @@ public class LocalSigningService implements SigningService {
 
     @Override
     public SignerResult createCredential(CredentialCreationConfig config) {
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyIdentifier());
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (encoding) {
@@ -84,9 +87,18 @@ public class LocalSigningService implements SigningService {
     }
 
     @Override
-    public KeyPair getKey() throws KeyGenerationException {
-        IKeyGenerator keyGenerator = new x21559Generator();
-        return keyGenerator.generateKey();
+    public KeyPair getKey(KeyCreationConfig config) throws KeyGenerationException {
+        KeyType keyType = Objects.requireNonNull(config.getKeyType());
+        switch (keyType.getValue().toUpperCase()) {
+            case "EC", "RSA" ->
+                    throw new NotImplementedException("%s is not implemented yet".formatted(keyType.toString()));
+            case "OCT" -> {
+                IKeyGenerator keyGenerator = new x21559Generator();
+                return keyGenerator.generateKey();
+            }
+            default -> throw new IllegalArgumentException("%s is not supported".formatted(keyType.toString()));
+        }
+
     }
 
     @Override
@@ -96,7 +108,7 @@ public class LocalSigningService implements SigningService {
 
     @Override
     public SignerResult createPresentation(PresentationCreationConfig config) {
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyIdentifier());
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (config.getEncoding()) {
@@ -118,6 +130,11 @@ public class LocalSigningService implements SigningService {
     @Override
     public void setKeyProvider(KeyProvider keyProvider) {
         this.keyProvider = Objects.requireNonNull(keyProvider);
+    }
+
+    @Override
+    public void saveKey(WalletKey key) {
+        keyProvider.saveKeys(key);
     }
 
     private SignedJWT generateJwtPresentation(PresentationCreationConfig config, byte[] privateKeyBytes) {

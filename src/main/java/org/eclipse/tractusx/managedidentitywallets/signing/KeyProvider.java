@@ -25,7 +25,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 
 public interface KeyProvider {
-    byte[] getPrivateKey(String id);
+    byte[] getPrivateKey(String keyName);
 
     void saveKeys(WalletKey walletKey);
 
