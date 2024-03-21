@@ -30,12 +30,47 @@ import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.exception.key.KeyGenerationException;
 
 
+/**
+ * Service used to sign the verifiable credentials and verifiable presentations
+ */
 public interface SigningService {
+    /**
+     * @param config the configuration for creating the credential
+     * @return SignerResult containing the signed credential
+     * @see CredentialCreationConfig
+     * @see SignerResult
+     */
     SignerResult createCredential(CredentialCreationConfig config);
 
+
+    /**
+     * @param config the config for creating/retrieving the key
+     * @return KeyPair containing the public and private key (private key depends on the type of signing service used)
+     * @throws KeyGenerationException when something goes wrong
+     *
+     * @see KeyPair
+     * @see KeyCreationConfig
+     */
     KeyPair getKey(KeyCreationConfig config) throws KeyGenerationException;
 
+    /**
+     * @param key the key to be saved, LocalSigningService implementations may call KeyProvider.saveKey
+     *
+     * @see KeyProvider
+     */
     void saveKey(WalletKey key);
+
+    /**
+     * @return the implementation's supported type
+     */
     SigningServiceType getSupportedServiceType();
+
+    /**
+     * @param config the configuration for creating the presentation
+     * @return SignerResult containing the signed presentation
+     *
+     * @see PresentationCreationConfig
+     * @see SignerResult
+     */
     SignerResult createPresentation(PresentationCreationConfig config);
 }
