@@ -106,7 +106,7 @@ public class WalletControllerApiDocs {
                                                      [
                                                          {
                                                              "controller": "did:web:localhost:BPNL000000000001",
-                                                             "id": "did:web:localhost:BPNL000000000001#",
+                                                             "id": "did:web:localhost:BPNL000000000001#key-1",
                                                              "publicKeyJwk":
                                                              {
                                                                  "crv": "Ed25519",
@@ -117,7 +117,7 @@ public class WalletControllerApiDocs {
                                                          },
                                                          {
                                                              "controller": "did:web:localhost:BPNL000000000001",
-                                                             "id": "did:web:localhost:BPNL000000000001#",
+                                                             "id": "did:web:localhost:BPNL000000000001#key-2",
                                                              "publicKeyJwk":
                                                              {
                                                                  "crv": "secp256k1",
