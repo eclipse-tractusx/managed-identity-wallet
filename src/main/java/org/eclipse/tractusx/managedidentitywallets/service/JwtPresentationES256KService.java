@@ -93,13 +93,13 @@ import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.TYPE;
 @Slf4j
 public class JwtPresentationES256KService {
 
+    public static final String JWK_Y = "y";
     private JsonLdSerializer jsonLdSerializer;
     private Did agentDid;
     private WalletRepository walletRepository;
     private EncryptionUtils encryptionUtils;
     private WalletKeyService walletKeyService;
     private MIWSettings miwSettings;
-    public static final String JWK_Y = "y";
 
     @Autowired
     public JwtPresentationES256KService(WalletRepository walletRepository, EncryptionUtils encryptionUtils, WalletKeyService walletKeyService, MIWSettings miwSettings) {

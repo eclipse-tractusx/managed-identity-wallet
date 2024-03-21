@@ -214,12 +214,12 @@ public class WalletService extends BaseService<Wallet, Long> {
     public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         final Wallet[] wallets = new Wallet[1];
-            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-                @Override
-                protected void doInTransactionWithoutResult(TransactionStatus status) {
-                    wallets[0] = createWallet(request, false, callerBpn);
-                }
-            });
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                wallets[0] = createWallet(request, false, callerBpn);
+            }
+        });
         wallets[0] = updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
         return wallets[0];
     }
@@ -311,9 +311,9 @@ public class WalletService extends BaseService<Wallet, Long> {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 // create additional key pair ES256K
-                    if (wallets[0] != null){
-                        wallets[0] = jwtPresentationES256KService.storeWalletKeyES256K(wallets[0], keyId);
-                    }
+                if (wallets[0] != null) {
+                    wallets[0] = jwtPresentationES256KService.storeWalletKeyES256K(wallets[0], keyId);
+                }
             }
         });
         return wallets[0];
