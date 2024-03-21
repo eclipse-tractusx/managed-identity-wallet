@@ -38,5 +38,4 @@ public interface SigningService {
     void saveKey(WalletKey key);
     SigningServiceType getSupportedServiceType();
     SignerResult createPresentation(PresentationCreationConfig config);
-    void setKeyProvider(KeyProvider keyProvider);
 }

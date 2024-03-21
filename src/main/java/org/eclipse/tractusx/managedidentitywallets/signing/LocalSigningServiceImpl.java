@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
-public class LocalSigningService implements SigningService {
+public class LocalSigningServiceImpl extends LocalSigningService {
 
     private KeyProvider keyProvider;
 
@@ -89,7 +89,6 @@ public class LocalSigningService implements SigningService {
     }
 
     @Override
-
     public KeyPair getKey(KeyCreationConfig config) throws KeyGenerationException {
         KeyType keyType = Objects.requireNonNull(config.getKeyType());
         switch (keyType.getValue().toUpperCase()) {
@@ -131,6 +130,7 @@ public class LocalSigningService implements SigningService {
         }
     }
 
+    @Override
     public void setKeyProvider(KeyProvider keyProvider) {
         this.keyProvider = Objects.requireNonNull(keyProvider);
     }
@@ -144,15 +144,14 @@ public class LocalSigningService implements SigningService {
         SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), config.getVpIssuerDid());
 
-        //Build JWT
         X25519PrivateKey privateKey = null;
         try {
             privateKey = new X25519PrivateKey(privateKeyBytes);
         } catch (InvalidPrivateKeyFormatException e) {
             throw new IllegalArgumentException(e);
         }
-
-        return presentationFactory.createPresentation(config.getVpIssuerDid(), config.getVerifiableCredentials(), config.getAudience(), privateKey, config.getKeyName());
+        return presentationFactory.createPresentation(config.getVpIssuerDid()
+                , config.getVerifiableCredentials(), config.getAudience(), privateKey, config.getKeyName());
     }
 
     private VerifiablePresentation generateJsonLdPresentation(PresentationCreationConfig config, byte[] privateKeyBytes) throws UnsupportedSignatureTypeException, InvalidPrivateKeyFormatException, SignatureGenerateFailedException, TransformJsonLdException {
