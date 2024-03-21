@@ -21,6 +21,16 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
+/**
+ * Specialized interface for SigningServices that will sign credentials/presentations locally
+ * (may retrieve the keys from remote via KeyProvider)
+ *
+ * @see SigningService
+ * @see KeyProvider
+ */
 public interface LocalSigningService extends SigningService{
+    /**
+     * @param keyProvider the KeyProvider to be used by the implementation
+     */
     void setKeyProvider(KeyProvider keyProvider);
 }
