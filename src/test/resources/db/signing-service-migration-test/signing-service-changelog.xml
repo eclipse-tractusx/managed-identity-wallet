@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ /********************************************************************************
-  ~  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+  ~  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
   ~
   ~  See the NOTICE file(s) distributed with this work for additional
   ~  information regarding copyright ownership.
@@ -24,11 +23,5 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <include file="/db/changelog/changes/init.sql"/>
-    <include file="/db/changelog/changes/create_jti_table.sql"/>
-    <include file="/db/changelog/changes/update_wallet_table.sql"/>
-    <changeSet id="4" author="PManaras" runAlways="false" failOnError="true" dbms="postgresql">
-        <customChange class="org.eclipse.tractusx.managedidentitywallets.migration.SetSigningServiceTypeToExistingWallets">
-        </customChange>
-    </changeSet>
+    <include file="db/changelog/changes/add-signing-service-column.sql"/>
 </databaseChangeLog>
