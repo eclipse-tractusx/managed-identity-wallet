@@ -57,17 +57,6 @@ class SetSigningServiceTypeToExistingWalletsTest {
                 "password");
 
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn));
-
-
-        // 2. add wallets
-
-        // 3. apply changelog with creating new column for signing service
-
-        // 4. run java-migration
-
-
-        // Liquibase liquibase = new Liquibase("db/framework-vc-migration-test/migration-test-changelog-master.xml", new ClassLoaderResourceAccessor(), database);
-        // liquibase.update((String) null);
     }
 
     @SneakyThrows
