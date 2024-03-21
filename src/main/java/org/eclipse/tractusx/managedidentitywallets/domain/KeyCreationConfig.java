@@ -25,11 +25,17 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.KeyType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 
 @Builder
 @Getter
 public class KeyCreationConfig {
+
+    @NonNull
     private String keyName;
+
     private Curve curve;
+
+    @NonNull
     private KeyType keyType;
 }
