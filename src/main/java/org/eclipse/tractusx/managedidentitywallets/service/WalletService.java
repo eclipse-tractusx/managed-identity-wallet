@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.nimbusds.jose.jwk.KeyType;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -97,8 +99,6 @@ public class WalletService extends BaseService<Wallet, Long> {
     private final MIWSettings miwSettings;
 
     private final EncryptionUtils encryptionUtils;
-
-    private final WalletKeyService walletKeyService;
 
     private final HoldersCredentialRepository holdersCredentialRepository;
 
@@ -242,12 +242,18 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         //create private key pair
         SigningServiceType signingServiceType = null;
-        if(authority){
+        if (authority) {
             signingServiceType = miwSettings.authoritySigningServiceType();
-        }else{
+        } else {
             signingServiceType = request.getSigningServiceType();
         }
-        KeyPair keyPair = availableSigningServices.get(signingServiceType).getKey();
+
+        KeyCreationConfig keyCreationConfig = KeyCreationConfig.builder()
+                .keyName(request.getBpn())
+                .keyType(KeyType.OCT)
+                .build();
+        SigningService signingService = availableSigningServices.get(signingServiceType);
+        KeyPair keyPair = signingService.getKey(keyCreationConfig);
 
         //create did json
         Did did = createDidJson(request.getDidUrl());
@@ -271,9 +277,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .build());
 
 
-        // TODO decide if this should be done via KeyProvider/SigningService
-        //Save key
-        walletKeyService.getRepository().save(WalletKey.builder()
+        signingService.saveKey(WalletKey.builder()
                 .walletId(wallet.getId())
                 .keyId(keyId)
                 .referenceKey(REFERENCE_KEY)
