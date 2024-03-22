@@ -1,3 +1,4 @@
+
 server:
   port: ${APPLICATION_PORT:8087}
   shutdown: graceful
@@ -75,6 +76,8 @@ miw:
   authorityWalletBpn: ${AUTHORITY_WALLET_BPN:BPNL000000000000}
   authorityWalletName: ${AUTHORITY_WALLET_NAME:Catena-X}
   authorityWalletDid: ${AUTHORITY_WALLET_DID:did:web:localhost:BPNL000000000000}
+  authoritySigningServiceType: ${AUTHORITY_SIGNING_SERVICE_TYPE:LOCAL}
+  localSigningKeyStorageType: ${LOCAL_SIGNING_KEY_STORAGE_TYPE:DB}
   vcContexts: ${VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json}
   summaryVcContexts: ${SUMMARY_VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://catenax-ng.github.io/product-core-schemas/SummaryVC.json}
   vcExpiryDate: ${VC_EXPIRY_DATE:01-10-2023} #dd-MM-yyyy ie.  01-01-2025 expiry date will be 2024-12-31T18:30:00Z in VC

@@ -28,6 +28,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
+import org.eclipse.tractusx.managedidentitywallets.signing.LocalSigningService;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +44,10 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Application config.
@@ -50,11 +58,13 @@ public class ApplicationConfig implements WebMvcConfigurer {
 
     private final SwaggerUiConfigProperties properties;
     private final String resourceBundlePath;
+    private final MIWSettings miwSettings;
 
     @Autowired
-    public ApplicationConfig(@Value("${resource.bundle.path:classpath:i18n/language}") String resourceBundlePath, SwaggerUiConfigProperties properties) {
+    public ApplicationConfig(@Value("${resource.bundle.path:classpath:i18n/language}") String resourceBundlePath, SwaggerUiConfigProperties properties, MIWSettings miwSettings) {
         this.resourceBundlePath = resourceBundlePath;
         this.properties = properties;
+        this.miwSettings = miwSettings;
     }
 
     /**
@@ -97,5 +107,24 @@ public class ApplicationConfig implements WebMvcConfigurer {
         LocalValidatorFactoryBean beanValidatorFactory = new LocalValidatorFactoryBean();
         beanValidatorFactory.setValidationMessageSource(messageSource());
         return beanValidatorFactory;
+    }
+
+    @Bean
+    public Map<SigningServiceType, SigningService> availableKeyStorages(List<SigningService> storages, List<KeyProvider> keyProviders) {
+        KeyProvider localSigningKeyProvider = keyProviders.stream().filter(s -> s.getKeyStorageType().equals(miwSettings.localSigningKeyStorageType()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("no key provider with type %s found".formatted(miwSettings.localSigningKeyStorageType())));
+
+        Map<SigningServiceType, SigningService> available = new EnumMap<>(SigningServiceType.class);
+        storages.forEach(
+                s -> {
+                    if(s instanceof LocalSigningService local){
+                        local.setKeyProvider(localSigningKeyProvider);
+                    }
+                    available.put(s.getSupportedServiceType(), s);
+                }
+        );
+
+        return available;
     }
 }

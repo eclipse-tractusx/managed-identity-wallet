@@ -91,4 +91,6 @@ public class StringPool {
     public static final String BEARER_SPACE = "Bearer ";
 
     public static final String BPN_NUMBER_REGEX = "^(BPN)(L|S|A)[0-9A-Z]{12}";
+
+    public static final String W3_ID_JWS_2020_V1_CONTEXT_URL = "https://w3id.org/security/suites/jws-2020/v1";
 }

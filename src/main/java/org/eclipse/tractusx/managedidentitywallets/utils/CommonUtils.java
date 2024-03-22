@@ -21,29 +21,16 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
-import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
-import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
-import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
-import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofGenerator;
-import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 
-import java.net.URI;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -53,7 +40,6 @@ import java.util.regex.Pattern;
 public class CommonUtils {
 
     public static final Pattern BPN_NUMBER_PATTERN = Pattern.compile(StringPool.BPN_NUMBER_REGEX);
-
 
     /**
      * Gets identifier type.
@@ -70,79 +56,19 @@ public class CommonUtils {
         }
     }
 
-
-    /**
-     * Gets credential.
-     *
-     * @param subject         the subject
-     * @param types           the types
-     * @param issuerDoc       the issuer doc
-     * @param privateKeyBytes the private key bytes
-     * @param holderDid       the holder did
-     * @return the credential
-     */
-    public static HoldersCredential getHoldersCredential(VerifiableCredentialSubject subject, List<String> types, DidDocument issuerDoc,
-                                                         byte[] privateKeyBytes, String holderDid, List<URI> contexts, Date expiryDate, boolean selfIssued) {
-        List<String> cloneTypes = new ArrayList<>(types);
-
-        // Create VC
-        VerifiableCredential verifiableCredential = createVerifiableCredential(issuerDoc, types,
-                subject, privateKeyBytes, contexts, expiryDate);
-
+    public static HoldersCredential convertVerifiableCredential(VerifiableCredential verifiableCredential, CredentialCreationConfig config) {
+        List<String> cloneTypes = new ArrayList<>(config.getTypes());
         cloneTypes.remove(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
 
         // Create Credential
         return HoldersCredential.builder()
-                .holderDid(holderDid)
-                .issuerDid(issuerDoc.getId().toString())
+                .holderDid(config.getHolderDid())
+                .issuerDid(config.getIssuerDoc().getId().toString())
                 .type(String.join(",", cloneTypes))
                 .credentialId(verifiableCredential.getId().toString())
                 .data(verifiableCredential)
-                .selfIssued(selfIssued)
+                .selfIssued(config.isSelfIssued())
                 .build();
     }
 
-    @SneakyThrows({UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class})
-    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
-                                                                   VerifiableCredentialSubject verifiableCredentialSubject,
-                                                                   byte[] privateKey, List<URI> contexts, Date expiryDate) {
-        //VC Builder
-
-        // if the credential does not contain the JWS proof-context add it
-        URI jwsUri = URI.create("https://w3id.org/security/suites/jws-2020/v1");
-        if (!contexts.contains(jwsUri)) {
-            contexts.add(jwsUri);
-        }
-
-        // check if the expiryDate is set
-        // if its null then it will be ignored from the SSI Lib (VerifiableCredentialBuilder) and will not be added to the VC
-        Instant expiryInstant = null;
-        if (expiryDate != null) {
-            expiryInstant = expiryDate.toInstant();
-        }
-
-        URI id = URI.create(UUID.randomUUID().toString());
-        VerifiableCredentialBuilder builder = new VerifiableCredentialBuilder()
-                .context(contexts)
-                .id(URI.create(issuerDoc.getId() + "#" + id))
-                .type(verifiableCredentialType)
-                .issuer(issuerDoc.getId())
-                .expirationDate(expiryInstant)
-                .issuanceDate(Instant.now())
-                .credentialSubject(verifiableCredentialSubject);
-
-
-        LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
-        URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
-
-        JWSSignature2020 proof =
-                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKey));
-
-
-        //Adding Proof to VC
-        builder.proof(proof);
-
-        //Create Credential
-        return builder.build();
-    }
 }

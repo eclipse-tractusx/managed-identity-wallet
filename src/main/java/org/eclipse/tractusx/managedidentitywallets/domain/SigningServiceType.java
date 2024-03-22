@@ -19,28 +19,10 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-/**
- * The type Managed identity wallets application.
- */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-@EnableTransactionManagement
-public class ManagedIdentityWalletsApplication {
-
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-    }
-
+public enum SigningServiceType {
+    LOCAL,
+    AZURE,
+    REMOTE
 }

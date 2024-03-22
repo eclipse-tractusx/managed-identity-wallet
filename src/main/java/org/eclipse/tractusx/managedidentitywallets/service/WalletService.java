@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.nimbusds.jose.jwk.KeyType;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -34,6 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -41,16 +45,15 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.*;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -92,8 +95,6 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final EncryptionUtils encryptionUtils;
 
-    private final WalletKeyService walletKeyService;
-
     private final HoldersCredentialRepository holdersCredentialRepository;
 
     private final SpecificationUtil<Wallet> walletSpecificationUtil;
@@ -101,6 +102,8 @@ public class WalletService extends BaseService<Wallet, Long> {
     private final IssuersCredentialService issuersCredentialService;
 
     private final CommonService commonService;
+
+    private final Map<SigningServiceType, SigningService> availableSigningServices;
 
     @Qualifier("transactionManager")
     private final PlatformTransactionManager transactionManager;
@@ -223,8 +226,19 @@ public class WalletService extends BaseService<Wallet, Long> {
         validateCreateWallet(request, callerBpn);
 
         //create private key pair
-        IKeyGenerator keyGenerator = new x21559Generator();
-        KeyPair keyPair = keyGenerator.generateKey();
+        SigningServiceType signingServiceType = null;
+        if (authority) {
+            signingServiceType = miwSettings.authoritySigningServiceType();
+        } else {
+            signingServiceType = request.getSigningServiceType();
+        }
+
+        KeyCreationConfig keyCreationConfig = KeyCreationConfig.builder()
+                .keyName(request.getBpn())
+                .keyType(KeyType.OCT)
+                .build();
+        SigningService signingService = availableSigningServices.get(signingServiceType);
+        KeyPair keyPair = signingService.getKey(keyCreationConfig);
 
         //create did json
         Did did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), request.getBpn());
@@ -258,11 +272,11 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .name(request.getName())
                 .did(did.toUri().toString())
                 .algorithm(StringPool.ED_25519)
+                .signingServiceType(signingServiceType)
                 .build());
 
 
-        //Save key
-        walletKeyService.getRepository().save(WalletKey.builder()
+        signingService.saveKey(WalletKey.builder()
                 .walletId(wallet.getId())
                 .keyId(keyId)
                 .referenceKey("dummy ref key, removed once vault setup is ready")

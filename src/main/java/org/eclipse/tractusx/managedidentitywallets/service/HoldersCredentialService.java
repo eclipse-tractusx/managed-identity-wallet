@@ -36,8 +36,13 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -71,7 +76,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
-    private final WalletKeyService walletKeyService;
+    private final Map<SigningServiceType, SigningService> availableSigningServices;
 
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {
@@ -150,19 +155,29 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         //validate BPN access, Holder must be caller of API
         Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
-        // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId());
-
         // check if the expiryDate is set
         Date expiryDate = null;
         if (verifiableCredential.getExpirationDate() != null) {
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
+
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
+                .subject(verifiableCredential.getCredentialSubject().get(0))
+                .types(verifiableCredential.getTypes())
+                .issuerDoc(issuerWallet.getDidDocument())
+                .holderDid(issuerWallet.getDid())
+                .contexts(verifiableCredential.getContext())
+                .expiryDate(expiryDate)
+                .selfIssued(true)
+                .keyName(issuerWallet.getBpn())
+                .build();
+
         // Create Credential
-        HoldersCredential credential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
-                verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
-                privateKeyBytes, issuerWallet.getDid(),
-                verifiableCredential.getContext(), expiryDate, true);
+        SignerResult signerResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = (VerifiableCredential) signerResult.getJsonLd();
+        HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc,holdersCredentialCreationConfig);
+
 
         //Store Credential in holder table
         credential = create(credential);

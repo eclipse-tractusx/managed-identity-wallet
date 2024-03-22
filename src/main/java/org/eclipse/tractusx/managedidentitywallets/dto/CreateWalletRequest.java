@@ -26,6 +26,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 
 
 /**
@@ -45,4 +46,6 @@ public class CreateWalletRequest {
     @NotBlank(message = "Please provide name")
     @Size(min = 1, max = 255, message = "Please provide valid name")
     private String name;
+
+    private SigningServiceType signingServiceType = SigningServiceType.LOCAL;
 }

@@ -21,6 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -39,5 +41,7 @@ public record MIWSettings(String host, String encryptionKey, String authorityWal
                           @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
                           Set<String> supportedFrameworkVCTypes,
                           boolean enforceHttps, String contractTemplatesUrl,
-                          List<URI> didDocumentContextUrls) {
+                          List<URI> didDocumentContextUrls,
+                          KeyStorageType localSigningKeyStorageType,
+                          SigningServiceType authoritySigningServiceType) {
 }

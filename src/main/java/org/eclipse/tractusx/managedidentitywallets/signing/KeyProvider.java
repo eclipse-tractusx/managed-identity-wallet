@@ -19,28 +19,35 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 
 /**
- * The type Managed identity wallets application.
+ * This class will be used by LocalSigningService to retrieve and save keys
+ *
+ * @see LocalSigningService
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-@EnableTransactionManagement
-public class ManagedIdentityWalletsApplication {
+public interface KeyProvider {
 
     /**
-     * The entry point of application.
+     * @param keyName the name of the key that is to be retrieved
+     * @return the key as a byte-array
      *
-     * @param args the input arguments
      */
-    public static void main(String[] args) {
-        SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-    }
+    byte[] getPrivateKey(String keyName);
 
+    /**
+     * @param walletKey the key to save
+     */
+    void saveKeys(WalletKey walletKey);
+
+
+    /**
+     * @return the type of KeyProvider
+     *
+     * @see KeyStorageType
+     */
+    KeyStorageType getKeyStorageType();
 }

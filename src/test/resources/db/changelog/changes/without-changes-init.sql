@@ -78,6 +78,3 @@ COMMENT ON COLUMN public.holders_credential.is_stored IS 'true is VC is stored u
 
 --changeset nitin:2
 ALTER TABLE public.wallet_key ADD key_id varchar(255) NULL;
-
---changeset pmanaras:3
-ALTER TABLE public.wallet ADD signing_service_type VARCHAR(255) NOT NULL DEFAULT 'LOCAL';

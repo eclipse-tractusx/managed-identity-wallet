@@ -19,28 +19,37 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
-/**
- * The type Managed identity wallets application.
- */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-@EnableTransactionManagement
-public class ManagedIdentityWalletsApplication {
+import java.net.URI;
+import java.util.List;
 
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-    }
+@Builder
+@Getter
+public class PresentationCreationConfig {
+
+    @NonNull
+    private VerifiableEncoding encoding;
+
+    @NonNull
+    private String keyName;
+
+    @NonNull
+    private List<VerifiableCredential> verifiableCredentials;
+
+    @NonNull
+    private Did vpIssuerDid;
+
+    // all for JWT
+    private String audience;
+
+    // all for JsonLD
+    URI verificationMethod;
 
 }

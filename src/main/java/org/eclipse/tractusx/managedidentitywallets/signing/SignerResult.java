@@ -19,28 +19,19 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 
-/**
- * The type Managed identity wallets application.
- */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-@EnableTransactionManagement
-public class ManagedIdentityWalletsApplication {
-
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-    }
-
+@Getter
+@Setter
+@Builder
+public class SignerResult {
+    private VerifiableEncoding encoding;
+    private Verifiable jsonLd;
+    private String jwt;
 }

@@ -19,28 +19,18 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
 /**
- * The type Managed identity wallets application.
+ * Specialized interface for SigningServices that will sign credentials/presentations locally
+ * (may retrieve the keys from remote via KeyProvider)
+ *
+ * @see SigningService
+ * @see KeyProvider
  */
-@SpringBootApplication
-@ConfigurationPropertiesScan
-@EnableTransactionManagement
-public class ManagedIdentityWalletsApplication {
-
+public interface LocalSigningService extends SigningService{
     /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
+     * @param keyProvider the KeyProvider to be used by the implementation
      */
-    public static void main(String[] args) {
-        SpringApplication.run(ManagedIdentityWalletsApplication.class, args);
-    }
-
+    void setKeyProvider(KeyProvider keyProvider);
 }
