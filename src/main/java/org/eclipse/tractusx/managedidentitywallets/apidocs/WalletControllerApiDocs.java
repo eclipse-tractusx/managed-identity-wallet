@@ -23,8 +23,9 @@ public class WalletControllerApiDocs {
 
                     @ExampleObject(name = "Create wallet with BPN", value = """
                                                         {
-                                                          "bpn": "BPNL000000000001",
-                                                          "name": "companyA"
+                                                          "businessPartnerNumber": "BPNL000000000001",
+                                                          "companyName": "companyA",
+                                                          "didUrl": "portal.com:BPNL000000000001"
                                                         }
                             """)
             })
@@ -105,12 +106,24 @@ public class WalletControllerApiDocs {
                                                      [
                                                          {
                                                              "controller": "did:web:localhost:BPNL000000000001",
-                                                             "id": "did:web:localhost:BPNL000000000001#",
+                                                             "id": "did:web:localhost:BPNL000000000001#key-1",
                                                              "publicKeyJwk":
                                                              {
                                                                  "crv": "Ed25519",
                                                                  "kty": "OKP",
                                                                  "x": "0Ap6FsX5UuRBIoOzxWtcFA2ymnqXw0U08Ino_mIuYM4"
+                                                             },
+                                                             "type": "JsonWebKey2020"
+                                                         },
+                                                         {
+                                                             "controller": "did:web:localhost:BPNL000000000001",
+                                                             "id": "did:web:localhost:BPNL000000000001#key-2",
+                                                             "publicKeyJwk":
+                                                             {
+                                                                 "crv": "secp256k1",
+                                                                 "kty": "EC",
+                                                                 "x": "f9PkTOpsbcgKe_-s6bNCve3-aB1VZAFsCub8C5bhDn0",
+                                                                 "y": "xH1d7jCFavolGVZtaWcZZGP2nLuEsamDCotD56llxUk"
                                                              },
                                                              "type": "JsonWebKey2020"
                                                          }

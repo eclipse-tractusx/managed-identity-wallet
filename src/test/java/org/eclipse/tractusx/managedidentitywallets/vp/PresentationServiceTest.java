@@ -32,9 +32,11 @@ import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
+import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestConstants;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
@@ -52,6 +54,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_READ;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_WRITE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_1;
@@ -82,12 +85,18 @@ public class PresentationServiceTest {
     @Autowired
     private JtiRepository jtiRepository;
 
+    @Autowired
+    private IssuersCredentialService issuersCredentialService;
+
+    @Autowired
+    private WalletRepository walletRepository;
+
     @SneakyThrows
     @Test
     void createPresentation200ResponseAsJWT() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndGetDid(bpn);
+        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, false);
@@ -107,7 +116,7 @@ public class PresentationServiceTest {
     void createPresentation200ResponseAsJsonLD() {
         boolean asJwt = false;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndGetDid(bpn);
+        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, false);
@@ -130,7 +139,7 @@ public class PresentationServiceTest {
     void createPresentation200ResponseNoJtiRecord() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndGetDid(bpn);
+        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
 
@@ -147,7 +156,7 @@ public class PresentationServiceTest {
     void createPresentationIncorrectVcTypeResponse() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndGetDid(bpn);
+        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, INVALID_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, false);
@@ -173,7 +182,7 @@ public class PresentationServiceTest {
     void createPresentationIncorrectJtiAlreadyUsed() {
         boolean asJwt = false;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndGetDid(bpn);
+        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, true);
@@ -184,10 +193,13 @@ public class PresentationServiceTest {
     }
 
     @SneakyThrows
-    private String generateWalletAndGetDid(String bpn) {
+    private String generateWalletAndBpnCredentialAndGetDid(String bpn) {
         String baseBpn = miwSettings.authorityWalletBpn();
-        ResponseEntity<String> createWalletResponse = createWallet(bpn, "name", restTemplate, baseBpn);
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        ResponseEntity<String> createWalletResponse = createWallet(bpn, "name", restTemplate, baseBpn, defaultLocation);
         Wallet wallet = TestUtils.getWalletFromString(createWalletResponse.getBody());
+        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        issuersCredentialService.issueBpnCredential(issuerWallet, wallet, false);
         return wallet.getDid();
     }
 
@@ -196,7 +208,7 @@ public class PresentationServiceTest {
     }
 
     @SneakyThrows
-    private String generateAccessToken(String issUrl, String sub, String aud, String scope, String jwt)  {
+    private String generateAccessToken(String issUrl, String sub, String aud, String scope, String jwt) {
         JWTClaimsSet innerSet = buildClaimsSet(issUrl, sub, aud, TestConstants.NONCE, scope, EXP_VALID_DATE, IAT_VALID_DATE, jwt);
         return buildJWTToken(JWK_INNER, innerSet);
     }

@@ -35,6 +35,8 @@ import org.eclipse.tractusx.managedidentitywallets.controller.PresentationContro
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
@@ -62,6 +64,8 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class PresentationTest {
@@ -80,6 +84,12 @@ class PresentationTest {
 
     @Autowired
     private MIWSettings miwSettings;
+
+    @Autowired
+    private IssuersCredentialService issuersCredentialService;
+
+    @Autowired
+    private WalletRepository walletRepository;
 
 
     @Test
@@ -246,9 +256,11 @@ class PresentationTest {
     @NotNull
     private Map<String, Object> getIssueVPRequest(String bpn) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
-        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn);
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);
         Assertions.assertEquals(response.getStatusCode().value(), HttpStatus.CREATED.value());
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
+        generateBpnCredential(wallet);
 
         //get BPN credentials
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
@@ -265,9 +277,11 @@ class PresentationTest {
     @NotNull
     private ResponseEntity<Map> getIssueVPRequestWithShortExpiry(String bpn, String audience) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
-        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn);
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);
         Assertions.assertEquals(response.getStatusCode().value(), HttpStatus.CREATED.value());
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
+        generateBpnCredential(wallet);
 
         //create VC
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
@@ -290,6 +304,11 @@ class PresentationTest {
 
         ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS + "?asJwt={asJwt}&audience={audience}", HttpMethod.POST, entity, Map.class, true, audience);
         return vpResponse;
+    }
+
+    private void generateBpnCredential(Wallet holderWallet) {
+        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        issuersCredentialService.issueBpnCredential(issuerWallet, holderWallet, false);
     }
 
     private ResponseEntity<String> issueVC(String bpn, String holderDid, String issuerDid, String type, HttpHeaders headers, List<URI> contexts, Instant expiry) throws JsonProcessingException {

@@ -68,7 +68,7 @@ public class WalletController extends BaseController {
     @CreateWalletApiDoc
     @PostMapping(path = RestURI.WALLETS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request, Principal principal) {
-        log.debug("Received request to create wallet with BPN {}. authorized by BPN: {}", request.getBpn(), getBPNFromToken(principal));
+        log.debug("Received request to create wallet with BPN {}. authorized by BPN: {}", request.getBusinessPartnerNumber(), getBPNFromToken(principal));
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createWallet(request, getBPNFromToken(principal)));
     }
 

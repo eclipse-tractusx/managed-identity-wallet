@@ -37,6 +37,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
+import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
@@ -57,6 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class FrameworkHoldersCredentialTest {
@@ -73,6 +76,9 @@ class FrameworkHoldersCredentialTest {
 
     @Autowired
     private IssuersCredentialRepository issuersCredentialRepository;
+
+    @Autowired
+    private IssuersCredentialService issuersCredentialService;
 
 
     @Test
@@ -113,6 +119,7 @@ class FrameworkHoldersCredentialTest {
         String type = "PcfCredential";
         //create wallet
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        issuersCredentialService.issueBpnCredential(wallet, wallet, true);
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
@@ -187,7 +194,9 @@ class FrameworkHoldersCredentialTest {
     private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException {
         //create wallet
         String baseBpn = miwSettings.authorityWalletBpn();
-        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn).getBody());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        Wallet wallet = TestUtils.getWalletFromString(TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation).getBody());
+        generateBpnCredential(wallet);
         String oldSummaryCredentialId = TestUtils.getSummaryCredentialId(wallet.getDid(), holdersCredentialRepository);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
@@ -230,5 +239,10 @@ class FrameworkHoldersCredentialTest {
 
         //check summary credential
         TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, type, oldSummaryCredentialId);
+    }
+
+    private void generateBpnCredential(Wallet holderWallet) {
+        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
+        issuersCredentialService.issueBpnCredential(issuerWallet, holderWallet, false);
     }
 }

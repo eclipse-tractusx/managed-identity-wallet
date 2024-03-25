@@ -70,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
@@ -239,7 +240,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         KeyPair keyPair = keyGenerator.generateKey();
 
         //create did json
-        Did did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), request.getBpn());
+        Did did = createDidJson(request.getDidUrl());
 
         String keyId = UUID.randomUUID().toString();
 
@@ -247,13 +248,13 @@ public class WalletService extends BaseService<Wallet, Long> {
         JWKVerificationMethod jwkVerificationMethod =
                 new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
 
-        DidDocument didDocument = jwtPresentationES256KService.buildDidDocument(request.getBpn(), did, List.of(jwkVerificationMethod));
+        DidDocument didDocument = jwtPresentationES256KService.buildDidDocument(request.getBusinessPartnerNumber(), did, List.of(jwkVerificationMethod));
 
         //Save wallet
         Wallet wallet = create(Wallet.builder()
                 .didDocument(didDocument)
-                .bpn(request.getBpn())
-                .name(request.getName())
+                .bpn(request.getBusinessPartnerNumber())
+                .name(request.getCompanyName())
                 .did(did.toUri().toString())
                 .algorithm(ED_25519)
                 .build());
@@ -270,14 +271,24 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         //Save key EdDSA
         walletKeyService.getRepository().save(walletKeyED25519);
-        log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBpn()));
+        log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBusinessPartnerNumber()));
 
-        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-
-        //issue BPN credentials
-        issuersCredentialService.issueBpnCredential(issuerWallet, wallet, authority);
+        //credentials issuance will be moved to the issuer component
 
         return wallet;
+    }
+
+    private Did createDidJson(String didUrl) {
+        String[] split = didUrl.split(COLON_SEPARATOR);
+        if (split.length == 1) {
+            return DidWebFactory.fromHostname(didUrl);
+        } else if (split.length == 2) {
+            return DidWebFactory.fromHostnameAndPath(split[0], split[1]);
+        } else {
+            int i = didUrl.lastIndexOf(COLON_SEPARATOR);
+            String[] splitByLast = { didUrl.substring(0, i), didUrl.substring(i + 1) };
+            return DidWebFactory.fromHostnameAndPath(splitByLast[0], splitByLast[1]);
+        }
     }
 
     /**
@@ -292,8 +303,9 @@ public class WalletService extends BaseService<Wallet, Long> {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 if (!walletRepository.existsByBpn(miwSettings.authorityWalletBpn())) {
                     CreateWalletRequest request = CreateWalletRequest.builder()
-                            .name(miwSettings.authorityWalletName())
-                            .bpn(miwSettings.authorityWalletBpn())
+                            .companyName(miwSettings.authorityWalletName())
+                            .businessPartnerNumber(miwSettings.authorityWalletBpn())
+                            .didUrl(miwSettings.host() + COLON_SEPARATOR + miwSettings.authorityWalletBpn())
                             .build();
                     wallets[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
                     log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
@@ -324,9 +336,9 @@ public class WalletService extends BaseService<Wallet, Long> {
         Validate.isFalse(callerBpn.equalsIgnoreCase(miwSettings.authorityWalletBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // check wallet already exists
-        boolean exist = walletRepository.existsByBpn(request.getBpn());
+        boolean exist = walletRepository.existsByBpn(request.getBusinessPartnerNumber());
         if (exist) {
-            throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBpn());
+            throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBusinessPartnerNumber());
         }
     }
 }

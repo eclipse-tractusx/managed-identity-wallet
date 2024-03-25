@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
 public class VerifiableCredentialIssuerEqualProofSignerTest {
@@ -56,12 +58,14 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
     @Test
     public void test() {
         var bpn1 = "BPNL000000000FOO";
-        var response1 = TestUtils.createWallet(bpn1, "did:web:localhost%3A8080:BPNL000000000FOO", restTemplate, miwSettings.authorityWalletBpn());
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn1;
+        var response1 = TestUtils.createWallet(bpn1, "did:web:localhost%3A8080:BPNL000000000FOO", restTemplate, miwSettings.authorityWalletBpn(), defaultLocation);
         Assertions.assertTrue(response1.getStatusCode().is2xxSuccessful(), "Wallet 1 creation failed. " + response1.getBody());
         var wallet1 = commonService.getWalletByIdentifier(bpn1);
 
         var bpn2 = "BPNL000000000BAR";
-        var response2 = TestUtils.createWallet(bpn2, "did:web:localhost%3A8080:BPNL000000000BAR", restTemplate, miwSettings.authorityWalletBpn());
+        String defaultLocation2 = miwSettings.host() + COLON_SEPARATOR + bpn2;
+        var response2 = TestUtils.createWallet(bpn2, "did:web:localhost%3A8080:BPNL000000000BAR", restTemplate, miwSettings.authorityWalletBpn(), defaultLocation2);
         Assertions.assertTrue(response2.getStatusCode().is2xxSuccessful(), "Wallet 2 creation failed. " + response2.getBody());
         var wallet2 = commonService.getWalletByIdentifier(bpn2);
 

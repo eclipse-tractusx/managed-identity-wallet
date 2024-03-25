@@ -37,6 +37,7 @@ import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
@@ -47,10 +48,11 @@ import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.SignatureFailureException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
+import org.eclipse.tractusx.ssi.lib.model.did.DidMethod;
+import org.eclipse.tractusx.ssi.lib.model.did.DidMethodIdentifier;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -75,6 +77,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PRIVATE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PUBLIC_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
@@ -94,6 +97,7 @@ import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.TYPE;
 public class JwtPresentationES256KService {
 
     public static final String JWK_Y = "y";
+
     private JsonLdSerializer jsonLdSerializer;
     private Did agentDid;
     private WalletRepository walletRepository;
@@ -136,7 +140,8 @@ public class JwtPresentationES256KService {
                     .provider(BouncyCastleProviderSingleton.getInstance())
                     .generate();
 
-            Did did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), wallet.getBpn());
+            Did did = getDidFromDidString(wallet.getDid());
+
             JWKVerificationMethod jwkVerificationMethod = getJwkVerificationMethod(ecKey, did);
             DidDocument didDocument = wallet.getDidDocument();
             List<VerificationMethod> verificationMethods = didDocument.getVerificationMethods();
@@ -162,6 +167,14 @@ public class JwtPresentationES256KService {
             throw new BadDataException("Could not generate EC Jwk", e);
         }
         return wallet;
+    }
+
+    private Did getDidFromDidString(String didString) {
+        int index = StringUtils.ordinalIndexOf(didString, COLON_SEPARATOR, 2);
+        String identifier = didString.substring(index + 1);
+        DidMethod didMethod = new DidMethod("web");
+        DidMethodIdentifier methodIdentifier = new DidMethodIdentifier(identifier);
+        return new Did(didMethod, methodIdentifier, null);
     }
 
     private JWKVerificationMethod getJwkVerificationMethod(ECKey ecKey, Did did) {

@@ -67,6 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = {TestContextInitializer.class})
 class PresentationValidationTest {
@@ -98,14 +100,18 @@ class PresentationValidationTest {
         bpnOperator = miwSettings.authorityWalletBpn();
 
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();
-        createWalletRequest.setBpn(bpnTenant_1);
-        createWalletRequest.setName("My Test Tenant Wallet");
+        createWalletRequest.setBusinessPartnerNumber(bpnTenant_1);
+        createWalletRequest.setCompanyName("My Test Tenant Wallet");
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpnTenant_1;
+        createWalletRequest.setDidUrl(defaultLocation);
         Wallet tenantWallet = walletService.createWallet(createWalletRequest, bpnOperator);
         tenant_1 = DidParser.parse(tenantWallet.getDid());
 
         CreateWalletRequest createWalletRequest2 = new CreateWalletRequest();
-        createWalletRequest2.setBpn(bpnTenant_2);
-        createWalletRequest2.setName("My Test Tenant Wallet");
+        createWalletRequest2.setBusinessPartnerNumber(bpnTenant_2);
+        createWalletRequest2.setCompanyName("My Test Tenant Wallet");
+        String defaultLocation2 = miwSettings.host() + COLON_SEPARATOR + bpnTenant_2;
+        createWalletRequest2.setDidUrl(defaultLocation2);
         Wallet tenantWallet2 = walletService.createWallet(createWalletRequest2, bpnOperator);
         tenant_2 = DidParser.parse(tenantWallet2.getDid());
 

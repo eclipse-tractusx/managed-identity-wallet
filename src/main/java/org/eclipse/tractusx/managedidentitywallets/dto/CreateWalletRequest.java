@@ -40,9 +40,13 @@ public class CreateWalletRequest {
 
     @NotBlank(message = "Please provide BPN")
     @Pattern(regexp = StringPool.BPN_NUMBER_REGEX, message = "Please provide valid BPN")
-    private String bpn;
+    private String businessPartnerNumber;
 
     @NotBlank(message = "Please provide name")
     @Size(min = 1, max = 255, message = "Please provide valid name")
-    private String name;
+    private String companyName;
+
+    @NotBlank(message = "Please provide url")
+    @Size(min = 1, max = 2000, message = "Please provide url")
+    private String didUrl;
 }
