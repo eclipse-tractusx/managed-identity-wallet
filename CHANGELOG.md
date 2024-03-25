@@ -1,3 +1,15 @@
+# [0.5.0-develop.12](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.11...v0.5.0-develop.12) (2024-03-25)
+
+
+### Bug Fixes
+
+* fix did creation in did document ([c21f7af](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c21f7af470a6db484a63e49df222a1b7132a0a1e))
+
+
+### Features
+
+* adapt request and wallet service ([c911d33](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c911d332579f669f347dcec3399b430e685baaf0))
+
 # [0.5.0-develop.11](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.10...v0.5.0-develop.11) (2024-03-21)
 
 
