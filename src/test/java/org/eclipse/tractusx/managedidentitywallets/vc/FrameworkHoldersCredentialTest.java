@@ -118,7 +118,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameWorkVCToBaseWalletTest201() throws JSONException, JsonProcessingException {
+    void issueFrameWorkVCToBaseWalletTest201() throws JSONException {
         String bpn = miwSettings.authorityWalletBpn();
         String type = "PcfCredential";
         //create wallet
@@ -275,3 +275,4 @@ class FrameworkHoldersCredentialTest {
         issuersCredentialService.issueBpnCredential(issuerWallet, holderWallet, false);
     }
 }
+
