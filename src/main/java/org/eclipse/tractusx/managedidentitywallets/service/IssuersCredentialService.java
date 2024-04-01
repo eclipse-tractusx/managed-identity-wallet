@@ -483,7 +483,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         VerifiableCredentialSubject vcByCredentialSubjectType = holdersCredentialList.stream()
                 .flatMap(credential -> credential.getData().getCredentialSubject().stream())
-                .filter(credentialSubject -> credentialSubject.getOrDefault("type", "").equals(credentialSubjectType))
+                .filter(credentialSubject -> credentialSubject.getOrDefault(StringPool.TYPE, "").equals(credentialSubjectType))
                 .findAny()
                 .orElse(null);
 
