@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -56,7 +56,6 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -68,7 +67,12 @@ import org.springframework.util.StringUtils;
 
 import java.net.http.HttpClient;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * The type Issuers credential service.
@@ -228,6 +232,9 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(request.getHolderIdentifier());
+
+        //check duplicate
+        doesFrameworkCredentialExist(holderWallet.getDid(), request.getType());
 
         Wallet baseWallet = commonService.getWalletByIdentifier(miwSettings.authorityWalletBpn());
 
@@ -457,6 +464,28 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
     private void isCredentialExit(String holderDid, String credentialType) {
         Validate.isTrue(holdersCredentialRepository.existsByHolderDidAndType(holderDid, credentialType)).launch(new DuplicateCredentialProblem("Credential of type " + credentialType + " is already exists "));
+    }
+
+    /**
+     * Check if UseCaseFrameworkCredential of given type already exists for holder
+     *
+     * @param holderDid             holder's DID
+     * @param credentialSubjectType UseCaseFrameworkCredential type
+     */
+    private void doesFrameworkCredentialExist(String holderDid, String credentialSubjectType) {
+        List<HoldersCredential> holdersCredentialList = holdersCredentialRepository.getByHolderDidAndType(holderDid, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
+
+        if (CollectionUtils.isEmpty(holdersCredentialList)) {
+            return;
+        }
+
+        VerifiableCredentialSubject vcByCredentialSubjectType = holdersCredentialList.stream()
+                .flatMap(credential -> credential.getData().getCredentialSubject().stream())
+                .filter(credentialSubject -> credentialSubject.getOrDefault("type", "").equals(credentialSubjectType))
+                .findAny()
+                .orElse(null);
+
+        Validate.isNotNull(vcByCredentialSubjectType).launch(new DuplicateCredentialProblem("Credential of type " + credentialSubjectType + " already exists"));
     }
 
     private boolean isSelfIssued(String holderBpn) {

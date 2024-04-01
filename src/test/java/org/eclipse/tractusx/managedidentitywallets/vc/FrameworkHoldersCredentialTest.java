@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -51,7 +51,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
@@ -60,8 +64,8 @@ import java.util.stream.Stream;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ContextConfiguration(initializers = {TestContextInitializer.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
+@ContextConfiguration(initializers = { TestContextInitializer.class })
 class FrameworkHoldersCredentialTest {
     @Autowired
     private HoldersCredentialRepository holdersCredentialRepository;
@@ -142,6 +146,31 @@ class FrameworkHoldersCredentialTest {
 
         //check summary credential
         TestUtils.checkSummaryCredential(miwSettings.authorityWalletDid(), wallet.getDid(), holdersCredentialRepository, issuersCredentialRepository, type, oldSummaryCredentialId);
+    }
+
+    @Test
+    void issueFrameWorkVCToWalletTest409() throws JSONException {
+        String bpn = TestUtils.getRandomBpmNumber();
+        String name = "Sample Wallet";
+        String baseBpn = miwSettings.authorityWalletBpn();
+
+        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, name, restTemplate, baseBpn, defaultLocation);
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+
+        miwSettings.supportedFrameworkVCTypes().forEach(type -> {
+            ResponseEntity<String> credentialResponse;
+            IssueFrameworkCredentialRequest twinRequest = TestUtils.getIssueFrameworkCredentialRequest(bpn, type);
+
+            HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
+            HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(twinRequest, headers);
+
+            credentialResponse = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+            Assertions.assertEquals(HttpStatus.CREATED.value(), credentialResponse.getStatusCode().value());
+
+            credentialResponse = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+            Assertions.assertEquals(HttpStatus.CONFLICT.value(), credentialResponse.getStatusCode().value());
+        });
     }
 
     @ParameterizedTest
