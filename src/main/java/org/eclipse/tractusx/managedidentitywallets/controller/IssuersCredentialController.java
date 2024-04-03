@@ -54,9 +54,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getBPNFromToken;
 
 /**
  * The type Issuers credential controller.
@@ -64,7 +65,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class IssuersCredentialController extends BaseController {
+public class IssuersCredentialController {
 
     /**
      * The constant API_TAG_VERIFIABLE_CREDENTIAL_ISSUER.
@@ -88,7 +89,7 @@ public class IssuersCredentialController extends BaseController {
      * @param size             the size
      * @param sortColumn       the sort column
      * @param sortTpe          the sort tpe
-     * @param principal        the principal
+     * @param authentication   the authentication
      * @return the credentials
      */
     @GetCredentialsApiDocs
@@ -129,7 +130,7 @@ public class IssuersCredentialController extends BaseController {
      * Issue membership credential response entity.
      *
      * @param issueMembershipCredentialRequest the issue membership credential request
-     * @param principal                        the principal
+     * @param authentication the authentication
      * @return the response entity
      */
     @IssueMembershipCredentialApiDoc
@@ -145,7 +146,7 @@ public class IssuersCredentialController extends BaseController {
      * Issue dismantler credential response entity.
      *
      * @param request   the request
-     * @param principal the principal
+     * @param authentication   the authentication
      * @return the response entity
      */
     @IssueDismantlerCredentialApiDoc
@@ -161,7 +162,7 @@ public class IssuersCredentialController extends BaseController {
      * Issue framework credential response entity.
      *
      * @param request   the request
-     * @param principal the principal
+     * @param authentication   the authentication
      * @return the response entity
      */
     @IssueFrameworkCredentialApiDocs
@@ -193,7 +194,7 @@ public class IssuersCredentialController extends BaseController {
      *
      * @param holderDid the holder did
      * @param data      the data
-     * @param principal the principal
+     * @param authentication   the authentication
      * @return the response entity
      */
     @PostMapping(path = RestURI.ISSUERS_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

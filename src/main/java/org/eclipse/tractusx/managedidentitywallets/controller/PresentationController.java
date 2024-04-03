@@ -33,6 +33,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,10 +41,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.Map;
 
 import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getAccessToken;
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getBPNFromToken;
 
 /**
  * The type Presentation controller.
@@ -51,7 +52,7 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtil
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class PresentationController extends BaseController {
+public class PresentationController {
 
     public static final String API_TAG_VERIFIABLE_PRESENTATIONS_GENERATION = "Verifiable Presentations - Generation";
     public static final String API_TAG_VERIFIABLE_PRESENTATIONS_VALIDATION = "Verifiable Presentations - Validation";
@@ -63,17 +64,18 @@ public class PresentationController extends BaseController {
      * @param data      the data
      * @param audience  the audience
      * @param asJwt     the as jwt
-     * @param principal the principal
+     * @param authentication the authentication
      * @return the response entity
      */
     @PostVerifiablePresentationApiDocs
     @PostMapping(path = RestURI.API_PRESENTATIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> createPresentation(@RequestBody Map<String, Object> data,
                                                                   @RequestParam(name = "audience", required = false) String audience,
-                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Principal principal
+                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Authentication authentication
     ) {
-        log.debug("Received request to create presentation. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, getBPNFromToken(principal)));
+        String bpn = getBPNFromToken(authentication);
+        log.debug("Received request to create presentation. BPN: {}", bpn);
+        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, bpn));
     }
 
     /**

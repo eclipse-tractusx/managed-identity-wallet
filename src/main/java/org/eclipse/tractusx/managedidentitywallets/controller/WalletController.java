@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.eclipse.tractusx.managedidentitywallets.apidocs.DidDocumentControllerApiDocs.DidOrBpnParameterDoc;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.WalletControllerApiDocs.CreateWalletApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.WalletControllerApiDocs.PageNumberParameterDoc;
@@ -43,10 +42,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.Map;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getBPNFromToken;
 
 /**
  * The type Wallet controller.
@@ -55,7 +61,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Wallets")
-public class WalletController extends BaseController {
+public class WalletController {
 
     private final WalletService service;
 
@@ -67,9 +73,10 @@ public class WalletController extends BaseController {
      */
     @CreateWalletApiDoc
     @PostMapping(path = RestURI.WALLETS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request, Principal principal) {
-        log.debug("Received request to create wallet with BPN {}. authorized by BPN: {}", request.getBusinessPartnerNumber(), getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createWallet(request, getBPNFromToken(principal)));
+    public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request, Authentication authentication) {
+        String bpn = getBPNFromToken(authentication);
+        log.debug("Received request to create wallet with BPN {}. authorized by BPN: {}", request.getBusinessPartnerNumber(), bpn);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createWallet(request, bpn));
     }
 
     /**
@@ -82,9 +89,10 @@ public class WalletController extends BaseController {
     @StoreVerifiableCredentialApiDoc
     @PostMapping(path = RestURI.API_WALLETS_IDENTIFIER_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> storeCredential(@RequestBody Map<String, Object> data,
-                                                               @DidOrBpnParameterDoc @PathVariable(name = "identifier") String identifier, Principal principal) {
-        log.debug("Received request to store credential in wallet with identifier {}. authorized by BPN: {}", identifier, getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier, getBPNFromToken(principal)));
+                                                               @DidOrBpnParameterDoc @PathVariable(name = "identifier") String identifier, Authentication authentication) {
+        String bpn = getBPNFromToken(authentication);
+        log.debug("Received request to store credential in wallet with identifier {}. authorized by BPN: {}", identifier, bpn);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.storeCredential(data, identifier, bpn));
     }
 
     /**
@@ -98,9 +106,10 @@ public class WalletController extends BaseController {
     @GetMapping(path = RestURI.API_WALLETS_IDENTIFIER, produces = MediaType.APPLICATION_JSON_VALUE)
 public ResponseEntity<Wallet> getWalletByIdentifier( @DidOrBpnParameterDoc @PathVariable(name = "identifier") String identifier,
                                                         @RequestParam(name = "withCredentials", defaultValue = "false") boolean withCredentials,
-                                                        Principal principal) {
-        log.debug("Received request to retrieve wallet with identifier {}. authorized by BPN: {}", identifier, getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials, getBPNFromToken(principal)));
+                                                     Authentication authentication) {
+        String bpn = getBPNFromToken(authentication);
+        log.debug("Received request to retrieve wallet with identifier {}. authorized by BPN: {}", identifier, bpn);
+        return ResponseEntity.status(HttpStatus.OK).body(service.getWalletByIdentifier(identifier, withCredentials, bpn));
     }
 
     /**

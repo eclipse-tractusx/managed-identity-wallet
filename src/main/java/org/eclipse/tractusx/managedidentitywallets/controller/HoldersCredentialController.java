@@ -47,9 +47,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getBPNFromToken;
 
 /**
  * The type Holders credential controller.
@@ -58,7 +59,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Verifiable Credential - Holder")
-public class HoldersCredentialController extends BaseController {
+public class HoldersCredentialController {
 
     private final HoldersCredentialService holdersCredentialService;
 
@@ -71,7 +72,7 @@ public class HoldersCredentialController extends BaseController {
      * @param type             the type
      * @param sortColumn       the sort column
      * @param sortTpe          the sort tpe
-     * @param principal        the principal
+     * @param authentication   the authentication
      * @return the credentials
     */
     @GetCredentialsApiDocs
@@ -116,7 +117,7 @@ public class HoldersCredentialController extends BaseController {
      * Issue credential response entity.
      *
      * @param data      the data
-     * @param principal the principal
+     * @param authentication   the authentication
      * @return the response entity
      */
 
