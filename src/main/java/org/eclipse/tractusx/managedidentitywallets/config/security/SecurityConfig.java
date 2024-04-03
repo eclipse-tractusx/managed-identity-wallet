@@ -23,6 +23,8 @@ package org.eclipse.tractusx.managedidentitywallets.config.security;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.config.BpnValidator;
+import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
@@ -39,6 +41,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -59,6 +67,8 @@ public class SecurityConfig {
     private final STSTokenValidationService validationService;
 
     private final SecurityConfigProperties securityConfigProperties;
+
+    private final MIWSettings miwSettings;
 
     /**
      * Filter chain security filter chain.
@@ -142,5 +152,18 @@ public class SecurityConfig {
     public AuthenticationEventPublisher authenticationEventPublisher
             (ApplicationEventPublisher applicationEventPublisher) {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromIssuerLocation(miwSettings.issuerUri());
+        OAuth2TokenValidator<Jwt> bpnValidator = bpnValidator();
+        OAuth2TokenValidator<Jwt> withBpn = new DelegatingOAuth2TokenValidator<>(bpnValidator);
+        jwtDecoder.setJwtValidator(withBpn);
+        return jwtDecoder;
+    }
+
+    OAuth2TokenValidator<Jwt> bpnValidator() {
+            return new BpnValidator();
     }
 }

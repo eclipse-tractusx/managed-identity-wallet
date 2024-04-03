@@ -39,5 +39,5 @@ public record MIWSettings(String host, String encryptionKey, String authorityWal
                           @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
                           Set<String> supportedFrameworkVCTypes,
                           boolean enforceHttps, String contractTemplatesUrl,
-                          List<URI> didDocumentContextUrls) {
+                          List<URI> didDocumentContextUrls, String issuerUri) {
 }
