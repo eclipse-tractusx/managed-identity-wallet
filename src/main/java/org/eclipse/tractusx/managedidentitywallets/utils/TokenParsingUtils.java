@@ -25,10 +25,16 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.experimental.UtilityClass;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.text.ParseException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
 import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
@@ -108,5 +114,14 @@ public class TokenParsingUtils {
         } catch (ParseException e) {
             throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
+    }
+
+    public static String getBPNFromToken(Authentication authentication) {
+        Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+        // this will misbehave if we have more then one claims with different case
+        // ie. BPN=123456 and bpn=789456
+        Map<String, Object> claims = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        claims.putAll(jwt.getClaims());
+        return claims.get(StringPool.BPN).toString();
     }
 }
