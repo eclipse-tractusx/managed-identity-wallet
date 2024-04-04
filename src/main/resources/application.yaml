@@ -103,7 +103,6 @@ miw:
   enforceHttps: ${ENFORCE_HTTPS_IN_DID_RESOLUTION:true}
   contractTemplatesUrl: ${CONTRACT_TEMPLATES_URL:https://public.catena-x.org/contracts/}
   didDocumentContextUrls: ${DID_DOCUMENT_CONTEXT_URL:https://www.w3.org/ns/did/v1,https://w3c.github.io/vc-jws-2020/contexts/v1}
-  issuerUri: ${ISSUER_URI:http://localhost:8080/realms/miw_test}
   security:
     enabled: true
     realm: ${KEYCLOAK_REALM:miw_test}
