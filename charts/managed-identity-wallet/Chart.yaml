@@ -1,5 +1,5 @@
 # /********************************************************************************
-# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# * Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
 # *
 # * See the NOTICE file(s) distributed with this work for additional
 # * information regarding copyright ownership.
@@ -52,7 +52,7 @@ dependencies:
       - bitnami-common
     version: 2.x.x
   - name: postgresql
-    version: 11.9.13
+    version: 12.12.10
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
   - name: pgadmin4
