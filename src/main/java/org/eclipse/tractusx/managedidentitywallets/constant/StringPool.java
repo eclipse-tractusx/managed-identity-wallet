@@ -102,4 +102,6 @@ public class StringPool {
 
     public static final String PRIVATE_KEY = "PRIVATE KEY";
     public static final String PUBLIC_KEY = "PUBLIC KEY";
+
+    public static final String BPN_NOT_FOUND = "Invalid token, BPN not found";
 }
