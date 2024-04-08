@@ -32,7 +32,6 @@ import org.springframework.security.oauth2.server.resource.BearerTokenError;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.util.StringUtils;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ public final class CustomAuthenticationEntryPoint implements AuthenticationEntry
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        Map<String, String> parameters = new LinkedHashMap();
+        Map<String, String> parameters = new LinkedHashMap<>();
 
         if (this.realmName != null) {
             parameters.put("realm", this.realmName);
@@ -63,8 +62,7 @@ public final class CustomAuthenticationEntryPoint implements AuthenticationEntry
                 parameters.put("error_uri", error.getUri());
             }
 
-            if (error instanceof BearerTokenError) {
-                BearerTokenError bearerTokenError = (BearerTokenError) error;
+            if (error instanceof BearerTokenError bearerTokenError) {
                 if (StringUtils.hasText(bearerTokenError.getScope())) {
                     parameters.put("scope", bearerTokenError.getScope());
                 }
@@ -88,16 +86,14 @@ public final class CustomAuthenticationEntryPoint implements AuthenticationEntry
         if (!parameters.isEmpty()) {
             wwwAuthenticate.append(" ");
             int i = 0;
-
-            for (Iterator var3 = parameters.entrySet().iterator(); var3.hasNext(); ++i) {
-                Map.Entry<String, String> entry = (Map.Entry) var3.next();
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
                 wwwAuthenticate.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
                 if (i != parameters.size() - 1) {
                     wwwAuthenticate.append(", ");
                 }
+                i++;
             }
         }
-
         return wwwAuthenticate.toString();
     }
 
