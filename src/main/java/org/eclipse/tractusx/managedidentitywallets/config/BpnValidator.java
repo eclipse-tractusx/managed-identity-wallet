@@ -22,8 +22,8 @@
 package org.eclipse.tractusx.managedidentitywallets.config;
 
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
-import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -31,7 +31,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.BPN_NOT_FOUND;
+
 public class BpnValidator implements OAuth2TokenValidator<Jwt> {
+
+    OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, BPN_NOT_FOUND, null);
 
     @Override
     public OAuth2TokenValidatorResult validate(Jwt jwt) {
@@ -39,7 +43,10 @@ public class BpnValidator implements OAuth2TokenValidator<Jwt> {
         // ie. BPN=123456 and bpn=789456
         Map<String, Object> claims = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         claims.putAll(jwt.getClaims());
-        Validate.isFalse(claims.containsKey(StringPool.BPN)).launch(new ForbiddenException("Invalid token, BPN not found"));
-        return OAuth2TokenValidatorResult.success();
+        if (claims.containsKey(StringPool.BPN)) {
+            return OAuth2TokenValidatorResult.success();
+        } else {
+            return OAuth2TokenValidatorResult.failure(error);
+        }
     }
 }

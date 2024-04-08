@@ -128,7 +128,8 @@ public class SecurityConfig {
                         //error
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
-                        jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()))))
+                        jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId())))
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .addFilterAfter(new PresentationIatpFilter(validationService), BasicAuthenticationFilter.class);
 
         return http.build();
