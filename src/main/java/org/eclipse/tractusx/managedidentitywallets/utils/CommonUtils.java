@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
 
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
@@ -74,6 +75,16 @@ public class CommonUtils {
                 .data(verifiableCredential)
                 .selfIssued(config.isSelfIssued())
                 .build();
+    }
+
+    @SneakyThrows
+   public static String getKeyString(byte[] privateKeyBytes, String type) {
+        StringWriter stringWriter = new StringWriter();
+        PemWriter pemWriter = new PemWriter(stringWriter);
+        pemWriter.writeObject(new PemObject(type, privateKeyBytes));
+        pemWriter.flush();
+        pemWriter.close();
+        return stringWriter.toString();
     }
 
 }

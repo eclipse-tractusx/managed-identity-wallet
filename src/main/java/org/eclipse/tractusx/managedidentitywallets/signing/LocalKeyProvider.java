@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
 import lombok.RequiredArgsConstructor;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
@@ -41,9 +42,9 @@ public class LocalKeyProvider implements KeyProvider {
     private final WalletRepository walletRepository;
 
     @Override
-    public byte[] getPrivateKey(String keyName) { //
+    public byte[] getPrivateKey(String keyName, SupportedAlgorithms algorithm) { //
         Wallet wallet = walletRepository.getByBpn(keyName);
-        return walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(wallet.getId());
+        return walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(wallet.getId(), algorithm.name());
     }
 
     @Override

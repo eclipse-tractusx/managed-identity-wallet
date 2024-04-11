@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 
@@ -36,7 +37,7 @@ public interface KeyProvider {
      * @return the key as a byte-array
      *
      */
-    byte[] getPrivateKey(String keyName);
+    byte[] getPrivateKey(String keyName, SupportedAlgorithms algorithm);
 
     /**
      * @param walletKey the key to save

@@ -35,9 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
-import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
-import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
@@ -46,11 +43,14 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
+import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
@@ -70,16 +70,15 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
-import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
 
 /**
  * The type Wallet service.
@@ -249,7 +248,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         }
 
         KeyCreationConfig keyCreationConfig = KeyCreationConfig.builder()
-                .keyName(request.getBpn())
+                .keyName(request.getBusinessPartnerNumber())
                 .keyType(KeyType.OCT)
                 .build();
         SigningService signingService = availableSigningServices.get(signingServiceType);
@@ -278,17 +277,17 @@ public class WalletService extends BaseService<Wallet, Long> {
 
 
         signingService.saveKey(WalletKey.builder()
-                .walletId(wallet.getId())
+                .wallet(wallet)
                 .keyId(keyId)
                 .referenceKey(REFERENCE_KEY)
                 .vaultAccessToken(VAULT_ACCESS_TOKEN)
-                .privateKey(encryptionUtils.encrypt(getKeyString(keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
-                .publicKey(encryptionUtils.encrypt(getKeyString(keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
+                .privateKey(encryptionUtils.encrypt(CommonUtils.getKeyString(keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
+                .publicKey(encryptionUtils.encrypt(CommonUtils.getKeyString(keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
                 .algorithm(SupportedAlgorithms.ED25519.toString())
-                .build();
+                .build());
 
         //Save key EdDSA
-        walletKeyService.getRepository().save(walletKeyED25519);
+        // walletKeyService.getRepository().save(walletKeyED25519);
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBusinessPartnerNumber()));
 
         //credentials issuance will be moved to the issuer component
@@ -360,24 +359,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         }
     }
 
-    @SneakyThrows
-    private String getPrivateKeyString(byte[] privateKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PRIVATE KEY", privateKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
 
-    @SneakyThrows
-    private String getPublicKeyString(byte[] publicKeyBytes) {
-        StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKeyBytes));
-        pemWriter.flush();
-        pemWriter.close();
-        return stringWriter.toString();
-    }
+
 
 }

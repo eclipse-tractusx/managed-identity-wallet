@@ -24,6 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatus;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -52,6 +53,9 @@ public class CredentialCreationConfig {
 
     @NonNull
     private List<URI> contexts;
+
+    @NonNull
+    private SupportedAlgorithms algorithm;
 
     private URI vcId;
 

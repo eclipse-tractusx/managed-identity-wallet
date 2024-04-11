@@ -47,6 +47,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletReposito
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.SignatureFailureException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
+import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -157,7 +158,7 @@ public class JwtPresentationES256KService {
                     .keyId(keyId)
                     .referenceKey(REFERENCE_KEY)
                     .vaultAccessToken(VAULT_ACCESS_TOKEN)
-                    .privateKey(encryptionUtils.encrypt(getKeyString(ecKey.toECPrivateKey().getEncoded(), PRIVATE_KEY)))
+                    .privateKey(encryptionUtils.encrypt(CommonUtils.getKeyString(ecKey.toECPrivateKey().getEncoded(), PRIVATE_KEY)))
                     .publicKey(encryptionUtils.encrypt(getKeyString(ecKey.toECPublicKey().getEncoded(), PUBLIC_KEY)))
                     .algorithm(SupportedAlgorithms.ES256K.toString())
                     .build();
