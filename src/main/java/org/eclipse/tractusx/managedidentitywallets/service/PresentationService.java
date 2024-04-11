@@ -160,7 +160,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         PresentationCreationConfig.PresentationCreationConfigBuilder builder = PresentationCreationConfig.builder()
                 .verifiableCredentials(verifiableCredentials)
                 .keyName(callerWallet.getBpn())
-                .vpIssuerDid(vpIssuerDid);
+                .vpIssuerDid(vpIssuerDid)
+                .algorithm(SupportedAlgorithms.ED25519);
 
         if (asJwt) {
             log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
@@ -243,7 +244,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         //Build JWT
         return Pair.of(vpIssuerDid, walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(callerWallet.getId(), algorithm));
     }
-
 
     /**
      * Validate presentation map.
@@ -364,6 +364,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return isValid;
     }
 
+    @SneakyThrows
     public Map<String, Object> createVpWithRequiredScopes(SignedJWT innerJWT, boolean asJwt) {
 
         JWTClaimsSet jwtClaimsSet = getClaimsSet(innerJWT);
@@ -397,11 +398,34 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         holdersCredentials.forEach(c -> verifiableCredentials.add(c.getData()));
 
-        // if as JWT true -> get key ES256K and sign with it
-        Map<String, Object> vp = buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
-                callerWallet, verifiableCredentials, SupportedAlgorithms.ES256K);
+        PresentationCreationConfig.PresentationCreationConfigBuilder builder = PresentationCreationConfig.builder()
+                .verifiableCredentials(verifiableCredentials)
+                .keyName(callerWallet.getBpn())
+                .vpIssuerDid(DidParser.parse(callerWallet.getDid()))
+                .algorithm(SupportedAlgorithms.ES256K);
+
+        if (asJwt) {
+            //Issuer of VP is holder of VC
+            builder.encoding(VerifiableEncoding.JWT)
+                    .audience(jwtClaimsSet.getAudience().get(0));
+        } else {
+            builder.encoding(VerifiableEncoding.JSON_LD)
+                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()));
+        }
+
+        PresentationCreationConfig presentationConfig = builder.build();
+        SigningService keyStorageService = availableSigningServices.get(callerWallet.getSigningServiceType());
+        SignerResult signerResult = keyStorageService.createPresentation(presentationConfig);
+
         changeJtiStatus(jtiRecord);
-        return vp;
+
+        return Map.of(StringPool.VP, asJwt ? signerResult.getJwt() : signerResult.getJsonLd().toJson());
+
+        // if as JWT true -> get key ES256K and sign with it
+        // Map<String, Object> vp = buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
+        //         callerWallet, verifiableCredentials, SupportedAlgorithms.ES256K);
+        // changeJtiStatus(jtiRecord);
+        // return vp;
     }
 
     private void checkReadPermission(String permission) {

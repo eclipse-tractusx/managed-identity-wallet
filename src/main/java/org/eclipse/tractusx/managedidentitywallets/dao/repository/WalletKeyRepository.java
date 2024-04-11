@@ -50,5 +50,5 @@ public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
 
     WalletKey findFirstByWallet_Did(String did);
 
-    WalletKey getByKeyId(String keyId);
+    WalletKey getByKeyIdAndAlgorithm(String keyId, String algorithm);
 }

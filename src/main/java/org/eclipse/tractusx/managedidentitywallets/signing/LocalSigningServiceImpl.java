@@ -27,12 +27,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
+import org.eclipse.tractusx.managedidentitywallets.service.JwtPresentationES256KService;
 import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
@@ -48,6 +50,7 @@ import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
 import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
@@ -60,6 +63,9 @@ import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationF
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
+import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -74,7 +80,7 @@ public class LocalSigningServiceImpl extends LocalSigningService {
 
     @Override
     public SignerResult createCredential(CredentialCreationConfig config) {
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName());
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (encoding) {
@@ -110,7 +116,7 @@ public class LocalSigningServiceImpl extends LocalSigningService {
 
     @Override
     public SignerResult createPresentation(PresentationCreationConfig config) {
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName());
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (config.getEncoding()) {
@@ -141,17 +147,15 @@ public class LocalSigningServiceImpl extends LocalSigningService {
     }
 
     private SignedJWT generateJwtPresentation(PresentationCreationConfig config, byte[] privateKeyBytes) {
-        SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
-                new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), config.getVpIssuerDid());
 
-        X25519PrivateKey privateKey = null;
-        try {
-            privateKey = new X25519PrivateKey(privateKeyBytes);
-        } catch (InvalidPrivateKeyFormatException e) {
-            throw new IllegalArgumentException(e);
+
+        if (config.getAlgorithm() == SupportedAlgorithms.ES256K) {
+            return buildES256K(config, privateKeyBytes);
+        } else if (config.getAlgorithm() == SupportedAlgorithms.ED25519) {
+            return buildED25519(config, privateKeyBytes);
         }
-        return presentationFactory.createPresentation(config.getVpIssuerDid()
-                , config.getVerifiableCredentials(), config.getAudience(), privateKey, config.getKeyName());
+
+        throw new IllegalArgumentException("algorithm %s is not supported for VP JWT".formatted(config.getAlgorithm().name()));
     }
 
     private VerifiablePresentation generateJsonLdPresentation(PresentationCreationConfig config, byte[] privateKeyBytes) throws UnsupportedSignatureTypeException, InvalidPrivateKeyFormatException, SignatureGenerateFailedException, TransformJsonLdException {
@@ -177,8 +181,9 @@ public class LocalSigningServiceImpl extends LocalSigningService {
         return verifiablePresentation;
     }
 
+
     @SneakyThrows
-    private static org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential createVerifiableCredential(CredentialCreationConfig config, byte[] privateKeyBytes) {
+    private static VerifiableCredential createVerifiableCredential(CredentialCreationConfig config, byte[] privateKeyBytes) {
         //VC Builder
 
         // if the credential does not contain the JWS proof-context add it
@@ -216,5 +221,31 @@ public class LocalSigningServiceImpl extends LocalSigningService {
         //Create Credential
         return builder.build();
     }
+
+
+    private SignedJWT buildED25519(PresentationCreationConfig config, byte[] privateKeyBytes) {
+        SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
+                new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), config.getVpIssuerDid());
+
+        X25519PrivateKey privateKey = null;
+        try {
+            privateKey = new X25519PrivateKey(privateKeyBytes);
+        } catch (InvalidPrivateKeyFormatException e) {
+            throw new IllegalArgumentException(e);
+        }
+        return presentationFactory.createPresentation(config.getVpIssuerDid(), config.getVerifiableCredentials(), config.getAudience(), privateKey, config.getKeyName());
+    }
+
+    @SneakyThrows
+    private SignedJWT buildES256K(PresentationCreationConfig config, byte[] privateKeyBytes) {
+        var kf = KeyFactory.getInstance("EC");
+        var privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        ECPrivateKey ecPrivateKey = (ECPrivateKey) kf.generatePrivate(privateKeySpec);
+
+        JwtPresentationES256KService presentationFactory = new JwtPresentationES256KService(config.getVpIssuerDid(), new JsonLdSerializerImpl());
+        return presentationFactory.createPresentation(config.getVpIssuerDid()
+                , config.getVerifiableCredentials(), config.getAudience(), ecPrivateKey);
+    }
+
 
 }

@@ -74,7 +74,7 @@ public class LocalSigningService implements SigningService {
 
     @Override
     public SignerResult createCredential(CredentialCreationConfig config) {
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName());
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (encoding) {
@@ -111,7 +111,7 @@ public class LocalSigningService implements SigningService {
 
     @Override
     public SignerResult createPresentation(PresentationCreationConfig config) {
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName());
+        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (config.getEncoding()) {
