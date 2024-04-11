@@ -1,3 +1,21 @@
 rootProject.name = 'managedidentitywallets'
 
 include 'miw-service', 'revocation-service'
+
+dependencyResolutionManagement {
+    repositories {
+        // delegate is RepositoryHandler
+        // docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.dsl.RepositoryHandler.html
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = uri("https://repo.danubetech.com/repository/maven-public")
+        }
+        maven { url 'https://jitpack.io' }
+        maven {
+            // Used to resolve Dash License Tool
+            // Dash has a maven plugin, BUT is not resolvable through mavenCentral()
+            url = uri("https://repo.eclipse.org/content/repositories/dash-licenses/")
+        }
+    }
+}
