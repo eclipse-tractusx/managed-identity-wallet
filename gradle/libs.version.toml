@@ -1,9 +1,0 @@
-[metadata]
-format.version = "1.1"
-
-[versions]
-openApiVersion = "2.1.0"
-
-[libraries]
-openapi = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "openApiVersion" }
-

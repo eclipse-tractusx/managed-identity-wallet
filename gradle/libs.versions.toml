@@ -1,0 +1,47 @@
+[metadata]
+format.version = "1.1"
+
+[versions]
+openApiVersion = "2.1.0"
+commonsDao = "0.0.5"
+cxSsiLib = "0.0.18"
+snakeYaml = "2.0"
+fileUpload = "1.5"
+testLombok = "1.18.28"
+keycloak = "2.5.0"
+mockito = "5.2.0"
+json = "20230227"
+rgxgen = "1.4"
+
+[libraries]
+
+starter-actuator =  { module = "org.springframework.boot:spring-boot-starter-actuator" }
+starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+starter-web =  { module = "org.springframework.boot:spring-boot-starter-web" }
+starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+security-oauth2-resource-server =  { module = "org.springframework.security:spring-security-oauth2-resource-server" }
+security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
+cloud-starter-openfeign = { module = "org.springframework.cloud:spring-cloud-starter-openfeign" }
+openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "openApiVersion" }
+openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "openApiVersion" }
+commons-dao = { module = "com.smartsensesolutions:commons-dao",  version.ref = "commonsDao" }
+liquibase-core = { module = "org.liquibase:liquibase-core" }
+cx-ssi-lib = { module = "org.eclipse.tractusx.ssi:cx-ssi-lib", version.ref = "cxSsiLib" }
+
+snake-yaml = { module = "org.yaml:snakeyaml", version.ref = "snakeYaml" }
+
+commons-fileupload = { module = "commons-fileupload:commons-fileupload", version.ref = "fileUpload" }
+
+postgresql = { module = "org.postgresql:postgresql" }
+lombok = { module = "org.projectlombok:lombok" }
+boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
+test-lombok = { module = "org.projectlombok:lombok", version.ref = "testLombok" }
+boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+testcontainers = { module = "org.testcontainers:testcontainers" }
+testcontainers-jupiter = { module = "org.testcontainers:junit-jupiter" }
+testcontainers-keycloak = { module = "com.github.dasniko:testcontainers-keycloak", version.ref = "keycloak" }
+testcontainers-postgre = { module = "org.testcontainers:postgresql" }
+mockito = { module = "org.mockito:mockito-inline", version.ref = "mockito" }
+json = { module = "org.json:json", version.ref = "json" }
+rgxgen = { module = "com.github.curious-odd-man:rgxgen", version.ref = "rgxgen" }

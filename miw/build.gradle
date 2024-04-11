@@ -65,43 +65,42 @@ dependencies {
     // 'implementation', 'testImplementation', 'runtimeOnly', 'compileOnly', 'annotationProcessor' and
     // 'testAnnotationProcessor' configuration come from the java-plugin
     // docs: https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.security:spring-security-oauth2-resource-server'
-    implementation 'org.springframework.security:spring-security-oauth2-jose'
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
-    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
-    implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
-    implementation 'org.liquibase:liquibase-core'
-    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.18'
+    implementation libs.starter.actuator
+    implementation libs.starter.validation
+    implementation libs.starter.web
+    implementation libs.starter.data.jpa
+    implementation libs.boot.starter.security
+    implementation libs.security.oauth2.resource.server
+    implementation libs.security.oauth2.jose
+    implementation libs.cloud.starter.openfeign
+    implementation libs.openapi.starter.common
+    implementation libs.openapi.starter.webmvc.ui
+    implementation libs.commons.dao
+    implementation libs.liquibase.core
+    implementation libs.cx.ssi.lib
 
     //Added explicitly to mitigate CVE 2022-1471
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
+    implementation libs.snake.yaml
 
     //Added explicitly to mitigate CVE 2023-24998
-    implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
+    implementation libs.commons.fileupload
 
-    runtimeOnly 'org.postgresql:postgresql'
-    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly libs.postgresql
+    compileOnly libs.lombok
     // custom 'developmentOnly' config
     // https://docs.spring.io/spring-boot/docs/2.0.6.RELEASE/reference/html/using-boot-devtools.html#using-boot-devtools
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.projectlombok:lombok:1.18.28'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation "org.testcontainers:testcontainers"
-    testImplementation 'com.h2database:h2:2.2.220'
-    testImplementation "org.testcontainers:junit-jupiter"
-    testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
-    testImplementation 'org.testcontainers:postgresql'
-    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
-    testImplementation group: 'org.json', name: 'json', version: '20230227'
-    testImplementation group: 'com.github.curious-odd-man', name: 'rgxgen', version: '1.4'
+    developmentOnly libs.boot.devtools
+    annotationProcessor libs.lombok
+    testAnnotationProcessor libs.lombok
+    testImplementation libs.test.lombok
+    testImplementation libs.boot.starter.test
+    testImplementation libs.testcontainers
+    testImplementation libs.testcontainers.jupiter
+    testImplementation libs.testcontainers.keycloak
+    testImplementation libs.testcontainers.postgre
+    testImplementation libs.mockito
+    testImplementation libs.json
+    testImplementation libs.rgxgen
 
 }
 
