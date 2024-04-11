@@ -1,1 +1,3 @@
 rootProject.name = 'managedidentitywallets'
+
+include 'miw', 'revocation-service'

@@ -30,13 +30,13 @@ configurations {
 // docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.ResolutionStrategy.html
 configurations.configureEach {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'ch.qos.logback') {
-                details.useVersion '1.4.12'
-            }
-            // avoid a license issue
-            if (details.requested.name == 'spring-boot-devtools') {
-                details.useVersion '3.1.5'
-            }
+        if (details.requested.group == 'ch.qos.logback') {
+            details.useVersion '1.4.12'
+        }
+        // avoid a license issue
+        if (details.requested.name == 'spring-boot-devtools') {
+            details.useVersion '3.1.5'
+        }
     }
 }
 
@@ -139,11 +139,11 @@ tasks.register('dashDependencies') { dashDependencies ->
             // resolving 'archives' or 'default' is deprecated
             if (conf.canBeResolved && conf.getName() != 'archives' && conf.getName() != 'default') {
                 deps.addAll(conf.incoming.resolutionResult.allDependencies
-                        // the 'allDependencies' method return a 'DependencyResult'
-                        // we're only interested in the 'ResolvedDependencyResult' sub-interface
-                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolutionResult.html#allDependencies-groovy.lang.Closure-
-                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/DependencyResult.html
-                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolvedDependencyResult.html
+                // the 'allDependencies' method return a 'DependencyResult'
+                // we're only interested in the 'ResolvedDependencyResult' sub-interface
+                // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolutionResult.html#allDependencies-groovy.lang.Closure-
+                // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/DependencyResult.html
+                // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolvedDependencyResult.html
                         .findAll({ it instanceof ResolvedDependencyResult })
                         .collect { ResolvedDependencyResult dep ->
                             "${dep.selected}"
@@ -165,7 +165,7 @@ tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
     doFirst {
         classpath = files('dash.jar')
         // docs: https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-04
-        args('-project', 'automotive.tractusx',  '-summary', 'DEPENDENCIES', 'deps.txt')
+        args('-project', 'automotive.tractusx', '-summary', 'DEPENDENCIES', 'deps.txt')
     }
     doLast {
         logger.lifecycle("Removing 'deps.txt' now.")
