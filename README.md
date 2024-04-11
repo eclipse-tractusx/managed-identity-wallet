@@ -2,7 +2,13 @@
 
 The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identity (SSI) using `did:web`.
 
-# Usage
+# Structure
+This repository contains 2 modules:
+1. MIW-service (Managed Identity wallet) that contains functionality of wallets and credentials management.
+2. Revocation-service that is a dedicated module to provide support for VC revocation process.
+Each module is a separate running service. 
+
+# Usage MIW
 
 See [INSTALL.md](INSTALL.md) 
 

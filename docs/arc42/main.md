@@ -124,7 +124,12 @@ PostgreSQL database for persistance.
 The Java code is organized by responsibilities, e.g. routers, services,
 repositories, etc.
 
-# Runtime View
+This repository contains 2 modules:
+1. MIW-service (Managed Identity wallet) that contains functionality of wallets and credentials management.
+2. Revocation-service that is a dedicated module to provide support for VC revocation process.
+   Each module is a separate running service.
+
+# Runtime View of miw-service
 
 The currently released API specification and documentation (INT environment)
 can be found under
