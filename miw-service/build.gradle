@@ -1,11 +1,3 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version "${springBootVersion}"
-    id 'io.spring.dependency-management' version "${springDependencyVersion}"
-    id "jacoco"
-    id 'project-report'
-}
-
 group = "${groupName}"
 version = "${applicationVersion}"
 sourceCompatibility = JavaVersion.VERSION_17
@@ -84,45 +76,7 @@ build {
     version = "latest"
 }
 
-// 'bootJar' comes from the 'org.springframework.boot' plugin
-// 'bootJar' is a subclass of the 'jar' task type
-// docs: https://docs.gradle.org/current/dsl/org.gradle.jvm.tasks.Jar.html#org.gradle.jvm.tasks.Jar
-bootJar {
-    metaInf {
-        from 'DEPENDENCIES'
-        from 'SECURITY.md'
-        from 'NOTICE.md'
-        from 'LICENSE'
-    }
-}
-
-// 'test' comes from the 'java' plugin
-// docs: https://docs.gradle.org/current/userguide/java_plugin.html
-test {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
-// standard gradle class
-// docs: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.dependencies.HtmlDependencyReportTask.html
-htmlDependencyReport {
-    projects = project.allprojects
-}
-
-// 'jacocoTestReport' is provided by the 'jacoco' plugin
-// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html
 jacocoTestReport {
-
-    reports {
-        xml.enabled true
-        xml.outputLocation = file("./build/reports/xml/jacoco.xml")
-
-        csv.enabled false
-
-        html.enabled true
-        html.outputLocation = file("./build/reports/html/jacoco")
-    }
-
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
@@ -133,12 +87,6 @@ jacocoTestReport {
             ])
         }))
     }
-}
-
-// 'jacoco' is provided by the 'jacoco' plugin
-// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:configuring_the_jacoco_plugin
-jacoco {
-    toolVersion = "${jacocoVersion}"
 }
 
 
@@ -155,14 +103,4 @@ jacocoTestCoverageVerification {
             ])
         }))
     }
-    violationRules {
-        rule {
-            limit {
-                // disabled for now
-                minimum = 0.00
-            }
-        }
-    }
 }
-
-check.dependsOn jacocoTestCoverageVerification
