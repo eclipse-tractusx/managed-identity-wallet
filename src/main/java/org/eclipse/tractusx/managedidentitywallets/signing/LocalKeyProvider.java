@@ -31,6 +31,8 @@ import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class LocalKeyProvider implements KeyProvider {
@@ -48,8 +50,10 @@ public class LocalKeyProvider implements KeyProvider {
     }
 
     @Override
-    public void saveKeys(WalletKey walletKey) {
-        walletKeyRepository.save(walletKey);
+    public void saveKeys(List<WalletKey> walletKeys) {
+        for(WalletKey k: walletKeys){
+            walletKeyRepository.save(k);
+        }
     }
 
     @Override

@@ -27,8 +27,4 @@
     <include file="/db/changelog/changes/init.sql"/>
     <include file="/db/changelog/changes/create_jti_table.sql"/>
     <include file="/db/changelog/changes/update_wallet_table.sql"/>
-    <changeSet id="4" author="PManaras" runAlways="false" failOnError="true" dbms="postgresql">
-        <customChange class="org.eclipse.tractusx.managedidentitywallets.migration.SetSigningServiceTypeToExistingWallets">
-        </customChange>
-    </changeSet>
 </databaseChangeLog>

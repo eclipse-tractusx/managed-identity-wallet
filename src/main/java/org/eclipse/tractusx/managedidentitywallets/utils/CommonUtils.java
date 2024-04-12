@@ -34,6 +34,11 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 
 import java.io.StringWriter;
 import java.net.URI;
+import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,13 +83,27 @@ public class CommonUtils {
     }
 
     @SneakyThrows
-   public static String getKeyString(byte[] privateKeyBytes, String type) {
+    public static String getKeyString(byte[] privateKeyBytes, String type) {
         StringWriter stringWriter = new StringWriter();
         PemWriter pemWriter = new PemWriter(stringWriter);
         pemWriter.writeObject(new PemObject(type, privateKeyBytes));
         pemWriter.flush();
         pemWriter.close();
         return stringWriter.toString();
+    }
+
+    @SneakyThrows
+    public static ECPrivateKey ecPrivateFrom(byte[] encoded) {
+        var kf = KeyFactory.getInstance("EC");
+        var privateKeySpec = new PKCS8EncodedKeySpec(encoded);
+        return (ECPrivateKey) kf.generatePrivate(privateKeySpec);
+    }
+
+    @SneakyThrows
+    public static ECPublicKey ecPublicFrom(byte[] encoded) {
+        var kf = KeyFactory.getInstance("EC");
+        var publicKeySpec = new X509EncodedKeySpec(encoded);
+        return (ECPublicKey) kf.generatePublic(publicKeySpec);
     }
 
 }

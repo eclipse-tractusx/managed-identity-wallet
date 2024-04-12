@@ -327,16 +327,19 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         PresentationCreationConfig.PresentationCreationConfigBuilder builder = PresentationCreationConfig.builder()
                 .verifiableCredentials(verifiableCredentials)
                 .keyName(callerWallet.getBpn())
-                .vpIssuerDid(DidParser.parse(callerWallet.getDid()))
-                .algorithm(SupportedAlgorithms.ES256K);
+                .vpIssuerDid(DidParser.parse(callerWallet.getDid()));
+
 
         if (asJwt) {
+
             //Issuer of VP is holder of VC
             builder.encoding(VerifiableEncoding.JWT)
-                    .audience(jwtClaimsSet.getAudience().get(0));
+                    .audience(jwtClaimsSet.getAudience().get(0))
+                    .algorithm(SupportedAlgorithms.ES256K);
         } else {
             builder.encoding(VerifiableEncoding.JSON_LD)
-                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()));
+                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
+                    .algorithm(SupportedAlgorithms.valueOf(callerWallet.getAlgorithm()));
         }
 
         PresentationCreationConfig presentationConfig = builder.build();
@@ -345,7 +348,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         changeJtiStatus(jtiRecord);
 
-        return Map.of(StringPool.VP, asJwt ? signerResult.getJwt() : signerResult.getJsonLd().toJson());
+        return Map.of(StringPool.VP, asJwt ? signerResult.getJwt() : signerResult.getJsonLd());
 
         // if as JWT true -> get key ES256K and sign with it
         // Map<String, Object> vp = buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),

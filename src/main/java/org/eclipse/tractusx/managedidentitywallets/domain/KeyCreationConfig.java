@@ -27,6 +27,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
+import java.util.List;
+
 @Builder
 @Getter
 public class KeyCreationConfig {
@@ -37,5 +39,5 @@ public class KeyCreationConfig {
     private Curve curve;
 
     @NonNull
-    private KeyType keyType;
+    private List<KeyType> keyTypes;
 }

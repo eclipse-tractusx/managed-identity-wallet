@@ -43,7 +43,7 @@ import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
  */
 @Getter
 @Setter
-@Entity
+@Entity(name = "wallet_key")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

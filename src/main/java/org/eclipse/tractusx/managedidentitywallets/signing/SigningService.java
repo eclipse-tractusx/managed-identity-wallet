@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
+import com.nimbusds.jose.jwk.KeyType;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
@@ -29,6 +30,9 @@ import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.exception.KeyGenerationException;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Service used to sign the verifiable credentials and verifiable presentations
  */
@@ -36,7 +40,6 @@ public interface SigningService {
     /**
      * @param config the configuration for creating the credential
      * @return SignerResult containing the signed credential
-     *
      * @see CredentialCreationConfig
      * @see SignerResult
      */
@@ -46,18 +49,16 @@ public interface SigningService {
      * @param config the config for creating/retrieving the key
      * @return KeyPair containing the public and private key (private key depends on the type of signing service used)
      * @throws KeyGenerationException when something goes wrong
-     *
      * @see KeyPair
      * @see KeyCreationConfig
      */
-    KeyPair getKey(KeyCreationConfig config) throws KeyGenerationException;
+    Map<KeyType, KeyPair> getKeys(KeyCreationConfig config) throws KeyGenerationException;
 
     /**
      * @param key the key to be saved, LocalSigningService implementations may call KeyProvider.saveKey
-     *
      * @see KeyProvider
      */
-    void saveKey(WalletKey key);
+    void saveKeys(List<WalletKey> key);
 
     /**
      * @return the implementation's supported type
@@ -67,7 +68,6 @@ public interface SigningService {
     /**
      * @param config the configuration for creating the presentation
      * @return SignerResult containing the signed presentation
-     *
      * @see PresentationCreationConfig
      * @see SignerResult
      */

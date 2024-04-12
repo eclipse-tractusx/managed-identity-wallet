@@ -35,6 +35,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -216,6 +217,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .expiryDate(miwSettings.vcExpiryDate())
                 .selfIssued(authority)
                 .keyName(miwSettings.authorityWalletBpn())
+                .algorithm(SupportedAlgorithms.valueOf(baseWallet.getAlgorithm()))
                 .build();
 
         SignerResult result = availableSigningServices.get(baseWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
@@ -230,7 +232,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredentialRepository.save(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(baseWallet.getDidDocument(), baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL, baseWallet.getSigningServiceType());
+        updateSummeryCredentials(baseWallet.getDidDocument(), baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL, baseWallet.getSigningServiceType(),SupportedAlgorithms.valueOf(baseWallet.getAlgorithm()));
 
         log.debug("BPN credential issued for bpn -{}", StringEscapeUtils.escapeJava(holderWallet.getBpn()));
 
@@ -278,6 +280,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .contexts(miwSettings.vcContexts())
                 .expiryDate(miwSettings.vcExpiryDate())
                 .selfIssued(isSelfIssued)
+                .algorithm(SupportedAlgorithms.valueOf(baseWallet.getAlgorithm()))
                 .build();
 
         SignerResult result = availableSigningServices.get(baseWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
@@ -292,7 +295,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery cred
-        updateSummeryCredentials(baseWallet.getDidDocument(),  baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType(), baseWallet.getSigningServiceType());
+        updateSummeryCredentials(baseWallet.getDidDocument(),  baseWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), request.getType(), baseWallet.getSigningServiceType(),SupportedAlgorithms.valueOf(baseWallet.getAlgorithm()));
 
         log.debug("Framework VC of type ->{} issued to bpn ->{}", StringEscapeUtils.escapeJava(request.getType()), StringEscapeUtils.escapeJava(holderWallet.getBpn()));
 
@@ -342,6 +345,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .contexts(miwSettings.vcContexts())
                 .expiryDate(miwSettings.vcExpiryDate())
                 .selfIssued(isSelfIssued)
+                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()))
                 .build();
 
         SignerResult result = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
@@ -357,7 +361,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(),  issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL, issuerWallet.getSigningServiceType());
+        updateSummeryCredentials(issuerWallet.getDidDocument(),  issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL, issuerWallet.getSigningServiceType(),SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()));
 
         log.debug("Dismantler VC issued to bpn -> {}", StringEscapeUtils.escapeJava(request.getBpn()));
 
@@ -410,6 +414,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .contexts(miwSettings.vcContexts())
                 .expiryDate(miwSettings.vcExpiryDate())
                 .selfIssued(isSelfIssued)
+                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()))
                 .build();
 
         SignerResult result = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
@@ -426,7 +431,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         issuersCredential = create(issuersCredential);
 
         //update summery VC
-        updateSummeryCredentials(issuerWallet.getDidDocument(), issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL, issuerWallet.getSigningServiceType());
+        updateSummeryCredentials(issuerWallet.getDidDocument(), issuerWallet.getDid(), holderWallet.getBpn(), holderWallet.getDid(), VerifiableCredentialType.MEMBERSHIP_CREDENTIAL, issuerWallet.getSigningServiceType(), SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()));
 
         log.debug("Membership VC issued to bpn ->{}", StringEscapeUtils.escapeJava(issueMembershipCredentialRequest.getBpn()));
 
@@ -469,6 +474,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .contexts(verifiableCredential.getContext())
                 .expiryDate(Date.from(verifiableCredential.getExpirationDate()))
                 .selfIssued(isSelfIssued)
+                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()))
                 .build();
 
 
@@ -547,7 +553,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param holderDid         the holder did
      * @param type              the type
      */
-    private void updateSummeryCredentials(DidDocument issuerDidDocument, String issuerDid, String holderBpn, String holderDid, String type, SigningServiceType signingServiceType) {
+    private void updateSummeryCredentials(DidDocument issuerDidDocument, String issuerDid, String holderBpn, String holderDid, String type, SigningServiceType signingServiceType, SupportedAlgorithms algorithm) {
 
         //get last issued summary vc to holder to update items
         Page<IssuersCredential> filter = getLastIssuedSummaryCredential(issuerDid, holderDid);
@@ -607,6 +613,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .contexts(miwSettings.summaryVcContexts())
                 .expiryDate(miwSettings.vcExpiryDate())
                 .selfIssued(isSelfIssued)
+                .algorithm(algorithm)
                 .build();
 
         SignerResult result = availableSigningServices.get(signingServiceType).createCredential(holdersCredentialCreationConfig);

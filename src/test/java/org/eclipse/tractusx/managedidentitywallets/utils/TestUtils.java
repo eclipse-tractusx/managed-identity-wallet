@@ -267,6 +267,7 @@ public class TestUtils {
                 .didDocument(DidDocument.fromJson(didJson))
                 .algorithm(StringPool.ED_25519)
                 .name(bpn)
+                .signingServiceType(SigningServiceType.LOCAL)
                 .build();
     }
 }
