@@ -72,7 +72,7 @@ dependencyManagement {
 // 'build' task comes from the 'java' plugin
 // docs: https://docs.gradle.org/current/userguide/java_plugin.html
 build {
-    archivesBaseName = "miw-service"
+    archivesBaseName = "miw"
     version = "latest"
 }
 
