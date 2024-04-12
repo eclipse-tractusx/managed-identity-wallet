@@ -25,6 +25,8 @@ import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 
+import java.util.List;
+
 /**
  * This class will be used by LocalSigningService to retrieve and save keys
  *
@@ -42,7 +44,7 @@ public interface KeyProvider {
     /**
      * @param walletKey the key to save
      */
-    void saveKeys(WalletKey walletKey);
+    void saveKeys(List<WalletKey> walletKey);
 
 
     /**

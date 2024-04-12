@@ -21,7 +21,12 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyType;
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -34,8 +39,11 @@ import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
+import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.JwtPresentationES256KService;
 import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
+import org.eclipse.tractusx.ssi.lib.crypt.IPrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.IPublicKey;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519Generator;
@@ -47,6 +55,7 @@ import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureGenerateFailedExcep
 import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
+import org.eclipse.tractusx.ssi.lib.model.base.EncodeType;
 import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
@@ -65,16 +74,19 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.security.KeyFactory;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
-public class LocalSigningServiceImpl extends LocalSigningService {
+public class LocalSigningServiceImpl implements LocalSigningService {
 
     private KeyProvider keyProvider;
 
@@ -95,18 +107,75 @@ public class LocalSigningServiceImpl extends LocalSigningService {
     }
 
     @Override
-    public KeyPair getKey(KeyCreationConfig config) throws KeyGenerationException {
-        KeyType keyType = Objects.requireNonNull(config.getKeyType());
-        switch (keyType.getValue().toUpperCase()) {
-            case "EC", "RSA" ->
-                    throw new NotImplementedException("%s is not implemented yet".formatted(keyType.toString()));
-            case "OCT" -> {
-                IKeyGenerator keyGenerator = new X25519Generator();
-                return keyGenerator.generateKey();
-            }
-            default -> throw new IllegalArgumentException("%s is not supported".formatted(keyType.toString()));
-        }
 
+    public Map<KeyType, KeyPair> getKeys(KeyCreationConfig config) throws KeyGenerationException {
+        List<KeyType> keyTypes = Objects.requireNonNull(config.getKeyTypes());
+        Map<KeyType, KeyPair> result = new HashMap<>();
+        for (KeyType keyType : keyTypes) {
+            switch (keyType.getValue().toUpperCase()) {
+                case "EC" -> {
+                    try {
+                        ECKey ecKey = new ECKeyGenerator(Curve.SECP256K1)
+                                .provider(BouncyCastleProviderSingleton.getInstance())
+                                .generate();
+                        ECPrivateKey ecPrivateKey = ecKey.toECPrivateKey();
+                        ECPublicKey ecPublicKey = ecKey.toECPublicKey();
+
+                        result.put(keyType, new KeyPair(new IPublicKey() {
+                            @Override
+                            public int getKeyLength() {
+                                return 0;
+                            }
+
+                            @Override
+                            public String asStringForStoring() {
+                                return null;
+                            }
+
+                            @Override
+                            public String asStringForExchange(EncodeType encodeType) {
+                                return null;
+                            }
+
+                            @Override
+                            public byte[] asByte() {
+                                return ecPublicKey.getEncoded();
+                            }
+                        }, new IPrivateKey() {
+                            @Override
+                            public int getKeyLength() {
+                                return 0;
+                            }
+
+                            @Override
+                            public String asStringForStoring() {
+                                return null;
+                            }
+
+                            @Override
+                            public String asStringForExchange(EncodeType encodeType) {
+                                return null;
+                            }
+
+                            @Override
+                            public byte[] asByte() {
+                                return ecPrivateKey.getEncoded();
+                            }
+                        }));
+                    } catch (JOSEException e) {
+                        throw new BadDataException("Could not generate EC Jwk", e);
+                    }
+                }
+                case "RSA" ->
+                        throw new NotImplementedException("%s is not implemented yet".formatted(keyType.toString()));
+                case "OCT" -> {
+                    IKeyGenerator keyGenerator = new X25519Generator();
+                    result.put(keyType, keyGenerator.generateKey());
+                }
+                default -> throw new IllegalArgumentException("%s is not supported".formatted(keyType.toString()));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -142,7 +211,7 @@ public class LocalSigningServiceImpl extends LocalSigningService {
     }
 
     @Override
-    public void saveKey(WalletKey key) {
+    public void saveKeys(List<WalletKey> key) {
         keyProvider.saveKeys(key);
     }
 

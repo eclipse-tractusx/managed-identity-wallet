@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -181,6 +182,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
                 .expiryDate(expiryDate)
                 .selfIssued(true)
                 .keyName(issuerWallet.getBpn())
+                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()))
                 .build();
 
         // Create Credential

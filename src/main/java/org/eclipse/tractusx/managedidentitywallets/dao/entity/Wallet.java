@@ -84,7 +84,7 @@ public class Wallet extends MIWBaseEntity {
     @Convert(converter = StringToDidDocumentConverter.class)
     private DidDocument didDocument;
 
-    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "wallet", orphanRemoval = true)
     @JsonIgnore
     private List<WalletKey> walletKeys;
 

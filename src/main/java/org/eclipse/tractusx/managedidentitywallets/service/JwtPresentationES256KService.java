@@ -154,7 +154,7 @@ public class JwtPresentationES256KService {
             walletRepository.save(wallet);
 
             WalletKey walletKeyES256K = WalletKey.builder()
-                    .wallet(wallet)
+                    //.wallet(wallet)
                     .keyId(keyId)
                     .referenceKey(REFERENCE_KEY)
                     .vaultAccessToken(VAULT_ACCESS_TOKEN)
@@ -178,7 +178,7 @@ public class JwtPresentationES256KService {
         return new Did(didMethod, methodIdentifier, null);
     }
 
-    private JWKVerificationMethod getJwkVerificationMethod(ECKey ecKey, Did did) {
+    public JWKVerificationMethod getJwkVerificationMethod(ECKey ecKey, Did did) {
         Map<String, Object> verificationMethodJson = new HashMap<>();
         Map<String, String> publicKeyJwk = Map.of(JWK_KEK_TYPE, ecKey.getKeyType().toString(), JWK_CURVE,
                 ecKey.getCurve().getName(), JWK_X, ecKey.getX().toString(), JWK_Y, ecKey.getY().toString());

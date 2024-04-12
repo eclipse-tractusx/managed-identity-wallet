@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.domain;
 
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatus;
@@ -58,6 +59,7 @@ class CredentialCreationConfigTest {
                 .verifiableCredentialStatus(Mockito.mock(VerifiableCredentialStatus.class))
                 .vcId(URI.create("yada://test.com"))
                 .keyName("keyName")
+                .algorithm(SupportedAlgorithms.ED25519)
                 .build());
         assertNotNull(build);
         assertNotNull(build.getExpiryDate());
@@ -86,6 +88,7 @@ class CredentialCreationConfigTest {
                 .contexts(Collections.emptyList())
                 .verifiableCredentialStatus(Mockito.mock(VerifiableCredentialStatus.class))
                 .keyName("keyName")
+                .algorithm(SupportedAlgorithms.ED25519)
                 .build());
     }
 

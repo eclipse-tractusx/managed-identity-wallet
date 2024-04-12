@@ -47,6 +47,11 @@ import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtVCFactoryImpl
 import org.springframework.util.MultiValueMap;
 
 import java.io.StringWriter;
+import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -127,4 +132,19 @@ public class CommonUtils {
         );
         return vcJWT.serialize();
     }
+
+    @SneakyThrows
+    public static ECPrivateKey ecPrivateFrom(byte[] encoded) {
+        var kf = KeyFactory.getInstance("EC");
+        var privateKeySpec = new PKCS8EncodedKeySpec(encoded);
+        return (ECPrivateKey) kf.generatePrivate(privateKeySpec);
+    }
+
+    @SneakyThrows
+    public static ECPublicKey ecPublicFrom(byte[] encoded) {
+        var kf = KeyFactory.getInstance("EC");
+        var publicKeySpec = new X509EncodedKeySpec(encoded);
+        return (ECPublicKey) kf.generatePublic(publicKeySpec);
+    }
+
 }
