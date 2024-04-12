@@ -1,19 +1,9 @@
-plugins {
-    id 'java'
-}
-
-group = 'org.eclipse.tractusx'
-version = 'latest'
-
-repositories {
-    mavenCentral()
-}
+group = "${groupName}"
+version = "${applicationVersion}"
+sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    testImplementation ('org.springframework.boot:spring-boot-starter-test')
 }
 
-test {
-    useJUnitPlatform()
-}
