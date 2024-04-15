@@ -81,7 +81,7 @@ public class StringPool {
 
     public static final String REALM = "miw_test";
 
-    public static final String USER_PASSWORD = "s3cr3t";
+    public static final String USER_PWD = "s3cr3t";
 
     public static final String VALID_USER_NAME = "valid_user";
 
@@ -104,4 +104,7 @@ public class StringPool {
     public static final String PUBLIC_KEY = "PUBLIC KEY";
 
     public static final String BPN_NOT_FOUND = "Invalid token, BPN not found";
+
+    public static final String ACCESS_TOKEN = "accessToken";
+    public static final String ACCESS_SCOPE = "bearerAccessScope";
 }

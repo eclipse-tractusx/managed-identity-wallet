@@ -26,6 +26,10 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ACCESS_SCOPE;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ACCESS_TOKEN;
+
+
 public class SecureTokenRequestValidator  implements Validator {
     @Override
     public boolean supports(Class<?> clazz) {
@@ -40,12 +44,12 @@ public class SecureTokenRequestValidator  implements Validator {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "grantType", "grant_type.empty", "The 'grant_type' cannot be empty or missing.");
         SecureTokenRequest secureTokenRequest = (SecureTokenRequest) target;
         if (secureTokenRequest.getAccessToken() != null && secureTokenRequest.getBearerAccessScope() != null) {
-            errors.rejectValue("accessToken", "access_token.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
-            errors.rejectValue("bearerAccessScope", "bearer_access_scope.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
+            errors.rejectValue(ACCESS_TOKEN, "access_token.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
+            errors.rejectValue(ACCESS_SCOPE, "bearer_access_scope.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
         }
         if (secureTokenRequest.getAccessToken() == null && secureTokenRequest.getBearerAccessScope() == null) {
-            errors.rejectValue("accessToken", "access_token.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
-            errors.rejectValue("bearerAccessScope", "bearer_access_scope.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
+            errors.rejectValue(ACCESS_TOKEN, "access_token.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
+            errors.rejectValue(ACCESS_SCOPE, "bearer_access_scope.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
         }
         if (secureTokenRequest.getAccessToken() != null) {
             ValidationUtils.rejectIfEmptyOrWhitespace(errors, "accessToken", "access_token.empty", "The 'access_token' cannot be empty or missing.");

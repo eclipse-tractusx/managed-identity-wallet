@@ -36,7 +36,7 @@ import java.net.http.HttpClient;
 @Service
 public class DidDocumentResolverService {
 
-    final static HttpClient httpClient = HttpClient.newHttpClient();
+    static final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Getter
     private final DidDocumentResolverRegistry didDocumentResolverRegistry;

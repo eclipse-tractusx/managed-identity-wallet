@@ -17,6 +17,8 @@
 # * SPDX-License-Identifier: Apache-2.0
 # ********************************************************************************/
 
+#TODO: create Dockerfile for revocation-service module, this Dockerfile is used only for miw module
+
 FROM eclipse-temurin:17-jre-alpine
 
 # run as non-root user

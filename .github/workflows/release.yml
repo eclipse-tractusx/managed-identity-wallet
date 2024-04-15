@@ -94,6 +94,7 @@ jobs:
       - name: Execute Gradle build
         run: ./gradlew build
 
+      #TODO: implement upload of revocation-service jar, currently only miw jar is uploaded
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -115,6 +116,7 @@ jobs:
           echo "::notice::${{ env.next_release }}"
           echo "::notice::${{ env.will_create_new_release }}"
 
+      #TODO: implement upload of revocation-service jar, currently only miw jar is uploaded
       - name: Upload jar to GitHub release
         if: github.event_name != 'pull_request' && steps.semantic-release.outputs.will_create_new_release == 'true'
         env:
@@ -124,6 +126,7 @@ jobs:
           echo "::notice::Uploading jar to GitHub release"
           gh release upload "v$RELEASE_VERSION" ./miw-service/build/libs/miw-latest.jar
 
+  #TODO: implement release of revocation-service jar, currently only miw jar is released
   docker:
     name: Docker Release
     needs: semantic_release

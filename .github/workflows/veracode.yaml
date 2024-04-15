@@ -68,6 +68,7 @@ jobs:
         with:
           arguments: build
 
+      #TODO: implement upload and scan of revocation-service jar, currently only miw jar is uploaded
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.6
         continue-on-error: true

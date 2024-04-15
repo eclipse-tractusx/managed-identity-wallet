@@ -157,7 +157,7 @@ public class AuthenticationUtils {
                 .clientId(StringPool.CLIENT_ID)
                 .clientSecret(StringPool.CLIENT_SECRET)
                 .username(username)
-                .password(StringPool.USER_PASSWORD)
+                .password(StringPool.USER_PWD)
                 .build();
         String access_token = keycloakAdminClient.tokenManager().getAccessToken().getToken();
 

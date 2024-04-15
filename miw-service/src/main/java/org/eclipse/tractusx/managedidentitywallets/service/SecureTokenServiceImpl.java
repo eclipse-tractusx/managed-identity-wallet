@@ -49,6 +49,8 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtil
 @RequiredArgsConstructor
 public class SecureTokenServiceImpl implements SecureTokenService {
 
+    private static final String BPN_UNKNOWN = "The provided BPN '%s' is unknown";
+
     private final WalletKeyRepository walletKeyRepository;
 
     private final WalletRepository walletRepository;
@@ -93,11 +95,11 @@ public class SecureTokenServiceImpl implements SecureTokenService {
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes) {
         log.debug("'issueToken' using scopes and BPN.");
         WalletKey walletKey = Optional.of(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format(BPN_UNKNOWN, self)));
         KeyPair keyPair = walletKey.toDto();
         DID selfDid = new DID(walletKey.getWallet().getDid());
         DID partnerDid = new DID(Optional.ofNullable(walletRepository.getByBpn(partner.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format(BPN_UNKNOWN, partner)))
                 .getDid());
         // IMPORTANT: we re-use the expiration time intentionally to mitigate any kind of timing attacks,
         // as we're signing two tokens.
@@ -110,11 +112,11 @@ public class SecureTokenServiceImpl implements SecureTokenService {
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken) {
         log.debug("'issueToken' using an access_token and BPN.");
         WalletKey walletKey = Optional.ofNullable(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format(BPN_UNKNOWN, self)));
         KeyPair keyPair = walletKey.toDto();
         DID selfDid = new DID(walletKey.getWallet().getDid());
         DID partnerDid = new DID(Optional.of(walletRepository.getByBpn(partner.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
+                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format(BPN_UNKNOWN, partner)))
                 .getDid());
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         return this.tokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
