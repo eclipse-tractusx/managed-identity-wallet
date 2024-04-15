@@ -50,12 +50,14 @@ import org.eclipse.tractusx.managedidentitywallets.validator.SecureTokenRequestV
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
@@ -82,6 +84,12 @@ public class SecureTokenController {
     @InitBinder
     void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(new SecureTokenRequestValidator());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handle(HttpMessageNotReadableException e) {
+        log.warn("##### Returning HTTP 400 Bad Request", e);
     }
 
     @SneakyThrows

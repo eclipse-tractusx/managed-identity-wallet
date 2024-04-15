@@ -11,3 +11,5 @@ miw:
     enabled: true
     realm: miw_test
     clientId: miw_private_client
+
+debug: true

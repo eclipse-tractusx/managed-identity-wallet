@@ -23,6 +23,8 @@ package org.eclipse.tractusx.managedidentitywallets.signing;
 
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 
 import java.util.List;
@@ -53,4 +55,7 @@ public interface KeyProvider {
      * @see KeyStorageType
      */
     KeyStorageType getKeyStorageType();
+
+    KeyPair getKeyPair(DID self);
+    KeyPair getKeyPair(String bpn);
 }

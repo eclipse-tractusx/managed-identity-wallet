@@ -93,9 +93,12 @@ import java.util.stream.Collectors;
 @Component
 public class LocalSigningServiceImpl implements LocalSigningService {
 
+    // this is not autowired by name, and injected by ApplicationConfig,
+    // since keys could be saved in hashicorp (=> HashicorpKeyProvider, e.g.) and retrieved from there
     private KeyProvider keyProvider;
 
-    private final SecureTokenService secureTokenService;
+    // Autowired by name!!!
+    private final SecureTokenService localSecureTokenService;
 
     @Override
     public SignerResult createCredential(CredentialCreationConfig config) {
@@ -256,8 +259,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
         verifiablePresentation.put(Verifiable.PROOF, proof);
         return verifiablePresentation;
     }
-
-
+    
     @SneakyThrows
     private static VerifiableCredential createVerifiableCredential(CredentialCreationConfig config, byte[] privateKeyBytes) {
         //VC Builder
@@ -326,21 +328,21 @@ public class LocalSigningServiceImpl implements LocalSigningService {
 
     @Override
     public JWT issueToken(DID self, DID partner, Set<String> scopes) {
-        return secureTokenService.issueToken(self, partner, scopes);
+        return localSecureTokenService.issueToken(self, partner, scopes, keyProvider);
     }
 
     @Override
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes) {
-        return secureTokenService.issueToken(self, partner, scopes);
+        return localSecureTokenService.issueToken(self, partner, scopes, keyProvider);
     }
 
     @Override
     public JWT issueToken(DID self, DID partner, JWT accessToken) {
-        return secureTokenService.issueToken(self,partner,accessToken);
+        return localSecureTokenService.issueToken(self, partner, accessToken, keyProvider);
     }
 
     @Override
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken) {
-        return secureTokenService.issueToken(self, partner, accessToken);
+        return localSecureTokenService.issueToken(self, partner, accessToken, keyProvider);
     }
 }

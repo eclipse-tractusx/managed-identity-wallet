@@ -97,3 +97,5 @@ miw:
 
 sts:
   token-duration: 60000
+  token-service: org.eclipse.tractusx.managedidentitywallets.service.
+
