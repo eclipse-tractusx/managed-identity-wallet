@@ -35,13 +35,12 @@ public class SecureTokenBeanConfig {
 
     @Bean
     public SecureTokenService secureTokenService(
-            WalletKeyRepository keyRepository,
             WalletRepository walletRepository,
             SecureTokenIssuer issuer,
             SecureTokenConfigurationProperties properties,
             JtiRepository jtiRepository
     ) {
-        return new LocalSecureTokenService(keyRepository, walletRepository, issuer, properties, jtiRepository);
+        return new LocalSecureTokenService(walletRepository, issuer, properties, jtiRepository);
     }
 
 }

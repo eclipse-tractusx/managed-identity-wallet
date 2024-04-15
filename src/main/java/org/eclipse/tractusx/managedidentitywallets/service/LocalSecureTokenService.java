@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
@@ -51,17 +50,15 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtil
 @RequiredArgsConstructor
 public class LocalSecureTokenService implements SecureTokenService {
 
-    private final WalletKeyRepository walletKeyRepository;
-
     private final WalletRepository walletRepository;
 
-    private final SecureTokenIssuer tokenIssuer;
+    // Autowired by name!!!
+    private final SecureTokenIssuer localSecureTokenIssuer;
 
     private final SecureTokenConfigurationProperties properties;
 
     private final JtiRepository jtiRepository;
 
-    // TODO abstract issue token into signing service
 
     @Override
     public JWT issueToken(final DID self, final DID partner, final Set<String> scopes, KeyProvider keyProvider) {
@@ -70,9 +67,9 @@ public class LocalSecureTokenService implements SecureTokenService {
         // IMPORTANT: we re-use the expiration time intentionally to mitigate any kind of timing attacks,
         // as we're signing two tokens.
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
-        JWT accessToken = this.tokenIssuer.createAccessToken(keyPair, self, partner, expirationTime, scopes);
+        JWT accessToken = this.localSecureTokenIssuer.createAccessToken(keyPair, self, partner, expirationTime, scopes);
         checkAndStoreJti(accessToken);
-        return this.tokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
     }
 
     @Override
@@ -81,7 +78,7 @@ public class LocalSecureTokenService implements SecureTokenService {
         KeyPair keyPair = keyProvider.getKeyPair(self);
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         checkAndStoreJti(accessToken);
-        return this.tokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
     }
 
     private void checkAndStoreJti(JWT accessToken) {
@@ -107,8 +104,8 @@ public class LocalSecureTokenService implements SecureTokenService {
         // IMPORTANT: we re-use the expiration time intentionally to mitigate any kind of timing attacks,
         // as we're signing two tokens.
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
-        JWT accessToken = this.tokenIssuer.createAccessToken(keyPair, selfDid, partnerDid, expirationTime, scopes);
-        return this.tokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
+        JWT accessToken = this.localSecureTokenIssuer.createAccessToken(keyPair, selfDid, partnerDid, expirationTime, scopes);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
     }
 
     @Override
@@ -123,6 +120,6 @@ public class LocalSecureTokenService implements SecureTokenService {
                 .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
-        return this.tokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
     }
 }
