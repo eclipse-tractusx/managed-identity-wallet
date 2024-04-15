@@ -27,11 +27,13 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
+import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -43,6 +45,8 @@ public class LocalKeyProvider implements KeyProvider {
     private final WalletKeyRepository walletKeyRepository;
 
     private final WalletRepository walletRepository;
+
+    private final EncryptionUtils encryptionUtils;
 
     @Override
     public byte[] getPrivateKey(String keyName, SupportedAlgorithms algorithm) { //
@@ -58,5 +62,27 @@ public class LocalKeyProvider implements KeyProvider {
     @Override
     public KeyStorageType getKeyStorageType() {
         return KeyStorageType.DB;
+    }
+
+    @Override
+    public KeyPair getKeyPair(DID self) {
+        KeyPair dto = walletKeyRepository.findFirstByWallet_Did(self.toString()).toDto();
+
+        return new KeyPair(
+                dto.keyId(),
+                encryptionUtils.decrypt(dto.privateKey()),
+                encryptionUtils.decrypt(dto.publicKey())
+        );
+    }
+
+    @Override
+    public KeyPair getKeyPair(String bpn) {
+        KeyPair dto = walletKeyRepository.findFirstByWallet_Bpn(bpn).toDto();
+
+        return new KeyPair(
+                dto.keyId(),
+                encryptionUtils.decrypt(dto.privateKey()),
+                encryptionUtils.decrypt(dto.publicKey())
+        );
     }
 }

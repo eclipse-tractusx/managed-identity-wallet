@@ -101,7 +101,7 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
         log.debug("Creating JWS signature for issuer '{}' and holder '{}'", builder.getClaims().get("iss"),
                 builder.getClaims().get("sub"));
         SignedJWT signedJWT = new SignedJWT(header, body);
-        String privateKey = encryptionUtils.decrypt(keyPair.privateKey());
+        String privateKey = keyPair.privateKey();
         // todo bri: this should become dynamic in the future, as we want to support more key algos.
         OctetKeyPair jwk = new OctetKeyPairFactory().fromPrivateKey(new x21559PrivateKey(privateKey, true));
         Ed25519Signer signer = new Ed25519Signer(jwk);
