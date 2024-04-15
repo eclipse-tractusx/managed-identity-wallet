@@ -178,7 +178,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         // Create Credential
         SignerResult signerResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
         VerifiableCredential vc = (VerifiableCredential) signerResult.getJsonLd();
-        HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc,holdersCredentialCreationConfig);
+        HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
 
 
         //Store Credential in holder table

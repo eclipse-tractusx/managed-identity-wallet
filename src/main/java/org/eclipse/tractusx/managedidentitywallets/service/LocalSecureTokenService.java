@@ -25,6 +25,7 @@ import com.nimbusds.jwt.JWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
@@ -47,7 +48,7 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtil
 
 @Slf4j
 @RequiredArgsConstructor
-public class SecureTokenServiceImpl implements SecureTokenService {
+public class LocalSecureTokenService implements SecureTokenService {
 
     private final WalletKeyRepository walletKeyRepository;
 
@@ -58,6 +59,8 @@ public class SecureTokenServiceImpl implements SecureTokenService {
     private final SecureTokenConfigurationProperties properties;
 
     private final JtiRepository jtiRepository;
+
+    // TODO abstract issue token into signing service
 
     @Override
     public JWT issueToken(final DID self, final DID partner, final Set<String> scopes) {
@@ -95,7 +98,8 @@ public class SecureTokenServiceImpl implements SecureTokenService {
         WalletKey walletKey = Optional.of(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
                 .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
         KeyPair keyPair = walletKey.toDto();
-        DID selfDid = new DID(walletKey.getWallet().getDid());
+        Wallet wallet = walletRepository.getByBpn(self.toString());
+        DID selfDid = new DID(wallet.getDid());
         DID partnerDid = new DID(Optional.ofNullable(walletRepository.getByBpn(partner.toString()))
                 .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());
@@ -112,7 +116,8 @@ public class SecureTokenServiceImpl implements SecureTokenService {
         WalletKey walletKey = Optional.ofNullable(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
                 .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
         KeyPair keyPair = walletKey.toDto();
-        DID selfDid = new DID(walletKey.getWallet().getDid());
+        Wallet wallet = walletRepository.getByBpn(self.toString());
+        DID selfDid = new DID(wallet.getDid());
         DID partnerDid = new DID(Optional.of(walletRepository.getByBpn(partner.toString()))
                 .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());

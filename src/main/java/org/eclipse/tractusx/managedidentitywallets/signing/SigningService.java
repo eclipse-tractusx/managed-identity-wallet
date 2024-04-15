@@ -22,8 +22,11 @@
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
 import com.nimbusds.jose.jwk.KeyType;
+import com.nimbusds.jwt.JWT;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
@@ -32,6 +35,7 @@ import org.eclipse.tractusx.ssi.lib.exception.KeyGenerationException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Service used to sign the verifiable credentials and verifiable presentations
@@ -72,4 +76,12 @@ public interface SigningService {
      * @see SignerResult
      */
     SignerResult createPresentation(PresentationCreationConfig config);
+
+    JWT issueToken(DID self, DID partner, Set<String> scopes);
+
+    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes);
+
+    JWT issueToken(DID self, DID partner, JWT accessToken);
+
+    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken);
 }
