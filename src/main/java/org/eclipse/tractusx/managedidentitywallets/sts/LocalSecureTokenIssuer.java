@@ -35,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenIssuer;
-import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
 import org.springframework.stereotype.Component;
@@ -53,9 +52,7 @@ import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NO
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SecureTokenIssuerImpl implements SecureTokenIssuer {
-
-    private final EncryptionUtils encryptionUtils;
+public class LocalSecureTokenIssuer implements SecureTokenIssuer {
 
     @Override
     public JWT createIdToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime, JWT accessToken) {
