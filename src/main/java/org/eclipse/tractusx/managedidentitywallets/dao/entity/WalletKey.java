@@ -25,35 +25,43 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
+
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+
+import java.util.Objects;
 
 /**
  * The type Wallet key.
  */
 @Getter
 @Setter
-@Entity(name = "wallet_key")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name="wallet_key")
 public class WalletKey extends MIWBaseEntity {
 
     @Id
     @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
-    private Long id;
+    private long id;
 
     @Column(nullable = false)
     private String vaultAccessToken;
@@ -68,8 +76,8 @@ public class WalletKey extends MIWBaseEntity {
     private String publicKey;
 
     @ManyToOne
-    @MapsId
-    @JoinColumn(name = "walletId", columnDefinition = "bigint")
+    // @MapsId
+    @JoinColumn(name = "wallet_id", columnDefinition = "bigint")
     @JsonBackReference
     private Wallet wallet;
 
@@ -80,5 +88,18 @@ public class WalletKey extends MIWBaseEntity {
 
     public KeyPair toDto() {
         return new KeyPair(keyId, privateKey, publicKey);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WalletKey walletKey = (WalletKey) o;
+        return Objects.equals(id, walletKey.id) && Objects.equals(keyId, walletKey.keyId) && Objects.equals(algorithm, walletKey.algorithm);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, keyId, algorithm);
     }
 }

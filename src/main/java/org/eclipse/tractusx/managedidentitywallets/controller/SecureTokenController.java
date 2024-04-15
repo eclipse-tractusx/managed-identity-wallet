@@ -31,10 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.SecureTokenControllerApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenErrorResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
@@ -42,8 +44,8 @@ import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResp
 import org.eclipse.tractusx.managedidentitywallets.exception.InvalidSecureTokenRequestException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumberException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
-import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.service.IdpAuthorization;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.validator.SecureTokenRequestValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,6 +59,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -69,11 +72,12 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getS
 @Tag(name = "STS")
 public class SecureTokenController {
 
-    private final SecureTokenService tokenService;
 
     private final IdpAuthorization idpAuthorization;
 
     private final WalletRepository walletRepo;
+
+    private final Map<SigningServiceType, SigningService> availableSigningServices;
 
     @InitBinder
     void initBinder(WebDataBinder webDataBinder) {
@@ -103,7 +107,8 @@ public class SecureTokenController {
         // handle idp authorization
         IdpTokenResponse idpResponse = idpAuthorization.fromSecureTokenRequest(secureTokenRequest);
         BusinessPartnerNumber bpn = idpResponse.bpn();
-        DID selfDid = new DID(walletRepo.getByBpn(bpn.toString()).getDid());
+        Wallet selfWallet = walletRepo.getByBpn(bpn.toString());
+        DID selfDid = new DID(selfWallet.getDid());
         DID partnerDid;
         if (Pattern.compile(StringPool.BPN_NUMBER_REGEX).matcher(secureTokenRequest.getAudience()).matches()) {
             partnerDid = new DID(walletRepo.getByBpn(secureTokenRequest.getAudience()).getDid());
@@ -113,18 +118,21 @@ public class SecureTokenController {
             throw new InvalidSecureTokenRequestException("You must provide an audience either as a BPN or DID.");
         }
 
+        SigningServiceType signingServiceType = selfWallet.getSigningServiceType();
+        SigningService signingService = availableSigningServices.get(signingServiceType);
+
         // create the SI token and put/create the access_token inside
         JWT responseJwt;
         if (secureTokenRequest.assertValidWithAccessToken()) {
             log.debug("Signing si token.");
-            responseJwt = tokenService.issueToken(
+            responseJwt = signingService.issueToken(
                     selfDid,
                     partnerDid,
                     JWTParser.parse(secureTokenRequest.getAccessToken())
             );
         } else if (secureTokenRequest.assertValidWithScopes()) {
             log.debug("Creating access token and signing si token.");
-            responseJwt = tokenService.issueToken(
+            responseJwt = signingService.issueToken(
                     selfDid,
                     partnerDid,
                     Set.of(secureTokenRequest.getBearerAccessScope())

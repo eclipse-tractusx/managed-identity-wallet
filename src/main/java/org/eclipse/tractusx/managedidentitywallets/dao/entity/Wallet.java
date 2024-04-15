@@ -77,14 +77,14 @@ public class Wallet extends MIWBaseEntity {
     private String algorithm;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="signing_service_type", nullable = false)
+    @Column(name = "signing_service_type", nullable = false)
     private SigningServiceType signingServiceType;
 
     @Column(nullable = false)
     @Convert(converter = StringToDidDocumentConverter.class)
     private DidDocument didDocument;
 
-    @OneToMany(mappedBy = "wallet", orphanRemoval = true)
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<WalletKey> walletKeys;
 

@@ -32,6 +32,7 @@ import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -217,6 +218,7 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the wallet
      */
     @SneakyThrows
+    @Transactional
     public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         final Wallet[] wallets = new Wallet[1];
@@ -241,7 +243,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         validateCreateWallet(request, callerBpn);
 
         //create private key pair
-        SigningServiceType signingServiceType = null;
+        final SigningServiceType signingServiceType;
         if (authority) {
             signingServiceType = miwSettings.authoritySigningServiceType();
         } else {
@@ -312,6 +314,7 @@ public class WalletService extends BaseService<Wallet, Long> {
 
 
         signingService.saveKeys(walletsKeys);
+
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBusinessPartnerNumber()));
 
         return wallet;
