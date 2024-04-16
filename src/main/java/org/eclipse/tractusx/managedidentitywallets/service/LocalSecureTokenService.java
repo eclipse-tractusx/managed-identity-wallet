@@ -93,8 +93,6 @@ public class LocalSecureTokenService implements SecureTokenService {
     @Override
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes, KeyProvider keyProvider) {
         log.debug("'issueToken' using scopes and BPN.");
-        // WalletKey walletKey = Optional.of(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-        //         .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
         KeyPair keyPair = keyProvider.getKeyPair(self.toString());
         Wallet wallet = walletRepository.getByBpn(self.toString());
         DID selfDid = new DID(wallet.getDid());
@@ -111,8 +109,6 @@ public class LocalSecureTokenService implements SecureTokenService {
     @Override
     public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken, KeyProvider keyProvider) {
         log.debug("'issueToken' using an access_token and BPN.");
-        // WalletKey walletKey = Optional.ofNullable(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-        //         .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
         KeyPair keyPair = keyProvider.getKeyPair(self.toString());
         Wallet wallet = walletRepository.getByBpn(self.toString());
         DID selfDid = new DID(wallet.getDid());

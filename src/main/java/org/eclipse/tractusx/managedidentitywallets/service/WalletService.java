@@ -228,7 +228,6 @@ public class WalletService extends BaseService<Wallet, Long> {
                 wallets[0] = createWallet(request, false, callerBpn);
             }
         });
-        // wallets[0] = updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
         return wallets[0];
     }
 
@@ -250,7 +249,6 @@ public class WalletService extends BaseService<Wallet, Long> {
             signingServiceType = request.getSigningServiceType();
         }
 
-        // TODO suffix key-name with key-type
         KeyCreationConfig keyCreationConfig = KeyCreationConfig.builder()
                 .keyName(request.getBusinessPartnerNumber())
                 .keyTypes(List.of(KeyType.OCT, KeyType.EC))
@@ -356,22 +354,8 @@ public class WalletService extends BaseService<Wallet, Long> {
                 }
             }
         });
-        //updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
     }
 
-    private Wallet updateWalletWithWalletKeyES256K(TransactionTemplate transactionTemplate, Wallet[] wallets) {
-        String keyId = UUID.randomUUID().toString();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                // create additional key pair ES256K
-                if (wallets[0] != null) {
-                    wallets[0] = jwtPresentationES256KService.storeWalletKeyES256K(wallets[0], keyId);
-                }
-            }
-        });
-        return wallets[0];
-    }
 
     private void validateCreateWallet(CreateWalletRequest request, String callerBpn) {
         // check base wallet

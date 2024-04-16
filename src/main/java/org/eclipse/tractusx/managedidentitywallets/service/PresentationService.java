@@ -148,9 +148,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
             verifiableCredentials.add(verifiableCredential);
         });
 
-        // TODO copied code must be implemented in VP creation
-        //return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials, SupportedAlgorithms.ED25519);
-
         SigningService keyStorageService = availableSigningServices.get(callerWallet.getSigningServiceType());
 
         Map<String, Object> response = new HashMap<>();
@@ -423,12 +420,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         changeJtiStatus(jtiRecord);
 
         return Map.of(StringPool.VP, asJwt ? signerResult.getJwt() : signerResult.getJsonLd());
-
-        // if as JWT true -> get key ES256K and sign with it
-        // Map<String, Object> vp = buildVP(asJwt, jwtClaimsSet.getAudience().get(0), callerWallet.getBpn(),
-        //         callerWallet, verifiableCredentials, SupportedAlgorithms.ES256K);
-        // changeJtiStatus(jtiRecord);
-        // return vp;
     }
 
     private void checkReadPermission(String permission) {

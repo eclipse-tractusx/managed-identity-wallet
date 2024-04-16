@@ -21,12 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
-import com.nimbusds.jwt.JWT;
-import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
-import org.eclipse.tractusx.managedidentitywallets.domain.DID;
-
-import java.util.Set;
-
 /**
  * Specialized interface for SigningServices that will sign credentials/presentations locally
  * (may retrieve the keys from remote via KeyProvider)
