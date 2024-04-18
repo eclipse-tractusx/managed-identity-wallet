@@ -28,6 +28,7 @@ import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,13 +57,19 @@ class SecureTokenControllerTest {
     @Autowired
     private TestRestTemplate testTemplate;
 
-    @Test
-    void token() {
+    private String bpn;
+
+    private String clientId;
+
+    private String clientSecret;
+
+    @BeforeEach
+    public void initWallets() {
         // given
-        String bpn = TestUtils.getRandomBpmNumber();
+        bpn = TestUtils.getRandomBpmNumber();
         String partnerBpn = TestUtils.getRandomBpmNumber();
-        String clientId = "main";
-        String clientSecret = "main";
+        clientId = "main";
+        clientSecret = "main";
         AuthenticationUtils.setupKeycloakClient(clientId, clientSecret, bpn);
         AuthenticationUtils.setupKeycloakClient("partner", "partner", partnerBpn);
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
@@ -71,7 +78,10 @@ class SecureTokenControllerTest {
         TestUtils.createWallet(bpn, did, testTemplate, miwSettings.authorityWalletBpn(), defaultLocation);
         String defaultLocationPartner = miwSettings.host() + COLON_SEPARATOR + partnerBpn;
         TestUtils.createWallet(partnerBpn, didPartner, testTemplate, miwSettings.authorityWalletBpn(), defaultLocationPartner);
+    }
 
+    @Test
+    void tokenJSON() {
         // when
         String body = """
                 {
@@ -86,6 +96,29 @@ class SecureTokenControllerTest {
         // then
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON_VALUE));
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<Map<String, Object>> response = testTemplate.exchange(
+                "/api/token",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<>() {
+                }
+        );
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertNotNull(response.getBody().getOrDefault("token", null));
+        Assertions.assertNotNull(response.getBody().getOrDefault("expiresAt", null));
+    }
+
+    @Test
+    void tokenFormUrlencoded() {
+        // when
+        String body = "audience=%s&client_id=%s&client_secret=%s&grant_type=client_credentials&bearer_access_scope=org.eclipse.tractusx.vc.type:BpnCredential:read";
+        String requestBody = String.format(body, bpn, clientId, clientSecret);
+        // then
+        HttpHeaders headers = new HttpHeaders();
+        headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<Map<String, Object>> response = testTemplate.exchange(
                 "/api/token",
