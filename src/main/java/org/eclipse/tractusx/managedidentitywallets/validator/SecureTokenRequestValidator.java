@@ -22,36 +22,49 @@
 package org.eclipse.tractusx.managedidentitywallets.validator;
 
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
-public class SecureTokenRequestValidator  implements Validator {
+import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getSecureTokenRequest;
+
+public class SecureTokenRequestValidator implements Validator {
+
+    public static final String LINKED_MULTI_VALUE_MAP_CLASS_NAME = "org.springframework.util.LinkedMultiValueMap";
+
     @Override
     public boolean supports(Class<?> clazz) {
-        return SecureTokenRequest.class.equals(clazz);
+        return SecureTokenRequest.class.equals(clazz) || clazz.getCanonicalName().equals(LINKED_MULTI_VALUE_MAP_CLASS_NAME);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "audience", "audience.empty", "The 'audience' cannot be empty or missing.");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "clientId", "client_id.empty", "The 'client_id' cannot be empty or missing.");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "clientSecret", "client_secret.empty", "The 'client_secret' cannot be empty or missing.");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "grantType", "grant_type.empty", "The 'grant_type' cannot be empty or missing.");
-        SecureTokenRequest secureTokenRequest = (SecureTokenRequest) target;
+        LinkedMultiValueMap<String, String> requestParams = null;
+        if (target instanceof LinkedMultiValueMap) {
+            requestParams = (LinkedMultiValueMap) target;
+        }
+        SecureTokenRequest secureTokenRequest = requestParams != null ? getSecureTokenRequest(requestParams) : (SecureTokenRequest) target;
+        Errors errorsHandled = new BeanPropertyBindingResult(secureTokenRequest, errors.getObjectName());
+        ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "audience", "audience.empty", "The 'audience' cannot be empty or missing.");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "clientId", "client_id.empty", "The 'client_id' cannot be empty or missing.");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "clientSecret", "client_secret.empty", "The 'client_secret' cannot be empty or missing.");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "grantType", "grant_type.empty", "The 'grant_type' cannot be empty or missing.");
+
         if (secureTokenRequest.getAccessToken() != null && secureTokenRequest.getBearerAccessScope() != null) {
-            errors.rejectValue("accessToken", "access_token.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
-            errors.rejectValue("bearerAccessScope", "bearer_access_scope.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
+            errorsHandled.rejectValue("accessToken", "access_token.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
+            errorsHandled.rejectValue("bearerAccessScope", "bearer_access_scope.incompatible", "The 'access_token' and the 'bearer_access_token' cannot be set together.");
         }
         if (secureTokenRequest.getAccessToken() == null && secureTokenRequest.getBearerAccessScope() == null) {
-            errors.rejectValue("accessToken", "access_token.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
-            errors.rejectValue("bearerAccessScope", "bearer_access_scope.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
+            errorsHandled.rejectValue("accessToken", "access_token.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
+            errorsHandled.rejectValue("bearerAccessScope", "bearer_access_scope.incompatible", "Both the 'access_token' and the 'bearer_access_scope' are missing. At least one must be set.");
         }
         if (secureTokenRequest.getAccessToken() != null) {
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "accessToken", "access_token.empty", "The 'access_token' cannot be empty or missing.");
+            ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "accessToken", "access_token.empty", "The 'access_token' cannot be empty or missing.");
         }
         if (secureTokenRequest.getBearerAccessScope() != null) {
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "bearerAccessScope", "bearer_access_scope.empty", "The 'bearer_access_scope' cannot be empty or missing.");
+            ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "bearerAccessScope", "bearer_access_scope.empty", "The 'bearer_access_scope' cannot be empty or missing.");
         }
     }
 }
