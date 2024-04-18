@@ -33,7 +33,6 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getS
 public class SecureTokenRequestValidator implements Validator {
 
     public static final String LINKED_MULTI_VALUE_MAP_CLASS_NAME = "org.springframework.util.LinkedMultiValueMap";
-    public static final String OBJECT_NAME = "multiValueMap";
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -47,7 +46,7 @@ public class SecureTokenRequestValidator implements Validator {
             requestParams = (LinkedMultiValueMap) target;
         }
         SecureTokenRequest secureTokenRequest = requestParams != null ? getSecureTokenRequest(requestParams) : (SecureTokenRequest) target;
-        Errors errorsHandled = new BeanPropertyBindingResult(secureTokenRequest, OBJECT_NAME);
+        Errors errorsHandled = new BeanPropertyBindingResult(secureTokenRequest, errors.getObjectName());
         ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "audience", "audience.empty", "The 'audience' cannot be empty or missing.");
         ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "clientId", "client_id.empty", "The 'client_id' cannot be empty or missing.");
         ValidationUtils.rejectIfEmptyOrWhitespace(errorsHandled, "clientSecret", "client_secret.empty", "The 'client_secret' cannot be empty or missing.");
