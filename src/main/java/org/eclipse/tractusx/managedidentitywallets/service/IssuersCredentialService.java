@@ -190,7 +190,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
     public VerifiableCredential issueBpnCredential(Wallet baseWallet, Wallet holderWallet, boolean authority) {
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId(), baseWallet.getAlgorithm());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), baseWallet.getAlgorithm());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, MIWVerifiableCredentialType.BPN_CREDENTIAL);
         VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
                 StringPool.ID, holderWallet.getDid(),
@@ -233,7 +233,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         validateAccess(callerBPN, baseWallet);
         // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(baseWallet.getId(), baseWallet.getAlgorithm());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), baseWallet.getAlgorithm());
 
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
@@ -293,7 +293,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         //check duplicate
         isCredentialExit(holderWallet.getDid(), MIWVerifiableCredentialType.DISMANTLER_CREDENTIAL);
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
 
         //if base wallet issue credentials to itself
         boolean isSelfIssued = isSelfIssued(request.getBpn());
@@ -352,7 +352,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         validateAccess(callerBPN, issuerWallet);
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
         List<String> types = List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, VerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
 
         //if base wallet issue credentials to itself
@@ -417,7 +417,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         validateAccess(callerBpn, issuerWallet);
 
         // get issuer Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
 
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 

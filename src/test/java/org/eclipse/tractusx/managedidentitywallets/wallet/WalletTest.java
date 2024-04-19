@@ -315,7 +315,7 @@ class WalletTest {
     }
 
     @Test
-    void createWalletWithDuplicateBpn409() throws JsonProcessingException {
+    void createWalletWithDuplicateBpn409() throws JsonProcessingException, JSONException {
 
         String bpn = TestUtils.getRandomBpmNumber();
         String name = "Sample Wallet";
@@ -362,7 +362,7 @@ class WalletTest {
     }
 
     @Test
-    void getWalletByIdentifierBPNTest200() throws JsonProcessingException {
+    void getWalletByIdentifierBPNTest200() throws JsonProcessingException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String name = "Sample Name";
         String baseBpn = miwSettings.authorityWalletBpn();
@@ -386,7 +386,7 @@ class WalletTest {
 
 
     @Test
-    void getWalletByIdentifierBPNWithCredentialsTest200() throws JsonProcessingException {
+    void getWalletByIdentifierBPNWithCredentialsTest200() throws JsonProcessingException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String name = "Sample Name";
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
@@ -416,7 +416,7 @@ class WalletTest {
 
     @Test
     @Disabled("the endpoint has an issue that prevents resolving did with a port number")
-    void getWalletByIdentifierDidTest200() throws JsonProcessingException {
+    void getWalletByIdentifierDidTest200() throws JsonProcessingException, JSONException {
 
         String bpn = TestUtils.getRandomBpmNumber();
         String name = "Sample Name";
@@ -462,7 +462,7 @@ class WalletTest {
 
 
     @Test
-    void getWallets200() throws JsonProcessingException {
+    void getWallets200() throws JsonProcessingException, JSONException {
 
         String bpn = TestUtils.getRandomBpmNumber();
         String name = "Sample Name";
@@ -535,7 +535,7 @@ class WalletTest {
     }
 
 
-    private List<Wallet> getWalletsFromString(String body) throws JsonProcessingException {
+    private List<Wallet> getWalletsFromString(String body) throws JsonProcessingException, JSONException {
         List<Wallet> walletList = new ArrayList<>();
 
         JSONArray array = new JSONArray(new JSONObject(body).getJSONArray("content"));

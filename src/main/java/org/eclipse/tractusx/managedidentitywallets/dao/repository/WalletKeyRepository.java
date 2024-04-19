@@ -31,12 +31,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
     /**
-     * Gets by wallet id.
+     * Gets by wallet id and algorithm.
      *
      * @param id the id
+     * param algorithm the algorithm
      * @return the by wallet id
      */
     WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
+
+    /**
+     * Gets by wallet id.
+     * @param id
+     * @return WalletKey
+     */
+    WalletKey getByWalletId(Long id);
 
     WalletKey findFirstByWallet_Bpn(String bpn);
 

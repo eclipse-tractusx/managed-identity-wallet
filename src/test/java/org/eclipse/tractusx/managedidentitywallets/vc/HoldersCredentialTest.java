@@ -40,6 +40,13 @@ import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
+import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
+import org.eclipse.tractusx.ssi.lib.exception.json.TransformJsonLdException;
+import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPublicKeyFormatException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.NoVerificationKeyFoundException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureParseException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureVerificationFailedException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -258,7 +265,7 @@ class HoldersCredentialTest {
 
 
     @Test
-    void validateCredentialsWithInvalidVC() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void validateCredentialsWithInvalidVC() throws com.fasterxml.jackson.core.JsonProcessingException, UnsupportedSignatureTypeException, InvalidPublicKeyFormatException, NoVerificationKeyFoundException, SignatureParseException, DidParseException, SignatureVerificationFailedException, TransformJsonLdException {
         //data setup
         CredentialVerificationRequest request = new CredentialVerificationRequest();
         request.setVc(issueVC());
@@ -281,7 +288,7 @@ class HoldersCredentialTest {
 
     @Test
     @DisplayName("validate VC with date check true, it should return true")
-    void validateCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void validateCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException, UnsupportedSignatureTypeException, InvalidPublicKeyFormatException, NoVerificationKeyFoundException, SignatureParseException, DidParseException, SignatureVerificationFailedException, TransformJsonLdException {
         CredentialVerificationRequest request = new CredentialVerificationRequest();
         request.setVc(issueVC());
 
@@ -303,7 +310,7 @@ class HoldersCredentialTest {
 
     @Test
     @DisplayName("validate expired VC with date check false, it should return true")
-    void validateCredentialsWithExpiryCheckFalse() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void validateCredentialsWithExpiryCheckFalse() throws com.fasterxml.jackson.core.JsonProcessingException, UnsupportedSignatureTypeException, InvalidPublicKeyFormatException, NoVerificationKeyFoundException, SignatureParseException, DidParseException, SignatureVerificationFailedException, TransformJsonLdException {
         CredentialVerificationRequest request = new CredentialVerificationRequest();
         request.setVc(issueVC());
 
@@ -330,7 +337,7 @@ class HoldersCredentialTest {
 
     @Test
     @DisplayName("validate expired VC with date check true, it should return false")
-    void validateExpiredCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void validateExpiredCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException, UnsupportedSignatureTypeException, InvalidPublicKeyFormatException, NoVerificationKeyFoundException, SignatureParseException, DidParseException, SignatureVerificationFailedException, TransformJsonLdException {
 
         //data setup
         CredentialVerificationRequest request = new CredentialVerificationRequest();

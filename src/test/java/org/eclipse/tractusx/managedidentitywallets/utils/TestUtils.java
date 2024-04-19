@@ -50,6 +50,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -144,7 +145,7 @@ public class TestUtils {
     }
 
 
-    public static Wallet getWalletFromString(String body) throws JsonProcessingException {
+    public static Wallet getWalletFromString(String body) throws JsonProcessingException, JSONException {
         JSONObject jsonObject = new JSONObject(body);
         //convert DidDocument
         JSONObject didDocument = jsonObject.getJSONObject(StringPool.DID_DOCUMENT);

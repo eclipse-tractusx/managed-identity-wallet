@@ -69,13 +69,14 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * Get private key by wallet identifier as bytes byte [ ].
      *
      * @param walletId the wallet id
+     * @param algorithm the algorithm
      * @return the byte [ ]
      */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId, String algorithm) {
-        Object privateKey = getPrivateKeyByWalletIdentifierAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
-        if (privateKey instanceof x21559PrivateKey x21559PrivateKey) {
-            return x21559PrivateKey.asByte();
+    public byte[] getPrivateKeyByWalletIdAsBytes(long walletId, String algorithm) {
+        Object privateKey = getPrivateKeyByWalletIdAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
+        if (privateKey instanceof x25519PrivateKey x25519PrivateKey) {
+            return x25519PrivateKey.asByte();
         } else {
             return ((ECPrivateKey) privateKey).getEncoded();
         }
@@ -85,16 +86,16 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
      * Gets private key by wallet identifier.
      *
      * @param walletId the wallet id
+     * @param algorithm the algorithm
      * @return the private key by wallet identifier
      */
     @SneakyThrows
-
-    public Object getPrivateKeyByWalletIdentifierAndAlgorithm(long walletId, SupportedAlgorithms algorithm) {
+    public Object getPrivateKeyByWalletIdAndAlgorithm(long walletId, SupportedAlgorithms algorithm) {
         WalletKey wallet = walletKeyRepository.getByWalletIdAndAlgorithm(walletId, algorithm.toString());
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
         if (SupportedAlgorithms.ED25519.equals(algorithm)) {
-            return new x21559PrivateKey(content);
+            return new x25519PrivateKey(content);
         } else if (SupportedAlgorithms.ES256K.equals(algorithm)) {
             KeyFactory kf = KeyFactory.getInstance(EC);
             return kf.generatePrivate(new PKCS8EncodedKeySpec(content));
@@ -102,5 +103,17 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
             throw new UnsupportedAlgorithmException("Unsupported algorithm: " + algorithm);
         }
     }
+
+       /**
+     * Gets wallet key by wallet identifier.
+     *
+     * @param walletId the wallet id
+     * @return the wallet key by wallet identifier
+     */
+    @SneakyThrows
+    public String getWalletKeyIdByWalletId(long walletId) {
+        return walletKeyRepository.getByWalletId(walletId).getKeyId();
+    }
+
 
 }

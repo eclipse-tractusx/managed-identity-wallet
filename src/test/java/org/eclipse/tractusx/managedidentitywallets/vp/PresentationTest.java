@@ -50,6 +50,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
@@ -95,7 +96,7 @@ class PresentationTest {
 
 
     @Test
-    void validateVPAssJsonLd400() throws JsonProcessingException {
+    void validateVPAssJsonLd400() throws JsonProcessingException, JSONException {
         //create VP
         String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
@@ -112,7 +113,7 @@ class PresentationTest {
 
 
     @Test
-    void validateVPAsJwt() throws JsonProcessingException {
+    void validateVPAsJwt() throws JsonProcessingException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
         ResponseEntity<Map> vpResponse = createBpnVCAsJwt(bpn, audience);
@@ -159,7 +160,7 @@ class PresentationTest {
     }
 
     @Test
-    void validateVPAsJwtWithValidAudienceAndDateValidation() throws JsonProcessingException {
+    void validateVPAsJwtWithValidAudienceAndDateValidation() throws JsonProcessingException, JSONException {
         //create VP
         String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
@@ -176,7 +177,7 @@ class PresentationTest {
     }
 
     @Test
-    void validateVPAsJwtWithInValidVCDateValidation() throws JsonProcessingException {
+    void validateVPAsJwtWithInValidVCDateValidation() throws JsonProcessingException, JSONException {
         //create VP
         String bpn = TestUtils.getRandomBpmNumber();
         String audience = "companyA";
@@ -194,7 +195,7 @@ class PresentationTest {
     }
 
     @Test
-    void createPresentationAsJWT201() throws JsonProcessingException, ParseException {
+    void createPresentationAsJWT201() throws JsonProcessingException, ParseException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String audience = "companyA";
@@ -209,7 +210,7 @@ class PresentationTest {
         Assertions.assertEquals(iss, did);
     }
 
-    private ResponseEntity<Map> createBpnVCAsJwt(String bpn, String audience) throws JsonProcessingException {
+    private ResponseEntity<Map> createBpnVCAsJwt(String bpn, String audience) throws JsonProcessingException, JSONException {
         Map<String, Object> request = getIssueVPRequest(bpn);
 
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
@@ -223,7 +224,7 @@ class PresentationTest {
 
 
     @Test
-    void createPresentationAsJsonLD201() throws JsonProcessingException {
+    void createPresentationAsJsonLD201() throws JsonProcessingException, JSONException {
 
         String bpn = TestUtils.getRandomBpmNumber();
         String didWeb = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
@@ -241,7 +242,7 @@ class PresentationTest {
     }
 
     @Test
-    void createPresentationWithInvalidBPNAccess403() throws JsonProcessingException {
+    void createPresentationWithInvalidBPNAccess403() throws JsonProcessingException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String didWeb = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
 
@@ -257,7 +258,7 @@ class PresentationTest {
     }
 
     @NotNull
-    private Map<String, Object> getIssueVPRequest(String bpn) throws JsonProcessingException {
+    private Map<String, Object> getIssueVPRequest(String bpn) throws JsonProcessingException, JSONException {
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
         ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);
@@ -278,7 +279,7 @@ class PresentationTest {
     }
 
     @NotNull
-    private ResponseEntity<Map> getIssueVPRequestWithShortExpiry(String bpn, String audience) throws JsonProcessingException {
+    private ResponseEntity<Map> getIssueVPRequestWithShortExpiry(String bpn, String audience) throws JsonProcessingException, JSONException {
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
         ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);

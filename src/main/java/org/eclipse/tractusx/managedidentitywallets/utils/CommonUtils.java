@@ -27,6 +27,7 @@ import lombok.experimental.UtilityClass;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -35,6 +36,7 @@ import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
 import org.eclipse.tractusx.ssi.lib.exception.json.TransformJsonLdException;
 import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
 import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureGenerateFailedException;
@@ -182,7 +184,8 @@ public class CommonUtils {
         return objectMapper.convertValue(singleValueMap, SecureTokenRequest.class);
     }
     
-    public static String vcAsJwt(Wallet issuerWallet, Wallet holderWallet, VerifiableCredential vc , WalletKeyService walletKeyService) {
+    @SneakyThrows({DidParseException.class})
+    public static String vcAsJwt(Wallet issuerWallet, Wallet holderWallet, VerifiableCredential vc , WalletKeyService walletKeyService){
 
         Did issuerDid = DidParser.parse(issuerWallet.getDid());
         Did holderDid = DidParser.parse(holderWallet.getDid());
@@ -191,13 +194,14 @@ public class CommonUtils {
         SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()));
 
-        x25519PrivateKey privateKey = walletKeyService.getPrivateKeyByWalletId(issuerWallet.getId());
+        x25519PrivateKey privateKey = (x25519PrivateKey) walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(issuerWallet.getId(), SupportedAlgorithms.ED25519);
         // JWT Factory
 
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, vc,
                 privateKey,
-                walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId()));
-
+                walletKeyService.getWalletKeyIdByWalletId(issuerWallet.getId())
+                
+                );
         return vcJWT.serialize();
     }
 

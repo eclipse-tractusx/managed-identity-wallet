@@ -146,9 +146,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials, SupportedAlgorithms.ED25519);
     }
 
-    @SneakyThrows({ InvalidePrivateKeyFormat.class })
     private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet,
-                                        List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm) {
+                                        List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm){
         Map<String, Object> response = new HashMap<>();
         if (asJwt && algorithm.equals(SupportedAlgorithms.ES256K)) {
             buildVPJwtES256K(audience, callerBpn, callerWallet, verifiableCredentials, algorithm, response);
@@ -174,15 +173,16 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         response.put(StringPool.VP, verifiablePresentation);
     }
 
-    private void buildVPJwtEdDSA(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) throws InvalidePrivateKeyFormat {
+    @SneakyThrows({ InvalidPrivateKeyFormatException.class})
+    private void buildVPJwtEdDSA(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) {
         Pair<Did, Object> result = getPrivateKey(callerWallet, algorithm, audience, callerBpn);
 
         SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), result.getKey());
 
-        x21559PrivateKey ed25519Key = (x21559PrivateKey) result.getRight();
-        x21559PrivateKey privateKey = new x21559PrivateKey(ed25519Key.asByte());
-        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey);
+        x25519PrivateKey ed25519Key = (x25519PrivateKey) result.getRight();
+        x25519PrivateKey privateKey = new x25519PrivateKey(ed25519Key.asByte());
+        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey , "keyId" );
 
         response.put(StringPool.VP, presentation.serialize());
     }
@@ -197,6 +197,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         response.put(StringPool.VP, presentation.serialize());
     }
 
+    @SneakyThrows({ DidParseException.class })
     private Pair<Did, Object> getPrivateKey(Wallet callerWallet, SupportedAlgorithms algorithm, String audience, String callerBpn) {
         log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
         Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
@@ -205,7 +206,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
 
         //Build JWT
-        return Pair.of(vpIssuerDid, walletKeyService.getPrivateKeyByWalletIdentifierAndAlgorithm(callerWallet.getId(), algorithm));
+        return Pair.of(vpIssuerDid, walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(callerWallet.getId(), algorithm));
     }
 
 

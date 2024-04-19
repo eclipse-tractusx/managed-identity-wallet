@@ -32,6 +32,7 @@ import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -175,7 +176,7 @@ class IssuersCredentialServiceTest {
             when(walletKey.getKeyId()).thenReturn(KEY_ID);
             when(walletKey.getId()).thenReturn(42L);
 
-            when(walletKeyService.getPrivateKeyByWalletId(baseWallet.getId()))
+            when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
 
@@ -225,7 +226,7 @@ class IssuersCredentialServiceTest {
             when(walletKey.getKeyId()).thenReturn(KEY_ID);
             when(walletKey.getId()).thenReturn(42L);
 
-            when(walletKeyService.getPrivateKeyByWalletId(baseWallet.getId()))
+            when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
 
@@ -264,7 +265,7 @@ class IssuersCredentialServiceTest {
             when(walletKey.getKeyId()).thenReturn(KEY_ID);
             when(walletKey.getId()).thenReturn(42L);
 
-            when(walletKeyService.getPrivateKeyByWalletId(baseWallet.getId()))
+            when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
 
@@ -298,7 +299,7 @@ class IssuersCredentialServiceTest {
                     MockUtil.generateDid("basewallet")).build();
 
             MockUtil.makeCreateWorkForIssuer(issuersCredentialRepository);
-            when(walletKeyService.getPrivateKeyByWalletIdAsBytes(any(Long.class))).thenReturn(keyPair.getPrivateKey()
+            when(walletKeyService.getPrivateKeyByWalletIdAsBytes(any(Long.class) , SupportedAlgorithms.ED25519.toString())).thenReturn(keyPair.getPrivateKey()
                     .asByte());
             when(commonService.getWalletByIdentifier(holderWalletBpn)).thenReturn(holderWallet);
             when(commonService.getWalletByIdentifier(verifiableCredential.getIssuer()
@@ -317,7 +318,7 @@ class IssuersCredentialServiceTest {
             WalletKey walletKey = mock(WalletKey.class);
             when(walletKey.getKeyId()).thenReturn(KEY_ID);
             when(walletKey.getId()).thenReturn(42L);
-            when(walletKeyService.getPrivateKeyByWalletId(baseWallet.getId()))
+            when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
                     .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
 
@@ -431,7 +432,7 @@ class IssuersCredentialServiceTest {
         when(miwSettings.authorityWalletBpn()).thenReturn(baseWalletBpn);
         when(commonService.getWalletByIdentifier(baseWalletBpn)).thenReturn(baseWallet);
         when(commonService.getWalletByIdentifier(holderWalletBpn)).thenReturn(holderWallet);
-        when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId()))
+        when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId() ,baseWallet.getAlgorithm()))
                 .thenReturn(keyPair.getPrivateKey().asByte());
         when(miwSettings.supportedFrameworkVCTypes()).thenReturn(Set.of("SustainabilityCredential"));
         when(holdersCredentialRepository.save(any(HoldersCredential.class)))

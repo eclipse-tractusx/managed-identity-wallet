@@ -98,7 +98,7 @@ class MembershipHoldersCredentialTest {
     }
 
     @Test
-    void testIssueSummeryVCAfterDeleteSummaryVCFromHolderWallet() throws JsonProcessingException {
+    void testIssueSummeryVCAfterDeleteSummaryVCFromHolderWallet() throws JsonProcessingException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String baseBpn = miwSettings.authorityWalletBpn();
@@ -128,7 +128,7 @@ class MembershipHoldersCredentialTest {
     }
 
     @Test
-    void testStoredSummaryVCTest() throws JsonProcessingException {
+    void testStoredSummaryVCTest() throws JsonProcessingException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String baseBpn = miwSettings.authorityWalletBpn();
@@ -192,7 +192,7 @@ class MembershipHoldersCredentialTest {
     }
 
     @Test
-    void issueMembershipCredentialToBaseWalletTest400() throws JsonProcessingException {
+    void issueMembershipCredentialToBaseWalletTest400() throws JsonProcessingException, JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String baseBpn = miwSettings.authorityWalletBpn();
 

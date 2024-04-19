@@ -191,7 +191,7 @@ class FrameworkHoldersCredentialTest {
 
     }
 
-    private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException {
+    private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException, JSONException {
         //create wallet
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
