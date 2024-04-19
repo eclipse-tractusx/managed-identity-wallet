@@ -32,7 +32,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
@@ -75,8 +75,8 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     @SneakyThrows
     public byte[] getPrivateKeyByWalletIdAsBytes(long walletId, String algorithm) {
         Object privateKey = getPrivateKeyByWalletIdAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
-        if (privateKey instanceof x25519PrivateKey x25519PrivateKey) {
-            return x25519PrivateKey.asByte();
+        if (privateKey instanceof X25519PrivateKey X25519PrivateKey) {
+            return X25519PrivateKey.asByte();
         } else {
             return ((ECPrivateKey) privateKey).getEncoded();
         }
@@ -95,7 +95,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
         if (SupportedAlgorithms.ED25519.equals(algorithm)) {
-            return new x25519PrivateKey(content);
+            return new X25519PrivateKey(content);
         } else if (SupportedAlgorithms.ES256K.equals(algorithm)) {
             KeyFactory kf = KeyFactory.getInstance(EC);
             return kf.generatePrivate(new PKCS8EncodedKeySpec(content));

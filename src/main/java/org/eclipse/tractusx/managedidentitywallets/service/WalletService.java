@@ -49,7 +49,7 @@ import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519Generator;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
@@ -236,7 +236,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         validateCreateWallet(request, callerBpn);
 
         //create private key pair
-        IKeyGenerator keyGenerator = new x25519Generator();
+        IKeyGenerator keyGenerator = new X25519Generator();
         KeyPair keyPair = keyGenerator.generateKey();
 
         //create did json

@@ -34,7 +34,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
 import org.eclipse.tractusx.ssi.lib.exception.json.TransformJsonLdException;
 import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
@@ -157,7 +157,7 @@ public class CommonUtils {
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
 
         JWSSignature2020 proof = new JWSSignature2020(generator.createProof(builder.build(), verificationMethod,
-                new x25519PrivateKey(privateKey)));
+                new X25519PrivateKey(privateKey)));
 
         // Adding Proof to VC
         builder.proof(proof);
@@ -192,7 +192,7 @@ public class CommonUtils {
         SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()));
 
-        x25519PrivateKey privateKey = (x25519PrivateKey) walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(issuerWallet.getId(), SupportedAlgorithms.ED25519);
+        X25519PrivateKey privateKey = (X25519PrivateKey) walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(issuerWallet.getId(), SupportedAlgorithms.ED25519);
         // JWT Factory
 
         SignedJWT vcJWT = vcFactory.createVCJwt(issuerDid, holderDid, vc,

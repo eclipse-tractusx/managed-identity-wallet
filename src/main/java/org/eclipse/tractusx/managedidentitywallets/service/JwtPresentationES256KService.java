@@ -58,7 +58,7 @@ import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
-import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializer;
+import org.eclipse.tractusx.ssi.lib.serialization.jsonld.JsonLdSerializer;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

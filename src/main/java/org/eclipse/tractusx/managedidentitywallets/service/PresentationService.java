@@ -46,7 +46,7 @@ import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesExcep
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
 import org.eclipse.tractusx.ssi.lib.exception.json.InvalidJsonLdException;
@@ -62,7 +62,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePres
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializerImpl;
+import org.eclipse.tractusx.ssi.lib.serialization.jsonld.JsonLdSerializerImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresentation;
@@ -180,8 +180,8 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), result.getKey());
 
-        x25519PrivateKey ed25519Key = (x25519PrivateKey) result.getRight();
-        x25519PrivateKey privateKey = new x25519PrivateKey(ed25519Key.asByte());
+        X25519PrivateKey ed25519Key = (X25519PrivateKey) result.getRight();
+        X25519PrivateKey privateKey = new X25519PrivateKey(ed25519Key.asByte());
         SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey , "keyId" );
 
         response.put(StringPool.VP, presentation.serialize());

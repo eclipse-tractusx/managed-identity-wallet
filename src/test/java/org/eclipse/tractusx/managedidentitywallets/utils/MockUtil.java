@@ -31,7 +31,7 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.ssi.lib.crypt.IPublicKey;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519Generator;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519Generator;
 import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
 import org.eclipse.tractusx.ssi.lib.exception.key.KeyGenerationException;
 import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
@@ -253,7 +253,7 @@ public class MockUtil {
     }
 
     public static KeyPair generateEDKeys() {
-        x25519Generator gen = new x25519Generator();
+        X25519Generator gen = new X25519Generator();
         KeyPair baseWalletKeys;
         try {
             baseWalletKeys = gen.generateKey();

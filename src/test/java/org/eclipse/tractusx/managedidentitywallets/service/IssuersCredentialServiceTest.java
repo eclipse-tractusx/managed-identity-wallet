@@ -48,7 +48,7 @@ import org.eclipse.tractusx.managedidentitywallets.utils.MockUtil;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.x25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
 import org.eclipse.tractusx.ssi.lib.exception.did.DidResolverException;
@@ -177,7 +177,7 @@ class IssuersCredentialServiceTest {
             when(walletKey.getId()).thenReturn(42L);
             when(baseWallet.getAlgorithm()).thenReturn("ED25519");
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
-                    .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
+                    .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
             when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId() , "ED25519")).thenReturn(keyPair.getPrivateKey()
                     .asByte());
@@ -230,7 +230,7 @@ class IssuersCredentialServiceTest {
             when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId() , "ED25519")).thenReturn(keyPair.getPrivateKey()
                     .asByte());
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
-                    .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
+                    .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
 
             CredentialsResponse credentialsResponse = assertDoesNotThrow(
@@ -269,7 +269,7 @@ class IssuersCredentialServiceTest {
             when(walletKey.getId()).thenReturn(42L);
             when(baseWallet.getAlgorithm()).thenReturn("ED25519");
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
-                    .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
+                    .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId() , "ED25519")).thenReturn(keyPair.getPrivateKey()
             .asByte());
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
@@ -324,7 +324,7 @@ class IssuersCredentialServiceTest {
             when(baseWallet.getAlgorithm()).thenReturn("ED25519");
             when(walletKey.getId()).thenReturn(42L);
             when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId() ,SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
-                    .thenReturn(new x25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
+                    .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId())).thenReturn(walletKeyId);
 
             CredentialsResponse credentialsResponse = assertDoesNotThrow(
