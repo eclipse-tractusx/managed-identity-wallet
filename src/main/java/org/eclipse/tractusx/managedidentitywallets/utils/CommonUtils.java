@@ -31,7 +31,6 @@ import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
@@ -64,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -158,8 +156,8 @@ public class CommonUtils {
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
 
-        JWSSignature2020 proof = (JWSSignature2020) generator.createProof(builder.build(), verificationMethod,
-                new x25519PrivateKey(privateKey));
+        JWSSignature2020 proof = new JWSSignature2020(generator.createProof(builder.build(), verificationMethod,
+                new x25519PrivateKey(privateKey)));
 
         // Adding Proof to VC
         builder.proof(proof);
