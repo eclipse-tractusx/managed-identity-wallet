@@ -203,8 +203,7 @@ public class IssuersCredentialControllerApiDocs {
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                   "bpn": "BPNL000000000000",
-                                   "asJwt": false
+                                   "bpn": "BPNL000000000000"
                                  }
                     """))
     })
@@ -331,8 +330,7 @@ public class IssuersCredentialControllerApiDocs {
                                    "activityType": "vehicleDismantle",
                                    "allowedVehicleBrands": [
                                      "Audi", "Abarth", "Alfa Romeo", "Chrysler"
-                                   ],
-                                    "asJwt": false
+                                   ]
                                  }
                     """))
     })
@@ -464,8 +462,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0",
-                                                              "asJwt": false
+                                                              "contract-version": "1.0.0"
                                                             }
                             """),
                     @ExampleObject(name = "PcfCredential", value = """
@@ -473,8 +470,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "PcfCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0",
-                                                              "asJwt": false
+                                                              "contract-version": "1.0.0"
                                                             }
                             """),
                     @ExampleObject(name = "SustainabilityCredential", value = """
@@ -482,8 +478,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "SustainabilityCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0",
-                                                              "asJwt": false
+                                                              "contract-version": "1.0.0"
                                                             }
                             """),
                     @ExampleObject(name = "QualityCredential", value = """
@@ -491,8 +486,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "QualityCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0",
-                                                              "asJwt": false
+                                                              "contract-version": "1.0.0"
                                                             }
                             """),
                     @ExampleObject(name = "TraceabilityCredential", value = """
@@ -500,8 +494,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "TraceabilityCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0",
-                                                              "asJwt": false
+                                                              "contract-version": "1.0.0"
                                                             }
                             """),
                     @ExampleObject(name = "BehaviorTwinCredential", value = """
@@ -509,8 +502,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0",
-                                                              "asJwt": false
+                                                              "contract-version": "1.0.0"
                                                             }
                             """),
                     @ExampleObject(name = "ResiliencyCredential", value = """
@@ -518,8 +510,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "ResiliencyCredential",
                                                               "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                                                              "contract-version": "1.0.0",
-                                                              "asJwt": false
+                                                              "contract-version": "1.0.0"
                                                             }
                             """)
 
