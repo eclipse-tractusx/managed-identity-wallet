@@ -180,7 +180,6 @@ public class CommonUtils {
         Map<String, String> singleValueMap = map.toSingleValueMap();
         return objectMapper.convertValue(singleValueMap, SecureTokenRequest.class);
     }
-
     @SneakyThrows({DidParseException.class})
     public static String vcAsJwt(Wallet issuerWallet, Wallet holderWallet, VerifiableCredential vc , WalletKeyService walletKeyService){
 

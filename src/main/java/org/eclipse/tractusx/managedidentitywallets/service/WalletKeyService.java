@@ -114,5 +114,4 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     public String getWalletKeyIdByWalletId(long walletId) {
         return walletKeyRepository.getByWalletId(walletId).getKeyId();
     }
-
 }
