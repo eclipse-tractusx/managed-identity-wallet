@@ -289,7 +289,6 @@ class IssuersCredentialServiceTest {
             Map<String, Object> wallets = mockBaseAndHolderWallet();
             Wallet baseWallet = (Wallet) wallets.get("base");
             String baseWalletBpn = baseWallet.getBpn();
-            String baseWalletDid = baseWallet.getDid();
             Wallet holderWallet = (Wallet) wallets.get("holder");
             String holderWalletBpn = holderWallet.getBpn();
             String walletKeyId = "key-1";
