@@ -203,8 +203,7 @@ public class IssuersCredentialControllerApiDocs {
     @RequestBody(content = {
             @Content(examples = @ExampleObject("""
                                 {
-                                   "bpn": "BPNL000000000000",
-                                   "asJwt": false
+                                   "bpn": "BPNL000000000000"
                                  }
                     """))
     })
@@ -331,8 +330,7 @@ public class IssuersCredentialControllerApiDocs {
                                    "activityType": "vehicleDismantle",
                                    "allowedVehicleBrands": [
                                      "Audi", "Abarth", "Alfa Romeo", "Chrysler"
-                                   ],
-                                    "asJwt": false
+                                   ]
                                  }
                     """))
     })
@@ -482,7 +480,7 @@ public class IssuersCredentialControllerApiDocs {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "SustainabilityCredential",
                                                               "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
-                                                              "contract-version": "1.0.0",
+                                                             "contract-version": "1.0.0",
                                                               "asJwt": false
                                                             }
                             """),
