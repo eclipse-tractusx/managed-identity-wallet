@@ -37,7 +37,6 @@ import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
@@ -184,7 +183,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         X25519PrivateKey ed25519Key = (X25519PrivateKey) result.getRight();
         X25519PrivateKey privateKey = new X25519PrivateKey(ed25519Key.asByte());
         SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey , keyId);
-
         response.put(StringPool.VP, presentation.serialize());
     }
 

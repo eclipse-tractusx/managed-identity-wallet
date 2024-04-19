@@ -237,7 +237,6 @@ public class WalletService extends BaseService<Wallet, Long> {
 
         //create private key pair
         IKeyGenerator keyGenerator = new X25519Generator();
-
         KeyPair keyPair = keyGenerator.generateKey();
 
         //create did json
