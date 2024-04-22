@@ -176,13 +176,14 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     @SneakyThrows({ InvalidPrivateKeyFormatException.class})
     private void buildVPJwtEdDSA(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) {
         Pair<Did, Object> result = getPrivateKey(callerWallet, algorithm, audience, callerBpn);
+        String keyId = walletKeyService.getWalletKeyIdByWalletId(callerWallet.getId());
 
         SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), result.getKey());
 
         X25519PrivateKey ed25519Key = (X25519PrivateKey) result.getRight();
         X25519PrivateKey privateKey = new X25519PrivateKey(ed25519Key.asByte());
-        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey , "keyId" );
+        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey , keyId);
 
         response.put(StringPool.VP, presentation.serialize());
     }
