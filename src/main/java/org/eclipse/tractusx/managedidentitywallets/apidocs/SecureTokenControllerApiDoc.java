@@ -130,7 +130,11 @@ public class SecureTokenControllerApiDoc {
                     })
             })
     })
-    @Operation(summary = "Create and Sign Access Tokens", description = "The endpoint for creating and signing access tokens which are to be used during a verifiable presentation flow.")
-    public @interface PostSecureTokenDoc {
+    @Operation(summary = "Create and Sign Access Tokens", description = "The endpoint for creating and signing access tokens which are to be used during a verifiable presentation flow.", method = "tokenJson")
+    public @interface PostSecureTokenDocJson {
+    }
+
+    @Operation(summary = "Create and Sign Access Tokens", description = "The endpoint for creating and signing access tokens which are to be used during a verifiable presentation flow.", method = "tokenFormUrlencoded")
+    public @interface PostSecureTokenDocFormUrlencoded {
     }
 }
