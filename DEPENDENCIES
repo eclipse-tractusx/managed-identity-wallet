@@ -121,9 +121,9 @@ maven/mavencentral/org.eclipse.angus/angus-activation/2.0.1, EPL-2.0 OR GPL-2.0-
 maven/mavencentral/org.eclipse.microprofile.config/microprofile-config-api/2.0, Apache-2.0, approved, technology.microprofile
 maven/mavencentral/org.eclipse.parsson/parsson/1.1.5, EPL-2.0, approved, ee4j.parsson
 maven/mavencentral/org.eclipse.tractusx.ssi/cx-ssi-lib/0.0.18, Apache-2.0, approved, automotive.tractusx
-maven/mavencentral/org.glassfish.jaxb/jaxb-core/4.0.4, BSD-3-Clause, approved, ee4j.jaxb
-maven/mavencentral/org.glassfish.jaxb/jaxb-runtime/4.0.4, BSD-3-Clause, approved, ee4j.jaxb
-maven/mavencentral/org.glassfish.jaxb/txw2/4.0.4, BSD-3-Clause, approved, ee4j.jaxb
+maven/mavencentral/org.glassfish.jaxb/jaxb-core/4.0.4, BSD-3-Clause, approved, ee4j.jaxb-impl
+maven/mavencentral/org.glassfish.jaxb/jaxb-runtime/4.0.4, BSD-3-Clause, approved, ee4j.jaxb-impl
+maven/mavencentral/org.glassfish.jaxb/txw2/4.0.4, BSD-3-Clause, approved, ee4j.jaxb-impl
 maven/mavencentral/org.hamcrest/hamcrest-core/2.2, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.hamcrest/hamcrest/2.2, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.hdrhistogram/HdrHistogram/2.1.12, BSD-2-Clause OR LicenseRef-Public-Domain, approved, CQ13192

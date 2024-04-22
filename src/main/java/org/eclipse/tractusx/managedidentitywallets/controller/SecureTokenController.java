@@ -51,6 +51,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -59,9 +60,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getSecureTokenRequest;
 
 
 @RestController
@@ -94,6 +98,20 @@ public class SecureTokenController {
     public ResponseEntity<StsTokenResponse> token(
             @Valid @RequestBody SecureTokenRequest secureTokenRequest
     ) {
+        return processTokenRequest(secureTokenRequest);
+    }
+
+    @SneakyThrows
+    @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @SecureTokenControllerApiDoc.PostSecureTokenDoc
+    public ResponseEntity<StsTokenResponse> token(
+            @Valid @RequestBody MultiValueMap<String, String> requestParameters
+    ) {
+        final SecureTokenRequest secureTokenRequest = getSecureTokenRequest(requestParameters);
+        return processTokenRequest(secureTokenRequest);
+    }
+
+    private ResponseEntity<StsTokenResponse> processTokenRequest(SecureTokenRequest secureTokenRequest) throws ParseException {
         // handle idp authorization
         IdpTokenResponse idpResponse = idpAuthorization.fromSecureTokenRequest(secureTokenRequest);
         BusinessPartnerNumber bpn = idpResponse.bpn();
