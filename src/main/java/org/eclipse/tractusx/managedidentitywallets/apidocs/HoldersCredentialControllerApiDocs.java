@@ -82,7 +82,7 @@ public class HoldersCredentialControllerApiDocs {
                                                                             "@context":
                                                                             [
                                                                                 "https://www.w3.org/2018/credentials/v1",
-                                                                                "https://catenax-ng.github.io/product-core-schemas/SummaryVC.json",
+                                                                                "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                                                 "https://w3id.org/security/suites/jws-2020/v1"
                                                                             ],
                                                                             "id": "did:web:localhost:BPNL000000000000#954d43de-ebed-481d-9e35-e3bbb311b8f5",
@@ -162,7 +162,7 @@ public class HoldersCredentialControllerApiDocs {
                                                     "@context":
                                                     [
                                                         "https://www.w3.org/2018/credentials/v1",
-                                                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                        "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                         "https://w3id.org/security/suites/jws-2020/v1"
                                                     ],
                                                     "id": "did:web:localhost:BPNL000000000000#319a2641-9407-4c39-bf51-a4a109b59604",
@@ -256,7 +256,7 @@ public class HoldersCredentialControllerApiDocs {
                                 {
                                   "@context": [
                                     "https://www.w3.org/2018/credentials/v1",
-                                    "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                    "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                     "https://w3id.org/security/suites/jws-2020/v1"
                                   ],
                                   "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",

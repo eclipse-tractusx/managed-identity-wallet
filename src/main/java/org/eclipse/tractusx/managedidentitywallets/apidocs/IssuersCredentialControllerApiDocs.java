@@ -76,7 +76,7 @@ public class IssuersCredentialControllerApiDocs {
                                           {
                                             "@context": [
                                               "https://www.w3.org/2018/credentials/v1",
-                                              "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                              "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                               "https://w3id.org/security/suites/jws-2020/v1"
                                             ],
                                             "id": "did:web:localhost:BPNL000000000000#ae364f71-f054-4d91-b579-f001bcb3e59e",
@@ -109,7 +109,7 @@ public class IssuersCredentialControllerApiDocs {
                                             ],
                                             "@context": [
                                               "https://www.w3.org/2018/credentials/v1",
-                                              "https://catenax-ng.github.io/product-core-schemas/SummaryVC.json",
+                                              "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                               "https://w3id.org/security/suites/jws-2020/v1"
                                             ],
                                             "issuer": "did:web:localhost:BPNL000000000000",
@@ -137,7 +137,7 @@ public class IssuersCredentialControllerApiDocs {
                                           {
                                             "@context": [
                                               "https://www.w3.org/2018/credentials/v1",
-                                              "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                              "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                               "https://w3id.org/security/suites/jws-2020/v1"
                                             ],
                                             "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
@@ -285,7 +285,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#0d6b6447-99de-4bc5-94f3-3ac0ae8ee188",
@@ -412,7 +412,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                         "@context": [
                                           "https://www.w3.org/2018/credentials/v1",
-                                          "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                          "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                           "https://w3id.org/security/suites/jws-2020/v1"
                                         ],
                                         "id": "did:web:localhost:BPNL000000000000#5caac86c-8ef8-4aab-9d2b-fb18c62560a9",
@@ -461,7 +461,7 @@ public class IssuersCredentialControllerApiDocs {
                                                             {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
-                                                              "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                              "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                               "contract-version": "1.0.0"
                                                             }
                             """),
@@ -469,7 +469,7 @@ public class IssuersCredentialControllerApiDocs {
                                                             {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "PcfCredential",
-                                                              "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                              "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                               "contract-version": "1.0.0"
                                                             }
                             """),
@@ -477,7 +477,7 @@ public class IssuersCredentialControllerApiDocs {
                                                             {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "SustainabilityCredential",
-                                                              "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                              "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                               "contract-version": "1.0.0"
                                                             }
                             """),
@@ -485,7 +485,7 @@ public class IssuersCredentialControllerApiDocs {
                                                             {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "QualityCredential",
-                                                              "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                              "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                               "contract-version": "1.0.0"
                                                             }
                             """),
@@ -493,7 +493,7 @@ public class IssuersCredentialControllerApiDocs {
                                                             {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "TraceabilityCredential",
-                                                              "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                              "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                               "contract-version": "1.0.0"
                                                             }
                             """),
@@ -501,7 +501,7 @@ public class IssuersCredentialControllerApiDocs {
                                                             {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "BehaviorTwinCredential",
-                                                              "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                              "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                               "contract-version": "1.0.0"
                                                             }
                             """),
@@ -509,7 +509,7 @@ public class IssuersCredentialControllerApiDocs {
                                                             {
                                                               "holderIdentifier": "BPNL000000000000",
                                                               "type": "ResiliencyCredential",
-                                                              "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                                              "contract-template": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                               "contract-version": "1.0.0"
                                                             }
                             """)
@@ -580,7 +580,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
@@ -596,7 +596,7 @@ public class IssuersCredentialControllerApiDocs {
                                            "holderIdentifier": "BPNL000000000000",
                                            "id": "did:web:localhost:BPNL000000000000",
                                            "type": "BehaviorTwinCredential",
-                                           "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                           "contractTemplate": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "contractVersion": "1.0.0"
                                          }
                                        ],
@@ -613,7 +613,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
@@ -629,7 +629,7 @@ public class IssuersCredentialControllerApiDocs {
                                            "holderIdentifier": "BPNL000000000000",
                                            "id": "did:web:localhost:BPNL000000000000",
                                            "type": "PcfCredential",
-                                           "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                           "contractTemplate": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "contractVersion": "1.0.0"
                                          }
                                        ],
@@ -646,7 +646,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
@@ -662,7 +662,7 @@ public class IssuersCredentialControllerApiDocs {
                                            "holderIdentifier": "BPNL000000000000",
                                            "id": "did:web:localhost:BPNL000000000000",
                                            "type": "SustainabilityCredential",
-                                           "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                           "contractTemplate": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "contractVersion": "1.0.0"
                                          }
                                        ],
@@ -679,7 +679,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
@@ -695,7 +695,7 @@ public class IssuersCredentialControllerApiDocs {
                                            "holderIdentifier": "BPNL000000000000",
                                            "id": "did:web:localhost:BPNL000000000000",
                                            "type": "QualityCredential",
-                                           "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                           "contractTemplate": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "contractVersion": "1.0.0"
                                          }
                                        ],
@@ -712,7 +712,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
@@ -728,7 +728,7 @@ public class IssuersCredentialControllerApiDocs {
                                            "holderIdentifier": "BPNL000000000000",
                                            "id": "did:web:localhost:BPNL000000000000",
                                            "type": "TraceabilityCredential",
-                                           "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                           "contractTemplate": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "contractVersion": "1.0.0"
                                          }
                                        ],
@@ -745,7 +745,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
@@ -761,7 +761,7 @@ public class IssuersCredentialControllerApiDocs {
                                            "holderIdentifier": "BPNL000000000000",
                                            "id": "did:web:localhost:BPNL000000000000",
                                            "type": "ResiliencyCredential",
-                                           "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
+                                           "contractTemplate": "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "contractVersion": "1.0.0"
                                          }
                                        ],
@@ -831,7 +831,7 @@ public class IssuersCredentialControllerApiDocs {
                                          ],
                                          "@context": [
                                            "https://www.w3.org/2018/credentials/v1",
-                                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                           "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "https://w3id.org/security/suites/jws-2020/v1"
                                          ],
                                          "issuer": "did:web:localhost:BPNL000000000000",
@@ -866,7 +866,7 @@ public class IssuersCredentialControllerApiDocs {
                                          ],
                                          "@context": [
                                            "https://www.w3.org/2018/credentials/v1",
-                                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                           "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "https://w3id.org/security/suites/jws-2020/v1"
                                          ],
                                          "issuer": "did:web:localhost:BPNL000000000000",
@@ -901,7 +901,7 @@ public class IssuersCredentialControllerApiDocs {
                                          ],
                                          "@context": [
                                            "https://www.w3.org/2018/credentials/v1",
-                                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                           "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                            "https://w3id.org/security/suites/jws-2020/v1"
                                          ],
                                          "issuer": "did:web:localhost:BPNL000000000000",
@@ -944,7 +944,7 @@ public class IssuersCredentialControllerApiDocs {
                                           ],
                                           "@context": [
                                             "https://www.w3.org/2018/credentials/v1",
-                                            "https://cofinity-x.github.io/schema-registry/v1.1/DismantlerVC.json",
+                                            "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                             "https://w3id.org/security/suites/jws-2020/v1",
                                             "https://w3id.org/vc/status-list/2021/v1"
                                           ],
@@ -968,7 +968,7 @@ public class IssuersCredentialControllerApiDocs {
                                              "@context":
                                              [
                                                  "https://www.w3.org/2018/credentials/v1",
-                                                 "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                 "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                  "https://w3id.org/security/suites/jws-2020/v1"
                                              ],
                                              "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
@@ -1007,7 +1007,7 @@ public class IssuersCredentialControllerApiDocs {
                                 {
                                   "@context": [
                                     "https://www.w3.org/2018/credentials/v1",
-                                    "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                    "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                     "https://w3id.org/security/suites/jws-2020/v1"
                                   ],
                                   "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
@@ -1110,7 +1110,7 @@ public class IssuersCredentialControllerApiDocs {
                                      {
                                        "@context": [
                                          "https://www.w3.org/2018/credentials/v1",
-                                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                         "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                          "https://w3id.org/security/suites/jws-2020/v1"
                                        ],
                                        "id": "did:web:localhost:BPNL000000000000#ff084e7a-1b46-4a2f-a78d-3d701a0bd6e4",
@@ -1145,7 +1145,7 @@ public class IssuersCredentialControllerApiDocs {
                                 {
                                   "@context": [
                                     "https://www.w3.org/2018/credentials/v1",
-                                    "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                    "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                     "https://w3id.org/security/suites/jws-2020/v1"
                                   ],
                                   "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",

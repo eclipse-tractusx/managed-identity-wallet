@@ -75,7 +75,7 @@ public class PresentationControllerApiDocs {
                                                     "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                                     "@context": [
                                                       "https://www.w3.org/2018/credentials/v1",
-                                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                      "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                       "https://w3id.org/security/suites/jws-2020/v1"
                                                     ],
                                                     "type": [
@@ -121,7 +121,7 @@ public class PresentationControllerApiDocs {
                                             "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                             "@context": [
                                               "https://www.w3.org/2018/credentials/v1",
-                                              "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                              "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                               "https://w3id.org/security/suites/jws-2020/v1"
                                             ],
                                             "type": [
@@ -252,7 +252,7 @@ public class PresentationControllerApiDocs {
                                                               "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                                               "@context": [
                                                                 "https://www.w3.org/2018/credentials/v1",
-                                                                "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                                "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                                 "https://w3id.org/security/suites/jws-2020/v1"
                                                               ],
                                                               "type": [
@@ -343,7 +343,7 @@ public class PresentationControllerApiDocs {
                                                     "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
                                                     "@context": [
                                                       "https://www.w3.org/2018/credentials/v1",
-                                                      "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                      "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                       "https://w3id.org/security/suites/jws-2020/v1"
                                                     ],
                                                     "type": [

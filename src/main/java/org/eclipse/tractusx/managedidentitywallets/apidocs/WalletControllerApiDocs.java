@@ -377,7 +377,7 @@ public class WalletControllerApiDocs {
                                                     "@context":
                                                     [
                                                         "https://www.w3.org/2018/credentials/v1",
-                                                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
+                                                        "https://eclipse-tractusx.github.io/tractusx-profiles/cx/context/credentials.context.json",
                                                         "https://w3id.org/security/suites/jws-2020/v1"
                                                     ],
                                                     "id": "did:web:localhost:BPNL000000000000#a1f8ae36-9919-4ed8-8546-535280acc5bf",
