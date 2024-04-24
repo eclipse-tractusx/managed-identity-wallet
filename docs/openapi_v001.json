@@ -15,20 +15,7 @@
     },
     "version": "0.0.1"
   },
-  "servers": [
-    {
-      "url": "http://localhost:8000",
-      "description": "Generated server url"
-    }
-  ],
-  "security": [
-    {
-      "Authenticate using access_token": []
-    },
-    {
-      "sts_token": []
-    }
-  ],
+  "servers": [],
   "paths": {
     "/api/wallets": {
       "get": {
@@ -1129,6 +1116,7 @@
             "required": false,
             "schema": {
               "type": "array",
+              "maxItems": 100,
               "items": {
                 "type": "string"
               }
@@ -1955,6 +1943,7 @@
             "required": false,
             "schema": {
               "type": "array",
+              "maxItems": 100,
               "items": {
                 "type": "string"
               }
@@ -3955,6 +3944,7 @@
           },
           "allowedVehicleBrands": {
             "uniqueItems": true,
+            "maxItems": 100,
             "type": "array",
             "items": {
               "type": "string"
