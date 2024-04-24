@@ -15,6 +15,10 @@
     },
     "version": "0.0.1"
   },
+  "security": [
+    {"Authenticate using access_token": []},
+    {"sts_token": []}
+  ],
   "servers": [],
   "paths": {
     "/api/wallets": {
