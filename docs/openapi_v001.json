@@ -671,8 +671,7 @@
               }
             }
           }
-        },
-        "security": []
+        }
       }
     },
     "/api/presentations": {
