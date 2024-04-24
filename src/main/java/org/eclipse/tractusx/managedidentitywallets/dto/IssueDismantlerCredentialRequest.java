@@ -49,5 +49,4 @@ public class IssueDismantlerCredentialRequest {
 
     @Builder.Default
     private Set<@NotBlank String> allowedVehicleBrands = Set.of();
-
 }
