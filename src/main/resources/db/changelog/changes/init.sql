@@ -81,3 +81,5 @@ ALTER TABLE public.wallet_key ADD key_id varchar(255) NULL;
 
 --changeset pmanaras:3
 ALTER TABLE public.wallet ADD signing_service_type VARCHAR(255) NOT NULL DEFAULT 'LOCAL';
+
+

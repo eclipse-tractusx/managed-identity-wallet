@@ -154,7 +154,6 @@ public class JwtPresentationES256KService {
             walletRepository.save(wallet);
 
             WalletKey walletKeyES256K = WalletKey.builder()
-                    //.wallet(wallet)
                     .keyId(keyId)
                     .referenceKey(REFERENCE_KEY)
                     .vaultAccessToken(VAULT_ACCESS_TOKEN)

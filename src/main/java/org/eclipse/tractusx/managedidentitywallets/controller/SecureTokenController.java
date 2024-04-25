@@ -86,11 +86,6 @@ public class SecureTokenController {
         webDataBinder.addValidators(new SecureTokenRequestValidator());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public void handle(HttpMessageNotReadableException e) {
-        log.warn("##### Returning HTTP 400 Bad Request", e);
-    }
 
     @SneakyThrows
     @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
