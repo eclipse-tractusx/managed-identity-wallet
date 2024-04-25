@@ -71,7 +71,6 @@ public class WalletKey extends MIWBaseEntity {
     private String publicKey;
 
     @ManyToOne
-    // @MapsId
     @JoinColumn(name = "wallet_id", columnDefinition = "bigint")
     @JsonBackReference
     private Wallet wallet;
@@ -83,18 +82,5 @@ public class WalletKey extends MIWBaseEntity {
 
     public KeyPair toDto() {
         return new KeyPair(keyId, privateKey, publicKey);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WalletKey walletKey = (WalletKey) o;
-        return Objects.equals(id, walletKey.id) && Objects.equals(keyId, walletKey.keyId) && Objects.equals(algorithm, walletKey.algorithm);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, keyId, algorithm);
     }
 }
