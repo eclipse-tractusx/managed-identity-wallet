@@ -1,17 +1,4 @@
-# [1.0.0-develop.2](https://github.com/Cofinity-X/upstream-managed-identity-wallet/compare/v1.0.0-develop.1...v1.0.0-develop.2) (2024-04-22)
-
-
-### Bug Fixes
-
-* fix object name ([59ccdb2](https://github.com/Cofinity-X/upstream-managed-identity-wallet/commit/59ccdb2e1b15633d7de442691d851a6a7d134025))
-
-
-### Features
-
-* added body type to /token endpoint ([6a67c92](https://github.com/Cofinity-X/upstream-managed-identity-wallet/commit/6a67c9266170d77d5161ea38f6e9a8fc76a213ba))
-
 # [0.5.0-develop.13](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.12...v0.5.0-develop.13) (2024-04-18)
-
 
 ### Bug Fixes
 
