@@ -49,12 +49,13 @@ import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559Generator;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
-import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethodBuilder;
+import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -65,6 +66,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +76,12 @@ import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.CO
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
+import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getJwkVerificationMethod;
 import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
+import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_CURVE;
+import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_KEK_TYPE;
+import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_X;
+import static org.springframework.security.oauth2.jwt.JoseHeaderNames.KID;
 
 /**
  * The type Wallet service.
@@ -236,7 +243,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         validateCreateWallet(request, callerBpn);
 
         //create private key pair EdDSA
-        IKeyGenerator keyGenerator = new x21559Generator();
+        IKeyGenerator keyGenerator = new X25519Generator();
         KeyPair keyPair = keyGenerator.generateKey();
 
         //create did json
@@ -245,10 +252,11 @@ public class WalletService extends BaseService<Wallet, Long> {
         String keyId = UUID.randomUUID().toString();
 
         JsonWebKey jwk = new JsonWebKey(keyId, keyPair.getPublicKey(), keyPair.getPrivateKey());
-        JWKVerificationMethod jwkVerificationMethod =
-                new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
+        Map<String, String> publicKeyJwk = Map.of(JWK_KEK_TYPE, jwk.getKeyType(), JWK_CURVE,
+                jwk.getCurv(), JWK_X, jwk.getX(),  KID, jwk.getKeyID());
+        JWKVerificationMethod jwkVerificationMethod = getJwkVerificationMethod(publicKeyJwk, did, keyId);
 
-        DidDocument didDocument = jwtPresentationES256KService.buildDidDocument(request.getBusinessPartnerNumber(), did, List.of(jwkVerificationMethod));
+        DidDocument didDocument = buildDidDocument(request.getBusinessPartnerNumber(), did, jwkVerificationMethod);
 
         //Save wallet
         Wallet wallet = create(Wallet.builder()
@@ -289,6 +297,33 @@ public class WalletService extends BaseService<Wallet, Long> {
             String[] splitByLast = { didUrl.substring(0, i), didUrl.substring(i + 1) };
             return DidWebFactory.fromHostnameAndPath(splitByLast[0], splitByLast[1]);
         }
+    }
+
+    private DidDocument buildDidDocument(String bpn, Did did, VerificationMethod jwkVerificationMethod) {
+        DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
+        didDocumentBuilder.id(did.toUri());
+        didDocumentBuilder.verificationMethods(List.of(jwkVerificationMethod));
+        DidDocument didDocument = didDocumentBuilder.build();
+        //modify context URLs
+        List<URI> context = didDocument.getContext();
+        List<URI> mutableContext = new ArrayList<>(context);
+        miwSettings.didDocumentContextUrls().forEach(uri -> {
+            if (!mutableContext.contains(uri)) {
+                mutableContext.add(uri);
+            }
+        });
+        didDocument.put("@context", mutableContext);
+        didDocument = DidDocument.fromJson(didDocument.toJson());
+
+        didDocument.put("assertionMethod", List.of(jwkVerificationMethod.getId()));
+
+        Map<String, Object> serviceData = Map.of("id", did.toUri(), "type", "CredentialService",
+                "serviceEndpoint",  miwSettings.host() + "/api/token");
+        org.eclipse.tractusx.ssi.lib.model.did.Service service = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData);
+        didDocument.put("service", List.of(service));
+
+        log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(bpn));
+        return didDocument;
     }
 
     /**

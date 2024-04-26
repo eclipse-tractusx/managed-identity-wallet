@@ -40,6 +40,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -96,7 +97,7 @@ class PresentationValidationTest {
     private VerifiableCredential membershipCredential_2;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DidParseException {
         bpnOperator = miwSettings.authorityWalletBpn();
 
         CreateWalletRequest createWalletRequest = new CreateWalletRequest();

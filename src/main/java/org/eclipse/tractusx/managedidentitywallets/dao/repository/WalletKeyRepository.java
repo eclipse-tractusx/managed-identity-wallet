@@ -41,4 +41,12 @@ public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
     WalletKey findFirstByWallet_Bpn(String bpn);
 
     WalletKey findFirstByWallet_Did(String did);
+
+    /**
+     * Gets by wallet id.
+     * @param id the id
+     * @return WalletKey
+     */
+    WalletKey getByWalletId(Long id);
+
 }

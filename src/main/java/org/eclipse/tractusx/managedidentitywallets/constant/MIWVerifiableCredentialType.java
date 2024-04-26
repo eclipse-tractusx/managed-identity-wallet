@@ -21,12 +21,13 @@
 
 package org.eclipse.tractusx.managedidentitywallets.constant;
 
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
-
 /**
  * The type Miw verifiable credential type.
  */
-public class MIWVerifiableCredentialType extends VerifiableCredentialType {
+public class MIWVerifiableCredentialType {
+
+    /** The constant MEMBERSHIP_CREDENTIAL. */
+    public static final String MEMBERSHIP_CREDENTIAL = "MembershipCredential";
 
     public static final String DISMANTLER_CREDENTIAL = "DismantlerCredential";
 

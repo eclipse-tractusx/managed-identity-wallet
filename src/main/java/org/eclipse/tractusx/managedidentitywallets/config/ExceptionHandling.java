@@ -27,7 +27,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.exception.*;
-import org.eclipse.tractusx.ssi.lib.exception.NoVerificationKeyFoundExcpetion;
+import org.eclipse.tractusx.ssi.lib.exception.proof.NoVerificationKeyFoundException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -205,8 +205,8 @@ public class ExceptionHandling {
      * @param exception the exception
      * @return the problem detail
      */
-    @ExceptionHandler(NoVerificationKeyFoundExcpetion.class)
-    ProblemDetail handleNoVerificationKeyFoundException(NoVerificationKeyFoundExcpetion exception) {
+    @ExceptionHandler({ NoVerificationKeyFoundException.class} )
+    ProblemDetail handleNoVerificationKeyFoundException(NoVerificationKeyFoundException exception) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ExceptionUtils.getMessage(exception));
         problemDetail.setTitle(ExceptionUtils.getMessage(exception));
         problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());

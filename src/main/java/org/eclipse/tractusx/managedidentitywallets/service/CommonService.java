@@ -23,14 +23,12 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.exception.DidParseException;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.stereotype.Service;
 
@@ -55,12 +53,7 @@ public class CommonService {
         if (CommonUtils.getIdentifierType(identifier).equals(StringPool.BPN)) {
             wallet = walletRepository.getByBpn(identifier);
         } else {
-            try {
-                wallet = walletRepository.getByDid(identifier);
-            } catch (DidParseException e) {
-                log.error("Error while parsing did {}", StringEscapeUtils.escapeJava(identifier), e);
-                throw new WalletNotFoundProblem("Error while parsing did " + identifier);
-            }
+            wallet = walletRepository.getByDid(identifier);
         }
         Validate.isNull(wallet).launch(new WalletNotFoundProblem("Wallet not found for identifier " + identifier));
         return wallet;

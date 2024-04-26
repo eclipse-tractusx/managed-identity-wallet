@@ -11,7 +11,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.CommonService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -88,7 +88,7 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
     }
 
     @SneakyThrows
-    private VerifiableCredential issueVC(String issuerDid, Wallet signerWallet) throws JsonProcessingException {
+    private VerifiableCredential issueVC(String issuerDid, Wallet signerWallet) {
         List<URI> contexts = new ArrayList();
         contexts.add(URI.create("https://www.w3.org/2018/credentials/v1"));
         // if the credential does not contain the JWS proof-context add it
@@ -114,8 +114,7 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
         byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(signerWallet.getId(), signerWallet.getAlgorithm());
 
         JWSSignature2020 proof =
-                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKeyBytes));
-
+                new JWSSignature2020(generator.createProof(builder.build(), verificationMethod, new X25519PrivateKey(privateKeyBytes)));
         //Adding Proof to VC
         builder.proof(proof);
 

@@ -38,7 +38,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -50,7 +49,6 @@ import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorith
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
-import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
 import org.eclipse.tractusx.ssi.lib.model.did.DidMethod;
 import org.eclipse.tractusx.ssi.lib.model.did.DidMethodIdentifier;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
@@ -58,7 +56,7 @@ import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
-import org.eclipse.tractusx.ssi.lib.serialization.jsonLd.JsonLdSerializer;
+import org.eclipse.tractusx.ssi.lib.serialization.jsonld.JsonLdSerializer;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,14 +80,11 @@ import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PR
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PUBLIC_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
+import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getJwkVerificationMethod;
 import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
 import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_CURVE;
 import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_KEK_TYPE;
 import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_X;
-import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.PUBLIC_KEY_JWK;
-import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.CONTROLLER;
-import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.ID;
-import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.TYPE;
 
 
 @Service
@@ -103,14 +98,12 @@ public class JwtPresentationES256KService {
     private WalletRepository walletRepository;
     private EncryptionUtils encryptionUtils;
     private WalletKeyService walletKeyService;
-    private MIWSettings miwSettings;
 
     @Autowired
     public JwtPresentationES256KService(WalletRepository walletRepository, EncryptionUtils encryptionUtils, WalletKeyService walletKeyService, MIWSettings miwSettings) {
         this.walletRepository = walletRepository;
         this.encryptionUtils = encryptionUtils;
         this.walletKeyService = walletKeyService;
-        this.miwSettings = miwSettings;
     }
 
     public JwtPresentationES256KService(Did agentDid, JsonLdSerializer jsonLdSerializer) {
@@ -142,11 +135,12 @@ public class JwtPresentationES256KService {
 
             Did did = getDidFromDidString(wallet.getDid());
 
-            JWKVerificationMethod jwkVerificationMethod = getJwkVerificationMethod(ecKey, did);
+            Map<String, String> publicKeyJwk = Map.of(JWK_KEK_TYPE, ecKey.getKeyType().toString(), JWK_CURVE,
+                    ecKey.getCurve().getName(), JWK_X, ecKey.getX().toString(), JWK_Y, ecKey.getY().toString());
+            JWKVerificationMethod jwkVerificationMethod = getJwkVerificationMethod(publicKeyJwk, did, keyId);
+
             DidDocument didDocument = wallet.getDidDocument();
-            List<VerificationMethod> verificationMethods = didDocument.getVerificationMethods();
-            verificationMethods.add(jwkVerificationMethod);
-            DidDocument updatedDidDocument = buildDidDocument(wallet.getBpn(), did, verificationMethods);
+            DidDocument updatedDidDocument = updateDidDocument(didDocument, jwkVerificationMethod);
 
             wallet = walletRepository.getByDid(wallet.getDid());
             wallet.setDidDocument(updatedDidDocument);
@@ -177,33 +171,17 @@ public class JwtPresentationES256KService {
         return new Did(didMethod, methodIdentifier, null);
     }
 
-    private JWKVerificationMethod getJwkVerificationMethod(ECKey ecKey, Did did) {
-        Map<String, Object> verificationMethodJson = new HashMap<>();
-        Map<String, String> publicKeyJwk = Map.of(JWK_KEK_TYPE, ecKey.getKeyType().toString(), JWK_CURVE,
-                ecKey.getCurve().getName(), JWK_X, ecKey.getX().toString(), JWK_Y, ecKey.getY().toString());
-        verificationMethodJson.put(ID, URI.create(did + "#" + ecKey.getKeyID()));
-        verificationMethodJson.put(TYPE, JWKVerificationMethod.DEFAULT_TYPE);
-        verificationMethodJson.put(CONTROLLER, did.toUri());
-        verificationMethodJson.put(PUBLIC_KEY_JWK, publicKeyJwk);
-        return new JWKVerificationMethod(verificationMethodJson);
-    }
+    public DidDocument updateDidDocument(DidDocument didDocument, VerificationMethod jwkVerificationMethod) {
+        List<URI> assertionMethod = (List<URI>)didDocument.get("assertionMethod");
+        List<URI> updatedAssertionMethod = new ArrayList<>(assertionMethod);
+        updatedAssertionMethod.add(jwkVerificationMethod.getId());
+        didDocument.put("assertionMethod", updatedAssertionMethod);
 
-    public DidDocument buildDidDocument(String bpn, Did did, List<VerificationMethod> jwkVerificationMethods) {
-        DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
-        didDocumentBuilder.id(did.toUri());
-        didDocumentBuilder.verificationMethods(jwkVerificationMethods);
-        DidDocument didDocument = didDocumentBuilder.build();
-        //modify context URLs
-        List<URI> context = didDocument.getContext();
-        List<URI> mutableContext = new ArrayList<>(context);
-        miwSettings.didDocumentContextUrls().forEach(uri -> {
-            if (!mutableContext.contains(uri)) {
-                mutableContext.add(uri);
-            }
-        });
-        didDocument.put("@context", mutableContext);
-        didDocument = DidDocument.fromJson(didDocument.toJson());
-        log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(bpn));
+        List<VerificationMethod> methods = didDocument.getVerificationMethods();
+        List<VerificationMethod> updatedMethods = new ArrayList<>(methods);
+        updatedMethods.add(jwkVerificationMethod);
+        didDocument.put("verificationMethod", updatedMethods);
+
         return didDocument;
     }
 

@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
@@ -204,6 +205,7 @@ class HoldersCredentialTest {
     }
 
 
+    @SneakyThrows
     @Test
     void validateCredentialsWithInvalidVC() throws com.fasterxml.jackson.core.JsonProcessingException {
         //data setup
@@ -225,6 +227,7 @@ class HoldersCredentialTest {
     }
 
 
+    @SneakyThrows
     @Test
     @DisplayName("validate VC with date check true, it should return true")
     void validateCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {
@@ -248,6 +251,7 @@ class HoldersCredentialTest {
         }
     }
 
+    @SneakyThrows
     @Test
     @DisplayName("validate expired VC with date check false, it should return true")
     void validateCredentialsWithExpiryCheckFalse() throws com.fasterxml.jackson.core.JsonProcessingException {
@@ -275,6 +279,7 @@ class HoldersCredentialTest {
     }
 
 
+    @SneakyThrows
     @Test
     @DisplayName("validate expired VC with date check true, it should return false")
     void validateExpiredCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {

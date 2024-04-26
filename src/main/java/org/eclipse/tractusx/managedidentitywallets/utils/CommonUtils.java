@@ -30,10 +30,14 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
-import org.eclipse.tractusx.ssi.lib.exception.InvalidePrivateKeyFormat;
-import org.eclipse.tractusx.ssi.lib.exception.UnsupportedSignatureTypeException;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
+import org.eclipse.tractusx.ssi.lib.exception.json.TransformJsonLdException;
+import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureGenerateFailedException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -48,10 +52,16 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.PUBLIC_KEY_JWK;
+import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.CONTROLLER;
+import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.ID;
+import static org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod.TYPE;
 
 /**
  * The type Common utils.
@@ -109,7 +119,7 @@ public class CommonUtils {
                 .build();
     }
 
-    @SneakyThrows({ UnsupportedSignatureTypeException.class, InvalidePrivateKeyFormat.class })
+    @SneakyThrows({ UnsupportedSignatureTypeException.class, InvalidPrivateKeyFormatException.class, SignatureGenerateFailedException.class, TransformJsonLdException.class })
     private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType,
                                                                    VerifiableCredentialSubject verifiableCredentialSubject,
                                                                    byte[] privateKey, List<URI> contexts, Date expiryDate) {
@@ -142,9 +152,8 @@ public class CommonUtils {
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = issuerDoc.getVerificationMethods().get(0).getId();
 
-        JWSSignature2020 proof =
-                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKey));
-
+        JWSSignature2020 proof = new JWSSignature2020(generator.createProof(builder.build(), verificationMethod,
+                new X25519PrivateKey(privateKey)));
 
         //Adding Proof to VC
         builder.proof(proof);
@@ -161,6 +170,15 @@ public class CommonUtils {
         pemWriter.flush();
         pemWriter.close();
         return stringWriter.toString();
+    }
+
+    public static JWKVerificationMethod getJwkVerificationMethod(Map<String, String> publicKeyJwk, Did did, String keyId) {
+        Map<String, Object> verificationMethodJson = new HashMap<>();
+        verificationMethodJson.put(ID, URI.create(did + "#" + keyId));
+        verificationMethodJson.put(TYPE, JWKVerificationMethod.DEFAULT_TYPE);
+        verificationMethodJson.put(CONTROLLER, did.toUri());
+        verificationMethodJson.put(PUBLIC_KEY_JWK, publicKeyJwk);
+        return new JWKVerificationMethod(verificationMethodJson);
     }
 
     public static SecureTokenRequest getSecureTokenRequest(MultiValueMap<String, String> map) {
