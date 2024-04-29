@@ -139,7 +139,7 @@ public class SecureTokenController {
                 .token(responseJwt.serialize())
                 .expiresAt(responseJwt.getJWTClaimsSet().getExpirationTime().getTime())
                 .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @ExceptionHandler({ UnsupportedGrantTypeException.class, InvalidSecureTokenRequestException.class, UnknownBusinessPartnerNumberException.class, InvalidIdpTokenResponseException.class })
