@@ -41,6 +41,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
+import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,11 +62,17 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ASSERTION_METHOD;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PUBLIC_KEY;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VERIFICATION_METHOD_TYPE;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
@@ -95,6 +102,10 @@ class WalletTest {
 
     @Autowired
     private IssuersCredentialService issuersCredentialService;
+
+    public static final String EC_ALGORITHM = "secp256k1";
+    public static final String EdDSA_ALGORITHM = "Ed25519";
+    public static final String PUBLIC_KEY_JWK = "publicKeyJwk";
 
 
     @Test
@@ -175,7 +186,24 @@ class WalletTest {
 
         Assertions.assertNotNull(response.getBody());
         Assertions.assertNotNull(wallet.getDidDocument());
-        Assertions.assertEquals(2, wallet.getDidDocument().getVerificationMethods().size());
+        List<VerificationMethod> verificationMethods = wallet.getDidDocument().getVerificationMethods();
+        Assertions.assertEquals(2, verificationMethods.size());
+        // both public keys will include the publicKeyJwk format to express the public key
+        List<String> curves = verificationMethods.stream().map(vm -> (LinkedHashMap) vm.get(PUBLIC_KEY_JWK))
+                .map(lhm -> lhm.get("crv").toString()).toList();
+        List<String> algorithms = Arrays.asList(EdDSA_ALGORITHM, EC_ALGORITHM);
+        // both the Ed25519 and the secp256k1 curve keys must be present in the verificationMethod of a did document
+        Assertions.assertTrue(curves.containsAll(algorithms));
+        List<URI> assertionMethod = (List<URI>)wallet.getDidDocument().get(ASSERTION_METHOD);
+        // both public keys must be expressed in the assertionMethod
+        Assertions.assertEquals(2, assertionMethod.size());
+        // both public keys will use the JsonWebKey2020 verification method type
+        Assertions.assertTrue(verificationMethods.get(0).getType().equals(VERIFICATION_METHOD_TYPE) &&
+                verificationMethods.get(1).getType().equals(VERIFICATION_METHOD_TYPE));
+        // the controller for the keys is the MIW
+        Assertions.assertEquals(verificationMethods.get(0).getController().toString(), wallet.getDid());
+        Assertions.assertEquals(verificationMethods.get(1).getController().toString(), wallet.getDid());
+
         List<URI> context = wallet.getDidDocument().getContext();
         miwSettings.didDocumentContextUrls().forEach(uri -> {
             Assertions.assertTrue(context.contains(uri));
@@ -193,7 +221,7 @@ class WalletTest {
         Assertions.assertEquals(walletFromDB.getBpn(), bpn);
 
         //validate keyId
-        String keyId = wallet.getDidDocument().getVerificationMethods().get(0).getId().toString().split("#")[1];
+        String keyId = verificationMethods.get(0).getId().toString().split("#")[1];
         Assertions.assertNotNull(walletKey.getKeyId());
         Assertions.assertEquals(walletKey.getKeyId(), keyId);
 
@@ -202,7 +230,7 @@ class WalletTest {
         Assertions.assertNotNull(walletKey2);
 
         //validate keyId2
-        String keyId2 = wallet.getDidDocument().getVerificationMethods().get(1).getId().toString().split("#")[1];
+        String keyId2 = verificationMethods.get(1).getId().toString().split("#")[1];
         Assertions.assertNotNull(walletKey2.getKeyId());
         Assertions.assertEquals(walletKey2.getKeyId(), keyId2);
 

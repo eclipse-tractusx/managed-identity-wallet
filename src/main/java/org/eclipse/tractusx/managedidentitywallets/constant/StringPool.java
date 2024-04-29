@@ -102,4 +102,6 @@ public class StringPool {
 
     public static final String PRIVATE_KEY = "PRIVATE KEY";
     public static final String PUBLIC_KEY = "PUBLIC KEY";
+    public static final String VERIFICATION_METHOD_TYPE = "JsonWebKey2020";
+    public static final String ASSERTION_METHOD = "assertionMethod";
 }
