@@ -72,8 +72,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ASSERTION_METHOD;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.HTTPS_SCHEME;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
 import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getJwkVerificationMethod;
@@ -315,10 +317,9 @@ public class WalletService extends BaseService<Wallet, Long> {
         didDocument.put("@context", mutableContext);
         didDocument = DidDocument.fromJson(didDocument.toJson());
 
-        didDocument.put("assertionMethod", List.of(jwkVerificationMethod.getId()));
-
+        didDocument.put(ASSERTION_METHOD, List.of(jwkVerificationMethod.getId()));
         Map<String, Object> serviceData = Map.of("id", did.toUri(), "type", "CredentialService",
-                "serviceEndpoint",  miwSettings.host() + "/api/token");
+                "serviceEndpoint",  HTTPS_SCHEME + miwSettings.host() + "/api/token");
         org.eclipse.tractusx.ssi.lib.model.did.Service service = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData);
         didDocument.put("service", List.of(service));
 

@@ -75,6 +75,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ASSERTION_METHOD;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PRIVATE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PUBLIC_KEY;
@@ -172,10 +173,10 @@ public class JwtPresentationES256KService {
     }
 
     public DidDocument updateDidDocument(DidDocument didDocument, VerificationMethod jwkVerificationMethod) {
-        List<URI> assertionMethod = (List<URI>)didDocument.get("assertionMethod");
+        List<URI> assertionMethod = (List<URI>)didDocument.get(ASSERTION_METHOD);
         List<URI> updatedAssertionMethod = new ArrayList<>(assertionMethod);
         updatedAssertionMethod.add(jwkVerificationMethod.getId());
-        didDocument.put("assertionMethod", updatedAssertionMethod);
+        didDocument.put(ASSERTION_METHOD, updatedAssertionMethod);
 
         List<VerificationMethod> methods = didDocument.getVerificationMethods();
         List<VerificationMethod> updatedMethods = new ArrayList<>(methods);
