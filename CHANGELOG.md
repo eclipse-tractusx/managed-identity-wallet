@@ -1,3 +1,11 @@
+# [0.5.0-develop.14](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.13...v0.5.0-develop.14) (2024-05-02)
+
+
+### Bug Fixes
+
+* STS Token API Response ([78b7dc3](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/78b7dc33d6ddf9fbe5d0aeccf6e540fc3110e1d5))
+* Test Cases ([8eda499](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8eda499476604ee14001811df3c01297bd3e7f7a))
+
 # [0.5.0-develop.13](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.12...v0.5.0-develop.13) (2024-04-18)
 
 
