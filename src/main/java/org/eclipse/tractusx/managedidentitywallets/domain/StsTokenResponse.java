@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +34,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StsTokenResponse {
+
+    @JsonProperty("access_token")
     private String token;
+
     private long expiresAt;
 }

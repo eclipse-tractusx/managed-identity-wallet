@@ -104,10 +104,10 @@ class SecureTokenControllerTest {
                 new ParameterizedTypeReference<>() {
                 }
         );
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
         Assertions.assertNotNull(response.getBody());
-        Assertions.assertNotNull(response.getBody().getOrDefault("token", null));
+        Assertions.assertNotNull(response.getBody().getOrDefault("access_token", null));
         Assertions.assertNotNull(response.getBody().getOrDefault("expiresAt", null));
     }
 
@@ -127,10 +127,10 @@ class SecureTokenControllerTest {
                 new ParameterizedTypeReference<>() {
                 }
         );
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
         Assertions.assertNotNull(response.getBody());
-        Assertions.assertNotNull(response.getBody().getOrDefault("token", null));
+        Assertions.assertNotNull(response.getBody().getOrDefault("access_token", null));
         Assertions.assertNotNull(response.getBody().getOrDefault("expiresAt", null));
     }
 }
