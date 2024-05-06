@@ -1,0 +1,57 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'documentation/**'
+
+permissions:
+  contents: read
+  deployments: write
+  pages: write
+
+jobs:
+  build:
+    name: Build Docusaurus
+    runs-on: [ self-hosted, Linux, road-runner, small ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: yarn
+          cache-dependency-path: documentation/yarn.lock
+
+      - name: Install dependencies
+        run: yarn --cwd documentation install --frozen-lockfile
+
+      - name: Build Documentation
+        run: yarn --cwd documentation build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-pages-artifact@v2.0.0
+        with:
+          path: documentation/build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: [ self-hosted, Linux, road-runner, small ]
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3

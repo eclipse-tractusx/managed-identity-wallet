@@ -1,6 +1,9 @@
-# Table of content
+---
+title: Arc42
+sidebar_position: 2
+tags: [ ]
+---
 
-[[toc]]
 
 # Introduction and Goals
 
@@ -127,8 +130,7 @@ repositories, etc.
 # Runtime View
 
 The currently released API specification and documentation (INT environment)
-can be found under
-<https://managed-identity-wallets-new.int.demo.catena-x.net/>.
+can be found under https://managed-identity-wallets-new.int.demo.catena-x.net/.
 
 In general, the API covers the following functionality:
 
@@ -379,12 +381,12 @@ A decoded JWT access token might look like this:
 
 ```json
 # header
-{
+\{
     "alg": "HS256",
     "typ": "JWT"
 }
 # body
-{
+\{
     "sub": "1234",
     "name": "Max Musterman",
     "iat": 1516239022,
@@ -392,7 +394,7 @@ A decoded JWT access token might look like this:
     "bpn": "BPN00000000XS2X"
 }
 # signature
-{
+\{
     ...
 }
 ```
@@ -404,14 +406,13 @@ wallet belonging to the BPN.
 The Managed Identity Wallet service issues a couple of Verifiable Credentials
 with the DID of the base wallet as issuer related to membership and business
 partner data. The GitHub repository
-<https://github.com/catenax-ng/product-core-schemas> defines a custom JSON-LD
+https://github.com/catenax-ng/product-core-schemas defines a custom JSON-LD
 schema for those credential types and data model. The Verifiable Credentials
 reference the raw content of the context in
-<https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity>.
+https://raw.githubusercontent.com/catenax-ng/product-core-schemas/main/legalEntity.
 The schema defines the following credential types:
 
-**Note**: all examples highlight the important parts in <b style="color:
-yellow">yellow</b>. The value types are enclosed in brackets for brevity. Some
+**Note**: all examples highlight the important parts in <b style={{color: 'yellow' }}>yellow</b>. The value types are enclosed in brackets for brevity. Some
 examples:
 
 - `[bpn]` represents a BPN number such as `"BPN00000000XS2X"`
@@ -423,7 +424,7 @@ examples:
 #### BPN Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -432,14 +433,14 @@ examples:
     "id": "[uuid]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"BpnCredential"</b>
+        <b style={{color: 'yellow' }}>"BpnCredential"</b>
     ],
     "issuer": "[did]",
     "issuanceDate": "[iso8601-timestamp]",
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]"
         "type": "BpnCredential",
-        <b style="color: yellow">"bpn": "[bpn]"</b>
+        <b style={{color: 'yellow' }}>"bpn": "[bpn]"</b>
     }
 }
 </pre>
@@ -447,7 +448,7 @@ examples:
 #### Behavior Twin Use Case Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -457,21 +458,21 @@ examples:
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"UseCaseFrameworkCondition"</b>
+        <b style={{color: 'yellow' }}>"UseCaseFrameworkCondition"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]",
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
-        "usecase-agreement": {
-            <b style="color: yellow">"value": "Behavior Twin",
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
+        "usecase-agreement": \{
+            <b style={{color: 'yellow' }}>"value": "Behavior Twin",
             "type": "cx-behavior-twin"</b>,
             "contract-template": "https://public.catena-x.org/contracts/behavior_twin.v1.pdf",
             "contract-version": "1.0.0"
         }
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -486,7 +487,7 @@ examples:
 Attestation of membership, currently used for Catena-X membership
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -495,16 +496,16 @@ Attestation of membership, currently used for Catena-X membership
     "id": "[uuid]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"MembershipCredential"</b>
+        <b style={{color: 'yellow' }}>"MembershipCredential"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]",
     "issuer": "[did]",
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]"
-        <b style="color: yellow">"type": "MembershipCredential"</b>,
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
-        <b style="color: yellow">"memberOf": "Catena-X"</b>,
+        <b style={{color: 'yellow' }}>"type": "MembershipCredential"</b>,
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
+        <b style={{color: 'yellow' }}>"memberOf": "Catena-X"</b>,
         "status": "Active",
         "startTime": "[iso8601-timestamp]",
     }
@@ -514,7 +515,7 @@ Attestation of membership, currently used for Catena-X membership
 #### Dismantler Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -524,20 +525,20 @@ Attestation of membership, currently used for Catena-X membership
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"DismantlerCredential"</b>
+        <b style={{color: 'yellow' }}>"DismantlerCredential"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]",
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]",
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]",
         "allowedVehicleBrands": [
             "[brand 1]",
             "[brand 2]",
             "[brand 3]"
         ]</b>
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -550,7 +551,7 @@ Attestation of membership, currently used for Catena-X membership
 #### PCF Use Case Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://www.w3.org/2018/credentials/examples/v1",
@@ -560,21 +561,21 @@ Attestation of membership, currently used for Catena-X membership
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"UseCaseFrameworkCondition"</b>
+        <b style={{color: 'yellow' }}>"UseCaseFrameworkCondition"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]", //Optional field
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
-        "usecaseAgreement": {
-            <b style="color: yellow">"value": "PCF",
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
+        "usecaseAgreement": \{
+            <b style={{color: 'yellow' }}>"value": "PCF",
             "type": "cx-pcf"</b>,
             "contract-template": "https://public.catena-x.org/contracts/pcf.v1.pdf",
             "contract-version": "1.0.0"
         }
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -587,7 +588,7 @@ Attestation of membership, currently used for Catena-X membership
 #### Quality Use Case Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -597,21 +598,21 @@ Attestation of membership, currently used for Catena-X membership
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"UseCaseFrameworkCondition"</b>
+        <b style={{color: 'yellow' }}>"UseCaseFrameworkCondition"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]",
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
-        "usecase-agreement": {
-            <b style="color: yellow">"value": "Quality",
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
+        "usecase-agreement": \{
+            <b style={{color: 'yellow' }}>"value": "Quality",
             "type": "cx-quality"</b>,
             "contract-template": "https://public.catena-x.org/contracts/quality.v1.pdf",
             "contract-version": "1.0.0"
         }
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -624,7 +625,7 @@ Attestation of membership, currently used for Catena-X membership
 #### Resiliency Use Case Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -634,21 +635,21 @@ Attestation of membership, currently used for Catena-X membership
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"UseCaseFrameworkCondition"</b>
+        <b style={{color: 'yellow' }}>"UseCaseFrameworkCondition"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]",
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
-        "usecase-agreement": {
-            <b style="color: yellow">"value": "Resiliency",
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
+        "usecase-agreement": \{
+            <b style={{color: 'yellow' }}>"value": "Resiliency",
             "type": "cx-resiliency"</b>,
             "contract-template": "https://public.catena-x.org/contracts/resiliency.v1.pdf",
             "contract-version": "1.0.0"
         }
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -661,7 +662,7 @@ Attestation of membership, currently used for Catena-X membership
 #### Sustainability Use Case Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -671,21 +672,21 @@ Attestation of membership, currently used for Catena-X membership
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"UseCaseFrameworkCondition"</b>
+        <b style={{color: 'yellow' }}>"UseCaseFrameworkCondition"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]",
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
-        "usecase-agreement": {
-            <b style="color: yellow">"value": "Sustainability",
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
+        "usecase-agreement": \{
+            <b style={{color: 'yellow' }}>"value": "Sustainability",
             "type": "cx-sustainability"</b>,
             "contract-template": "https://public.catena-x.org/contracts/sustainability.v1.pdf",
             "contract-version": "1.0.0"
         }
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -698,7 +699,7 @@ Attestation of membership, currently used for Catena-X membership
 #### Trace Use Case Credential
 
 <pre lang="json">
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -708,21 +709,21 @@ Attestation of membership, currently used for Catena-X membership
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"UseCaseFrameworkCondition"</b>
+        <b style={{color: 'yellow' }}>"UseCaseFrameworkCondition"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]", //Optional field
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
-        "usecaseAgreement": {
-            <b style="color: yellow">"value": "ID_3.0_Trace",
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
+        "usecaseAgreement": \{
+            <b style={{color: 'yellow' }}>"value": "ID_3.0_Trace",
             "type": "cx-traceability"</b>,
             "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
             "contract-version": "1.0.0",
         }
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -740,7 +741,7 @@ The flow of creating a summary credential
 ```
 
 <pre>
-{
+\{
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
         "https://w3id.org/security/suites/jws-2020/v1",
@@ -750,15 +751,15 @@ The flow of creating a summary credential
     "issuer": "[did]",
     "type": [
         "VerifiableCredential",
-        <b style="color: yellow">"SummaryCredential"</b>
+        <b style={{color: 'yellow' }}>"SummaryCredential"</b>
     ],
     "issuanceDate": "[iso8601-timestamp]",
     "expirationDate": "[iso8601-timestamp]", //Optional field
-    "credentialSubject": {
+    "credentialSubject": \{
         "id": "[did]",
-        <b style="color: yellow">"holderIdentifier": "[bpn]"</b>,
+        <b style={{color: 'yellow' }}>"holderIdentifier": "[bpn]"</b>,
     },
-    "proof": {
+    "proof": \{
         "type": "JsonWebSignature2020",
         "created": "[iso8601-timestamp]",
         "jws": "[jws]",
@@ -774,7 +775,7 @@ The flow of creating a summary credential
 A description of the overall structure of components including how to
 run and test it locally as well as on Kubernetes in the cloud is
 available in the GitHub repository:
-<https://github.com/eclipse-tractusx/managed-identity-wallet>
+https://github.com/eclipse-tractusx/managed-identity-wallet
 
 The INT/DEV deployment is done using Helm charts. The charts are located in the
 `charts/` sub-directory of the repository. The charts are picked up by
@@ -798,12 +799,12 @@ and compatibility with W3C SSI standards in relation to GAIA-X principles. The
 solution references, and uses a couple of standards and re-usable open-source
 components:
 
-- W3C Decentralized Identifiers (DIDs) <https://www.w3.org/TR/did-core/>
-- W3C Verifiable Credentials Core Data Model <https://www.w3.org/TR/vc-data-model/#core-data-model>
-- W3C JSON-LD Basic Concepts <https://www.w3.org/TR/json-ld11/#basic-concepts>
+- W3C Decentralized Identifiers (DIDs) https://www.w3.org/TR/did-core/
+- W3C Verifiable Credentials Core Data Model https://www.w3.org/TR/vc-data-model/#core-data-model
+- W3C JSON-LD Basic Concepts https://www.w3.org/TR/json-ld11/#basic-concepts
 - W3C Securing Verifiable Credentials using JOSE and COSE
-  <https://www.w3.org/TR/vc-jose-cose/>, **NOTE**: the JsonWebSignature2020 is
-  discontinued <https://www.w3.org/TR/vc-jws-2020/>.
+  https://www.w3.org/TR/vc-jose-cose/, **NOTE**: the JsonWebSignature2020 is
+  discontinued https://www.w3.org/TR/vc-jws-2020/.
 
 # Design Decisions
 
