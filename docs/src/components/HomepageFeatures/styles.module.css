@@ -1,0 +1,21 @@
+.features {
+    display: flex;
+    align-items: center;
+    padding: 2rem 0;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.featureHeading {
+    margin-top: 12px;
+}
+
+.featureSvg {
+    height: 200px;
+    width: 200px;
+}
+
+img {
+    border-radius: 20%;
+    max-height: 250px;
+}
