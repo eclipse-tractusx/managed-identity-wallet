@@ -11,11 +11,11 @@ const config: Config = {
     url: 'https://github.com',
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
-    baseUrl: '/eclipse-tractusx/managed-identity-wallet/',
+    baseUrl: '/managed-identity-wallet/',
 
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
-    organizationName: 'eclipse-tractusx', // Usually your GitHub org/user name.
+    organizationName: 'eDominikPinsel', // Usually your GitHub org/user name.
     projectName: 'managed-identity-wallet', // Usually your repo name.
 
     onBrokenLinks: 'throw',
