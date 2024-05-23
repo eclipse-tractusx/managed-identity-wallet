@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -30,7 +30,7 @@ public class MIWVerifiableCredentialType {
 
     /** The constant MEMBERSHIP_CREDENTIAL. */
     public static final String MEMBERSHIP_CREDENTIAL = "MembershipCredential";
-    
+
     public static final String DISMANTLER_CREDENTIAL = "DismantlerCredential";
     /**
      * The constant USE_CASE_FRAMEWORK_CONDITION_CX.

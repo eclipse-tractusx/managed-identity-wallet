@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -26,7 +26,15 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eclipse.tractusx.managedidentitywallets.exception.*;
+import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateSummaryCredentialProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
+import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
+import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
+import org.eclipse.tractusx.managedidentitywallets.exception.WalletNotFoundProblem;
 import org.eclipse.tractusx.ssi.lib.exception.proof.NoVerificationKeyFoundException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
