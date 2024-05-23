@@ -32,8 +32,8 @@ public class CredentialsResponse extends LinkedHashMap<String, Object> {
         put(StringPool.VC_JWT_KEY, jwt);
     }
 
-    public void setVc(Map<String,Object> vc) {
+    public void setVc(Map<String, Object> vc) {
         putAll(vc);
     }
-    
+
 }

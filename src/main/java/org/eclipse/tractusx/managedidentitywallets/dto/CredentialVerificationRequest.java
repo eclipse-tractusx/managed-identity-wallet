@@ -19,22 +19,21 @@
  * ******************************************************************************
  */
 
- package org.eclipse.tractusx.managedidentitywallets.dto;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
- import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
  
- import java.util.LinkedHashMap;
- import java.util.Map;
- 
- public class CredentialVerificationRequest extends LinkedHashMap<String, Object> {
- 
- 
-     public void setJwt(String jwt) {
-         put(StringPool.VC_JWT_KEY, jwt);
-     }
- 
-     public void setVc(Map<String,Object> vc) {
-         putAll(vc);
-     }
- }
- 
+public class CredentialVerificationRequest extends LinkedHashMap<String, Object> {
+
+
+    public void setJwt(String jwt) {
+        put(StringPool.VC_JWT_KEY, jwt);
+    }
+
+    public void setVc(Map<String, Object> vc) {
+        putAll(vc);
+    }
+}

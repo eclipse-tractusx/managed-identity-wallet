@@ -18,12 +18,10 @@
  *  SPDX-License-Identifier: Apache-2.0
  * ******************************************************************************
  */
- package org.eclipse.tractusx.managedidentitywallets.utils;
+package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import com.nimbusds.jose.util.JSONObjectUtils;
-
 import lombok.SneakyThrows;
-
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -37,7 +35,14 @@ import org.eclipse.tractusx.ssi.lib.exception.key.KeyGenerationException;
 import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.model.MultibaseString;
 import org.eclipse.tractusx.ssi.lib.model.base.MultibaseFactory;
-import org.eclipse.tractusx.ssi.lib.model.did.*;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
+import org.eclipse.tractusx.ssi.lib.model.did.DidMethod;
+import org.eclipse.tractusx.ssi.lib.model.did.DidMethodIdentifier;
+import org.eclipse.tractusx.ssi.lib.model.did.Ed25519VerificationMethod;
+import org.eclipse.tractusx.ssi.lib.model.did.Ed25519VerificationMethodBuilder;
+import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -59,7 +64,11 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -165,14 +174,9 @@ public class MockUtil {
 
         // Building Verification Methods:
         List<VerificationMethod> verificationMethods = new ArrayList<>();
-            Ed25519VerificationMethodBuilder builder = new Ed25519VerificationMethodBuilder();
-            Ed25519VerificationMethod key =
-                    builder
-                            .id(URI.create(did.toUri() + "#key-" + 1))
-                            .controller(did.toUri())
-                            .publicKeyMultiBase(publicKeyBase)
-                            .build();
-            verificationMethods.add(key);
+        Ed25519VerificationMethodBuilder builder = new Ed25519VerificationMethodBuilder();
+        Ed25519VerificationMethod key = builder.id(URI.create(did.toUri() + "#key-" + 1)).controller(did.toUri()).publicKeyMultiBase(publicKeyBase).build();
+        verificationMethods.add(key);
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         didDocumentBuilder.id(did.toUri());
         didDocumentBuilder.verificationMethods(verificationMethods);

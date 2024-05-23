@@ -145,8 +145,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return buildVP(asJwt, audience, callerBpn, callerWallet, verifiableCredentials, SupportedAlgorithms.ED25519);
     }
 
-    private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet,
-                                        List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm){
+    private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm) {
         Map<String, Object> response = new HashMap<>();
         if (asJwt && algorithm.equals(SupportedAlgorithms.ES256K)) {
             buildVPJwtES256K(audience, callerBpn, callerWallet, verifiableCredentials, algorithm, response);
@@ -172,7 +171,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         response.put(StringPool.VP, verifiablePresentation);
     }
 
-    @SneakyThrows({ InvalidPrivateKeyFormatException.class})
+    @SneakyThrows({ InvalidPrivateKeyFormatException.class })
     private void buildVPJwtEdDSA(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) {
         Pair<Did, Object> result = getPrivateKey(callerWallet, algorithm, audience, callerBpn);
         String keyId = walletKeyService.getWalletKeyIdByWalletId(callerWallet.getId());
@@ -182,7 +181,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
         X25519PrivateKey ed25519Key = (X25519PrivateKey) result.getRight();
         X25519PrivateKey privateKey = new X25519PrivateKey(ed25519Key.asByte());
-        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey , keyId);
+        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey, keyId);
         response.put(StringPool.VP, presentation.serialize());
     }
 

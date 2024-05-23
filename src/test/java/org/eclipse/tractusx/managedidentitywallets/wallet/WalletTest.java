@@ -68,8 +68,8 @@ import java.util.Objects;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ContextConfiguration(initializers = {TestContextInitializer.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
+@ContextConfiguration(initializers = { TestContextInitializer.class })
 class WalletTest {
 
     @Autowired

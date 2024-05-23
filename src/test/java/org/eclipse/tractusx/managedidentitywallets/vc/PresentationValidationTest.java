@@ -72,7 +72,7 @@ import java.util.UUID;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
-@ContextConfiguration(initializers = {TestContextInitializer.class})
+@ContextConfiguration(initializers = { TestContextInitializer.class })
 class PresentationValidationTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()

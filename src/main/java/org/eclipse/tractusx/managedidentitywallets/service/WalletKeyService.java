@@ -68,7 +68,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     /**
      * Get private key by wallet identifier as bytes byte [ ].
      *
-     * @param walletId the wallet id
+     * @param walletId  the wallet id
      * @param algorithm the algorithm
      * @return the byte [ ]
      */
@@ -85,7 +85,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     /**
      * Gets private key by wallet identifier.
      *
-     * @param walletId the wallet id
+     * @param walletId  the wallet id
      * @param algorithm the algorithm
      * @return the private key by wallet identifier
      */
@@ -104,8 +104,8 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
         }
     }
 
-       /**
-        * Gets wallet key by wallet id.
+    /**
+     * Gets wallet key by wallet id.
      *
      * @param walletId the wallet id
      * @return the wallet key by wallet identifier

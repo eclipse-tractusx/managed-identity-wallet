@@ -84,8 +84,8 @@ import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ContextConfiguration(initializers = {TestContextInitializer.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
+@ContextConfiguration(initializers = { TestContextInitializer.class })
 @ExtendWith(MockitoExtension.class)
 class HoldersCredentialTest {
 
@@ -251,7 +251,7 @@ class HoldersCredentialTest {
                     jsonObject.get(StringPool.TYPE).toString());
             HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request,
                     AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); // ony base wallet
-                                                                                                    // can issue VC
+            // can issue VC
             ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK,
                     HttpMethod.POST, entity, String.class);
             Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
@@ -263,10 +263,10 @@ class HoldersCredentialTest {
                 HttpMethod.GET, entity, String.class, baseDID);
 
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Map<String,Object> responseMap = SerializeUtil.fromJson(response.getBody());
-        List<Map<String,Object>> vcsAsJwt = (ArrayList<Map<String,Object>>)  responseMap.get("content");
+        Map<String, Object> responseMap = SerializeUtil.fromJson(response.getBody());
+        List<Map<String, Object>> vcsAsJwt = (ArrayList<Map<String, Object>>) responseMap.get("content");
         // 5 framework + 1 BPN + 1 Summary
-        Assertions.assertEquals(7 , vcsAsJwt.size());
+        Assertions.assertEquals(7, vcsAsJwt.size());
         vcsAsJwt.forEach(vc -> {
             Assertions.assertNotNull(vc.get(StringPool.VC_JWT_KEY));
         });

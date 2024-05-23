@@ -260,7 +260,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(baseWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+            cr.setJwt(CommonUtils.vcAsJwt(baseWallet, holderWallet, issuersCredential.getData(), walletKeyService));
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -279,7 +279,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public CredentialsResponse issueDismantlerCredential(IssueDismantlerCredentialRequest request, boolean asJwt,  String callerBPN) {
+    public CredentialsResponse issueDismantlerCredential(IssueDismantlerCredentialRequest request, boolean asJwt, String callerBPN) {
 
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(request.getBpn());
@@ -320,7 +320,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData(), walletKeyService));
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -383,7 +383,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData(), walletKeyService));
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -441,7 +441,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData() , walletKeyService));
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData(), walletKeyService));
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -518,7 +518,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @return the map
      */
     @SneakyThrows
-    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialsValidation , boolean withCredentialExpiryDate) {
+    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialsValidation, boolean withCredentialExpiryDate) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .build();

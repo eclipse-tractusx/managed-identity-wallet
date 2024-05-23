@@ -130,7 +130,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         for (HoldersCredential credential : filter.getContent()) {
             CredentialsResponse cr = new CredentialsResponse();
             if (command.isAsJwt()) {
-                cr.setJwt(CommonUtils.vcAsJwt(command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : holderWallet , holderWallet, credential.getData(), walletKeyService));
+                cr.setJwt(CommonUtils.vcAsJwt(command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : holderWallet, holderWallet, credential.getData(), walletKeyService));
             } else {
                 cr.setVc(credential.getData());
             }
@@ -176,7 +176,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, commonService.getWalletByIdentifier(callerBpn), credential.getData() , walletKeyService));
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, commonService.getWalletByIdentifier(callerBpn), credential.getData(), walletKeyService));
         } else {
             cr.setVc(credential.getData());
         }

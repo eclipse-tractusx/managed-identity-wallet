@@ -19,7 +19,7 @@
  * ******************************************************************************
  */
 
- 
+
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,17 +54,25 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ContextConfiguration(initializers = {TestContextInitializer.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
+@ContextConfiguration(initializers = { TestContextInitializer.class })
 class IssuersCredentialTest {
 
     @Autowired
@@ -152,7 +160,7 @@ class IssuersCredentialTest {
         }
     }
 
-        @Test
+    @Test
     @DisplayName("Get Credentials as JWT")
     void getCredentialsAsJWT200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
         String baseBPN = miwSettings.authorityWalletBpn();
@@ -184,9 +192,9 @@ class IssuersCredentialTest {
                 , HttpMethod.GET, entity, String.class, holderDID);
 
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Map<String,Object> responseMap = SerializeUtil.fromJson(response.getBody());
-        List<Map<String,Object>> vcsAsJwt = (ArrayList<Map<String,Object>>)  responseMap.get("content");
-      //5 framework CV + 1 membership + 6 Summary VC
+        Map<String, Object> responseMap = SerializeUtil.fromJson(response.getBody());
+        List<Map<String, Object>> vcsAsJwt = (ArrayList<Map<String, Object>>) responseMap.get("content");
+        //5 framework CV + 1 membership + 6 Summary VC
         Assertions.assertEquals(12, vcsAsJwt.size());
         vcsAsJwt.forEach(vc -> {
             Assertions.assertNotNull(vc.get(StringPool.VC_JWT_KEY));

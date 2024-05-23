@@ -99,9 +99,7 @@ public class CommonUtils {
      * @param holderDid       the holder did
      * @return the credential
      */
-    public static HoldersCredential getHoldersCredential(VerifiableCredentialSubject subject, List<String> types,
-            DidDocument issuerDoc,
-            byte[] privateKeyBytes, String holderDid, List<URI> contexts, Date expiryDate, boolean selfIssued) {
+    public static HoldersCredential getHoldersCredential(VerifiableCredentialSubject subject, List<String> types, DidDocument issuerDoc, byte[] privateKeyBytes, String holderDid, List<URI> contexts, Date expiryDate, boolean selfIssued) {
         List<String> cloneTypes = new ArrayList<>(types);
 
         // Create VC
@@ -121,11 +119,8 @@ public class CommonUtils {
                 .build();
     }
 
-    @SneakyThrows({UnsupportedSignatureTypeException.class , InvalidPrivateKeyFormatException.class , SignatureGenerateFailedException.class , TransformJsonLdException.class})
-    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc,
-            List<String> verifiableCredentialType,
-            VerifiableCredentialSubject verifiableCredentialSubject,
-            byte[] privateKey, List<URI> contexts, Date expiryDate) {
+    @SneakyThrows({ UnsupportedSignatureTypeException.class, InvalidPrivateKeyFormatException.class, SignatureGenerateFailedException.class, TransformJsonLdException.class })
+    private static VerifiableCredential createVerifiableCredential(DidDocument issuerDoc, List<String> verifiableCredentialType, VerifiableCredentialSubject verifiableCredentialSubject, byte[] privateKey, List<URI> contexts, Date expiryDate) {
         // VC Builder
 
         // if the credential does not contain the JWS proof-context add it
@@ -180,8 +175,9 @@ public class CommonUtils {
         Map<String, String> singleValueMap = map.toSingleValueMap();
         return objectMapper.convertValue(singleValueMap, SecureTokenRequest.class);
     }
-    @SneakyThrows({DidParseException.class})
-    public static String vcAsJwt(Wallet issuerWallet, Wallet holderWallet, VerifiableCredential vc , WalletKeyService walletKeyService){
+
+    @SneakyThrows({ DidParseException.class })
+    public static String vcAsJwt(Wallet issuerWallet, Wallet holderWallet, VerifiableCredential vc, WalletKeyService walletKeyService) {
 
         Did issuerDid = DidParser.parse(issuerWallet.getDid());
         Did holderDid = DidParser.parse(holderWallet.getDid());
