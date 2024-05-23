@@ -19,7 +19,7 @@
  * ******************************************************************************
  */
 
- package org.eclipse.tractusx.managedidentitywallets.dto;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
@@ -34,27 +34,28 @@ import lombok.Setter;
 /**
  * The type Issue framework credential request.
  */
- @Getter
- @Setter
- @NoArgsConstructor
- @AllArgsConstructor
- @Builder
- public class IssueFrameworkCredentialRequest {
 
-     @NotBlank(message = "Please provide holder identifier")
-     @Size(min = 5, max = 255, message = "Please provide valid identifier")
-     private String holderIdentifier;
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class IssueFrameworkCredentialRequest {
+
+    @NotBlank(message = "Please provide holder identifier")
+    @Size(min = 5, max = 255, message = "Please provide valid identifier")
+    private String holderIdentifier;
 
     @NotBlank(message = "Please provide type")
-     private String type;
+    private String type;
 
     @NotBlank(message = "Please provide contract-template")
-     @JsonProperty("contract-template")
-     private String contractTemplate;
+    @JsonProperty("contract-template")
+    private String contractTemplate;
 
     @NotBlank(message = "Please provide contract-template")
-     @JsonProperty("contract-version")
-     private String contractVersion;
+    @JsonProperty("contract-version")
+    private String contractVersion;
     @JsonProperty("asJwt")
     private boolean asJwt;
 
