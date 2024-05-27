@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -37,8 +37,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
-
-import java.util.Objects;
 
 /**
  * The type Wallet key.

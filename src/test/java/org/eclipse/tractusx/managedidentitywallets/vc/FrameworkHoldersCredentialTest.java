@@ -250,4 +250,3 @@ class FrameworkHoldersCredentialTest {
         issuersCredentialService.issueBpnCredential(issuerWallet, holderWallet, false);
     }
 }
-

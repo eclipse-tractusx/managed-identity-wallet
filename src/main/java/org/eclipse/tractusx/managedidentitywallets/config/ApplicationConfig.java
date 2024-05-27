@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -45,7 +45,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

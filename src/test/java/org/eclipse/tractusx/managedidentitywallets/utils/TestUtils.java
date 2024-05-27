@@ -42,7 +42,6 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
-import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
