@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -33,6 +33,7 @@ public class StringPool {
     public static final String ALLOWED_VEHICLE_BRANDS = "allowedVehicleBrands";
     public static final String VERIFIABLE_CREDENTIALS = "verifiableCredentials";
     public static final String VP = "vp";
+    public static final String VC = "vc";
     public static final String VALID = "valid";
     public static final String VALIDATE_AUDIENCE = "validateAudience";
     public static final String VALIDATE_EXPIRY_DATE = "validateExpiryDate";
@@ -102,4 +103,7 @@ public class StringPool {
 
     public static final String PRIVATE_KEY = "PRIVATE KEY";
     public static final String PUBLIC_KEY = "PUBLIC KEY";
+    public static final String VC_JWT_KEY = "jwt";
+
+    public static final String AS_JWT = "asJwt";
 }

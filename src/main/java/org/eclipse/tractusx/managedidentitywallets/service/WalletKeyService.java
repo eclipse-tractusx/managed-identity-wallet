@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -26,14 +26,13 @@ import com.smartsensesolutions.java.commons.base.service.BaseService;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.springframework.stereotype.Service;
 
 import java.io.StringReader;
@@ -45,7 +44,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
  * The type Wallet key service.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class WalletKeyService extends BaseService<WalletKey, Long> {
 
@@ -70,14 +68,15 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     /**
      * Get private key by wallet identifier as bytes byte [ ].
      *
-     * @param walletId the wallet id
+     * @param walletId  the wallet id
+     * @param algorithm the algorithm
      * @return the byte [ ]
      */
     @SneakyThrows
-    public byte[] getPrivateKeyByWalletIdentifierAsBytes(long walletId, String algorithm) {
-        Object privateKey = getPrivateKeyByWalletIdentifierAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
-        if (privateKey instanceof x21559PrivateKey x21559PrivateKey) {
-            return x21559PrivateKey.asByte();
+    public byte[] getPrivateKeyByWalletIdAsBytes(long walletId, String algorithm) {
+        Object privateKey = getPrivateKeyByWalletIdAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
+        if (privateKey instanceof X25519PrivateKey X25519PrivateKey) {
+            return X25519PrivateKey.asByte();
         } else {
             return ((ECPrivateKey) privateKey).getEncoded();
         }
@@ -86,22 +85,33 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     /**
      * Gets private key by wallet identifier.
      *
-     * @param walletId the wallet id
+     * @param walletId  the wallet id
+     * @param algorithm the algorithm
      * @return the private key by wallet identifier
      */
     @SneakyThrows
-
-    public Object getPrivateKeyByWalletIdentifierAndAlgorithm(long walletId, SupportedAlgorithms algorithm) {
+    public Object getPrivateKeyByWalletIdAndAlgorithm(long walletId, SupportedAlgorithms algorithm) {
         WalletKey wallet = walletKeyRepository.getByWalletIdAndAlgorithm(walletId, algorithm.toString());
         String privateKey = encryptionUtils.decrypt(wallet.getPrivateKey());
         byte[] content = new PemReader(new StringReader(privateKey)).readPemObject().getContent();
         if (SupportedAlgorithms.ED25519.equals(algorithm)) {
-            return new x21559PrivateKey(content);
+            return new X25519PrivateKey(content);
         } else if (SupportedAlgorithms.ES256K.equals(algorithm)) {
             KeyFactory kf = KeyFactory.getInstance(EC);
             return kf.generatePrivate(new PKCS8EncodedKeySpec(content));
         } else {
             throw new UnsupportedAlgorithmException("Unsupported algorithm: " + algorithm);
         }
+    }
+
+    /**
+     * Gets wallet key by wallet id.
+     *
+     * @param walletId the wallet id
+     * @return the wallet key by wallet identifier
+     */
+    @SneakyThrows
+    public String getWalletKeyIdByWalletId(long walletId) {
+        return walletKeyRepository.getByWalletId(walletId).getKeyId();
     }
 }

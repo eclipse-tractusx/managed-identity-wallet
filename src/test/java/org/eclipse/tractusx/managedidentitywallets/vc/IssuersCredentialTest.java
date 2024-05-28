@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -18,6 +18,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  * ******************************************************************************
  */
+
 
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
@@ -43,24 +44,35 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
+import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ContextConfiguration(initializers = {TestContextInitializer.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
+@ContextConfiguration(initializers = { TestContextInitializer.class })
 class IssuersCredentialTest {
 
     @Autowired
@@ -79,7 +91,7 @@ class IssuersCredentialTest {
 
 
     @Test
-    void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
         String baseBPN = miwSettings.authorityWalletBpn();
         String holderBpn = TestUtils.getRandomBpmNumber();
         String holderDID = "did:web:localhost:" + holderBpn;
@@ -146,6 +158,48 @@ class IssuersCredentialTest {
         for (VerifiableCredential vc : credentialList) {
             Assertions.assertEquals(3, vc.getContext().size(), "Each credential requires 3 contexts");
         }
+    }
+
+    @Test
+    @DisplayName("Get Credentials as JWT")
+    void getCredentialsAsJWT200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
+        String baseBPN = miwSettings.authorityWalletBpn();
+        String holderBpn = TestUtils.getRandomBpmNumber();
+        String holderDID = "did:web:localhost:" + holderBpn;
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseBPN);
+        //save wallet
+        TestUtils.createWallet(holderBpn, holderDID, walletRepository);
+        TestUtils.issueMembershipVC(restTemplate, holderBpn, baseBPN);
+        String vcList = """
+                [
+                {"type":"TraceabilityCredential"},
+                {"type":"SustainabilityCredential"},
+                {"type":"ResiliencyCredential"},
+                {"type":"QualityCredential"},
+                {"type":"PcfCredential"}
+                ]
+                """;
+        JSONArray jsonArray = new JSONArray(vcList);
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            issueFrameworkCredential(holderBpn, jsonObject.get(StringPool.TYPE).toString());
+        }
+
+        HttpEntity<Map> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderIdentifier={did}&asJwt=true"
+                , HttpMethod.GET, entity, String.class, holderDID);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Map<String, Object> responseMap = SerializeUtil.fromJson(response.getBody());
+        List<Map<String, Object>> vcsAsJwt = (ArrayList<Map<String, Object>>) responseMap.get("content");
+        //5 framework CV + 1 membership + 6 Summary VC
+        Assertions.assertEquals(12, vcsAsJwt.size());
+        vcsAsJwt.forEach(vc -> {
+            Assertions.assertNotNull(vc.get(StringPool.VC_JWT_KEY));
+
+        });
     }
 
 
@@ -260,6 +314,14 @@ class IssuersCredentialTest {
         Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
         return restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
+    }
+
+    private void issueFrameworkCredential(String holderBpn, String type) {
+        IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(holderBpn, type);
+        HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); //ony base wallet can issue VC
+        ResponseEntity<String> exchange = null;
+        exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
+        Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
     }
 
 }

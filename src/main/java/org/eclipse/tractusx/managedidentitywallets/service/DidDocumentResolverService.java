@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -24,9 +24,6 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 import lombok.Getter;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.ssi.lib.did.resolver.CompositeDidResolver;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistry;
-import org.eclipse.tractusx.ssi.lib.did.resolver.DidDocumentResolverRegistryImpl;
-import org.eclipse.tractusx.ssi.lib.did.web.DidWebDocumentResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
 import org.springframework.stereotype.Service;
@@ -39,7 +36,7 @@ public class DidDocumentResolverService {
     final static HttpClient httpClient = HttpClient.newHttpClient();
 
     @Getter
-    private final DidDocumentResolverRegistry didDocumentResolverRegistry;
+    private final DidWebResolver didDocumentResolverRegistry;
 
     @Getter
     private final CompositeDidResolver compositeDidResolver;
@@ -49,9 +46,8 @@ public class DidDocumentResolverService {
         final boolean enforceHttps = miwSettings.enforceHttps();
         final DidWebParser didParser = new DidWebParser();
 
-        didDocumentResolverRegistry = new DidDocumentResolverRegistryImpl();
-        didDocumentResolverRegistry.register(
-                new DidWebDocumentResolver(httpClient, didParser, enforceHttps));
+        didDocumentResolverRegistry =
+                new DidWebResolver(httpClient, didParser, enforceHttps);
 
         compositeDidResolver = new CompositeDidResolver(
                 new DidWebResolver(httpClient, didParser, enforceHttps)

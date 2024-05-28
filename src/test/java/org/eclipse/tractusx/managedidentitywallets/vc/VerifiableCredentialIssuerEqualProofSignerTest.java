@@ -1,3 +1,24 @@
+/*
+ * *******************************************************************************
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
+ *
+ *  See the NOTICE file(s) distributed with this work for additional
+ *  information regarding copyright ownership.
+ *
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Apache License, Version 2.0 which is available at
+ *  https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  License for the specific language governing permissions and limitations
+ *  under the License.
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ * ******************************************************************************
+ */
+
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,7 +32,7 @@ import org.eclipse.tractusx.managedidentitywallets.service.CommonService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletKeyService;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
-import org.eclipse.tractusx.ssi.lib.crypt.x21559.x21559PrivateKey;
+import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -111,10 +132,10 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = signerWallet.getDidDocument().getVerificationMethods().get(0).getId();
 
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(signerWallet.getId(), signerWallet.getAlgorithm());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(signerWallet.getId(), signerWallet.getAlgorithm());
 
         JWSSignature2020 proof =
-                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new x21559PrivateKey(privateKeyBytes));
+                new JWSSignature2020(generator.createProof(builder.build(), verificationMethod, new X25519PrivateKey(privateKeyBytes)));
 
         //Adding Proof to VC
         builder.proof(proof);

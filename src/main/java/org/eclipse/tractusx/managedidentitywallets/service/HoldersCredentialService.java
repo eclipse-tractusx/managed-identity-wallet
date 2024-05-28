@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -32,10 +32,12 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
@@ -85,52 +87,54 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
 
     /**
-     * Gets list of holder's credentials
+     * Gets credentials.
      *
-     * @param credentialId     the credentialId
-     * @param issuerIdentifier the issuer identifier
-     * @param type             the type
-     * @param sortColumn       the sort column
-     * @param sortType         the sort type
-     * @param callerBPN        the caller bpn
+     * @param command the command
      * @return the credentials
      */
-    public PageImpl<VerifiableCredential> getCredentials(String credentialId, String issuerIdentifier, List<String> type, String sortColumn, String sortType, int pageNumber, int size, String callerBPN) {
+    public PageImpl<CredentialsResponse> getCredentials(GetCredentialsCommand command) {
         FilterRequest filterRequest = new FilterRequest();
-        filterRequest.setPage(pageNumber);
-        filterRequest.setSize(size);
+        filterRequest.setPage(command.getPageNumber());
+        filterRequest.setSize(command.getSize());
 
         //Holder must be caller of API
-        Wallet holderWallet = commonService.getWalletByIdentifier(callerBPN);
+        Wallet holderWallet = commonService.getWalletByIdentifier(command.getCallerBPN());
         filterRequest.appendCriteria(StringPool.HOLDER_DID, Operator.EQUALS, holderWallet.getDid());
 
-        if (StringUtils.hasText(issuerIdentifier)) {
-            Wallet issuerWallet = commonService.getWalletByIdentifier(issuerIdentifier);
+        if (StringUtils.hasText(command.getIdentifier())) {
+            Wallet issuerWallet = commonService.getWalletByIdentifier(command.getIdentifier());
             filterRequest.appendCriteria(StringPool.ISSUER_DID, Operator.EQUALS, issuerWallet.getDid());
         }
 
-        if (StringUtils.hasText(credentialId)) {
-            filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, credentialId);
+        if (StringUtils.hasText(command.getCredentialId())) {
+            filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, command.getCredentialId());
         }
         FilterRequest request = new FilterRequest();
-        if (!CollectionUtils.isEmpty(type)) {
+        if (!CollectionUtils.isEmpty(command.getType())) {
             request.setPage(filterRequest.getPage());
             request.setSize(filterRequest.getSize());
             request.setCriteriaOperator(CriteriaOperator.OR);
-            for (String str : type) {
+            for (String str : command.getType()) {
                 request.appendCriteria(StringPool.TYPE, Operator.CONTAIN, str);
             }
         }
 
         Sort sort = new Sort();
-        sort.setColumn(sortColumn);
-        sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
+        sort.setColumn(command.getSortColumn());
+        sort.setSortType(SortType.valueOf(command.getSortType().toUpperCase()));
         filterRequest.setSort(sort);
         Page<HoldersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
-        List<VerifiableCredential> list = new ArrayList<>(filter.getContent().size());
+        List<CredentialsResponse> list = new ArrayList<>(filter.getContent().size());
+
         for (HoldersCredential credential : filter.getContent()) {
-            list.add(credential.getData());
+            CredentialsResponse cr = new CredentialsResponse();
+            if (command.isAsJwt()) {
+                cr.setJwt(CommonUtils.vcAsJwt(command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : holderWallet, holderWallet, credential.getData(), walletKeyService));
+            } else {
+                cr.setVc(credential.getData());
+            }
+            list.add(cr);
         }
 
         return new PageImpl<>(list, filter.getPageable(), filter.getTotalElements());
@@ -141,9 +145,10 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      *
      * @param data      the data
      * @param callerBpn the caller bpn
+     * @param asJwt     the as jwt
      * @return the verifiable credential
      */
-    public VerifiableCredential issueCredential(Map<String, Object> data, String callerBpn) {
+    public CredentialsResponse issueCredential(Map<String, Object> data, String callerBpn, boolean asJwt) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
@@ -151,7 +156,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
         // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdentifierAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
+        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
 
         // check if the expiryDate is set
         Date expiryDate = null;
@@ -167,9 +172,18 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         //Store Credential in holder table
         credential = create(credential);
 
-        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(callerBpn));
+        final CredentialsResponse cr = new CredentialsResponse();
+
         // Return VC
-        return credential.getData();
+        if (asJwt) {
+            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, commonService.getWalletByIdentifier(callerBpn), credential.getData(), walletKeyService));
+        } else {
+            cr.setVc(credential.getData());
+        }
+
+        log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(callerBpn));
+
+        return cr;
     }
 
     private void isCredentialExistWithId(String holderDid, String credentialId) {

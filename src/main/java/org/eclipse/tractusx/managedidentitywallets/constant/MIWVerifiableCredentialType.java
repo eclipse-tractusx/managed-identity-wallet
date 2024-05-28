@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -21,15 +21,17 @@
 
 package org.eclipse.tractusx.managedidentitywallets.constant;
 
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
-
 /**
  * The type Miw verifiable credential type.
  */
-public class MIWVerifiableCredentialType extends VerifiableCredentialType {
+public class MIWVerifiableCredentialType {
+
+    public static final String VERIFIABLE_CREDENTIAL = "VerifiableCredential";
+
+    /** The constant MEMBERSHIP_CREDENTIAL. */
+    public static final String MEMBERSHIP_CREDENTIAL = "MembershipCredential";
 
     public static final String DISMANTLER_CREDENTIAL = "DismantlerCredential";
-
     /**
      * The constant USE_CASE_FRAMEWORK_CONDITION_CX.
      */

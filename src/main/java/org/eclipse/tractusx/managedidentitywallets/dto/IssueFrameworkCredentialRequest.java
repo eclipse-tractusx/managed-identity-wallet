@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -24,12 +24,17 @@ package org.eclipse.tractusx.managedidentitywallets.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 /**
  * The type Issue framework credential request.
  */
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,4 +56,7 @@ public class IssueFrameworkCredentialRequest {
     @NotBlank(message = "Please provide contract-template")
     @JsonProperty("contract-version")
     private String contractVersion;
+    @JsonProperty("asJwt")
+    private boolean asJwt;
+
 }

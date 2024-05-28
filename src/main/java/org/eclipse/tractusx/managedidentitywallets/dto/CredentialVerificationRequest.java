@@ -19,34 +19,21 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.springframework.stereotype.Repository;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 
-/**
- * The interface Wallet key repository.
- */
-@Repository
-public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
-    /**
-     * Gets by wallet id and algorithm.
-     *
-     * @param id the id
-     * param algorithm the algorithm
-     * @return the by wallet id
-     */
-    WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
+import java.util.LinkedHashMap;
+import java.util.Map;
+ 
+public class CredentialVerificationRequest extends LinkedHashMap<String, Object> {
 
-    /**
-     * Gets by wallet id.
-     * @param id
-     * @return WalletKey
-     */
-    WalletKey getByWalletId(Long id);
 
-    WalletKey findFirstByWallet_Bpn(String bpn);
+    public void setJwt(String jwt) {
+        put(StringPool.VC_JWT_KEY, jwt);
+    }
 
-    WalletKey findFirstByWallet_Did(String did);
+    public void setVc(Map<String, Object> vc) {
+        putAll(vc);
+    }
 }

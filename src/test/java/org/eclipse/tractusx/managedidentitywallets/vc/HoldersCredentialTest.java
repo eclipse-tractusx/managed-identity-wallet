@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
@@ -34,17 +35,27 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
+import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
+import org.eclipse.tractusx.ssi.lib.exception.json.TransformJsonLdException;
+import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPublicKeyFormatException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.NoVerificationKeyFoundException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureParseException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureVerificationFailedException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
+import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -56,17 +67,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {ManagedIdentityWalletsApplication.class})
-@ContextConfiguration(initializers = {TestContextInitializer.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
+@ContextConfiguration(initializers = { TestContextInitializer.class })
 @ExtendWith(MockitoExtension.class)
 class HoldersCredentialTest {
 
@@ -134,7 +153,7 @@ class HoldersCredentialTest {
     }
 
     @Test
-    void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
 
 
         String baseDID = miwSettings.authorityWalletDid();
@@ -205,9 +224,60 @@ class HoldersCredentialTest {
 
 
     @Test
-    void validateCredentialsWithInvalidVC() throws com.fasterxml.jackson.core.JsonProcessingException {
+    @DisplayName("Get Credentials as JWT")
+    void getCredentialsAsJWT200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
+
+        String baseDID = miwSettings.authorityWalletDid();
+        String bpn = TestUtils.getRandomBpmNumber();
+        String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
+        // save wallet
+        TestUtils.createWallet(bpn, did, walletRepository);
+        TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
+        String vcList = """
+                [
+                {"type":"TraceabilityCredential"},
+                {"type":"SustainabilityCredential"},
+                {"type":"ResiliencyCredential"},
+                {"type":"QualityCredential"},
+                {"type":"PcfCredential"}
+                ]
+                """;
+        JSONArray jsonArray = new JSONArray(vcList);
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn,
+                    jsonObject.get(StringPool.TYPE).toString());
+            HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request,
+                    AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); // ony base wallet
+            // can issue VC
+            ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK,
+                    HttpMethod.POST, entity, String.class);
+            Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
+        }
+
+        HttpEntity<Map> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}&asJwt=true",
+                HttpMethod.GET, entity, String.class, baseDID);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Map<String, Object> responseMap = SerializeUtil.fromJson(response.getBody());
+        List<Map<String, Object>> vcsAsJwt = (ArrayList<Map<String, Object>>) responseMap.get("content");
+        // 5 framework + 1 BPN + 1 Summary
+        Assertions.assertEquals(7, vcsAsJwt.size());
+        vcsAsJwt.forEach(vc -> {
+            Assertions.assertNotNull(vc.get(StringPool.VC_JWT_KEY));
+        });
+    }
+
+
+    @Test
+    void validateCredentialsWithInvalidVC() throws com.fasterxml.jackson.core.JsonProcessingException, UnsupportedSignatureTypeException, InvalidPublicKeyFormatException, NoVerificationKeyFoundException, SignatureParseException, DidParseException, SignatureVerificationFailedException, TransformJsonLdException {
         //data setup
-        Map<String, Object> map = issueVC();
+        CredentialVerificationRequest request = new CredentialVerificationRequest();
+        request.setVc(issueVC());
 
         //service call
         try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
@@ -219,18 +289,18 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
 
 
+    @SneakyThrows
     @Test
     @DisplayName("validate VC with date check true, it should return true")
-    void validateCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {
-
-        //data setup
-        Map<String, Object> map = issueVC();
+    void validateCredentialsWithExpiryCheckTrue() {
+        CredentialVerificationRequest request = new CredentialVerificationRequest();
+        request.setVc(issueVC());
 
         //service call
         try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
@@ -242,7 +312,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
         }
@@ -250,13 +320,13 @@ class HoldersCredentialTest {
 
     @Test
     @DisplayName("validate expired VC with date check false, it should return true")
-    void validateCredentialsWithExpiryCheckFalse() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void validateCredentialsWithExpiryCheckFalse() throws com.fasterxml.jackson.core.JsonProcessingException, UnsupportedSignatureTypeException, InvalidPublicKeyFormatException, NoVerificationKeyFoundException, SignatureParseException, DidParseException, SignatureVerificationFailedException, TransformJsonLdException {
+        CredentialVerificationRequest request = new CredentialVerificationRequest();
+        request.setVc(issueVC());
 
-        //data setup
-        Map<String, Object> map = issueVC();
         //modify expiry date
         Instant instant = Instant.now().minusSeconds(60);
-        map.put("expirationDate", instant.toString());
+        request.put("expirationDate", instant.toString());
 
 
         //service call
@@ -269,7 +339,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, false).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false).getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
@@ -277,13 +347,15 @@ class HoldersCredentialTest {
 
     @Test
     @DisplayName("validate expired VC with date check true, it should return false")
-    void validateExpiredCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException {
+    void validateExpiredCredentialsWithExpiryCheckTrue() throws com.fasterxml.jackson.core.JsonProcessingException, UnsupportedSignatureTypeException, InvalidPublicKeyFormatException, NoVerificationKeyFoundException, SignatureParseException, DidParseException, SignatureVerificationFailedException, TransformJsonLdException {
 
         //data setup
-        Map<String, Object> map = issueVC();
+        CredentialVerificationRequest request = new CredentialVerificationRequest();
+        request.setVc(issueVC());
+
         //modify expiry date
         Instant instant = Instant.now().minusSeconds(60);
-        map.put("expirationDate", instant.toString());
+        request.put("expirationDate", instant.toString());
 
         //service call
         try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
@@ -295,7 +367,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(map, true).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true).getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
 

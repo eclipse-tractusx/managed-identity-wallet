@@ -19,34 +19,25 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.dao.repository;
+package org.eclipse.tractusx.managedidentitywallets.command;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.springframework.stereotype.Repository;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-/**
- * The interface Wallet key repository.
- */
-@Repository
-public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
-    /**
-     * Gets by wallet id and algorithm.
-     *
-     * @param id the id
-     * param algorithm the algorithm
-     * @return the by wallet id
-     */
-    WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
+import java.util.List;
 
-    /**
-     * Gets by wallet id.
-     * @param id
-     * @return WalletKey
-     */
-    WalletKey getByWalletId(Long id);
-
-    WalletKey findFirstByWallet_Bpn(String bpn);
-
-    WalletKey findFirstByWallet_Did(String did);
+@Builder
+@Getter
+@Setter
+public class GetCredentialsCommand {
+    private String credentialId;
+    private String identifier;
+    private List<String> type;
+    private String sortColumn;
+    private String sortType;
+    private int pageNumber;
+    private int size;
+    private boolean asJwt;
+    private String callerBPN;
 }
