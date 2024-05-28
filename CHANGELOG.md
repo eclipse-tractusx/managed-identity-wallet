@@ -1,3 +1,13 @@
+# [0.5.0-develop.16](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.15...v0.5.0-develop.16) (2024-05-28)
+
+
+### Bug Fixes
+
+* adjust api docs for 'api/token' endpoint ([7190ed1](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/7190ed17880dcd6aeba46a79211c5b6dba1eae08))
+* fix openapi_v001.json ([068462b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/068462b992136aedeeaace966910bbcefc10aad3))
+* fix openapi_v001.json ([c30134e](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c30134e10c4d2aa8ec91afc8ba2d1c1de9eca87b))
+* fix openapi_v001.json ([1910e88](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/1910e886dd5aace37e55d00858559c51d5ba7659))
+
 # [0.5.0-develop.15](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.14...v0.5.0-develop.15) (2024-05-28)
 
 
