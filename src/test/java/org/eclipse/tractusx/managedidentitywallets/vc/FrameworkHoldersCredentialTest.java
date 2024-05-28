@@ -156,7 +156,7 @@ class FrameworkHoldersCredentialTest {
 
         String type = request.getType();
 
-        createAndValidateVC(bpn, did, type);
+        createAndValidateVC(bpn, type);
         //check in issuer tables
         List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertEquals(1, issuerVCs.size());
@@ -195,7 +195,7 @@ class FrameworkHoldersCredentialTest {
 
     }
 
-    private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException, JSONException {
+    private void createAndValidateVC(String bpn, String type) throws JsonProcessingException, JSONException {
         //create wallet
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;

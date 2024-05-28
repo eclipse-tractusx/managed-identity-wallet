@@ -208,7 +208,6 @@ public class MockUtil {
                 Instant.now().plus(Duration.ofDays(5))
         );
         HoldersCredential holdersCredential = mockHolderCredential(verifiableCredential);
-        //getRepository().findAll(specification, pageRequest);
         when(holdersCredentialRepository.findAll(any(Specification.class), any(PageRequest.class))).thenReturn(
                 new PageImpl<>(List.of(holdersCredential))
         );
@@ -224,7 +223,6 @@ public class MockUtil {
                 Instant.now().plus(Duration.ofDays(5))
         );
         IssuersCredential holdersCredential = mockIssuerCredential(verifiableCredential);
-        //getRepository().findAll(specification, pageRequest);
         when(holdersCredentialRepository.findAll(any(Specification.class), any(PageRequest.class))).thenReturn(
                 new PageImpl<>(List.of(holdersCredential))
         );
