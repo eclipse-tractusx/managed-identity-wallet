@@ -33,22 +33,51 @@ public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
     /**
      * Gets by wallet id and algorithm.
      *
-     * @param id the id
-     * param algorithm the algorithm
+     * @param id        the id param algorithm the algorithm
+     * @param algorithm the algorithm
      * @return the by wallet id
      */
     WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
 
     /**
      * Gets by wallet id.
-     * @param id
-     * @return WalletKey
+     *
+     * @param id the id
+     * @return WalletKey by wallet id
      */
     WalletKey getByWalletId(Long id);
 
+    /**
+     * Find first by wallet bpn wallet key.
+     *
+     * @param bpn the bpn
+     * @return the wallet key
+     */
     WalletKey findFirstByWallet_Bpn(String bpn);
 
+    /**
+     * Find first by wallet did wallet key.
+     *
+     * @param did the did
+     * @return the wallet key
+     */
     WalletKey findFirstByWallet_Did(String did);
 
+    /**
+     * Gets by key id and algorithm.
+     *
+     * @param keyId     the key id
+     * @param algorithm the algorithm
+     * @return the by key id and algorithm
+     */
     WalletKey getByKeyIdAndAlgorithm(String keyId, String algorithm);
+
+    /**
+     * Gets by algorithm and wallet bpn.
+     *
+     * @param name    the name
+     * @param keyName the key name
+     * @return the by algorithm and wallet bpn
+     */
+    WalletKey getByAlgorithmAndWallet_Bpn(String name, String keyName);
 }

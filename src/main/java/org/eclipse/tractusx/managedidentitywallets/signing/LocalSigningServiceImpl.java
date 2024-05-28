@@ -61,7 +61,6 @@ import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
 import org.eclipse.tractusx.ssi.lib.model.base.EncodeType;
 import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
-import org.eclipse.tractusx.ssi.lib.model.proof.jws.JWSSignature2020;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
@@ -102,6 +101,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
 
     @Override
     public SignerResult createCredential(CredentialCreationConfig config) {
+
         byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
@@ -259,7 +259,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
         verifiablePresentation.put(Verifiable.PROOF, proof);
         return verifiablePresentation;
     }
-    
+
     @SneakyThrows
     private static VerifiableCredential createVerifiableCredential(CredentialCreationConfig config, byte[] privateKeyBytes) {
         //VC Builder
@@ -270,10 +270,6 @@ public class LocalSigningServiceImpl implements LocalSigningService {
             config.getContexts().add(jwsUri);
         }
 
-        // check if the expiryDate is set
-        // if its null then it will be ignored from the SSI Lib (VerifiableCredentialBuilder) and will not be added to the VC
-        Instant expiryInstant = config.getExpiryDate().toInstant();
-
 
         URI id = URI.create(UUID.randomUUID().toString());
         VerifiableCredentialBuilder builder = new VerifiableCredentialBuilder()
@@ -281,7 +277,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
                 .id(URI.create(config.getIssuerDoc().getId() + "#" + id))
                 .type(config.getTypes())
                 .issuer(config.getIssuerDoc().getId())
-                .expirationDate(expiryInstant)
+                .expirationDate(config.getExpiryDate() != null ? config.getExpiryDate().toInstant() : null)
                 .issuanceDate(Instant.now())
                 .credentialSubject(config.getSubject());
 
@@ -289,9 +285,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = config.getIssuerDoc().getVerificationMethods().get(0).getId();
 
-        JWSSignature2020 proof =
-                (JWSSignature2020) generator.createProof(builder.build(), verificationMethod, new X25519PrivateKey(privateKeyBytes));
-
+        Proof proof = generator.createProof(builder.build(), verificationMethod, new X25519PrivateKey(privateKeyBytes));
 
         //Adding Proof to VC
         builder.proof(proof);
