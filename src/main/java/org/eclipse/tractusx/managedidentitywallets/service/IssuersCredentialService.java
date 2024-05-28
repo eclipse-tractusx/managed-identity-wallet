@@ -117,7 +117,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
     private final ObjectMapper objectMapper;
 
-    private final WalletKeyService walletKeyService;
     private Map<SigningServiceType, SigningService> availableSigningServices;
 
 
@@ -172,10 +171,27 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         Page<IssuersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
 
         List<CredentialsResponse> list = new ArrayList<>(filter.getContent().size());
+
+        Wallet holderWallet = command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : issuerWallet;
+
         for (IssuersCredential credential : filter.getContent()) {
             CredentialsResponse cr = new CredentialsResponse();
             if (command.isAsJwt()) {
-                cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : issuerWallet, credential.getData(), walletKeyService));
+                CredentialCreationConfig config = CredentialCreationConfig.builder()
+                        .algorithm(SupportedAlgorithms.ED25519)
+                        .issuerDoc(issuerWallet.getDidDocument())
+                        .holderDid(holderWallet.getDid())
+                        .keyName(issuerWallet.getBpn())
+                        .verifiableCredential(credential.getData())
+                        .subject(credential.getData().getCredentialSubject().get(0))
+                        .contexts(credential.getData().getContext())
+                        .vcId(credential.getData().getId())
+                        .types(credential.getData().getTypes())
+                        .encoding(VerifiableEncoding.JWT)
+                        .build();
+
+                SignerResult signerResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(config);
+                cr.setJwt(signerResult.getJwt());
             } else {
                 cr.setVc(credential.getData());
             }
@@ -298,7 +314,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(baseWallet, holderWallet, issuersCredential.getData(), walletKeyService));
+            holdersCredentialCreationConfig.setVerifiableCredential(issuersCredential.getData());
+            holdersCredentialCreationConfig.setEncoding(VerifiableEncoding.JWT);
+            SignerResult credential = availableSigningServices.get(baseWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+            cr.setJwt(credential.getJwt());
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -373,7 +392,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData(), walletKeyService));
+            holdersCredentialCreationConfig.setVerifiableCredential(issuersCredential.getData());
+            holdersCredentialCreationConfig.setEncoding(VerifiableEncoding.JWT);
+            SignerResult credential = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+            cr.setJwt(credential.getJwt());
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -452,7 +474,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData(), walletKeyService));
+            holdersCredentialCreationConfig.setVerifiableCredential(issuersCredential.getData());
+            holdersCredentialCreationConfig.setEncoding(VerifiableEncoding.JWT);
+            SignerResult credential = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+            cr.setJwt(credential.getJwt());
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -519,7 +544,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, holderWallet, issuersCredential.getData(), walletKeyService));
+            holdersCredentialCreationConfig.setVerifiableCredential(issuersCredential.getData());
+            holdersCredentialCreationConfig.setEncoding(VerifiableEncoding.JWT);
+            SignerResult credential = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+            cr.setJwt(credential.getJwt());
         } else {
             cr.setVc(issuersCredential.getData());
         }
@@ -580,6 +608,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     /**
      * Credentials validation map.
      *
+     * @param verificationRequest      the verification request
      * @param withCredentialExpiryDate the with credential expiry date
      * @return the map
      */
@@ -610,7 +639,6 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         if (verificationRequest.containsKey(StringPool.VC_JWT_KEY)) {
             JWTVerificationResult result = verifyVCAsJWT((String) verificationRequest.get(StringPool.VC_JWT_KEY), didResolver, withCredentialsValidation, withCredentialExpiryDate);
-            verifiableCredential = result.verifiableCredential;
             valid = result.valid;
         } else {
 
@@ -653,15 +681,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     }
 
 
-    /**
-     * Update summery credentials.
-     *
-     * @param issuerDidDocument the issuer did document
-     * @param baseWalletId      the issuer base wallet id
-     * @param holderBpn         the holder bpn
-     * @param holderDid         the holder did
-     * @param type              the type
-     */
+
     private void updateSummeryCredentials(DidDocument issuerDidDocument, String issuerDid, String holderBpn, String holderDid, String type, SigningServiceType signingServiceType, SupportedAlgorithms algorithm) {
 
         //get last issued summary vc to holder to update items
@@ -756,6 +776,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         return filter(filterRequest);
     }
 
+    /**
+     * Sets key service.
+     *
+     * @param availableKeyStorage the available key storage
+     */
     @Autowired
     public void setKeyService(Map<SigningServiceType, SigningService> availableKeyStorage) {
         this.availableSigningServices = availableKeyStorage;

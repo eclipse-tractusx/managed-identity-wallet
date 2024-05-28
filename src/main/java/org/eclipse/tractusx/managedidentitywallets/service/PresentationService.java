@@ -30,7 +30,6 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
@@ -48,32 +47,22 @@ import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolation
 import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
-import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
 import org.eclipse.tractusx.ssi.lib.exception.json.InvalidJsonLdException;
-import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
 import org.eclipse.tractusx.ssi.lib.exception.proof.JwtExpiredException;
-import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonld.JsonLdSerializerImpl;
-import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
-import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URI;
-import java.security.interfaces.ECPrivateKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,7 +103,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private final JtiRepository jtiRepository;
 
-    private final WalletKeyService walletKeyService;
 
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {
@@ -169,7 +157,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         } else {
             log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
             builder.encoding(VerifiableEncoding.JSON_LD)
-                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()));
+                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID()));
         }
 
         PresentationCreationConfig presentationConfig = builder.build();
@@ -178,68 +166,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         response.put(StringPool.VP, asJwt ? signerResult.getJwt() : signerResult.getJsonLd().toJson());
 
         return response;
-    }
-
-    private Map<String, Object> buildVP(boolean asJwt, String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm) {
-        Map<String, Object> response = new HashMap<>();
-        if (asJwt && algorithm.equals(SupportedAlgorithms.ES256K)) {
-            buildVPJwtES256K(audience, callerBpn, callerWallet, verifiableCredentials, algorithm, response);
-        } else if (asJwt && algorithm.equals(SupportedAlgorithms.ED25519)) {
-            buildVPJwtEdDSA(audience, callerBpn, callerWallet, verifiableCredentials, algorithm, response);
-        } else {
-            buildVPJsonLd(callerBpn, verifiableCredentials, response);
-        }
-        return response;
-    }
-
-    private void buildVPJsonLd(String callerBpn, List<VerifiableCredential> verifiableCredentials, Map<String, Object> response) {
-        log.debug("Creating VP as JSON-LD for bpn ->{}", callerBpn);
-        VerifiablePresentationBuilder verifiablePresentationBuilder =
-                new VerifiablePresentationBuilder();
-
-        VerifiablePresentation verifiablePresentation =
-                verifiablePresentationBuilder
-                        .id(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID()))
-                        .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
-                        .verifiableCredentials(verifiableCredentials)
-                        .build();
-        response.put(StringPool.VP, verifiablePresentation);
-    }
-
-    @SneakyThrows({ InvalidPrivateKeyFormatException.class })
-    private void buildVPJwtEdDSA(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) {
-        Pair<Did, Object> result = getPrivateKey(callerWallet, algorithm, audience, callerBpn);
-        String keyId = walletKeyService.getWalletKeyIdByWalletId(callerWallet.getId(), algorithm);
-
-        SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
-                new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), result.getKey());
-
-        X25519PrivateKey ed25519Key = (X25519PrivateKey) result.getRight();
-        X25519PrivateKey privateKey = new X25519PrivateKey(ed25519Key.asByte());
-        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, privateKey, keyId);
-        response.put(StringPool.VP, presentation.serialize());
-    }
-
-    private void buildVPJwtES256K(String audience, String callerBpn, Wallet callerWallet, List<VerifiableCredential> verifiableCredentials, SupportedAlgorithms algorithm, Map<String, Object> response) {
-        Pair<Did, Object> result = getPrivateKey(callerWallet, algorithm, audience, callerBpn);
-        ECPrivateKey ecPrivateKey = (ECPrivateKey) result.getRight();
-
-        JwtPresentationES256KService presentationFactory = new JwtPresentationES256KService(result.getLeft(), new JsonLdSerializerImpl());
-        SignedJWT presentation = presentationFactory.createPresentation(result.getLeft(), verifiableCredentials, audience, ecPrivateKey);
-
-        response.put(StringPool.VP, presentation.serialize());
-    }
-
-    @SneakyThrows({ DidParseException.class })
-    private Pair<Did, Object> getPrivateKey(Wallet callerWallet, SupportedAlgorithms algorithm, String audience, String callerBpn) {
-        log.debug("Creating VP as JWT for bpn ->{}", callerBpn);
-        Validate.isFalse(StringUtils.hasText(audience)).launch(new BadDataException("Audience needed to create VP as JWT"));
-
-        //Issuer of VP is holder of VC
-        Did vpIssuerDid = DidParser.parse(callerWallet.getDid());
-
-        //Build JWT
-        return Pair.of(vpIssuerDid, walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(callerWallet.getId(), algorithm));
     }
 
     /**
@@ -409,7 +335,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
                     .algorithm(SupportedAlgorithms.ES256K);
         } else {
             builder.encoding(VerifiableEncoding.JSON_LD)
-                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID().toString()))
+                    .verificationMethod(URI.create(miwSettings.authorityWalletDid() + "#" + UUID.randomUUID()))
                     .algorithm(SupportedAlgorithms.valueOf(callerWallet.getAlgorithm()));
         }
 

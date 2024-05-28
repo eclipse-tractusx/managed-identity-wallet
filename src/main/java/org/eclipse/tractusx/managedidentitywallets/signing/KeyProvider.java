@@ -41,12 +41,15 @@ public interface KeyProvider {
      * @return the key as a byte-array
      *
      */
-    byte[] getPrivateKey(String keyName, SupportedAlgorithms algorithm);
+    Object getPrivateKey(String keyName, SupportedAlgorithms algorithm);
 
     /**
      * @param walletKey the key to save
      */
     void saveKeys(List<WalletKey> walletKey);
+
+
+    String getKeyId(String keyName, SupportedAlgorithms algorithm);
 
 
     /**

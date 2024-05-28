@@ -24,8 +24,10 @@ package org.eclipse.tractusx.managedidentitywallets.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatus;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 
@@ -68,7 +70,12 @@ public class CredentialCreationConfig {
     private String keyName;
 
     @NonNull
+    @Setter
     private VerifiableEncoding encoding;
+
+    @Setter
+    //This is used when we issue VC as JWT
+    private VerifiableCredential verifiableCredential;
 
     public static class CredentialCreationConfigBuilder {
         public CredentialCreationConfigBuilder vcId(Object object) {

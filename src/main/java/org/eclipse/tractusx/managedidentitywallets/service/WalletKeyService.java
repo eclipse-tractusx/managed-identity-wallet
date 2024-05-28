@@ -79,8 +79,8 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     @SneakyThrows
     public byte[] getPrivateKeyByWalletIdAsBytes(long walletId, String algorithm) {
         Object privateKey = getPrivateKeyByWalletIdAndAlgorithm(walletId, SupportedAlgorithms.valueOf(algorithm));
-        if (privateKey instanceof X25519PrivateKey X25519PrivateKey) {
-            return X25519PrivateKey.asByte();
+        if (privateKey instanceof X25519PrivateKey x25519PrivateKey) {
+            return x25519PrivateKey.asByte();
         } else {
             return ((ECPrivateKey) privateKey).getEncoded();
         }
@@ -88,13 +88,13 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
 
 
     @SneakyThrows
-    public byte[] getPrivateKeyByKeyId(String keyId, SupportedAlgorithms supportedAlgorithms) {
-        WalletKey wallet = walletKeyRepository.getByKeyIdAndAlgorithm(keyId, supportedAlgorithms.name());
-        Object privateKey = getKeyObject(SupportedAlgorithms.valueOf(wallet.getAlgorithm()), encryptionUtils.decrypt(wallet.getPrivateKey()));
-        if (privateKey instanceof X25519PrivateKey X25519PrivateKey) {
-            return X25519PrivateKey.asByte();
+    public Object getPrivateKeyByKeyId(String keyId, SupportedAlgorithms supportedAlgorithms) {
+        WalletKey walletKey = walletKeyRepository.getByKeyIdAndAlgorithm(keyId, supportedAlgorithms.name());
+        Object privateKey = getKeyObject(SupportedAlgorithms.valueOf(walletKey.getAlgorithm()), encryptionUtils.decrypt(walletKey.getPrivateKey()));
+        if (privateKey instanceof X25519PrivateKey x25519PrivateKey) {
+            return x25519PrivateKey;
         } else {
-            return ((ECPrivateKey) privateKey).getEncoded();
+            return privateKey;
         }
     }
     /**

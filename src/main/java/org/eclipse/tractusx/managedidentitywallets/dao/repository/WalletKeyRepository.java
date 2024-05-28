@@ -40,14 +40,6 @@ public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
     WalletKey getByWalletIdAndAlgorithm(Long id, String algorithm);
 
     /**
-     * Gets by wallet id.
-     *
-     * @param id the id
-     * @return WalletKey by wallet id
-     */
-    WalletKey getByWalletId(Long id);
-
-    /**
      * Find first by wallet bpn wallet key.
      *
      * @param bpn the bpn

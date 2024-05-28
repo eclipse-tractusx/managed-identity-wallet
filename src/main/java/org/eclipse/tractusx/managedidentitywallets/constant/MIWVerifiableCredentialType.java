@@ -21,9 +21,12 @@
 
 package org.eclipse.tractusx.managedidentitywallets.constant;
 
+import lombok.experimental.UtilityClass;
+
 /**
  * The type Miw verifiable credential type.
  */
+@UtilityClass
 public class MIWVerifiableCredentialType {
 
     public static final String VERIFIABLE_CREDENTIAL = "VerifiableCredential";

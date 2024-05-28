@@ -60,6 +60,7 @@ import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeExce
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
 import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
 import org.eclipse.tractusx.ssi.lib.model.base.EncodeType;
+import org.eclipse.tractusx.ssi.lib.model.did.DidParser;
 import org.eclipse.tractusx.ssi.lib.model.proof.Proof;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -72,6 +73,7 @@ import org.eclipse.tractusx.ssi.lib.proof.SignatureType;
 import org.eclipse.tractusx.ssi.lib.serialization.jsonld.JsonLdSerializerImpl;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactory;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtPresentationFactoryImpl;
+import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedJwtVCFactoryImpl;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -102,18 +104,49 @@ public class LocalSigningServiceImpl implements LocalSigningService {
     @Override
     public SignerResult createCredential(CredentialCreationConfig config) {
 
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm());
+        byte[] privateKeyBytes = getPrivateKeyBytes(config.getKeyName(), config.getAlgorithm());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (encoding) {
             case JSON_LD -> {
                 return resultBuilder.jsonLd(createVerifiableCredential(config, privateKeyBytes)).build();
             }
-            case JWT -> throw new NotImplementedException("not implemented yet");
+            case JWT -> {
+                SignedJWT verifiableCredentialAsJwt = createVerifiableCredentialAsJwt(config);
+                return resultBuilder.jwt(verifiableCredentialAsJwt.serialize()).build();
+            }
             default ->
                     throw new IllegalArgumentException("encoding %s is not supported".formatted(config.getEncoding()));
 
         }
+    }
+
+    private byte[] getPrivateKeyBytes(String keyName, SupportedAlgorithms supportedAlgorithms) {
+        byte[] privateKeyBytes;
+        if (supportedAlgorithms.equals(SupportedAlgorithms.ED25519)) {
+            privateKeyBytes = ((IPrivateKey) keyProvider.getPrivateKey(keyName, supportedAlgorithms)).asByte();
+        } else if (supportedAlgorithms.equals(SupportedAlgorithms.ES256K)) {
+            ECPrivateKey ecKey = (ECPrivateKey) keyProvider.getPrivateKey(keyName, supportedAlgorithms);
+            privateKeyBytes = ecKey.getEncoded();
+        } else {
+            throw new IllegalArgumentException("Unknown algorithm " + supportedAlgorithms);
+        }
+        return privateKeyBytes;
+    }
+
+    @SneakyThrows
+    private SignedJWT createVerifiableCredentialAsJwt(CredentialCreationConfig config) {
+        if (!config.getAlgorithm().equals(SupportedAlgorithms.ED25519)) {
+            throw new IllegalArgumentException("VC as JWT is not supported for provided algorithm -> " + config.getAlgorithm());
+        }
+        // JWT Factory
+        SerializedJwtVCFactoryImpl vcFactory = new SerializedJwtVCFactoryImpl(
+                new SignedJwtFactory(new OctetKeyPairFactory()));
+        IPrivateKey iPrivateKey = ((IPrivateKey) keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm()));
+
+        return vcFactory.createVCJwt(DidParser.parse(config.getIssuerDoc().getId()), DidParser.parse(config.getHolderDid()), config.getVerifiableCredential(),
+                iPrivateKey,
+                keyProvider.getKeyId(config.getKeyName(), config.getAlgorithm()));
     }
 
     @Override
@@ -195,7 +228,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
 
     @Override
     public SignerResult createPresentation(PresentationCreationConfig config) {
-        byte[] privateKeyBytes = keyProvider.getPrivateKey(config.getKeyName(), config.getAlgorithm());
+        byte[] privateKeyBytes = getPrivateKeyBytes(config.getKeyName(), config.getAlgorithm());
         VerifiableEncoding encoding = Objects.requireNonNull(config.getEncoding());
         SignerResult.SignerResultBuilder resultBuilder = SignerResult.builder().encoding(encoding);
         switch (config.getEncoding()) {

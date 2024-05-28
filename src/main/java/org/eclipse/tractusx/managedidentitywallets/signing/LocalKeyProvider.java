@@ -45,7 +45,7 @@ public class LocalKeyProvider implements KeyProvider {
     private final EncryptionUtils encryptionUtils;
 
     @Override
-    public byte[] getPrivateKey(String keyName, SupportedAlgorithms algorithm) {
+    public Object getPrivateKey(String keyName, SupportedAlgorithms algorithm) {
         WalletKey walletKey = walletKeyRepository.getByAlgorithmAndWallet_Bpn(algorithm.name(), keyName);
         return walletKeyService.getPrivateKeyByKeyId(walletKey.getKeyId(), algorithm);
     }
@@ -53,6 +53,12 @@ public class LocalKeyProvider implements KeyProvider {
     @Override
     public void saveKeys(List<WalletKey> walletKeys) {
         walletKeyRepository.saveAllAndFlush(walletKeys);
+    }
+
+    @Override
+    public String getKeyId(String keyName, SupportedAlgorithms algorithm) {
+        WalletKey walletKey = walletKeyRepository.getByAlgorithmAndWallet_Bpn(algorithm.name(), keyName);
+        return walletKey.getKeyId();
     }
 
     @Override

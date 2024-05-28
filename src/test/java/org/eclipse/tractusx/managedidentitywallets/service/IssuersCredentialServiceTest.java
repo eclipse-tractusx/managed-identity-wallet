@@ -152,8 +152,7 @@ class IssuersCredentialServiceTest {
                 issuersCredentialRepository,
                 miwSettings,
                 new SpecificationUtil<IssuersCredential>(),
-                holdersCredentialRepository, commonService, objectMapper,
-                walletKeyService);
+                holdersCredentialRepository, commonService, objectMapper);
     }
 
     @BeforeEach
@@ -199,8 +198,7 @@ class IssuersCredentialServiceTest {
                     .asByte());
 
 
-            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey()
-                    .asByte());
+            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
             when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
 
             LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);
@@ -264,8 +262,7 @@ class IssuersCredentialServiceTest {
 
 
             when(baseWallet.getSigningServiceType()).thenReturn(SigningServiceType.LOCAL);
-            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey()
-                    .asByte());
+            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
             when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
 
             LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);
@@ -318,8 +315,7 @@ class IssuersCredentialServiceTest {
 
 
             when(baseWallet.getSigningServiceType()).thenReturn(SigningServiceType.LOCAL);
-            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey()
-                    .asByte());
+            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
             when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
 
             LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);
@@ -382,9 +378,9 @@ class IssuersCredentialServiceTest {
                     .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
             when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
 
+            when(walletKeyRepository.getByKeyIdAndAlgorithm(anyString(), anyString())).thenReturn(walletKey);
             when(baseWallet.getSigningServiceType()).thenReturn(SigningServiceType.LOCAL);
-            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey()
-                    .asByte());
+            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
             when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
 
             LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);

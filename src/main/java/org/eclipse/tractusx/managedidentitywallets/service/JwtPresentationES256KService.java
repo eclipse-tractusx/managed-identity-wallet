@@ -30,30 +30,18 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
-import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.SignatureFailureException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
-import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
-import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
-import org.eclipse.tractusx.ssi.lib.model.did.DidMethod;
-import org.eclipse.tractusx.ssi.lib.model.did.DidMethodIdentifier;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -63,9 +51,6 @@ import org.eclipse.tractusx.ssi.lib.serialization.jsonld.JsonLdSerializer;
 import org.eclipse.tractusx.ssi.lib.serialization.jwt.SerializedVerifiablePresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.URI;
@@ -78,12 +63,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PRIVATE_KEY;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.PUBLIC_KEY;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
-import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
 import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_CURVE;
 import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_KEK_TYPE;
 import static org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod.JWK_X;
@@ -101,16 +80,10 @@ public class JwtPresentationES256KService {
 
     private JsonLdSerializer jsonLdSerializer;
     private Did agentDid;
-    private WalletRepository walletRepository;
-    private EncryptionUtils encryptionUtils;
-    private WalletKeyService walletKeyService;
     private MIWSettings miwSettings;
 
     @Autowired
-    public JwtPresentationES256KService(WalletRepository walletRepository, EncryptionUtils encryptionUtils, WalletKeyService walletKeyService, MIWSettings miwSettings) {
-        this.walletRepository = walletRepository;
-        this.encryptionUtils = encryptionUtils;
-        this.walletKeyService = walletKeyService;
+    public JwtPresentationES256KService(MIWSettings miwSettings) {
         this.miwSettings = miwSettings;
     }
 
@@ -132,50 +105,6 @@ public class JwtPresentationES256KService {
         return createSignedJwt(verifiablePresentation.getId(), issuer, audience, serializedVerifiablePresentation, ecPrivateKey);
     }
 
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRES_NEW)
-    public Wallet storeWalletKeyES256K(Wallet wallet, String keyId) {
-        try {
-            ECKey ecKey = new ECKeyGenerator(Curve.SECP256K1)
-                    .keyUse(KeyUse.SIGNATURE)
-                    .keyID(keyId)
-                    .provider(BouncyCastleProviderSingleton.getInstance())
-                    .generate();
-
-            Did did = getDidFromDidString(wallet.getDid());
-
-            JWKVerificationMethod jwkVerificationMethod = getJwkVerificationMethod(ecKey, did);
-            DidDocument didDocument = wallet.getDidDocument();
-            List<VerificationMethod> verificationMethods = didDocument.getVerificationMethods();
-            verificationMethods.add(jwkVerificationMethod);
-            DidDocument updatedDidDocument = buildDidDocument(wallet.getBpn(), did, verificationMethods);
-
-            wallet = walletRepository.getByDid(wallet.getDid());
-            wallet.setDidDocument(updatedDidDocument);
-            walletRepository.save(wallet);
-
-            WalletKey walletKeyES256K = WalletKey.builder()
-                    .keyId(keyId)
-                    .referenceKey(REFERENCE_KEY)
-                    .vaultAccessToken(VAULT_ACCESS_TOKEN)
-                    .privateKey(encryptionUtils.encrypt(CommonUtils.getKeyString(ecKey.toECPrivateKey().getEncoded(), PRIVATE_KEY)))
-                    .publicKey(encryptionUtils.encrypt(getKeyString(ecKey.toECPublicKey().getEncoded(), PUBLIC_KEY)))
-                    .algorithm(SupportedAlgorithms.ES256K.toString())
-                    .build();
-            //Save key ES256K
-            walletKeyService.getRepository().save(walletKeyES256K);
-        } catch (JOSEException e) {
-            throw new BadDataException("Could not generate EC Jwk", e);
-        }
-        return wallet;
-    }
-
-    private Did getDidFromDidString(String didString) {
-        int index = StringUtils.ordinalIndexOf(didString, COLON_SEPARATOR, 2);
-        String identifier = didString.substring(index + 1);
-        DidMethod didMethod = new DidMethod("web");
-        DidMethodIdentifier methodIdentifier = new DidMethodIdentifier(identifier);
-        return new Did(didMethod, methodIdentifier, null);
-    }
 
     public JWKVerificationMethod getJwkVerificationMethod(ECKey ecKey, Did did) {
         Map<String, Object> verificationMethodJson = new HashMap<>();
