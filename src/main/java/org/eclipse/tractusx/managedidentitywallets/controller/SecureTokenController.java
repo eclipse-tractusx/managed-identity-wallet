@@ -82,8 +82,8 @@ public class SecureTokenController {
 
     @SneakyThrows
     @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @SecureTokenControllerApiDoc.PostSecureTokenDoc
-    public ResponseEntity<StsTokenResponse> token(
+    @SecureTokenControllerApiDoc.PostSecureTokenDocJson
+    public ResponseEntity<StsTokenResponse> tokenJson(
             @Valid @RequestBody SecureTokenRequest secureTokenRequest
     ) {
         return processTokenRequest(secureTokenRequest);
@@ -91,8 +91,8 @@ public class SecureTokenController {
 
     @SneakyThrows
     @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @SecureTokenControllerApiDoc.PostSecureTokenDoc
-    public ResponseEntity<StsTokenResponse> token(
+    @SecureTokenControllerApiDoc.PostSecureTokenDocFormUrlencoded
+    public ResponseEntity<StsTokenResponse> tokenFormUrlencoded(
             @Valid @RequestBody MultiValueMap<String, String> requestParameters
     ) {
         final SecureTokenRequest secureTokenRequest = getSecureTokenRequest(requestParameters);
