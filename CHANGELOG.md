@@ -1,3 +1,10 @@
+# [0.5.0-develop.17](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.16...v0.5.0-develop.17) (2024-05-29)
+
+
+### Bug Fixes
+
+* api doc folder structure ([ebd691a](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/ebd691a8a5c05f26a6aa10b778d4c8be6189a4af))
+
 # [0.5.0-develop.16](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.15...v0.5.0-develop.16) (2024-05-28)
 
 
