@@ -151,7 +151,7 @@ class WalletTest {
 
     @Test
     @DisplayName("Create wallet with invalid BPN, it should return 400 ")
-    void createWalletWithInvalidBPNTest400() throws JsonProcessingException, JSONException {
+    void createWalletWithInvalidBPNTest400() throws JSONException {
         String bpn = "invalid bpn";
         String name = "Sample Wallet";
         String baseBpn = miwSettings.authorityWalletBpn();

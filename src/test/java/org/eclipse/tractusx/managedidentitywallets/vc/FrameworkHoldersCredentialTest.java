@@ -100,7 +100,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JsonProcessingException, JSONException {
+    void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         TestUtils.createWallet(bpn, did, walletRepository);
@@ -118,7 +118,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameWorkVCToBaseWalletTest201() throws JSONException, JsonProcessingException {
+    void issueFrameWorkVCToBaseWalletTest201() throws JSONException {
         String bpn = miwSettings.authorityWalletBpn();
         String type = "PcfCredential";
         //create wallet
@@ -176,7 +176,7 @@ class FrameworkHoldersCredentialTest {
 
     @Test
     @DisplayName("Issue framework with invalid type")
-    void issueFrameworkCredentialTest400() throws JsonProcessingException, JSONException {
+    void issueFrameworkCredentialTest400() throws JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);

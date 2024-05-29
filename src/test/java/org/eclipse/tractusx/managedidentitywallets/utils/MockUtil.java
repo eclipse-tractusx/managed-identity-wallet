@@ -232,7 +232,7 @@ public class MockUtil {
         when(holdersCredentialRepository.save(any(HoldersCredential.class)))
                 .thenAnswer(new Answer<HoldersCredential>() {
                                 @Override
-                                public HoldersCredential answer(InvocationOnMock invocation) throws Throwable {
+                                public HoldersCredential answer(InvocationOnMock invocation) {
                                     HoldersCredential argument = invocation.getArgument(0, HoldersCredential.class);
                                     argument.setId(42L);
                                     return argument;
@@ -245,7 +245,7 @@ public class MockUtil {
         when(issuersCredentialRepository.save(any(IssuersCredential.class)))
                 .thenAnswer(new Answer<IssuersCredential>() {
                                 @Override
-                                public IssuersCredential answer(InvocationOnMock invocation) throws Throwable {
+                                public IssuersCredential answer(InvocationOnMock invocation) {
                                     IssuersCredential argument = invocation.getArgument(0, IssuersCredential.class);
                                     argument.setId(42L);
                                     return argument;

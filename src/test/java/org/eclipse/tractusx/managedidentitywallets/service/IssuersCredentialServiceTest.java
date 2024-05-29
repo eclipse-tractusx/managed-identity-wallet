@@ -56,7 +56,6 @@ import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
-import org.eclipse.tractusx.ssi.lib.exception.did.DidResolverException;
 import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPrivateKeyFormatException;
 import org.eclipse.tractusx.ssi.lib.exception.key.KeyTransformationException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtFactory;
@@ -78,10 +77,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.security.oauth2.jwt.JwtException;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -170,7 +167,7 @@ class IssuersCredentialServiceTest {
 
         @Test
         void shouldIssueCredentialAsJwt()
-                throws IOException, InvalidPrivateKeyFormatException, KeyTransformationException {
+                throws InvalidPrivateKeyFormatException, KeyTransformationException {
             Map<String, Object> wallets = mockBaseAndHolderWallet();
             Wallet baseWallet = (Wallet) wallets.get("base");
             String baseWalletBpn = baseWallet.getBpn();
@@ -225,7 +222,7 @@ class IssuersCredentialServiceTest {
 
         @Test
         void shouldIssueCredentialAsJwt()
-                throws IOException, InvalidPrivateKeyFormatException, ParseException, JwtException, KeyTransformationException {
+                throws InvalidPrivateKeyFormatException, JwtException, KeyTransformationException {
             Map<String, Object> wallets = mockBaseAndHolderWallet();
             Wallet baseWallet = (Wallet) wallets.get("base");
             String baseWalletBpn = baseWallet.getBpn();
@@ -285,7 +282,7 @@ class IssuersCredentialServiceTest {
     class issueDismantlerCredentialTest {
 
         @Test
-        void shouldIssueCredentialAsJwt() throws IOException, InvalidPrivateKeyFormatException, ParseException,
+        void shouldIssueCredentialAsJwt() throws InvalidPrivateKeyFormatException,
                 JwtException, KeyTransformationException {
             Map<String, Object> wallets = mockBaseAndHolderWallet();
             Wallet baseWallet = (Wallet) wallets.get("base");
@@ -337,7 +334,7 @@ class IssuersCredentialServiceTest {
     class issueCredentialUsingBaseWallet {
 
         @Test
-        void shouldIssueCredentialAsJwt() throws IOException, ParseException, InvalidPrivateKeyFormatException,
+        void shouldIssueCredentialAsJwt() throws InvalidPrivateKeyFormatException,
                 KeyTransformationException, JwtException {
             Map<String, Object> wallets = mockBaseAndHolderWallet();
             Wallet baseWallet = (Wallet) wallets.get("base");
@@ -363,7 +360,7 @@ class IssuersCredentialServiceTest {
             when(holdersCredentialRepository.save(any(HoldersCredential.class)))
                     .thenAnswer(new Answer<HoldersCredential>() {
                         @Override
-                        public HoldersCredential answer(InvocationOnMock invocation) throws Throwable {
+                        public HoldersCredential answer(InvocationOnMock invocation) {
                             HoldersCredential argument = invocation.getArgument(0, HoldersCredential.class);
                             argument.setId(42L);
                             return argument;
@@ -506,7 +503,7 @@ class IssuersCredentialServiceTest {
         when(holdersCredentialRepository.save(any(HoldersCredential.class)))
                 .thenAnswer(new Answer<HoldersCredential>() {
                     @Override
-                    public HoldersCredential answer(InvocationOnMock invocation) throws Throwable {
+                    public HoldersCredential answer(InvocationOnMock invocation) {
                         HoldersCredential argument = invocation.getArgument(0, HoldersCredential.class);
                         argument.setId(42L);
                         return argument;
@@ -527,7 +524,7 @@ class IssuersCredentialServiceTest {
 
         SignedJwtVerifier jwtVerifier = new SignedJwtVerifier(new DidResolver() {
             @Override
-            public DidDocument resolve(Did did) throws DidResolverException {
+            public DidDocument resolve(Did did) {
                 return didDocument;
             }
 

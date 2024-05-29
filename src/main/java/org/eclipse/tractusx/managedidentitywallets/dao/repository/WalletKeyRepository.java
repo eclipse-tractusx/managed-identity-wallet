@@ -33,7 +33,7 @@ public interface WalletKeyRepository extends BaseRepository<WalletKey, Long> {
     /**
      * Gets by wallet id and algorithm.
      *
-     * @param id        the id param algorithm the algorithm
+     * @param id        the wallet id
      * @param algorithm the algorithm
      * @return the by wallet id
      */
