@@ -4,7 +4,7 @@ The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identit
 
 # Usage
 
-See [INSTALL.md](INSTALL.md) 
+See [INSTALL.md](INSTALL.md)
 
 # Developer Documentation
 
@@ -157,13 +157,13 @@ directory, but without ".dist" at the end.
 
 Description of the env files:
 
-- **env.local**: Set up everything to get ready for flow "local". You need to fill in the passwords. 
+- **env.local**: Set up everything to get ready for flow "local". You need to fill in the passwords.
 - **env.docker**: Set up everything to get ready for flow "docker". You need to fill in the passwords.
 
 > **IMPORTANT**: ssi-lib is resolving DID documents over the network. There are two endpoints that rely on this resolution:
 > - Verifiable Credentials - Validation
 > - Verifiable Presentations - Validation
->   
+>
 > The following parameters are set in env.local or env.docker file per default:
 > ENFORCE_HTTPS_IN_DID_RESOLUTION=false
 > MIW_HOST_NAME=localhost
@@ -210,10 +210,11 @@ When you just run `task` without parameters, you will see all tasks available.
 
 ### pgAdmin
 
-This local environment contains [pgAdmin](https://www.pgadmin.org/), which is also started (default: http://localhost:8888). 
+This local environment contains [pgAdmin](https://www.pgadmin.org/), which is also started (
+default: http://localhost:8888).
 The default login is:
 
-``` 
+```
 user: pg@admin.com (you can change it in the env.* files)
 password: the one you set for "POSTGRES_PASSWORD" in the env.* files
 ```
@@ -233,7 +234,7 @@ For example, You can save DB backups there, so you can access them on your local
 
 See OpenAPI documentation, which is automatically created from the source and available on each deployment at
 the `/docs/api-docs/docs` endpoint (e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
-document can be also found in [docs/openapi_v001.json](docs/openapi_v001.json).
+document can be also found in [docs/openapi_v001.json](docs/api/openapi_v001.json).
 
 # Test Coverage
 
