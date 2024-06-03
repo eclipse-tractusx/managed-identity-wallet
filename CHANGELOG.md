@@ -1,3 +1,16 @@
+# [0.5.0-develop.18](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.17...v0.5.0-develop.18) (2024-06-03)
+
+
+### Bug Fixes
+
+* chart file ([8b16023](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8b16023dd1f73a5e8f3f83117ff8b461cbbff4f5))
+* chart file ([099fabb](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/099fabbbfd0f14dfdd93307895440d4c0dd48abd))
+* direct access to WalletKeyService while signing VC removed ([e264c0f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e264c0f08de30fa5f3064f9a8d67c121419d75ad))
+* ficense header updated ([b2959e6](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b2959e69e26346ff94a8dcbb47d60d41dde1c72f))
+* javadoc, imports and throws ([af87ecb](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/af87ecb3a79fa49577af0aa0da31d22366e48791))
+* sonar issues ([a7fb417](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a7fb417e694c6199618e1e51e62c53b33c173089))
+* test cases ([22e3bb8](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/22e3bb831e8cc83fd947a6aef6b687f438cc7e5e))
+
 # [0.5.0-develop.17](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.16...v0.5.0-develop.17) (2024-05-29)
 
 
