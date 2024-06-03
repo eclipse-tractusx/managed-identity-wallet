@@ -22,11 +22,10 @@
 package org.eclipse.tractusx.managedidentitywallets.sts;
 
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenIssuer;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
-import org.eclipse.tractusx.managedidentitywallets.service.SecureTokenServiceImpl;
+import org.eclipse.tractusx.managedidentitywallets.service.LocalSecureTokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,13 +34,12 @@ public class SecureTokenBeanConfig {
 
     @Bean
     public SecureTokenService secureTokenService(
-            WalletKeyRepository keyRepository,
             WalletRepository walletRepository,
             SecureTokenIssuer issuer,
             SecureTokenConfigurationProperties properties,
             JtiRepository jtiRepository
     ) {
-        return new SecureTokenServiceImpl(keyRepository, walletRepository, issuer, properties, jtiRepository);
+        return new LocalSecureTokenService(walletRepository, issuer, properties, jtiRepository);
     }
 
 }

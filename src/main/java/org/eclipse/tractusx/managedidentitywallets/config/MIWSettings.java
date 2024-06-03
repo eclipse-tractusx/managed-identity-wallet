@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -21,6 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config;
 
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyStorageType;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -39,5 +41,8 @@ public record MIWSettings(String host, String encryptionKey, String authorityWal
                           @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
                           Set<String> supportedFrameworkVCTypes,
                           boolean enforceHttps, String contractTemplatesUrl,
-                          List<URI> didDocumentContextUrls) {
+                          List<URI> didDocumentContextUrls,
+                          KeyStorageType localSigningKeyStorageType,
+                          SigningServiceType authoritySigningServiceType) {
 }
+

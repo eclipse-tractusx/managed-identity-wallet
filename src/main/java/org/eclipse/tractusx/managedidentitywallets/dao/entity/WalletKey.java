@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -30,7 +30,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,13 +47,14 @@ import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name="wallet_key")
 public class WalletKey extends MIWBaseEntity {
 
     @Id
     @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
-    private Long id;
+    private long id;
 
     @Column(nullable = false)
     private String vaultAccessToken;
@@ -68,8 +69,7 @@ public class WalletKey extends MIWBaseEntity {
     private String publicKey;
 
     @ManyToOne
-    @MapsId
-    @JoinColumn(name = "walletId", columnDefinition = "bigint")
+    @JoinColumn(name = "wallet_id", columnDefinition = "bigint")
     @JsonBackReference
     private Wallet wallet;
 

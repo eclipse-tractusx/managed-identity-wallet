@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -109,7 +108,7 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
     }
 
     @SneakyThrows
-    private VerifiableCredential issueVC(String issuerDid, Wallet signerWallet) throws JsonProcessingException {
+    private VerifiableCredential issueVC(String issuerDid, Wallet signerWallet) {
         List<URI> contexts = new ArrayList();
         contexts.add(URI.create("https://www.w3.org/2018/credentials/v1"));
         // if the credential does not contain the JWS proof-context add it

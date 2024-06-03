@@ -208,7 +208,6 @@ public class MockUtil {
                 Instant.now().plus(Duration.ofDays(5))
         );
         HoldersCredential holdersCredential = mockHolderCredential(verifiableCredential);
-        //getRepository().findAll(specification, pageRequest);
         when(holdersCredentialRepository.findAll(any(Specification.class), any(PageRequest.class))).thenReturn(
                 new PageImpl<>(List.of(holdersCredential))
         );
@@ -224,7 +223,6 @@ public class MockUtil {
                 Instant.now().plus(Duration.ofDays(5))
         );
         IssuersCredential holdersCredential = mockIssuerCredential(verifiableCredential);
-        //getRepository().findAll(specification, pageRequest);
         when(holdersCredentialRepository.findAll(any(Specification.class), any(PageRequest.class))).thenReturn(
                 new PageImpl<>(List.of(holdersCredential))
         );
@@ -234,7 +232,7 @@ public class MockUtil {
         when(holdersCredentialRepository.save(any(HoldersCredential.class)))
                 .thenAnswer(new Answer<HoldersCredential>() {
                                 @Override
-                                public HoldersCredential answer(InvocationOnMock invocation) throws Throwable {
+                                public HoldersCredential answer(InvocationOnMock invocation) {
                                     HoldersCredential argument = invocation.getArgument(0, HoldersCredential.class);
                                     argument.setId(42L);
                                     return argument;
@@ -247,7 +245,7 @@ public class MockUtil {
         when(issuersCredentialRepository.save(any(IssuersCredential.class)))
                 .thenAnswer(new Answer<IssuersCredential>() {
                                 @Override
-                                public IssuersCredential answer(InvocationOnMock invocation) throws Throwable {
+                                public IssuersCredential answer(InvocationOnMock invocation) {
                                     IssuersCredential argument = invocation.getArgument(0, IssuersCredential.class);
                                     argument.setId(42L);
                                     return argument;

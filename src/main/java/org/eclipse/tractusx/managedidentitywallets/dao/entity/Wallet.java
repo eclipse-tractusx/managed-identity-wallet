@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -27,6 +27,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,6 +39,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.utils.StringToDidDocumentConverter;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -71,6 +74,10 @@ public class Wallet extends MIWBaseEntity {
 
     @Column(nullable = false)
     private String algorithm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "signing_service_type", nullable = false)
+    private SigningServiceType signingServiceType;
 
     @Column(nullable = false)
     @Convert(converter = StringToDidDocumentConverter.class)

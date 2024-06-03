@@ -19,22 +19,10 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.interfaces;
+package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
-import org.eclipse.tractusx.managedidentitywallets.domain.DID;
-
-import com.nimbusds.jwt.JWT;
-import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
-
-import java.util.Set;
-
-public interface SecureTokenService {
-    JWT issueToken(DID self, DID partner, Set<String> scopes, KeyProvider keyProvider);
-
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes, KeyProvider keyProvider);
-
-    JWT issueToken(DID self, DID partner, JWT accessToken, KeyProvider keyProvider);
-
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken, KeyProvider keyProvider);
+public enum SigningServiceType {
+    LOCAL,
+    AZURE,
+    REMOTE
 }

@@ -35,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenIssuer;
-import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.ssi.lib.crypt.octet.OctetKeyPairFactory;
 import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519PrivateKey;
 import org.springframework.stereotype.Component;
@@ -53,9 +52,7 @@ import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NO
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SecureTokenIssuerImpl implements SecureTokenIssuer {
-
-    private final EncryptionUtils encryptionUtils;
+public class LocalSecureTokenIssuer implements SecureTokenIssuer {
 
     @Override
     public JWT createIdToken(KeyPair keyPair, DID self, DID partner, Instant expirationTime, JWT accessToken) {
@@ -101,7 +98,7 @@ public class SecureTokenIssuerImpl implements SecureTokenIssuer {
         log.debug("Creating JWS signature for issuer '{}' and holder '{}'", builder.getClaims().get("iss"),
                 builder.getClaims().get("sub"));
         SignedJWT signedJWT = new SignedJWT(header, body);
-        String privateKey = encryptionUtils.decrypt(keyPair.privateKey());
+        String privateKey = keyPair.privateKey();
         // todo bri: this should become dynamic in the future, as we want to support more key algos.
         OctetKeyPair jwk = new OctetKeyPairFactory().fromPrivateKey(new X25519PrivateKey(privateKey, true));
         Ed25519Signer signer = new Ed25519Signer(jwk);

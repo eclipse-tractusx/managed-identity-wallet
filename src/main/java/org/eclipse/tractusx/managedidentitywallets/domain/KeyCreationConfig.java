@@ -19,22 +19,25 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.interfaces;
+package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
-import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.KeyType;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
 
-import com.nimbusds.jwt.JWT;
-import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
+import java.util.List;
 
-import java.util.Set;
+@Builder
+@Getter
+public class KeyCreationConfig {
 
-public interface SecureTokenService {
-    JWT issueToken(DID self, DID partner, Set<String> scopes, KeyProvider keyProvider);
+    @NonNull
+    private String keyName;
 
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes, KeyProvider keyProvider);
+    private Curve curve;
 
-    JWT issueToken(DID self, DID partner, JWT accessToken, KeyProvider keyProvider);
-
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken, KeyProvider keyProvider);
+    @NonNull
+    private List<KeyType> keyTypes;
 }

@@ -25,9 +25,8 @@ import com.nimbusds.jwt.JWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
@@ -35,6 +34,7 @@ import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumberException;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenIssuer;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
+import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
 import org.eclipse.tractusx.managedidentitywallets.sts.SecureTokenConfigurationProperties;
 
 import java.time.Instant;
@@ -47,37 +47,37 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtil
 
 @Slf4j
 @RequiredArgsConstructor
-public class SecureTokenServiceImpl implements SecureTokenService {
-
-    private final WalletKeyRepository walletKeyRepository;
+public class LocalSecureTokenService implements SecureTokenService {
 
     private final WalletRepository walletRepository;
 
-    private final SecureTokenIssuer tokenIssuer;
+    // Autowired by name!!!
+    private final SecureTokenIssuer localSecureTokenIssuer;
 
     private final SecureTokenConfigurationProperties properties;
 
     private final JtiRepository jtiRepository;
 
+
     @Override
-    public JWT issueToken(final DID self, final DID partner, final Set<String> scopes) {
+    public JWT issueToken(final DID self, final DID partner, final Set<String> scopes, KeyProvider keyProvider) {
         log.debug("'issueToken' using scopes and DID.");
-        KeyPair keyPair = walletKeyRepository.findFirstByWallet_Did(self.toString()).toDto();
+        KeyPair keyPair = keyProvider.getKeyPair(self);
         // IMPORTANT: we re-use the expiration time intentionally to mitigate any kind of timing attacks,
         // as we're signing two tokens.
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
-        JWT accessToken = this.tokenIssuer.createAccessToken(keyPair, self, partner, expirationTime, scopes);
+        JWT accessToken = this.localSecureTokenIssuer.createAccessToken(keyPair, self, partner, expirationTime, scopes);
         checkAndStoreJti(accessToken);
-        return this.tokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
     }
 
     @Override
-    public JWT issueToken(DID self, DID partner, JWT accessToken) {
+    public JWT issueToken(DID self, DID partner, JWT accessToken, KeyProvider keyProvider) {
         log.debug("'issueToken' using an access_token and DID.");
-        KeyPair keyPair = walletKeyRepository.findFirstByWallet_Did(self.toString()).toDto();
+        KeyPair keyPair = keyProvider.getKeyPair(self);
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
         checkAndStoreJti(accessToken);
-        return this.tokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, self, partner, expirationTime, accessToken);
     }
 
     private void checkAndStoreJti(JWT accessToken) {
@@ -90,33 +90,31 @@ public class SecureTokenServiceImpl implements SecureTokenService {
     }
 
     @Override
-    public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes) {
+    public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes, KeyProvider keyProvider) {
         log.debug("'issueToken' using scopes and BPN.");
-        WalletKey walletKey = Optional.of(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
-        KeyPair keyPair = walletKey.toDto();
-        DID selfDid = new DID(walletKey.getWallet().getDid());
+        KeyPair keyPair = keyProvider.getKeyPair(self.toString());
+        Wallet wallet = walletRepository.getByBpn(self.toString());
+        DID selfDid = new DID(wallet.getDid());
         DID partnerDid = new DID(Optional.ofNullable(walletRepository.getByBpn(partner.toString()))
                 .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());
         // IMPORTANT: we re-use the expiration time intentionally to mitigate any kind of timing attacks,
         // as we're signing two tokens.
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
-        JWT accessToken = this.tokenIssuer.createAccessToken(keyPair, selfDid, partnerDid, expirationTime, scopes);
-        return this.tokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
+        JWT accessToken = this.localSecureTokenIssuer.createAccessToken(keyPair, selfDid, partnerDid, expirationTime, scopes);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
     }
 
     @Override
-    public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken) {
+    public JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken, KeyProvider keyProvider) {
         log.debug("'issueToken' using an access_token and BPN.");
-        WalletKey walletKey = Optional.ofNullable(walletKeyRepository.findFirstByWallet_Bpn(self.toString()))
-                .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", self)));
-        KeyPair keyPair = walletKey.toDto();
-        DID selfDid = new DID(walletKey.getWallet().getDid());
+        KeyPair keyPair = keyProvider.getKeyPair(self.toString());
+        Wallet wallet = walletRepository.getByBpn(self.toString());
+        DID selfDid = new DID(wallet.getDid());
         DID partnerDid = new DID(Optional.of(walletRepository.getByBpn(partner.toString()))
                 .orElseThrow(() -> new UnknownBusinessPartnerNumberException(String.format("The provided BPN '%s' is unknown", partner)))
                 .getDid());
         Instant expirationTime = Instant.now().plus(properties.tokenDuration());
-        return this.tokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
+        return this.localSecureTokenIssuer.createIdToken(keyPair, selfDid, partnerDid, expirationTime, accessToken);
     }
 }

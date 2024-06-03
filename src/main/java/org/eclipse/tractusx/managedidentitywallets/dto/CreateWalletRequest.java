@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -24,8 +24,13 @@ package org.eclipse.tractusx.managedidentitywallets.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 
 
 /**
@@ -49,4 +54,6 @@ public class CreateWalletRequest {
     @NotBlank(message = "Please provide url")
     @Size(min = 1, max = 2000, message = "Please provide url")
     private String didUrl;
+
+    private SigningServiceType signingServiceType = SigningServiceType.LOCAL;
 }

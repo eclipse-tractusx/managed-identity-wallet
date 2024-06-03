@@ -19,22 +19,18 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.interfaces;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
-import org.eclipse.tractusx.managedidentitywallets.domain.DID;
-
-import com.nimbusds.jwt.JWT;
-import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
-
-import java.util.Set;
-
-public interface SecureTokenService {
-    JWT issueToken(DID self, DID partner, Set<String> scopes, KeyProvider keyProvider);
-
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes, KeyProvider keyProvider);
-
-    JWT issueToken(DID self, DID partner, JWT accessToken, KeyProvider keyProvider);
-
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken, KeyProvider keyProvider);
+/**
+ * Specialized interface for SigningServices that will sign credentials/presentations locally
+ * (may retrieve the keys from remote via KeyProvider)
+ *
+ * @see SigningService
+ * @see KeyProvider
+ */
+public interface LocalSigningService extends SigningService {
+    /**
+     * @param keyProvider the KeyProvider to be used by the implementation
+     */
+    void setKeyProvider(KeyProvider keyProvider);
 }

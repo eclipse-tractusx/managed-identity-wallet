@@ -225,7 +225,7 @@ class HoldersCredentialTest {
 
     @Test
     @DisplayName("Get Credentials as JWT")
-    void getCredentialsAsJWT200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
+    void getCredentialsAsJWT200() throws JSONException {
 
         String baseDID = miwSettings.authorityWalletDid();
         String bpn = TestUtils.getRandomBpmNumber();

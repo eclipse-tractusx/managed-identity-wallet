@@ -19,22 +19,19 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.interfaces;
+package org.eclipse.tractusx.managedidentitywallets.signing;
 
-import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
-import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 
-import com.nimbusds.jwt.JWT;
-import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
-
-import java.util.Set;
-
-public interface SecureTokenService {
-    JWT issueToken(DID self, DID partner, Set<String> scopes, KeyProvider keyProvider);
-
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes, KeyProvider keyProvider);
-
-    JWT issueToken(DID self, DID partner, JWT accessToken, KeyProvider keyProvider);
-
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken, KeyProvider keyProvider);
+@Getter
+@Setter
+@Builder
+public class SignerResult {
+    private VerifiableEncoding encoding;
+    private Verifiable jsonLd;
+    private String jwt;
 }

@@ -162,7 +162,7 @@ class IssuersCredentialTest {
 
     @Test
     @DisplayName("Get Credentials as JWT")
-    void getCredentialsAsJWT200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
+    void getCredentialsAsJWT200() throws JSONException {
         String baseBPN = miwSettings.authorityWalletBpn();
         String holderBpn = TestUtils.getRandomBpmNumber();
         String holderDID = "did:web:localhost:" + holderBpn;

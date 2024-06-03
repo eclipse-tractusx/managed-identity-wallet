@@ -19,22 +19,41 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.interfaces;
+package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
-import org.eclipse.tractusx.managedidentitywallets.domain.DID;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.ssi.lib.model.did.Did;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 
-import com.nimbusds.jwt.JWT;
-import org.eclipse.tractusx.managedidentitywallets.signing.KeyProvider;
+import java.net.URI;
+import java.util.List;
 
-import java.util.Set;
+@Builder
+@Getter
+public class PresentationCreationConfig {
 
-public interface SecureTokenService {
-    JWT issueToken(DID self, DID partner, Set<String> scopes, KeyProvider keyProvider);
+    @NonNull
+    private VerifiableEncoding encoding;
 
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, Set<String> scopes, KeyProvider keyProvider);
+    @NonNull
+    private String keyName;
 
-    JWT issueToken(DID self, DID partner, JWT accessToken, KeyProvider keyProvider);
+    @NonNull
+    private List<VerifiableCredential> verifiableCredentials;
 
-    JWT issueToken(BusinessPartnerNumber self, BusinessPartnerNumber partner, JWT accessToken, KeyProvider keyProvider);
+    @NonNull
+    private Did vpIssuerDid;
+
+    // all for JWT
+    private String audience;
+
+    // all for JsonLD
+    URI verificationMethod;
+
+    @NonNull
+    private SupportedAlgorithms algorithm;
+
 }

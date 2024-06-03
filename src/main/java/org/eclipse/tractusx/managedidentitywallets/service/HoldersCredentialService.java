@@ -34,12 +34,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
+import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -73,7 +79,8 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
-    private final WalletKeyService walletKeyService;
+    private final Map<SigningServiceType, SigningService> availableSigningServices;
+
 
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {
@@ -127,10 +134,27 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         List<CredentialsResponse> list = new ArrayList<>(filter.getContent().size());
 
+        Wallet issuerWallet = command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : holderWallet;
+
         for (HoldersCredential credential : filter.getContent()) {
             CredentialsResponse cr = new CredentialsResponse();
             if (command.isAsJwt()) {
-                cr.setJwt(CommonUtils.vcAsJwt(command.getIdentifier() != null ? commonService.getWalletByIdentifier(command.getIdentifier()) : holderWallet, holderWallet, credential.getData(), walletKeyService));
+
+                CredentialCreationConfig config = CredentialCreationConfig.builder()
+                        .algorithm(SupportedAlgorithms.ED25519)
+                        .issuerDoc(issuerWallet.getDidDocument())
+                        .holderDid(holderWallet.getDid())
+                        .keyName(issuerWallet.getBpn())
+                        .verifiableCredential(credential.getData())
+                        .subject(credential.getData().getCredentialSubject().get(0))
+                        .contexts(credential.getData().getContext())
+                        .vcId(credential.getData().getId())
+                        .types(credential.getData().getTypes())
+                        .encoding(VerifiableEncoding.JWT)
+                        .build();
+
+                SignerResult signerResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(config);
+                cr.setJwt(signerResult.getJwt());
             } else {
                 cr.setVc(credential.getData());
             }
@@ -155,19 +179,31 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         //validate BPN access, Holder must be caller of API
         Validate.isFalse(callerBpn.equals(issuerWallet.getBpn())).launch(new ForbiddenException(BASE_WALLET_BPN_IS_NOT_MATCHING_WITH_REQUEST_BPN_FROM_TOKEN));
 
-        // get Key
-        byte[] privateKeyBytes = walletKeyService.getPrivateKeyByWalletIdAsBytes(issuerWallet.getId(), issuerWallet.getAlgorithm());
-
         // check if the expiryDate is set
         Date expiryDate = null;
         if (verifiableCredential.getExpirationDate() != null) {
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
+
+        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
+                .encoding(VerifiableEncoding.JSON_LD)
+                .subject(verifiableCredential.getCredentialSubject().get(0))
+                .types(verifiableCredential.getTypes())
+                .issuerDoc(issuerWallet.getDidDocument())
+                .holderDid(issuerWallet.getDid())
+                .contexts(verifiableCredential.getContext())
+                .expiryDate(expiryDate)
+                .selfIssued(true)
+                .keyName(issuerWallet.getBpn())
+                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()))
+                .build();
+
         // Create Credential
-        HoldersCredential credential = CommonUtils.getHoldersCredential(verifiableCredential.getCredentialSubject().get(0),
-                verifiableCredential.getTypes(), issuerWallet.getDidDocument(),
-                privateKeyBytes, issuerWallet.getDid(),
-                verifiableCredential.getContext(), expiryDate, true);
+
+        SignerResult signerResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+        VerifiableCredential vc = (VerifiableCredential) signerResult.getJsonLd();
+        HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
+
 
         //Store Credential in holder table
         credential = create(credential);
@@ -176,7 +212,10 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
         // Return VC
         if (asJwt) {
-            cr.setJwt(CommonUtils.vcAsJwt(issuerWallet, commonService.getWalletByIdentifier(callerBpn), credential.getData(), walletKeyService));
+            holdersCredentialCreationConfig.setVerifiableCredential(credential.getData());
+            holdersCredentialCreationConfig.setEncoding(VerifiableEncoding.JWT);
+            SignerResult signerJwtResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
+            cr.setJwt(signerJwtResult.getJwt());
         } else {
             cr.setVc(credential.getData());
         }

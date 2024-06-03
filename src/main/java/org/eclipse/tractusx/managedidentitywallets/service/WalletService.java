@@ -21,6 +21,10 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.KeyType;
+import com.nimbusds.jose.jwk.KeyUse;
 import com.smartsensesolutions.java.commons.FilterRequest;
 import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
 import com.smartsensesolutions.java.commons.base.service.BaseService;
@@ -28,6 +32,7 @@ import com.smartsensesolutions.java.commons.sort.Sort;
 import com.smartsensesolutions.java.commons.sort.SortType;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -40,21 +45,24 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
+import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
+import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
-import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
-import org.eclipse.tractusx.ssi.lib.crypt.x25519.X25519Generator;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethodBuilder;
+import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -71,10 +79,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.ED_25519;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
 import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
-import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getKeyString;
 
 /**
  * The type Wallet service.
@@ -95,8 +101,6 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final EncryptionUtils encryptionUtils;
 
-    private final WalletKeyService walletKeyService;
-
     private final HoldersCredentialRepository holdersCredentialRepository;
 
     private final SpecificationUtil<Wallet> walletSpecificationUtil;
@@ -104,6 +108,8 @@ public class WalletService extends BaseService<Wallet, Long> {
     private final IssuersCredentialService issuersCredentialService;
 
     private final CommonService commonService;
+
+    private final Map<SigningServiceType, SigningService> availableSigningServices;
 
     @Qualifier("transactionManager")
     private final PlatformTransactionManager transactionManager;
@@ -212,6 +218,7 @@ public class WalletService extends BaseService<Wallet, Long> {
      * @return the wallet
      */
     @SneakyThrows
+    @Transactional
     public Wallet createWallet(CreateWalletRequest request, String callerBpn) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         final Wallet[] wallets = new Wallet[1];
@@ -221,7 +228,6 @@ public class WalletService extends BaseService<Wallet, Long> {
                 wallets[0] = createWallet(request, false, callerBpn);
             }
         });
-        wallets[0] = updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
         return wallets[0];
     }
 
@@ -236,19 +242,51 @@ public class WalletService extends BaseService<Wallet, Long> {
         validateCreateWallet(request, callerBpn);
 
         //create private key pair
-        IKeyGenerator keyGenerator = new X25519Generator();
-        KeyPair keyPair = keyGenerator.generateKey();
+        final SigningServiceType signingServiceType;
+        if (authority) {
+            signingServiceType = miwSettings.authoritySigningServiceType();
+        } else {
+            signingServiceType = request.getSigningServiceType();
+        }
+
+        KeyCreationConfig keyCreationConfig = KeyCreationConfig.builder()
+                .keyName(request.getBusinessPartnerNumber())
+                .keyTypes(List.of(KeyType.OCT, KeyType.EC))
+                .curve(Curve.SECP256K1)
+                .build();
+        SigningService signingService = availableSigningServices.get(signingServiceType);
+
+        Map<KeyType, KeyPair> keyPairs = signingService.getKeys(keyCreationConfig);
 
         //create did json
         Did did = createDidJson(request.getDidUrl());
+        List<WalletKeyInfo> walletKeyInfos = new ArrayList<>();
+        keyPairs.forEach((k, keyPair) -> {
+            String keyId = UUID.randomUUID().toString();
+            JWKVerificationMethod jwkVerificationMethod;
+            SupportedAlgorithms algorithm;
+            if (k == KeyType.OCT) {
+                algorithm = SupportedAlgorithms.ED25519;
+                JsonWebKey jwk = new JsonWebKey(keyId, keyPair.getPublicKey(), keyPair.getPrivateKey());
+                jwkVerificationMethod =
+                        new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
+            } else if (k == KeyType.EC) {
+                algorithm = SupportedAlgorithms.ES256K;
+                ECKey ecKey = new ECKey.Builder(Curve.SECP256K1, CommonUtils.ecPublicFrom(keyPair.getPublicKey().asByte()))
+                        .privateKey(CommonUtils.ecPrivateFrom(keyPair.getPrivateKey().asByte()))
+                        .keyID(keyId)
+                        .keyUse(KeyUse.SIGNATURE)
+                        .build();
+                jwkVerificationMethod = jwtPresentationES256KService.getJwkVerificationMethod(ecKey, did);
+            } else {
+                throw new IllegalArgumentException("unsupported keyType %s".formatted(k.getValue()));
+            }
 
-        String keyId = UUID.randomUUID().toString();
+            walletKeyInfos.add(new WalletKeyInfo(keyId, keyPair, algorithm, jwkVerificationMethod));
+        });
 
-        JsonWebKey jwk = new JsonWebKey(keyId, keyPair.getPublicKey(), keyPair.getPrivateKey());
-        JWKVerificationMethod jwkVerificationMethod =
-                new JWKVerificationMethodBuilder().did(did).jwk(jwk).build();
 
-        DidDocument didDocument = jwtPresentationES256KService.buildDidDocument(request.getBusinessPartnerNumber(), did, List.of(jwkVerificationMethod));
+        DidDocument didDocument = jwtPresentationES256KService.buildDidDocument(request.getBusinessPartnerNumber(), did, walletKeyInfos.stream().map(wki -> wki.verificationMethod).toList());
 
         //Save wallet
         Wallet wallet = create(Wallet.builder()
@@ -256,24 +294,26 @@ public class WalletService extends BaseService<Wallet, Long> {
                 .bpn(request.getBusinessPartnerNumber())
                 .name(request.getCompanyName())
                 .did(did.toUri().toString())
-                .algorithm(ED_25519)
+                .algorithm(StringPool.ED_25519)
+                .signingServiceType(signingServiceType)
                 .build());
 
-        WalletKey walletKeyED25519 = WalletKey.builder()
-                .wallet(wallet)
-                .keyId(keyId)
-                .referenceKey(REFERENCE_KEY)
-                .vaultAccessToken(VAULT_ACCESS_TOKEN)
-                .privateKey(encryptionUtils.encrypt(getKeyString(keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
-                .publicKey(encryptionUtils.encrypt(getKeyString(keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
-                .algorithm(SupportedAlgorithms.ED25519.toString())
-                .build();
+        var walletsKeys = walletKeyInfos.stream().map(e ->
+                WalletKey.builder()
+                        .wallet(wallet)
+                        .keyId(e.keyId)
+                        .referenceKey(REFERENCE_KEY)
+                        .vaultAccessToken(VAULT_ACCESS_TOKEN)
+                        .privateKey(encryptionUtils.encrypt(CommonUtils.getKeyString(e.keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
+                        .publicKey(encryptionUtils.encrypt(CommonUtils.getKeyString(e.keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
+                        .algorithm(e.algorithm.name())
+                        .build()
+        ).toList();
 
-        //Save key EdDSA
-        walletKeyService.getRepository().save(walletKeyED25519);
+
+        signingService.saveKeys(walletsKeys);
+
         log.debug("Wallet created for bpn ->{}", StringEscapeUtils.escapeJava(request.getBusinessPartnerNumber()));
-
-        //credentials issuance will be moved to the issuer component
 
         return wallet;
     }
@@ -314,22 +354,8 @@ public class WalletService extends BaseService<Wallet, Long> {
                 }
             }
         });
-        updateWalletWithWalletKeyES256K(transactionTemplate, wallets);
     }
 
-    private Wallet updateWalletWithWalletKeyES256K(TransactionTemplate transactionTemplate, Wallet[] wallets) {
-        String keyId = UUID.randomUUID().toString();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                // create additional key pair ES256K
-                if (wallets[0] != null) {
-                    wallets[0] = jwtPresentationES256KService.storeWalletKeyES256K(wallets[0], keyId);
-                }
-            }
-        });
-        return wallets[0];
-    }
 
     private void validateCreateWallet(CreateWalletRequest request, String callerBpn) {
         // check base wallet
@@ -340,5 +366,14 @@ public class WalletService extends BaseService<Wallet, Long> {
         if (exist) {
             throw new DuplicateWalletProblem("Wallet is already exists for bpn " + request.getBusinessPartnerNumber());
         }
+    }
+
+
+    @RequiredArgsConstructor
+    private class WalletKeyInfo {
+        private final String keyId;
+        private final KeyPair keyPair;
+        private final SupportedAlgorithms algorithm;
+        private final VerificationMethod verificationMethod;
     }
 }

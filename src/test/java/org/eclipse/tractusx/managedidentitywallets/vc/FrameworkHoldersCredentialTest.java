@@ -100,7 +100,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JsonProcessingException, JSONException {
+    void issueFrameworkCredentialWithInvalidBpnAccessTest403() throws JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         TestUtils.createWallet(bpn, did, walletRepository);
@@ -118,7 +118,7 @@ class FrameworkHoldersCredentialTest {
     }
 
     @Test
-    void issueFrameWorkVCToBaseWalletTest201() throws JSONException, JsonProcessingException {
+    void issueFrameWorkVCToBaseWalletTest201() throws JSONException {
         String bpn = miwSettings.authorityWalletBpn();
         String type = "PcfCredential";
         //create wallet
@@ -156,7 +156,7 @@ class FrameworkHoldersCredentialTest {
 
         String type = request.getType();
 
-        createAndValidateVC(bpn, did, type);
+        createAndValidateVC(bpn, type);
         //check in issuer tables
         List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(miwSettings.authorityWalletDid(), did, MIWVerifiableCredentialType.USE_CASE_FRAMEWORK_CONDITION);
         Assertions.assertEquals(1, issuerVCs.size());
@@ -176,7 +176,7 @@ class FrameworkHoldersCredentialTest {
 
     @Test
     @DisplayName("Issue framework with invalid type")
-    void issueFrameworkCredentialTest400() throws JsonProcessingException, JSONException {
+    void issueFrameworkCredentialTest400() throws JSONException {
         String bpn = TestUtils.getRandomBpmNumber();
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         Wallet wallet = TestUtils.createWallet(bpn, did, walletRepository);
@@ -195,7 +195,7 @@ class FrameworkHoldersCredentialTest {
 
     }
 
-    private void createAndValidateVC(String bpn, String did, String type) throws JsonProcessingException, JSONException {
+    private void createAndValidateVC(String bpn, String type) throws JsonProcessingException, JSONException {
         //create wallet
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
