@@ -96,7 +96,7 @@ public class PresentationServiceTest {
     void createPresentation200ResponseAsJWT() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
+        String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, false);
@@ -116,7 +116,7 @@ public class PresentationServiceTest {
     void createPresentation200ResponseAsJsonLD() {
         boolean asJwt = false;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
+        String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, false);
@@ -139,7 +139,7 @@ public class PresentationServiceTest {
     void createPresentation200ResponseNoJtiRecord() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
+        String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
 
@@ -156,7 +156,7 @@ public class PresentationServiceTest {
     void createPresentationIncorrectVcTypeResponse() {
         boolean asJwt = true;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
+        String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, INVALID_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, false);
@@ -182,7 +182,7 @@ public class PresentationServiceTest {
     void createPresentationIncorrectJtiAlreadyUsed() {
         boolean asJwt = false;
         String bpn = TestUtils.getRandomBpmNumber();
-        String did = generateWalletAndBpnCredentialAndGetDid(bpn);
+        String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, true);
@@ -193,13 +193,12 @@ public class PresentationServiceTest {
     }
 
     @SneakyThrows
-    private String generateWalletAndBpnCredentialAndGetDid(String bpn) {
+    private String generateWalletAndGetDid(String bpn) {
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
         ResponseEntity<String> createWalletResponse = createWallet(bpn, "name", restTemplate, baseBpn, defaultLocation);
         Wallet wallet = TestUtils.getWalletFromString(createWalletResponse.getBody());
         Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-        issuersCredentialService.issueBpnCredential(issuerWallet, wallet, false);
         return wallet.getDid();
     }
 

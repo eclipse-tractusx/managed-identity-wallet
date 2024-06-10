@@ -39,6 +39,9 @@ public class RestURI {
      * The constant DID_DOCUMENTS.
      */
     public static final String DID_DOCUMENTS = "/api/didDocuments/{identifier}";
+    /**
+     * The constant DID_RESOLVE.
+     */
     public static final String DID_RESOLVE = "/{bpn}/did.json";
     /**
      * The constant WALLETS_BY_BPN.
@@ -54,29 +57,27 @@ public class RestURI {
      */
     public static final String CREDENTIALS = "/api/credentials";
 
-
+    /**
+     * The constant CREDENTIALS_VALIDATION.
+     */
     public static final String CREDENTIALS_VALIDATION = "/api/credentials/validation";
 
-
+    /**
+     * The constant ISSUERS_CREDENTIALS.
+     */
     public static final String ISSUERS_CREDENTIALS = "/api/credentials/issuer";
 
     /**
-     * The constant CREDENTIALS_ISSUER_MEMBERSHIP.
+     * The constant API_PRESENTATIONS.
      */
-    public static final String CREDENTIALS_ISSUER_MEMBERSHIP = "/api/credentials/issuer/membership";
-
-    /**
-     * The constant CREDENTIALS_ISSUER_DISMANTLER.
-     */
-    public static final String CREDENTIALS_ISSUER_DISMANTLER = "/api/credentials/issuer/dismantler";
-
-    /**
-     * The constant API_CREDENTIALS_ISSUER_FRAMEWORK.
-     */
-    public static final String API_CREDENTIALS_ISSUER_FRAMEWORK = "/api/credentials/issuer/framework";
-
     public static final String API_PRESENTATIONS = "/api/presentations";
+    /**
+     * The constant API_PRESENTATIONS_VALIDATION.
+     */
     public static final String API_PRESENTATIONS_VALIDATION = "/api/presentations/validation";
+    /**
+     * The constant API_PRESENTATIONS_IATP.
+     */
     public static final String API_PRESENTATIONS_IATP = "/api/presentations/iatp";
 
 }

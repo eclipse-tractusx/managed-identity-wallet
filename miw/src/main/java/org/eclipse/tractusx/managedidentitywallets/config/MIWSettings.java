@@ -29,7 +29,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The type Miw settings.
@@ -37,10 +36,9 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "miw")
 public record MIWSettings(String host, String encryptionKey, String authorityWalletBpn, String authorityWalletDid,
                           String authorityWalletName,
-                          List<URI> vcContexts, List<URI> summaryVcContexts,
+                          List<URI> vcContexts,
                           @DateTimeFormat(pattern = "dd-MM-yyyy") Date vcExpiryDate,
-                          Set<String> supportedFrameworkVCTypes,
-                          boolean enforceHttps, String contractTemplatesUrl,
+                          boolean enforceHttps,
                           List<URI> didDocumentContextUrls,
                           KeyStorageType localSigningKeyStorageType,
                           SigningServiceType authoritySigningServiceType) {

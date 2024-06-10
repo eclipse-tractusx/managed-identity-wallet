@@ -53,8 +53,6 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtil
 @Slf4j
 public class PresentationController extends BaseController {
 
-    public static final String API_TAG_VERIFIABLE_PRESENTATIONS_GENERATION = "Verifiable Presentations - Generation";
-    public static final String API_TAG_VERIFIABLE_PRESENTATIONS_VALIDATION = "Verifiable Presentations - Validation";
     private final PresentationService presentationService;
 
     /**

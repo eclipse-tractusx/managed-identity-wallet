@@ -33,22 +33,14 @@ import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
-import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,24 +120,6 @@ public class TestUtils {
         Assertions.assertEquals(0, verifiableCredential.getExpirationDate().compareTo(miwSettings.vcExpiryDate().toInstant()));
     }
 
-    public static ResponseEntity<String> issueMembershipVC(TestRestTemplate restTemplate, String bpn, String baseWalletBpn) {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseWalletBpn);
-        IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
-        HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
-
-        return restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
-    }
-
-    public static IssueFrameworkCredentialRequest getIssueFrameworkCredentialRequest(String bpn, String type) {
-        IssueFrameworkCredentialRequest twinRequest = IssueFrameworkCredentialRequest.builder()
-                .contractTemplate("http://localhost")
-                .contractVersion("v1")
-                .type(type)
-                .holderIdentifier(bpn)
-                .build();
-        return twinRequest;
-    }
-
 
     public static Wallet getWalletFromString(String body) throws JsonProcessingException, JSONException {
         JSONObject jsonObject = new JSONObject(body);
@@ -177,37 +151,6 @@ public class TestUtils {
     }
 
 
-    public static String getSummaryCredentialId(String holderDID, HoldersCredentialRepository holdersCredentialRepository) {
-        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(holderDID, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
-        Assertions.assertEquals(1, holderVCs.size());
-        return holderVCs.get(0).getData().getId().toString();
-    }
-
-    public static void checkSummaryCredential(String issuerDID, String holderDID, HoldersCredentialRepository holdersCredentialRepository,
-                                              IssuersCredentialRepository issuersCredentialRepository, String type, String previousSummaryCredentialId) {
-
-        //get VC from holder of Summary type
-        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(holderDID, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
-        Assertions.assertEquals(1, holderVCs.size());
-        VerifiableCredential vc = holderVCs.get(0).getData();
-        VerifiableCredentialSubject subject = vc.getCredentialSubject().get(0);
-
-        //check if type is in items
-        List<String> list = (List<String>) subject.get(StringPool.ITEMS);
-        Assertions.assertTrue(list.contains(type));
-
-        //check in issuer table
-        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(issuerDID, holderDID,
-                MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
-        IssuersCredential issuersCredential = issuerVCs.stream()
-                .filter(issuerVC -> issuerVC.getCredentialId().equalsIgnoreCase(vc.getId().toString())).findFirst()
-                .orElse(null);
-        Assertions.assertNotNull(issuersCredential);
-        IssuersCredential previousIssuersCredential = issuerVCs.stream()
-                .filter(issuerVC -> issuerVC.getCredentialId().equalsIgnoreCase(previousSummaryCredentialId)).findFirst()
-                .orElse(null);
-        Assertions.assertNotNull(previousIssuersCredential);
-    }
 
 
     @NotNull

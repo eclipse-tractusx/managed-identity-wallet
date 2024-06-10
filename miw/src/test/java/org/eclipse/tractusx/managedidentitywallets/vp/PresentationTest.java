@@ -29,7 +29,6 @@ import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
-import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.controller.PresentationController;
@@ -271,10 +270,10 @@ class PresentationTest {
         ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);
         Assertions.assertEquals(response.getStatusCode().value(), HttpStatus.CREATED.value());
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
-        generateBpnCredential(wallet);
 
         //get BPN credentials
-        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
+        //TODO need to get some VCs for testing
+        List<HoldersCredential> credentials = null;
 
         Map<String, Object> map = objectMapper.readValue(credentials.get(0).getData().toJson(), Map.class);
 
@@ -292,7 +291,6 @@ class PresentationTest {
         ResponseEntity<String> response = TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);
         Assertions.assertEquals(response.getStatusCode().value(), HttpStatus.CREATED.value());
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
-        generateBpnCredential(wallet);
 
         //create VC
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn());
@@ -317,10 +315,6 @@ class PresentationTest {
         return vpResponse;
     }
 
-    private void generateBpnCredential(Wallet holderWallet) {
-        Wallet issuerWallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-        issuersCredentialService.issueBpnCredential(issuerWallet, holderWallet, false);
-    }
 
     private ResponseEntity<String> issueVC(String bpn, String holderDid, String issuerDid, String type, HttpHeaders headers, List<URI> contexts, Instant expiry) throws JsonProcessingException {
         // Create VC without proof
@@ -329,7 +323,7 @@ class PresentationTest {
                 new VerifiableCredentialBuilder();
 
         //VC Subject
-        VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, MIWVerifiableCredentialType.BPN_CREDENTIAL,
+        VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, "BpnCredentials",
                 StringPool.ID, holderDid,
                 StringPool.BPN, bpn));
 

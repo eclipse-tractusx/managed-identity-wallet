@@ -27,10 +27,7 @@ package org.eclipse.tractusx.managedidentitywallets.constant;
 public class StringPool {
 
     public static final String CREDENTIAL_ID = "credentialId";
-    public static final String VALUE = "value";
-    public static final String CONTRACT_VERSION = "contractVersion";
-    public static final String ACTIVITY_TYPE = "activityType";
-    public static final String ALLOWED_VEHICLE_BRANDS = "allowedVehicleBrands";
+
     public static final String VERIFIABLE_CREDENTIALS = "verifiableCredentials";
     public static final String VP = "vp";
     public static final String VC = "vc";
@@ -39,8 +36,6 @@ public class StringPool {
     public static final String VALIDATE_EXPIRY_DATE = "validateExpiryDate";
     public static final String VALIDATE_JWT_EXPIRY_DATE = "validateJWTExpiryDate";
     public static final String DID_DOCUMENT = "didDocument";
-    public static final String VEHICLE_DISMANTLE = "vehicleDismantle";
-    public static final String CREATED_AT = "createdAt";
 
     private StringPool() {
         throw new IllegalStateException("Constant class");
@@ -49,13 +44,7 @@ public class StringPool {
     public static final String ISSUER_DID = "issuerDid";
     public static final String HOLDER_DID = "holderDid";
     public static final String HOLDER_IDENTIFIER = "holderIdentifier";
-    public static final String NAME = "name";
-    public static final String CONTRACT_TEMPLATE = "contractTemplate";
     public static final String TYPE = "type";
-    public static final String MEMBER_OF = "memberOf";
-    public static final String STATUS = "status";
-    public static final String START_TIME = "startTime";
-
     public static final String ED_25519 = "ED25519";
 
 
@@ -69,12 +58,7 @@ public class StringPool {
      */
     public static final String BPN = "bpn";
 
-    public static final String BPN_UPPER_CASE = "BPN";
-
     public static final String ID = "id";
-
-    public static final String ITEMS = "items";
-
 
     public static final String CLIENT_ID = "miw_private_client";
 

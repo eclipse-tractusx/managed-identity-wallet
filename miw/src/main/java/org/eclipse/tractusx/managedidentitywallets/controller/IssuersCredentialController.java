@@ -23,16 +23,12 @@ package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.AsJwtParam;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.GetCredentialsApiDocs;
-import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.IssueDismantlerCredentialApiDoc;
-import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.IssueFrameworkCredentialApiDocs;
-import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.IssueMembershipCredentialApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.IssueVerifiableCredentialUsingBaseWalletApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs.ValidateVerifiableCredentialApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
@@ -40,9 +36,6 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
@@ -125,53 +118,6 @@ public class IssuersCredentialController extends BaseController {
         return ResponseEntity.status(HttpStatus.OK).body(issuersCredentialService.getCredentials(command));
     }
 
-    /**
-     * Issue membership credential response entity.
-     *
-     * @param issueMembershipCredentialRequest the issue membership credential request
-     * @param principal                        the principal
-     * @return the response entity
-     */
-    @IssueMembershipCredentialApiDoc
-    @PostMapping(path = RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CredentialsResponse> issueMembershipCredential(@Valid @RequestBody IssueMembershipCredentialRequest issueMembershipCredentialRequest,
-                                                                             @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt,
-                                                                             Principal principal) {
-        log.debug("Received request to issue membership credential. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, asJwt, getBPNFromToken(principal)));
-    }
-
-    /**
-     * Issue dismantler credential response entity.
-     *
-     * @param request   the request
-     * @param principal the principal
-     * @return the response entity
-     */
-    @IssueDismantlerCredentialApiDoc
-    @PostMapping(path = RestURI.CREDENTIALS_ISSUER_DISMANTLER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CredentialsResponse> issueDismantlerCredential(@Valid @RequestBody IssueDismantlerCredentialRequest request,
-                                                                            @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt,
-                                                                            Principal principal) {
-        log.debug("Received request to issue dismantler credential. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueDismantlerCredential(request, asJwt, getBPNFromToken(principal)));
-    }
-
-   /**
-     * Issue framework credential response entity.
-     *
-     * @param request   the request
-     * @param principal the principal
-     * @return the response entity
-     */
-    @IssueFrameworkCredentialApiDocs
-    @PostMapping(path = RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CredentialsResponse> issueFrameworkCredential(@Valid @RequestBody IssueFrameworkCredentialRequest request,
-                                                                            @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt,
-                                                                            Principal principal) {
-        log.debug("Received request to issue framework credential. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueFrameworkCredential(request, asJwt, getBPNFromToken(principal)));
-    }
 
     /**
      * Credentials validation response entity.

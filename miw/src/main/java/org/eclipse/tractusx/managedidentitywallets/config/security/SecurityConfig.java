@@ -110,10 +110,7 @@ public class SecurityConfig {
                         //VC - Issuer
                         .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //Lis of issuer VC
                         .requestMatchers(new AntPathRequestMatcher(RestURI.ISSUERS_CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //Issue VC
-                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue Membership Credential
-                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_ISSUER_DISMANTLER, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue dismantler Credential
-                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLETS) //issue dismantler Credential
-
+                        
                         //error
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
