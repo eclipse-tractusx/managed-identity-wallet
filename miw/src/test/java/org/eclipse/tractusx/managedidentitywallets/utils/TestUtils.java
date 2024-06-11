@@ -64,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
@@ -227,6 +226,17 @@ public class TestUtils {
     public static VerifiableCredential issueCustomVCUsingBaseWallet(String holderDid, String issuerDid, String type, HttpHeaders headers,
                                                                     MIWSettings miwSettings, ObjectMapper objectMapper, TestRestTemplate restTemplate) {
 
+        Map<String, Object> map = getCredentialAsMap(issuerDid, type, miwSettings, objectMapper);
+        HttpEntity<Map> entity = new HttpEntity<>(map, headers);
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
+        if (response.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
+            throw new ForbiddenException();
+        }
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+        return new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+    }
+
+    public static Map<String, Object> getCredentialAsMap(String issuerDid, String type, MIWSettings miwSettings, ObjectMapper objectMapper) throws JsonProcessingException {
         // Create VC without proof
         //VC Builder
         VerifiableCredentialBuilder verifiableCredentialBuilder =
@@ -234,7 +244,7 @@ public class TestUtils {
 
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
-                new VerifiableCredentialSubject(Map.of("test", "test"));
+                new VerifiableCredentialSubject(Map.of("id", "test"));
 
         //Using Builder
         VerifiableCredential credentialWithoutProof =
@@ -248,13 +258,6 @@ public class TestUtils {
                         .credentialSubject(verifiableCredentialSubject)
                         .build();
 
-        Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
-        HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
-        if (response.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
-            throw new ForbiddenException();
-        }
-        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
-        return new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+        return objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
     }
 }
