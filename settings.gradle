@@ -3,3 +3,4 @@ rootProject.name = 'managedidentitywallets'
 // add sub-projects here, the path on disk and the name can be the same
 // for example:
 // include '<sub-project-name>'
+include 'miw'

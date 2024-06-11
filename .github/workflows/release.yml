@@ -122,7 +122,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.semantic-release.outputs.next_release }}
         run: |
           echo "::notice::Uploading jar to GitHub release"
-          gh release upload "v$RELEASE_VERSION" ./build/libs/miw-latest.jar
+          gh release upload "v$RELEASE_VERSION" ./miw/build/libs/miw-latest.jar
 
   docker:
     name: Docker Release
