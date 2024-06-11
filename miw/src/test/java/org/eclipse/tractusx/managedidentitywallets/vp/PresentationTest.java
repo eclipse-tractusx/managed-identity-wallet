@@ -67,6 +67,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -272,8 +273,14 @@ class PresentationTest {
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
 
         //get BPN credentials
-        //TODO need to get some VCs for testing
-        List<HoldersCredential> credentials = null;
+        List<VerifiableCredential> vcs = new ArrayList<>();
+        List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
+
+        typesOfVcs.forEach(type -> {
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(wallet.getDid(), miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            vcs.add(verifiableCredential);
+        });
+        List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDid(wallet.getDid());
 
         Map<String, Object> map = objectMapper.readValue(credentials.get(0).getData().toJson(), Map.class);
 
@@ -323,9 +330,8 @@ class PresentationTest {
                 new VerifiableCredentialBuilder();
 
         //VC Subject
-        VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, "BpnCredentials",
-                StringPool.ID, holderDid,
-                StringPool.BPN, bpn));
+        VerifiableCredentialSubject verifiableCredentialSubject = new VerifiableCredentialSubject(Map.of(StringPool.TYPE, "CustomType",
+                StringPool.ID, holderDid));
 
         //Using Builder
         VerifiableCredential credentialWithoutProof =

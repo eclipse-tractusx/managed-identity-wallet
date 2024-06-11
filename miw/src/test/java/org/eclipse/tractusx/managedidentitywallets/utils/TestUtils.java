@@ -154,7 +154,6 @@ public class TestUtils {
             }
             wallet1.setVerifiableCredentials(verifiableCredentials);
         }
-        System.out.println("wallet -- >" + wallet1.getBpn());
         return wallet1;
     }
 
