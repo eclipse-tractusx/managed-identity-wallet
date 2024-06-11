@@ -31,6 +31,7 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
@@ -159,8 +160,13 @@ class HoldersCredentialTest {
         //save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
 
+        List<VerifiableCredential> vcs = new ArrayList<>();
+        List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
 
-        //TODO need to issue some VCs to get VC
+        typesOfVcs.forEach(type -> {
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            vcs.add(verifiableCredential);
+        });
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
@@ -168,7 +174,7 @@ class HoldersCredentialTest {
                 , HttpMethod.GET, entity, String.class, baseDID);
         List<VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertEquals(7, Objects.requireNonNull(credentialList).size()); //5  framework + 1 BPN + 1 Summary
+        Assertions.assertEquals(typesOfVcs.size(), Objects.requireNonNull(credentialList).size());
 
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}"
                 , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
@@ -176,15 +182,20 @@ class HoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
-        List<String> list = new ArrayList<>();
-        //TODO need to get VC which are issued
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
-                , HttpMethod.GET, entity, String.class, String.join(",", list));
+                , HttpMethod.GET, entity, String.class, String.join(",", typesOfVcs));
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertEquals(typesOfVcs.size(), Objects.requireNonNull(credentialList).size());
+
+
+        //test get by type
+        String type = typesOfVcs.get(0);
+        response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
+                , HttpMethod.GET, entity, String.class, type);
         credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
-
-
     }
 
 
@@ -199,8 +210,15 @@ class HoldersCredentialTest {
         // save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
 
+        //issue VC : test data
+        List<VerifiableCredential> vcs = new ArrayList<>();
+        List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
 
-        //TODO need to issue some VCs
+        typesOfVcs.forEach(type -> {
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            vcs.add(verifiableCredential);
+        });
+
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
@@ -210,8 +228,8 @@ class HoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Map<String, Object> responseMap = SerializeUtil.fromJson(response.getBody());
         List<Map<String, Object>> vcsAsJwt = (ArrayList<Map<String, Object>>) responseMap.get("content");
-        // 5 framework + 1 BPN + 1 Summary
-        Assertions.assertEquals(7, vcsAsJwt.size());
+
+        Assertions.assertEquals(vcs.size(), vcsAsJwt.size());
         vcsAsJwt.forEach(vc -> {
             Assertions.assertNotNull(vc.get(StringPool.VC_JWT_KEY));
         });
@@ -324,11 +342,9 @@ class HoldersCredentialTest {
         String bpn = TestUtils.getRandomBpmNumber();
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
-        TestUtils.createWallet(bpn, "Test", restTemplate, baseBpn, defaultLocation);
-
-        //TODO need to issue some random VC
-        ResponseEntity<String> vc = null;
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, "Test Wallet", restTemplate, baseBpn, defaultLocation);
+        Wallet wallet = TestUtils.getWalletFromString(response.getBody());
+        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(wallet.getDid(), miwSettings.authorityWalletDid(), "Type1", AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
         Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
         return map;
     }
