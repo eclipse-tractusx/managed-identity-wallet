@@ -56,7 +56,7 @@
       {
         "assets": [
           "CHANGELOG.md",
-          "DEPENDENCIES",
+          "miw/DEPENDENCIES",
           "gradle.properties",
           "./charts/managed-identity-wallet/Chart.yaml",
           "./charts/managed-identity-wallet/README.md"

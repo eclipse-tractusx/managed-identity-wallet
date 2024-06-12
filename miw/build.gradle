@@ -215,9 +215,9 @@ build {
 bootJar {
     metaInf {
         from 'DEPENDENCIES'
-        from 'SECURITY.md'
-        from 'NOTICE.md'
-        from 'LICENSE'
+        from '../SECURITY.md'
+        from '../NOTICE.md'
+        from '../LICENSE'
     }
 }
 
