@@ -277,7 +277,7 @@ class PresentationTest {
         List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
 
         typesOfVcs.forEach(type -> {
-            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(wallet.getDid(), miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(wallet.getBpn(), wallet.getDid(), miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
             vcs.add(verifiableCredential);
         });
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDid(wallet.getDid());

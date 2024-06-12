@@ -92,4 +92,6 @@ public class StringPool {
     public static final String VC_JWT_KEY = "jwt";
 
     public static final String AS_JWT = "asJwt";
+
+    public static final String BPN_CREDENTIAL = "BpnCredential";
 }

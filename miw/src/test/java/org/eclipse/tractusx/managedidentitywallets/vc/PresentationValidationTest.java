@@ -118,13 +118,13 @@ class PresentationValidationTest {
         tenant_2 = DidParser.parse(tenantWallet2.getDid());
 
 
-        Map<String, Object> type1 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletDid(), "Type1", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
+        Map<String, Object> type1 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), "Type1", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
 
         CredentialsResponse rs1 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type1, false, bpnOperator);
         vc_1 = new ObjectMapper().convertValue(rs1, VerifiableCredential.class);
 
 
-        Map<String, Object> type2 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletDid(), "Type2", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
+        Map<String, Object> type2 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), "Type2", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
 
         CredentialsResponse rs2 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type2, false, bpnOperator);
         vc_2 = new ObjectMapper().convertValue(rs2, VerifiableCredential.class);

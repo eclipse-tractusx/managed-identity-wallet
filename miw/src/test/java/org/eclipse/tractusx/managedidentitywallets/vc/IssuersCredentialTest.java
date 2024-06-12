@@ -94,7 +94,7 @@ class IssuersCredentialTest {
         //issue some VCs
         List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
         typesOfVcs.forEach(type -> {
-            TestUtils.issueCustomVCUsingBaseWallet(wallet.getDid(), miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            TestUtils.issueCustomVCUsingBaseWallet(holderBpn, wallet.getDid(), miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
         });
 
 
@@ -146,7 +146,7 @@ class IssuersCredentialTest {
         //create test data
         List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
         typesOfVcs.forEach(type -> {
-            TestUtils.issueCustomVCUsingBaseWallet(wallet.getDid(), miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            TestUtils.issueCustomVCUsingBaseWallet(holderBpn, wallet.getDid(), miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
         });
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
@@ -191,7 +191,7 @@ class IssuersCredentialTest {
 
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
-            TestUtils.issueCustomVCUsingBaseWallet(holderDid, holderDid, type, headers, miwSettings, objectMapper, restTemplate);
+            TestUtils.issueCustomVCUsingBaseWallet(bpn, holderDid, holderDid, type, headers, miwSettings, objectMapper, restTemplate);
         });
     }
 
@@ -206,7 +206,7 @@ class IssuersCredentialTest {
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
         TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);
 
-        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), type, headers, miwSettings, objectMapper, restTemplate);
+        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(baseBpn, miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), type, headers, miwSettings, objectMapper, restTemplate);
 
         Assertions.assertNotNull(verifiableCredential.getProof());
 
@@ -229,7 +229,7 @@ class IssuersCredentialTest {
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
         TestUtils.createWallet(bpn, bpn, restTemplate, baseBpn, defaultLocation);
 
-        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(did, miwSettings.authorityWalletDid(), type, headers, miwSettings, objectMapper, restTemplate);
+        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), type, headers, miwSettings, objectMapper, restTemplate);
 
         Assertions.assertNotNull(verifiableCredential.getProof());
 

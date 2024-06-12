@@ -164,7 +164,7 @@ class HoldersCredentialTest {
         List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
 
         typesOfVcs.forEach(type -> {
-            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
             vcs.add(verifiableCredential);
         });
 
@@ -215,7 +215,7 @@ class HoldersCredentialTest {
         List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
 
         typesOfVcs.forEach(type -> {
-            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
             vcs.add(verifiableCredential);
         });
 
@@ -344,7 +344,7 @@ class HoldersCredentialTest {
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
         ResponseEntity<String> response = TestUtils.createWallet(bpn, "Test Wallet", restTemplate, baseBpn, defaultLocation);
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
-        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(wallet.getDid(), miwSettings.authorityWalletDid(), "Type1", AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, wallet.getDid(), miwSettings.authorityWalletDid(), "Type1", AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
         Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
         return map;
     }

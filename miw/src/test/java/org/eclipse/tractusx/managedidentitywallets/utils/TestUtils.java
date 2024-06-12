@@ -42,6 +42,7 @@ import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
@@ -64,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
@@ -222,10 +224,10 @@ public class TestUtils {
     }
 
     @SneakyThrows
-    public static VerifiableCredential issueCustomVCUsingBaseWallet(String holderDid, String issuerDid, String type, HttpHeaders headers,
+    public static VerifiableCredential issueCustomVCUsingBaseWallet(String holderBPn, String holderDid, String issuerDid, String type, HttpHeaders headers,
                                                                     MIWSettings miwSettings, ObjectMapper objectMapper, TestRestTemplate restTemplate) {
 
-        Map<String, Object> map = getCredentialAsMap(issuerDid, type, miwSettings, objectMapper);
+        Map<String, Object> map = getCredentialAsMap(holderBPn, holderDid, issuerDid, type, miwSettings, objectMapper);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
         ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
         if (response.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
@@ -235,15 +237,21 @@ public class TestUtils {
         return new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
     }
 
-    public static Map<String, Object> getCredentialAsMap(String issuerDid, String type, MIWSettings miwSettings, ObjectMapper objectMapper) throws JsonProcessingException {
+    public static Map<String, Object> getCredentialAsMap(String holderBpn, String holderDid, String issuerDid, String type, MIWSettings miwSettings, ObjectMapper objectMapper) throws JsonProcessingException {
         // Create VC without proof
         //VC Builder
         VerifiableCredentialBuilder verifiableCredentialBuilder =
                 new VerifiableCredentialBuilder();
 
+        Map<String, Object> subjectData;
+        if (Objects.equals(type, StringPool.BPN_CREDENTIAL)) {
+            subjectData = Map.of(Verifiable.ID, holderDid, StringPool.BPN, holderBpn);
+        } else {
+            subjectData = Map.of(Verifiable.ID, "test");
+        }
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
-                new VerifiableCredentialSubject(Map.of("id", "test"));
+                new VerifiableCredentialSubject(subjectData);
 
         //Using Builder
         VerifiableCredential credentialWithoutProof =

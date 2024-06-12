@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.vp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -29,6 +30,7 @@ import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
@@ -38,8 +40,10 @@ import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesExcep
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
+import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestConstants;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
@@ -71,7 +75,7 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TestUtils.genera
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = {
         ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
-public class PresentationServiceTest {
+class PresentationServiceTest {
 
     @Autowired
     private MIWSettings miwSettings;
@@ -89,6 +93,9 @@ public class PresentationServiceTest {
     private IssuersCredentialService issuersCredentialService;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private WalletRepository walletRepository;
 
     @SneakyThrows
@@ -101,6 +108,10 @@ public class PresentationServiceTest {
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
         JtiRecord jtiRecord = buildJti(jtiValue, false);
         jtiRepository.save(jtiRecord);
+
+        //issue BPN vc
+        VerifiableCredential bpnVc = TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), StringPool.BPN_CREDENTIAL,
+                AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
 
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
         String vpAsJwt = String.valueOf(presentation.get(VERIFIABLE_PRESENTATION));
@@ -122,6 +133,10 @@ public class PresentationServiceTest {
         JtiRecord jtiRecord = buildJti(jtiValue, false);
         jtiRepository.save(jtiRecord);
 
+        //issue BPN vc
+        TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), StringPool.BPN_CREDENTIAL,
+                AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
         Assertions.assertNotNull(presentation);
 
@@ -130,8 +145,8 @@ public class PresentationServiceTest {
         VerifiableCredential verifiableCredential = vp.getVerifiableCredentials().get(0);
         VerifiableCredentialSubject verifiableCredentialSubject = verifiableCredential.getCredentialSubject().get(0);
         Assertions.assertNotNull(verifiableCredentialSubject);
-        Assertions.assertEquals(bpn, verifiableCredentialSubject.get("bpn"));
-        Assertions.assertEquals(did, verifiableCredentialSubject.get("id"));
+        Assertions.assertEquals(bpn, verifiableCredentialSubject.get(StringPool.BPN));
+        Assertions.assertEquals(did, verifiableCredentialSubject.get(Verifiable.ID));
     }
 
     @SneakyThrows
@@ -142,6 +157,11 @@ public class PresentationServiceTest {
         String did = generateWalletAndGetDid(bpn);
         String jtiValue = generateUuid();
         String accessToken = generateAccessToken(did, did, did, BPN_CREDENTIAL_READ, jtiValue);
+
+        //issue BPN vc
+        TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), StringPool.BPN_CREDENTIAL,
+                AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+
 
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
         String vpAsJwt = String.valueOf(presentation.get(VERIFIABLE_PRESENTATION));
