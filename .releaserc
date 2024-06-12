@@ -41,7 +41,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "cd charts/managed-identity-wallet && helm-docs -i .helmdocsignore ."
+        "prepareCmd": "cd charts/managed-identity-wallet && helm-docs ."
       }
     ],
     "@semantic-release/release-notes-generator",
