@@ -1,0 +1,313 @@
+title Verifiable Presentation Protocol (VPP)
+
+header <b>WIP | DRAFT 20231121
+
+footer <b>WIP | DRAFT 20231121
+
+
+autonumber
+
+box \n\t\t Data Provider \t\t\n
+
+    database "\n\n CS \n\n" as CS_Provider
+    control "\n\n STS \n\n" as STS_Provider
+    actor "\n\n EDC \n\n" as EDC_Provider
+
+end box
+
+
+box \n\t\t Data Consumer \t\t\n
+
+    actor "\n\n EDC \n\n" as EDC_Consumer
+    control "\n\n STS \n\n" as STS_Consumer
+    database "\n\n CS \n\n" as CS_Consumer
+
+end box
+
+rnote across
+
+end note
+
+rnote across
+    The <b>Verifiable Presentation Protocol (VPP)</b> is designed to
+    address the problem of resolving Verifiable Presentations and
+    other claims when they cannot be passed as part of a client request.
+end note
+rnote across
+    The <b><i>VPP</i></b> is represented in publicly known policies defining what to
+    grant by the <i>Data Consumer</i> to enable the <b>Data Provider</b>.
+end note
+
+rnote across
+    The <i>Data Consumer</i> wants exchange data with a yet <i>foreign</i> <b>Data Provider</b>.
+end note
+rnote across
+    Hence, the <i>Data Consumer</i> creates a <i>permission</i> for the <b>Data Provider</b>
+    containing all grants and information needed.
+end note
+rnote across
+    The example requested demanding the preparing grant is:
+    <b>GET</b><i>catalog</i>
+    And data consumer wants to issue that request against the data provider.
+end note
+rnote across
+    <b>Self-issued:</b> no external CA involved in ceation and/ or validation of exchanged tokens!
+end note
+
+rnote across
+    <b>IMPORTANT</b>
+    This intpretation of to the concept for Verifiable Presentation Protocol (VPP) requires <b>standard JWT</b> for all <i>self-issued</i> tokens used.
+
+    <b>REMARK</b>
+    I.e. custom tokens holding permissions are <b>OMITTED</b>
+end note
+
+rnote across
+
+end note
+
+rnote across
+    EDC: Eclipse Dataspace Connector
+    STS: Secure Token Service
+    CS: Credential Service (e.g. MIW)
+end note
+
+rnote across
+
+end note
+
+rnote across
+    The <b>Data Provider</b> uses that permission to obtain all information
+    needed to fulfill the future request of the <i>Data Consumer</i>.
+end note
+
+rnote across
+
+end note
+
+== START ==
+
+
+== Data Consumer creates data access permission for Data Provider ==
+
+note over EDC_Consumer, STS_Consumer
+    BPN, DID, scopes
+end note
+
+EDC_Consumer -> STS_Consumer : Request for self-issued JWT
+
+
+STS_Consumer ->> STS_Consumer : Self-issue <b>JWT-Access-Token</b> as <i>PERMISSION</i>
+note right
+    Set these values:
+    \t <i>iss</i> = DID Consumer
+    \t <i>sub</i> = DID Provider
+    \t <i>aud</i> = DID Provider
+    \t <i>jti</i> = claim for security
+    \t <i>exp</i> = expiration date of token
+    \t <b>scope</b> = granted scopes/ permissions/ rights
+end note
+
+STS_Consumer -> CS_Consumer : Sign <b>JWT Access Token</b>
+
+CS_Consumer ->> CS_Consumer : sign <b>JWT Access Token</b>
+note right
+    <b>private key</b> of <i>key pair</i> of Consumer
+    determined by BPN/ DID
+end note
+
+CS_Consumer --> STS_Consumer : Signed <b>JWT Access Token</b>
+
+STS_Consumer ->> STS_Consumer : Self-issue <b>JWT ID Token</b> as <i>ENVELOPE</i>
+note right
+    Set these values:
+    \t <i>iss</i> = DID Consumer
+    \t <i>sub</i> = DID Consumer
+    \t <i>aud</i> = DID Provider
+    \t <i>client_id</i> = DID Consumer
+    \t <i>jti</i> = claim for security
+    \t <i>exp</i> = expiration date of token
+    \t <i><b>access_token</b></i> = signed JWT Access Token (<i>PERMISSION</i>)
+end note
+
+STS_Consumer -> CS_Consumer : Sign <b>JWT ID Token</b>
+
+CS_Consumer ->> CS_Consumer : Return sign <b>JWT ID Token</b>
+note right
+    <b>private key</b> of <i>key pair</i>
+    of Consumer determined by BPN/ DID
+end note
+
+CS_Consumer --> STS_Consumer : Signed <b>JWT ID Token</b>
+
+STS_Consumer --> EDC_Consumer : Signed <b>JWT ID Token</b>
+
+== Data consumer issues request for target data, e.g <b>GET <i>catalog</i></b> ==
+
+EDC_Consumer -> EDC_Provider : <b>GET</b> <i>catalog</i>
+note right
+    The request that is the reason to grant permissions in the first place.
+    ~~JWT as Authorization Header Bearer Scheme~~
+end note
+
+
+== Data Provider processes permission request ==
+
+EDC_Provider -> CS_Provider : Validate signed <b>JWT ID Token</b>
+
+CS_Provider ->> CS_Provider : Validate signature of <b>JWT ID Token</b>
+note left
+<b>public key</b> of <i>key pair</i>
+of Consumer determined by BPN/ DID
+end note
+
+CS_Provider --> EDC_Provider : Approval of signature
+
+EDC_Provider ->> EDC_Provider : Check values of <b>JWT ID Token</b>
+note left
+    Check that these values are set:
+    \t <i>iss</i> = DID Consumer
+    \t <i>sub</i> = DID Consumer
+    \t <i>aud</i> = DID Provider
+    \t <i>client_id</i> = DID Consumer
+    \t <i>jti</i> = claim for security
+    \t <i>exp</i> = expiration date of token
+
+    jti and exp need to be stored to prevent replay attacks (until exp runs out)
+end note
+
+EDC_Provider ->> EDC_Provider: Extract <b>JWT --ID-- Access Token</b> from <b>JWT ID Token</b>
+
+EDC_Provider ->> EDC_Provider : Extract permission
+
+EDC_Provider ->> EDC_Provider: if consumer's permission is a signed <b>JWT Access Token</b>
+note left
+    Check that these values are set:
+    \t <i>iss</i> = DID Consumer
+    \t <i>sub</i> = DID Consumer
+    \t <i>aud</i> = DID Provider
+    \t <i>exp</i> = expiration date of token
+    \t <i>scope</i> = granted scopes/ permissions/ rights
+
+    Remark: <i>scope</i> must not be empty
+
+!!! Remark
+    Not suitable for custom permissions,
+    i.e. non-JWT-Access-Tokens
+!!!
+end note
+
+== Data provider prepares request to obtain VP from data consumer ==
+
+EDC_Provider -> STS_Provider : request self-issued <b>JWT ID Token</b> as <i>ENVELOPE</i>
+
+STS_Provider ->> STS_Provider : self-issue <b>JWT ID Token</b> as <i>ENVELOPE</i>
+note left
+    Set these values:
+    \t <i>iss</i> = DID Provider
+    \t <i>sub</i> = DID Provider
+    \t <i>aud</i> = DID Consumer
+    \t <i>client_id</i> = DID Provider
+    \t <i>jti</i> = claim for security
+    \t <i>exp</i> = expiration date of token
+    \t <i><b>access_token</b></i> = signed Consumer <i>PERMISSION</i>
+end note
+
+STS_Provider -> CS_Provider : Request to sign <b>JWT ID Token</b>
+
+CS_Provider ->> CS_Provider : Sign <b>JWT ID Token</b>
+note left
+    <b>private key</b> of <i>key pair</i>
+    of Provider determined by BPN/ DID
+end note
+
+STS_Provider -> EDC_Provider : return self-issued <b>JWT ID Token</b> as <i>ENVELOPE</i>
+
+== Data provider issues request against data consumer for required target data ==
+
+EDC_Provider -> CS_Consumer : Request for Verifiable Presentation (VP) with permission
+note left
+    Request delivers JWT ID Token signed by <i>data provider</i>
+    with permission of <i>data consumer</i>
+end note
+
+
+== CS of data provider process request for target data with permission ==
+
+CS_Consumer ->> CS_Consumer : validate signature of <b>JWT ID Token</b>
+note right
+    <b>public key</b> of <i>key pair</i>
+    of Provider determined by BPN/ DID
+end note
+
+CS_Consumer ->> CS_Consumer : Check values of <b>JWT ID Token</b>
+note right
+    Check that these values are set:
+    \t <i>iss</i> = DID Provider
+    \t <i>sub</i> = DID Provider
+    \t <i>aud</i> = DID Consumer
+    \t <i>client_id</i> = DID Provider
+    \t <i>jti</i> = claim for security
+    \t <i>exp</i> = expiration date of token
+end note
+
+CS_Consumer ->> CS_Consumer : Extract permission, here JWT Access Token
+
+CS_Consumer ->> CS_Consumer : Validate signature of JWT Access Token
+note right
+    <b>public key</b> of <i>key pair</i>
+    of Consumer determined by BPN/ DID
+end note
+
+CS_Consumer ->> CS_Consumer :  If permission is a signed <b>JWT Access Token</b>
+note right
+    Check that these values are set:
+    \t <i>iss</i> = DID Consumer
+    \t <i>sub</i> = DID Provider
+    \t <i>aud</i> = DID Provider
+    \t <i>jti</i> = claim for security
+    \t <i>exp</i> = expiration date of token
+    \t <i>scope</i> = granted scopes/ permissions/ rights
+
+!!! Remark
+    Not suitable for custom permissions,
+    i.e. non-JWT-Access-Tokens
+!!!
+end note
+
+CS_Consumer ->> CS_Consumer : Extract granted permissions from payload of \nJWT Access Token
+note right
+    Permissions granted are contained in payload as
+    value of key:
+    \t <b>scope</b> = granted scopes/ permissions/ rights
+end note
+
+CS_Consumer ->> CS_Consumer : Process data request using granted <b>scope</b>
+
+
+== Data Consumer delivers target data to data provider ==
+
+CS_Consumer --> EDC_Provider : Return target response with <i>VP</i>
+
+
+== Provider validates VP ==
+
+
+
+EDC_Provider -> CS_Provider : Validate VP
+CS_Provider --> EDC_Provider
+
+note left
+how does the edc get the policies / which VCs are needed?
+end note
+
+== Data provider responses to Data consumers request ==
+
+EDC_Provider --> EDC_Consumer : Catalog as requested
+
+
+== END ==
+rnote across
+    DONE:
+    \t <b>GET</b> <i>catalog</i> successfully conducted.
+end note
