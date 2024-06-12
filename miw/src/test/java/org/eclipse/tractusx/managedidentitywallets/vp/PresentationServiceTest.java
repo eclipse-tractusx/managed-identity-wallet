@@ -110,7 +110,7 @@ class PresentationServiceTest {
         jtiRepository.save(jtiRecord);
 
         //issue BPN vc
-        VerifiableCredential bpnVc = TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), StringPool.BPN_CREDENTIAL,
+        TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), StringPool.BPN_CREDENTIAL,
                 AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
 
         Map<String, Object> presentation = presentationService.createVpWithRequiredScopes(SignedJWT.parse(accessToken), asJwt);
