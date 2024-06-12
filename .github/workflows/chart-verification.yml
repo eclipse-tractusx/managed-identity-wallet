@@ -86,8 +86,8 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: jnorwood/helm-docs:v1.11.3
-          options: -v ${{ github.workspace }}/charts:/helm-docs
-          run: helm-docs -i managed-identity-wallet/.helmdocsignore
+          options: -v ${{ github.workspace }}/charts:/helm-docs -v ${{ github.workspace }}/.helmdocsignore:/helm-docs/.helmdocsignore
+          run: helm-docs
 
       - name: Verify that no changes are required
         run: |

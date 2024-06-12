@@ -55,14 +55,14 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: ${{ github.workspace }}/build/
+          path: ${{ github.workspace }}/miw/build/
 
       - name: Publish code coverage report as PR comment
         uses: madrapps/jacoco-report@v1.6.1
         if: always()
         with:
           paths: |
-            ${{ github.workspace }}/build/reports/xml/jacoco.xml
+            ${{ github.workspace }}/miw/build/reports/xml/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80

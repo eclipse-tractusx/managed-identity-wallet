@@ -131,7 +131,7 @@ tasks.register('dashDownload', Download) {
     description = 'Download the Dash License Tool standalone jar'
     group = 'License'
     src 'https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST'
-    dest layout.projectDirectory.file('dash.jar')
+    dest rootProject.file('dash.jar')
     // will not replace an existing file. If you know you need a new version
     // then manually delete the file yourself, or run `dashClean`
     overwrite false
@@ -142,7 +142,7 @@ tasks.register('dashClean') {
     description = "Clean all files used by the 'License' group"
     group = 'License'
     logger.lifecycle("Removing 'dash.jar'")
-    file('dash.jar').delete()
+    rootProject.file('dash.jar').delete()
     logger.lifecycle("Removing 'deps.txt'")
     file('deps.txt').delete()
 }
@@ -183,7 +183,7 @@ tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
     dashLicenseCheck.dependsOn('dashDownload')
     dashLicenseCheck.dependsOn('dashDependencies')
     doFirst {
-        classpath = files('dash.jar')
+        classpath = rootProject.files('dash.jar')
         // docs: https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-04
         args('-project', 'automotive.tractusx',  '-summary', 'DEPENDENCIES', 'deps.txt')
     }
@@ -215,9 +215,9 @@ build {
 bootJar {
     metaInf {
         from 'DEPENDENCIES'
-        from 'SECURITY.md'
-        from 'NOTICE.md'
-        from 'LICENSE'
+        from '../SECURITY.md'
+        from '../NOTICE.md'
+        from '../LICENSE'
     }
 }
 
