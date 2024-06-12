@@ -1,3 +1,18 @@
+# [0.5.0-develop.19](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.18...v0.5.0-develop.19) (2024-06-12)
+
+
+### Bug Fixes
+
+* .helmdocsignore is not at project root ([a6ceba4](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a6ceba41ac9a456f6016ad16afbf423b17126c4a))
+* new build location for upload action ([b6a7656](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b6a76561af20ee675debe9564bf6e5e203fdb705))
+* update helm-docs test action ([99a1e91](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/99a1e91f05010b1dbd5d0b5c734ef703d8b1ef7f))
+
+
+### Features
+
+* move src/ to a dedicated sub-project ([45ddd7b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/45ddd7b4a63120801eb638bd64e72821c309a336))
+* save dash.jar in the root project for easy re-use ([98747c8](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/98747c8357e769259c9ef44b80fe5c469a0d82d0))
+
 # [0.5.0-develop.18](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.17...v0.5.0-develop.18) (2024-06-03)
 
 
