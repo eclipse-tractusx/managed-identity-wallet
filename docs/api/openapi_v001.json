@@ -1,41 +1,45 @@
 {
   "openapi": "3.0.1",
-  "info": {
+  "info" : {
     "title": "Managed Identity Wallets API",
     "description": "Managed Identity Wallets API",
     "termsOfService": "https://www.eclipse.org/legal/termsofuse.php",
-    "contact": {
+    "contact" : {
       "name": "Eclipse Tractus-X",
       "url": "https://projects.eclipse.org/projects/automotive.tractusx",
       "email": "tractusx-dev@eclipse.org"
     },
-    "license": {
+    "license" : {
       "name": "Apache 2.0",
       "url": "https://github.com/eclipse-tractusx/managed-identity-wallets/blob/develop/LICENSE"
     },
     "version": "0.0.1"
   },
-  "security": [
-    {"Authenticate using access_token": []},
-    {"sts_token": []}
+  "security" : [
+    {
+      "Authenticate using access_token" : []
+    },
+    {
+      "sts_token" : []
+    }
   ],
-  "servers": [],
-  "paths": {
-    "/api/wallets": {
-      "get": {
-        "tags": [
+  "servers" : [],
+  "paths" : {
+    "/api/wallets" : {
+      "get" : {
+        "tags" : [
           "Wallets"
         ],
         "summary": "List of wallets",
         "description": "Permission: **view_wallets** \n\n Retrieve list of registered wallets",
         "operationId": "getWallets",
-        "parameters": [
+        "parameters" : [
           {
             "name": "pageNumber",
             "in": "query",
             "description": "Page number, Page number start with zero",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "integer",
               "format": "int32",
               "default": 0
@@ -46,7 +50,7 @@
             "in": "query",
             "description": "Number of records per page",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "integer",
               "format": "int32",
               "default": 2147483647
@@ -57,24 +61,24 @@
             "in": "query",
             "description": "Sort column name",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string",
               "default": "createdAt"
             },
-            "examples": {
-              "Creation date": {
+            "examples" : {
+              "Creation date" : {
                 "description": "Creation date",
                 "value": "createdAt"
               },
-              "Wallet BPN": {
+              "Wallet BPN" : {
                 "description": "Wallet BPN",
                 "value": "bpn"
               },
-              "Wallet did": {
+              "Wallet did" : {
                 "description": "Wallet did",
                 "value": "did"
               },
-              "Wallet name": {
+              "Wallet name" : {
                 "description": "Wallet name",
                 "value": "name"
               }
@@ -85,48 +89,48 @@
             "in": "query",
             "description": "Sort order",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string",
               "default": "desc"
             },
-            "examples": {
-              "Ascending order": {
+            "examples" : {
+              "Ascending order" : {
                 "description": "Ascending order",
                 "value": "asc"
               },
-              "Descending order": {
+              "Descending order" : {
                 "description": "Descending order",
                 "value": "desc"
               }
             }
           }
         ],
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Wallet list",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet list": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet list" : {
                     "description": "Wallet list",
-                    "value": {
-                      "content": [
+                    "value" : {
+                      "content" : [
                         {
                           "name": "companyA",
                           "did": "did:web:localhost:BPNL000000000001",
                           "bpn": "BPNL000000000001",
                           "algorithm": "ED25519",
-                          "didDocument": {
-                            "@context": [
+                          "didDocument" : {
+                            "@context" : [
                               "https://www.w3.org/ns/did/v1",
                               "https://w3c.github.io/vc-jws-2020/contexts/v1"
                             ],
                             "id": "did:web:localhost:BPNL000000000001",
-                            "verificationMethod": [
+                            "verificationMethod" : [
                               {
                                 "controller": "did:web:localhost:BPNL000000000001",
                                 "id": "did:web:localhost:BPNL000000000001#",
-                                "publicKeyJwk": {
+                                "publicKeyJwk" : {
                                   "crv": "Ed25519",
                                   "kty": "OKP",
                                   "x": "mhph0ZSVk7cDVmazbaaC3jBDpphW4eNygAK9gHPlMow"
@@ -137,8 +141,8 @@
                           }
                         }
                       ],
-                      "pageable": {
-                        "sort": {
+                      "pageable" : {
+                        "sort" : {
                           "empty": false,
                           "sorted": true,
                           "unsorted": false
@@ -154,7 +158,7 @@
                       "last": false,
                       "size": 1,
                       "number": 0,
-                      "sort": {
+                      "sort" : {
                         "empty": false,
                         "sorted": true,
                         "unsorted": false
@@ -168,22 +172,22 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "title",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {}
+                        "errors" : {}
                       }
                     }
                   }
@@ -191,26 +195,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -220,29 +224,29 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       },
-      "post": {
-        "tags": [
+      "post" : {
+        "tags" : [
           "Wallets"
         ],
         "summary": "Create Wallet",
         "description": "Permission: **add_wallets** (The BPN of the base wallet must equal BPN of caller)\n\n Create a wallet and store it",
         "operationId": "createWallet",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "$ref": "#/components/schemas/CreateWalletRequest"
               },
-              "examples": {
-                "Create wallet with BPN": {
+              "examples" : {
+                "Create wallet with BPN" : {
                   "description": "Create wallet with BPN",
-                  "value": {
+                  "value" : {
                     "businessPartnerNumber": "BPNL000000000001",
                     "companyName": "companyA",
                     "didUrl": "portal.com:BPNL000000000001"
@@ -253,30 +257,30 @@
           },
           "required": true
         },
-        "responses": {
-          "201": {
+        "responses" : {
+          "201" : {
             "description": "Created",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Success response": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Success response" : {
                     "description": "Success response",
-                    "value": {
+                    "value" : {
                       "name": "companyA",
                       "did": "did:web:localhost:BPNL000000000001",
                       "bpn": "BPNL000000000501",
                       "algorithm": "ED25519",
-                      "didDocument": {
-                        "@context": [
+                      "didDocument" : {
+                        "@context" : [
                           "https://www.w3.org/ns/did/v1",
                           "https://w3c.github.io/vc-jws-2020/contexts/v1"
                         ],
                         "id": "did:web:localhost:BPNL000000000001",
-                        "verificationMethod": [
+                        "verificationMethod" : [
                           {
                             "controller": "did:web:localhost:BPNL000000000001",
                             "id": "did:web:localhost:BPNL000000000001#key-1",
-                            "publicKeyJwk": {
+                            "publicKeyJwk" : {
                               "crv": "Ed25519",
                               "kty": "OKP",
                               "x": "0Ap6FsX5UuRBIoOzxWtcFA2ymnqXw0U08Ino_mIuYM4"
@@ -286,7 +290,7 @@
                           {
                             "controller": "did:web:localhost:BPNL000000000001",
                             "id": "did:web:localhost:BPNL000000000001#key-2",
-                            "publicKeyJwk": {
+                            "publicKeyJwk" : {
                               "crv": "secp256k1",
                               "kty": "EC",
                               "x": "f9PkTOpsbcgKe_-s6bNCve3-aB1VZAFsCub8C5bhDn0",
@@ -302,22 +306,22 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Invalid data provided",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {
+                        "errors" : {
                           "filed": "filed error message"
                         }
                       }
@@ -327,26 +331,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "409": {
+          "409" : {
             "description": "The request could not be completed due to a conflict.",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet already exist": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet already exist" : {
                     "description": "Wallet already exist",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Wallet is already exists for bpn BPNL000000000001",
                       "status": 409,
                       "detail": "Wallet is already exists for bpn BPNL000000000001",
                       "instance": "/api/wallets",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762639948
                       }
                     }
@@ -355,20 +359,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -378,79 +382,79 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/wallets/{identifier}/credentials": {
-      "post": {
-        "tags": [
+    "/api/wallets/{identifier}/credentials" : {
+      "post" : {
+        "tags" : [
           "Wallets"
         ],
         "summary": "Store Verifiable Credential",
         "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of wallet to extract credentials from must equal BPN of caller) \n\n Store a verifiable credential in the wallet of the given identifier",
         "operationId": "storeCredential",
-        "parameters": [
+        "parameters" : [
           {
             "name": "identifier",
             "in": "path",
             "description": "Did or BPN",
             "required": true,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "bpn": {
+            "examples" : {
+              "bpn" : {
                 "description": "bpn",
                 "value": "BPNL000000000000"
               },
-              "did": {
+              "did" : {
                 "description": "did",
                 "value": "did:web:localhost:BPNL000000000000"
               }
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "type": "object",
-                "additionalProperties": {
+                "additionalProperties" : {
                   "type": "object"
                 }
               },
-              "example": {
-                "@context": [
+              "example" : {
+                "@context" : [
                   "https://www.w3.org/2018/credentials/v1",
                   "https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#"
                 ],
                 "id": "did:web:localhost.in#123456789",
-                "type": [
+                "type" : [
                   "VerifiableCredential",
                   "LegalParticipant"
                 ],
                 "issuer": "did:web:localhost.in",
                 "issuanceDate": "2023-05-04T07:36:03.633Z",
-                "credentialSubject": {
+                "credentialSubject" : {
                   "id": "https://localhost/.well-known/participant.json",
                   "type": "gx:LegalParticipant",
                   "gx:legalName": "Sample Company",
-                  "gx:legalRegistrationNumber": {
+                  "gx:legalRegistrationNumber" : {
                     "gx:taxID": "113123123"
                   },
-                  "gx:headquarterAddress": {
+                  "gx:headquarterAddress" : {
                     "gx:countrySubdivisionCode": "BE-BRU"
                   },
-                  "gx:legalAddress": {
+                  "gx:legalAddress" : {
                     "gx:countrySubdivisionCode": "BE-BRU"
                   },
                   "gx-terms-and-conditions:gaiaxTermsAndConditions": "70c1d713215f95191a11d38fe2341faed27d19e083917bc8732ca4fea4976700"
                 },
-                "proof": {
+                "proof" : {
                   "type": "JsonWebSignature2020",
                   "created": "2023-05-04T07:36:04.079Z",
                   "proofPurpose": "assertionMethod",
@@ -462,15 +466,15 @@
           },
           "required": true
         },
-        "responses": {
-          "201": {
+        "responses" : {
+          "201" : {
             "description": "Success Response",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Success Response": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Success Response" : {
                     "description": "Success Response",
-                    "value": {
+                    "value" : {
                       "message": "Credential with id did:web:localhost#123456789 has been successfully stored"
                     }
                   }
@@ -478,22 +482,22 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "title",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {}
+                        "errors" : {}
                       }
                     }
                   }
@@ -501,26 +505,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with provided identifier",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided identifier": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with provided identifier" : {
                     "description": "Wallet not found with provided identifier",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Wallet not found for identifier did:web:localhost:BPNL000000044001",
                       "status": 404,
                       "detail": "Wallet not found for identifier did:web:localhost:BPNL000000044001",
                       "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000/credentials",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689765541959
                       }
                     }
@@ -529,20 +533,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -552,31 +556,31 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/token": {
-      "post": {
-        "tags": [
+    "/api/token" : {
+      "post" : {
+        "tags" : [
           "STS"
         ],
         "summary": "Create and Sign Access Tokens",
         "description": "The endpoint for creating and signing access tokens which are to be used during a verifiable presentation flow.",
         "operationId": "token_1",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "$ref": "#/components/schemas/SecureTokenRequest"
               },
-              "examples": {
-                "Request Secure Token using Scopes": {
+              "examples" : {
+                "Request Secure Token using Scopes" : {
                   "description": "Request Secure Token using Scopes",
-                  "value": {
+                  "value" : {
                     "audience": "BPNL000000000009",
                     "client_id": "your_client_id",
                     "client_secret": "your_client_secret",
@@ -584,9 +588,9 @@
                     "bearer_access_scope": "org.eclipse.tractusx.vc.type:ValidCredentialType:read"
                   }
                 },
-                "Request Secure Token using Access Token": {
+                "Request Secure Token using Access Token" : {
                   "description": "Request Secure Token using Access Token",
-                  "value": {
+                  "value" : {
                     "audience": "BPNL000000000009",
                     "client_id": "your_client_id",
                     "client_secret": "your_client_secret",
@@ -599,15 +603,15 @@
           },
           "required": true
         },
-        "responses": {
-          "201": {
+        "responses" : {
+          "201" : {
             "description": "Created",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Success response": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Success response" : {
                     "description": "Success response",
-                    "value": {
+                    "value" : {
                       "token": "a_jwt_token",
                       "expiresAt": 1706888709315
                     }
@@ -616,35 +620,35 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Unknown BPN": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Unknown BPN" : {
                     "description": "Unknown BPN",
-                    "value": {
+                    "value" : {
                       "error": "UnknownBusinessPartnerNumber",
                       "errorDescription": "The provided BPN 'BPNL000000000001' is unknown"
                     }
                   },
-                  "Wrong Grant Type": {
+                  "Wrong Grant Type" : {
                     "description": "Wrong Grant Type",
-                    "value": {
+                    "value" : {
                       "error": "UnsupportedGrantTypeException",
                       "errorDescription": "The provided 'grant_type' is not valid. Use 'client_credentials'."
                     }
                   },
-                  "Invalid idp Token Response": {
+                  "Invalid idp Token Response" : {
                     "description": "Invalid idp Token Response",
-                    "value": {
+                    "value" : {
                       "error": "InvalidIdpTokenResponse",
                       "errorDescription": "The idp response cannot be null. Possible causes for this are: the 'clientId' is invalid, or the 'client' is not enabled."
                     }
                   },
-                  "Invalid Secure Token Request": {
+                  "Invalid Secure Token Request" : {
                     "description": "Invalid Secure Token Request",
-                    "value": {
+                    "value" : {
                       "error": "InvalidSecureTokenRequest",
                       "errorDescription": "The provided data could not be used to create and sign a token."
                     }
@@ -653,20 +657,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -678,20 +682,20 @@
         }
       }
     },
-    "/api/presentations": {
-      "post": {
-        "tags": [
+    "/api/presentations" : {
+      "post" : {
+        "tags" : [
           "Verifiable Presentations - Generation"
         ],
         "summary": "Create Verifiable Presentation",
         "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Presentation must equal to BPN of caller) \n\n Create a verifiable presentation from a list of verifiable credentials, signed by the holder",
         "operationId": "createPresentation",
-        "parameters": [
+        "parameters" : [
           {
             "name": "audience",
             "in": "query",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string"
             }
           },
@@ -699,45 +703,45 @@
             "name": "asJwt",
             "in": "query",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "type": "object",
-                "additionalProperties": {
+                "additionalProperties" : {
                   "type": "object"
                 }
               },
-              "example": {
-                "verifiableCredentials": [
+              "example" : {
+                "verifiableCredentials" : [
                   {
                     "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                    "@context": [
+                    "@context" : [
                       "https://www.w3.org/2018/credentials/v1",
                       "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                       "https://w3id.org/security/suites/jws-2020/v1"
                     ],
-                    "type": [
+                    "type" : [
                       "VerifiableCredential",
                       "BpnCredential"
                     ],
                     "issuer": "did:web:localhost:BPNL000000000000",
                     "expirationDate": "2024-12-31T18:30:00Z",
                     "issuanceDate": "2023-07-19T09:11:34Z",
-                    "credentialSubject": [
+                    "credentialSubject" : [
                       {
                         "bpn": "BPNL000000000000",
                         "id": "did:web:localhost:BPNL000000000000",
                         "type": "BpnCredential"
                       }
                     ],
-                    "proof": {
+                    "proof" : {
                       "created": "2023-07-19T09:11:39Z",
                       "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                       "proofPurpose": "proofPurpose",
@@ -751,46 +755,46 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Verifiable Presentation",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "VP as Json-LD": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "VP as Json-LD" : {
                     "description": "VP as Json-LD",
-                    "value": {
-                      "vp": {
-                        "@context": [
+                    "value" : {
+                      "vp" : {
+                        "@context" : [
                           "https://www.w3.org/2018/credentials/v1"
                         ],
                         "id": "did:web:localhost:BPNL000000000000#b2e69e47-95f3-48ff-af30-eaaab36431d5",
-                        "type": [
+                        "type" : [
                           "VerifiablePresentation"
                         ],
-                        "verifiableCredential": [
+                        "verifiableCredential" : [
                           {
                             "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                            "@context": [
+                            "@context" : [
                               "https://www.w3.org/2018/credentials/v1",
                               "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                               "https://w3id.org/security/suites/jws-2020/v1"
                             ],
-                            "type": [
+                            "type" : [
                               "VerifiableCredential",
                               "BpnCredential"
                             ],
                             "issuer": "did:web:localhost:BPNL000000000000",
                             "expirationDate": "2024-12-31T18:30:00Z",
                             "issuanceDate": "2023-07-19T09:11:34Z",
-                            "credentialSubject": [
+                            "credentialSubject" : [
                               {
                                 "bpn": "BPNL000000000000",
                                 "id": "did:web:localhost:BPNL000000000000",
                                 "type": "BpnCredential"
                               }
                             ],
-                            "proof": {
+                            "proof" : {
                               "created": "2023-07-19T09:11:39Z",
                               "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                               "proofPurpose": "proofPurpose",
@@ -802,9 +806,9 @@
                       }
                     }
                   },
-                  "VP as JWT": {
+                  "VP as JWT" : {
                     "description": "VP as JWT",
-                    "value": {
+                    "value" : {
                       "vp": "eyJraWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidHlwIjoiSldUIiwiYWxnIjoiRWREU0EifQ.eyJzdWIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiYXVkIjoic21hcnQiLCJpc3MiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidnAiOnsiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIzM4ZTU2ZTg1LTNkODQtNGEyNS1iZjg1LWFiMjRlYzY4MmMwOSIsInR5cGUiOlsiVmVyaWZpYWJsZVByZXNlbnRhdGlvbiJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ2ZXJpZmlhYmxlQ3JlZGVudGlhbCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vY2F0ZW5heC1uZy5naXRodWIuaW8vcHJvZHVjdC1jb3JlLXNjaGVtYXMvYnVzaW5lc3NQYXJ0bmVyRGF0YS5qc29uIiwiaHR0cHM6Ly93M2lkLm9yZy9zZWN1cml0eS9zdWl0ZXMvandzLTIwMjAvdjEiXSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkJwbkNyZWRlbnRpYWwiXSwiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwI2Y3M2UzNjMxLWJhODctNGEwMy1iZWEzLWIyODcwMDA1Njg3OSIsImlzc3VlciI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJpc3N1YW5jZURhdGUiOiIyMDIzLTA3LTE5VDA5OjExOjM0WiIsImV4cGlyYXRpb25EYXRlIjoiMjAyNC0xMi0zMVQxODozMDowMFoiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJicG4iOiJCUE5MMDAwMDAwMDAwMDAwIiwidHlwZSI6IkJwbkNyZWRlbnRpYWwifSwicHJvb2YiOnsicHJvb2ZQdXJwb3NlIjoicHJvb2ZQdXJwb3NlIiwidHlwZSI6Ikpzb25XZWJTaWduYXR1cmUyMDIwIiwidmVyaWZpY2F0aW9uTWV0aG9kIjoiZGlkOndlYjpsb2NhbGhvc3Q6QlBOTDAwMDAwMDAwMDAwMCMiLCJjcmVhdGVkIjoiMjAyMy0wNy0xOVQwOToxMTozOVoiLCJqd3MiOiJleUpoYkdjaU9pSkZaRVJUUVNKOS4uZmRuMnFVODVhdU9sdGRIRExkSEk3c0pWVjFaUGRmdHBpWGRfbmRYTjBkRmdTRFdpSXJTY2REMDN3dHZLTHFfSC1zaFFXZmgyUlllTW1ybEV6QWhmRHcifX19LCJleHAiOjE2ODk4MzQ4MDUsImp0aSI6ImIwODYzOWZiLWQ5MWEtNGUwZS1iNmY4LTYzYjdhMzQ1ZTRhZiJ9.80x0AB-OauefdeZfx1cwhitdVKRvCRFeFzYwU73DL7y4w34vu6BdfHWLBGjkwELxkQEoFfiTPOqtuyqhtsyDBg"
                     }
                   }
@@ -812,26 +816,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with provided identifier",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided identifier": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with provided identifier" : {
                     "description": "Wallet not found with provided identifier",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 404,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -840,20 +844,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -863,28 +867,28 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/presentations/validation": {
-      "post": {
-        "tags": [
+    "/api/presentations/validation" : {
+      "post" : {
+        "tags" : [
           "Verifiable Presentations - Validation"
         ],
         "summary": "Validate Verifiable Presentation",
         "description": "Permission: **view_wallets** OR **view_wallet**  \n\n Validate Verifiable Presentation with all included credentials",
         "operationId": "validatePresentation",
-        "parameters": [
+        "parameters" : [
           {
             "name": "audience",
             "in": "query",
             "description": "Audience to validate in VP (Only supported in case of JWT formatted VP)",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string"
             }
           },
@@ -893,7 +897,7 @@
             "in": "query",
             "description": "Pass true in case of VP is in JWT format",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             }
@@ -903,62 +907,62 @@
             "in": "query",
             "description": "Check expiry of VC(Only supported in case of JWT formatted VP)",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "type": "object",
-                "additionalProperties": {
+                "additionalProperties" : {
                   "type": "object"
                 }
               },
-              "examples": {
-                "VP as JWT": {
+              "examples" : {
+                "VP as JWT" : {
                   "description": "VP as JWT",
-                  "value": {
+                  "value" : {
                     "vp": "eyJraWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidHlwIjoiSldUIiwiYWxnIjoiRWREU0EifQ.eyJzdWIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiYXVkIjoic21hcnQiLCJpc3MiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidnAiOnsiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIzZmZWRmYWRmLWYxNTItNGNjZS05MWQ1LWNjMjhhNzhlMTExMyIsInR5cGUiOlsiVmVyaWZpYWJsZVByZXNlbnRhdGlvbiJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ2ZXJpZmlhYmxlQ3JlZGVudGlhbCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vY2F0ZW5heC1uZy5naXRodWIuaW8vcHJvZHVjdC1jb3JlLXNjaGVtYXMvYnVzaW5lc3NQYXJ0bmVyRGF0YS5qc29uIiwiaHR0cHM6Ly93M2lkLm9yZy9zZWN1cml0eS9zdWl0ZXMvandzLTIwMjAvdjEiXSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkJwbkNyZWRlbnRpYWwiXSwiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwI2Y3M2UzNjMxLWJhODctNGEwMy1iZWEzLWIyODcwMDA1Njg3OSIsImlzc3VlciI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJpc3N1YW5jZURhdGUiOiIyMDIzLTA3LTE5VDA5OjExOjM0WiIsImV4cGlyYXRpb25EYXRlIjoiMjAyNC0xMi0zMVQxODozMDowMFoiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJicG4iOiJCUE5MMDAwMDAwMDAwMDAwIiwidHlwZSI6IkJwbkNyZWRlbnRpYWwifSwicHJvb2YiOnsicHJvb2ZQdXJwb3NlIjoicHJvb2ZQdXJwb3NlIiwidHlwZSI6Ikpzb25XZWJTaWduYXR1cmUyMDIwIiwidmVyaWZpY2F0aW9uTWV0aG9kIjoiZGlkOndlYjpsb2NhbGhvc3Q6QlBOTDAwMDAwMDAwMDAwMCMiLCJjcmVhdGVkIjoiMjAyMy0wNy0xOVQwOToxMTozOVoiLCJqd3MiOiJleUpoYkdjaU9pSkZaRVJUUVNKOS4uZmRuMnFVODVhdU9sdGRIRExkSEk3c0pWVjFaUGRmdHBpWGRfbmRYTjBkRmdTRFdpSXJTY2REMDN3dHZLTHFfSC1zaFFXZmgyUlllTW1ybEV6QWhmRHcifX19LCJleHAiOjE2ODk3NTg1NDQsImp0aSI6IjdlNWE4MzQ4LTgwZjUtNGIzMS1iMDNlLTBiOTJmNzc4ZTVjZiJ9.c7FS-CLwm3vxfO9847M5sqcVxv3QbwwSmSsFWcGif7MOesjt1pdnARlQ4pvHzgsFj1UqBEvHwZQvyYyPCQg_Cw"
                   }
                 },
-                "VP as json-ld": {
+                "VP as json-ld" : {
                   "description": "VP as json-ld",
-                  "value": {
-                    "vp": {
+                  "value" : {
+                    "vp" : {
                       "id": "b9d97cef-758d-4a7c-843d-86f17632b08a",
-                      "type": [
+                      "type" : [
                         "VerifiablePresentation"
                       ],
-                      "@context": [
+                      "@context" : [
                         "https://www.w3.org/2018/credentials/v1"
                       ],
-                      "verifiableCredential": [
+                      "verifiableCredential" : [
                         {
                           "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                          "@context": [
+                          "@context" : [
                             "https://www.w3.org/2018/credentials/v1",
                             "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                             "https://w3id.org/security/suites/jws-2020/v1"
                           ],
-                          "type": [
+                          "type" : [
                             "VerifiableCredential",
                             "BpnCredential"
                           ],
                           "issuer": "did:web:localhost:BPNL000000000000",
                           "expirationDate": "2024-12-31T18:30:00Z",
                           "issuanceDate": "2023-07-19T09:11:34Z",
-                          "credentialSubject": [
+                          "credentialSubject" : [
                             {
                               "bpn": "BPNL000000000000",
                               "id": "did:web:localhost:BPNL000000000000",
                               "type": "BpnCredential"
                             }
                           ],
-                          "proof": {
+                          "proof" : {
                             "created": "2023-07-19T09:11:39Z",
                             "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                             "proofPurpose": "proofPurpose",
@@ -975,15 +979,15 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Verifiable presentation validate",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "VP as JWT": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "VP as JWT" : {
                     "description": "VP as JWT",
-                    "value": {
+                    "value" : {
                       "valid": true,
                       "validateJWTExpiryDate": true,
                       "validateAudience": true,
@@ -995,35 +999,35 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Validation of VP in form of JSON-LD is not supported": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Validation of VP in form of JSON-LD is not supported" : {
                     "description": "Validation of VP in form of JSON-LD is not supported",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Validation of VP in form of JSON-LD is not supported",
                       "status": 400,
                       "detail": "Validation of VP in form of JSON-LD is not supported",
                       "instance": "/api/presentations/validation",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689835085703
                       }
                     }
                   },
-                  "Response in case of invalid data provided": {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Invalid data provided",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {
+                        "errors" : {
                           "filed": "filed error message"
                         }
                       }
@@ -1033,26 +1037,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -1062,32 +1066,32 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/credentials": {
-      "get": {
-        "tags": [
+    "/api/credentials" : {
+      "get" : {
+        "tags" : [
           "Verifiable Credential - Holder"
         ],
         "summary": "Query Verifiable Credentials",
         "description": "Permission: **view_wallets** OR **view_wallet** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria",
         "operationId": "getCredentials",
-        "parameters": [
+        "parameters" : [
           {
             "name": "credentialId",
             "in": "query",
             "description": "Credential Id",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "Credential Id": {
+            "examples" : {
+              "Credential Id" : {
                 "description": "Credential Id",
                 "value": "did:web:localhost:BPNL000000000000#12528899-160a-48bd-ba15-f396c3959ae9"
               }
@@ -1098,15 +1102,15 @@
             "in": "query",
             "description": "Issuer identifier(did of BPN)",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "bpn": {
+            "examples" : {
+              "bpn" : {
                 "description": "bpn",
                 "value": "BPNL000000000000"
               },
-              "did": {
+              "did" : {
                 "description": "did",
                 "value": "did:web:localhost:BPNL000000000000"
               }
@@ -1117,19 +1121,19 @@
             "in": "query",
             "description": "Type of VC",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "array",
               "maxItems": 100,
-              "items": {
+              "items" : {
                 "type": "string"
               }
             },
-            "examples": {
-              "SummaryCredential": {
+            "examples" : {
+              "SummaryCredential" : {
                 "description": "SummaryCredential",
                 "value": "SummaryCredential"
               },
-              "BpnCredential": {
+              "BpnCredential" : {
                 "description": "BpnCredential",
                 "value": "BpnCredential"
               }
@@ -1140,32 +1144,32 @@
             "in": "query",
             "description": "Sort column name",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string",
               "default": "createdAt"
             },
-            "examples": {
-              "creation date": {
+            "examples" : {
+              "creation date" : {
                 "description": "creation date",
                 "value": "createdAt"
               },
-              "Self issued credential": {
+              "Self issued credential" : {
                 "description": "Self issued credential",
                 "value": "selfIssued"
               },
-              "Stored credential": {
+              "Stored credential" : {
                 "description": "Stored credential",
                 "value": "stored"
               },
-              "Issuer did": {
+              "Issuer did" : {
                 "description": "Issuer did",
                 "value": "issuerDid"
               },
-              "Credential type": {
+              "Credential type" : {
                 "description": "Credential type",
                 "value": "type"
               },
-              "Credential id": {
+              "Credential id" : {
                 "description": "Credential id",
                 "value": "credentialId"
               }
@@ -1176,16 +1180,16 @@
             "in": "query",
             "description": "Sort order",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string",
               "default": "desc"
             },
-            "examples": {
-              "Ascending order": {
+            "examples" : {
+              "Ascending order" : {
                 "description": "Ascending order",
                 "value": "asc"
               },
-              "Descending order": {
+              "Descending order" : {
                 "description": "Descending order",
                 "value": "desc"
               }
@@ -1196,7 +1200,7 @@
             "in": "query",
             "description": "Page number, Page number start with zero",
             "required": false,
-            "schema": {
+            "schema" : {
               "maximum": 2147483647,
               "minimum": 0,
               "type": "integer",
@@ -1209,7 +1213,7 @@
             "in": "query",
             "description": "Number of records per page",
             "required": false,
-            "schema": {
+            "schema" : {
               "maximum": 2147483647,
               "minimum": 0,
               "type": "integer",
@@ -1222,58 +1226,58 @@
             "in": "query",
             "description": "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). If set to true, the VC will be generated in JWT formatSetting this parameter to false will result in the VC being created as JSON-LD Defaults to false if not specified.",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             },
-            "examples": {
-              "Create VC as JWT": {
+            "examples" : {
+              "Create VC as JWT" : {
                 "description": "Create VC as JWT",
                 "value": true
               },
-              "Do not create VC as JWT": {
+              "Do not create VC as JWT" : {
                 "description": "Do not create VC as JWT",
                 "value": false
               }
             }
           }
         ],
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Credential list",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Credential list": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Credential list" : {
                     "description": "Credential list",
-                    "value": {
-                      "content": [
+                    "value" : {
+                      "content" : [
                         {
-                          "@context": [
+                          "@context" : [
                             "https://www.w3.org/2018/credentials/v1",
                             "https://catenax-ng.github.io/product-core-schemas/SummaryVC.json",
                             "https://w3id.org/security/suites/jws-2020/v1"
                           ],
                           "id": "did:web:localhost:BPNL000000000000#954d43de-ebed-481d-9e35-e3bbb311b8f5",
-                          "type": [
+                          "type" : [
                             "VerifiableCredential",
                             "SummaryCredential"
                           ],
                           "issuer": "did:web:localhost:BPNL000000000000",
                           "issuanceDate": "2023-07-14T11:05:48Z",
                           "expirationDate": "2023-09-30T18:30:00Z",
-                          "credentialSubject": [
+                          "credentialSubject" : [
                             {
                               "contractTemplate": "https://public.catena-x.org/contracts/",
                               "holderIdentifier": "BPNL000000000000",
                               "id": "did:web:localhost:BPNL000000000000",
-                              "items": [
+                              "items" : [
                                 "BpnCredential"
                               ],
                               "type": "SummaryCredential"
                             }
                           ],
-                          "proof": {
+                          "proof" : {
                             "created": "2023-07-14T11:05:50Z",
                             "jws": "eyJhbGciOiJFZERTQSJ9..4xwFUCtP0xXVEo5_lXd90Vv-TWO2FijZut-HZ5cozAQseexj8EpTkK1erhFbf2Ua1kb8pi_H5At5HiPkTxSIAQ",
                             "proofPurpose": "proofPurpose",
@@ -1282,8 +1286,8 @@
                           }
                         }
                       ],
-                      "pageable": {
-                        "sort": {
+                      "pageable" : {
+                        "sort" : {
                           "empty": false,
                           "sorted": true,
                           "unsorted": false
@@ -1299,7 +1303,7 @@
                       "last": true,
                       "size": 2147483647,
                       "number": 0,
-                      "sort": {
+                      "sort" : {
                         "empty": false,
                         "sorted": true,
                         "unsorted": false
@@ -1313,22 +1317,22 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "title",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {}
+                        "errors" : {}
                       }
                     }
                   }
@@ -1336,26 +1340,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with caller BPN",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with caller BPN": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with caller BPN" : {
                     "description": "Wallet not found with caller BPN",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Wallet not found for identifier did:web:localhost:BPNL0000000",
                       "status": 404,
                       "detail": "Wallet not found for identifier did:web:localhost:BPNL0000000",
                       "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000/credentials",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689765541959
                       }
                     }
@@ -1364,20 +1368,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -1387,65 +1391,65 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       },
-      "post": {
-        "tags": [
+      "post" : {
+        "tags" : [
           "Verifiable Credential - Holder"
         ],
         "summary": "Issue Verifiable Credential",
         "description": "Permission: **update_wallets** OR **update_wallet** (The BPN of the issuer of the Verifiable Credential must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID",
         "operationId": "issueCredential",
-        "parameters": [
+        "parameters" : [
           {
             "name": "asJwt",
             "in": "query",
             "description": "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). If set to true, the VC will be generated in JWT formatSetting this parameter to false will result in the VC being created as JSON-LD Defaults to false if not specified.",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             },
-            "examples": {
-              "Create VC as JWT": {
+            "examples" : {
+              "Create VC as JWT" : {
                 "description": "Create VC as JWT",
                 "value": true
               },
-              "Do not create VC as JWT": {
+              "Do not create VC as JWT" : {
                 "description": "Do not create VC as JWT",
                 "value": false
               }
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "type": "object",
-                "additionalProperties": {
+                "additionalProperties" : {
                   "type": "object"
                 }
               },
-              "example": {
-                "@context": [
+              "example" : {
+                "@context" : [
                   "https://www.w3.org/2018/credentials/v1",
                   "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                   "https://w3id.org/security/suites/jws-2020/v1"
                 ],
                 "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                "type": [
+                "type" : [
                   "VerifiableCredential",
                   "BankDetails"
                 ],
                 "issuer": "did:web:localhost:BPNL000000000000",
                 "expirationDate": "2024-12-31T18:30:00Z",
                 "issuanceDate": "2023-07-19T09:11:34Z",
-                "credentialSubject": [
+                "credentialSubject" : [
                   {
                     "bpn": "BPNL000000000000",
                     "id": "did:web:localhost:BPNL000000000000",
@@ -1459,29 +1463,29 @@
           },
           "required": true
         },
-        "responses": {
-          "201": {
+        "responses" : {
+          "201" : {
             "description": "Success Response",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Success Response": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Success Response" : {
                     "description": "Success Response",
-                    "value": {
-                      "@context": [
+                    "value" : {
+                      "@context" : [
                         "https://www.w3.org/2018/credentials/v1",
                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                         "https://w3id.org/security/suites/jws-2020/v1"
                       ],
                       "id": "did:web:localhost:BPNL000000000000#319a2641-9407-4c39-bf51-a4a109b59604",
-                      "type": [
+                      "type" : [
                         "VerifiableCredential",
                         "BankDetails"
                       ],
                       "issuer": "did:web:localhost:BPNL000000000000",
                       "issuanceDate": "2023-07-19T13:41:52Z",
                       "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
+                      "credentialSubject" : [
                         {
                           "bpn": "BPNL000000000000",
                           "bankName": "Dummy Bank",
@@ -1490,7 +1494,7 @@
                           "accountNumber": "123456789"
                         }
                       ],
-                      "proof": {
+                      "proof" : {
                         "proofPurpose": "proofPurpose",
                         "verificationMethod": "did:web:localhost:BPNL000000000000#",
                         "type": "JsonWebSignature2020",
@@ -1503,22 +1507,22 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Invalid data provided",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {
+                        "errors" : {
                           "filed": "filed error message"
                         }
                       }
@@ -1528,26 +1532,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with caller BPN",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with caller BPN": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with caller BPN" : {
                     "description": "Wallet not found with caller BPN",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                       "status": 404,
                       "detail": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                       "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000501",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689764377224
                       }
                     }
@@ -1556,20 +1560,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -1579,64 +1583,64 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/credentials/validation": {
-      "post": {
-        "tags": [
+    "/api/credentials/validation" : {
+      "post" : {
+        "tags" : [
           "Verifiable Credential - Validation"
         ],
         "summary": "Validate Verifiable Credentials",
         "description": "Permission: **view_wallets** OR **view_wallet** \n\n Validate Verifiable Credentials",
         "operationId": "credentialsValidation",
-        "parameters": [
+        "parameters" : [
           {
             "name": "withCredentialExpiryDate",
             "in": "query",
             "description": "Check expiry of VC",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "$ref": "#/components/schemas/CredentialVerificationRequest"
               },
-              "examples": {
-                "Validate credential in JSON-LD format": {
+              "examples" : {
+                "Validate credential in JSON-LD format" : {
                   "description": "Validate credential in JSON-LD format",
-                  "value": {
-                    "@context": [
+                  "value" : {
+                    "@context" : [
                       "https://www.w3.org/2018/credentials/v1",
                       "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                       "https://w3id.org/security/suites/jws-2020/v1"
                     ],
                     "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                    "type": [
+                    "type" : [
                       "VerifiableCredential",
                       "BpnCredential"
                     ],
                     "issuer": "did:web:localhost:BPNL000000000000",
                     "issuanceDate": "2023-07-19T09:11:34Z",
                     "expirationDate": "2024-12-31T18:30:00Z",
-                    "credentialSubject": [
+                    "credentialSubject" : [
                       {
                         "bpn": "BPNL000000000000",
                         "id": "did:web:localhost:BPNL000000000000",
                         "type": "BpnCredential"
                       }
                     ],
-                    "proof": {
+                    "proof" : {
                       "created": "2023-07-19T09:11:39Z",
                       "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                       "proofPurpose": "proofPurpose",
@@ -1645,9 +1649,9 @@
                     }
                   }
                 },
-                "Validate credential in JWT format": {
+                "Validate credential in JWT format" : {
                   "description": "Validate credential in JWT format",
-                  "value": {
+                  "value" : {
                     "jwt": "eyJraWQiOiJkaWQ6d2ViOmFmODgtMjAzLTEyOS0yMTMtMTA3Lm5ncm9rLWZyZWUuYXBwOkJQTkwwMDAwMDAwMDAwMDAjOGYyZWU5ZDItYTM2Yy00MTM4LWJlMWYtYjZmZWZiNmY4MDI0IiwidHlwIjoiSldUIiwiYWxnIjoiRWREU0EifQ.eyJpc3MiOiJkaWQ6d2ViOmFmODgtMjAzLTEyOS0yMTMtMTA3Lm5ncm9rLWZyZWUuYXBwOkJQTkwwMDAwMDAwMDAwMDAiLCJzdWIiOiJkaWQ6d2ViOmFmODgtMjAzLTEyOS0yMTMtMTA3Lm5ncm9rLWZyZWUuYXBwOkJQTkwwMDAwMDAwMDAwMTEiLCJleHAiOjE3MzU2Njk4MDAsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9jb2Zpbml0eS14LmdpdGh1Yi5pby9zY2hlbWEtcmVnaXN0cnkvdjEuMS9Vc2VDYXNlVkMuanNvbiIsImh0dHBzOi8vdzNpZC5vcmcvc2VjdXJpdHkvc3VpdGVzL2p3cy0yMDIwL3YxIl0sImlkIjoiZGlkOndlYjphZjg4LTIwMy0xMjktMjEzLTEwNy5uZ3Jvay1mcmVlLmFwcDpCUE5MMDAwMDAwMDAwMDAwI2Q4Y2ZjZDBiLWY0NGQtNDVkMC05OGEzLTA4ZDZkNmU5Y2E5NSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJVc2VDYXNlRnJhbWV3b3JrQ29uZGl0aW9uIl0sImlzc3VlciI6ImRpZDp3ZWI6YWY4OC0yMDMtMTI5LTIxMy0xMDcubmdyb2stZnJlZS5hcHA6QlBOTDAwMDAwMDAwMDAwMCIsImNyZWRlbnRpYWxTdWJqZWN0IjpbeyJob2xkZXJJZGVudGlmaWVyIjoiQlBOTDAwMDAwMDAwMDAxMSIsImlkIjoiZGlkOndlYjphZjg4LTIwMy0xMjktMjEzLTEwNy5uZ3Jvay1mcmVlLmFwcDpCUE5MMDAwMDAwMDAwMDExIiwidHlwZSI6IkJlaGF2aW9yVHdpbkNyZWRlbnRpYWwiLCJjb250cmFjdFRlbXBsYXRlIjoiaHR0cHM6Ly9wdWJsaWMuY2F0ZW5hLXgub3JnL2NvbnRyYWN0cy90cmFjZWFiaWx0eS52MS5wZGYiLCJjb250cmFjdFZlcnNpb24iOiIxLjAuMCJ9XSwiY3JlZGVudGlhbFN0YXR1cyI6bnVsbCwiaXNzdWFuY2VEYXRlIjoiMjAyNC0wMi0wOFQxNDowMjo1M1oiLCJleHBpcmF0aW9uRGF0ZSI6IjIwMjQtMTItMzFUMTg6MzA6MDBaIn0sImp0aSI6IjliYWFhMjIzLTAxMjctNDEyZS05NjZhLTA3ZTJmZGU4NGNlNCJ9.X3rkj8Gv4OD5nEaeFG5pSA-dogbcYA91YEPmHiKT4FhAiIr7QAdSEULGXHYOn8-eK0jSDHNdAxNYIK1UwYRsCA"
                   }
                 }
@@ -1656,19 +1660,19 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Validate Verifiable Credentials",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Verifiable Credentials without check expiry": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Verifiable Credentials without check expiry" : {
                     "description": "Verifiable Credentials without check expiry",
-                    "value": {
+                    "value" : {
                       "valid": true,
-                      "vc": {
+                      "vc" : {
                         "issuanceDate": "2023-07-19T09:11:34Z",
-                        "credentialSubject": [
+                        "credentialSubject" : [
                           {
                             "bpn": "BPNL000000000000",
                             "id": "did:web:localhost:BPNL000000000000",
@@ -1676,18 +1680,18 @@
                           }
                         ],
                         "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                        "proof": {
+                        "proof" : {
                           "created": "2023-07-19T09:11:39Z",
                           "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                           "proofPurpose": "proofPurpose",
                           "type": "JsonWebSignature2020",
                           "verificationMethod": "did:web:localhost:BPNL000000000000#"
                         },
-                        "type": [
+                        "type" : [
                           "VerifiableCredential",
                           "BpnCredential"
                         ],
-                        "@context": [
+                        "@context" : [
                           "https://www.w3.org/2018/credentials/v1",
                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                           "https://w3id.org/security/suites/jws-2020/v1"
@@ -1697,14 +1701,14 @@
                       }
                     }
                   },
-                  "Verifiable Credentials with check expiry": {
+                  "Verifiable Credentials with check expiry" : {
                     "description": "Verifiable Credentials with check expiry",
-                    "value": {
+                    "value" : {
                       "valid": true,
                       "validateExpiryDate": true,
-                      "vc": {
+                      "vc" : {
                         "issuanceDate": "2023-07-19T09:11:34Z",
-                        "credentialSubject": [
+                        "credentialSubject" : [
                           {
                             "bpn": "BPNL000000000000",
                             "id": "did:web:localhost:BPNL000000000000",
@@ -1712,18 +1716,18 @@
                           }
                         ],
                         "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                        "proof": {
+                        "proof" : {
                           "created": "2023-07-19T09:11:39Z",
                           "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                           "proofPurpose": "proofPurpose",
                           "type": "JsonWebSignature2020",
                           "verificationMethod": "did:web:localhost:BPNL000000000000#"
                         },
-                        "type": [
+                        "type" : [
                           "VerifiableCredential",
                           "BpnCredential"
                         ],
-                        "@context": [
+                        "@context" : [
                           "https://www.w3.org/2018/credentials/v1",
                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                           "https://w3id.org/security/suites/jws-2020/v1"
@@ -1733,14 +1737,14 @@
                       }
                     }
                   },
-                  "Verifiable expired credentials with check expiry ": {
+                  "Verifiable expired credentials with check expiry " : {
                     "description": "Verifiable expired credentials with check expiry ",
-                    "value": {
+                    "value" : {
                       "valid": false,
                       "validateExpiryDate": false,
-                      "vc": {
+                      "vc" : {
                         "issuanceDate": "2023-07-19T09:11:34Z",
-                        "credentialSubject": [
+                        "credentialSubject" : [
                           {
                             "bpn": "BPNL000000000000",
                             "id": "did:web:localhost:BPNL000000000000",
@@ -1748,18 +1752,18 @@
                           }
                         ],
                         "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                        "proof": {
+                        "proof" : {
                           "created": "2023-07-19T09:11:39Z",
                           "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                           "proofPurpose": "proofPurpose",
                           "type": "JsonWebSignature2020",
                           "verificationMethod": "did:web:localhost:BPNL000000000000#"
                         },
-                        "type": [
+                        "type" : [
                           "VerifiableCredential",
                           "BpnCredential"
                         ],
-                        "@context": [
+                        "@context" : [
                           "https://www.w3.org/2018/credentials/v1",
                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                           "https://w3id.org/security/suites/jws-2020/v1"
@@ -1769,17 +1773,17 @@
                       }
                     }
                   },
-                  "Revocable Verifiable credentials with check expiry ": {
+                  "Revocable Verifiable credentials with check expiry " : {
                     "description": "Revocable Verifiable credentials with check expiry ",
-                    "value": {
+                    "value" : {
                       "credentialStatus": "active",
                       "valid": true,
                       "validateExpiryDate": true,
-                      "vc": {
-                        "credentialSubject": [
+                      "vc" : {
+                        "credentialSubject" : [
                           {
                             "holderIdentifier": "BPNL000000000001",
-                            "allowedVehicleBrands": [
+                            "allowedVehicleBrands" : [
                               "Audi",
                               "Abarth",
                               "Alfa Romeo",
@@ -1792,25 +1796,25 @@
                         ],
                         "issuanceDate": "2024-01-05T05:42:53Z",
                         "id": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000#8507aa50-b2a4-4532-8e45-f50e7654b23b",
-                        "proof": {
+                        "proof" : {
                           "proofPurpose": "assertionMethod",
                           "verificationMethod": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000#a39d8ccf-2a66-488d-bfec-916768082e91",
                           "type": "JsonWebSignature2020",
                           "created": "2024-01-05T05:42:53Z",
                           "jws": "eyJhbGciOiJFZERTQSJ9..15NdxA8L_Iw7Igxevm7YGMAQA-Kt6PMOpix6p0jaYHCtfQnTy3q61SDvsnsltGT6fzM90JOubOuig2WFy-GPDg"
                         },
-                        "type": [
+                        "type" : [
                           "VerifiableCredential",
                           "DismantlerCredential"
                         ],
-                        "@context": [
+                        "@context" : [
                           "https://www.w3.org/2018/credentials/v1",
                           "https://cofinity-x.github.io/schema-registry/v1.1/DismantlerVC.json",
                           "https://w3id.org/security/suites/jws-2020/v1",
                           "https://w3id.org/vc/status-list/2021/v1"
                         ],
                         "issuer": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000",
-                        "credentialStatus": {
+                        "credentialStatus" : {
                           "id": "did:web:6e3e-203-129-213-107.ngrok-free.app:BPNL000000000000#0",
                           "statusPurpose": "revocation",
                           "statusListIndex": "0",
@@ -1821,32 +1825,32 @@
                       }
                     }
                   },
-                  "Verifiable Credentials with invalid signature": {
+                  "Verifiable Credentials with invalid signature" : {
                     "description": "Verifiable Credentials with invalid signature",
-                    "value": {
+                    "value" : {
                       "valid": false,
-                      "vc": {
-                        "@context": [
+                      "vc" : {
+                        "@context" : [
                           "https://www.w3.org/2018/credentials/v1",
                           "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                           "https://w3id.org/security/suites/jws-2020/v1"
                         ],
                         "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                        "type": [
+                        "type" : [
                           "VerifiableCredential",
                           "BpnCredential"
                         ],
                         "issuer": "did:web:localhost:BPNL000000000000",
                         "expirationDate": "2024-12-31T18:30:00Z",
                         "issuanceDate": "2023-07-19T09:11:34Z",
-                        "credentialSubject": [
+                        "credentialSubject" : [
                           {
                             "bpn": "BPNL000000000000",
                             "id": "did:web:localhost:BPNL000000000000",
                             "type": "BpnCredential"
                           }
                         ],
-                        "proof": {
+                        "proof" : {
                           "created": "2023-07-19T09:11:39Z",
                           "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhf",
                           "proofPurpose": "proofPurpose",
@@ -1860,26 +1864,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -1889,32 +1893,32 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/credentials/issuer": {
-      "get": {
-        "tags": [
+    "/api/credentials/issuer" : {
+      "get" : {
+        "tags" : [
           "Verifiable Credential - Issuer"
         ],
         "summary": "Query Verifiable Credentials",
         "description": "Permission: **view_wallets** (The BPN of holderIdentifier must equal BPN of caller)\n\n Search verifiable credentials with filter criteria",
         "operationId": "getCredentials_1",
-        "parameters": [
+        "parameters" : [
           {
             "name": "credentialId",
             "in": "query",
             "description": "Credential Id",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "Credential Id": {
+            "examples" : {
+              "Credential Id" : {
                 "description": "Credential Id",
                 "value": "did:web:localhost:BPNL000000000000#12528899-160a-48bd-ba15-f396c3959ae9"
               }
@@ -1925,15 +1929,15 @@
             "in": "query",
             "description": "Holder identifier(did of BPN)",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "bpn": {
+            "examples" : {
+              "bpn" : {
                 "description": "bpn",
                 "value": "BPNL000000000001"
               },
-              "did": {
+              "did" : {
                 "description": "did",
                 "value": "did:web:localhost:BPNL000000000001"
               }
@@ -1944,19 +1948,19 @@
             "in": "query",
             "description": "Type of VC",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "array",
               "maxItems": 100,
-              "items": {
+              "items" : {
                 "type": "string"
               }
             },
-            "examples": {
-              "SummaryCredential": {
+            "examples" : {
+              "SummaryCredential" : {
                 "description": "SummaryCredential",
                 "value": "SummaryCredential"
               },
-              "BpnCredential": {
+              "BpnCredential" : {
                 "description": "BpnCredential",
                 "value": "BpnCredential"
               }
@@ -1967,7 +1971,7 @@
             "in": "query",
             "description": "Page number, Page number start with zero",
             "required": false,
-            "schema": {
+            "schema" : {
               "maximum": 2147483647,
               "minimum": 0,
               "type": "integer",
@@ -1980,7 +1984,7 @@
             "in": "query",
             "description": "Number of records per page",
             "required": false,
-            "schema": {
+            "schema" : {
               "maximum": 2147483647,
               "minimum": 0,
               "type": "integer",
@@ -1993,24 +1997,24 @@
             "in": "query",
             "description": "Sort column name",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string",
               "default": "createdAt"
             },
-            "examples": {
-              "creation date": {
+            "examples" : {
+              "creation date" : {
                 "description": "creation date",
                 "value": "createdAt"
               },
-              "Holder did": {
+              "Holder did" : {
                 "description": "Holder did",
                 "value": "holderDid"
               },
-              "Credential type": {
+              "Credential type" : {
                 "description": "Credential type",
                 "value": "type"
               },
-              "Credential id": {
+              "Credential id" : {
                 "description": "Credential id",
                 "value": "credentialId"
               }
@@ -2021,16 +2025,16 @@
             "in": "query",
             "description": "Sort order",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "string",
               "default": "desc"
             },
-            "examples": {
-              "Ascending order": {
+            "examples" : {
+              "Ascending order" : {
                 "description": "Ascending order",
                 "value": "asc"
               },
-              "Descending order": {
+              "Descending order" : {
                 "description": "Descending order",
                 "value": "desc"
               }
@@ -2041,54 +2045,54 @@
             "in": "query",
             "description": "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). If set to true, the VC will be generated in JWT formatSetting this parameter to false will result in the VC being created as JSON-LD Defaults to false if not specified.",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             },
-            "examples": {
-              "Create VC as JWT": {
+            "examples" : {
+              "Create VC as JWT" : {
                 "description": "Create VC as JWT",
                 "value": true
               },
-              "Do not create VC as JWT": {
+              "Do not create VC as JWT" : {
                 "description": "Do not create VC as JWT",
                 "value": false
               }
             }
           }
         ],
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Issuer credential list",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Issuer credential list": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Issuer credential list" : {
                     "description": "Issuer credential list",
-                    "value": {
-                      "content": [
+                    "value" : {
+                      "content" : [
                         {
-                          "@context": [
+                          "@context" : [
                             "https://www.w3.org/2018/credentials/v1",
                             "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                             "https://w3id.org/security/suites/jws-2020/v1"
                           ],
                           "id": "did:web:localhost:BPNL000000000000#ae364f71-f054-4d91-b579-f001bcb3e59e",
-                          "type": [
+                          "type" : [
                             "VerifiableCredential",
                             "BpnCredential"
                           ],
                           "issuer": "did:web:localhost:BPNL000000000000",
                           "issuanceDate": "2023-07-19T09:27:42Z",
                           "expirationDate": "2024-12-31T18:30:00Z",
-                          "credentialSubject": [
+                          "credentialSubject" : [
                             {
                               "bpn": "BPNL000000000000",
                               "id": "did:web:localhost:BPNL000000000000",
                               "type": "BpnCredential"
                             }
                           ],
-                          "proof": {
+                          "proof" : {
                             "created": "2023-07-19T09:27:44Z",
                             "jws": "eyJhbGciOiJFZERTQSJ9..evDHQfW4EzJUt2HnS_WlmO8FFtywTGnwyywtCE7WP41my4Iscpqr4tbuVOqnZg85b4U8L3_ut8_pEONIhbExCQ",
                             "proofPurpose": "proofPurpose",
@@ -2097,11 +2101,11 @@
                           }
                         },
                         {
-                          "type": [
+                          "type" : [
                             "VerifiableCredential",
                             "SummaryCredential"
                           ],
-                          "@context": [
+                          "@context" : [
                             "https://www.w3.org/2018/credentials/v1",
                             "https://catenax-ng.github.io/product-core-schemas/SummaryVC.json",
                             "https://w3id.org/security/suites/jws-2020/v1"
@@ -2109,18 +2113,18 @@
                           "issuer": "did:web:localhost:BPNL000000000000",
                           "issuanceDate": "2023-07-19T09:11:39Z",
                           "expirationDate": "2024-12-31T18:30:00Z",
-                          "credentialSubject": [
+                          "credentialSubject" : [
                             {
                               "contractTemplate": "https://public.catena-x.org/contracts/",
                               "holderIdentifier": "BPNL000000000000",
                               "id": "did:web:localhost:BPNL000000000000",
-                              "items": [
+                              "items" : [
                                 "BpnCredential"
                               ],
                               "type": "SummaryCredential"
                             }
                           ],
-                          "proof": {
+                          "proof" : {
                             "created": "2023-07-19T09:11:41Z",
                             "jws": "eyJhbGciOiJFZERTQSJ9..YvoFhDip3TQAfZUIu0yc843oA4uGTg049dMFt_GoaMmPjiNB_B1EFOL-gDpwjIxTYNlGOO_CLp9qStbzlDTNBg",
                             "proofPurpose": "proofPurpose",
@@ -2129,27 +2133,27 @@
                           }
                         },
                         {
-                          "@context": [
+                          "@context" : [
                             "https://www.w3.org/2018/credentials/v1",
                             "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                             "https://w3id.org/security/suites/jws-2020/v1"
                           ],
                           "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                          "type": [
+                          "type" : [
                             "VerifiableCredential",
                             "BpnCredential"
                           ],
                           "issuer": "did:web:localhost:BPNL000000000000",
                           "issuanceDate": "2023-07-19T09:11:34Z",
                           "expirationDate": "2024-12-31T18:30:00Z",
-                          "credentialSubject": [
+                          "credentialSubject" : [
                             {
                               "bpn": "BPNL000000000000",
                               "id": "did:web:localhost:BPNL000000000000",
                               "type": "BpnCredential"
                             }
                           ],
-                          "proof": {
+                          "proof" : {
                             "created": "2023-07-19T09:11:39Z",
                             "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                             "proofPurpose": "proofPurpose",
@@ -2158,8 +2162,8 @@
                           }
                         }
                       ],
-                      "pageable": {
-                        "sort": {
+                      "pageable" : {
+                        "sort" : {
                           "empty": false,
                           "unsorted": false,
                           "sorted": true
@@ -2176,7 +2180,7 @@
                       "first": true,
                       "size": 2147483647,
                       "number": 0,
-                      "sort": {
+                      "sort" : {
                         "empty": false,
                         "unsorted": false,
                         "sorted": true
@@ -2189,22 +2193,22 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "title",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {}
+                        "errors" : {}
                       }
                     }
                   }
@@ -2212,26 +2216,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -2241,30 +2245,30 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       },
-      "post": {
-        "tags": [
+      "post" : {
+        "tags" : [
           "Verifiable Credential - Issuer"
         ],
         "summary": "Issue Verifiable Credential",
         "description": "Permission: **update_wallets** (The BPN of the base wallet must equal BPN of caller)\nIssue a verifiable credential with a given issuer DID",
         "operationId": "issueCredentialUsingBaseWallet",
-        "parameters": [
+        "parameters" : [
           {
             "name": "holderDid",
             "in": "query",
             "description": "Holder DID",
             "required": true,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "did": {
+            "examples" : {
+              "did" : {
                 "description": "did",
                 "value": "did:web:localhost:BPNL000000000000"
               }
@@ -2275,46 +2279,46 @@
             "in": "query",
             "description": "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). If set to true, the VC will be generated in JWT formatSetting this parameter to false will result in the VC being created as JSON-LD Defaults to false if not specified.",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             },
-            "examples": {
-              "Create VC as JWT": {
+            "examples" : {
+              "Create VC as JWT" : {
                 "description": "Create VC as JWT",
                 "value": true
               },
-              "Do not create VC as JWT": {
+              "Do not create VC as JWT" : {
                 "description": "Do not create VC as JWT",
                 "value": false
               }
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
                 "type": "object",
-                "additionalProperties": {
+                "additionalProperties" : {
                   "type": "object"
                 }
               },
-              "example": {
-                "@context": [
+              "example" : {
+                "@context" : [
                   "https://www.w3.org/2018/credentials/v1",
                   "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                   "https://w3id.org/security/suites/jws-2020/v1"
                 ],
                 "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                "type": [
+                "type" : [
                   "VerifiableCredential",
                   "BpnCredential"
                 ],
                 "issuer": "did:web:localhost:BPNL000000000000",
                 "issuanceDate": "2023-07-19T09:11:34Z",
                 "expirationDate": "2024-12-31T18:30:00Z",
-                "credentialSubject": [
+                "credentialSubject" : [
                   {
                     "bpn": "BPNL000000000000",
                     "id": "did:web:localhost:BPNL000000000000",
@@ -2326,36 +2330,36 @@
           },
           "required": true
         },
-        "responses": {
-          "201": {
+        "responses" : {
+          "201" : {
             "description": "Issuer credential",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Issuer credential": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Issuer credential" : {
                     "description": "Issuer credential",
-                    "value": {
-                      "@context": [
+                    "value" : {
+                      "@context" : [
                         "https://www.w3.org/2018/credentials/v1",
                         "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                         "https://w3id.org/security/suites/jws-2020/v1"
                       ],
                       "id": "did:web:localhost:BPNL000000000000#ff084e7a-1b46-4a2f-a78d-3d701a0bd6e4",
-                      "type": [
+                      "type" : [
                         "VerifiableCredential",
                         "BpnCredential"
                       ],
                       "issuer": "did:web:localhost:BPNL000000000000",
                       "issuanceDate": "2023-07-19T12:18:30Z",
                       "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
+                      "credentialSubject" : [
                         {
                           "bpn": "BPNL000000000000",
                           "id": "did:web:localhost:BPNL000000000000",
                           "type": "BpnCredential"
                         }
                       ],
-                      "proof": {
+                      "proof" : {
                         "proofPurpose": "proofPurpose",
                         "type": "JsonWebSignature2020",
                         "verificationMethod": "did:web:localhost:BPNL000000000000#",
@@ -2368,22 +2372,23 @@
               }
             }
           },
-          "400": {
+          "400" :
+          {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Invalid data provided",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {
+                        "errors" : {
                           "filed": "filed error message"
                         }
                       }
@@ -2393,26 +2398,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with provided identifier",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided identifier": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with provided identifier" : {
                     "description": "Wallet not found with provided identifier",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 404,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -2421,20 +2426,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -2444,847 +2449,57 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/credentials/issuer/membership": {
-      "post": {
-        "tags": [
-          "Verifiable Credential - Issuer"
-        ],
-        "summary": "Issue a Membership Verifiable Credential with base wallet issuer",
-        "description": "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet",
-        "operationId": "issueMembershipCredential",
-        "parameters": [
-          {
-            "name": "asJwt",
-            "in": "query",
-            "description": "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). If set to true, the VC will be generated in JWT formatSetting this parameter to false will result in the VC being created as JSON-LD Defaults to false if not specified.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            },
-            "examples": {
-              "Create VC as JWT": {
-                "description": "Create VC as JWT",
-                "value": true
-              },
-              "Do not create VC as JWT": {
-                "description": "Do not create VC as JWT",
-                "value": false
-              }
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IssueMembershipCredentialRequest"
-              },
-              "example": {
-                "bpn": "BPNL000000000000"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Issuer credential",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Membership credential": {
-                    "description": "Membership credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#0d6b6447-99de-4bc5-94f3-3ac0ae8ee188",
-                      "type": [
-                        "VerifiableCredential",
-                        "MembershipCredential"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:13:53Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "startTime": "2023-07-19T13:13:53.581081Z",
-                          "memberOf": "Catena-X",
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "type": "MembershipCredential",
-                          "status": "Active"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "type": "JsonWebSignature2020",
-                        "created": "2023-07-19T13:13:57Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..zt7SyONY1shO7N6KrabQJr9uNrToM1Bc4eagTQc1LxAfZ1v-SSp9Y-2cpZNDV8AR08r4L8VbtWrR9t2dNoAfDw"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
-                    "description": "Response in case of invalid data provided",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Invalid data provided",
-                      "status": 400,
-                      "detail": "details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689760833962,
-                        "errors": {
-                          "filed": "filed error message"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "The request could not be completed due to a failed authorization."
-          },
-          "403": {
-            "description": "The request could not be completed due to a forbidden access"
-          },
-          "404": {
-            "description": "Wallet not found with provided identifier",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided identifier": {
-                    "description": "Wallet not found with provided identifier",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Error Title",
-                      "status": 404,
-                      "detail": "Error Details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689762476720
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "The request could not be completed due to a conflict.",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "MembershipCredential already exist": {
-                    "description": "MembershipCredential already exist",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Credential of type MembershipCredential is already exists ",
-                      "status": 409,
-                      "detail": "Credential of type MembershipCredential is already exists ",
-                      "instance": "/api/credentials/issuer/membership",
-                      "properties": {
-                        "timestamp": 1689772483831
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
-                    "description": "Internal server error",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Error Title",
-                      "status": 500,
-                      "detail": "Error Details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689762476720
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Authenticate using access_token": []
-          }
-        ]
-      }
-    },
-    "/api/credentials/issuer/framework": {
-      "post": {
-        "tags": [
-          "Verifiable Credential - Issuer"
-        ],
-        "summary": "Issue a Use Case Verifiable Credential with base wallet issuer",
-        "description": "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet",
-        "operationId": "issueFrameworkCredential",
-        "parameters": [
-          {
-            "name": "asJwt",
-            "in": "query",
-            "description": "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). If set to true, the VC will be generated in JWT formatSetting this parameter to false will result in the VC being created as JSON-LD Defaults to false if not specified.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            },
-            "examples": {
-              "Create VC as JWT": {
-                "description": "Create VC as JWT",
-                "value": true
-              },
-              "Do not create VC as JWT": {
-                "description": "Do not create VC as JWT",
-                "value": false
-              }
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IssueFrameworkCredentialRequest"
-              },
-              "examples": {
-                "BehaviorTwinCredential": {
-                  "description": "BehaviorTwinCredential",
-                  "value": {
-                    "holderIdentifier": "BPNL000000000000",
-                    "type": "BehaviorTwinCredential",
-                    "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                    "contract-version": "1.0.0"
-                  }
-                },
-                "PcfCredential": {
-                  "description": "PcfCredential",
-                  "value": {
-                    "holderIdentifier": "BPNL000000000000",
-                    "type": "PcfCredential",
-                    "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                    "contract-version": "1.0.0"
-                  }
-                },
-                "SustainabilityCredential": {
-                  "description": "SustainabilityCredential",
-                  "value": {
-                    "holderIdentifier": "BPNL000000000000",
-                    "type": "SustainabilityCredential",
-                    "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                    "contract-version": "1.0.0"
-                  }
-                },
-                "QualityCredential": {
-                  "description": "QualityCredential",
-                  "value": {
-                    "holderIdentifier": "BPNL000000000000",
-                    "type": "QualityCredential",
-                    "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                    "contract-version": "1.0.0"
-                  }
-                },
-                "TraceabilityCredential": {
-                  "description": "TraceabilityCredential",
-                  "value": {
-                    "holderIdentifier": "BPNL000000000000",
-                    "type": "TraceabilityCredential",
-                    "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                    "contract-version": "1.0.0"
-                  }
-                },
-                "ResiliencyCredential": {
-                  "description": "ResiliencyCredential",
-                  "value": {
-                    "holderIdentifier": "BPNL000000000000",
-                    "type": "ResiliencyCredential",
-                    "contract-template": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                    "contract-version": "1.0.0"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Framework credential",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "BehaviorTwin credential": {
-                    "description": "BehaviorTwin credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
-                      "type": [
-                        "VerifiableCredential",
-                        "UseCaseFrameworkCondition"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:49:58Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "type": "BehaviorTwinCredential",
-                          "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                          "contractVersion": "1.0.0"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "type": "JsonWebSignature2020",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "created": "2023-07-19T13:50:02Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
-                      }
-                    }
-                  },
-                  "Pcf Credential": {
-                    "description": "Pcf Credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
-                      "type": [
-                        "VerifiableCredential",
-                        "UseCaseFrameworkCondition"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:49:58Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "type": "PcfCredential",
-                          "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                          "contractVersion": "1.0.0"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "type": "JsonWebSignature2020",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "created": "2023-07-19T13:50:02Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
-                      }
-                    }
-                  },
-                  "Sustainability Credential": {
-                    "description": "Sustainability Credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
-                      "type": [
-                        "VerifiableCredential",
-                        "UseCaseFrameworkCondition"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:49:58Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "type": "SustainabilityCredential",
-                          "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                          "contractVersion": "1.0.0"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "type": "JsonWebSignature2020",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "created": "2023-07-19T13:50:02Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
-                      }
-                    }
-                  },
-                  "Quality Credential": {
-                    "description": "Quality Credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
-                      "type": [
-                        "VerifiableCredential",
-                        "UseCaseFrameworkCondition"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:49:58Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "type": "QualityCredential",
-                          "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                          "contractVersion": "1.0.0"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "type": "JsonWebSignature2020",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "created": "2023-07-19T13:50:02Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
-                      }
-                    }
-                  },
-                  "Traceability Credential": {
-                    "description": "Traceability Credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
-                      "type": [
-                        "VerifiableCredential",
-                        "UseCaseFrameworkCondition"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:49:58Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "type": "TraceabilityCredential",
-                          "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                          "contractVersion": "1.0.0"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "type": "JsonWebSignature2020",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "created": "2023-07-19T13:50:02Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
-                      }
-                    }
-                  },
-                  "Resiliency Credential": {
-                    "description": "Resiliency Credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#46a8c5e6-b195-4ec9-85cd-665c57d296ab",
-                      "type": [
-                        "VerifiableCredential",
-                        "UseCaseFrameworkCondition"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:49:58Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "type": "ResiliencyCredential",
-                          "contractTemplate": "https://public.catena-x.org/contracts/traceabilty.v1.pdf",
-                          "contractVersion": "1.0.0"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "type": "JsonWebSignature2020",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "created": "2023-07-19T13:50:02Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..IkfgC6Gn9sOT1uu1zMiDIIqw6pV4Z8axkKvphegsCVWT9uo0HZp4J9L1ILxR-huINGR5QlGIKiVuLGB5kKDOAQ"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
-                    "description": "Response in case of invalid data provided",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Invalid data provided",
-                      "status": 400,
-                      "detail": "details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689760833962,
-                        "errors": {
-                          "filed": "filed error message"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "The request could not be completed due to a failed authorization."
-          },
-          "403": {
-            "description": "The request could not be completed due to a forbidden access"
-          },
-          "404": {
-            "description": "Wallet not found with provided identifier",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided identifier": {
-                    "description": "Wallet not found with provided identifier",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Error Title",
-                      "status": 404,
-                      "detail": "Error Details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689762476720
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
-                    "description": "Internal server error",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Error Title",
-                      "status": 500,
-                      "detail": "Error Details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689762476720
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Authenticate using access_token": []
-          }
-        ]
-      }
-    },
-    "/api/credentials/issuer/dismantler": {
-      "post": {
-        "tags": [
-          "Verifiable Credential - Issuer"
-        ],
-        "summary": "Issue a Dismantler Verifiable Credential with base wallet issuer",
-        "description": "Permission: **update_wallets** (The BPN of base wallet must equal BPN of caller)\n\n Issue a verifiable credential by base wallet",
-        "operationId": "issueDismantlerCredential",
-        "parameters": [
-          {
-            "name": "asJwt",
-            "in": "query",
-            "description": "Specifies whether the VC (Verifiable Credential) should be created as a JWT (JSON Web Token). If set to true, the VC will be generated in JWT formatSetting this parameter to false will result in the VC being created as JSON-LD Defaults to false if not specified.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            },
-            "examples": {
-              "Create VC as JWT": {
-                "description": "Create VC as JWT",
-                "value": true
-              },
-              "Do not create VC as JWT": {
-                "description": "Do not create VC as JWT",
-                "value": false
-              }
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IssueDismantlerCredentialRequest"
-              },
-              "example": {
-                "bpn": "BPNL000000000000",
-                "activityType": "vehicleDismantle",
-                "allowedVehicleBrands": [
-                  "Audi",
-                  "Abarth",
-                  "Alfa Romeo",
-                  "Chrysler"
-                ]
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Dismantler Credential",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Dismantler Credential": {
-                    "description": "Dismantler Credential",
-                    "value": {
-                      "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
-                        "https://w3id.org/security/suites/jws-2020/v1"
-                      ],
-                      "id": "did:web:localhost:BPNL000000000000#5caac86c-8ef8-4aab-9d2b-fb18c62560a9",
-                      "type": [
-                        "VerifiableCredential",
-                        "DismantlerCredential"
-                      ],
-                      "issuer": "did:web:localhost:BPNL000000000000",
-                      "issuanceDate": "2023-07-19T13:35:33Z",
-                      "expirationDate": "2024-12-31T18:30:00Z",
-                      "credentialSubject": [
-                        {
-                          "holderIdentifier": "BPNL000000000000",
-                          "allowedVehicleBrands": [
-                            "Audi",
-                            "Abarth",
-                            "Alfa Romeo",
-                            "Chrysler"
-                          ],
-                          "id": "did:web:localhost:BPNL000000000000",
-                          "activityType": "vehicleDismantle",
-                          "type": "DismantlerCredential"
-                        }
-                      ],
-                      "proof": {
-                        "proofPurpose": "proofPurpose",
-                        "verificationMethod": "did:web:localhost:BPNL000000000000#",
-                        "type": "JsonWebSignature2020",
-                        "created": "2023-07-19T13:35:38Z",
-                        "jws": "eyJhbGciOiJFZERTQSJ9..UI82uq6iyqoaKjZIhJiV24v_Bqnj_7EqWiqZ3VWjqkoHLnr7JDtW5KVywWPl27j_baLBxxnM5jqjQdSK4rfbBg"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
-                    "description": "Response in case of invalid data provided",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Invalid data provided",
-                      "status": 400,
-                      "detail": "details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689760833962,
-                        "errors": {
-                          "filed": "filed error message"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "The request could not be completed due to a failed authorization."
-          },
-          "403": {
-            "description": "The request could not be completed due to a forbidden access"
-          },
-          "404": {
-            "description": "Wallet not found with provided identifier",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided identifier": {
-                    "description": "Wallet not found with provided identifier",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Error Title",
-                      "status": 404,
-                      "detail": "Error Details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689762476720
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "The request could not be completed due to a conflict.",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "DismantlerCredential already exist": {
-                    "description": "DismantlerCredential already exist",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Credential of type DismantlerCredential is already exists ",
-                      "status": 409,
-                      "detail": "Credential of type DismantlerCredential is already exists ",
-                      "instance": "/api/credentials/issuer/dismantler",
-                      "properties": {
-                        "timestamp": 1689773804746
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
-                    "description": "Internal server error",
-                    "value": {
-                      "type": "about:blank",
-                      "title": "Error Title",
-                      "status": 500,
-                      "detail": "Error Details",
-                      "instance": "API endpoint",
-                      "properties": {
-                        "timestamp": 1689762476720
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Authenticate using access_token": []
-          }
-        ]
-      }
-    },
-    "/{bpn}/did.json": {
-      "get": {
-        "tags": [
+    "/{bpn}/did.json" : {
+      "get" : {
+        "tags" : [
           "DIDDocument"
         ],
         "summary": "Resolve DID Document",
         "description": "Resolve the DID document for a given BPN",
         "operationId": "getDidResolve",
-        "parameters": [
+        "parameters" : [
           {
             "name": "bpn",
             "in": "path",
             "description": "BPN",
             "required": true,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "bpn": {
+            "examples" : {
+              "bpn" : {
                 "description": "bpn",
                 "value": "BPNL000000000000"
               }
             }
           }
         ],
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "DID document",
-            "content": {
-              "application/json": {
-                "examples": {
-                  " DID document": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  " DID document" : {
                     "description": " DID document",
-                    "value": {
-                      "@context": [
+                    "value" : {
+                      "@context" : [
                         "https://www.w3.org/ns/did/v1",
                         "https://w3c.github.io/vc-jws-2020/contexts/v1"
                       ],
                       "id": "did:web:localhost:BPNL000000000000",
-                      "verificationMethod": [
+                      "verificationMethod" : [
                         {
                           "controller": "did:web:localhost:BPNL000000000000",
                           "id": "did:web:localhost:BPNL000000000000",
-                          "publicKeyJwk": {
+                          "publicKeyJwk" : {
                             "crv": "Ed25519",
                             "kty": "OKP",
                             "x": "wAOQvr92L1m7RwrpeOrgWByVYvWmhRr4fJbiMwHEIdY"
@@ -3298,20 +2513,20 @@
               }
             }
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with provided bpn",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided bpn": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with provided bpn" : {
                     "description": "Wallet not found with provided bpn",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Wallet not found for identifier BPNL00000000000",
                       "status": 404,
                       "detail": "Wallet not found for identifier BPNL00000000000",
                       "instance": "/BPNL00000000000/did.json",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689767698010
                       }
                     }
@@ -3320,20 +2535,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -3343,36 +2558,36 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/wallets/{identifier}": {
-      "get": {
-        "tags": [
+    "/api/wallets/{identifier}" : {
+      "get" : {
+        "tags" : [
           "Wallets"
         ],
         "summary": "Retrieve wallet by BPN",
         "description": "Permission: **view_wallets** OR **view_wallet** (The BPN of Wallet to retrieve must equal the BPN of caller or Base wallet, authority wallet can see all wallets) \n\n Retrieve single wallet by identifier, with or without its credentials",
         "operationId": "getWalletByIdentifier",
-        "parameters": [
+        "parameters" : [
           {
             "name": "identifier",
             "in": "path",
             "description": "Did or BPN",
             "required": true,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "bpn": {
+            "examples" : {
+              "bpn" : {
                 "description": "bpn",
                 "value": "BPNL000000000000"
               },
-              "did": {
+              "did" : {
                 "description": "did",
                 "value": "did:web:localhost:BPNL000000000000"
               }
@@ -3382,36 +2597,36 @@
             "name": "withCredentials",
             "in": "query",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             }
           }
         ],
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Wallet Details",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet details without with credentials false": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet details without with credentials false" : {
                     "description": "Wallet details without with credentials false",
-                    "value": {
+                    "value" : {
                       "name": "companyA",
                       "did": "did:web:localhost:BPNL000000000001",
                       "bpn": "BPNL000000000001",
                       "algorithm": "ED25519",
-                      "didDocument": {
-                        "@context": [
+                      "didDocument" : {
+                        "@context" : [
                           "https://www.w3.org/ns/did/v1",
                           "https://w3c.github.io/vc-jws-2020/contexts/v1"
                         ],
                         "id": "did:web:localhost:BPNL000000000001",
-                        "verificationMethod": [
+                        "verificationMethod" : [
                           {
                             "controller": "did:web:localhost:BPNL000000000001",
                             "id": "did:web:localhost:BPNL000000000001#",
-                            "publicKeyJwk": {
+                            "publicKeyJwk" : {
                               "crv": "Ed25519",
                               "kty": "OKP",
                               "x": "mhph0ZSVk7cDVmazbaaC3jBDpphW4eNygAK9gHPlMow"
@@ -3422,24 +2637,24 @@
                       }
                     }
                   },
-                  "Wallet details without with credentials true": {
+                  "Wallet details without with credentials true" : {
                     "description": "Wallet details without with credentials true",
-                    "value": {
+                    "value" : {
                       "name": "companyA",
                       "did": "did:web:localhost:BPNL000000000001",
                       "bpn": "BPNL000000000001",
                       "algorithm": "ED25519",
-                      "didDocument": {
-                        "@context": [
+                      "didDocument" : {
+                        "@context" : [
                           "https://www.w3.org/ns/did/v1",
                           "https://w3c.github.io/vc-jws-2020/contexts/v1"
                         ],
                         "id": "did:web:localhost:BPNL000000000001",
-                        "verificationMethod": [
+                        "verificationMethod" : [
                           {
                             "controller": "did:web:localhost:BPNL000000000001",
                             "id": "did:web:localhost:BPNL000000000001#",
-                            "publicKeyJwk": {
+                            "publicKeyJwk" : {
                               "crv": "Ed25519",
                               "kty": "OKP",
                               "x": "mhph0ZSVk7cDVmazbaaC3jBDpphW4eNygAK9gHPlMow"
@@ -3448,29 +2663,29 @@
                           }
                         ]
                       },
-                      "verifiableCredentials": [
+                      "verifiableCredentials" : [
                         {
-                          "@context": [
+                          "@context" : [
                             "https://www.w3.org/2018/credentials/v1",
                             "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                             "https://w3id.org/security/suites/jws-2020/v1"
                           ],
                           "id": "did:web:localhost:BPNL000000000000#a1f8ae36-9919-4ed8-8546-535280acc5bf",
-                          "type": [
+                          "type" : [
                             "VerifiableCredential",
                             "BpnCredential"
                           ],
                           "issuer": "did:web:localhost:BPNL000000000000",
                           "issuanceDate": "2023-07-19T09:14:45Z",
                           "expirationDate": "2023-09-30T18:30:00Z",
-                          "credentialSubject": [
+                          "credentialSubject" : [
                             {
                               "bpn": "BPNL000000000001",
                               "id": "did:web:localhost:BPNL000000000001",
                               "type": "BpnCredential"
                             }
                           ],
-                          "proof": {
+                          "proof" : {
                             "created": "2023-07-19T09:14:47Z",
                             "jws": "eyJhbGciOiJFZERTQSJ9..O69dLGMDVgZQJ7chFx3aUbkJFvibH8WWunw634rIDC77_pdiUHvQpQ0hq15_7OgFMy3dp-9H-pNgxTZ-i4UXCw",
                             "proofPurpose": "proofPurpose",
@@ -3485,22 +2700,22 @@
               }
             }
           },
-          "400": {
+          "400" : {
             "description": "The input does not comply to the syntax requirements",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Response in case of invalid data provided": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Response in case of invalid data provided" : {
                     "description": "Response in case of invalid data provided",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "title",
                       "status": 400,
                       "detail": "details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689760833962,
-                        "errors": {}
+                        "errors" : {}
                       }
                     }
                   }
@@ -3508,26 +2723,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden access"
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with provided identifier",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided identifier": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with provided identifier" : {
                     "description": "Wallet not found with provided identifier",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                       "status": 404,
                       "detail": "Wallet not found for identifier did:web:localhost:BPNL0000000501",
                       "instance": "/api/wallets/did%3Aweb%3Alocalhost%3ABPNL0000000501",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689764377224
                       }
                     }
@@ -3536,20 +2751,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -3559,72 +2774,72 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     },
-    "/api/presentations/iatp": {
-      "get": {
-        "tags": [
+    "/api/presentations/iatp" : {
+      "get" : {
+        "tags" : [
           "Verifiable Presentations - Generation"
         ],
         "summary": "Create Verifiable Presentation",
         "description": "Create a verifiable presentation for the verifiable credential types listed in STS token",
         "operationId": "createPresentation_1",
-        "parameters": [
+        "parameters" : [
           {
             "name": "asJwt",
             "in": "query",
             "required": false,
-            "schema": {
+            "schema" : {
               "type": "boolean",
               "default": false
             }
           }
         ],
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "Verifiable Presentation",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "VP as Json-LD": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "VP as Json-LD" : {
                     "description": "VP as Json-LD",
-                    "value": {
-                      "vp": {
-                        "@context": [
+                    "value" : {
+                      "vp" : {
+                        "@context" : [
                           "https://www.w3.org/2018/credentials/v1"
                         ],
                         "id": "did:web:localhost:BPNL000000000000#b2e69e47-95f3-48ff-af30-eaaab36431d5",
-                        "type": [
+                        "type" : [
                           "VerifiablePresentation"
                         ],
-                        "verifiableCredential": [
+                        "verifiableCredential" : [
                           {
                             "id": "did:web:localhost:BPNL000000000000#f73e3631-ba87-4a03-bea3-b28700056879",
-                            "@context": [
+                            "@context" : [
                               "https://www.w3.org/2018/credentials/v1",
                               "https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json",
                               "https://w3id.org/security/suites/jws-2020/v1"
                             ],
-                            "type": [
+                            "type" : [
                               "VerifiableCredential",
                               "BpnCredential"
                             ],
                             "issuer": "did:web:localhost:BPNL000000000000",
                             "expirationDate": "2024-12-31T18:30:00Z",
                             "issuanceDate": "2023-07-19T09:11:34Z",
-                            "credentialSubject": [
+                            "credentialSubject" : [
                               {
                                 "bpn": "BPNL000000000000",
                                 "id": "did:web:localhost:BPNL000000000000",
                                 "type": "BpnCredential"
                               }
                             ],
-                            "proof": {
+                            "proof" : {
                               "created": "2023-07-19T09:11:39Z",
                               "jws": "eyJhbGciOiJFZERTQSJ9..fdn2qU85auOltdHDLdHI7sJVV1ZPdftpiXd_ndXN0dFgSDWiIrScdD03wtvKLq_H-shQWfh2RYeMmrlEzAhfDw",
                               "proofPurpose": "proofPurpose",
@@ -3636,9 +2851,9 @@
                       }
                     }
                   },
-                  "VP as JWT": {
+                  "VP as JWT" : {
                     "description": "VP as JWT",
-                    "value": {
+                    "value" : {
                       "vp": "eyJraWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidHlwIjoiSldUIiwiYWxnIjoiRWREU0EifQ.eyJzdWIiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwiYXVkIjoic21hcnQiLCJpc3MiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIiwidnAiOnsiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwIzM4ZTU2ZTg1LTNkODQtNGEyNS1iZjg1LWFiMjRlYzY4MmMwOSIsInR5cGUiOlsiVmVyaWZpYWJsZVByZXNlbnRhdGlvbiJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ2ZXJpZmlhYmxlQ3JlZGVudGlhbCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vY2F0ZW5heC1uZy5naXRodWIuaW8vcHJvZHVjdC1jb3JlLXNjaGVtYXMvYnVzaW5lc3NQYXJ0bmVyRGF0YS5qc29uIiwiaHR0cHM6Ly93M2lkLm9yZy9zZWN1cml0eS9zdWl0ZXMvandzLTIwMjAvdjEiXSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkJwbkNyZWRlbnRpYWwiXSwiaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdDpCUE5MMDAwMDAwMDAwMDAwI2Y3M2UzNjMxLWJhODctNGEwMy1iZWEzLWIyODcwMDA1Njg3OSIsImlzc3VlciI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJpc3N1YW5jZURhdGUiOiIyMDIzLTA3LTE5VDA5OjExOjM0WiIsImV4cGlyYXRpb25EYXRlIjoiMjAyNC0xMi0zMVQxODozMDowMFoiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDp3ZWI6bG9jYWxob3N0OkJQTkwwMDAwMDAwMDAwMDAiLCJicG4iOiJCUE5MMDAwMDAwMDAwMDAwIiwidHlwZSI6IkJwbkNyZWRlbnRpYWwifSwicHJvb2YiOnsicHJvb2ZQdXJwb3NlIjoicHJvb2ZQdXJwb3NlIiwidHlwZSI6Ikpzb25XZWJTaWduYXR1cmUyMDIwIiwidmVyaWZpY2F0aW9uTWV0aG9kIjoiZGlkOndlYjpsb2NhbGhvc3Q6QlBOTDAwMDAwMDAwMDAwMCMiLCJjcmVhdGVkIjoiMjAyMy0wNy0xOVQwOToxMTozOVoiLCJqd3MiOiJleUpoYkdjaU9pSkZaRVJUUVNKOS4uZmRuMnFVODVhdU9sdGRIRExkSEk3c0pWVjFaUGRmdHBpWGRfbmRYTjBkRmdTRFdpSXJTY2REMDN3dHZLTHFfSC1zaFFXZmgyUlllTW1ybEV6QWhmRHcifX19LCJleHAiOjE2ODk4MzQ4MDUsImp0aSI6ImIwODYzOWZiLWQ5MWEtNGUwZS1iNmY4LTYzYjdhMzQ1ZTRhZiJ9.80x0AB-OauefdeZfx1cwhitdVKRvCRFeFzYwU73DL7y4w34vu6BdfHWLBGjkwELxkQEoFfiTPOqtuyqhtsyDBg"
                     }
                   }
@@ -3646,26 +2861,26 @@
               }
             }
           },
-          "401": {
+          "401" : {
             "description": "The request could not be completed due to a failed authorization."
           },
-          "403": {
+          "403" : {
             "description": "The request could not be completed due to a forbidden scope value"
           },
-          "404": {
+          "404" : {
             "description": "One or more of the requested verifiable credential types were not found",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "One or more of the requested verifiable credential types were not found": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "One or more of the requested verifiable credential types were not found" : {
                     "description": "One or more of the requested verifiable credential types were not found",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 404,
                       "detail": "Verifiable credential types that were not found",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -3674,20 +2889,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -3697,61 +2912,61 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "sts_token": []
+            "sts_token" : []
           }
         ]
       }
     },
-    "/api/didDocuments/{identifier}": {
-      "get": {
-        "tags": [
+    "/api/didDocuments/{identifier}" : {
+      "get" : {
+        "tags" : [
           "DIDDocument"
         ],
         "summary": "Resolve DID Document",
         "description": "Resolve the DID document for a given DID or BPN",
         "operationId": "getDidDocument",
-        "parameters": [
+        "parameters" : [
           {
             "name": "identifier",
             "in": "path",
             "description": "Did or BPN",
             "required": true,
-            "schema": {
+            "schema" : {
               "type": "string"
             },
-            "examples": {
-              "bpn": {
+            "examples" : {
+              "bpn" : {
                 "description": "bpn",
                 "value": "BPNL000000000000"
               },
-              "did": {
+              "did" : {
                 "description": "did",
                 "value": "did:web:localhost:BPNL000000000000"
               }
             }
           }
         ],
-        "responses": {
-          "200": {
+        "responses" : {
+          "200" : {
             "description": "DID document",
-            "content": {
-              "application/json": {
-                "examples": {
-                  " DID document": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  " DID document" : {
                     "description": " DID document",
-                    "value": {
-                      "@context": [
+                    "value" : {
+                      "@context" : [
                         "https://www.w3.org/ns/did/v1",
                         "https://w3c.github.io/vc-jws-2020/contexts/v1"
                       ],
                       "id": "did:web:localhost:BPNL000000000000",
-                      "verificationMethod": [
+                      "verificationMethod" : [
                         {
                           "controller": "did:web:localhost:BPNL000000000000",
                           "id": "did:web:localhost:BPNL000000000000",
-                          "publicKeyJwk": {
+                          "publicKeyJwk" : {
                             "crv": "Ed25519",
                             "kty": "OKP",
                             "x": "wAOQvr92L1m7RwrpeOrgWByVYvWmhRr4fJbiMwHEIdY"
@@ -3765,20 +2980,20 @@
               }
             }
           },
-          "404": {
+          "404" : {
             "description": "Wallet not found with provided bpn",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Wallet not found with provided bpn": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Wallet not found with provided bpn" : {
                     "description": "Wallet not found with provided bpn",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Wallet not found for identifier BPNL00000000000",
                       "status": 404,
                       "detail": "Wallet not found for identifier BPNL00000000000",
                       "instance": "/BPNL00000000000/did.json",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689767698010
                       }
                     }
@@ -3787,20 +3002,20 @@
               }
             }
           },
-          "500": {
+          "500" : {
             "description": "Any other internal server error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "Internal server error": {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "Internal server error" : {
                     "description": "Internal server error",
-                    "value": {
+                    "value" : {
                       "type": "about:blank",
                       "title": "Error Title",
                       "status": 500,
                       "detail": "Error Details",
                       "instance": "API endpoint",
-                      "properties": {
+                      "properties" : {
                         "timestamp": 1689762476720
                       }
                     }
@@ -3810,160 +3025,97 @@
             }
           }
         },
-        "security": [
+        "security" : [
           {
-            "Authenticate using access_token": []
+            "Authenticate using access_token" : []
           }
         ]
       }
     }
   },
-  "components": {
-    "schemas": {
-      "CreateWalletRequest": {
-        "required": [
+  "components" : {
+    "schemas" : {
+      "CreateWalletRequest" : {
+        "required" : [
           "businessPartnerNumber",
           "companyName",
           "didUrl"
         ],
         "type": "object",
-        "properties": {
-          "businessPartnerNumber": {
+        "properties" : {
+          "businessPartnerNumber" : {
             "pattern": "^(BPN)(L|S|A)[0-9A-Z]{12}",
             "type": "string"
           },
-          "companyName": {
+          "companyName" : {
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
           },
-          "didUrl": {
+          "didUrl" : {
             "maxLength": 2000,
             "minLength": 1,
             "type": "string"
           }
         }
       },
-      "SecureTokenRequest": {
+      "SecureTokenRequest" : {
         "type": "object",
-        "properties": {
-          "audience": {
+        "properties" : {
+          "audience" : {
             "type": "string"
           },
-          "client_id": {
+          "client_id" : {
             "type": "string"
           },
-          "client_secret": {
+          "client_secret" : {
             "type": "string"
           },
-          "grant_type": {
+          "grant_type" : {
             "type": "string"
           },
-          "access_token": {
+          "access_token" : {
             "type": "string"
           },
-          "bearer_access_alias": {
+          "bearer_access_alias" : {
             "type": "string"
           },
-          "bearer_access_scope": {
+          "bearer_access_scope" : {
             "type": "string"
           }
         }
       },
-      "CredentialVerificationRequest": {
+      "CredentialVerificationRequest" : {
         "type": "object",
-        "properties": {
-          "jwt": {
+        "properties" : {
+          "jwt" : {
             "type": "string",
             "writeOnly": true
           },
-          "vc": {
+          "vc" : {
             "type": "object",
-            "additionalProperties": {
+            "additionalProperties" : {
               "type": "object"
             },
             "writeOnly": true
           },
-          "empty": {
+          "empty" : {
             "type": "boolean"
           }
         },
-        "additionalProperties": {
+        "additionalProperties" : {
           "type": "object"
-        }
-      },
-      "IssueMembershipCredentialRequest": {
-        "required": [
-          "bpn"
-        ],
-        "type": "object",
-        "properties": {
-          "bpn": {
-            "pattern": "^(BPN)(L|S|A)[0-9A-Z]{12}",
-            "type": "string"
-          }
-        }
-      },
-      "IssueFrameworkCredentialRequest": {
-        "required": [
-          "contract-template",
-          "contract-version",
-          "holderIdentifier",
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "holderIdentifier": {
-            "maxLength": 255,
-            "minLength": 5,
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "contract-template": {
-            "type": "string"
-          },
-          "contract-version": {
-            "type": "string"
-          }
-        }
-      },
-      "IssueDismantlerCredentialRequest": {
-        "required": [
-          "activityType",
-          "bpn"
-        ],
-        "type": "object",
-        "properties": {
-          "bpn": {
-            "pattern": "^(BPN)(L|S|A)[0-9A-Z]{12}",
-            "type": "string"
-          },
-          "activityType": {
-            "maxLength": 2147483647,
-            "minLength": 1,
-            "type": "string"
-          },
-          "allowedVehicleBrands": {
-            "uniqueItems": true,
-            "maxItems": 100,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
         }
       }
     },
-    "securitySchemes": {
-      "Authenticate using access_token": {
+    "securitySchemes" : {
+      "Authenticate using access_token" : {
         "type": "apiKey",
         "description": "**Bearer (apiKey)**\nJWT Authorization header using the Bearer scheme.\nEnter **Bearer** [space] and then your token in the text input below:\nExample: Bearer 12345abcdef\n",
         "name": "Authorization",
         "in": "header"
       },
-      "sts_token": {
+      "sts_token" : {
         "type": "apiKey",
         "description": "**STS token**\nJWT Authorization header.\nEnter your token in the text input below:\nExample: 12345abcdef\n",
         "name": "Authorization",
