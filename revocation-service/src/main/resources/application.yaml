@@ -1,0 +1,130 @@
+################################################################################
+# Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+################################################################################
+
+#set all env here
+revocation:
+  application:
+    name: ${APPLICATION_NAME:Revocation}
+    port: ${APPLICATION_PORT:8080}
+    profile: ${APPLICATION_PROFILE:local}
+  database:
+    host: ${DATABASE_HOST:localhost}
+    port: ${DATABASE_PORT:5434}
+    name: ${DATABASE_NAME:revocation}
+    useSSL: ${DATABASE_USE_SSL_COMMUNICATION:false}
+    username: ${DATABASE_USERNAME:admin}
+    password: ${DATABASE_PASSWORD:admin}
+    connectionPoolSize: ${DATABASE_CONNECTION_POOL_SIZE:10}
+  swagger:
+    enableSwaggerUi: ${ENABLE_SWAGGER_UI:true}
+    enableApiDoc: ${ENABLE_API_DOC:true}
+  config:
+    applicationLogLevel: ${APPLICATION_LOG_LEVEL:DEBUG}
+  security:
+    service:
+      enabled: ${SERVICE_SECURITY_ENABLED:true}
+    keycloak:
+      enabled: ${KEYCLOAK_ENABLED:true}
+      realm: ${KEYCLOAK_REALM:miw_test}
+      clientId: ${KEYCLOAK_CLIENT_ID:miw_private_client}
+      publicClientId: ${KEYCLOAK_PUBLIC_CLIENT_ID:miw_public_client}  #used for swagger login
+      auth-server-url: ${AUTH_SERVER_URL:http://localhost:28080}
+      auth-url: ${revocation.security.keycloak.auth-server-url}/realms/${revocation.security.keycloak.realm}/protocol/openid-connect/auth
+      token-url: ${revocation.security.keycloak.auth-server-url}/realms/${revocation.security.keycloak.realm}/protocol/openid-connect/token
+      refresh-token-url: ${revocation.security.keycloak.token-url}
+  miw:
+    url: ${MIW_URL:https://b366-203-129-213-107.ngrok-free.app}
+    vcContexts: ${VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://eclipse-tractusx.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json}
+  domain:
+    url: ${DOMAIN_URL:http://localhost:8080}
+
+
+
+#Spring boot configuration
+server:
+  port: ${revocation.application.port}
+  shutdown: graceful
+  compression:
+    enabled: true
+spring:
+  profiles:
+    active: ${revocation.application.profile}
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.xml
+  application:
+    name: revocation
+  datasource:
+    url: jdbc:postgresql://${revocation.database.host}:${revocation.database.port}/${revocation.database.name}?useSSL=${revocation.database.useSSL}
+    username: ${revocation.database.username}
+    password: ${revocation.database.password}
+    initialization-mode: always
+    hikari:
+      maximumPoolSize: ${revocation.database.connectionPoolSize}
+  jpa:
+    show-sql: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          #Issuer-uri indicates the iss claims from jwt token
+          issuer-uri: ${revocation.security.keycloak.auth-server-url}/realms/${revocation.security.keycloak.realm}
+          jwk-set-uri: ${revocation.security.keycloak.auth-server-url}/realms/${revocation.security.keycloak.realm}/protocol/openid-connect/certs
+
+## only needed if you want to enable API doc
+springdoc:
+  swagger-ui:
+    enabled: ${revocation.swagger.enableSwaggerUi}
+    oauth:
+      clientId: ${revocation.security.keycloak.publicClientId} #It should be public client created in keycloak
+    disable-swagger-default-url: true
+    path: /ui/swagger-ui
+    show-common-extensions: true
+    csrf:
+      enabled: true
+  api-docs:
+    enabled: ${revocation.swagger.enableApiDoc}
+    path: /docs/api-docs
+
+management:
+  endpoint:
+    loggers:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*, pre-stop, loggers'
+  health:
+    db:
+      enabled: true
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+# log level
+logging:
+  level:
+    org:
+      eclipse:
+        tractusx:
+          managedidentitywallets:
+            revocation: ${APP_LOG_LEVEL:INFO}

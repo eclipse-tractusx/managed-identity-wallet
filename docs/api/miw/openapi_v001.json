@@ -1805,7 +1805,7 @@
                         ],
                         "@context": [
                           "https://www.w3.org/2018/credentials/v1",
-                          "https://cofinity-x.github.io/schema-registry/v1.1/DismantlerVC.json",
+                          "https://eclipse=tractusx.github.io/schema-registry/v1.1/DismantlerVC.json",
                           "https://w3id.org/security/suites/jws-2020/v1",
                           "https://w3id.org/vc/status-list/2021/v1"
                         ],

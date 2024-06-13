@@ -4,3 +4,4 @@ rootProject.name = 'managedidentitywallets'
 // for example:
 // include '<sub-project-name>'
 include 'miw'
+include 'revocation-service'

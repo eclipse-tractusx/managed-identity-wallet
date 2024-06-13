@@ -1,5 +1,5 @@
 # /********************************************************************************
-# * Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+# * Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
 # *
 # * See the NOTICE file(s) distributed with this work for additional
 # * information regarding copyright ownership.
@@ -27,7 +27,7 @@ RUN apk add curl
 
 USER miw
 
-COPY LICENSE NOTICE.md miw/DEPENDENCIES SECURITY.md miw/build/libs/miw-latest.jar /app/
+COPY ../LICENSE NOTICE.md miw/DEPENDENCIES SECURITY.md ./build/libs/miw-latest.jar /app/
 
 WORKDIR /app
 

@@ -1,0 +1,134 @@
+/********************************************************************************
+ * Copyright (c) 2021, 2024 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ********************************************************************************/
+
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'project-report'
+}
+
+group = "${groupName}"
+version = "${applicationVersion}"
+sourceCompatibility = JavaVersion.VERSION_17
+
+jar {
+    enabled = false
+}
+
+java {
+    sourceCompatibility = '17'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
+    implementation  "com.google.code.gson:gson:${gsonVersion}"
+    implementation 'org.liquibase:liquibase-core'
+    implementation "org.eclipse.tractusx.ssi:cx-ssi-lib:${ssiLibVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testImplementation "org.wiremock:wiremock-standalone:${wiremockVersion}"
+    testImplementation "org.projectlombok:lombok:${lombokVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'com.h2database:h2'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+build {
+    archivesBaseName = "revocation-service"
+    version = "latest"
+
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "org/eclipse/tractusx/managedidentitywallets/revocation/utils/StringPool.class",
+                    "org/eclipse/tractusx/managedidentitywallets/revocation/config/security/SecurityConfigProperties.class"
+            ])
+        }))
+    }
+}
+
+htmlDependencyReport {
+    projects = project.allprojects
+}
+
+
+
+
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "org/eclipse/tractusx/managedidentitywallets/revocation/utils/StringPool.class",
+                    "org/eclipse/tractusx/managedidentitywallets/revocation/config/security/SecurityConfigProperties.class"
+            ])
+        }))
+    }
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
