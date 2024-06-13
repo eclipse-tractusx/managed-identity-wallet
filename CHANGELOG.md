@@ -1,3 +1,14 @@
+# [0.5.0-develop.20](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.19...v0.5.0-develop.20) (2024-06-13)
+
+
+### Bug Fixes
+
+* failing test cases ([bf71a1d](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/bf71a1dc9d89334bfbbe8c189b331d4841ee37d2))
+* formatting issue with api json file ([b10fa38](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b10fa38eeae221b48adc6ebdace8ffdf4781bb09))
+* test cases of get VC api ([1430881](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/14308815e8e8a5420d02bb73ffca2a5386e8eee6))
+* VP test cases ([847f123](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/847f123f0e3dc4679fd0a22ff287d774c894e8f8))
+* VP validation tests ([09d337f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/09d337f85f70e1c6514dc111757264330dc2a3ac))
+
 # [0.5.0-develop.19](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0-develop.18...v0.5.0-develop.19) (2024-06-12)
 
 
