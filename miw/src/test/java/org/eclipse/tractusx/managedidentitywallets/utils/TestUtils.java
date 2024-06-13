@@ -32,23 +32,21 @@ import com.nimbusds.jose.crypto.Ed25519Signer;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
-import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
+import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,13 +56,16 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
@@ -119,31 +120,14 @@ public class TestUtils {
 
     public static void checkVC(VerifiableCredential verifiableCredential, MIWSettings miwSettings) {
         //text context URL
-        Assertions.assertEquals(verifiableCredential.getContext().size(), miwSettings.vcContexts().size());
-        for (URI link : verifiableCredential.getContext()) {
-            Assertions.assertTrue(miwSettings.vcContexts().contains(link));
+        Assertions.assertEquals(verifiableCredential.getContext().size(), miwSettings.vcContexts().size() + 1);
+
+        for (URI link : miwSettings.vcContexts()) {
+            Assertions.assertTrue(verifiableCredential.getContext().contains(link));
         }
 
         //check expiry date
         Assertions.assertEquals(0, verifiableCredential.getExpirationDate().compareTo(miwSettings.vcExpiryDate().toInstant()));
-    }
-
-    public static ResponseEntity<String> issueMembershipVC(TestRestTemplate restTemplate, String bpn, String baseWalletBpn) {
-        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(baseWalletBpn);
-        IssueMembershipCredentialRequest request = IssueMembershipCredentialRequest.builder().bpn(bpn).build();
-        HttpEntity<IssueMembershipCredentialRequest> entity = new HttpEntity<>(request, headers);
-
-        return restTemplate.exchange(RestURI.CREDENTIALS_ISSUER_MEMBERSHIP, HttpMethod.POST, entity, String.class);
-    }
-
-    public static IssueFrameworkCredentialRequest getIssueFrameworkCredentialRequest(String bpn, String type) {
-        IssueFrameworkCredentialRequest twinRequest = IssueFrameworkCredentialRequest.builder()
-                .contractTemplate("http://localhost")
-                .contractVersion("v1")
-                .type(type)
-                .holderIdentifier(bpn)
-                .build();
-        return twinRequest;
     }
 
 
@@ -172,42 +156,10 @@ public class TestUtils {
             }
             wallet1.setVerifiableCredentials(verifiableCredentials);
         }
-        System.out.println("wallet -- >" + wallet1.getBpn());
         return wallet1;
     }
 
 
-    public static String getSummaryCredentialId(String holderDID, HoldersCredentialRepository holdersCredentialRepository) {
-        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(holderDID, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
-        Assertions.assertEquals(1, holderVCs.size());
-        return holderVCs.get(0).getData().getId().toString();
-    }
-
-    public static void checkSummaryCredential(String issuerDID, String holderDID, HoldersCredentialRepository holdersCredentialRepository,
-                                              IssuersCredentialRepository issuersCredentialRepository, String type, String previousSummaryCredentialId) {
-
-        //get VC from holder of Summary type
-        List<HoldersCredential> holderVCs = holdersCredentialRepository.getByHolderDidAndType(holderDID, MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
-        Assertions.assertEquals(1, holderVCs.size());
-        VerifiableCredential vc = holderVCs.get(0).getData();
-        VerifiableCredentialSubject subject = vc.getCredentialSubject().get(0);
-
-        //check if type is in items
-        List<String> list = (List<String>) subject.get(StringPool.ITEMS);
-        Assertions.assertTrue(list.contains(type));
-
-        //check in issuer table
-        List<IssuersCredential> issuerVCs = issuersCredentialRepository.getByIssuerDidAndHolderDidAndType(issuerDID, holderDID,
-                MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
-        IssuersCredential issuersCredential = issuerVCs.stream()
-                .filter(issuerVC -> issuerVC.getCredentialId().equalsIgnoreCase(vc.getId().toString())).findFirst()
-                .orElse(null);
-        Assertions.assertNotNull(issuersCredential);
-        IssuersCredential previousIssuersCredential = issuerVCs.stream()
-                .filter(issuerVC -> issuerVC.getCredentialId().equalsIgnoreCase(previousSummaryCredentialId)).findFirst()
-                .orElse(null);
-        Assertions.assertNotNull(previousIssuersCredential);
-    }
 
 
     @NotNull
@@ -269,5 +221,50 @@ public class TestUtils {
                 .name(bpn)
                 .signingServiceType(SigningServiceType.LOCAL)
                 .build();
+    }
+
+    @SneakyThrows
+    public static VerifiableCredential issueCustomVCUsingBaseWallet(String holderBPn, String holderDid, String issuerDid, String type, HttpHeaders headers,
+                                                                    MIWSettings miwSettings, ObjectMapper objectMapper, TestRestTemplate restTemplate) {
+
+        Map<String, Object> map = getCredentialAsMap(holderBPn, holderDid, issuerDid, type, miwSettings, objectMapper);
+        HttpEntity<Map> entity = new HttpEntity<>(map, headers);
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
+        if (response.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
+            throw new ForbiddenException();
+        }
+        Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+        return new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
+    }
+
+    public static Map<String, Object> getCredentialAsMap(String holderBpn, String holderDid, String issuerDid, String type, MIWSettings miwSettings, ObjectMapper objectMapper) throws JsonProcessingException {
+        // Create VC without proof
+        //VC Builder
+        VerifiableCredentialBuilder verifiableCredentialBuilder =
+                new VerifiableCredentialBuilder();
+
+        Map<String, Object> subjectData;
+        if (Objects.equals(type, StringPool.BPN_CREDENTIAL)) {
+            subjectData = Map.of(Verifiable.ID, holderDid, StringPool.BPN, holderBpn);
+        } else {
+            subjectData = Map.of(Verifiable.ID, "test");
+        }
+        //VC Subject
+        VerifiableCredentialSubject verifiableCredentialSubject =
+                new VerifiableCredentialSubject(subjectData);
+
+        //Using Builder
+        VerifiableCredential credentialWithoutProof =
+                verifiableCredentialBuilder
+                        .id(URI.create(issuerDid + "#" + UUID.randomUUID()))
+                        .context(miwSettings.vcContexts())
+                        .type(List.of(VerifiableCredentialType.VERIFIABLE_CREDENTIAL, type))
+                        .issuer(URI.create(issuerDid)) //issuer must be base wallet
+                        .expirationDate(miwSettings.vcExpiryDate().toInstant())
+                        .issuanceDate(Instant.now())
+                        .credentialSubject(verifiableCredentialSubject)
+                        .build();
+
+        return objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
     }
 }

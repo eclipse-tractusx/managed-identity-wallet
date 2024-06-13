@@ -35,7 +35,6 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
@@ -94,9 +93,10 @@ class PresentationValidationTest {
     private String bpnOperator;
     private Did tenant_1;
     private Did tenant_2;
-    private VerifiableCredential membershipCredential_1;
-    private VerifiableCredential membershipCredential_2;
+    private VerifiableCredential vc_1;
+    private VerifiableCredential vc_2;
 
+    @SneakyThrows
     @BeforeEach
     public void setup() throws DidParseException {
         bpnOperator = miwSettings.authorityWalletBpn();
@@ -117,20 +117,22 @@ class PresentationValidationTest {
         Wallet tenantWallet2 = walletService.createWallet(createWalletRequest2, bpnOperator);
         tenant_2 = DidParser.parse(tenantWallet2.getDid());
 
-        IssueMembershipCredentialRequest issueMembershipCredentialRequest = new IssueMembershipCredentialRequest();
-        issueMembershipCredentialRequest.setBpn(bpnTenant_1);
 
-        CredentialsResponse rs1 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest, false, bpnOperator);
-        membershipCredential_1 = new ObjectMapper().convertValue(rs1, VerifiableCredential.class);
-        IssueMembershipCredentialRequest issueMembershipCredentialRequest2 = new IssueMembershipCredentialRequest();
-        issueMembershipCredentialRequest2.setBpn(bpnTenant_2);
-        CredentialsResponse rs2 = issuersCredentialService.issueMembershipCredential(issueMembershipCredentialRequest2, false, bpnOperator);
-        membershipCredential_2 = new ObjectMapper().convertValue(rs2, VerifiableCredential.class);
+        Map<String, Object> type1 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), "Type1", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
+
+        CredentialsResponse rs1 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type1, false, bpnOperator);
+        vc_1 = new ObjectMapper().convertValue(rs1, VerifiableCredential.class);
+
+
+        Map<String, Object> type2 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), "Type2", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
+
+        CredentialsResponse rs2 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type2, false, bpnOperator);
+        vc_2 = new ObjectMapper().convertValue(rs2, VerifiableCredential.class);
     }
 
     @Test
     void testSuccessfulValidation() {
-        Map<String, Object> presentation = createPresentationJwt(membershipCredential_1, tenant_1);
+        Map<String, Object> presentation = createPresentationJwt(vc_1, tenant_1);
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(presentation);
         Assertions.assertTrue(response.valid);
     }
@@ -138,7 +140,7 @@ class PresentationValidationTest {
     @Test
     @SneakyThrows
     public void testSuccessfulValidationForMultipleVC() {
-        Map<String, Object> creationResponse = createPresentationJwt(List.of(membershipCredential_1, membershipCredential_2), tenant_1);
+        Map<String, Object> creationResponse = createPresentationJwt(List.of(vc_1, vc_2), tenant_1);
         // get the payload of the json web token
         String encodedJwtPayload = ((String) creationResponse.get("vp")).split("\\.")[1];
         Map<String, Object> decodedJwtPayload = OBJECT_MAPPER.readValue(Base64.getUrlDecoder().decode(encodedJwtPayload), Map.class);
@@ -154,7 +156,7 @@ class PresentationValidationTest {
     public void testValidationFailureOfCredentialWitInvalidExpirationDate() {
         // test is related to this old issue where the signature check still succeeded
         // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
-        VerifiableCredential copyCredential = new VerifiableCredential(membershipCredential_1);
+        VerifiableCredential copyCredential = new VerifiableCredential(vc_1);
         // e.g. an attacker tries to extend the validity of a verifiable credential
         copyCredential.put(VerifiableCredential.EXPIRATION_DATE, "2500-09-30T22:00:00Z");
         Map<String, Object> presentation = createPresentationJwt(copyCredential, tenant_1);
@@ -167,10 +169,10 @@ class PresentationValidationTest {
     public void testValidationFailureOfCredentialWitInvalidExpirationDateInSecondCredential() {
         // test is related to this old issue where the signature check still succeeded
         // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
-        VerifiableCredential copyCredential = new VerifiableCredential(membershipCredential_1);
+        VerifiableCredential copyCredential = new VerifiableCredential(vc_1);
         // e.g. an attacker tries to extend the validity of a verifiable credential
         copyCredential.put(VerifiableCredential.EXPIRATION_DATE, "2500-09-30T22:00:00Z");
-        Map<String, Object> presentation = createPresentationJwt(List.of(membershipCredential_1, copyCredential), tenant_1);
+        Map<String, Object> presentation = createPresentationJwt(List.of(vc_1, copyCredential), tenant_1);
         VerifiablePresentationValidationResponse response = validateJwtOfCredential(presentation);
         Assertions.assertFalse(response.valid);
     }
@@ -178,7 +180,7 @@ class PresentationValidationTest {
     @Test
     @SneakyThrows
     void testValidationFailureOfPresentationPayloadManipulation() {
-        Map<String, Object> presentation = createPresentationJwt(membershipCredential_1, tenant_1);
+        Map<String, Object> presentation = createPresentationJwt(vc_1, tenant_1);
 
         String jwt = (String) presentation.get(StringPool.VP);
         String payload = jwt.split("\\.")[1];
@@ -193,7 +195,7 @@ class PresentationValidationTest {
                 .context(List.of(VerifiablePresentation.DEFAULT_CONTEXT))
                 .id(URI.create("did:test:" + UUID.randomUUID()))
                 .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
-                .verifiableCredentials(List.of(membershipCredential_2))
+                .verifiableCredentials(List.of(vc_2))
                 .build();
         payloadMap.put("vp", newPresentation);
         String newPayloadJson = OBJECT_MAPPER.writeValueAsString(payloadMap);

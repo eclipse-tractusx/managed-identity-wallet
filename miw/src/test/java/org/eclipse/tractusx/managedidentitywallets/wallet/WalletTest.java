@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
-import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -107,16 +106,10 @@ class WalletTest {
     @Test
     void authorityWalletExistTest() {
         Wallet wallet = walletRepository.getByBpn(miwSettings.authorityWalletBpn());
-        issuersCredentialService.issueBpnCredential(wallet, wallet, true);
         Assertions.assertNotNull(wallet);
         Assertions.assertEquals(wallet.getBpn(), miwSettings.authorityWalletBpn());
         Assertions.assertEquals(wallet.getName(), miwSettings.authorityWalletName());
         Assertions.assertNotNull(wallet.getDidDocument());
-
-        //check BPN credentials issued for authority wallet
-        List<HoldersCredential> vcs = holdersCredentialRepository.getByHolderDidAndType(wallet.getDid(), MIWVerifiableCredentialType.BPN_CREDENTIAL);
-        Assertions.assertFalse(vcs.isEmpty());
-        Assertions.assertTrue(vcs.get(0).isSelfIssued());
     }
 
 

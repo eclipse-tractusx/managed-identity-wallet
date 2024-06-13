@@ -28,8 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateCredentialProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateSummaryCredentialProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
 import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
@@ -149,19 +147,6 @@ public class ExceptionHandling {
         return problemDetail;
     }
 
-    /**
-     * Handle duplicate credential problem problem detail.
-     *
-     * @param e the e
-     * @return the problem detail
-     */
-    @ExceptionHandler({DuplicateCredentialProblem.class, DuplicateSummaryCredentialProblem.class})
-    ProblemDetail handleDuplicateCredentialProblem(RuntimeException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
-        problemDetail.setTitle(e.getMessage());
-        problemDetail.setProperty(TIMESTAMP, System.currentTimeMillis());
-        return problemDetail;
-    }
 
     /**
      * Handle not found credential problem detail.

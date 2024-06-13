@@ -27,16 +27,15 @@ import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
-import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
+import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
@@ -54,9 +53,7 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -162,26 +159,14 @@ class HoldersCredentialTest {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         //save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
-        TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
-        String vcList = """
-                [
-                {"type":"TraceabilityCredential"},
-                {"type":"SustainabilityCredential"},
-                {"type":"ResiliencyCredential"},
-                {"type":"QualityCredential"},
-                {"type":"PcfCredential"}
-                ]
-                """;
-        JSONArray jsonArray = new JSONArray(vcList);
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn, jsonObject.get(StringPool.TYPE).toString());
-            HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); //ony base wallet can issue VC
-            ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK, HttpMethod.POST, entity, String.class);
-            Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
-        }
+        List<VerifiableCredential> vcs = new ArrayList<>();
+        List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
 
+        typesOfVcs.forEach(type -> {
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            vcs.add(verifiableCredential);
+        });
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
@@ -189,7 +174,7 @@ class HoldersCredentialTest {
                 , HttpMethod.GET, entity, String.class, baseDID);
         List<VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertEquals(7, Objects.requireNonNull(credentialList).size()); //5  framework + 1 BPN + 1 Summary
+        Assertions.assertEquals(typesOfVcs.size(), Objects.requireNonNull(credentialList).size());
 
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}"
                 , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
@@ -197,29 +182,20 @@ class HoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
-        List<String> list = new ArrayList<>();
-        list.add(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL);
         response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
-                , HttpMethod.GET, entity, String.class, String.join(",", list));
+                , HttpMethod.GET, entity, String.class, String.join(",", typesOfVcs));
+        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        Assertions.assertEquals(typesOfVcs.size(), Objects.requireNonNull(credentialList).size());
+
+
+        //test get by type
+        String type = typesOfVcs.get(0);
+        response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
+                , HttpMethod.GET, entity, String.class, type);
         credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
-
-        list = new ArrayList<>();
-        list.add(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL);
-        response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
-                , HttpMethod.GET, entity, String.class, String.join(",", list));
-        credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
-        Assertions.assertEquals(1, credentialList.size());
-        VerifiableCredentialSubject subject = credentialList.get(0).getCredentialSubject().get(0);
-        List<String> itemList = (List<String>) subject.get(StringPool.ITEMS);
-        Assertions.assertTrue(itemList.contains(MIWVerifiableCredentialType.MEMBERSHIP_CREDENTIAL));
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            Assertions.assertTrue(itemList.contains(jsonObject.get(StringPool.TYPE).toString()));
-        }
-
     }
 
 
@@ -233,29 +209,16 @@ class HoldersCredentialTest {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         // save wallet
         TestUtils.createWallet(bpn, did, walletRepository);
-        TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
-        String vcList = """
-                [
-                {"type":"TraceabilityCredential"},
-                {"type":"SustainabilityCredential"},
-                {"type":"ResiliencyCredential"},
-                {"type":"QualityCredential"},
-                {"type":"PcfCredential"}
-                ]
-                """;
-        JSONArray jsonArray = new JSONArray(vcList);
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(bpn,
-                    jsonObject.get(StringPool.TYPE).toString());
-            HttpEntity<IssueFrameworkCredentialRequest> entity = new HttpEntity<>(request,
-                    AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn())); // ony base wallet
-            // can issue VC
-            ResponseEntity<String> exchange = restTemplate.exchange(RestURI.API_CREDENTIALS_ISSUER_FRAMEWORK,
-                    HttpMethod.POST, entity, String.class);
-            Assertions.assertEquals(exchange.getStatusCode().value(), HttpStatus.CREATED.value());
-        }
+        //issue VC : test data
+        List<VerifiableCredential> vcs = new ArrayList<>();
+        List<String> typesOfVcs = List.of("Type1", "Type2", "Type3");
+
+        typesOfVcs.forEach(type -> {
+            VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, did, miwSettings.authorityWalletDid(), type, AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
+            vcs.add(verifiableCredential);
+        });
+
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
@@ -265,8 +228,8 @@ class HoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Map<String, Object> responseMap = SerializeUtil.fromJson(response.getBody());
         List<Map<String, Object>> vcsAsJwt = (ArrayList<Map<String, Object>>) responseMap.get("content");
-        // 5 framework + 1 BPN + 1 Summary
-        Assertions.assertEquals(7, vcsAsJwt.size());
+
+        Assertions.assertEquals(vcs.size(), vcsAsJwt.size());
         vcsAsJwt.forEach(vc -> {
             Assertions.assertNotNull(vc.get(StringPool.VC_JWT_KEY));
         });
@@ -379,9 +342,9 @@ class HoldersCredentialTest {
         String bpn = TestUtils.getRandomBpmNumber();
         String baseBpn = miwSettings.authorityWalletBpn();
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
-        TestUtils.createWallet(bpn, "Test", restTemplate, baseBpn, defaultLocation);
-        ResponseEntity<String> vc = TestUtils.issueMembershipVC(restTemplate, bpn, miwSettings.authorityWalletBpn());
-        VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(vc.getBody(), Map.class));
+        ResponseEntity<String> response = TestUtils.createWallet(bpn, "Test Wallet", restTemplate, baseBpn, defaultLocation);
+        Wallet wallet = TestUtils.getWalletFromString(response.getBody());
+        VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, wallet.getDid(), miwSettings.authorityWalletDid(), "Type1", AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
         Map<String, Object> map = objectMapper.readValue(verifiableCredential.toJson(), Map.class);
         return map;
     }

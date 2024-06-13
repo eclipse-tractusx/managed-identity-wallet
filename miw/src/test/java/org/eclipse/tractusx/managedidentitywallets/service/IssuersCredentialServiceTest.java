@@ -27,8 +27,8 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.SignedJWT;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.MIWVerifiableCredentialType;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -41,9 +41,6 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepos
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueDismantlerCredentialRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueFrameworkCredentialRequest;
-import org.eclipse.tractusx.managedidentitywallets.dto.IssueMembershipCredentialRequest;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.signing.LocalKeyProvider;
 import org.eclipse.tractusx.managedidentitywallets.signing.LocalSigningServiceImpl;
@@ -81,11 +78,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.sql.DataSource;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -96,7 +92,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -143,6 +138,7 @@ class IssuersCredentialServiceTest {
         when(dataSource.getConnection()).thenReturn(connection);
 
         when(miwSettings.encryptionKey()).thenReturn("26FlcjRKOEML8YW699CXlg==");
+        when(miwSettings.vcExpiryDate()).thenReturn(DateUtils.addMonths(new Date(), 10));
         encryptionUtils = new EncryptionUtils(miwSettings);
 
         issuersCredentialService = new IssuersCredentialService(
@@ -160,174 +156,6 @@ class IssuersCredentialServiceTest {
                 holdersCredentialRepository,
                 commonService,
                 issuersCredentialRepository);
-    }
-
-    @Nested
-    class issueMembershipCredentialTest {
-
-        @Test
-        void shouldIssueCredentialAsJwt()
-                throws InvalidPrivateKeyFormatException, KeyTransformationException {
-            Map<String, Object> wallets = mockBaseAndHolderWallet();
-            Wallet baseWallet = (Wallet) wallets.get("base");
-            String baseWalletBpn = baseWallet.getBpn();
-            Wallet holderWallet = (Wallet) wallets.get("holder");
-            String holderWalletBpn = holderWallet.getBpn();
-            String walletKeyId = "key-1";
-            KeyPair keyPair = MockUtil.generateEDKeys();
-
-            mockCommon(baseWalletBpn, holderWalletBpn, keyPair, baseWallet, holderWallet);
-            MockUtil.makeFilterWorkForIssuer(issuersCredentialRepository);
-            MockUtil.makeCreateWorkForIssuer(issuersCredentialRepository);
-
-            IssueMembershipCredentialRequest issueMembershipCredentialRequest = new IssueMembershipCredentialRequest();
-            issueMembershipCredentialRequest.setBpn(holderWalletBpn);
-
-            WalletKey walletKey = mock(WalletKey.class);
-            when(walletKey.getKeyId()).thenReturn(KEY_ID);
-            when(walletKey.getId()).thenReturn(42L);
-            when(baseWallet.getAlgorithm()).thenReturn("ED25519");
-            when(baseWallet.getSigningServiceType()).thenReturn(SigningServiceType.LOCAL);
-            when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId(), SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
-                    .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
-            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
-            when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), "ED25519")).thenReturn(keyPair.getPrivateKey()
-                    .asByte());
-
-
-            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
-            when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
-
-            LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);
-            localSigningService.setKeyProvider(new LocalKeyProvider(walletKeyService, walletKeyRepository, encryptionUtils));
-
-            Map<SigningServiceType, SigningService> map = new HashMap<>();
-            map.put(SigningServiceType.LOCAL, localSigningService);
-
-            issuersCredentialService.setKeyService(map);
-            CredentialsResponse credentialsResponse = assertDoesNotThrow(
-                    () -> issuersCredentialService.issueMembershipCredential(
-                            issueMembershipCredentialRequest,
-                            true,
-                            baseWalletBpn));
-
-            validateCredentialResponse(credentialsResponse, MockUtil.buildDidDocument(new Did(new DidMethod("web"),
-                    new DidMethodIdentifier("basewallet"),
-                    null), keyPair));
-        }
-    }
-
-    @Nested
-    class issueFrameWorkCredentialTest {
-
-        @Test
-        void shouldIssueCredentialAsJwt()
-                throws InvalidPrivateKeyFormatException, JwtException, KeyTransformationException {
-            Map<String, Object> wallets = mockBaseAndHolderWallet();
-            Wallet baseWallet = (Wallet) wallets.get("base");
-            String baseWalletBpn = baseWallet.getBpn();
-            Wallet holderWallet = (Wallet) wallets.get("holder");
-            String holderWalletBpn = holderWallet.getBpn();
-            String walletKeyId = "key-1";
-
-            KeyPair keyPair = MockUtil.generateEDKeys();
-
-            mockCommon(baseWalletBpn, holderWalletBpn, keyPair, baseWallet, holderWallet);
-            MockUtil.makeFilterWorkForIssuer(issuersCredentialRepository);
-            MockUtil.makeCreateWorkForIssuer(issuersCredentialRepository);
-
-
-            when(holdersCredentialRepository.getByHolderDidAndIssuerDidAndTypeAndStored(
-                    any(String.class),
-                    any(String.class),
-                    eq(MIWVerifiableCredentialType.SUMMARY_CREDENTIAL),
-                    eq(false)
-            )).thenReturn(Collections.emptyList());
-
-            IssueFrameworkCredentialRequest request = TestUtils.getIssueFrameworkCredentialRequest(
-                    holderWalletBpn,
-                    "SustainabilityCredential");
-            WalletKey walletKey = mock(WalletKey.class);
-            when(walletKey.getKeyId()).thenReturn(KEY_ID);
-            when(walletKey.getId()).thenReturn(42L);
-            when(baseWallet.getAlgorithm()).thenReturn("ED25519");
-            when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), "ED25519")).thenReturn(keyPair.getPrivateKey()
-                    .asByte());
-            when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId(), SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
-                    .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
-            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
-
-
-            when(baseWallet.getSigningServiceType()).thenReturn(SigningServiceType.LOCAL);
-            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
-            when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
-
-            LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);
-            localSigningService.setKeyProvider(new LocalKeyProvider(walletKeyService, walletKeyRepository, encryptionUtils));
-
-            Map<SigningServiceType, SigningService> map = new HashMap<>();
-            map.put(SigningServiceType.LOCAL, localSigningService);
-
-            issuersCredentialService.setKeyService(map);
-
-            CredentialsResponse credentialsResponse = assertDoesNotThrow(
-                    () -> issuersCredentialService.issueFrameworkCredential(request, true, baseWalletBpn));
-            validateCredentialResponse(credentialsResponse, MockUtil.buildDidDocument(new Did(new DidMethod("web"),
-                    new DidMethodIdentifier("basewallet"),
-                    null), keyPair));
-        }
-    }
-
-    @Nested
-    class issueDismantlerCredentialTest {
-
-        @Test
-        void shouldIssueCredentialAsJwt() throws InvalidPrivateKeyFormatException,
-                JwtException, KeyTransformationException {
-            Map<String, Object> wallets = mockBaseAndHolderWallet();
-            Wallet baseWallet = (Wallet) wallets.get("base");
-            String baseWalletBpn = baseWallet.getBpn();
-            Wallet holderWallet = (Wallet) wallets.get("holder");
-            String holderWalletBpn = holderWallet.getBpn();
-            String walletKeyId = "key-1";
-            KeyPair keyPair = MockUtil.generateEDKeys();
-
-            mockCommon(baseWalletBpn, holderWalletBpn, keyPair, baseWallet, holderWallet);
-            MockUtil.makeFilterWorkForIssuer(issuersCredentialRepository);
-            MockUtil.makeCreateWorkForIssuer(issuersCredentialRepository);
-
-            IssueDismantlerCredentialRequest request = new IssueDismantlerCredentialRequest();
-            request.setActivityType("dunno");
-            request.setBpn(holderWalletBpn);
-            request.setAllowedVehicleBrands(Collections.emptySet());
-
-            WalletKey walletKey = mock(WalletKey.class);
-            when(walletKey.getKeyId()).thenReturn(KEY_ID);
-            when(walletKey.getId()).thenReturn(42L);
-            when(baseWallet.getAlgorithm()).thenReturn("ED25519");
-            when(walletKeyService.getPrivateKeyByWalletIdAndAlgorithm(baseWallet.getId(), SupportedAlgorithms.valueOf(baseWallet.getAlgorithm())))
-                    .thenReturn(new X25519PrivateKey(keyPair.getPrivateKey().asStringForStoring(), true));
-            when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), "ED25519")).thenReturn(keyPair.getPrivateKey().asByte());
-            when(walletKeyService.getWalletKeyIdByWalletId(baseWallet.getId(), SupportedAlgorithms.ED25519)).thenReturn(walletKeyId);
-
-
-            when(baseWallet.getSigningServiceType()).thenReturn(SigningServiceType.LOCAL);
-            when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
-            when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
-
-            LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);
-            localSigningService.setKeyProvider(new LocalKeyProvider(walletKeyService, walletKeyRepository, encryptionUtils));
-
-            Map<SigningServiceType, SigningService> map = new HashMap<>();
-            map.put(SigningServiceType.LOCAL, localSigningService);
-
-            issuersCredentialService.setKeyService(map);
-            CredentialsResponse credentialsResponse = assertDoesNotThrow(
-                    () -> issuersCredentialService.issueDismantlerCredential(request, true, baseWalletBpn));
-            validateCredentialResponse(credentialsResponse, MockUtil.buildDidDocument(new Did(new DidMethod("web"),
-                    new DidMethodIdentifier("basewallet"),
-                    null), keyPair));
-        }
     }
 
     @Nested
@@ -493,13 +321,11 @@ class IssuersCredentialServiceTest {
             KeyPair keyPair,
             Wallet baseWallet,
             Wallet holderWallet) {
-        when(miwSettings.contractTemplatesUrl()).thenReturn("https://templates.com");
         when(miwSettings.authorityWalletBpn()).thenReturn(baseWalletBpn);
         when(commonService.getWalletByIdentifier(baseWalletBpn)).thenReturn(baseWallet);
         when(commonService.getWalletByIdentifier(holderWalletBpn)).thenReturn(holderWallet);
         when(walletKeyService.getPrivateKeyByWalletIdAsBytes(baseWallet.getId(), baseWallet.getAlgorithm()))
                 .thenReturn(keyPair.getPrivateKey().asByte());
-        when(miwSettings.supportedFrameworkVCTypes()).thenReturn(Set.of("SustainabilityCredential"));
         when(holdersCredentialRepository.save(any(HoldersCredential.class)))
                 .thenAnswer(new Answer<HoldersCredential>() {
                     @Override
