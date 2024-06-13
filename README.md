@@ -52,4 +52,4 @@ For end-to-end testing both the application should be running.
 
 2. Run tests
 
-``./gradlew clean test`
+``./gradlew clean test``

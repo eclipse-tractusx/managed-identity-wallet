@@ -177,6 +177,72 @@ group "Create Wallet"
 end group
 ```
 
+### Issue revocable credential
+
+![issue_revocable_vc.png](images%2Fissue_revocable_vc.png)
+
+```
+@startuml
+title issue revocable VC
+actor User as User
+participant "Managed identity wallet" as MIW
+participant "Revocation service" as RS
+group "Issue VC"
+User -> MIW: "/api/credentials/issuer" with revocable=true
+alt "If revocable then get issuer status list"
+MIW -> RS: "/api/v1/revocations/statusEntry
+alt If status list VC not created?
+RS -> RS: Create StatusList credentail
+RS -> MIW: Sign new status list VC
+MIW -> MIW: Save status list into issuer table
+RS<-- MIW: return sighed status list VC
+RS -> RS: Store StatusList VC in DB
+end
+RS -> RS: Get Current StatusList Index for Issuer
+RS -> RS: Incease statusList Index by 1 and save in DB
+RS --> MIW: Return Status List
+end
+group "Create and Sign VC"
+MIW -> MIW: Create credentail
+alt "If revocable then add status list"
+MIW -> MIW: Add Status List in VC
+end
+MIW -> MIW: Sign VC
+end group
+MIW --> User: Return revocable VC
+end group
+@enduml
+
+```
+
+### Verify revocable credential
+
+![verify_revocable_vc.png](images%2Fverify_revocable_vc.png)
+
+```
+@startuml
+actor User as User
+participant "Managed Identity Wallet" as MIW
+participant "Revocation service" as RS
+title Verify VC with revocation status
+group "Verify VC"
+User -> MIW: "/api/credentials/validation?withCredentialExpiryDate=true&withRevocation=true"
+alt "If withRevocation then check issuer status list"
+MIW -> RS: "/api/v1/revocations/credentials/{issueId}"
+RS -> RS: Get Current StatusList Index for Issuer
+RS --> MIW: Return StatusList VC
+end
+group "Credential Validation"
+MIW -> MIW: validate status list VC
+MIW -> MIW: Valaidate vc index with encoded list of status list VC
+MIW -> MIW: Check Credential is not expired
+MIW -> MIW: Validate Credential JsonLD
+MIW -> MIW: Verify Credential Signature
+end group
+MIW --> User: Return Valid or Invalid + Reason
+@enduml
+```
+
 ### Validate Verifiable Presentation
 
 ```plantuml
