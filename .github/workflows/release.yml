@@ -171,7 +171,7 @@ jobs:
       - name: Push image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./miw
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -222,7 +222,7 @@ jobs:
           # Package MIW chart
           helm_package_path=$(helm package -u -d helm-charts ./charts/managed-identity-wallet | grep -o 'to: .*' | cut -d' ' -f2-)
           echo "HELM_PACKAGE_PATH=$helm_package_path" >> $GITHUB_ENV
-          
+
           # Commit and push to gh-pages
           git add helm-charts
           git stash -- helm-charts
@@ -230,13 +230,13 @@ jobs:
           git fetch origin
           git checkout gh-pages
           git stash pop
-          
+
           # Generate helm repo index.yaml
           helm repo index . --merge index.yaml --url https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/
           git add index.yaml
-          
+
           git commit -s -m "Release ${{ needs.semantic_release.outputs.next_release }}"
-          
+
           git push origin gh-pages
 
       - name: Upload chart to GitHub release
