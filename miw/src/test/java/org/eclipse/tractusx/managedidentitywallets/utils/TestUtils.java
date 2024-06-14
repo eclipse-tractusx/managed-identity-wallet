@@ -33,6 +33,8 @@ import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
@@ -41,10 +43,13 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.StatusListRequest;
+import org.eclipse.tractusx.managedidentitywallets.revocation.RevocationClient;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatusList2021Entry;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -59,14 +65,19 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.BitSet;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.SCOPE;
@@ -264,5 +275,136 @@ public class TestUtils {
                         .build();
 
         return objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
+    }
+
+
+    public static VerifiableCredentialStatusList2021Entry getStatusListEntry(int index) {
+        return new VerifiableCredentialStatusList2021Entry(Map.of(
+                "id", "https://example.com/credentials/bpn123456789000/revocation/3#" + index,
+                "type", "BitstringStatusListEntry",
+                "statusPurpose", "revocation",
+                "statusListIndex", String.valueOf(index),
+                "statusListCredential", "https://example.com/credentials/bpn123456789000/revocation/3"
+        ));
+    }
+
+    public static VerifiableCredentialStatusList2021Entry getStatusListEntry() {
+        int index = RandomUtils.nextInt(1, 100);
+        return new VerifiableCredentialStatusList2021Entry(Map.of(
+                "id", "https://example.com/credentials/bpn123456789000/revocation/3#" + index,
+                "type", "BitstringStatusListEntry",
+                "statusPurpose", "revocation",
+                "statusListIndex", String.valueOf(index),
+                "statusListCredential", "https://example.com/credentials/bpn123456789000/revocation/3"
+        ));
+    }
+
+    public static void mockGetStatusListEntry(RevocationClient revocationClient, int statusIndex) {
+        //mock revocation service
+        Mockito.when(revocationClient.getStatusListEntry(Mockito.any(StatusListRequest.class), Mockito.any(String.class))).thenReturn(TestUtils.getStatusListEntry(statusIndex));
+    }
+
+    public static void mockGetStatusListEntry(RevocationClient revocationClient) {
+        //mock revocation service
+        Mockito.when(revocationClient.getStatusListEntry(Mockito.any(StatusListRequest.class), Mockito.any(String.class))).thenReturn(TestUtils.getStatusListEntry());
+    }
+
+
+    public static void mockRevocationVerification(RevocationClient revocationClient, CredentialStatus credentialStatus) {
+        Mockito.when(revocationClient.verifyCredentialStatus(Mockito.any(), Mockito.anyString())).thenReturn(Map.of("status", credentialStatus.getName().toLowerCase()));
+    }
+
+    @SneakyThrows
+    public static void mockGetStatusListVC(RevocationClient revocationClient, ObjectMapper objectMapper, String encodedList) {
+        String vcString = """
+                {
+                  "type": [
+                    "VerifiableCredential"
+                  ],
+                  "@context": [
+                    "https://www.w3.org/2018/credentials/v1",
+                    "https://w3id.org/vc/status-list/2021/v1",
+                    "https://w3id.org/security/suites/jws-2020/v1"
+                  ],
+                  "id": "http://localhost:8085/api/v1/revocations/credentials/did:web:BPNL01-revocation",
+                  "issuer": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
+                  "issuanceDate": "2023-11-30T11:29:17Z",
+                  "issued": "2023-11-30T11:29:17Z",
+                  "validFrom": "2023-11-30T11:29:17Z",
+                  "proof": {
+                    "type": "JsonWebSignature2020",
+                    "created": "2023-11-30T11:29:17Z",
+                    "verificationMethod": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce#z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
+                    "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..Iv6H_e4kfLj9dr0COsB2D_ZPpkMoFj3BVXW2iyKFC3q5QtvPWraWfzEDJ5fxtfd5bARJQIP6YhaXdfSRgJpACQ"
+                  },
+                  "credentialSubject": {
+                    "id": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
+                    "type": "BitstringStatusList",
+                    "statusPurpose": "revocation",
+                    "encodedList": "##encodedList"
+                  }
+                }
+                """;
+        vcString = vcString.replace("##encodedList", encodedList);
+
+        VerifiableCredential verifiableCredential = new VerifiableCredential(objectMapper.readValue(vcString, Map.class));
+        Mockito.when(revocationClient.getStatusListCredential(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class))).thenReturn(verifiableCredential);
+    }
+
+    @SneakyThrows
+    public static void mockGetStatusListVC(RevocationClient revocationClient, ObjectMapper objectMapper) {
+        String vcString = """
+                {
+                  "type": [
+                    "VerifiableCredential",
+                    "StatusList2021Credential"
+                  ],
+                  "@context": [
+                    "https://www.w3.org/2018/credentials/v1",
+                    "https://w3id.org/vc/status-list/2021/v1",
+                    "https://w3id.org/security/suites/jws-2020/v1"
+                  ],
+                  "id": "http://localhost:8085/api/v1/revocations/credentials/did:web:BPNL01-revocation",
+                  "issuer": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
+                  "issuanceDate": "2023-11-30T11:29:17Z",
+                  "issued": "2023-11-30T11:29:17Z",
+                  "validFrom": "2023-11-30T11:29:17Z",
+                  "proof": {
+                    "type": "JsonWebSignature2020",
+                    "creator": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
+                    "created": "2023-11-30T11:29:17Z",
+                    "verificationMethod": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce#z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
+                    "jws": "eyJiNjQiOmZhbHNlLCJjcml0IjpbImI2NCJdLCJhbGciOiJFZERTQSJ9..Iv6H_e4kfLj9dr0COsB2D_ZPpkMoFj3BVXW2iyKFC3q5QtvPWraWfzEDJ5fxtfd5bARJQIP6YhaXdfSRgJpACQ"
+                  },
+                  "credentialSubject": {
+                    "id": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
+                    "type": "StatusList2021Credential",
+                    "statusPurpose": "revocation",
+                    "encodedList": "H4sIAAAAAAAA/+3BMQEAAAjAoEqzfzk/SwjUmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIDXFiqoX4AAAAIA"
+                  }
+                }
+                """;
+
+        VerifiableCredential verifiableCredential = new VerifiableCredential(objectMapper.readValue(vcString, Map.class));
+        Mockito.when(revocationClient.getStatusListCredential(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class))).thenReturn(verifiableCredential);
+    }
+
+    public static String createEncodedList() throws IOException {
+        BitSet bitSet = new BitSet(16 * 1024 * 8);
+
+        byte[] bitstringBytes = bitSet.toByteArray();
+        // Perform GZIP compression
+        ByteArrayOutputStream gzipOutput = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipStream = new GZIPOutputStream(gzipOutput)) {
+            gzipStream.write(bitstringBytes);
+        }
+
+
+        // Base64 encode the compressed byte array
+        byte[] compressedBytes = gzipOutput.toByteArray();
+        String encodedList = Base64.getEncoder().encodeToString(compressedBytes);
+
+
+        return encodedList;
     }
 }

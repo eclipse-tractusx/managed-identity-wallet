@@ -25,8 +25,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.teketik.test.mockinbean.MockInBean;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
@@ -36,7 +38,9 @@ import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
+import org.eclipse.tractusx.managedidentitywallets.revocation.RevocationClient;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
+import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
@@ -48,7 +52,9 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
@@ -100,6 +106,22 @@ class PresentationTest {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @MockInBean(RevocationService.class)
+    private RevocationClient revocationClient;
+
+    @SneakyThrows
+    @BeforeEach
+    void beforeEach() {
+        TestUtils.mockGetStatusListEntry(revocationClient);
+        TestUtils.mockGetStatusListVC(revocationClient, objectMapper, TestUtils.createEncodedList());
+        TestUtils.mockRevocationVerification(revocationClient, CredentialStatus.ACTIVE);
+    }
+
+    @AfterEach
+    void afterEach() {
+        Mockito.reset(revocationClient);
+    }
 
 
     @Test
