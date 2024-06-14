@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.revocation;
 
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.StatusListCredentialSubject;
 import org.eclipse.tractusx.managedidentitywallets.revocation.jpa.StatusListCredential;
 import org.eclipse.tractusx.managedidentitywallets.revocation.jpa.StatusListIndex;
@@ -51,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 import static org.mockito.Mockito.when;
 
@@ -185,5 +188,16 @@ public class TestUtil {
 
     public static String extractBpnFromDid(String did) {
         return did.substring(did.lastIndexOf(":") + 1).toUpperCase();
+    }
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        // use explicit initialization as the platform default might fail
+        keyGen.init(128);
+        SecretKey secretKey = keyGen.generateKey();
+        String s = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+
+        System.out.println(s);
     }
 }

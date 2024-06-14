@@ -32,8 +32,10 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.NotImplementedException;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConfig;
@@ -42,7 +44,6 @@ import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
-import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
 import org.eclipse.tractusx.managedidentitywallets.service.JwtPresentationES256KService;
 import org.eclipse.tractusx.ssi.lib.crypt.IKeyGenerator;
@@ -101,6 +102,8 @@ public class LocalSigningServiceImpl implements LocalSigningService {
     // Autowired by name!!!
     private final SecureTokenService localSecureTokenService;
 
+    private final RevocationSettings revocationSettings;
+
     @Override
     public SignerResult createCredential(CredentialCreationConfig config) {
 
@@ -112,6 +115,9 @@ public class LocalSigningServiceImpl implements LocalSigningService {
                 return resultBuilder.jsonLd(createVerifiableCredential(config, privateKeyBytes)).build();
             }
             case JWT -> {
+
+                //TODO maybe this we want, currently in VC as JET, we are putting signed VC(VC with proof) as a JWT claim
+                //instead of this we should put VC without proof and utilize JWT signature as a proof
                 SignedJWT verifiableCredentialAsJwt = createVerifiableCredentialAsJwt(config);
                 return resultBuilder.jwt(verifiableCredentialAsJwt.serialize()).build();
             }
@@ -295,14 +301,11 @@ public class LocalSigningServiceImpl implements LocalSigningService {
 
     @SneakyThrows
     private static VerifiableCredential createVerifiableCredential(CredentialCreationConfig config, byte[] privateKeyBytes) {
-        //VC Builder
-
         // if the credential does not contain the JWS proof-context add it
         URI jwsUri = URI.create("https://w3id.org/security/suites/jws-2020/v1");
         if (!config.getContexts().contains(jwsUri)) {
             config.getContexts().add(jwsUri);
         }
-
 
         URI id = URI.create(UUID.randomUUID().toString());
         VerifiableCredentialBuilder builder = new VerifiableCredentialBuilder()
@@ -314,6 +317,10 @@ public class LocalSigningServiceImpl implements LocalSigningService {
                 .issuanceDate(Instant.now())
                 .credentialSubject(config.getSubject());
 
+        //set status list
+        if (config.isRevocable()) {
+            builder.verifiableCredentialStatus(config.getVerifiableCredentialStatus());
+        }
 
         LinkedDataProofGenerator generator = LinkedDataProofGenerator.newInstance(SignatureType.JWS);
         URI verificationMethod = config.getIssuerDoc().getVerificationMethods().get(0).getId();

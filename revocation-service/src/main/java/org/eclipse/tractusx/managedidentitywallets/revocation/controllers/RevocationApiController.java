@@ -26,14 +26,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.eclipse.tractusx.managedidentitywallets.revocation.apidocs.RevocationApiControllerApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.revocation.constant.RevocationApiEndpoints;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.CredentialStatusDto;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.StatusEntryDto;
-import org.eclipse.tractusx.managedidentitywallets.revocation.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.revocation.exception.RevocationServiceException;
 import org.eclipse.tractusx.managedidentitywallets.revocation.services.RevocationService;
-import org.eclipse.tractusx.managedidentitywallets.revocation.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.Map;
 
 /**
  * The RevocationApiController class is a REST controller that handles revocation-related API
@@ -110,6 +111,21 @@ public class RevocationApiController extends BaseController {
                 .launch(new ForbiddenException("Invalid caller"));
         revocationService.revoke(dto, token);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @RevocationApiControllerApiDocs.verifyCredentialDocs
+    @PostMapping(RevocationApiEndpoints.VERIFY)
+    public ResponseEntity<Map<String, String>> verifyRevocation(
+            @Valid @RequestBody CredentialStatusDto dto,
+            @Parameter(hidden = true) @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token,
+            Principal principal) {
+        Validate.isFalse(
+                        getBPNFromToken(principal).equals(revocationService.extractBpnFromURL(dto.id())))
+                .launch(new ForbiddenException("Invalid caller"));
+
+
+        return ResponseEntity.ofNullable(revocationService.verifyStatus(dto));
     }
 
     /**

@@ -19,15 +19,19 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.revocation.constant;
+package org.eclipse.tractusx.managedidentitywallets.dto;
 
-public class ApplicationRole {
 
-    public static final String ROLE_MANAGE_APP = "manage_app";
+import lombok.*;
 
-    public static final String ROLE_UPDATE_WALLET = "update_wallet";
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StatusListRequest {
 
-    private ApplicationRole() {
-        // static
-    }
+    private String issuerId;
+
+    private String purpose;
 }

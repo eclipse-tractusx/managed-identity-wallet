@@ -33,8 +33,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -42,13 +44,12 @@ import org.eclipse.tractusx.managedidentitywallets.domain.CredentialCreationConf
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
-import org.eclipse.tractusx.managedidentitywallets.exception.CredentialNotFoundProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
-import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatusList2021Entry;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -80,6 +81,8 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
     private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
     private final Map<SigningServiceType, SigningService> availableSigningServices;
+
+    private final RevocationService revocationService;
 
 
     @Override
@@ -172,7 +175,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
      * @param asJwt     the as jwt
      * @return the verifiable credential
      */
-    public CredentialsResponse issueCredential(Map<String, Object> data, String callerBpn, boolean asJwt) {
+    public CredentialsResponse issueCredential(Map<String, Object> data, String callerBpn, boolean asJwt, boolean revocable, String token) {
         VerifiableCredential verifiableCredential = new VerifiableCredential(data);
         Wallet issuerWallet = commonService.getWalletByIdentifier(verifiableCredential.getIssuer().toString());
 
@@ -185,7 +188,7 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
             expiryDate = Date.from(verifiableCredential.getExpirationDate());
         }
 
-        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
+        CredentialCreationConfig.CredentialCreationConfigBuilder builder = CredentialCreationConfig.builder()
                 .encoding(VerifiableEncoding.JSON_LD)
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
@@ -194,12 +197,19 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
                 .contexts(verifiableCredential.getContext())
                 .expiryDate(expiryDate)
                 .selfIssued(true)
+                .revocable(revocable)
                 .keyName(issuerWallet.getBpn())
-                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()))
-                .build();
+                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()));
+
+        if (revocable) {
+            //get credential status in case of revocation
+            VerifiableCredentialStatusList2021Entry statusListEntry = revocationService.getStatusListEntry(issuerWallet.getBpn(), token);
+            builder.verifiableCredentialStatus(statusListEntry);
+        }
+
+        CredentialCreationConfig holdersCredentialCreationConfig = builder.build();
 
         // Create Credential
-
         SignerResult signerResult = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
         VerifiableCredential vc = (VerifiableCredential) signerResult.getJsonLd();
         HoldersCredential credential = CommonUtils.convertVerifiableCredential(vc, holdersCredentialCreationConfig);
@@ -223,9 +233,5 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         log.debug("VC type of {} issued to bpn ->{}", StringEscapeUtils.escapeJava(verifiableCredential.getTypes().toString()), StringEscapeUtils.escapeJava(callerBpn));
 
         return cr;
-    }
-
-    private void isCredentialExistWithId(String holderDid, String credentialId) {
-        Validate.isFalse(holdersCredentialRepository.existsByHolderDidAndCredentialId(holderDid, credentialId)).launch(new CredentialNotFoundProblem("Credential ID: " + credentialId + " is not exists "));
     }
 }

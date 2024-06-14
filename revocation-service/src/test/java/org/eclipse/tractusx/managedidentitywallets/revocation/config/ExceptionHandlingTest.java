@@ -21,8 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.revocation.config;
 
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.revocation.exception.CredentialAlreadyRevokedException;
-import org.eclipse.tractusx.managedidentitywallets.revocation.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;

@@ -25,6 +25,7 @@ package org.eclipse.tractusx.managedidentitywallets.revocation.services;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.revocation.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.revocation.constant.RevocationApiEndpoints;
 import org.eclipse.tractusx.managedidentitywallets.revocation.domain.BPN;
@@ -38,19 +39,34 @@ import org.eclipse.tractusx.managedidentitywallets.revocation.jpa.StatusListInde
 import org.eclipse.tractusx.managedidentitywallets.revocation.repository.StatusListCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.revocation.repository.StatusListIndexRepository;
 import org.eclipse.tractusx.managedidentitywallets.revocation.utils.BitSetManager;
+import org.eclipse.tractusx.managedidentitywallets.revocation.utils.CommonUtils;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
+import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
+import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
+import org.eclipse.tractusx.ssi.lib.exception.did.DidParseException;
+import org.eclipse.tractusx.ssi.lib.exception.json.TransformJsonLdException;
+import org.eclipse.tractusx.ssi.lib.exception.key.InvalidPublicKeyFormatException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.NoVerificationKeyFoundException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureParseException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.SignatureVerificationFailedException;
+import org.eclipse.tractusx.ssi.lib.exception.proof.UnsupportedSignatureTypeException;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialBuilder;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialType;
+import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,6 +79,8 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class RevocationService {
 
+    public static final String ENCODED_LIST = "encodedList";
+
     private final StatusListCredentialRepository statusListCredentialRepository;
 
     private final StatusListIndexRepository statusListIndexRepository;
@@ -70,6 +88,52 @@ public class RevocationService {
     private final HttpClientService httpClientService;
 
     private final MIWSettings miwSettings;
+
+    @Transactional
+
+    public Map<String, String> verifyStatus(CredentialStatusDto statusDto) {
+
+        String url = statusDto.statusListCredential();
+
+        String[] values = CommonUtils.extractValuesFromURL(url);
+        VerifiableCredential statusListCredential = getStatusListCredential(values[0], values[1], values[2]);
+        if (Objects.isNull(statusListCredential)) {
+            log.error("Status list VC not found for issuer -> {}",
+                    values[0]);
+            throw new BadDataException("Status list VC not found for issuer -> " + values[0]);
+        }
+
+        //validate status list VC
+        validateStatusListVC(statusListCredential);
+
+
+        String encodedList = statusListCredential.getCredentialSubject().get(0).get(ENCODED_LIST).toString();
+
+        BitSet bitSet = BitSetManager.decompress(BitSetManager.decodeFromString(encodedList));
+        int index = Integer.parseInt(statusDto.statusListIndex());
+        boolean status = bitSet.get(index);
+        return Map.of("status", status ? "revoked" : "active");
+    }
+
+
+    private void validateStatusListVC(VerifiableCredential statusListCredential) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
+        DidResolver didResolver = new DidWebResolver(httpClient, new DidWebParser(), true);
+        LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
+        boolean valid = false;
+        try {
+            valid = proofValidation.verify(statusListCredential);
+        } catch (UnsupportedSignatureTypeException | SignatureParseException | DidParseException |
+                 InvalidPublicKeyFormatException | SignatureVerificationFailedException |
+                 NoVerificationKeyFoundException | TransformJsonLdException e) {
+            log.error("Verification failed with error -> {}", e.getMessage(), e);
+        }
+        if (!valid) {
+            throw new BadDataException("Status list credential is not valid");
+        }
+    }
 
     /**
      * The `revoke` function revokes a credential by updating the status list credential with a new

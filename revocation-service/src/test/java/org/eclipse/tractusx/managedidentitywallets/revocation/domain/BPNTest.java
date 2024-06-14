@@ -27,15 +27,14 @@ import org.junit.jupiter.api.Test;
 import static org.eclipse.tractusx.managedidentitywallets.revocation.TestUtil.BPN;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BPNTest {
+class BPNTest {
 
     @Test
     @DisplayName("BPN Should not be valid")
-    public void invalidBPN() {
+    void invalidBPN() {
         String bpn = "thisnotbpn";
 
         assertThrows(
@@ -47,7 +46,7 @@ public class BPNTest {
 
     @Test
     @DisplayName("BPN Should be valid")
-    public void validBPN() {
+    void validBPN() {
         assertDoesNotThrow(
                 () -> {
                     new BPN(BPN);
@@ -56,24 +55,24 @@ public class BPNTest {
 
     @Test
     @DisplayName("BPN Should return value")
-    public void bpnValue() {
+    void bpnValue() {
         BPN bpn = new BPN(BPN);
         assertEquals(BPN, bpn.value());
     }
 
     @Test
     @DisplayName("BPN Should be equal")
-    public void bpnEqual() {
+    void bpnEqual() {
         BPN bpn1 = new BPN(BPN);
         BPN bpn2 = new BPN(BPN);
-        assertTrue(bpn1.equals(bpn2));
+        assertEquals(bpn1, bpn2);
     }
 
     @Test
     @DisplayName("BPN Should not be equal")
-    public void bpnNotEqual() {
+    void bpnNotEqual() {
         BPN bpn1 = new BPN(BPN);
         BPN bpn2 = new BPN("BPNL000000000000");
-        assertFalse(bpn1.equals(bpn2));
+        assertNotEquals(bpn1, bpn2);
     }
 }

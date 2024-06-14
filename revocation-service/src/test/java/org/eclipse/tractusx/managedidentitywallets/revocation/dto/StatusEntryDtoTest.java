@@ -23,7 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.revocation.dto;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import org.eclipse.tractusx.managedidentitywallets.revocation.constant.PurposeType;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.RevocationPurpose;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +36,7 @@ class StatusEntryDtoTest {
     @Test
     void validStatusEntryDto_CreatesSuccessfully() {
         // Arrange
-        String validPurpose = PurposeType.REVOCATION.toString();
+        String validPurpose = RevocationPurpose.REVOCATION.name();
 
         // Act
         StatusEntryDto dto = new StatusEntryDto(validPurpose, "issuerId");
@@ -81,7 +81,7 @@ class StatusEntryDtoTest {
                 validator
                         .validate(
                                 new StatusEntryDto(
-                                        PurposeType.REVOCATION.toString(), "" // issuerId is blank
+                                        RevocationPurpose.REVOCATION.name(), "" // issuerId is blank
                                 ))
                         .isEmpty());
     }

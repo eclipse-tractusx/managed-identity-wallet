@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(SpringExtension.class)
 @AutoConfigureJson
 @DataJpaTest
-public class StatusListIndexTest {
+class StatusListIndexTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -56,7 +56,7 @@ public class StatusListIndexTest {
     }
 
     @Test
-    public void whenFieldsAreValid_thenNoConstraintViolationsAndEntityPersists() {
+    void whenFieldsAreValid_thenNoConstraintViolationsAndEntityPersists() {
         String id = BPN + "-revocation#1";
         String issuerBpnStatus = BPN + "-revocation";
 
@@ -79,7 +79,7 @@ public class StatusListIndexTest {
     }
 
     @Test
-    public void whenIdIsBlank_thenConstraintViolationOccurs() {
+    void whenIdIsBlank_thenConstraintViolationOccurs() {
         StatusListIndex statusListIndex =
                 StatusListIndex.builder().id(" ").currentIndex("123456").build();
         Set<ConstraintViolation<StatusListIndex>> violations = validator.validate(statusListIndex);
@@ -89,7 +89,7 @@ public class StatusListIndexTest {
     }
 
     @Test
-    public void whenIssuerBpnStatusIsBlank_thenConstraintViolationOccurs() {
+    void whenIssuerBpnStatusIsBlank_thenConstraintViolationOccurs() {
         StatusListIndex statusListIndex =
                 StatusListIndex.builder()
                         .issuerBpnStatus(" ")
@@ -103,7 +103,7 @@ public class StatusListIndexTest {
     }
 
     @Test
-    public void whenCurrentIndexIsBlank_thenConstraintViolationOccurs() {
+    void whenCurrentIndexIsBlank_thenConstraintViolationOccurs() {
         StatusListIndex statusListIndex =
                 StatusListIndex.builder().issuerBpnStatus(TestUtil.BPN).currentIndex(" ").build();
         Set<ConstraintViolation<StatusListIndex>> violations = validator.validate(statusListIndex);
@@ -113,7 +113,7 @@ public class StatusListIndexTest {
     }
 
     @Test
-    public void whenCurrentIndexIsNotNumeric_thenConstraintViolationOccurs() {
+    void whenCurrentIndexIsNotNumeric_thenConstraintViolationOccurs() {
         String id = BPN + "-revocation#1";
         String issuerBpnStatus = BPN + "-revocation";
         String wrongIndex = "indexABC";
@@ -131,7 +131,7 @@ public class StatusListIndexTest {
     }
 
     @Test
-    public void whenSetInvalidCurrentIndex_thenIllegalArgumentExceptionIsThrown() {
+    void whenSetInvalidCurrentIndex_thenIllegalArgumentExceptionIsThrown() {
         // Constructing StatusListIndex using the builder pattern
         // with a valid issuerId and leaving currentIndex unset initially
         StatusListIndex statusListIndex =
@@ -143,7 +143,7 @@ public class StatusListIndexTest {
     }
 
     @Test
-    public void whenFieldsExceedSizeLimit_thenConstraintViolationOccurs() {
+    void whenFieldsExceedSizeLimit_thenConstraintViolationOccurs() {
         String longIssuerBpnStatus = BPN + "-revocation1";
         String longCurrentIndex =
                 "12345".repeat(4); // The repeat count adjusts on the max size of Index

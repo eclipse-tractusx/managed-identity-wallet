@@ -19,41 +19,14 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.revocation.exception;
+package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
-public class ForbiddenException extends RuntimeException {
+public enum RevocationPurpose {
+    REVOCATION("revocation"), SUSPENSION("suspension");
 
-    /**
-     * Instantiates a new Forbidden exception.
-     */
-    public ForbiddenException() {
-    }
+    private final String name;
 
-    /**
-     * Instantiates a new Forbidden exception.
-     *
-     * @param message the message
-     */
-    public ForbiddenException(String message) {
-        super(message);
-    }
-
-    /**
-     * Instantiates a new Forbidden exception.
-     *
-     * @param message the message
-     * @param cause   the cause
-     */
-    public ForbiddenException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Instantiates a new Forbidden exception.
-     *
-     * @param cause the cause
-     */
-    public ForbiddenException(Throwable cause) {
-        super(cause);
+    RevocationPurpose(String name) {
+        this.name = name;
     }
 }

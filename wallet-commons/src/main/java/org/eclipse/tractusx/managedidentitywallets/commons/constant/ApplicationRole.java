@@ -19,21 +19,38 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
-public enum SupportedAlgorithms {
+public class ApplicationRole {
 
-    ED25519("ED25519"),
-    ES256K("ES256K");
-
-    private String value;
-
-    SupportedAlgorithms(String value){
-        this.value = value;
+    private ApplicationRole() {
+        throw new IllegalStateException("Constant class");
     }
 
-    @Override
-    public String toString() {
-        return value;
-    }
+    /**
+     * The constant ROLE_VIEW_WALLETS.
+     */
+    public static final String ROLE_VIEW_WALLETS = "view_wallets";
+    /**
+     * The constant ROLE_VIEW_WALLET.
+     */
+    public static final String ROLE_VIEW_WALLET = "view_wallet";
+
+    /**
+     * The constant ROLE_ADD_WALLETS.
+     */
+    public static final String ROLE_ADD_WALLETS = "add_wallets";
+
+    /**
+     * The constant ROLE_UPDATE_WALLETS.
+     */
+    public static final String ROLE_UPDATE_WALLETS = "update_wallets";
+
+    /**
+     * The constant ROLE_UPDATE_WALLET.
+     */
+    public static final String ROLE_UPDATE_WALLET = "update_wallet";
+
+    public static final String ROLE_MANAGE_APP = "manage_app";
+
 }

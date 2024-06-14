@@ -23,8 +23,8 @@ package org.eclipse.tractusx.managedidentitywallets.revocation.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.revocation.exception.CredentialAlreadyRevokedException;
-import org.eclipse.tractusx.managedidentitywallets.revocation.exception.ForbiddenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;

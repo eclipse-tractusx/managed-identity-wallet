@@ -27,7 +27,7 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.bouncycastle.util.io.pem.PemReader;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
@@ -97,6 +97,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
             return privateKey;
         }
     }
+
     /**
      * Gets private key by wallet identifier.
      *
@@ -126,7 +127,7 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
     /**
      * Gets wallet key by wallet id.
      *
-     * @param walletId the wallet id
+     * @param walletId            the wallet id
      * @param supportedAlgorithms the algorithm  of private key
      * @return the wallet key by wallet identifier
      */

@@ -21,7 +21,7 @@
 revocation:
   application:
     name: ${APPLICATION_NAME:Revocation}
-    port: ${APPLICATION_PORT:8080}
+    port: ${APPLICATION_PORT:8081}
     profile: ${APPLICATION_PROFILE:local}
   database:
     host: ${DATABASE_HOST:localhost}
@@ -49,10 +49,10 @@ revocation:
       token-url: ${revocation.security.keycloak.auth-server-url}/realms/${revocation.security.keycloak.realm}/protocol/openid-connect/token
       refresh-token-url: ${revocation.security.keycloak.token-url}
   miw:
-    url: ${MIW_URL:https://b366-203-129-213-107.ngrok-free.app}
-    vcContexts: ${VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://eclipse-tractusx.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json}
+    url: ${MIW_URL:https://a888-203-129-213-107.ngrok-free.app}
+    vcContexts: ${VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://cofinity-x.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json}
   domain:
-    url: ${DOMAIN_URL:http://localhost:8080}
+    url: ${DOMAIN_URL:https://977d-203-129-213-107.ngrok-free.app}
 
 
 

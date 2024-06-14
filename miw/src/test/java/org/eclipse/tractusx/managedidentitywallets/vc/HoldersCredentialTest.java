@@ -25,10 +25,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -78,8 +78,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
@@ -252,7 +250,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false, "dummy token").getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
@@ -275,7 +273,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true, "dummy token").getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
         }
@@ -302,7 +300,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false, "dummt token").getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
@@ -330,7 +328,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true, "dummy token").getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
 
@@ -341,7 +339,7 @@ class HoldersCredentialTest {
     private Map<String, Object> issueVC() throws JsonProcessingException {
         String bpn = TestUtils.getRandomBpmNumber();
         String baseBpn = miwSettings.authorityWalletBpn();
-        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        String defaultLocation = miwSettings.host() + StringPool.COLON_SEPARATOR + bpn;
         ResponseEntity<String> response = TestUtils.createWallet(bpn, "Test Wallet", restTemplate, baseBpn, defaultLocation);
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
         VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, wallet.getDid(), miwSettings.authorityWalletDid(), "Type1", AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
@@ -353,7 +351,7 @@ class HoldersCredentialTest {
     private ResponseEntity<String> issueVC(String bpn, String did, String type, HttpHeaders headers) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
         //save wallet
-        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        String defaultLocation = miwSettings.host() + StringPool.COLON_SEPARATOR + bpn;
         TestUtils.createWallet(bpn, did, restTemplate, baseBpn, defaultLocation);
 
         // Create VC without proof

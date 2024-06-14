@@ -19,12 +19,13 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
-/**
- * The type Application constant.
- */
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class StringPool {
+
 
     public static final String CREDENTIAL_ID = "credentialId";
 
@@ -36,10 +37,6 @@ public class StringPool {
     public static final String VALIDATE_EXPIRY_DATE = "validateExpiryDate";
     public static final String VALIDATE_JWT_EXPIRY_DATE = "validateJWTExpiryDate";
     public static final String DID_DOCUMENT = "didDocument";
-
-    private StringPool() {
-        throw new IllegalStateException("Constant class");
-    }
 
     public static final String ISSUER_DID = "issuerDid";
     public static final String HOLDER_DID = "holderDid";
@@ -102,4 +99,9 @@ public class StringPool {
     public static final String CREDENTIAL_SERVICE = "CredentialService";
     public static final String HTTPS_SCHEME = "https://";
     public static final String BPN_NOT_FOUND = "BPN not found";
+
+    public static final String REVOCABLE = "revocable";
+
+    public static final String CREDENTIAL_STATUS = "credentialStatus";
+
 }

@@ -28,9 +28,10 @@ import com.nimbusds.jwt.SignedJWT;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -42,6 +43,7 @@ import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.interfaces.SecureTokenService;
+import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.signing.LocalKeyProvider;
 import org.eclipse.tractusx.managedidentitywallets.signing.LocalSigningServiceImpl;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
@@ -119,6 +121,10 @@ class IssuersCredentialServiceTest {
 
     private static EncryptionUtils encryptionUtils;
 
+    private static RevocationService revocationService;
+
+    private static RevocationSettings revocationSettings;
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -131,6 +137,8 @@ class IssuersCredentialServiceTest {
         issuersCredentialRepository = mock(IssuersCredentialRepository.class);
         secureTokenService = mock(SecureTokenService.class);
         walletKeyRepository = mock(WalletKeyRepository.class);
+        revocationService = mock(RevocationService.class);
+        revocationSettings = mock(RevocationSettings.class);
 
         Connection connection = mock(Connection.class);
 
@@ -145,7 +153,7 @@ class IssuersCredentialServiceTest {
                 issuersCredentialRepository,
                 miwSettings,
                 new SpecificationUtil<IssuersCredential>(),
-                holdersCredentialRepository, commonService, objectMapper);
+                holdersCredentialRepository, commonService, objectMapper, revocationService);
     }
 
     @BeforeEach
@@ -208,7 +216,7 @@ class IssuersCredentialServiceTest {
             when(walletKeyService.getPrivateKeyByKeyId(anyString(), any())).thenReturn(keyPair.getPrivateKey());
             when(walletKeyRepository.getByAlgorithmAndWallet_Bpn(anyString(), anyString())).thenReturn(walletKey);
 
-            LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService);
+            LocalSigningServiceImpl localSigningService = new LocalSigningServiceImpl(secureTokenService, revocationSettings);
             localSigningService.setKeyProvider(new LocalKeyProvider(walletKeyService, walletKeyRepository, encryptionUtils));
 
             Map<SigningServiceType, SigningService> map = new HashMap<>();
@@ -220,8 +228,8 @@ class IssuersCredentialServiceTest {
                     () -> issuersCredentialService.issueCredentialUsingBaseWallet(
                             holderWalletBpn,
                             verifiableCredential,
-                            true,
-                            baseWalletBpn));
+                            true, false,
+                            baseWalletBpn, "dummy token"));
 
             validateCredentialResponse(credentialsResponse, MockUtil.buildDidDocument(new Did(new DidMethod("web"),
                     new DidMethodIdentifier("basewallet"),
@@ -274,7 +282,7 @@ class IssuersCredentialServiceTest {
             credentialVerificationRequest.setJwt(serialized);
 
             Map<String, Object> stringObjectMap = assertDoesNotThrow(
-                    () -> issuersCredentialService.credentialsValidation(credentialVerificationRequest, true));
+                    () -> issuersCredentialService.credentialsValidation(credentialVerificationRequest, true, "dummy token"));
             assertTrue((Boolean) stringObjectMap.get(StringPool.VALID));
         }
     }

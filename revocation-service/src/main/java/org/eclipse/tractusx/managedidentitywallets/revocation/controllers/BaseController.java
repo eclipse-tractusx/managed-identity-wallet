@@ -21,8 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.revocation.controllers;
 
-import org.eclipse.tractusx.managedidentitywallets.revocation.utils.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.revocation.utils.Validate;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 

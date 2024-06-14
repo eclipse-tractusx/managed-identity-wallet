@@ -24,7 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.revocation.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.eclipse.tractusx.managedidentitywallets.revocation.constant.PurposeType;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.RevocationPurpose;
 import org.eclipse.tractusx.managedidentitywallets.revocation.utils.BitSetManager;
 
 public record CredentialStatusDto(
@@ -38,7 +38,7 @@ public record CredentialStatusDto(
                 || Integer.parseInt(statusListIndex) > BitSetManager.BITSET_SIZE - 1) {
             throw new IllegalArgumentException("statusListIndex is out of range");
         }
-        if (!statusPurpose.equalsIgnoreCase(PurposeType.REVOCATION.toString())) {
+        if (!statusPurpose.equalsIgnoreCase(RevocationPurpose.REVOCATION.name())) {
             throw new IllegalArgumentException("invalid statusPurpose");
         }
         if (!type.equals(StatusListCredentialSubject.TYPE_ENTRY)) {

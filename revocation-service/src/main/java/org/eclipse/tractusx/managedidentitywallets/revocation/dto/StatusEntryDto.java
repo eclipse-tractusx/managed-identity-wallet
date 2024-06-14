@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.eclipse.tractusx.managedidentitywallets.revocation.constant.PurposeType;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.RevocationPurpose;
 
 @Valid
 public record StatusEntryDto(
@@ -34,7 +34,7 @@ public record StatusEntryDto(
         @NotNull @NotBlank @JsonProperty("issuerId") String issuerId) {
 
     public StatusEntryDto {
-        if (!purpose.equalsIgnoreCase(PurposeType.REVOCATION.toString())) {
+        if (!purpose.equalsIgnoreCase(RevocationPurpose.REVOCATION.name())) {
             throw new IllegalArgumentException("purpose should only be revocation at this time");
         }
     }

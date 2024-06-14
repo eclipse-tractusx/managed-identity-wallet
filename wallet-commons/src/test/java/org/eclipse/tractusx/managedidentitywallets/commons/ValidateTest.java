@@ -19,31 +19,36 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.revocation.utils;
+package org.eclipse.tractusx.managedidentitywallets.commons;
 
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ValidateTest {
+class ValidateTest {
+
 
     @Test
     void validateTest() {
-        Assertions.assertThrows(
-                RuntimeException.class, () -> Validate.isFalse(false).launch(new RuntimeException()));
-        Assertions.assertThrows(
-                RuntimeException.class, () -> Validate.isTrue(true).launch(new RuntimeException()));
-        Assertions.assertThrows(
-                RuntimeException.class, () -> Validate.isNull(null).launch(new RuntimeException()));
-        Assertions.assertThrows(
-                RuntimeException.class, () -> Validate.isNotNull("Test").launch(new RuntimeException()));
-        Assertions.assertThrows(
-                RuntimeException.class,
-                () -> Validate.value("").isNotEmpty().launch(new RuntimeException()));
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isFalse(false).launch(new RuntimeException()));
+
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isTrue(true).launch(new RuntimeException()));
+
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isNull(null).launch(new RuntimeException()));
+
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isNotNull("Test").launch(new RuntimeException()));
+
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.value("").isNotEmpty().launch(new RuntimeException()));
+
         Assertions.assertDoesNotThrow(() -> Validate.isFalse(true).launch(new RuntimeException()));
+
         Assertions.assertDoesNotThrow(() -> Validate.isTrue(false).launch(new RuntimeException()));
+
         Assertions.assertDoesNotThrow(() -> Validate.isNull("").launch(new RuntimeException()));
+
         Assertions.assertDoesNotThrow(() -> Validate.isNotNull(null).launch(new RuntimeException()));
-        Assertions.assertDoesNotThrow(
-                () -> Validate.value("Test").isNotEmpty().launch(new RuntimeException()));
+
+        Assertions.assertDoesNotThrow(() -> Validate.value("Test").isNotEmpty().launch(new RuntimeException()));
+
     }
 }

@@ -19,24 +19,21 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.constant;
+package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
+public enum SupportedAlgorithms {
 
-public enum TokenValidationErrors {
+    ED25519("ED25519"),
+    ES256K("ES256K");
 
-    ACCESS_TOKEN_MISSING,
-    ISS_AND_SUB_NOT_EQUAL,
-    SUB_NOT_MATCH_ANY_DID,
-    SUB_NOT_DID,
-    EXP_MISSING,
-    TOKEN_ALREADY_EXPIRED,
-    IAT_AFTER_EXPIRATION,
-    CURRENT_TIME_BEFORE_IAT,
-    AUD_MISSING,
-    AUD_NOT_DID,
-    AUD_CLAIMS_NOT_EQUAL,
-    NONCE_MISSING,
-    NONCE_CLAIMS_NOT_EQUAL,
-    SIGNATURE_NOT_VERIFIED,
-    IAT_MISSING
+    private String value;
+
+    SupportedAlgorithms(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

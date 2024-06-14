@@ -19,9 +19,44 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.revocation.constant;
+package org.eclipse.tractusx.managedidentitywallets.commons.exception;
 
-public enum PurposeType {
-    REVOCATION,
-    SUSPENSION,
+/**
+ * The type Bad data exception.
+ */
+public class BadDataException extends RuntimeException {
+
+    /**
+     * Instantiates a new Bad data exception.
+     */
+    public BadDataException() {
+    }
+
+    /**
+     * Instantiates a new Bad data exception.
+     *
+     * @param message the message
+     */
+    public BadDataException(String message) {
+        super(message);
+    }
+
+    /**
+     * Instantiates a new Bad data exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public BadDataException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Instantiates a new Bad data exception.
+     *
+     * @param cause the cause
+     */
+    public BadDataException(Throwable cause) {
+        super(cause);
+    }
 }

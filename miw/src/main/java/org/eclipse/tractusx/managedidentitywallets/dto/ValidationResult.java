@@ -26,7 +26,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.TokenValidationErrors;
 
 import java.util.List;
 

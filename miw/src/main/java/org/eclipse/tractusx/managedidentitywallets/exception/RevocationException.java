@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -21,42 +21,33 @@
 
 package org.eclipse.tractusx.managedidentitywallets.exception;
 
+import lombok.Getter;
+
+import java.util.Map;
+
 /**
- * The type Bad data exception.
+ * The type Revocation problem.
  */
-public class BadDataException extends RuntimeException {
+@Getter
+public class RevocationException extends RuntimeException {
+
+
+    private final int status;
+
+    private final String message;
+
+    private final Map<String, Object> details;
 
     /**
-     * Instantiates a new Bad data exception.
-     */
-    public BadDataException() {
-    }
-
-    /**
-     * Instantiates a new Bad data exception.
+     * Instantiates a new Revocation problem.
      *
+     * @param status  the status
      * @param message the message
      */
-    public BadDataException(String message) {
+    public RevocationException(int status, String message, Map<String, Object> details) {
         super(message);
-    }
-
-    /**
-     * Instantiates a new Bad data exception.
-     *
-     * @param message the message
-     * @param cause   the cause
-     */
-    public BadDataException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Instantiates a new Bad data exception.
-     *
-     * @param cause the cause
-     */
-    public BadDataException(Throwable cause) {
-        super(cause);
+        this.status = status;
+        this.message = message;
+        this.details = details;
     }
 }

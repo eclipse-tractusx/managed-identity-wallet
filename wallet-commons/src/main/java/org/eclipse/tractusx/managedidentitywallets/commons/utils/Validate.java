@@ -19,7 +19,7 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.revocation.utils;
+package org.eclipse.tractusx.managedidentitywallets.commons.utils;
 
 import java.util.Objects;
 
@@ -101,6 +101,7 @@ public class Validate<T> {
     public static <T> Validate<T> isNotNull(T value) {
         return new Validate<>(value).isNotNull();
     }
+
 
     /**
      * Is not empty validate.

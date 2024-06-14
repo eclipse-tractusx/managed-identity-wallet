@@ -18,7 +18,7 @@
 ################################################################################
 
 server:
-  port: ${APPLICATION_PORT:8087}
+  port: ${APPLICATION_PORT:8080}
   shutdown: graceful
   compression:
     enabled: true
@@ -30,9 +30,9 @@ spring:
   application:
     name: miw
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?useSSL=${USE_SSL}
-    username: ${DB_USER_NAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5434}/${DB_NAME:miw}?useSSL=${USE_SSL:false}
+    username: ${DB_USER_NAME:admin}
+    password: ${DB_PASSWORD:admin}
     initialization-mode: always
     hikari:
       maximumPoolSize: ${DB_POOL_SIZE:10}
@@ -89,11 +89,11 @@ logging:
           managedidentitywallets: ${APP_LOG_LEVEL:INFO}
 
 miw:
-  host: ${MIW_HOST_NAME:localhost}
-  encryptionKey: ${ENCRYPTION_KEY}
+  host: ${MIW_HOST_NAME:a888-203-129-213-107.ngrok-free.app}
+  encryptionKey: ${ENCRYPTION_KEY:PQL+9tK5jaKXR+9hepTsNg==}
   authorityWalletBpn: ${AUTHORITY_WALLET_BPN:BPNL000000000000}
   authorityWalletName: ${AUTHORITY_WALLET_NAME:Catena-X}
-  authorityWalletDid: ${AUTHORITY_WALLET_DID:did:web:localhost:BPNL000000000000}
+  authorityWalletDid: ${AUTHORITY_WALLET_DID:did:web:a888-203-129-213-107.ngrok-free.app:BPNL000000000000}
   authoritySigningServiceType: ${AUTHORITY_SIGNING_SERVICE_TYPE:LOCAL}
   localSigningKeyStorageType: ${LOCAL_SIGNING_KEY_STORAGE_TYPE:DB}
   vcContexts: ${VC_SCHEMA_LINK:https://www.w3.org/2018/credentials/v1, https://catenax-ng.github.io/product-core-schemas/businessPartnerData.json}
@@ -103,11 +103,13 @@ miw:
   security:
     enabled: true
     realm: ${KEYCLOAK_REALM:miw_test}
-    clientId: ${KEYCLOAK_CLIENT_ID}
-    auth-server-url: ${AUTH_SERVER_URL:http://localhost:8081}
+    clientId: ${KEYCLOAK_CLIENT_ID:miw_private_client}
+    auth-server-url: ${AUTH_SERVER_URL:http://localhost:28080}
     auth-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/auth
     token-url: ${miw.security.auth-server-url}/realms/${miw.security.realm}/protocol/openid-connect/token
     refresh-token-url: ${miw.security.token-url}
+  revocation:
+    url: ${REVOCATION_SERVICE_URL:http://localhost:8081}
 
 
 sts:

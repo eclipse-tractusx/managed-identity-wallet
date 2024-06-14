@@ -65,6 +65,11 @@ subprojects {
 
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
+
+        testImplementation "org.testcontainers:junit-jupiter"
+        testImplementation 'org.junit.jupiter:junit-jupiter-api'
+        testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+
     }
 
 

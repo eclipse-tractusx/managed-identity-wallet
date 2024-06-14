@@ -23,7 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.revocation.config.security;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.tractusx.managedidentitywallets.revocation.constant.ApplicationRole;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.revocation.constant.RevocationApiEndpoints;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

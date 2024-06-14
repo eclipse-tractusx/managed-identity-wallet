@@ -26,6 +26,7 @@ public class RevocationApiEndpoints {
     public static final String REVOCATION_API = "/api/v1/revocations";
     public static final String CREDENTIALS = "/api/credentials";
     public static final String REVOKE = "/revoke";
+    public static final String VERIFY = "/verify";
     public static final String STATUS_ENTRY = "/status-entry";
     public static final String CREDENTIALS_BY_ISSUER = "/credentials";
     public static final String CREDENTIALS_STATUS_INDEX =

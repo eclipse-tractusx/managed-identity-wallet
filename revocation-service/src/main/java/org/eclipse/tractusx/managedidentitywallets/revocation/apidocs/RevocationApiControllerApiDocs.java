@@ -36,6 +36,69 @@ import java.lang.annotation.Target;
 
 public class RevocationApiControllerApiDocs {
 
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Verifiable credential revoked successfully.",
+                            content = @Content(examples = { @ExampleObject(description = "if credential is revoked", value = """
+                                    {
+                                        "status":"revoked"
+                                    }
+                                    """),
+                                    @ExampleObject(description = "if credential is is active", value = """
+                                            {
+                                                "status":"active"
+                                            }
+                                            """) })),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "UnauthorizedException: invalid token",
+                            content = @Content()),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "ForbiddenException: invalid caller",
+                            content = @Content()),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "ConflictException: Revocation service error",
+                            content =
+                            @Content(
+                                    examples =
+                                    @ExampleObject(
+                                            value =
+                                                    ""),
+                                    mediaType = "application/json")),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "RevocationServiceException: Internal Server Error",
+                            content = @Content())
+            })
+    @RequestBody(
+            content = {
+                    @Content(
+                            examples =
+                            @ExampleObject(
+                                    value = """
+                                            {
+                                                "id": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1#12",
+                                                "statusPurpose": "revocation",
+                                                "statusListIndex": "12",
+                                                "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                                                "type": "BitstringStatusListEntry"
+                                            }
+                                            """),
+                            mediaType = "application/json")
+            })
+    @Operation(
+            summary = "Verify Revocation status",
+            description = "Verify revocation status of Credential")
+    public @interface verifyCredentialDocs {
+    }
+
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @ApiResponses(
@@ -59,16 +122,16 @@ public class RevocationApiControllerApiDocs {
                             @Content(
                                     examples =
                                     @ExampleObject(
-                                            value =
-                                                    "{\n"
-                                                            + "  \"type\": \"about:blank\",\n"
-                                                            + "  \"title\": \"Revocation service error\",\n"
-                                                            + "  \"status\": 409,\n"
-                                                            + "  \"detail\": \"Credential already revoked\",\n"
-                                                            + "  \"type\": \"BitstringStatusListEntry\",\n"
-                                                            + "  \"instance\": \"/api/v1/revocations/revoke\",\n"
-                                                            + "  \"timestamp\": 1707133388128\n"
-                                                            + "}"),
+                                            value = """
+                                                    {
+                                                        "type": "BitstringStatusListEntry",
+                                                        "title": "Revocation service error",
+                                                        "status": "409",
+                                                        "detail": "Credential already revoked",
+                                                        "instance": "/api/v1/revocations/revoke",
+                                                        "timestamp": 1707133388128
+                                                    }
+                                                    """),
                                     mediaType = "application/json")),
                     @ApiResponse(
                             responseCode = "500",
@@ -80,14 +143,15 @@ public class RevocationApiControllerApiDocs {
                     @Content(
                             examples =
                             @ExampleObject(
-                                    value =
-                                            "{\n"
-                                                    + "  \"id\": \"http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1#0\",\n"
-                                                    + "  \"statusPurpose\": \"revocation\",\n"
-                                                    + "  \"statusListIndex\": \"0\",\n"
-                                                    + "  \"statusListCredential\": \"http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1\",\n"
-                                                    + "  \"type\": \"BitstringStatusListEntry\"\n"
-                                                    + "}"),
+                                    value = """
+                                            {
+                                                "id": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1#12",
+                                                "statusPurpose": "revocation",
+                                                "statusListIndex": "12",
+                                                "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                                                "type": "BitstringStatusListEntry"
+                                            }
+                                            """),
                             mediaType = "application/json")
             })
     @Operation(
@@ -107,14 +171,15 @@ public class RevocationApiControllerApiDocs {
                                     @Content(
                                             examples =
                                             @ExampleObject(
-                                                    value =
-                                                            "{\n"
-                                                                    + "  \"id\": \"http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1#0\",\n"
-                                                                    + "  \"statusPurpose\": \"revocation\",\n"
-                                                                    + "  \"statusListIndex\": \"0\",\n"
-                                                                    + "  \"statusListCredential\": \"http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1\",\n"
-                                                                    + "  \"type\": \"BitstringStatusListEntry\"\n"
-                                                                    + "}"),
+                                                    value = """
+                                                            {
+                                                                "id": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1#17",
+                                                                "statusPurpose": "revocation",
+                                                                "statusListIndex": "17",
+                                                                "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                                                                "type": "BitstringStatusListEntry"
+                                                            }
+                                                            """),
                                             mediaType = "application/json")
                             }),
                     @ApiResponse(
@@ -135,11 +200,12 @@ public class RevocationApiControllerApiDocs {
                     @Content(
                             examples =
                             @ExampleObject(
-                                    value =
-                                            "{\n"
-                                                    + "  \"purpose\": \"revocation\",\n"
-                                                    + "  \"issuerId\": \"did:web:localhost:BPNL000000000000\"\n"
-                                                    + "}"),
+                                    value = """
+                                            {
+                                              "purpose": "revocation",
+                                              "issuerId": "did:web:localhost:BPNL000000000000"
+                                            }
+                                            """),
                             mediaType = "application/json")
             })
     @Operation(

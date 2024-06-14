@@ -22,13 +22,13 @@
 package org.eclipse.tractusx.managedidentitywallets.revocation.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.tractusx.managedidentitywallets.revocation.constant.PurposeType;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.RevocationPurpose;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.revocation.constant.RevocationApiEndpoints;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.CredentialStatusDto;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.StatusEntryDto;
 import org.eclipse.tractusx.managedidentitywallets.revocation.services.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.revocation.utils.BitSetManager;
-import org.eclipse.tractusx.managedidentitywallets.revocation.utils.StringPool;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-public class RevocationApiControllerTest {
+class RevocationApiControllerTest {
 
     private static final String CALLER_BPN = UUID.randomUUID().toString();
 
@@ -87,16 +87,16 @@ public class RevocationApiControllerTest {
     }
 
     @Test
-    public void whenPostCreateStatusListVC_thenReturnStatus() throws Exception {
+    void whenPostCreateStatusListVC_thenReturnStatus() throws Exception {
         // Given
-        String validPurpose = PurposeType.REVOCATION.toString();
+        String validPurpose = RevocationPurpose.REVOCATION.name();
         StatusEntryDto statusEntryDto = new StatusEntryDto(validPurpose, DID);
         String validIndex =
                 String.valueOf(BitSetManager.BITSET_SIZE / 2); // any valid index within range
         CredentialStatusDto credentialStatusDto =
                 new CredentialStatusDto(
                         "https://example.com/revocations/credentials/" + BPN + "/revocation/1#" + validIndex,
-                        PurposeType.REVOCATION.toString(),
+                        RevocationPurpose.REVOCATION.name(),
                         validIndex, // this value is within the range [0, BitSetManager.BITSET_SIZE - 1]
                         "https://example.com/revocations/credentials/" + BPN + "/revocation/1",
                         "BitstringStatusListEntry");
@@ -132,7 +132,7 @@ public class RevocationApiControllerTest {
     }
 
     @Test
-    public void whenPostRevokeCredential_thenReturnOkStatus() throws Exception {
+    void whenPostRevokeCredential_thenReturnOkStatus() throws Exception {
         // Given
         String validIndex =
                 String.valueOf(BitSetManager.BITSET_SIZE / 2); // any valid index within range
@@ -160,9 +160,9 @@ public class RevocationApiControllerTest {
     }
 
     @Test
-    public void whenGetCredential_thenReturnCredentials() throws Exception {
+    void whenGetCredential_thenReturnCredentials() throws Exception {
         // Given
-        String validPurpose = PurposeType.REVOCATION.toString();
+        String validPurpose = RevocationPurpose.REVOCATION.name();
         VerifiableCredential verifiableCredential =
                 new VerifiableCredential(
                         createVerifiableCredentialTestData()); // Populate with valid test data

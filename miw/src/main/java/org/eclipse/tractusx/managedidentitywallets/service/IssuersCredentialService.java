@@ -36,9 +36,12 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -49,11 +52,10 @@ import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
-import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
-import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebResolver;
 import org.eclipse.tractusx.ssi.lib.did.web.util.DidWebParser;
@@ -61,6 +63,7 @@ import org.eclipse.tractusx.ssi.lib.exception.proof.JwtExpiredException;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtValidator;
 import org.eclipse.tractusx.ssi.lib.jwt.SignedJwtVerifier;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatusList2021Entry;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +81,10 @@ import java.net.http.HttpClient;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -107,6 +112,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     private final ObjectMapper objectMapper;
 
     private Map<SigningServiceType, SigningService> availableSigningServices;
+
+    private final RevocationService revocationService;
 
 
     @Override
@@ -190,18 +197,19 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     }
 
 
-
     /**
      * Issue credential using base wallet
      *
      * @param holderDid the holder did
      * @param data      the data
      * @param asJwt     the as jwt
+     * @param revocable the revocable
      * @param callerBpn the caller bpn
+     * @param token     the token
      * @return the verifiable credential
      */
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public CredentialsResponse issueCredentialUsingBaseWallet(String holderDid, Map<String, Object> data, boolean asJwt, String callerBpn) {
+    public CredentialsResponse issueCredentialUsingBaseWallet(String holderDid, Map<String, Object> data, boolean asJwt, boolean revocable, String callerBpn, String token) {
         //Fetch Holder Wallet
         Wallet holderWallet = commonService.getWalletByIdentifier(holderDid);
 
@@ -213,7 +221,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
         boolean isSelfIssued = isSelfIssued(holderWallet.getBpn());
 
-        CredentialCreationConfig holdersCredentialCreationConfig = CredentialCreationConfig.builder()
+
+        CredentialCreationConfig.CredentialCreationConfigBuilder builder = CredentialCreationConfig.builder()
                 .encoding(VerifiableEncoding.JSON_LD)
                 .subject(verifiableCredential.getCredentialSubject().get(0))
                 .types(verifiableCredential.getTypes())
@@ -223,9 +232,16 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
                 .contexts(verifiableCredential.getContext())
                 .expiryDate(Date.from(verifiableCredential.getExpirationDate()))
                 .selfIssued(isSelfIssued)
-                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()))
-                .build();
+                .revocable(revocable)
+                .algorithm(SupportedAlgorithms.valueOf(issuerWallet.getAlgorithm()));
 
+        if (revocable) {
+            //get credential status in case of revocation
+            VerifiableCredentialStatusList2021Entry statusListEntry = revocationService.getStatusListEntry(issuerWallet.getBpn(), token);
+            builder.verifiableCredentialStatus(statusListEntry);
+        }
+
+        CredentialCreationConfig holdersCredentialCreationConfig = builder.build();
 
         // Create Credential
         SignerResult result = availableSigningServices.get(issuerWallet.getSigningServiceType()).createCredential(holdersCredentialCreationConfig);
@@ -258,7 +274,7 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     }
 
 
-    private JWTVerificationResult verifyVCAsJWT(String jwt, DidResolver didResolver, boolean withCredentialsValidation, boolean withCredentialExpiryDate) throws IOException, ParseException {
+    private JWTVerificationResult verifyVCAsJWT(String jwt, DidResolver didResolver, boolean withCredentialsValidation, boolean withCredentialExpiryDate, String token) throws IOException, ParseException {
         SignedJWT signedJWT = SignedJWT.parse(jwt);
         Map<String, Object> claims = objectMapper.readValue(signedJWT.getPayload().toBytes(), Map.class);
         String vcClaim = objectMapper.writeValueAsString(claims.get("vc"));
@@ -266,7 +282,10 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         VerifiableCredential verifiableCredential = new VerifiableCredential(map);
 
         //took this approach to avoid issues in sonarQube
-        return new JWTVerificationResult(validateSignature(withCredentialsValidation, signedJWT, didResolver) && validateJWTExpiryDate(withCredentialExpiryDate, signedJWT), verifiableCredential);
+        return new JWTVerificationResult(validateSignature(withCredentialsValidation, signedJWT, didResolver)
+                && validateJWTExpiryDate(withCredentialExpiryDate, signedJWT)
+                && !checkRevocationStatus(token, verifiableCredential, new HashMap<>())
+                , verifiableCredential);
 
     }
 
@@ -310,10 +329,11 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      *
      * @param verificationRequest      the verification request
      * @param withCredentialExpiryDate the with credential expiry date
+     * @param token                    the token
      * @return the map
      */
-    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialExpiryDate) {
-        return credentialsValidation(verificationRequest, true, withCredentialExpiryDate);
+    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialExpiryDate, String token) {
+        return credentialsValidation(verificationRequest, true, withCredentialExpiryDate, token);
     }
 
     /**
@@ -322,10 +342,12 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
      * @param verificationRequest       the verification request
      * @param withCredentialsValidation the with credentials validation
      * @param withCredentialExpiryDate  the with credential expiry date
+     * @param token                     the token
      * @return the map
      */
     @SneakyThrows
-    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialsValidation, boolean withCredentialExpiryDate) {
+    public Map<String, Object> credentialsValidation(CredentialVerificationRequest verificationRequest, boolean withCredentialsValidation,
+                                                     boolean withCredentialExpiryDate, String token) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .build();
@@ -337,29 +359,39 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
         VerifiableCredential verifiableCredential;
         boolean dateValidation = true;
 
+        boolean revoked = false;
         if (verificationRequest.containsKey(StringPool.VC_JWT_KEY)) {
-            JWTVerificationResult result = verifyVCAsJWT((String) verificationRequest.get(StringPool.VC_JWT_KEY), didResolver, withCredentialsValidation, withCredentialExpiryDate);
+            JWTVerificationResult result = verifyVCAsJWT((String) verificationRequest.get(StringPool.VC_JWT_KEY), didResolver, withCredentialsValidation, withCredentialExpiryDate, token);
             valid = result.valid;
         } else {
-
             verifiableCredential = new VerifiableCredential(verificationRequest);
             LinkedDataProofValidation proofValidation = LinkedDataProofValidation.newInstance(didResolver);
-
-
             if (withCredentialsValidation) {
                 valid = proofValidation.verify(verifiableCredential);
             } else {
                 valid = true;
             }
 
+            revoked = checkRevocationStatus(token, verifiableCredential, response);
+
             dateValidation = CommonService.validateExpiry(withCredentialExpiryDate, verifiableCredential,
                     response);
         }
 
-        response.put(StringPool.VALID, valid && dateValidation);
+        response.put(StringPool.VALID, valid && dateValidation && !revoked);
         response.put(StringPool.VC, verificationRequest);
 
         return response;
+    }
+
+    private boolean checkRevocationStatus(String token, VerifiableCredential verifiableCredential, Map<String, Object> response) {
+        //check revocation
+        if (verifiableCredential.getVerifiableCredentialStatus() != null) {
+            CredentialStatus credentialStatus = revocationService.checkRevocation(verifiableCredential, token);
+            response.put(StringPool.CREDENTIAL_STATUS, credentialStatus.getName());
+            return !Objects.equals(credentialStatus.getName(), CredentialStatus.ACTIVE.getName());
+        }
+        return false;
     }
 
 
