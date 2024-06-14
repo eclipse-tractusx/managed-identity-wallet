@@ -48,15 +48,9 @@ public class VerifiableCredentialValidator
         // Assuming 'id' within 'credentialSubject' is the field to be validated as a URI
         @NonNull
         List<VerifiableCredentialSubject> credentialSubject = credential.getCredentialSubject();
-        if (credentialSubject != null) {
-            if (!validateCredentialSubject(credentialSubject, context)) {
-                return false;
-            }
-        }
+        return validateCredentialSubject(credentialSubject, context);
 
         // Additional validation checks can be added here, e.g., checking the proof object
-
-        return true;
     }
 
     private boolean validateCredentialSubject(

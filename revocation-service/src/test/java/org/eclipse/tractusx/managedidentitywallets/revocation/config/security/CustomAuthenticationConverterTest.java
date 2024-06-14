@@ -36,13 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CustomAuthenticationConverterTest {
 
-    private static String VALID =
+    private static final String VALID =
             "eyJhbGciOiJSUzI1NiIsImFscGhhIjoiZzB1ZjNycjlycnN2cHlhcTVuamg4In0.eyJpc3MiOiJEaW5vQ2hpZXNhLmdpdGh1Yi5pbyIsInN1YiI6Im1heGluZSIsImF1ZCI6ImlkcmlzIiwiaWF0IjoxNzAyNjUwMTc2LCJleHAiOjE3MDI2NTA3NzYsInJlc291cmNlX2FjY2VzcyI6eyJyZXNvdXJjZUlkIjp7InJvbGVzIjpbImRlaV9tdWRhIl19fX0.wTv9GBX3AuRO8UIsAuu2YJU77ai-wchDyxRn-_yX9PeHt23vCmp_JAbkkdMdyLAWWOKncjgNeG-4lB9RCBsjmbdb1imujUrAocp3VZQqNg6OVaNV58kdsIpNNF9S8XlFI4hr1BANrw2rWJDkTRu1id-Fu-BVE1BF7ySCKHS_NaY3e7yXQM-jtU63z5FBpPvfMF-La3blPle93rgut7V3LlG-tNOp93TgFzGrQQXuJUsew34T0u4OlQa3TjQuMdZMTy0SVSLSpIzAqDsAkHv34W6SdY1p6FVQ14TfawRLkrI2QY-YM_dCFAEE7KqqnUrVVyw6XG1ydeFDuX8SJuQX7g";
 
-    private static String MISSING_RESOURCE_ID =
+    private static final String MISSING_RESOURCE_ID =
             "{\n" + "    \"resource_access\": {\n" + "    }\n" + "}";
 
-    private static String MISSING_ROLES =
+    private static final String MISSING_ROLES =
             "{\n"
                     + "    \"resource_access\": {\n"
                     + "        \"resourceId\": {\n"

@@ -26,7 +26,7 @@ public enum SupportedAlgorithms {
     ED25519("ED25519"),
     ES256K("ES256K");
 
-    private String value;
+    private final String value;
 
     SupportedAlgorithms(String value) {
         this.value = value;

@@ -274,12 +274,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         final DidResolver resolver = didDocumentResolverService.getCompositeDidResolver();
         final LinkedDataProofValidation linkedDataProofValidation = LinkedDataProofValidation.newInstance(resolver);
         final boolean isValid = linkedDataProofValidation.verify(credential);
-
-        if (isValid) {
-            log.debug("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
-        } else {
-            log.info("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
-        }
+        log.info("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
         return isValid;
     }
 

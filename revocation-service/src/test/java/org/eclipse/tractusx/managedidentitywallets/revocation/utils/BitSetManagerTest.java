@@ -24,9 +24,9 @@ package org.eclipse.tractusx.managedidentitywallets.revocation.utils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.BitSet;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -104,6 +104,6 @@ class BitSetManagerTest {
 
         byte[] decodedData = BitSetManager.decodeFromString(encoded);
         assertNotNull(decodedData);
-        assertTrue(Arrays.equals(originalData, decodedData));
+        assertArrayEquals(originalData, decodedData);
     }
 }

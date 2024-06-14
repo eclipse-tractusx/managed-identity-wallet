@@ -278,7 +278,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
 
     private VerifiablePresentation generateJsonLdPresentation(PresentationCreationConfig config, byte[] privateKeyBytes) throws UnsupportedSignatureTypeException, InvalidPrivateKeyFormatException, SignatureGenerateFailedException, TransformJsonLdException {
         VerifiablePresentationBuilder verifiablePresentationBuilder =
-                new VerifiablePresentationBuilder().id(URI.create(config.getVpIssuerDid() + "#" + UUID.randomUUID().toString()))
+                new VerifiablePresentationBuilder().id(URI.create(config.getVpIssuerDid() + "#" + UUID.randomUUID()))
                         .type(List.of(VerifiablePresentationType.VERIFIABLE_PRESENTATION))
                         .verifiableCredentials(config.getVerifiableCredentials());
 
@@ -339,7 +339,7 @@ public class LocalSigningServiceImpl implements LocalSigningService {
         SerializedJwtPresentationFactory presentationFactory = new SerializedJwtPresentationFactoryImpl(
                 new SignedJwtFactory(new OctetKeyPairFactory()), new JsonLdSerializerImpl(), config.getVpIssuerDid());
 
-        X25519PrivateKey privateKey = null;
+        X25519PrivateKey privateKey;
         try {
             privateKey = new X25519PrivateKey(privateKeyBytes);
         } catch (InvalidPrivateKeyFormatException e) {

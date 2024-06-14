@@ -157,10 +157,15 @@ public class AuthenticationUtils {
                 .clientId(StringPool.CLIENT_ID)
                 .clientSecret(StringPool.CLIENT_SECRET)
                 .username(username)
-                .password(StringPool.USER_PASSWORD)
+                .password(getUserPassword())
                 .build();
         String access_token = keycloakAdminClient.tokenManager().getAccessToken().getToken();
 
         return StringPool.BEARER_SPACE + access_token;
+    }
+
+    @NotNull
+    private static String getUserPassword() {
+        return "s3cr3t";
     }
 }

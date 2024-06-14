@@ -363,11 +363,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     }
 
 
-    @RequiredArgsConstructor
-    private class WalletKeyInfo {
-        private final String keyId;
-        private final KeyPair keyPair;
-        private final SupportedAlgorithms algorithm;
-        private final VerificationMethod verificationMethod;
+    private record WalletKeyInfo(String keyId, KeyPair keyPair, SupportedAlgorithms algorithm,
+                                 VerificationMethod verificationMethod) {
     }
 }

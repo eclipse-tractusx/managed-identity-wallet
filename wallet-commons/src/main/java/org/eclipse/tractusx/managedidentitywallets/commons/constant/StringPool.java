@@ -62,9 +62,6 @@ public class StringPool {
     public static final String CLIENT_SECRET = "miw_private_client_secret";
 
     public static final String REALM = "miw_test";
-
-    public static final String USER_PASSWORD = "s3cr3t";
-
     public static final String VALID_USER_NAME = "valid_user";
 
     public static final String INVALID_USER_NAME = "invalid_user";

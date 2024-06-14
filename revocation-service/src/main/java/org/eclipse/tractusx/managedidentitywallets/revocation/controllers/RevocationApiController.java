@@ -131,7 +131,7 @@ public class RevocationApiController extends BaseController {
     /**
      * The function `getCredentialsByIssuerId` retrieves a list of credentials by their issuer ID.
      *
-     * @param issuerId The `issuerId` parameter is a string that represents the identifier of the
+     * @param issuerBPN The `issuerBPN` parameter is a string that represents the BPn of the
      *                 issuer.
      * @return The method is returning a ResponseEntity object that wraps a VerifiableCredential
      * object.
