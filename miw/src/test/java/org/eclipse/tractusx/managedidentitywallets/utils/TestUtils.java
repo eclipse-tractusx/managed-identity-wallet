@@ -38,6 +38,7 @@ import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialSt
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
@@ -129,14 +130,14 @@ public class TestUtils {
         return walletRepository.save(wallet);
     }
 
-    public static void checkVC(VerifiableCredential verifiableCredential, MIWSettings miwSettings) {
-        //text context URL
-        Assertions.assertEquals(verifiableCredential.getContext().size(), miwSettings.vcContexts().size() + 1);
-
+    public static void checkVC(VerifiableCredential verifiableCredential, MIWSettings miwSettings, RevocationSettings revocationSettings) {
         for (URI link : miwSettings.vcContexts()) {
             Assertions.assertTrue(verifiableCredential.getContext().contains(link));
         }
 
+        if (verifiableCredential.getVerifiableCredentialStatus() != null) {
+            Assertions.assertTrue(verifiableCredential.getContext().contains(revocationSettings.bitStringStatusListContext()));
+        }
         //check expiry date
         Assertions.assertEquals(0, verifiableCredential.getExpirationDate().compareTo(miwSettings.vcExpiryDate().toInstant()));
     }
@@ -261,7 +262,6 @@ public class TestUtils {
         //VC Subject
         VerifiableCredentialSubject verifiableCredentialSubject =
                 new VerifiableCredentialSubject(subjectData);
-
         //Using Builder
         VerifiableCredential credentialWithoutProof =
                 verifiableCredentialBuilder

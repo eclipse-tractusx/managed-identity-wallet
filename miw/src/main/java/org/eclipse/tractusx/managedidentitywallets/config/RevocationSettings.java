@@ -26,5 +26,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.net.URI;
 
 @ConfigurationProperties(prefix = "miw.revocation")
-public record RevocationSettings(URI url) {
+public record RevocationSettings(URI url, URI bitStringStatusListContext) {
 }

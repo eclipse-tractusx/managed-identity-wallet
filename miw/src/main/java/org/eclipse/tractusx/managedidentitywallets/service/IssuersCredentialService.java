@@ -42,6 +42,7 @@ import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlg
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -77,6 +78,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -114,6 +116,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
     private Map<SigningServiceType, SigningService> availableSigningServices;
 
     private final RevocationService revocationService;
+
+    private final RevocationSettings revocationSettings;
 
 
     @Override
@@ -239,6 +243,14 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
             //get credential status in case of revocation
             VerifiableCredentialStatusList2021Entry statusListEntry = revocationService.getStatusListEntry(issuerWallet.getBpn(), token);
             builder.verifiableCredentialStatus(statusListEntry);
+
+            //add revocation context if missing
+            List<URI> uris = miwSettings.vcContexts();
+            if (!uris.contains(revocationSettings.bitStringStatusListContext())) {
+                uris.add(revocationSettings.bitStringStatusListContext());
+                builder.contexts(uris);
+            }
+
         }
 
         CredentialCreationConfig holdersCredentialCreationConfig = builder.build();

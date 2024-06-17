@@ -31,6 +31,7 @@ import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialSt
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
@@ -88,6 +89,9 @@ class IssuersCredentialTest {
 
     @Autowired
     private IssuersCredentialRepository issuersCredentialRepository;
+
+    @Autowired
+    private RevocationSettings revocationSettings;
 
 
     @MockInBean(RevocationService.class)
@@ -259,7 +263,7 @@ class IssuersCredentialTest {
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
         Assertions.assertFalse(credentials.isEmpty());
-        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings, revocationSettings);
         Assertions.assertFalse(credentials.get(0).isStored());  //stored must be false
         Assertions.assertFalse(credentials.get(0).isSelfIssued());  //stored must be false
 

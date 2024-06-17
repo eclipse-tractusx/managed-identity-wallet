@@ -153,7 +153,7 @@ class IssuersCredentialServiceTest {
                 issuersCredentialRepository,
                 miwSettings,
                 new SpecificationUtil<IssuersCredential>(),
-                holdersCredentialRepository, commonService, objectMapper, revocationService);
+                holdersCredentialRepository, commonService, objectMapper, revocationService, revocationSettings);
     }
 
     @BeforeEach

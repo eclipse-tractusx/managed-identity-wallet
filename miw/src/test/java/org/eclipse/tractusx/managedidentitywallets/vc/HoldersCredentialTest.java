@@ -29,6 +29,7 @@ import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplica
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
@@ -101,6 +102,9 @@ class HoldersCredentialTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private RevocationSettings revocationSettings;
+
     @MockInBean(RevocationService.class)
     private RevocationClient revocationClient;
 
@@ -149,7 +153,7 @@ class HoldersCredentialTest {
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
         Assertions.assertFalse(credentials.isEmpty());
-        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings, revocationSettings);
         Assertions.assertTrue(credentials.get(0).isSelfIssued());
         Assertions.assertFalse(credentials.get(0).isStored());
     }
