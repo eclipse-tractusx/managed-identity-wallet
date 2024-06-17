@@ -21,8 +21,21 @@
 
 package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
+import lombok.Getter;
+
+/**
+ * The enum Revocation purpose.
+ */
+@Getter
 public enum RevocationPurpose {
-    REVOCATION("revocation"), SUSPENSION("suspension");
+    /**
+     * revocation purpose.
+     */
+    REVOCATION("revocation"),
+    /**
+     * Suspension  purpose.
+     */
+    SUSPENSION("suspension");
 
     private final String name;
 

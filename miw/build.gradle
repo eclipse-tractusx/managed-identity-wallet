@@ -19,8 +19,6 @@
 
 plugins {
     id 'java'
-    id "jacoco"
-    id 'project-report'
     id "de.undercouch.download" version "5.5.0"
 }
 
@@ -94,64 +92,3 @@ bootJar {
         from '../LICENSE'
     }
 }
-
-test {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
-htmlDependencyReport {
-    projects = project.allprojects
-}
-
-jacocoTestReport {
-
-    reports {
-        xml.enabled true
-        xml.outputLocation = file("./build/reports/xml/jacoco.xml")
-
-        csv.enabled false
-
-        html.enabled true
-        html.outputLocation = file("./build/reports/html/jacoco")
-    }
-
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    "org/eclipse/tractusx/managedidentitywallets/dto/*",
-                    "org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
-                    "org/eclipse/tractusx/managedidentitywallets/constant/*",
-                    "org/eclipse/tractusx/managedidentitywallets/exception/*"
-            ])
-        }))
-    }
-}
-
-jacoco {
-    toolVersion = "${jacocoVersion}"
-}
-
-
-jacocoTestCoverageVerification {
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    "org/eclipse/tractusx/managedidentitywallets/dto/*",
-                    "org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
-                    "org/eclipse/tractusx/managedidentitywallets/constant/*",
-                    "org/eclipse/tractusx/managedidentitywallets/exception/*"
-            ])
-        }))
-    }
-    violationRules {
-        rule {
-            limit {
-                // disabled for now
-                minimum = 0.00
-            }
-        }
-    }
-}
-
-check.dependsOn jacocoTestCoverageVerification

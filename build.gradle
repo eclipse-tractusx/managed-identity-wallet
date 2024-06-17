@@ -37,7 +37,8 @@ subprojects {
         plugin "java"
         plugin "org.springframework.boot"
         plugin "io.spring.dependency-management"
-        plugin 'jacoco-report-aggregation'
+        plugin "jacoco"
+        plugin 'project-report'
 
     }
 
@@ -81,6 +82,68 @@ subprojects {
         enabled = false
     }
 
+
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+
+    jacocoTestReport {
+
+        reports {
+            xml.enabled true
+            xml.outputLocation = file("./build/reports/xml/jacoco.xml")
+
+            csv.enabled false
+
+            html.enabled true
+            html.outputLocation = file("./build/reports/html/jacoco")
+        }
+
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        "org/eclipse/tractusx/managedidentitywallets/dto/*",
+                        "org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
+                        "org/eclipse/tractusx/managedidentitywallets/constant/*",
+                        "org/eclipse/tractusx/managedidentitywallets/commons/constant/*",
+                        "org/eclipse/tractusx/managedidentitywallets/exception/*"
+                ])
+            }))
+        }
+    }
+
+    jacoco {
+        toolVersion = "${jacocoVersion}"
+    }
+
+
+    jacocoTestCoverageVerification {
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        "org/eclipse/tractusx/managedidentitywallets/dto/*",
+                        "org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
+                        "org/eclipse/tractusx/managedidentitywallets/constant/*",
+                        "org/eclipse/tractusx/managedidentitywallets/commons/constant/*",
+                        "org/eclipse/tractusx/managedidentitywallets/exception/*"
+                ])
+            }))
+        }
+        violationRules {
+            rule {
+                limit {
+                    minimum = 0.80
+                }
+            }
+        }
+    }
+
+    htmlDependencyReport {
+        projects = project.allprojects
+    }
+
+    check.dependsOn jacocoTestCoverageVerification
 }
 
 
@@ -116,8 +179,8 @@ tasks.register('dashDependencies') { dashDependencies ->
                             conf.incoming.resolutionResult.allDependencies
                                     .findAll({ it instanceof ResolvedDependencyResult })
                                     .collect { ResolvedDependencyResult dep ->
-                                "${dep.selected}"
-                            }
+                                        "${dep.selected}"
+                                    }
                     )
                 }
             }
@@ -126,10 +189,10 @@ tasks.register('dashDependencies') { dashDependencies ->
         def finalDeps = []
         for (final def d in deps) {
             //skip main module dependencies
-            if(d.toString() =="project :miw" || d.toString() =="project :revocation-service"){
-                println(" - "+d.toString() + " -")
+            if (d.toString() == "project :miw" || d.toString() == "project :revocation-service") {
+                println(" - " + d.toString() + " -")
 
-            }else{
+            } else {
                 finalDeps.add(d)
             }
         }
@@ -148,7 +211,7 @@ tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
     doFirst {
         classpath = rootProject.files('dash.jar')
         // docs: https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-04
-        args('-project', 'automotive.tractusx',  '-summary', 'DEPENDENCIES', 'deps.txt')
+        args('-project', 'automotive.tractusx', '-summary', 'DEPENDENCIES', 'deps.txt')
     }
     doLast {
         logger.lifecycle("Removing 'deps.txt' now.")

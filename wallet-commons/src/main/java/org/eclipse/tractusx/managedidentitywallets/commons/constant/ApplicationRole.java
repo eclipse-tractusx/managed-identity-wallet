@@ -21,11 +21,10 @@
 
 package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
-public class ApplicationRole {
+import lombok.experimental.UtilityClass;
 
-    private ApplicationRole() {
-        throw new IllegalStateException("Constant class");
-    }
+@UtilityClass
+public class ApplicationRole {
 
     /**
      * The constant ROLE_VIEW_WALLETS.

@@ -23,10 +23,20 @@ package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
 import lombok.Getter;
 
+/**
+ * The enum Credential status.
+ */
 @Getter
 public enum CredentialStatus {
 
-    ACTIVE("active"), REVOKED("revoked");
+    /**
+     * Active credential status.
+     */
+    ACTIVE("active"),
+    /**
+     * Revoked credential status.
+     */
+    REVOKED("revoked");
 
     private final String name;
 

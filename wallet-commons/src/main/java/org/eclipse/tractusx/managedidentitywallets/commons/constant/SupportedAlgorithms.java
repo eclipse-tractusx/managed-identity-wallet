@@ -21,9 +21,18 @@
 
 package org.eclipse.tractusx.managedidentitywallets.commons.constant;
 
+/**
+ * The enum Supported algorithms.
+ */
 public enum SupportedAlgorithms {
 
+    /**
+     * Ed 25519 supported algorithms.
+     */
     ED25519("ED25519"),
+    /**
+     * Es 256 k supported algorithms.
+     */
     ES256K("ES256K");
 
     private final String value;
