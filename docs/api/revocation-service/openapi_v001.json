@@ -54,23 +54,35 @@
           "required" : true
         },
         "responses" : {
-          "401" : {
-            "description" : "UnauthorizedException: invalid token"
-          },
           "200" : {
-            "description" : "if credential is revoked"
-          },
-          "500" : {
-            "description" : "RevocationServiceException: Internal Server Error"
-          },
-          "409" : {
-            "description" : "ConflictException: Revocation service error",
+            "description" : "Status of credential",
             "content" : {
-              "application/json" : {}
+              "application/json" : {
+                "examples" : {
+                  "if credential is revoked" : {
+                    "description" : "if credential is revoked",
+                    "value" : {
+                      "status" : "revoked"
+                    }
+                  },
+                  "if credential is active" : {
+                    "description" : "if credential is is active",
+                    "value" : {
+                      "status" : "active"
+                    }
+                  }
+                }
+              }
             }
           },
           "403" : {
             "description" : "ForbiddenException: invalid caller"
+          },
+          "401" : {
+            "description" : "UnauthorizedException: invalid token"
+          },
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
           }
         }
       }
@@ -98,12 +110,6 @@
           "required" : true
         },
         "responses" : {
-          "401" : {
-            "description" : "UnauthorizedException: invalid token"
-          },
-          "500" : {
-            "description" : "RevocationServiceException: Internal Server Error"
-          },
           "403" : {
             "description" : "ForbiddenException: invalid caller"
           },
@@ -120,6 +126,12 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "UnauthorizedException: invalid token"
+          },
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
           }
         }
       }
@@ -150,15 +162,6 @@
           "required" : true
         },
         "responses" : {
-          "200" : {
-            "description" : "Verifiable credential revoked successfully."
-          },
-          "401" : {
-            "description" : "UnauthorizedException: invalid token"
-          },
-          "500" : {
-            "description" : "RevocationServiceException: Internal Server Error"
-          },
           "403" : {
             "description" : "ForbiddenException: invalid caller"
           },
@@ -176,6 +179,15 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "UnauthorizedException: invalid token"
+          },
+          "200" : {
+            "description" : "Verifiable credential revoked successfully."
+          },
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
           }
         }
       }
@@ -221,9 +233,6 @@
           }
         ],
         "responses" : {
-          "500" : {
-            "description" : "RevocationServiceException: Internal Server Error"
-          },
           "200" : {
             "description" : "Get Status list credential ",
             "content" : {
@@ -262,6 +271,9 @@
           },
           "404" : {
             "description" : "Status list credential not found"
+          },
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
           }
         }
       }

@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.MediaType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -43,19 +44,19 @@ public class RevocationApiControllerApiDocs {
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "if credential is revoked",
-                            content = @Content(
+                            description = "Status of credential",
+                            content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     examples = {
-                                            @ExampleObject(description = "if credential is revoked", value = """
+                                            @ExampleObject(name = "if credential is revoked", description = "if credential is revoked", value = """
                                                     {
                                                         "status":"revoked"
                                                     }
                                                     """),
-                                            @ExampleObject(description = "if credential is is active", value = """
+                                            @ExampleObject(name = "if credential is active", description = "if credential is is active", value = """
                                                     {
                                                         "status":"active"
                                                     }
-                                                    """) })),
+                                                    """) }) }),
                     @ApiResponse(
                             responseCode = "401",
                             description = "UnauthorizedException: invalid token",
@@ -64,14 +65,6 @@ public class RevocationApiControllerApiDocs {
                             responseCode = "403",
                             description = "ForbiddenException: invalid caller",
                             content = @Content()),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "ConflictException: Revocation service error",
-                            content =
-                            @Content(
-                                    examples =
-                                    @ExampleObject(),
-                                    mediaType = "application/json")),
                     @ApiResponse(
                             responseCode = "500",
                             description = "RevocationServiceException: Internal Server Error",
