@@ -89,11 +89,11 @@ with other DID agents.
 
 ## Business Context
 
-![](./images/business_context.png)
+![](images/business_context.png)
 
 ## Technical Context
 
-![](./images/technical_context.png)
+![](images/technical_context.png)
 
 # Solution Strategy
 
@@ -114,7 +114,7 @@ service using the following technology stack:
 This diagram is a zoomed out view of the MIW and the components it interacts
 with.
 
-![](./images/SingleInstanceDomainView.png)
+![](images/SingleInstanceDomainView.png)
 
 ## Overall System
 

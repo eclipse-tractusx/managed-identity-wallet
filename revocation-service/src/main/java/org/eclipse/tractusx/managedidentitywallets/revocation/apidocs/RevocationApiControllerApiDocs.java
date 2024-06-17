@@ -43,17 +43,19 @@ public class RevocationApiControllerApiDocs {
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Verifiable credential revoked successfully.",
-                            content = @Content(examples = { @ExampleObject(description = "if credential is revoked", value = """
-                                    {
-                                        "status":"revoked"
-                                    }
-                                    """),
-                                    @ExampleObject(description = "if credential is is active", value = """
-                                            {
-                                                "status":"active"
-                                            }
-                                            """) })),
+                            description = "if credential is revoked",
+                            content = @Content(
+                                    examples = {
+                                            @ExampleObject(description = "if credential is revoked", value = """
+                                                    {
+                                                        "status":"revoked"
+                                                    }
+                                                    """),
+                                            @ExampleObject(description = "if credential is is active", value = """
+                                                    {
+                                                        "status":"active"
+                                                    }
+                                                    """) })),
                     @ApiResponse(
                             responseCode = "401",
                             description = "UnauthorizedException: invalid token",
@@ -68,9 +70,7 @@ public class RevocationApiControllerApiDocs {
                             content =
                             @Content(
                                     examples =
-                                    @ExampleObject(
-                                            value =
-                                                    ""),
+                                    @ExampleObject(),
                                     mediaType = "application/json")),
                     @ApiResponse(
                             responseCode = "500",
@@ -225,8 +225,41 @@ public class RevocationApiControllerApiDocs {
                                     @Content(
                                             examples =
                                             @ExampleObject(
-                                                    value =
-                                                            "{\"@context\": [\"https://www.w3.org/2018/credentials/v1\", \"https://eclipse-tractusx.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json\", \"https://w3id.org/security/suites/jws-2020/v1\"], \"id\": \"http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1\", \"type\": [\"VerifiableCredential\", \"BitstringStatusListCredential\"], \"issuer\": \"did:web:localhost:BPNL000000000000\", \"issuanceDate\": \"2024-02-05T09:39:58Z\", \"credentialSubject\": [{\"statusPurpose\": \"revocation\", \"id\": \"http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1\", \"type\": \"BitstringStatusList\", \"encodedList\": \"H4sIAAAAAAAA/wMAAAAAAAAAAAA=\"}], \"proof\": {\"proofPurpose\": \"assertionMethod\", \"type\": \"JsonWebSignature2020\", \"verificationMethod\": \"did:web:localhost:BPNL000000000000#ed463e4c-b900-481a-b5d0-9ae439c434ae\", \"created\": \"2024-02-05T09:39:58Z\", \"jws\": \"eyJhbGciOiJFZERTQSJ9..swX1PLJkSlxB6JMmY4a2uUzR-uszlyLrVdNppoYSx4PTV1LzQrDb0afzp_dvTNUWEYDI57a8iPh78BDjqMjSDQ\"}}"),
+                                                    value = """
+                                                            {
+                                                                "@context":
+                                                                [
+                                                                    "https://www.w3.org/2018/credentials/v1",
+                                                                    "https://eclipse-tractusx.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json",
+                                                                    "https://w3id.org/security/suites/jws-2020/v1"
+                                                                ],
+                                                                "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                                                                "type":
+                                                                [
+                                                                    "VerifiableCredential",
+                                                                    "BitstringStatusListCredential"
+                                                                ],
+                                                                "issuer": "did:web:localhost:BPNL000000000000",
+                                                                "issuanceDate": "2024-02-05T09:39:58Z",
+                                                                "credentialSubject":
+                                                                [
+                                                                    {
+                                                                        "statusPurpose": "revocation",
+                                                                        "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                                                                        "type": "BitstringStatusList",
+                                                                        "encodedList": "H4sIAAAAAAAA/wMAAAAAAAAAAAA="
+                                                                    }
+                                                                ],
+                                                                "proof":
+                                                                {
+                                                                    "proofPurpose": "assertionMethod",
+                                                                    "type": "JsonWebSignature2020",
+                                                                    "verificationMethod": "did:web:localhost:BPNL000000000000#ed463e4c-b900-481a-b5d0-9ae439c434ae",
+                                                                    "created": "2024-02-05T09:39:58Z",
+                                                                    "jws": "eyJhbGciOiJFZERTQSJ9..swX1PLJkSlxB6JMmY4a2uUzR-uszlyLrVdNppoYSx4PTV1LzQrDb0afzp_dvTNUWEYDI57a8iPh78BDjqMjSDQ"
+                                                                }
+                                                            }
+                                                            """),
                                             mediaType = "application/json")
                             }),
                     @ApiResponse(

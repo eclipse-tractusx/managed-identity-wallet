@@ -1,131 +1,122 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "Reovcation Service API",
-    "description": "Revocation Service API",
-    "contact": {
-      "name": "eclipse-tractusx",
-      "url": "https://projects.eclipse.org/projects/automotive.tractusx",
-      "email": "tractusx-dev@eclipse.org"
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Reovcation Service API",
+    "description" : "Revocation Service API",
+    "contact" : {
+      "name" : "eclipse-tractusx",
+      "url" : "https://projects.eclipse.org/projects/automotive.tractusx",
+      "email" : "tractusx-dev@eclipse.org"
     },
-    "version": "0.0.1"
+    "version" : "0.0.1"
   },
-  "servers": [
+  "servers" : [
     {
-      "url": "http://localhost:8080",
-      "description": "Generated server url"
+      "url" : "http://localhost:8081",
+      "description" : "Generated server url"
     }
   ],
-  "security": [
+  "security" : [
     {
-      "Authenticate using access_token": []
+      "Authenticate using access_token" : []
     }
   ],
-  "tags": [
+  "tags" : [
     {
-      "name": "Revocation Service",
-      "description": "Revocation Service API"
+      "name" : "Revocation Service",
+      "description" : "Revocation Service API"
     }
   ],
-  "paths": {
-    "/api/v1/revocations/status-entry": {
-      "post": {
-        "tags": [
+  "paths" : {
+    "/api/v1/revocations/verify" : {
+      "post" : {
+        "tags" : [
           "Revocation Service"
         ],
-        "summary": "Create or Update a Status List Credential",
-        "description": "Create the status list credential if it does not exist, else update it.",
-        "operationId": "createStatusListVC",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StatusEntryDto"
+        "summary" : "Verify Revocation status",
+        "description" : "Verify revocation status of Credential",
+        "operationId" : "verifyRevocation",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CredentialStatusDto"
               },
-              "example": {
-                "purpose": "revocation",
-                "issuerId": "did:web:localhost:BPNL000000000000"
+              "example" : {
+                "id" : "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1#12",
+                "statusPurpose" : "revocation",
+                "statusListIndex" : "12",
+                "statusListCredential" : "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                "type" : "BitstringStatusListEntry"
               }
             }
           },
-          "required": true
+          "required" : true
         },
-        "responses": {
-          "403": {
-            "description": "ForbiddenException: invalid caller"
+        "responses" : {
+          "401" : {
+            "description" : "UnauthorizedException: invalid token"
           },
-          "200": {
-            "description": "Status list credential created/updated successfully.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1#0",
-                  "statusPurpose": "revocation",
-                  "statusListIndex": "0",
-                  "statusListCredential": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                  "type": "BitstringStatusListEntry"
-                }
-              }
+          "200" : {
+            "description" : "if credential is revoked"
+          },
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
+          },
+          "409" : {
+            "description" : "ConflictException: Revocation service error",
+            "content" : {
+              "application/json" : {}
             }
           },
-          "401": {
-            "description": "UnauthorizedException: invalid token"
-          },
-          "500": {
-            "description": "RevocationServiceException: Internal Server Error"
+          "403" : {
+            "description" : "ForbiddenException: invalid caller"
           }
         }
       }
     },
-    "/api/v1/revocations/revoke": {
-      "post": {
-        "tags": [
+    "/api/v1/revocations/status-entry" : {
+      "post" : {
+        "tags" : [
           "Revocation Service"
         ],
-        "summary": "Revoke a VerifiableCredential",
-        "description": "Revoke a VerifiableCredential using the provided Credential Status",
-        "operationId": "revokeCredential",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CredentialStatusDto"
+        "summary" : "Create or Update a Status List Credential",
+        "description" : "Create the status list credential if it does not exist, else update it.",
+        "operationId" : "createStatusListVC",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StatusEntryDto"
               },
-              "example": {
-                "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1#0",
-                "statusPurpose": "revocation",
-                "statusListIndex": "0",
-                "statusListCredential": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                "type": "BitstringStatusListEntry"
+              "example" : {
+                "purpose" : "revocation",
+                "issuerId" : "did:web:localhost:BPNL000000000000"
               }
             }
           },
-          "required": true
+          "required" : true
         },
-        "responses": {
-          "403": {
-            "description": "ForbiddenException: invalid caller"
+        "responses" : {
+          "401" : {
+            "description" : "UnauthorizedException: invalid token"
           },
-          "200": {
-            "description": "Verifiable credential revoked successfully."
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
           },
-          "401": {
-            "description": "UnauthorizedException: invalid token"
+          "403" : {
+            "description" : "ForbiddenException: invalid caller"
           },
-          "500": {
-            "description": "RevocationServiceException: Internal Server Error"
-          },
-          "409": {
-            "description": "ConflictException: Revocation service error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "type": "BitstringStatusListEntry",
-                  "title": "Revocation service error",
-                  "status": 409,
-                  "detail": "Credential already revoked",
-                  "instance": "/api/v1/revocations/revoke",
-                  "timestamp": 1707133388128
+          "200" : {
+            "description" : "Status list credential created/updated successfully.",
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "id" : "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1#17",
+                  "statusPurpose" : "revocation",
+                  "statusListIndex" : "17",
+                  "statusListCredential" : "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                  "type" : "BitstringStatusListEntry"
                 }
               }
             }
@@ -133,144 +124,200 @@
         }
       }
     },
-    "/api/v1/revocations/credentials/{issuerBPN}/{status}/{index}": {
-      "get": {
-        "tags": [
+    "/api/v1/revocations/revoke" : {
+      "post" : {
+        "tags" : [
           "Revocation Service"
         ],
-        "summary": "Get status list credential",
-        "description": "Get status list credential using the provided issuer BPN and status purpose and status list index",
-        "operationId": "getStatusListCredential",
-        "parameters": [
+        "summary" : "Revoke a VerifiableCredential",
+        "description" : "Revoke a VerifiableCredential using the provided Credential Status",
+        "operationId" : "revokeCredential",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CredentialStatusDto"
+              },
+              "example" : {
+                "id" : "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1#12",
+                "statusPurpose" : "revocation",
+                "statusListIndex" : "12",
+                "statusListCredential" : "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                "type" : "BitstringStatusListEntry"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Verifiable credential revoked successfully."
+          },
+          "401" : {
+            "description" : "UnauthorizedException: invalid token"
+          },
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
+          },
+          "403" : {
+            "description" : "ForbiddenException: invalid caller"
+          },
+          "409" : {
+            "description" : "ConflictException: Revocation service error",
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "type" : "BitstringStatusListEntry",
+                  "title" : "Revocation service error",
+                  "status" : "409",
+                  "detail" : "Credential already revoked",
+                  "instance" : "/api/v1/revocations/revoke",
+                  "timestamp" : 1707133388128
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/revocations/credentials/{issuerBPN}/{status}/{index}" : {
+      "get" : {
+        "tags" : [
+          "Revocation Service"
+        ],
+        "summary" : "Get status list credential",
+        "description" : "Get status list credential using the provided issuer BPN and status purpose and status list index",
+        "operationId" : "getStatusListCredential",
+        "parameters" : [
           {
-            "name": "issuerBPN",
-            "in": "path",
-            "description": "Issuer BPN",
-            "required": true,
-            "schema": {
-              "type": "string"
+            "name" : "issuerBPN",
+            "in" : "path",
+            "description" : "Issuer BPN",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
             },
-            "example": "BPNL000000000000"
+            "example" : "BPNL000000000000"
           },
           {
-            "name": "status",
-            "in": "path",
-            "description": "Status Purpose ( Revocation or Suspension)",
-            "required": true,
-            "schema": {
-              "type": "string"
+            "name" : "status",
+            "in" : "path",
+            "description" : "Status Purpose ( Revocation or Suspension)",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
             },
-            "example": "revocation"
+            "example" : "revocation"
           },
           {
-            "name": "index",
-            "in": "path",
-            "description": "status list index",
-            "required": true,
-            "schema": {
-              "type": "string"
+            "name" : "index",
+            "in" : "path",
+            "description" : "status list index",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
             },
-            "example": 1
+            "example" : 1
           }
         ],
-        "responses": {
-          "404": {
-            "description": "Status list credential not found"
+        "responses" : {
+          "500" : {
+            "description" : "RevocationServiceException: Internal Server Error"
           },
-          "500": {
-            "description": "RevocationServiceException: Internal Server Error"
-          },
-          "200": {
-            "description": "Get Status list credential ",
-            "content": {
-              "application/json": {
-                "example": {
-                  "@context": [
+          "200" : {
+            "description" : "Get Status list credential ",
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "@context" : [
                     "https://www.w3.org/2018/credentials/v1",
                     "https://eclipse-tractusx.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json",
                     "https://w3id.org/security/suites/jws-2020/v1"
                   ],
-                  "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                  "type": [
+                  "id" : "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                  "type" : [
                     "VerifiableCredential",
                     "BitstringStatusListCredential"
                   ],
-                  "issuer": "did:web:localhost:BPNL000000000000",
-                  "issuanceDate": "2024-02-05T09:39:58Z",
-                  "credentialSubject": [
+                  "issuer" : "did:web:localhost:BPNL000000000000",
+                  "issuanceDate" : "2024-02-05T09:39:58Z",
+                  "credentialSubject" : [
                     {
-                      "statusPurpose": "revocation",
-                      "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                      "type": "BitstringStatusList",
-                      "encodedList": "H4sIAAAAAAAA/wMAAAAAAAAAAAA="
+                      "statusPurpose" : "revocation",
+                      "id" : "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
+                      "type" : "BitstringStatusList",
+                      "encodedList" : "H4sIAAAAAAAA/wMAAAAAAAAAAAA="
                     }
                   ],
-                  "proof": {
-                    "proofPurpose": "assertionMethod",
-                    "type": "JsonWebSignature2020",
-                    "verificationMethod": "did:web:localhost:BPNL000000000000#ed463e4c-b900-481a-b5d0-9ae439c434ae",
-                    "created": "2024-02-05T09:39:58Z",
-                    "jws": "eyJhbGciOiJFZERTQSJ9..swX1PLJkSlxB6JMmY4a2uUzR-uszlyLrVdNppoYSx4PTV1LzQrDb0afzp_dvTNUWEYDI57a8iPh78BDjqMjSDQ"
+                  "proof" : {
+                    "proofPurpose" : "assertionMethod",
+                    "type" : "JsonWebSignature2020",
+                    "verificationMethod" : "did:web:localhost:BPNL000000000000#ed463e4c-b900-481a-b5d0-9ae439c434ae",
+                    "created" : "2024-02-05T09:39:58Z",
+                    "jws" : "eyJhbGciOiJFZERTQSJ9..swX1PLJkSlxB6JMmY4a2uUzR-uszlyLrVdNppoYSx4PTV1LzQrDb0afzp_dvTNUWEYDI57a8iPh78BDjqMjSDQ"
                   }
                 }
               }
             }
+          },
+          "404" : {
+            "description" : "Status list credential not found"
           }
         }
       }
     }
   },
-  "components": {
-    "schemas": {
-      "StatusEntryDto": {
-        "required": [
-          "issuerId",
-          "purpose"
-        ],
-        "type": "object",
-        "properties": {
-          "purpose": {
-            "type": "string"
-          },
-          "issuerId": {
-            "type": "string"
-          }
-        }
-      },
-      "CredentialStatusDto": {
-        "required": [
+  "components" : {
+    "schemas" : {
+      "CredentialStatusDto" : {
+        "required" : [
           "id",
           "statusListCredential",
           "statusListIndex",
           "statusPurpose",
           "type"
         ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
           },
-          "statusPurpose": {
-            "type": "string"
+          "statusPurpose" : {
+            "type" : "string"
           },
-          "statusListIndex": {
-            "type": "string"
+          "statusListIndex" : {
+            "type" : "string"
           },
-          "statusListCredential": {
-            "type": "string"
+          "statusListCredential" : {
+            "type" : "string"
           },
-          "type": {
-            "type": "string"
+          "type" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StatusEntryDto" : {
+        "required" : [
+          "issuerId",
+          "purpose"
+        ],
+        "type" : "object",
+        "properties" : {
+          "purpose" : {
+            "type" : "string"
+          },
+          "issuerId" : {
+            "type" : "string"
           }
         }
       }
     },
-    "securitySchemes": {
-      "Authenticate using access_token": {
-        "type": "apiKey",
-        "description": "**Bearer (apiKey)**\nJWT Authorization header using the Bearer scheme.\nEnter **Bearer** [space] and then your token in the text input below.\nExample: Bearer 12345abcdef",
-        "name": "Authorization",
-        "in": "header"
+    "securitySchemes" : {
+      "Authenticate using access_token" : {
+        "type" : "apiKey",
+        "description" : "**Bearer (apiKey)**\nJWT Authorization header using the Bearer scheme.\nEnter **Bearer** [space] and then your token in the text input below.\nExample: Bearer 12345abcdef",
+        "name" : "Authorization",
+        "in" : "header"
       }
     }
   }
