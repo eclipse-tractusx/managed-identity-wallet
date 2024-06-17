@@ -101,4 +101,6 @@ public class StringPool {
 
     public static final String CREDENTIAL_STATUS = "credentialStatus";
 
+    public static final String STATUS = "status";
+
 }

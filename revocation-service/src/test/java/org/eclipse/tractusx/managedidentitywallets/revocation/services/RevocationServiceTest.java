@@ -22,6 +22,9 @@
 package org.eclipse.tractusx.managedidentitywallets.revocation.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.SneakyThrows;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.revocation.TestUtil;
 import org.eclipse.tractusx.managedidentitywallets.revocation.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.CredentialStatusDto;
@@ -33,8 +36,11 @@ import org.eclipse.tractusx.managedidentitywallets.revocation.jpa.StatusListInde
 import org.eclipse.tractusx.managedidentitywallets.revocation.repository.StatusListCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.revocation.repository.StatusListIndexRepository;
 import org.eclipse.tractusx.managedidentitywallets.revocation.utils.BitSetManager;
+import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
+import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +55,7 @@ import java.net.URI;
 import java.util.Base64;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -106,6 +113,95 @@ class RevocationServiceTest {
     public void beforeEach() {
         Mockito.reset(statusListCredentialRepository, statusListIndexRepository, httpClientService);
     }
+
+
+    @Nested
+    class VerifyStatusTest {
+        @SneakyThrows
+        @Test
+        void shouldVerifyStatusActive() {
+            final var issuer = DID;
+            var encodedList = mockEmptyEncodedList();
+            var credentialBuilder = mockStatusListVC(issuer, "1", encodedList);
+            var statusListCredential = mockStatusListCredential(issuer, credentialBuilder);
+            // 1. create status list with the credential
+            var statusListIndex = mockStatusListIndex(issuer, statusListCredential, "0");
+            when(statusListIndex.getStatusListCredential()).thenReturn(statusListCredential);
+            when(statusListCredentialRepository.findById(any(String.class)))
+                    .thenReturn(Optional.of(statusListCredential));
+            CredentialStatusDto credentialStatusDto = Mockito.mock(CredentialStatusDto.class);
+            when(credentialStatusDto.id())
+                    .thenReturn(
+                            "http://this-is-my-domain/api/v1/revocations/credentials/"
+                                    + TestUtil.extractBpnFromDid(issuer)
+                                    + "/revocation/1#0");
+            when(credentialStatusDto.statusPurpose()).thenReturn("revocation");
+            when(credentialStatusDto.statusListIndex()).thenReturn("0");
+            when(credentialStatusDto.statusListCredential())
+                    .thenReturn(
+                            "http://this-is-my-domain/api/v1/revocations/credentials/"
+                                    + TestUtil.extractBpnFromDid(issuer)
+                                    + "/revocation/1");
+            when(credentialStatusDto.type()).thenReturn("BitstringStatusListEntry");
+
+
+            try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
+                LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
+                utils.when(() -> {
+                    LinkedDataProofValidation.newInstance(Mockito.any(DidResolver.class));
+                }).thenReturn(mock);
+                Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+                Map<String, String> status = revocationService.verifyStatus(credentialStatusDto);
+                Assertions.assertTrue(status.get(StringPool.STATUS).equals(CredentialStatus.ACTIVE.getName()));
+            }
+        }
+
+        @SneakyThrows
+        @Test
+        void shouldVerifyStatusRevoke() {
+
+            String indexTORevoke = "0";
+            final var issuer = DID;
+
+            //set bit at index
+            String encodedList = mockEmptyEncodedList();
+            encodedList = BitSetManager.revokeCredential(encodedList, Integer.parseInt(indexTORevoke));
+
+
+            var credentialBuilder = mockStatusListVC(issuer, "1", encodedList);
+            var statusListCredential = mockStatusListCredential(issuer, credentialBuilder);
+            // 1. create status list with the credential
+            var statusListIndex = mockStatusListIndex(issuer, statusListCredential, "0");
+            when(statusListIndex.getStatusListCredential()).thenReturn(statusListCredential);
+            when(statusListCredentialRepository.findById(any(String.class)))
+                    .thenReturn(Optional.of(statusListCredential));
+            CredentialStatusDto credentialStatusDto = Mockito.mock(CredentialStatusDto.class);
+            when(credentialStatusDto.id())
+                    .thenReturn(
+                            "http://this-is-my-domain/api/v1/revocations/credentials/"
+                                    + TestUtil.extractBpnFromDid(issuer)
+                                    + "/revocation/1#0");
+            when(credentialStatusDto.statusPurpose()).thenReturn("revocation");
+            when(credentialStatusDto.statusListIndex()).thenReturn(indexTORevoke);
+            when(credentialStatusDto.statusListCredential())
+                    .thenReturn(
+                            "http://this-is-my-domain/api/v1/revocations/credentials/"
+                                    + TestUtil.extractBpnFromDid(issuer)
+                                    + "/revocation/1");
+            when(credentialStatusDto.type()).thenReturn("BitstringStatusListEntry");
+            try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
+                LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
+                utils.when(() -> {
+                    LinkedDataProofValidation.newInstance(Mockito.any(DidResolver.class));
+                }).thenReturn(mock);
+                Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
+                Map<String, String> status = revocationService.verifyStatus(credentialStatusDto);
+
+                Assertions.assertTrue(status.get(StringPool.STATUS).equals(CredentialStatus.REVOKED.getName()));
+            }
+        }
+    }
+
 
     @Nested
     class RevokeTest {

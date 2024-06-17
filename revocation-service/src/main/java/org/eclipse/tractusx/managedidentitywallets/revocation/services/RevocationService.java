@@ -25,6 +25,8 @@ package org.eclipse.tractusx.managedidentitywallets.revocation.services;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.revocation.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.revocation.constant.RevocationApiEndpoints;
@@ -89,9 +91,18 @@ public class RevocationService {
 
     private final MIWSettings miwSettings;
 
+    /**
+     * Verifies the status of a credential based on the provided CredentialStatusDto object.
+     *
+     * @param statusDto The CredentialStatusDto object containing the necessary information for status verification.
+     * @return A Map object with the key "status" and the value "revoked" or "active" indicating the status of the credential.
+     * @throws BadDataException If the status list VC is not found for the issuer.
+     */
     @Transactional
 
     public Map<String, String> verifyStatus(CredentialStatusDto statusDto) {
+
+        validateCredentialStatus(statusDto);
 
         String url = statusDto.statusListCredential();
 
@@ -106,13 +117,12 @@ public class RevocationService {
         //validate status list VC
         validateStatusListVC(statusListCredential);
 
-
         String encodedList = statusListCredential.getCredentialSubject().get(0).get(ENCODED_LIST).toString();
 
         BitSet bitSet = BitSetManager.decompress(BitSetManager.decodeFromString(encodedList));
         int index = Integer.parseInt(statusDto.statusListIndex());
         boolean status = bitSet.get(index);
-        return Map.of("status", status ? "revoked" : "active");
+        return Map.of(StringPool.STATUS, status ? CredentialStatus.REVOKED.getName() : CredentialStatus.ACTIVE.getName());
     }
 
 
