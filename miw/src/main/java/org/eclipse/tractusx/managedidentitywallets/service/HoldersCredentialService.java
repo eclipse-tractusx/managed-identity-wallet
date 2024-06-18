@@ -35,6 +35,7 @@ import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -79,6 +81,8 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
     private final Map<SigningServiceType, SigningService> availableSigningServices;
 
     private final RevocationService revocationService;
+
+    private final RevocationSettings revocationSettings;
 
 
     @Override
@@ -192,6 +196,14 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
             //get credential status in case of revocation
             VerifiableCredentialStatusList2021Entry statusListEntry = revocationService.getStatusListEntry(issuerWallet.getBpn(), token);
             builder.verifiableCredentialStatus(statusListEntry);
+
+            //add revocation context if missing
+            List<URI> uris = verifiableCredential.getContext();
+            if (!uris.contains(revocationSettings.bitStringStatusListContext())) {
+                uris.add(revocationSettings.bitStringStatusListContext());
+                builder.contexts(uris);
+            }
+
         }
 
         CredentialCreationConfig holdersCredentialCreationConfig = builder.build();

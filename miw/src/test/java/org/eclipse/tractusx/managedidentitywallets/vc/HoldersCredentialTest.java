@@ -150,6 +150,8 @@ class HoldersCredentialTest {
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
+        Assertions.assertNotNull(verifiableCredential.getVerifiableCredentialStatus());
+
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
         Assertions.assertFalse(credentials.isEmpty());

@@ -237,6 +237,7 @@ class IssuersCredentialTest {
         VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(baseBpn, miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), type, headers, miwSettings, objectMapper, restTemplate);
 
         Assertions.assertNotNull(verifiableCredential.getProof());
+        Assertions.assertNotNull(verifiableCredential.getVerifiableCredentialStatus());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), type);
         Assertions.assertFalse(credentials.isEmpty());
