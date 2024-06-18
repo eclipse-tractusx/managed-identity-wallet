@@ -6,7 +6,7 @@ FROM eclipse-temurin:latest
 # add curl for healthcheck
 RUN apt-get update && apt-get install -y curl
 
-COPY ./revocation-service/build/libs/revocation-service-latest.jar /app/
+COPY ./LICENSE ./NOTICE.md ./revocation-service/DEPENDENCIES ./SECURITY.md ./revocation-service/build/libs/revocation-service-latest.jar /app/
 
 WORKDIR /app
 
