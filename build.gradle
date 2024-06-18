@@ -144,34 +144,32 @@ subprojects {
     }
 
     check.dependsOn jacocoTestCoverageVerification
-}
 
 
-tasks.register('dashDownload', Download) {
-    description = 'Download the Dash License Tool standalone jar'
-    group = 'License'
-    src 'https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST'
-    dest rootProject.file('dash.jar')
-    overwrite false
-}
+    tasks.register('dashDownload', Download) {
+        description = 'Download the Dash License Tool standalone jar'
+        group = 'License'
+        src 'https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST'
+        dest rootProject.file('dash.jar')
+        overwrite false
+    }
 
 // This task is primarily used by CIs
-tasks.register('dashClean') {
-    description = "Clean all files used by the 'License' group"
-    group = 'License'
-    logger.lifecycle("Removing 'dash.jar'")
-    rootProject.file('dash.jar').delete()
-    logger.lifecycle("Removing 'deps.txt'")
-    file('deps.txt').delete()
-}
+    tasks.register('dashClean') {
+        description = "Clean all files used by the 'License' group"
+        group = 'License'
+        logger.lifecycle("Removing 'dash.jar'")
+        rootProject.file('dash.jar').delete()
+        logger.lifecycle("Removing 'deps.txt'")
+        file('deps.txt').delete()
+    }
 
-tasks.register('dashDependencies') { dashDependencies ->
-    description = "Output all project dependencies as a flat list and save an intermediate file 'deps.txt'."
-    group = 'License'
-    dashDependencies.dependsOn('dashDownload')
-    doLast {
-        def deps = []
-        project.allprojects.each { project ->
+    tasks.register('dashDependencies') { dashDependencies ->
+        description = "Output all project dependencies as a flat list and save an intermediate file 'deps.txt'."
+        group = 'License'
+        dashDependencies.dependsOn('dashDownload')
+        doLast {
+            def deps = []
             project.configurations.each { conf ->
                 // resolving 'archives' or 'default' is deprecated
                 if (conf.canBeResolved && conf.getName() != 'archives' && conf.getName() != 'default') {
@@ -184,40 +182,41 @@ tasks.register('dashDependencies') { dashDependencies ->
                     )
                 }
             }
-        }
 
-        def finalDeps = []
-        for (final def d in deps) {
-            //skip main module dependencies
-            if (d.toString() == "project :miw"
-                    || d.toString() == "project :revocation-service"
-                    || d.toString() == "project :wallet-commons"
-            ) {
-                println(" - " + d.toString() + " -")
+            def finalDeps = []
+            for (final def d in deps) {
+                //skip main module dependencies
+                if (d.toString() == "project :miw"
+                        || d.toString() == "project :revocation-service"
+                        || d.toString() == "project :wallet-commons"
+                ) {
+                    println(" - " + d.toString() + " -")
 
-            } else {
-                finalDeps.add(d)
+                } else {
+                    finalDeps.add(d)
+                }
             }
+
+            def uniqueSorted = finalDeps.unique().sort()
+            uniqueSorted.each { logger.quiet("{}", it) }
+            file("deps.txt").write(uniqueSorted.join('\n'))
         }
+    }
 
-        def uniqueSorted = finalDeps.unique().sort()
-        uniqueSorted.each { logger.quiet("{}", it) }
-        file("deps.txt").write(uniqueSorted.join('\n'))
+    tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
+        description = "Run the Dash License Tool and save the summary in the 'DEPENDENCIES' file"
+        group = 'License'
+        dashLicenseCheck.dependsOn('dashDownload')
+        dashLicenseCheck.dependsOn('dashDependencies')
+        doFirst {
+            classpath = rootProject.files('dash.jar')
+            // docs: https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-04
+            args('-project', 'automotive.tractusx', '-summary', 'DEPENDENCIES', 'deps.txt')
+        }
+        doLast {
+            logger.lifecycle("Removing 'deps.txt' now.")
+            file('deps.txt').delete()
+        }
     }
-}
 
-tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
-    description = "Run the Dash License Tool and save the summary in the 'DEPENDENCIES' file"
-    group = 'License'
-    dashLicenseCheck.dependsOn('dashDownload')
-    dashLicenseCheck.dependsOn('dashDependencies')
-    doFirst {
-        classpath = rootProject.files('dash.jar')
-        // docs: https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-04
-        args('-project', 'automotive.tractusx', '-summary', 'DEPENDENCIES', 'deps.txt')
-    }
-    doLast {
-        logger.lifecycle("Removing 'deps.txt' now.")
-        file('deps.txt').delete()
-    }
 }
