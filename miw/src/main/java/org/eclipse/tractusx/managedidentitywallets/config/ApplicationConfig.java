@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
@@ -81,11 +80,6 @@ public class ApplicationConfig implements WebMvcConfigurer {
         return objectMapper;
     }
 
-    @Bean
-    public SpecificationUtil specificationUtil() {
-        return new SpecificationUtil<>();
-    }
-
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         String redirectUri = properties.getPath();
@@ -117,7 +111,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
         Map<SigningServiceType, SigningService> available = new EnumMap<>(SigningServiceType.class);
         storages.forEach(
                 s -> {
-                    if(s instanceof LocalSigningService local){
+                    if (s instanceof LocalSigningService local) {
                         local.setKeyProvider(localSigningKeyProvider);
                     }
                     available.put(s.getSupportedServiceType(), s);

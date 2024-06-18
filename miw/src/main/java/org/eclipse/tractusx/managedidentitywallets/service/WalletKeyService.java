@@ -21,9 +21,8 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import com.smartsensesolutions.java.commons.base.service.BaseService;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import com.smartsensesolutions.commons.dao.base.BaseRepository;
+import com.smartsensesolutions.commons.dao.base.BaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -55,7 +54,6 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
 
     private final WalletKeyRepository walletKeyRepository;
 
-    private final SpecificationUtil<WalletKey> specificationUtil;
 
     private final EncryptionUtils encryptionUtils;
 
@@ -64,10 +62,6 @@ public class WalletKeyService extends BaseService<WalletKey, Long> {
         return walletKeyRepository;
     }
 
-    @Override
-    protected SpecificationUtil<WalletKey> getSpecificationUtil() {
-        return specificationUtil;
-    }
 
     /**
      * Get private key by wallet identifier as bytes byte [ ].

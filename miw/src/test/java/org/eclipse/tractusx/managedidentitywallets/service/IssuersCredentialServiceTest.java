@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.SignedJWT;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
@@ -33,7 +32,6 @@ import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlg
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
-import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredentialRepository;
@@ -152,7 +150,6 @@ class IssuersCredentialServiceTest {
         issuersCredentialService = new IssuersCredentialService(
                 issuersCredentialRepository,
                 miwSettings,
-                new SpecificationUtil<IssuersCredential>(),
                 holdersCredentialRepository, commonService, objectMapper, revocationService, revocationSettings);
     }
 

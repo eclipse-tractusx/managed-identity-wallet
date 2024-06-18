@@ -21,14 +21,12 @@
 
 package org.eclipse.tractusx.managedidentitywallets.service;
 
-import com.smartsensesolutions.java.commons.FilterRequest;
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import com.smartsensesolutions.java.commons.base.service.BaseService;
-import com.smartsensesolutions.java.commons.criteria.CriteriaOperator;
-import com.smartsensesolutions.java.commons.operator.Operator;
-import com.smartsensesolutions.java.commons.sort.Sort;
-import com.smartsensesolutions.java.commons.sort.SortType;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import com.smartsensesolutions.commons.dao.base.BaseRepository;
+import com.smartsensesolutions.commons.dao.base.BaseService;
+import com.smartsensesolutions.commons.dao.filter.FilterRequest;
+import com.smartsensesolutions.commons.dao.filter.sort.Sort;
+import com.smartsensesolutions.commons.dao.filter.sort.SortType;
+import com.smartsensesolutions.commons.dao.operator.Operator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
@@ -78,8 +76,6 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
 
     private final CommonService commonService;
 
-    private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
-
     private final Map<SigningServiceType, SigningService> availableSigningServices;
 
     private final RevocationService revocationService;
@@ -88,11 +84,6 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
     @Override
     protected BaseRepository<HoldersCredential, Long> getRepository() {
         return holdersCredentialRepository;
-    }
-
-    @Override
-    protected SpecificationUtil<HoldersCredential> getSpecificationUtil() {
-        return credentialSpecificationUtil;
     }
 
 
@@ -119,21 +110,17 @@ public class HoldersCredentialService extends BaseService<HoldersCredential, Lon
         if (StringUtils.hasText(command.getCredentialId())) {
             filterRequest.appendCriteria(StringPool.CREDENTIAL_ID, Operator.EQUALS, command.getCredentialId());
         }
-        FilterRequest request = new FilterRequest();
         if (!CollectionUtils.isEmpty(command.getType())) {
-            request.setPage(filterRequest.getPage());
-            request.setSize(filterRequest.getSize());
-            request.setCriteriaOperator(CriteriaOperator.OR);
             for (String str : command.getType()) {
-                request.appendCriteria(StringPool.TYPE, Operator.CONTAIN, str);
+                filterRequest.appendOrCriteria(StringPool.TYPE, Operator.CONTAIN, str);
             }
         }
 
         Sort sort = new Sort();
         sort.setColumn(command.getSortColumn());
         sort.setSortType(SortType.valueOf(command.getSortType().toUpperCase()));
-        filterRequest.setSort(sort);
-        Page<HoldersCredential> filter = filter(filterRequest, request, CriteriaOperator.AND);
+        filterRequest.setSort(List.of(sort));
+        Page<HoldersCredential> filter = filter(filterRequest);
 
         List<CredentialsResponse> list = new ArrayList<>(filter.getContent().size());
 

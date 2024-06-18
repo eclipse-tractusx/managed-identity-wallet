@@ -21,7 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dao.repository;
 
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
+import com.smartsensesolutions.commons.dao.base.BaseRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.springframework.data.jpa.repository.Query;

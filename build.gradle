@@ -189,7 +189,10 @@ tasks.register('dashDependencies') { dashDependencies ->
         def finalDeps = []
         for (final def d in deps) {
             //skip main module dependencies
-            if (d.toString() == "project :miw" || d.toString() == "project :revocation-service") {
+            if (d.toString() == "project :miw"
+                    || d.toString() == "project :revocation-service"
+                    || d.toString() == "project :wallet-commons"
+            ) {
                 println(" - " + d.toString() + " -")
 
             } else {

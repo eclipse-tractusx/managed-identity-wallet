@@ -25,12 +25,11 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.KeyUse;
-import com.smartsensesolutions.java.commons.FilterRequest;
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import com.smartsensesolutions.java.commons.base.service.BaseService;
-import com.smartsensesolutions.java.commons.sort.Sort;
-import com.smartsensesolutions.java.commons.sort.SortType;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import com.smartsensesolutions.commons.dao.base.BaseRepository;
+import com.smartsensesolutions.commons.dao.base.BaseService;
+import com.smartsensesolutions.commons.dao.filter.FilterRequest;
+import com.smartsensesolutions.commons.dao.filter.sort.Sort;
+import com.smartsensesolutions.commons.dao.filter.sort.SortType;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -99,8 +98,6 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final HoldersCredentialRepository holdersCredentialRepository;
 
-    private final SpecificationUtil<Wallet> walletSpecificationUtil;
-
     private final CommonService commonService;
 
     private final Map<SigningServiceType, SigningService> availableSigningServices;
@@ -116,10 +113,6 @@ public class WalletService extends BaseService<Wallet, Long> {
         return walletRepository;
     }
 
-    @Override
-    protected SpecificationUtil<Wallet> getSpecificationUtil() {
-        return walletSpecificationUtil;
-    }
 
     /**
      * Store credential map.
@@ -201,7 +194,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         Sort sort = new Sort();
         sort.setColumn(sortColumn);
         sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
-        filterRequest.setSort(sort);
+        filterRequest.setSort(List.of(sort));
         return filter(filterRequest);
     }
 

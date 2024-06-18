@@ -24,9 +24,8 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import com.smartsensesolutions.java.commons.base.service.BaseService;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import com.smartsensesolutions.commons.dao.base.BaseRepository;
+import com.smartsensesolutions.commons.dao.base.BaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -85,8 +84,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private final HoldersCredentialRepository holdersCredentialRepository;
 
-    private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
-
     private final CommonService commonService;
 
 
@@ -105,10 +102,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return holdersCredentialRepository;
     }
 
-    @Override
-    protected SpecificationUtil<HoldersCredential> getSpecificationUtil() {
-        return credentialSpecificationUtil;
-    }
 
     /**
      * Create presentation map.
