@@ -4,7 +4,41 @@ The Managed Identity Wallets (MIW) service implements the Self-Sovereign-Identit
 
 # Usage
 
-See [INSTALL.md](INSTALL.md) 
+See [INSTALL.md](INSTALL.md)
+
+# Committer Documentation
+
+*(This section is also intentionally included in the CONTRIBUTING.md file)*
+
+The project uses the tool `semantic-release` to automatically create releases
+and manage CHANGELOG.md entries. These files **SHOULD** never be manually edited
+nor present in any PR. If you see this file in a PR, it means the incoming branch
+is not at the tip of the project history - it will most likely mangle your project
+when merged.
+
+You'll find all important steps in the files `.github/release.yaml` and `.releaserc`.
+
+The development work is always done on branch `develop`, all pull requests are made
+against `develop`. When it is time to create an official release a PR from `develop`
+to `main` must be created. **IMPORTANT**: after merging, you **MUST** wait for the
+pipeline to complete, as it will create two new commits on `main`. After that you
+**MUST** create a PR, merging main back into develop, to obtain these two new commits,
+and to kick-off the new tag on `develop`. Failing to do so will result in a huge
+headache, spaghetti code, faulty commits and other "life-improving" moments. **DO NOT
+MESS THIS STEP UP**.
+
+It is possible to test how a release will work on your own fork, **BUT** you'll have
+to do some extra work to make it happen. `semantic-release` uses git notes to track
+the tags. You'll have to sync them manually (as most git configs do not include the settings
+to do so automatically):
+
+```shell
+git fetch upstream refs/notes/*:refs/notes/*
+git push origin --tags
+git push origin refs/notes/*:refs/notes/*
+```
+
+At this point your repository will behave exactly like upstream when doing a release.
 
 # Developer Documentation
 
@@ -113,9 +147,6 @@ Overview by Endpoint
 | **Verfiable Credential - Validation**     | Create | POST               | /api/credentials/validation           | **view_wallets** OR<br />**view_wallet**     |                                                            |
 | **Verfiable Credential - Issuer**         | Read   | GET                | /api/credentials/issuer               | **view_wallets**                             |                                                            |
 | **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer               | **update_wallets**                           |                                                            |
-| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/membership    | **update_wallets**                           |                                                            |
-| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/framework     | **update_wallets**                           |                                                            |
-| **Verfiable Credential - Issuer**         | Create | POST               | /api/credentials/issuer/distmantler   | **update_wallets**                           |                                                            |
 | **DIDDocument**                           | Read   | GET                | /{bpn}/did.json                       | N/A                                          |                                                            |
 | **DIDDocument**                           | Read   | GET                | /api/didDocuments/{identifier}        | N/A                                          |                                                            |
 
@@ -139,6 +170,8 @@ Credentials* recreate the secret.
 
 ## Development Setup
 
+NOTE: The MIW requires access to the internet in order to validate the JSON-LD schema of DID documents.
+
 ### Prerequisites
 
 To simplify the dev environment, [Taskfile](https://taskfile.dev) is used as a task executor. You have to install it
@@ -155,13 +188,13 @@ directory, but without ".dist" at the end.
 
 Description of the env files:
 
-- **env.local**: Set up everything to get ready for flow "local". You need to fill in the passwords. 
+- **env.local**: Set up everything to get ready for flow "local". You need to fill in the passwords.
 - **env.docker**: Set up everything to get ready for flow "docker". You need to fill in the passwords.
 
 > **IMPORTANT**: ssi-lib is resolving DID documents over the network. There are two endpoints that rely on this resolution:
 > - Verifiable Credentials - Validation
 > - Verifiable Presentations - Validation
->   
+>
 > The following parameters are set in env.local or env.docker file per default:
 > ENFORCE_HTTPS_IN_DID_RESOLUTION=false
 > MIW_HOST_NAME=localhost
@@ -208,10 +241,11 @@ When you just run `task` without parameters, you will see all tasks available.
 
 ### pgAdmin
 
-This local environment contains [pgAdmin](https://www.pgadmin.org/), which is also started (default: http://localhost:8888). 
+This local environment contains [pgAdmin](https://www.pgadmin.org/), which is also started (
+default: http://localhost:8888).
 The default login is:
 
-``` 
+```
 user: pg@admin.com (you can change it in the env.* files)
 password: the one you set for "POSTGRES_PASSWORD" in the env.* files
 ```
@@ -231,7 +265,7 @@ For example, You can save DB backups there, so you can access them on your local
 
 See OpenAPI documentation, which is automatically created from the source and available on each deployment at
 the `/docs/api-docs/docs` endpoint (e.g. locally at http://localhost:8087/docs/api-docs/docs). An export of the JSON
-document can be also found in [docs/openapi_v001.json](docs/openapi_v001.json).
+document can be also found in [docs/openapi_v001.json](docs/api/openapi_v001.json).
 
 # Test Coverage
 
@@ -306,10 +340,10 @@ This process ensures that any issues with the database schema are resolved by re
 | KEYCLOAK_REALM                  | Realm name of keycloak                                                                       | miw_test                                                                                                                                            |
 | KEYCLOAK_CLIENT_ID              | Keycloak private client id                                                                   |                                                                                                                                                     |
 | AUTH_SERVER_URL                 | Keycloak server url                                                                          |                                                                                                                                                     |
-| SUPPORTED_FRAMEWORK_VC_TYPES    | Supported framework VC, provide values ie type1=value1,type2=value2                          | cx-behavior-twin=Behavior Twin,cx-pcf=PCF,cx-quality=Quality,cx-resiliency=Resiliency,cx-sustainability=Sustainability,cx-traceability=ID_3.0_Trace |
 | ENFORCE_HTTPS_IN_DID_RESOLUTION | Enforce https during web did resolution                                                      | true                                                                                                                                                |
-| CONTRACT_TEMPLATES_URL          | Contract templates URL used in summary VC                                                    | https://public.catena-x.org/contracts/                                                                                                              |
 | APP_LOG_LEVEL                   | Log level of application                                                                     | INFO                                                                                                                                                |
+| AUTHORITY_SIGNING_SERVICE_TYPE  | Base wallet signing type, Currency only LOCAL is supported                                   | Local                                                                                                                                               |
+| LOCAL_SIGNING_KEY_STORAGE_TYPE  | Key storage type, currently only DB is supported                                             | DB                                                                                                                                                  |
 |                                 |                                                                                              |                                                                                                                                                     |
 
 # Technical Debts and Known issue

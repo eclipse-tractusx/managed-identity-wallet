@@ -1,1 +1,6 @@
 rootProject.name = 'managedidentitywallets'
+// docs: https://docs.gradle.org/current/userguide/multi_project_builds.html
+// add sub-projects here, the path on disk and the name can be the same
+// for example:
+// include '<sub-project-name>'
+include 'miw'

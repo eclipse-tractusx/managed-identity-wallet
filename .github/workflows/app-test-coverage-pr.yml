@@ -35,10 +35,13 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Java 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
 
       - name: Test app
         run: ./gradlew test
@@ -48,18 +51,18 @@ jobs:
         run: ./gradlew jacocoTestReport
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
-          path: ${{ github.workspace }}/build/
+          path: ${{ github.workspace }}/miw/build/
 
       - name: Publish code coverage report as PR comment
         uses: madrapps/jacoco-report@v1.6.1
         if: always()
         with:
           paths: |
-            ${{ github.workspace }}/build/reports/xml/jacoco.xml
+            ${{ github.workspace }}/miw/build/reports/xml/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80
