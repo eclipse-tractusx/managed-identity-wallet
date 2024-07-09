@@ -1,0 +1,10 @@
+{
+  "grantAccess": {
+    "scope": "read",
+    "credentialTypes": [
+      "MembershipCredential"
+    ],
+    "consumerDid": "did:web:464-203-129-213-107.ngrok-free.app:BPNL000000000000",
+    "providerDid": "did:web:464-203-129-213-107.ngrok-free.app:BPNL000000000000"
+  }
+}

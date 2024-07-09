@@ -1,0 +1,8 @@
+{
+  "signToken" : {
+    "audience" : "did:web:localhost:BPNL000000000000",
+    "subject" : "did:web:localhost:BPNL000000000001",
+    "issuer" : "did:web:localhost:BPNL000000000001",
+    "token" : "yJraWQiOiJkaWQ6d2ViO...dvQiWfYFU0ihkOYshnOGVeA"
+  }
+}

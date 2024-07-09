@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.controller.SecureTokenController;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
@@ -80,9 +81,11 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/docs/api-docs/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/token", POST.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/presentations/iatp", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP, POST.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
+
+                        // secure token request
+                        .requestMatchers(new AntPathRequestMatcher(SecureTokenController.BASE_PATH, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET)
 
                         //did document resolve APIs
                         .requestMatchers(new AntPathRequestMatcher(RestURI.DID_RESOLVE, GET.name())).permitAll() //Get did document
@@ -137,7 +140,7 @@ public class SecurityConfig {
      */
     @Bean
     public AuthenticationEventPublisher authenticationEventPublisher
-            (ApplicationEventPublisher applicationEventPublisher) {
+    (ApplicationEventPublisher applicationEventPublisher) {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
     }
 }

@@ -35,7 +35,7 @@ import java.util.Base64;
 
 public class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final int port = findFreePort();
+    public static final int port = findFreePort();
     private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer().withRealmImportFile("miw-test-realm.json");
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.5")
             .withDatabaseName("integration-tests-db")

@@ -71,10 +71,12 @@ public class RestURI {
      * The constant API_PRESENTATIONS.
      */
     public static final String API_PRESENTATIONS = "/api/presentations";
+
     /**
      * The constant API_PRESENTATIONS_VALIDATION.
      */
     public static final String API_PRESENTATIONS_VALIDATION = "/api/presentations/validation";
+
     /**
      * The constant API_PRESENTATIONS_IATP.
      */

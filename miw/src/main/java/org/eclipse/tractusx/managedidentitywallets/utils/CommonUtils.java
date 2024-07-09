@@ -96,13 +96,6 @@ public class CommonUtils {
         return stringWriter.toString();
     }
 
-
-    public static SecureTokenRequest getSecureTokenRequest(MultiValueMap<String, String> map) {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> singleValueMap = map.toSingleValueMap();
-        return objectMapper.convertValue(singleValueMap, SecureTokenRequest.class);
-    }
-
     @SneakyThrows
     public static ECPrivateKey ecPrivateFrom(byte[] encoded) {
         var kf = KeyFactory.getInstance("EC");

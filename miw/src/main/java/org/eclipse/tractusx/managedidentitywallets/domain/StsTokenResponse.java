@@ -35,8 +35,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class StsTokenResponse {
 
-    @JsonProperty("access_token")
+    @JsonProperty("jwt")
     private String token;
-
-    private long expiresAt;
 }

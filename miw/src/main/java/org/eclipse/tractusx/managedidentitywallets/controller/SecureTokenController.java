@@ -21,94 +21,90 @@
 
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.BadRequestException;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.SecureTokenControllerApiDoc;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
-import org.eclipse.tractusx.managedidentitywallets.domain.BusinessPartnerNumber;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
-import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenErrorResponse;
 import org.eclipse.tractusx.managedidentitywallets.domain.StsTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
+import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequestScope;
+import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequestToken;
 import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponseException;
 import org.eclipse.tractusx.managedidentitywallets.exception.InvalidSecureTokenRequestException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnknownBusinessPartnerNumberException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
-import org.eclipse.tractusx.managedidentitywallets.service.IdpAuthorization;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
-import org.eclipse.tractusx.managedidentitywallets.validator.SecureTokenRequestValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import static org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils.getSecureTokenRequest;
-
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "STS")
-public class SecureTokenController {
+public class SecureTokenController extends BaseController {
 
+    public static final String BASE_PATH = "/api/token";
 
-    private final IdpAuthorization idpAuthorization;
 
     private final WalletRepository walletRepo;
 
     private final Map<SigningServiceType, SigningService> availableSigningServices;
 
-    @InitBinder
-    void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(new SecureTokenRequestValidator());
-    }
-
-
     @SneakyThrows
-    @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(path = BASE_PATH, consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
     @SecureTokenControllerApiDoc.PostSecureTokenDocJson
     public ResponseEntity<StsTokenResponse> tokenJson(
-            @Valid @RequestBody SecureTokenRequest secureTokenRequest
+            @RequestBody String data,
+            Principal principal
     ) {
-        return processTokenRequest(secureTokenRequest);
+        var request = new ObjectMapper().readValue(data, SecureTokenRequest.class);
+        return processRequest(request, principal);
     }
 
-    @SneakyThrows
-    @PostMapping(path = "/api/token", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @SecureTokenControllerApiDoc.PostSecureTokenDocFormUrlencoded
-    public ResponseEntity<StsTokenResponse> tokenFormUrlencoded(
-            @Valid @RequestBody MultiValueMap<String, String> requestParameters
-    ) {
-        final SecureTokenRequest secureTokenRequest = getSecureTokenRequest(requestParameters);
-        return processTokenRequest(secureTokenRequest);
+    private ResponseEntity<StsTokenResponse> processRequest(SecureTokenRequest secureTokenRequest,
+                                                            Principal principal) throws ParseException, BadRequestException {
+
+        var bpn = getBPNFromToken(principal);
+
+        /* If Token is Present */
+        if (secureTokenRequest.getSecureTokenRequestToken().isPresent()) {
+            return processWithToken(secureTokenRequest.getSecureTokenRequestToken().get(), bpn);
+            /* Else If Scope is Present */
+        } else if (secureTokenRequest.getSecureTokenRequestScope().isPresent()) {
+            return processWithScope(secureTokenRequest.getSecureTokenRequestScope().get(), bpn);
+            /* Else Throw */
+        } else {
+            throw new BadRequestException("The provided data could not be used to create and sign a token.");
+        }
     }
 
-    private ResponseEntity<StsTokenResponse> processTokenRequest(SecureTokenRequest secureTokenRequest) throws ParseException {
-        // handle idp authorization
-        IdpTokenResponse idpResponse = idpAuthorization.fromSecureTokenRequest(secureTokenRequest);
-        BusinessPartnerNumber bpn = idpResponse.bpn();
-        Wallet selfWallet = walletRepo.getByBpn(bpn.toString());
+
+    private ResponseEntity<StsTokenResponse> processWithToken(SecureTokenRequestToken secureTokenRequest, String bpn) throws ParseException {
+        Wallet selfWallet = walletRepo.getByBpn(bpn);
         DID selfDid = new DID(selfWallet.getDid());
         DID partnerDid;
         if (Pattern.compile(StringPool.BPN_NUMBER_REGEX).matcher(secureTokenRequest.getAudience()).matches()) {
@@ -124,29 +120,63 @@ public class SecureTokenController {
 
         // create the SI token and put/create the access_token inside
         JWT responseJwt;
-        if (secureTokenRequest.assertValidWithAccessToken()) {
-            log.debug("Signing si token.");
-            responseJwt = signingService.issueToken(
-                    selfDid,
-                    partnerDid,
-                    JWTParser.parse(secureTokenRequest.getAccessToken())
-            );
-        } else if (secureTokenRequest.assertValidWithScopes()) {
-            log.debug("Creating access token and signing si token.");
-            responseJwt = signingService.issueToken(
-                    selfDid,
-                    partnerDid,
-                    Set.of(secureTokenRequest.getBearerAccessScope())
-            );
-        } else {
-            throw new InvalidSecureTokenRequestException("The provided data could not be used to create and sign a token.");
-        }
+        log.debug("Signing si token.");
+        responseJwt = signingService.issueToken(
+                selfDid,
+                partnerDid,
+                JWTParser.parse(secureTokenRequest.getToken())
+        );
 
         // create the response
         log.debug("Preparing StsTokenResponse.");
         StsTokenResponse response = StsTokenResponse.builder()
                 .token(responseJwt.serialize())
-                .expiresAt(responseJwt.getJWTClaimsSet().getExpirationTime().getTime())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    private ResponseEntity<StsTokenResponse> processWithScope(SecureTokenRequestScope secureTokenRequest, String bpn) {
+        Wallet selfWallet = walletRepo.getByBpn(bpn);
+        DID selfDid = new DID(selfWallet.getDid());
+        DID partnerDid;
+        if (Pattern.compile(StringPool.BPN_NUMBER_REGEX).matcher(secureTokenRequest.getConsumerDid()).matches()) {
+            partnerDid = new DID(walletRepo.getByBpn(secureTokenRequest.getConsumerDid()).getDid());
+        } else if (StringUtils.startsWith(secureTokenRequest.getConsumerDid(), "did:")) {
+            partnerDid = new DID(secureTokenRequest.getConsumerDid());
+        } else {
+            throw new InvalidSecureTokenRequestException("You must provide an audience either as a BPN or DID.");
+        }
+
+        SigningServiceType signingServiceType = selfWallet.getSigningServiceType();
+        SigningService signingService = availableSigningServices.get(signingServiceType);
+
+        // create the SI token and put/create the access_token inside
+        JWT responseJwt;
+        log.debug("Creating access token and signing si token.");
+
+        var scope = secureTokenRequest.getScope();
+        if (!scope.equalsIgnoreCase("read")) {
+            throw new UnsupportedOperationException("Only read scope is supported.");
+        }
+
+        var scopes = secureTokenRequest.getCredentialTypes()
+                .stream()
+                // Why this strange scopes? Doesn't make sense, but done as defined here
+                // https://github.com/eclipse-tractusx/identity-trust/blob/main/specifications/verifiable.presentation.protocol.md#3-security
+                .map("hereCouldBeYourText:%s:read"::formatted)
+                .collect(Collectors.toSet());
+
+        responseJwt = signingService.issueToken(
+                selfDid,
+                partnerDid,
+                scopes
+        );
+
+        // create the response
+        log.debug("Preparing StsTokenResponse.");
+        StsTokenResponse response = StsTokenResponse.builder()
+                .token(responseJwt.serialize())
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

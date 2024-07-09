@@ -90,9 +90,6 @@ class PresentationServiceTest {
     private JtiRepository jtiRepository;
 
     @Autowired
-    private IssuersCredentialService issuersCredentialService;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired

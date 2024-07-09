@@ -61,6 +61,10 @@ public class STSTokenValidationService {
     public ValidationResult validateToken(String token) {
         List<ValidationResult> validationResults = new ArrayList<>();
 
+        if (token.startsWith("Bearer ")) {
+            token = token.substring("Bearer ".length());
+        }
+
         SignedJWT jwtSI = parseToken(token);
         JWTClaimsSet claimsSI = getClaimsSet(jwtSI);
 

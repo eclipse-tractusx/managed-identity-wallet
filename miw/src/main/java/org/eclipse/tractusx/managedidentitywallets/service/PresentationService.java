@@ -298,6 +298,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>();
 
         String scopeValue = getScope(jwtClaimsSet);
+
         String[] scopes = scopeValue.split(BLANK_SEPARATOR);
 
         for (String scope : scopes) {

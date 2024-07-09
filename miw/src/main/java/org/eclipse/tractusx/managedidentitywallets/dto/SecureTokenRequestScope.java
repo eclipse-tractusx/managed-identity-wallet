@@ -21,36 +21,25 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import java.util.Optional;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
+
 @Data
 @ToString
-public class SecureTokenRequest {
+public class SecureTokenRequestScope {
 
-    /**
-     * SecureTokenRequestScope request scope, may be null if token is present
-     */
-    @JsonProperty("grantAccess")
-    private SecureTokenRequestScope grantAccess;
+    @JsonProperty("scope")
+    private String scope;
 
-    /**
-     * SecureTokenRequestToken request token, may be null if scope is present
-     */
-    @JsonProperty("signToken")
-    private SecureTokenRequestToken signToken;
+    @JsonProperty("credentialTypes")
+    private List<String> credentialTypes;
 
-    @JsonIgnore
-    public Optional<SecureTokenRequestScope> getSecureTokenRequestScope() {
-        return Optional.ofNullable(grantAccess);
-    }
+    @JsonProperty("consumerDid")
+    private String consumerDid;
 
-    @JsonIgnore
-    public Optional<SecureTokenRequestToken> getSecureTokenRequestToken() {
-        return Optional.ofNullable(signToken);
-    }
+    @JsonProperty("providerDid")
+    private String providerDid;
 }

@@ -1,0 +1,10 @@
+{
+  "grantAccess": {
+    "scope": "read",
+    "credentialTypes": [
+      "MembershipCredential"
+    ],
+    "consumerDid": "did:web:localhost:BPNL000000000000",
+    "providerDid": "did:web:localhost:BPNL000000000000"
+  }
+}

@@ -85,16 +85,19 @@ class SecureTokenControllerTest {
         // when
         String body = """
                 {
-                    "audience": "%s",
-                    "client_id": "%s",
-                    "client_secret": "%s",
-                    "grant_type": "client_credentials",
-                    "bearer_access_scope": "org.eclipse.tractusx.vc.type:BpnCredential:read"
+                  "grantAccess": {
+                    "scope": "read",
+                    "credentialTypes": [
+                      "BpnCredential"
+                    ],
+                    "consumerDid": "did:web:localhost:BPNL000000000000",
+                    "providerDid": "did:web:localhost:BPNL000000000000"
+                  }
                 }
                 """;
         String requestBody = String.format(body, bpn, clientId, clientSecret);
         // then
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON_VALUE));
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<Map<String, Object>> response = testTemplate.exchange(
@@ -104,33 +107,9 @@ class SecureTokenControllerTest {
                 new ParameterizedTypeReference<>() {
                 }
         );
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
         Assertions.assertNotNull(response.getBody());
-        Assertions.assertNotNull(response.getBody().getOrDefault("access_token", null));
-        Assertions.assertNotNull(response.getBody().getOrDefault("expiresAt", null));
-    }
-
-    @Test
-    void tokenFormUrlencoded() {
-        // when
-        String body = "audience=%s&client_id=%s&client_secret=%s&grant_type=client_credentials&bearer_access_scope=org.eclipse.tractusx.vc.type:BpnCredential:read";
-        String requestBody = String.format(body, bpn, clientId, clientSecret);
-        // then
-        HttpHeaders headers = new HttpHeaders();
-        headers.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<Map<String, Object>> response = testTemplate.exchange(
-                "/api/token",
-                HttpMethod.POST,
-                entity,
-                new ParameterizedTypeReference<>() {
-                }
-        );
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
-        Assertions.assertNotNull(response.getBody());
-        Assertions.assertNotNull(response.getBody().getOrDefault("access_token", null));
-        Assertions.assertNotNull(response.getBody().getOrDefault("expiresAt", null));
+        Assertions.assertNotNull(response.getBody().getOrDefault("jwt", null));
     }
 }
