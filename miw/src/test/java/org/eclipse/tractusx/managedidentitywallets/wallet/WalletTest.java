@@ -23,10 +23,12 @@ package org.eclipse.tractusx.managedidentitywallets.wallet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.jwk.Curve;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -40,6 +42,8 @@ import org.eclipse.tractusx.managedidentitywallets.service.WalletService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
+import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
+import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +64,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -168,7 +174,25 @@ class WalletTest {
 
         Assertions.assertNotNull(response.getBody());
         Assertions.assertNotNull(wallet.getDidDocument());
-        Assertions.assertEquals(2, wallet.getDidDocument().getVerificationMethods().size());
+        List<VerificationMethod> verificationMethods = wallet.getDidDocument().getVerificationMethods();
+        Assertions.assertEquals(2, verificationMethods.size());
+
+        // both public keys will include the publicKeyJwk format to express the public key
+        List<String> curves = verificationMethods.stream().map(vm -> (LinkedHashMap) vm.get(JWKVerificationMethod.PUBLIC_KEY_JWK))
+                .map(lhm -> lhm.get(JWKVerificationMethod.JWK_CURVE).toString()).toList();
+        List<String> algorithms = Arrays.asList(Curve.SECP256K1.toString(),Curve.Ed25519.toString());
+        // both the Ed25519 and the secp256k1 curve keys must be present in the verificationMethod of a did document
+        Assertions.assertTrue(curves.containsAll(algorithms));
+        List<URI> assertionMethod = (List<URI>)wallet.getDidDocument().get(StringPool.ASSERTION_METHOD);
+        // both public keys must be expressed in the assertionMethod
+        Assertions.assertEquals(2, assertionMethod.size());
+        // both public keys will use the JsonWebKey2020 verification method type
+        Assertions.assertTrue(verificationMethods.get(0).getType().equals(JWKVerificationMethod.DEFAULT_TYPE) &&
+                verificationMethods.get(1).getType().equals(JWKVerificationMethod.DEFAULT_TYPE));
+        // the controller for the keys is the MIW
+        Assertions.assertEquals(verificationMethods.get(0).getController().toString(), wallet.getDid());
+        Assertions.assertEquals(verificationMethods.get(1).getController().toString(), wallet.getDid());
+
         List<URI> context = wallet.getDidDocument().getContext();
         miwSettings.didDocumentContextUrls().forEach(uri -> {
             Assertions.assertTrue(context.contains(uri));

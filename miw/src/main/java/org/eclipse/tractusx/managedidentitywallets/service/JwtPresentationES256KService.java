@@ -36,14 +36,17 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.SignatureFailureException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
+import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
 import org.eclipse.tractusx.ssi.lib.model.did.JWKVerificationMethod;
 import org.eclipse.tractusx.ssi.lib.model.did.VerificationMethod;
+import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentationBuilder;
@@ -130,7 +133,22 @@ public class JwtPresentationES256KService {
                 mutableContext.add(uri);
             }
         });
-        didDocument.put("@context", mutableContext);
+        didDocument.put(JsonLdObject.CONTEXT, mutableContext);
+        //add assertionMethod
+        List<URI> ids = new ArrayList<>();
+        jwkVerificationMethods.forEach((verificationMethod) -> {
+            ids.add(verificationMethod.getId());
+        });
+        didDocument.put(StringPool.ASSERTION_METHOD, ids);
+        //add service
+        Map<String, Object> tokenServiceData = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.SECURITY_TOKEN_SERVICE, Verifiable.TYPE, StringPool.SECURITY_TOKEN_SERVICE,
+                StringPool.SERVICE_ENDPOINT,  StringPool.HTTPS_SCHEME + miwSettings.host() + "/api/token");
+        org.eclipse.tractusx.ssi.lib.model.did.Service tokenService = new org.eclipse.tractusx.ssi.lib.model.did.Service(tokenServiceData);
+        Map<String, Object> credentialServiceData = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.CREDENTIAL_SERVICE, Verifiable.TYPE, StringPool.CREDENTIAL_SERVICE,
+                StringPool.SERVICE_ENDPOINT,  StringPool.HTTPS_SCHEME + miwSettings.host());
+        org.eclipse.tractusx.ssi.lib.model.did.Service credentialService = new org.eclipse.tractusx.ssi.lib.model.did.Service(credentialServiceData);
+        didDocument.put(StringPool.SERVICE, List.of(tokenService,credentialService));
+
         didDocument = DidDocument.fromJson(didDocument.toJson());
         log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(bpn));
         return didDocument;
