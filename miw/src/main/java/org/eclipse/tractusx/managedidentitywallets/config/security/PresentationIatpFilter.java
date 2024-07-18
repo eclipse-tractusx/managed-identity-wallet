@@ -43,7 +43,8 @@ import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.CO
 
 public class PresentationIatpFilter extends GenericFilterBean {
 
-    RequestMatcher customFilterUrl = new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP);
+    RequestMatcher customFilterUrl1 = new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP);
+    RequestMatcher customFilterUrl2 = new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP_WORKAROUND);
 
     STSTokenValidationService validationService;
 
@@ -57,7 +58,7 @@ public class PresentationIatpFilter extends GenericFilterBean {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-        if (customFilterUrl.matches(httpServletRequest)) {
+        if (customFilterUrl1.matches(httpServletRequest) || customFilterUrl2.matches(httpServletRequest)) {
             String authHeader = httpServletRequest.getHeader("Authorization");
             if (StringUtils.isEmpty(authHeader)) {
                 httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

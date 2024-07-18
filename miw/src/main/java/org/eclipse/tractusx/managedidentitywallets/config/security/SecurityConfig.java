@@ -81,7 +81,8 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/token", POST.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/presentations/iatp", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP, POST.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP_WORKAROUND, POST.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
 
                         //did document resolve APIs
@@ -137,7 +138,7 @@ public class SecurityConfig {
      */
     @Bean
     public AuthenticationEventPublisher authenticationEventPublisher
-            (ApplicationEventPublisher applicationEventPublisher) {
+    (ApplicationEventPublisher applicationEventPublisher) {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
     }
 }

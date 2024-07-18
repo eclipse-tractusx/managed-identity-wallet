@@ -80,4 +80,10 @@ public class RestURI {
      */
     public static final String API_PRESENTATIONS_IATP = "/api/presentations/iatp";
 
+    /**
+     * The constant API_PRESENTATIONS_IATP_WORKAROUND. THe EDC assumes (hard coded) that the presentation query endpoint is at /presentations/query.
+     * To mitigate this issue the MIW has to provide the same endpoint (without documentation), besides the correct one.
+     */
+    public static final String API_PRESENTATIONS_IATP_WORKAROUND = "/presentations/query";
+
 }
