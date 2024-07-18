@@ -1,3 +1,16 @@
+# [0.6.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0...v0.6.0-develop.1) (2024-07-18)
+
+
+### Bug Fixes
+
+* updated code as per review ([5961854](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/5961854ad811615453ea2afff15c1e4955ca450d))
+* updated var name ([44af067](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/44af0670f1e87b5ebedf88f66adcde89157d08fa))
+
+
+### Features
+
+* added new fields in did document ([8a17aec](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8a17aec6ddf330d730df0e9262c88abc2e297e0b))
+
 # [0.5.0](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0...v0.5.0) (2024-07-05)
 
 
