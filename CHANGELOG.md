@@ -1,3 +1,15 @@
+# [1.0.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.6.0-develop.1...v1.0.0-develop.1) (2024-07-18)
+
+
+* feat(identity-trust)!: update IATP protocol ([e3c5450](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e3c5450fe2e0084f9deee16dff59e228afa40966))
+
+
+### BREAKING CHANGES
+
+* `/api/presentations/iatp` endpoint now accepts PresentationQueryMessage and returns PresentationResponseMessage objects.
+
+Signed-off-by: Dominik Pinsel <dominik.pinsel@mercedes-benz.com>
+
 # [0.6.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0...v0.6.0-develop.1) (2024-07-18)
 
 
