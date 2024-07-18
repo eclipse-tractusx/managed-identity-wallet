@@ -96,7 +96,6 @@ public class StringPool {
     public static final String BPN_CREDENTIAL = "BpnCredential";
 
     public static final String ASSERTION_METHOD = "assertionMethod";
-    public static final String CONTEXT = "@context";
     public static final String SERVICE_ENDPOINT = "serviceEndpoint";
     public static final String SERVICE = "service";
     public static final String SECURITY_TOKEN_SERVICE = "SecurityTokenService";

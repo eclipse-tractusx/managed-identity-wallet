@@ -40,6 +40,7 @@ import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.SignatureFailureException;
 import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedAlgorithmException;
+import org.eclipse.tractusx.ssi.lib.model.JsonLdObject;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocumentBuilder;
@@ -132,7 +133,7 @@ public class JwtPresentationES256KService {
                 mutableContext.add(uri);
             }
         });
-        didDocument.put(StringPool.CONTEXT, mutableContext);
+        didDocument.put(JsonLdObject.CONTEXT, mutableContext);
         //add assertionMethod
         List<URI> ids = new ArrayList<>();
         jwkVerificationMethods.forEach((verificationMethod) -> {
@@ -142,11 +143,11 @@ public class JwtPresentationES256KService {
         //add service
         Map<String, Object> serviceData = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.SECURITY_TOKEN_SERVICE, Verifiable.TYPE, StringPool.SECURITY_TOKEN_SERVICE,
                 StringPool.SERVICE_ENDPOINT,  StringPool.HTTPS_SCHEME + miwSettings.host() + "/api/token");
-        org.eclipse.tractusx.ssi.lib.model.did.Service service1 = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData);
+        org.eclipse.tractusx.ssi.lib.model.did.Service tokenService = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData);
         Map<String, Object> serviceData2 = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.CREDENTIAL_SERVICE, Verifiable.TYPE, StringPool.CREDENTIAL_SERVICE,
                 StringPool.SERVICE_ENDPOINT,  StringPool.HTTPS_SCHEME + miwSettings.host());
-        org.eclipse.tractusx.ssi.lib.model.did.Service service2 = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData2);
-        didDocument.put(StringPool.SERVICE, List.of(service1,service2));
+        org.eclipse.tractusx.ssi.lib.model.did.Service credentialService = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData2);
+        didDocument.put(StringPool.SERVICE, List.of(tokenService,credentialService));
 
         didDocument = DidDocument.fromJson(didDocument.toJson());
         log.debug("did document created for bpn ->{}", StringEscapeUtils.escapeJava(bpn));
