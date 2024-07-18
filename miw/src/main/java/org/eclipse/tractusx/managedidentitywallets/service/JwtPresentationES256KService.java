@@ -141,12 +141,12 @@ public class JwtPresentationES256KService {
         });
         didDocument.put(StringPool.ASSERTION_METHOD, ids);
         //add service
-        Map<String, Object> serviceData = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.SECURITY_TOKEN_SERVICE, Verifiable.TYPE, StringPool.SECURITY_TOKEN_SERVICE,
+        Map<String, Object> tokenServiceData = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.SECURITY_TOKEN_SERVICE, Verifiable.TYPE, StringPool.SECURITY_TOKEN_SERVICE,
                 StringPool.SERVICE_ENDPOINT,  StringPool.HTTPS_SCHEME + miwSettings.host() + "/api/token");
-        org.eclipse.tractusx.ssi.lib.model.did.Service tokenService = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData);
-        Map<String, Object> serviceData2 = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.CREDENTIAL_SERVICE, Verifiable.TYPE, StringPool.CREDENTIAL_SERVICE,
+        org.eclipse.tractusx.ssi.lib.model.did.Service tokenService = new org.eclipse.tractusx.ssi.lib.model.did.Service(tokenServiceData);
+        Map<String, Object> credentialServiceData = Map.of(Verifiable.ID, did.toUri()+"#"+StringPool.CREDENTIAL_SERVICE, Verifiable.TYPE, StringPool.CREDENTIAL_SERVICE,
                 StringPool.SERVICE_ENDPOINT,  StringPool.HTTPS_SCHEME + miwSettings.host());
-        org.eclipse.tractusx.ssi.lib.model.did.Service credentialService = new org.eclipse.tractusx.ssi.lib.model.did.Service(serviceData2);
+        org.eclipse.tractusx.ssi.lib.model.did.Service credentialService = new org.eclipse.tractusx.ssi.lib.model.did.Service(credentialServiceData);
         didDocument.put(StringPool.SERVICE, List.of(tokenService,credentialService));
 
         didDocument = DidDocument.fromJson(didDocument.toJson());
