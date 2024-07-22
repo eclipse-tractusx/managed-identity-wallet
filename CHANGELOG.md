@@ -1,3 +1,10 @@
+# [1.0.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.1...v1.0.0-develop.2) (2024-07-22)
+
+
+### Bug Fixes
+
+* updated spring boot and cloud version ([010ecab](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/010ecab904a0ba4e85c3e4b885fbefb2ed6057e6))
+
 # [1.0.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.6.0-develop.1...v1.0.0-develop.1) (2024-07-18)
 
 
