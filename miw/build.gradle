@@ -43,22 +43,6 @@ configurations {
     compileOnly.extendsFrom(annotaionProcessor)
 }
 
-// this needs to be done, as we're using the org.springframework.boot plugin
-// with native Gradle bom resolution
-// docs: https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#managing-dependencies.gradle-bom-support.customizing
-// docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.ResolutionStrategy.html
-configurations.configureEach {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'ch.qos.logback') {
-                details.useVersion '1.4.12'
-            }
-            // avoid a license issue
-            if (details.requested.name == 'spring-boot-devtools') {
-                details.useVersion '3.1.5'
-            }
-    }
-}
-
 repositories {
     // delegate is RepositoryHandler
     // docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.dsl.RepositoryHandler.html
