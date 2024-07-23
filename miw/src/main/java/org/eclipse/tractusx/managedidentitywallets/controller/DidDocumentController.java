@@ -45,7 +45,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequiredArgsConstructor
 @Tag(name = "DIDDocument")
 @Slf4j
-public class DidDocumentController extends BaseController {
+public class DidDocumentController {
     private final DidDocumentService service;
 
     /**

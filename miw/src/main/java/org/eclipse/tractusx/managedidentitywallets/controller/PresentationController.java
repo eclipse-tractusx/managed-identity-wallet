@@ -33,10 +33,12 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dto.PresentationResponseMessage;
 import org.eclipse.tractusx.managedidentitywallets.reader.TractusXPresentationRequestReader;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
+import org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.InputStream;
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtil
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class PresentationController extends BaseController {
+public class PresentationController {
 
     private final PresentationService presentationService;
 
@@ -65,20 +66,20 @@ public class PresentationController extends BaseController {
     /**
      * Create presentation response entity.
      *
-     * @param data      the data
-     * @param audience  the audience
-     * @param asJwt     the as jwt
-     * @param principal the principal
+     * @param data              the data
+     * @param audience          the audience
+     * @param asJwt             the as jwt
+     * @param authentication    the authentication
      * @return the response entity
      */
     @PostVerifiablePresentationApiDocs
     @PostMapping(path = RestURI.API_PRESENTATIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> createPresentation(@RequestBody Map<String, Object> data,
                                                                   @RequestParam(name = "audience", required = false) String audience,
-                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Principal principal
+                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Authentication authentication
     ) {
-        log.debug("Received request to create presentation. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, getBPNFromToken(principal)));
+        log.debug("Received request to create presentation. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
+        return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, TokenParsingUtils.getBPNFromToken(authentication)));
     }
 
     /**

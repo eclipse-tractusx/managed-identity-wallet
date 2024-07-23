@@ -101,4 +101,5 @@ public class StringPool {
     public static final String SECURITY_TOKEN_SERVICE = "SecurityTokenService";
     public static final String CREDENTIAL_SERVICE = "CredentialService";
     public static final String HTTPS_SCHEME = "https://";
+    public static final String BPN_NOT_FOUND = "BPN not found";
 }

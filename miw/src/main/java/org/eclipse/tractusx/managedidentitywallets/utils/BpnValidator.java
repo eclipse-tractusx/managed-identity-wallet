@@ -1,6 +1,6 @@
 /*
  * *******************************************************************************
- *  Copyright (c) 2021,2023 Contributors to the Eclipse Foundation
+ *  Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
  *
  *  See the NOTICE file(s) distributed with this work for additional
  *  information regarding copyright ownership.
@@ -19,38 +19,35 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.controller;
+package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
-import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 
-import java.security.Principal;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * The type Base controller.
+ * The type Bpn validator.
  */
-public class BaseController {
+public class BpnValidator implements OAuth2TokenValidator<Jwt> {
 
-    /**
-     * Gets bpn from token.
-     *
-     * @param principal the principal
-     * @return the bpn from token
-     */
-    public String getBPNFromToken(Principal principal) {
-        Object principal1 = ((JwtAuthenticationToken) principal).getPrincipal();
-        Jwt jwt = (Jwt) principal1;
+    OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, StringPool.BPN_NOT_FOUND, null);
 
+    @Override
+    public OAuth2TokenValidatorResult validate(Jwt jwt) {
         //this will misbehave if we have more then one claims with different case
         // ie. BPN=123456 and bpn=789456
         Map<String, Object> claims = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         claims.putAll(jwt.getClaims());
-        Validate.isFalse(claims.containsKey(StringPool.BPN)).launch(new ForbiddenException("Invalid token, BPN not found"));
-        return claims.get(StringPool.BPN).toString();
+        if (claims.containsKey(StringPool.BPN)) {
+            return OAuth2TokenValidatorResult.success();
+        } else {
+            return OAuth2TokenValidatorResult.failure(error);
+        }
     }
 }
