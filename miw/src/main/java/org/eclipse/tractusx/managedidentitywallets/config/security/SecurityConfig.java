@@ -121,6 +121,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        // due to the identityMinusTrust protocol the MIW has to do the security itself, instead of relying on established solutions
+        return (web) -> web.ignoring().requestMatchers(RestURI.API_PRESENTATIONS_IATP, RestURI.API_PRESENTATIONS_IATP_WORKAROUND);
+    }
+
     /**
      * Security customizer web security customizer.
      *

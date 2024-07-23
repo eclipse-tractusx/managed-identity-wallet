@@ -148,7 +148,7 @@ public class TokenRequestTest {
         final Map<String, Object> data2 = MAPPER.readValue(message2, Map.class);
 
         final HttpHeaders headers2 = new HttpHeaders();
-        headers2.set(HttpHeaders.AUTHORIZATION, jwt);
+        headers2.set(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
         final HttpEntity<Map<String, Object>> entity2 = new HttpEntity<>(data2, headers2);
         var result2 = restTemplate
                 .postForEntity(RestURI.API_PRESENTATIONS_IATP, entity2, String.class);

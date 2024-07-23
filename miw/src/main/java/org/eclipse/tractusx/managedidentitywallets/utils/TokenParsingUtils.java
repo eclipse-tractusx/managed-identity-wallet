@@ -76,6 +76,14 @@ public class TokenParsingUtils {
     }
 
     public static SignedJWT getAccessToken(String outerToken) {
+
+        // in the history of tractus-x sometimes the header contains a bearer, sometimes not.
+        // as it is not possible to fix this wrong behavior over all applications
+        // we added this mitigation here (not good, we know..).
+        if (outerToken.startsWith("Bearer ")) {
+            outerToken = outerToken.substring("Bearer ".length());
+        }
+
         SignedJWT jwtOuter = parseToken(outerToken);
         JWTClaimsSet claimsSet = getClaimsSet(jwtOuter);
         Optional<String> accessToken = getAccessToken(claimsSet);
