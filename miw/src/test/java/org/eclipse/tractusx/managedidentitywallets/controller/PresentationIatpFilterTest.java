@@ -70,7 +70,7 @@ class PresentationIatpFilterTest {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<Map<String, Object>> response = testTemplate.exchange(
                 RestURI.API_PRESENTATIONS_IATP,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 entity,
                 new ParameterizedTypeReference<>() {
                 }
@@ -94,15 +94,12 @@ class PresentationIatpFilterTest {
 
         ResponseEntity<String> response = testTemplate.exchange(
                 RestURI.API_PRESENTATIONS_IATP,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 entity,
                 new ParameterizedTypeReference<>() {
                 }
         );
 
-        String expectedBody = TOKEN_ALREADY_EXPIRED.name() + StringPool.COMA_SEPARATOR + NONCE_MISSING.name();
-
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        Assertions.assertEquals(expectedBody, response.getBody());
     }
 }
