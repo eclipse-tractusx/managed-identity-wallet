@@ -37,17 +37,18 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.service.HoldersCredentialService;
+import org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Verifiable Credential - Holder")
-public class HoldersCredentialController extends BaseController {
+public class HoldersCredentialController {
 
     private final HoldersCredentialService holdersCredentialService;
 
@@ -71,7 +72,7 @@ public class HoldersCredentialController extends BaseController {
      * @param type             the type
      * @param sortColumn       the sort column
      * @param sortTpe          the sort tpe
-     * @param principal        the principal
+     * @param authentication   the authentication
      * @return the credentials
     */
     @GetCredentialsApiDocs
@@ -94,8 +95,8 @@ public class HoldersCredentialController extends BaseController {
                                                                          @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Number of records per page") @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
                                                                          @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt,
 
-                                                                         Principal principal) {
-        log.debug("Received request to get credentials. BPN: {}", getBPNFromToken(principal));
+                                                                        Authentication authentication) {
+        log.debug("Received request to get credentials. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
         final GetCredentialsCommand command;
         command = GetCredentialsCommand.builder()
                 .credentialId(credentialId)
@@ -106,7 +107,7 @@ public class HoldersCredentialController extends BaseController {
                 .pageNumber(pageNumber)
                 .size(size)
                 .asJwt(asJwt)
-                .callerBPN(getBPNFromToken(principal))
+                .callerBPN(TokenParsingUtils.getBPNFromToken(authentication))
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(holdersCredentialService.getCredentials(command));
     }
@@ -115,17 +116,17 @@ public class HoldersCredentialController extends BaseController {
     /**
      * Issue credential response entity.
      *
-     * @param data      the data
-     * @param principal the principal
+     * @param data              the data
+     * @param authentication    the authentication
      * @return the response entity
      */
 
     @IssueCredentialApiDoc
     @PostMapping(path = RestURI.CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CredentialsResponse> issueCredential(@RequestBody Map<String, Object> data, Principal principal,
+    public ResponseEntity<CredentialsResponse> issueCredential(@RequestBody Map<String, Object> data, Authentication authentication,
                                                                 @AsJwtParam @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt
     ) {
-        log.debug("Received request to issue credential. BPN: {}", getBPNFromToken(principal));
-        return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, getBPNFromToken(principal), asJwt));
+        log.debug("Received request to issue credential. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
+        return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, TokenParsingUtils.getBPNFromToken(authentication), asJwt));
     }
 }

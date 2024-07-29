@@ -21,11 +21,13 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config.security;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
+import org.eclipse.tractusx.managedidentitywallets.utils.BpnValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +41,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -53,12 +61,15 @@ import static org.springframework.http.HttpMethod.POST;
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final STSTokenValidationService validationService;
 
     private final SecurityConfigProperties securityConfigProperties;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private String issuerUri;
 
     /**
      * Filter chain security filter chain.
@@ -115,7 +126,8 @@ public class SecurityConfig {
                         //error
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
-                        jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()))))
+                                jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId())))
+                                .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .addFilterAfter(new PresentationIatpFilter(validationService), BasicAuthenticationFilter.class);
 
         return http.build();
@@ -140,5 +152,18 @@ public class SecurityConfig {
     public AuthenticationEventPublisher authenticationEventPublisher
     (ApplicationEventPublisher applicationEventPublisher) {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromIssuerLocation(issuerUri);
+        OAuth2TokenValidator<Jwt> bpnValidator = bpnValidator();
+        OAuth2TokenValidator<Jwt> withBpn = new DelegatingOAuth2TokenValidator<>(bpnValidator);
+        jwtDecoder.setJwtValidator(withBpn);
+        return jwtDecoder;
+    }
+
+    OAuth2TokenValidator<Jwt> bpnValidator() {
+        return new BpnValidator();
     }
 }
