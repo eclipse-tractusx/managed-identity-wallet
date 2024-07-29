@@ -1,3 +1,11 @@
+# [1.0.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.2...v1.0.0-develop.3) (2024-07-29)
+
+
+### Features
+
+* remove BaseController, change Principal to Authenticationand unit test cases added ([15425be](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/15425beccd8bbb3560328d7d845766f422e6e4d8))
+* test cases added, file header updated and detail log added for security events ([a4fa6cc](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a4fa6cc37d72e57796616fd87716fef059770e76))
+
 # [1.0.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.1...v1.0.0-develop.2) (2024-07-22)
 
 
