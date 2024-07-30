@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monday"
+      interval: "weekly"
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
