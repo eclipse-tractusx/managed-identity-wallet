@@ -120,7 +120,7 @@ dependencies {
     testImplementation group: 'com.github.dasniko', name: 'testcontainers-keycloak', version: '2.5.0'
     testImplementation 'org.testcontainers:postgresql'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
-    testImplementation group: 'org.json', name: 'json', version: '20230227'
+    testImplementation group: 'org.json', name: 'json', version: '20240303'
     testImplementation group: 'com.github.curious-odd-man', name: 'rgxgen', version: '1.4'
 
 }
