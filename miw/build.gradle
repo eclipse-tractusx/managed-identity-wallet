@@ -99,7 +99,7 @@ dependencies {
     implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.19'
 
     //Added explicitly to mitigate CVE 2022-1471
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
 
     //Added explicitly to mitigate CVE 2023-24998
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
