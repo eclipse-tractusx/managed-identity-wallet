@@ -80,7 +80,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | file://charts/pgadmin4 | pgadmin4 | 1.19.0 |
 | https://charts.bitnami.com/bitnami | common | 2.x.x |
 | https://charts.bitnami.com/bitnami | keycloak | 15.1.6 |
-| https://charts.bitnami.com/bitnami | postgresql | 11.9.13 |
+| https://charts.bitnami.com/bitnami | postgresql | 12.12.10 |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
