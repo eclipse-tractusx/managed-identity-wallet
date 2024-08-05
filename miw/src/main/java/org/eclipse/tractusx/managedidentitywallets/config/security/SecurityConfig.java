@@ -48,8 +48,11 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+
+import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -127,8 +130,11 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
                                 jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId())))
-                                .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
-                .addFilterAfter(new PresentationIatpFilter(validationService), BasicAuthenticationFilter.class);
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
+                .securityMatcher(new NegatedRequestMatcher(new OrRequestMatcher(
+                        List.of(
+                                new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP),
+                                new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP_WORKAROUND)))));
 
         return http.build();
     }

@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import com.nimbusds.jwt.SignedJWT;
 import io.swagger.v3.oas.annotations.Parameter;
+import liquibase.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dto.PresentationResponseMessage;
 import org.eclipse.tractusx.managedidentitywallets.reader.TractusXPresentationRequestReader;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
+import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,8 @@ public class PresentationController {
     private final PresentationService presentationService;
 
     private final TractusXPresentationRequestReader presentationRequestReader;
+
+    private final STSTokenValidationService validationService;
 
     /**
      * Create presentation response entity.
@@ -114,17 +118,37 @@ public class PresentationController {
     @PostMapping(path = { RestURI.API_PRESENTATIONS_IATP, RestURI.API_PRESENTATIONS_IATP_WORKAROUND }, produces = { MediaType.APPLICATION_JSON_VALUE })
     @GetVerifiablePresentationIATPApiDocs
     @SneakyThrows
-    public ResponseEntity<PresentationResponseMessage> createPresentation(@Parameter(hidden = true) @RequestHeader(name = "Authorization") String stsToken,
-                                                                          @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt,
-                                                                          InputStream is) {
+    public ResponseEntity<PresentationResponseMessage> createPresentation(
+            /* As filters are disabled for this endpoint set required to false and handle missing token manually */
+            @Parameter(hidden = true) @RequestHeader(name = "Authorization", required = false) String stsToken,
+            @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt,
+            InputStream is) {
         try {
 
+            if(stsToken == null){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            if (stsToken.startsWith("Bearer ")) {
+                stsToken = stsToken.substring("Bearer ".length());
+            }
+
+            var validationResult = validationService.validateToken(stsToken);
+            if (!validationResult.isValid()) {
+                log.atDebug().log("Unauthorized request. Errors: '%s'".formatted(
+                        StringUtil.join(validationResult.getErrors().stream()
+                                        .map(Enum::name)
+                                        .toList(),
+                                ", ")));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            // requested scopes are ignored for now
             final List<String> requestedScopes = presentationRequestReader.readVerifiableCredentialScopes(is);
-            // requested scopes are ignored until the documentation is better refined
 
             SignedJWT accessToken = getAccessToken(stsToken);
             Map<String, Object> map = presentationService.createVpWithRequiredScopes(accessToken, asJwt);
-            VerifiablePresentation verifiablePresentation = new VerifiablePresentation((Map)map.get("vp"));
+            VerifiablePresentation verifiablePresentation = new VerifiablePresentation((Map) map.get("vp"));
             PresentationResponseMessage message = new PresentationResponseMessage(verifiablePresentation);
             return ResponseEntity.ok(message);
         } catch (TractusXPresentationRequestReader.InvalidPresentationQueryMessageResource e) {
