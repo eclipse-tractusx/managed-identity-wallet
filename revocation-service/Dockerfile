@@ -20,12 +20,12 @@
 FROM eclipse-temurin:17-jre-alpine
 
 # run as non-root user
-RUN addgroup -g 11111 -S miw && adduser -u 11111 -S -s /bin/false -G miw miw
+RUN addgroup -g 11111 -S revocation-service && adduser -u 11111 -S -s /bin/false -G revocation-service revocation-service
 
 # add curl for healthcheck
-RUN apt-get update && apt-get install -y curl
+RUN apk add curl
 
-USER miw
+USER revocation-service
 
 COPY ./LICENSE ./NOTICE.md ./revocation-service/DEPENDENCIES ./SECURITY.md ./revocation-service/build/libs/revocation-service-latest.jar /app/
 
