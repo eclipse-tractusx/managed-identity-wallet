@@ -79,3 +79,13 @@ build {
     version = "latest"
 
 }
+
+bootJar {
+    enabled = true
+    metaInf {
+        from 'DEPENDENCIES'
+        from '../SECURITY.md'
+        from '../NOTICE.md'
+        from '../LICENSE'
+    }
+}

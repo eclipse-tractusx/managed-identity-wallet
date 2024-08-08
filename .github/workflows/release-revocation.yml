@@ -16,20 +16,34 @@
 # SPDX-License-Identifier: Apache-2.0
 ---
 
-name: Semantic Release
+name: Semantic Release - Revocation Service
 on:
   push:
+    paths:
+      - 'revocation-service/src/**'
+      - 'revocation-service/build.gradle/**'
+      - 'wallet-commons/src/**'
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'settings.gradle'
     branches:
       - main
       - develop
   pull_request:
+    paths:
+      - 'revocation-service/src/**'
+      - 'revocation-service/build.gradle/**'
+      - 'wallet-commons/src/**'
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'settings.gradle'
     branches:
       - main
       - develop
 
 env:
   IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME: "managed-identity-wallet"
+  IMAGE_NAME: "credential-revocation-service"
 
 jobs:
 
@@ -98,7 +112,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: ./miw/build
+          path: ./revocation-service/build
           if-no-files-found: error
           retention-days: 1
 
@@ -122,7 +136,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.semantic-release.outputs.next_release }}
         run: |
           echo "::notice::Uploading jar to GitHub release"
-          gh release upload "v$RELEASE_VERSION" ./miw/build/libs/miw-latest.jar
+          gh release upload "v$RELEASE_VERSION" ./revocation-service/build/libs/revocation-service-latest.jar
 
   docker:
     name: Docker Release
@@ -135,7 +149,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build
-          path: ./miw/build
+          path: ./revocation-service/build
 
       - name: Download Helm chart artifact
         uses: actions/download-artifact@v4
@@ -175,7 +189,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          file: ./miw/Dockerfile
+          file: ./revocation-service/Dockerfile
 
       # https://github.com/peter-evans/dockerhub-description
       # Important step to push image description to DockerHub
@@ -220,8 +234,8 @@ jobs:
       - name: Release chart
         if: github.event_name != 'pull_request' && needs.semantic_release.outputs.will_create_new_release == 'true'
         run: |
-          # Package MIW chart
-          helm_package_path=$(helm package -u -d helm-charts ./charts/managed-identity-wallet | grep -o 'to: .*' | cut -d' ' -f2-)
+          # Package Revocation-service chart,this will not work as we do not have any chart there
+          helm_package_path=$(helm package -u -d helm-charts ./charts/revocation-service | grep -o 'to: .*' | cut -d' ' -f2-)
           echo "HELM_PACKAGE_PATH=$helm_package_path" >> $GITHUB_ENV
 
           # Commit and push to gh-pages
