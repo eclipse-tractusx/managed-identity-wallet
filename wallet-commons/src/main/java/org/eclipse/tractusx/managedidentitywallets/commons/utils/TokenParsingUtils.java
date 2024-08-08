@@ -19,7 +19,7 @@
  * ******************************************************************************
  */
 
-package org.eclipse.tractusx.managedidentitywallets.utils;
+package org.eclipse.tractusx.managedidentitywallets.commons.utils;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -28,18 +28,16 @@ import lombok.experimental.UtilityClass;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.text.ParseException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-
-import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
-import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.SCOPE;
-import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
-import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
 
 /**
  * The type Token parsing utils.
@@ -111,7 +109,7 @@ public class TokenParsingUtils {
      */
     public static Optional<String> getAccessToken(JWTClaimsSet claims) {
         try {
-            String accessTokenValue = claims.getStringClaim(ACCESS_TOKEN);
+            String accessTokenValue = claims.getStringClaim(OAuth2ParameterNames.ACCESS_TOKEN);
             return accessTokenValue == null ? Optional.empty() : Optional.of(accessTokenValue);
         } catch (ParseException e) {
             throw new BadDataException(PARSING_TOKEN_ERROR, e);
@@ -139,7 +137,7 @@ public class TokenParsingUtils {
      */
     public static String getScope(JWTClaimsSet jwtClaimsSet) {
         try {
-            String scopes = jwtClaimsSet.getStringClaim(SCOPE);
+            String scopes = jwtClaimsSet.getStringClaim(OAuth2ParameterNames.SCOPE);
             if (scopes == null) {
                 scopes = jwtClaimsSet.getStringClaim(BEARER_ACCESS_SCOPE);
             }
@@ -157,7 +155,7 @@ public class TokenParsingUtils {
      */
     public static String getJtiAccessToken(JWT accessToken) {
         try {
-            return getStringClaim(accessToken.getJWTClaimsSet(), JTI);
+            return getStringClaim(accessToken.getJWTClaimsSet(), JwtClaimNames.JTI);
         } catch (ParseException e) {
             throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }
@@ -171,7 +169,7 @@ public class TokenParsingUtils {
      */
     public static String getNonceAccessToken(JWT accessToken) {
         try {
-            return accessToken.getJWTClaimsSet().getStringClaim(NONCE);
+            return accessToken.getJWTClaimsSet().getStringClaim(IdTokenClaimNames.NONCE);
         } catch (ParseException e) {
             throw new BadDataException(PARSING_TOKEN_ERROR, e);
         }

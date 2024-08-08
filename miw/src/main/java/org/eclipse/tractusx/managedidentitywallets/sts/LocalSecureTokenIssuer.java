@@ -44,7 +44,7 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getNonceAccessToken;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getNonceAccessToken;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.SCOPE;
 import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;

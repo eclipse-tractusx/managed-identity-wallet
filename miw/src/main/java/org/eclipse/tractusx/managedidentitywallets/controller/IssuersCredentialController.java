@@ -34,11 +34,11 @@ import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialCont
 import org.eclipse.tractusx.managedidentitywallets.apidocs.RevocationAPIDoc;
 import org.eclipse.tractusx.managedidentitywallets.command.GetCredentialsCommand;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
-import org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

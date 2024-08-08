@@ -69,9 +69,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getScope;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getStringClaim;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getClaimsSet;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getScope;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getStringClaim;
 import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
 
 /**

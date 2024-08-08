@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.IssuersCredentialControllerApiDocs;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
 import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
@@ -34,12 +35,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.Map;
 
 /**
@@ -49,7 +50,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "Verifiable Credential - Revoke")
-public class RevocationController extends BaseController {
+public class RevocationController {
 
 
     private final RevocationService revocationService;
@@ -66,8 +67,8 @@ public class RevocationController extends BaseController {
     @PutMapping(path = RestURI.CREDENTIALS_REVOKE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @IssuersCredentialControllerApiDocs.ValidateVerifiableCredentialApiDocs
     public ResponseEntity<Map<String, Object>> revokeCredential(@RequestBody CredentialVerificationRequest credentialVerificationRequest,
-                                                                @Parameter(hidden = true) @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token, Principal principal) {
-        revocationService.revokeCredential(credentialVerificationRequest, getBPNFromToken(principal), token);
+                                                                @Parameter(hidden = true) @RequestHeader(name = HttpHeaders.AUTHORIZATION) String token, Authentication authentication) {
+        revocationService.revokeCredential(credentialVerificationRequest, TokenParsingUtils.getBPNFromToken(authentication), token);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Credential has been revoked"));
 
     }

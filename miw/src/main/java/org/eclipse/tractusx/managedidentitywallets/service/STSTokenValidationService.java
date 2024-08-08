@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.TokenValidationErrors;
 import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils;
 import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.utils.CustomSignedJWTVerifier;
 import org.eclipse.tractusx.managedidentitywallets.utils.TokenValidationUtils;
@@ -38,9 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getAccessToken;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.parseToken;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getClaimsSet;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.parseToken;
 import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.NONCE;
 
 @Service
@@ -68,7 +68,7 @@ public class STSTokenValidationService {
         validationResults.add(tokenValidationUtils.checkIfIssuerEqualsSubject(claimsSI));
         validationResults.add(tokenValidationUtils.checkTokenExpiry(claimsSI));
 
-        Optional<String> accessToken = getAccessToken(claimsSI);
+        Optional<String> accessToken = TokenParsingUtils.getAccessToken(claimsSI);
         if (accessToken.isPresent()) {
             SignedJWT jwtAT = parseToken(accessToken.get());
             JWTClaimsSet claimsAT = getClaimsSet(jwtAT);
