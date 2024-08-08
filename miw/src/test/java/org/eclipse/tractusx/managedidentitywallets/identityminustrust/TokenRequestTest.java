@@ -23,6 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.identityminustrust;
 
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
@@ -49,8 +50,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
 
 
 @DirtiesContext
@@ -92,9 +91,9 @@ public class TokenRequestTest {
         AuthenticationUtils.setupKeycloakClient("partner", "partner", partnerBpn);
         String did = DidWebFactory.fromHostnameAndPath(miwSettings.host(), bpn).toString();
         String didPartner = DidWebFactory.fromHostnameAndPath(miwSettings.host(), partnerBpn).toString();
-        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        String defaultLocation = miwSettings.host() + StringPool.COLON_SEPARATOR + bpn;
         TestUtils.createWallet(bpn, did, testTemplate, miwSettings.authorityWalletBpn(), defaultLocation);
-        String defaultLocationPartner = miwSettings.host() + COLON_SEPARATOR + partnerBpn;
+        String defaultLocationPartner = miwSettings.host() + StringPool.COLON_SEPARATOR + partnerBpn;
         TestUtils.createWallet(partnerBpn, didPartner, testTemplate, miwSettings.authorityWalletBpn(), defaultLocationPartner);
 
         var vc = "{\n" +
@@ -119,8 +118,8 @@ public class TokenRequestTest {
         issuersCredentialService.issueCredentialUsingBaseWallet(
                 did,
                 MAPPER.readValue(vc, Map.class),
-                false,
-                miwSettings.authorityWalletBpn()
+                false, false,
+                miwSettings.authorityWalletBpn(), "token"
         );
     }
 

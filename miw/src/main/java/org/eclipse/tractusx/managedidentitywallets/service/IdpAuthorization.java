@@ -22,11 +22,12 @@
 package org.eclipse.tractusx.managedidentitywallets.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.security.SecurityConfigProperties;
 import org.eclipse.tractusx.managedidentitywallets.domain.IdpTokenResponse;
 import org.eclipse.tractusx.managedidentitywallets.dto.SecureTokenRequest;
-import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
 import org.eclipse.tractusx.managedidentitywallets.exception.InvalidIdpTokenResponseException;
+import org.eclipse.tractusx.managedidentitywallets.exception.UnsupportedGrantTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +38,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.CLIENT_CREDENTIALS;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.CLIENT_ID;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.CLIENT_SECRET;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.GRANT_TYPE;
@@ -64,11 +64,11 @@ public class IdpAuthorization {
 
     public IdpTokenResponse fromSecureTokenRequest(SecureTokenRequest secureTokenRequest) throws UnsupportedGrantTypeException, InvalidIdpTokenResponseException {
         // we're ignoring the input, but the protocol requires us to check.
-        if (!secureTokenRequest.getGrantType().equals(CLIENT_CREDENTIALS)) {
+        if (!secureTokenRequest.getGrantType().equals(StringPool.CLIENT_CREDENTIALS)) {
             throw new UnsupportedGrantTypeException("The provided 'grant_type' is not valid. Use 'client_credentials'.");
         }
         MultiValueMap<String, String> tokenRequest = new LinkedMultiValueMap<>();
-        tokenRequest.add(GRANT_TYPE, CLIENT_CREDENTIALS);
+        tokenRequest.add(GRANT_TYPE, StringPool.CLIENT_CREDENTIALS);
         tokenRequest.add(SCOPE, OPENID);
         tokenRequest.add(CLIENT_ID, secureTokenRequest.getClientId());
         tokenRequest.add(CLIENT_SECRET, secureTokenRequest.getClientSecret());

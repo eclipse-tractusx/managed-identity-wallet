@@ -19,13 +19,6 @@
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version "${springBootVersion}"
-    id 'io.spring.dependency-management' version "${springDependencyVersion}"
-    id "jacoco"
-    id 'project-report'
-
-    // used to download the 'dash.jar' for license checks
-    // docs: https://github.com/michel-kraemer/gradle-download-task
     id "de.undercouch.download" version "5.5.0"
 }
 
@@ -43,31 +36,12 @@ configurations {
     compileOnly.extendsFrom(annotaionProcessor)
 }
 
-repositories {
-    // delegate is RepositoryHandler
-    // docs: https://docs.gradle.org/7.6/dsl/org.gradle.api.artifacts.dsl.RepositoryHandler.html
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url = uri("https://repo.danubetech.com/repository/maven-public")
-    }
-    maven { url 'https://jitpack.io' }
-    maven {
-        // Used to resolve Dash License Tool
-        // Dash has a maven plugin, BUT is not resolvable through mavenCentral()
-        url = uri("https://repo.eclipse.org/content/repositories/dash-licenses/")
-    }
-}
 
-ext {
-
-}
-
-// comes from gradle directly
 dependencies {
-    // 'implementation', 'testImplementation', 'runtimeOnly', 'compileOnly', 'annotationProcessor' and
-    // 'testAnnotationProcessor' configuration come from the java-plugin
-    // docs: https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
+
+    //project deps
+    implementation project(":wallet-commons")
+
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -78,25 +52,13 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
-    implementation group: 'com.smartsensesolutions', name: 'commons-dao', version: '0.0.5'
+    implementation "com.smartsensesolutions:commons-dao:${commonsDaoVersion}"
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.eclipse.tractusx.ssi:cx-ssi-lib:0.0.19'
-
-    //Added explicitly to mitigate CVE 2022-1471
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
-
-    //Added explicitly to mitigate CVE 2023-24998
-    implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
+    implementation "org.eclipse.tractusx.ssi:cx-ssi-lib:${ssiLibVersion}"
 
     runtimeOnly 'org.postgresql:postgresql'
-    compileOnly 'org.projectlombok:lombok'
-    // custom 'developmentOnly' config
-    // https://docs.spring.io/spring-boot/docs/2.0.6.RELEASE/reference/html/using-boot-devtools.html#using-boot-devtools
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
+
     testImplementation 'org.wiremock:wiremock-standalone:3.4.2'
-    testImplementation 'org.projectlombok:lombok:1.18.28'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "org.testcontainers:testcontainers"
     testImplementation 'com.h2database:h2:2.2.220'
@@ -106,79 +68,9 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
     testImplementation group: 'org.json', name: 'json', version: '20230227'
     testImplementation group: 'com.github.curious-odd-man', name: 'rgxgen', version: '1.4'
-
+    testImplementation "com.teketik:mock-in-bean:${mockInBeanVersion}"
 }
 
-// uses the 'download' plugin
-// docs: https://plugins.gradle.org/plugin/de.undercouch.download
-tasks.register('dashDownload', Download) {
-    description = 'Download the Dash License Tool standalone jar'
-    group = 'License'
-    src 'https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST'
-    dest rootProject.file('dash.jar')
-    // will not replace an existing file. If you know you need a new version
-    // then manually delete the file yourself, or run `dashClean`
-    overwrite false
-}
-
-// This task is primarily used by CIs
-tasks.register('dashClean') {
-    description = "Clean all files used by the 'License' group"
-    group = 'License'
-    logger.lifecycle("Removing 'dash.jar'")
-    rootProject.file('dash.jar').delete()
-    logger.lifecycle("Removing 'deps.txt'")
-    file('deps.txt').delete()
-}
-
-// Usage: in the root of the project: `./gradlew -q dashDependencies`
-// The `-q` option is important if you want to use the output in a pipe.
-tasks.register('dashDependencies') { dashDependencies ->
-    description = "Output all project dependencies as a flat list and save an intermediate file 'deps.txt'."
-    group = 'License'
-    dashDependencies.dependsOn('dashDownload')
-    doLast {
-        def deps = []
-        project.configurations.each { conf ->
-            // resolving 'archives' or 'default' is deprecated
-            if (conf.canBeResolved && conf.getName() != 'archives' && conf.getName() != 'default') {
-                deps.addAll(conf.incoming.resolutionResult.allDependencies
-                        // the 'allDependencies' method return a 'DependencyResult'
-                        // we're only interested in the 'ResolvedDependencyResult' sub-interface
-                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolutionResult.html#allDependencies-groovy.lang.Closure-
-                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/DependencyResult.html
-                        // docs: https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolvedDependencyResult.html
-                        .findAll({ it instanceof ResolvedDependencyResult })
-                        .collect { ResolvedDependencyResult dep ->
-                            "${dep.selected}"
-                        })
-            }
-        }
-
-        def uniqueSorted = deps.unique().sort()
-        uniqueSorted.each { logger.quiet("{}", it) }
-        file("deps.txt").write(uniqueSorted.join('\n'))
-    }
-}
-
-tasks.register('dashLicenseCheck', JavaExec) { dashLicenseCheck ->
-    description = "Run the Dash License Tool and save the summary in the 'DEPENDENCIES' file"
-    group = 'License'
-    dashLicenseCheck.dependsOn('dashDownload')
-    dashLicenseCheck.dependsOn('dashDependencies')
-    doFirst {
-        classpath = rootProject.files('dash.jar')
-        // docs: https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-04
-        args('-project', 'automotive.tractusx',  '-summary', 'DEPENDENCIES', 'deps.txt')
-    }
-    doLast {
-        logger.lifecycle("Removing 'deps.txt' now.")
-        file('deps.txt').delete()
-    }
-}
-
-// 'dependencyManagement' comes from the 'io.spring.dependency-management' plugin
-// docs: https://docs.spring.io/dependency-management-plugin/docs/current/reference/html/
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
@@ -186,17 +78,13 @@ dependencyManagement {
     }
 }
 
-// 'build' task comes from the 'java' plugin
-// docs: https://docs.gradle.org/current/userguide/java_plugin.html
 build {
     archivesBaseName = "miw"
     version = "latest"
 }
 
-// 'bootJar' comes from the 'org.springframework.boot' plugin
-// 'bootJar' is a subclass of the 'jar' task type
-// docs: https://docs.gradle.org/current/dsl/org.gradle.jvm.tasks.Jar.html#org.gradle.jvm.tasks.Jar
 bootJar {
+    enabled = true
     metaInf {
         from 'DEPENDENCIES'
         from '../SECURITY.md'
@@ -204,74 +92,3 @@ bootJar {
         from '../LICENSE'
     }
 }
-
-// 'test' comes from the 'java' plugin
-// docs: https://docs.gradle.org/current/userguide/java_plugin.html
-test {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
-// standard gradle class
-// docs: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.dependencies.HtmlDependencyReportTask.html
-htmlDependencyReport {
-    projects = project.allprojects
-}
-
-// 'jacocoTestReport' is provided by the 'jacoco' plugin
-// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html
-jacocoTestReport {
-
-    reports {
-        xml.enabled true
-        xml.outputLocation = file("./build/reports/xml/jacoco.xml")
-
-        csv.enabled false
-
-        html.enabled true
-        html.outputLocation = file("./build/reports/html/jacoco")
-    }
-
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    "org/eclipse/tractusx/managedidentitywallets/dto/*",
-                    "org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
-                    "org/eclipse/tractusx/managedidentitywallets/constant/*",
-                    "org/eclipse/tractusx/managedidentitywallets/exception/*"
-            ])
-        }))
-    }
-}
-
-// 'jacoco' is provided by the 'jacoco' plugin
-// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:configuring_the_jacoco_plugin
-jacoco {
-    toolVersion = "${jacocoVersion}"
-}
-
-
-// 'jacocoTestCoverageVerification' is provided by the 'jacoco' plugin
-// docs: https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:jacoco_report_violation_rules
-jacocoTestCoverageVerification {
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    "org/eclipse/tractusx/managedidentitywallets/dto/*",
-                    "org/eclipse/tractusx/managedidentitywallets/dao/entity/*",
-                    "org/eclipse/tractusx/managedidentitywallets/constant/*",
-                    "org/eclipse/tractusx/managedidentitywallets/exception/*"
-            ])
-        }))
-    }
-    violationRules {
-        rule {
-            limit {
-                // disabled for now
-                minimum = 0.00
-            }
-        }
-    }
-}
-
-check.dependsOn jacocoTestCoverageVerification

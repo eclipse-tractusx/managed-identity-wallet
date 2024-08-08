@@ -24,7 +24,7 @@ package org.eclipse.tractusx.managedidentitywallets.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 

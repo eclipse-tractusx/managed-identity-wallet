@@ -615,11 +615,12 @@ public class IssuersCredentialControllerApiDocs {
             +
             "Setting this parameter to false will result in the VC being created as JSON-LD " +
             "Defaults to false if not specified.", examples = {
-                    @ExampleObject(name = "Create VC as JWT", value = "true"),
-                    @ExampleObject(name = "Do not create VC as JWT", value = "false")
-            })
+            @ExampleObject(name = "Create VC as JWT", value = "true"),
+            @ExampleObject(name = "Do not create VC as JWT", value = "false")
+    })
     @Target(ElementType.PARAMETER)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface AsJwtParam {
     }
+
 }

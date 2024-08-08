@@ -24,11 +24,16 @@ package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teketik.test.mockinbean.MockInBean;
+import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.IssuersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -36,16 +41,20 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.IssuersCredentialRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
-import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.revocation.RevocationClient;
+import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.json.JSONException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -61,7 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool.COLON_SEPARATOR;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
@@ -81,6 +90,25 @@ class IssuersCredentialTest {
     @Autowired
     private IssuersCredentialRepository issuersCredentialRepository;
 
+    @Autowired
+    private RevocationSettings revocationSettings;
+
+
+    @MockInBean(RevocationService.class)
+    private RevocationClient revocationClient;
+
+    @SneakyThrows
+    @BeforeEach
+    void beforeEach() {
+        TestUtils.mockGetStatusListEntry(revocationClient);
+        TestUtils.mockGetStatusListVC(revocationClient, objectMapper, TestUtils.createEncodedList());
+        TestUtils.mockRevocationVerification(revocationClient, CredentialStatus.ACTIVE);
+    }
+
+    @AfterEach
+    void afterEach() {
+        Mockito.reset(revocationClient);
+    }
 
     @Test
     void getCredentials200() throws com.fasterxml.jackson.core.JsonProcessingException, JSONException {
@@ -209,6 +237,7 @@ class IssuersCredentialTest {
         VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(baseBpn, miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), type, headers, miwSettings, objectMapper, restTemplate);
 
         Assertions.assertNotNull(verifiableCredential.getProof());
+        Assertions.assertNotNull(verifiableCredential.getVerifiableCredentialStatus());
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(miwSettings.authorityWalletDid(), type);
         Assertions.assertFalse(credentials.isEmpty());
@@ -235,7 +264,7 @@ class IssuersCredentialTest {
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
         Assertions.assertFalse(credentials.isEmpty());
-        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings, revocationSettings);
         Assertions.assertFalse(credentials.get(0).isStored());  //stored must be false
         Assertions.assertFalse(credentials.get(0).isSelfIssued());  //stored must be false
 
@@ -244,7 +273,6 @@ class IssuersCredentialTest {
         Assertions.assertEquals(1, issuersCredentials.size());
         Assertions.assertEquals(type, issuersCredentials.get(0).getType());
     }
-
 
 
 }

@@ -21,7 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyPair;
@@ -39,7 +39,6 @@ public interface KeyProvider {
     /**
      * @param keyName the name of the key that is to be retrieved
      * @return the key as a byte-array
-     *
      */
     Object getPrivateKey(String keyName, SupportedAlgorithms algorithm);
 
@@ -54,11 +53,11 @@ public interface KeyProvider {
 
     /**
      * @return the type of KeyProvider
-     *
      * @see KeyStorageType
      */
     KeyStorageType getKeyStorageType();
 
     KeyPair getKeyPair(DID self);
+
     KeyPair getKeyPair(String bpn);
 }

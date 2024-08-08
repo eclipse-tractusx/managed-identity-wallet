@@ -22,7 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.dao.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.smartsensesolutions.java.commons.base.entity.BaseEntity;
+import com.smartsensesolutions.commons.dao.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;

@@ -20,7 +20,8 @@
  */
 
 package org.eclipse.tractusx.managedidentitywallets.utils;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

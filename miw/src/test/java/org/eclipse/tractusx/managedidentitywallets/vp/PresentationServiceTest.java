@@ -26,20 +26,24 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
+import com.teketik.test.mockinbean.MockInBean;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
-import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
+import org.eclipse.tractusx.managedidentitywallets.revocation.RevocationClient;
 import org.eclipse.tractusx.managedidentitywallets.service.IssuersCredentialService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
+import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestConstants;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
@@ -47,8 +51,11 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.Verifiable;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -58,7 +65,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool.COLON_SEPARATOR;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_READ;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.BPN_CREDENTIAL_WRITE;
 import static org.eclipse.tractusx.managedidentitywallets.utils.TestConstants.DID_BPN_1;
@@ -97,6 +104,23 @@ class PresentationServiceTest {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @MockInBean(RevocationService.class)
+    private RevocationClient revocationClient;
+
+    @SneakyThrows
+    @BeforeEach
+    void beforeEach() {
+        TestUtils.mockGetStatusListEntry(revocationClient);
+        TestUtils.mockGetStatusListVC(revocationClient, objectMapper, TestUtils.createEncodedList());
+        TestUtils.mockRevocationVerification(revocationClient, CredentialStatus.ACTIVE);
+    }
+
+    @AfterEach
+    void afterEach() {
+        Mockito.reset(revocationClient);
+    }
+
 
     @SneakyThrows
     @Test

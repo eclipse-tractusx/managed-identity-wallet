@@ -37,10 +37,11 @@ maven/mavencentral/com.ibm.async/asyncutil/0.1.0, Apache-2.0, approved, clearlyd
 maven/mavencentral/com.jayway.jsonpath/json-path/2.9.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/9.37.3, Apache-2.0, approved, #11701
 maven/mavencentral/com.opencsv/opencsv/5.9, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.smartsensesolutions/commons-dao/0.0.5, Apache-2.0, approved, #9176
+maven/mavencentral/com.smartsensesolutions/commons-dao/1.0.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.sun.activation/jakarta.activation/1.2.1, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 maven/mavencentral/com.sun.istack/istack-commons-runtime/4.1.2, BSD-3-Clause, approved, #15290
 maven/mavencentral/com.sun.mail/jakarta.mail/1.6.5, EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, ee4j.mail
+maven/mavencentral/com.teketik/mock-in-bean/boot2-v1.5.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin.external.google/android-json/0.0.20131108.vaadin1, Apache-2.0, approved, CQ21310
 maven/mavencentral/com.zaxxer/HikariCP/5.1.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/commons-beanutils/commons-beanutils/1.9.4, Apache-2.0, approved, CQ12654
@@ -70,9 +71,9 @@ maven/mavencentral/io.smallrye.config/smallrye-config-common/2.3.0, Apache-2.0, 
 maven/mavencentral/io.smallrye.config/smallrye-config-core/2.3.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.smallrye.config/smallrye-config/2.3.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.smallrye/jandex/3.1.2, Apache-2.0, approved, clearlydefined
-maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.9, Apache-2.0, approved, #5947
-maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.9, Apache-2.0, approved, #5929
-maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.9, Apache-2.0, approved, #5919
+maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.21, Apache-2.0, approved, #5947
+maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.21, Apache-2.0, approved, #5929
+maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.21, Apache-2.0, approved, #5919
 maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.3, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.inject/jakarta.inject-api/2.0.1, Apache-2.0, approved, ee4j.cdi
@@ -167,16 +168,15 @@ maven/mavencentral/org.ow2.asm/asm-tree/9.5, BSD-3-Clause, approved, #7555
 maven/mavencentral/org.ow2.asm/asm/9.5, BSD-3-Clause, approved, #7554
 maven/mavencentral/org.ow2.asm/asm/9.6, BSD-3-Clause, approved, #10776
 maven/mavencentral/org.postgresql/postgresql/42.7.3, BSD-2-Clause AND Apache-2.0, approved, #11681
-maven/mavencentral/org.projectlombok/lombok/1.18.28, MIT, approved, #15192
 maven/mavencentral/org.projectlombok/lombok/1.18.34, MIT, approved, #15192
 maven/mavencentral/org.reactivestreams/reactive-streams/1.0.4, CC0-1.0, approved, CQ16332
 maven/mavencentral/org.rnorth.duct-tape/duct-tape/1.0.8, MIT, approved, clearlydefined
 maven/mavencentral/org.skyscreamer/jsonassert/1.5.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.13, MIT, approved, #7698
 maven/mavencentral/org.slf4j/slf4j-api/2.0.13, MIT, approved, #5915
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/2.1.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/2.1.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.1.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/2.5.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/2.5.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.5.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-actuator-autoconfigure/3.3.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-actuator/3.3.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-autoconfigure/3.3.2, Apache-2.0, approved, clearlydefined
@@ -229,7 +229,7 @@ maven/mavencentral/org.testcontainers/jdbc/1.19.3, Apache-2.0, approved, #10348
 maven/mavencentral/org.testcontainers/junit-jupiter/1.19.3, MIT, approved, #10344
 maven/mavencentral/org.testcontainers/postgresql/1.19.3, MIT, approved, #10350
 maven/mavencentral/org.testcontainers/testcontainers/1.19.3, Apache-2.0 AND MIT, approved, #10347
-maven/mavencentral/org.webjars/swagger-ui/4.18.2, Apache-2.0, approved, #15184
+maven/mavencentral/org.webjars/swagger-ui/5.13.0, Apache-2.0, approved, #14547
 maven/mavencentral/org.wiremock/wiremock-standalone/3.4.2, MIT AND Apache-2.0, approved, #14889
 maven/mavencentral/org.xmlunit/xmlunit-core/2.9.1, Apache-2.0, approved, #6272
-maven/mavencentral/org.yaml/snakeyaml/2.0, Apache-2.0 AND (Apache-2.0 OR BSD-3-Clause OR EPL-1.0 OR GPL-2.0-or-later OR LGPL-2.1-or-later), approved, #7275
+maven/mavencentral/org.yaml/snakeyaml/2.2, Apache-2.0 AND (Apache-2.0 OR BSD-3-Clause OR EPL-1.0 OR GPL-2.0-or-later OR LGPL-2.1-or-later), approved, #10232

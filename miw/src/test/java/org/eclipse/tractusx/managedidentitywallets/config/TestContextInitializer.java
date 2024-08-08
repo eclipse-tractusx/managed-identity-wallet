@@ -28,14 +28,15 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.net.ServerSocket;
 import java.util.Base64;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 public class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final int port = findFreePort();
+    private static final int MANAGEMENT_PORT = findFreePort();
     private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer().withRealmImportFile("miw-test-realm.json");
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.5")
             .withDatabaseName("integration-tests-db")
@@ -53,10 +54,11 @@ public class TestContextInitializer implements ApplicationContextInitializer<Con
         SecretKey secretKey = keyGen.generateKey();
         TestPropertyValues.of(
                 "server.port=" + port,
+                "management.server.port=" + MANAGEMENT_PORT,
                 "miw.host: localhost:${server.port}",
                 "miw.enforceHttps=false",
                 "miw.vcExpiryDate=1-1-2030",
-                "miw.encryptionKey="+ Base64.getEncoder().encodeToString(secretKey.getEncoded()),
+                "miw.encryptionKey=" + Base64.getEncoder().encodeToString(secretKey.getEncoded()),
                 "miw.authorityWalletBpn: BPNL000000000000",
                 "miw.authorityWalletName: Test-X",
                 "miw.authorityWalletDid: did:web:localhost%3A${server.port}:BPNL000000000000",

@@ -22,7 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.signing;
 
 import lombok.RequiredArgsConstructor;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletKeyRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.DID;

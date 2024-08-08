@@ -23,7 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
-import org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.TokenValidationErrors;
 import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.service.DidDocumentService;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;

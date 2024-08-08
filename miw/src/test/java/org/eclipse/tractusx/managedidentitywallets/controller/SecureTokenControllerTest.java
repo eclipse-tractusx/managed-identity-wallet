@@ -45,7 +45,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool.COLON_SEPARATOR;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
@@ -104,8 +104,8 @@ class SecureTokenControllerTest {
                 new ParameterizedTypeReference<>() {
                 }
         );
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
         Assertions.assertNotNull(response.getBody());
         Assertions.assertNotNull(response.getBody().getOrDefault("access_token", null));
         Assertions.assertNotNull(response.getBody().getOrDefault("expiresAt", null));
@@ -127,7 +127,7 @@ class SecureTokenControllerTest {
                 new ParameterizedTypeReference<>() {
                 }
         );
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals(response.getHeaders().getContentType(), MediaType.APPLICATION_JSON);
         Assertions.assertNotNull(response.getBody());
         Assertions.assertNotNull(response.getBody().getOrDefault("access_token", null));

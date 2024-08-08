@@ -25,7 +25,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatus;
@@ -64,6 +64,8 @@ public class CredentialCreationConfig {
     private Date expiryDate;
 
     private boolean selfIssued;
+
+    private boolean revocable;
 
     // this will be used by the DB-Impl of storage to retrieve privateKey
     @NonNull

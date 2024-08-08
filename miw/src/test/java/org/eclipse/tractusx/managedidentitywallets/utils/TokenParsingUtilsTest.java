@@ -23,8 +23,9 @@ package org.eclipse.tractusx.managedidentitywallets.utils;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.security.core.Authentication;
@@ -37,8 +38,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 class TokenParsingUtilsTest {
 

@@ -23,9 +23,9 @@ package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.service.CommonService;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
@@ -53,11 +53,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool.COLON_SEPARATOR;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
-public class VerifiableCredentialIssuerEqualProofSignerTest {
+class VerifiableCredentialIssuerEqualProofSignerTest {
 
     @Autowired
     private MIWSettings miwSettings;
@@ -76,7 +76,7 @@ public class VerifiableCredentialIssuerEqualProofSignerTest {
 
     @SneakyThrows
     @Test
-    public void test() {
+    void test() {
         var bpn1 = "BPNL000000000FOO";
         String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn1;
         var response1 = TestUtils.createWallet(bpn1, "did:web:localhost%3A8080:BPNL000000000FOO", restTemplate, miwSettings.authorityWalletBpn(), defaultLocation);

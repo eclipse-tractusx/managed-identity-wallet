@@ -24,15 +24,16 @@ package org.eclipse.tractusx.managedidentitywallets.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import com.smartsensesolutions.java.commons.base.service.BaseService;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import com.smartsensesolutions.commons.dao.base.BaseRepository;
+import com.smartsensesolutions.commons.dao.base.BaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.JtiRecord;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -41,12 +42,10 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.JtiRepository;
 import org.eclipse.tractusx.managedidentitywallets.domain.PresentationCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.domain.VerifiableEncoding;
-import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.MissingVcTypesException;
 import org.eclipse.tractusx.managedidentitywallets.exception.PermissionViolationException;
 import org.eclipse.tractusx.managedidentitywallets.signing.SignerResult;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
-import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.exception.json.InvalidJsonLdException;
 import org.eclipse.tractusx.ssi.lib.exception.proof.JwtExpiredException;
@@ -70,13 +69,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.BLANK_SEPARATOR;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COMA_SEPARATOR;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.UNDERSCORE;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getClaimsSet;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getScope;
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getStringClaim;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getClaimsSet;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getScope;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getStringClaim;
 import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
 
 /**
@@ -88,8 +83,6 @@ import static org.springframework.security.oauth2.jwt.JwtClaimNames.JTI;
 public class PresentationService extends BaseService<HoldersCredential, Long> {
 
     private final HoldersCredentialRepository holdersCredentialRepository;
-
-    private final SpecificationUtil<HoldersCredential> credentialSpecificationUtil;
 
     private final CommonService commonService;
 
@@ -109,10 +102,6 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         return holdersCredentialRepository;
     }
 
-    @Override
-    protected SpecificationUtil<HoldersCredential> getSpecificationUtil() {
-        return credentialSpecificationUtil;
-    }
 
     /**
      * Create presentation map.
@@ -278,12 +267,7 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         final DidResolver resolver = didDocumentResolverService.getCompositeDidResolver();
         final LinkedDataProofValidation linkedDataProofValidation = LinkedDataProofValidation.newInstance(resolver);
         final boolean isValid = linkedDataProofValidation.verify(credential);
-
-        if (isValid) {
-            log.debug("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
-        } else {
-            log.info("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
-        }
+        log.info("Credential validation result: (valid: {}, credential-id: {})", isValid, credential.getId());
         return isValid;
     }
 
@@ -298,10 +282,10 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
         List<VerifiableCredential> verifiableCredentials = new ArrayList<>();
 
         String scopeValue = getScope(jwtClaimsSet);
-        String[] scopes = scopeValue.split(BLANK_SEPARATOR);
+        String[] scopes = scopeValue.split(StringPool.BLANK_SEPARATOR);
 
         for (String scope : scopes) {
-            String[] scopeParts = scope.split(COLON_SEPARATOR);
+            String[] scopeParts = scope.split(StringPool.COLON_SEPARATOR);
             String vcType = scopeParts[1];
             checkReadPermission(scopeParts[2]);
             String vcTypeNoVersion = removeVersion(vcType);
@@ -357,12 +341,12 @@ public class PresentationService extends BaseService<HoldersCredential, Long> {
     private void checkMissingVcs(List<String> missingVCTypes) {
         if (!missingVCTypes.isEmpty()) {
             throw new MissingVcTypesException(String.format("Missing VC types: %s",
-                    String.join(COMA_SEPARATOR, missingVCTypes)));
+                    String.join(StringPool.COMA_SEPARATOR, missingVCTypes)));
         }
     }
 
     private String removeVersion(String vcType) {
-        String[] parts = vcType.split(UNDERSCORE);
+        String[] parts = vcType.split(StringPool.UNDERSCORE);
         return (parts.length > 1) ? parts[0] : vcType;
     }
 
