@@ -1,3 +1,15 @@
+# [1.0.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.3...v1.0.0-develop.4) (2024-08-09)
+
+
+* feat(API)!: change API VC/VP default data format from Json to JWT ([233ab68](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/233ab6883012a5523ecaa4e0ad234e775c3e4577))
+
+
+### BREAKING CHANGES
+
+* All API endpoints that used Verifiable Credentials and -Presentations in JSON format per default are now working with the JWT format by default instead.
+
+Signed-off-by: Dominik Pinsel <dominik.pinsel@mercedes-benz.com>
+
 # [1.0.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.2...v1.0.0-develop.3) (2024-07-29)
 
 
