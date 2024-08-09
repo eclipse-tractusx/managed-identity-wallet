@@ -101,7 +101,7 @@ public class IssuersCredentialController {
                                                                                  }
                                                                          ) @RequestParam(required = false, defaultValue = "createdAt") String sortColumn,
                                                                         @Parameter(name = "sortTpe", description = "Sort order", examples = { @ExampleObject(value = "desc", name = "Descending order"), @ExampleObject(value = "asc", name = "Ascending order") }) @RequestParam(required = false, defaultValue = "desc") String sortTpe,
-                                                                         @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt,
+                                                                         @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "true") boolean asJwt,
                                                                         Authentication authentication) {
         log.debug("Received request to get credentials. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
         final GetCredentialsCommand command;
@@ -146,7 +146,7 @@ public class IssuersCredentialController {
     @PostMapping(path = RestURI.ISSUERS_CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @IssueVerifiableCredentialUsingBaseWalletApiDocs
     public ResponseEntity<CredentialsResponse> issueCredentialUsingBaseWallet(@Parameter(description = "Holder DID", examples = {@ExampleObject(description = "did", name = "did", value = "did:web:localhost:BPNL000000000000")}) @RequestParam(name = "holderDid") String holderDid, @RequestBody Map<String, Object> data, Authentication authentication,
-                                                                            @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt) {
+                                                                            @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "true") boolean asJwt) {
         log.debug("Received request to issue verifiable credential. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(issuersCredentialService.issueCredentialUsingBaseWallet(holderDid, data, asJwt, TokenParsingUtils.getBPNFromToken(authentication)));
     }

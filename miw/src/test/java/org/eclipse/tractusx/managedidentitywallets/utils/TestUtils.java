@@ -229,7 +229,7 @@ public class TestUtils {
 
         Map<String, Object> map = getCredentialAsMap(holderBPn, holderDid, issuerDid, type, miwSettings, objectMapper);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}&asJwt={asJwt}", HttpMethod.POST, entity, String.class, holderDid, false);
         if (response.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
             throw new ForbiddenException();
         }

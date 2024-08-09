@@ -80,7 +80,7 @@ public class PresentationController {
     @PostMapping(path = RestURI.API_PRESENTATIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> createPresentation(@RequestBody Map<String, Object> data,
                                                                   @RequestParam(name = "audience", required = false) String audience,
-                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt, Authentication authentication
+                                                                  @RequestParam(name = "asJwt", required = false, defaultValue = "true") boolean asJwt, Authentication authentication
     ) {
         log.debug("Received request to create presentation. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(presentationService.createPresentation(data, asJwt, audience, TokenParsingUtils.getBPNFromToken(authentication)));
@@ -99,7 +99,7 @@ public class PresentationController {
     @PostMapping(path = RestURI.API_PRESENTATIONS_VALIDATION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> validatePresentation(@RequestBody Map<String, Object> data,
                                                                     @Parameter(description = "Audience to validate in VP (Only supported in case of JWT formatted VP)") @RequestParam(name = "audience", required = false) String audience,
-                                                                    @Parameter(description = "Pass true in case of VP is in JWT format") @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt,
+                                                                    @Parameter(description = "Pass true in case of VP is in JWT format") @RequestParam(name = "asJwt", required = false, defaultValue = "true") boolean asJwt,
                                                                     @Parameter(description = "Check expiry of VC(Only supported in case of JWT formatted VP)") @RequestParam(name = "withCredentialExpiryDate", required = false, defaultValue = "false") boolean withCredentialExpiryDate
     ) {
         log.debug("Received request to validate presentation");
@@ -121,7 +121,7 @@ public class PresentationController {
     public ResponseEntity<PresentationResponseMessage> createPresentation(
             /* As filters are disabled for this endpoint set required to false and handle missing token manually */
             @Parameter(hidden = true) @RequestHeader(name = "Authorization", required = false) String stsToken,
-            @RequestParam(name = "asJwt", required = false, defaultValue = "false") boolean asJwt,
+            @RequestParam(name = "asJwt", required = false, defaultValue = "true") boolean asJwt,
             InputStream is) {
         try {
 
@@ -147,10 +147,19 @@ public class PresentationController {
             final List<String> requestedScopes = presentationRequestReader.readVerifiableCredentialScopes(is);
 
             SignedJWT accessToken = getAccessToken(stsToken);
-            Map<String, Object> map = presentationService.createVpWithRequiredScopes(accessToken, asJwt);
-            VerifiablePresentation verifiablePresentation = new VerifiablePresentation((Map) map.get("vp"));
-            PresentationResponseMessage message = new PresentationResponseMessage(verifiablePresentation);
-            return ResponseEntity.ok(message);
+
+            if(asJwt) {
+                Map<String, Object> map = presentationService.createVpWithRequiredScopes(accessToken, true);
+                String verifiablePresentation = (String) map.get("vp");
+                PresentationResponseMessage message = new PresentationResponseMessage(verifiablePresentation);
+                return ResponseEntity.ok(message);
+            } else {
+                Map<String, Object> map = presentationService.createVpWithRequiredScopes(accessToken, false);
+                VerifiablePresentation verifiablePresentation = new VerifiablePresentation((Map) map.get("vp"));
+                PresentationResponseMessage message = new PresentationResponseMessage(verifiablePresentation);
+                return ResponseEntity.ok(message);
+            }
+
         } catch (TractusXPresentationRequestReader.InvalidPresentationQueryMessageResource e) {
             return ResponseEntity.badRequest().build();
         }

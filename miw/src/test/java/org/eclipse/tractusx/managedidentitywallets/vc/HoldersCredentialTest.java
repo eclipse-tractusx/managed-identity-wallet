@@ -170,20 +170,20 @@ class HoldersCredentialTest {
 
         HttpEntity<Map> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}"
-                , HttpMethod.GET, entity, String.class, baseDID);
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS + "?issuerIdentifier={did}&asJwt={asJwt}"
+                , HttpMethod.GET, entity, String.class, baseDID, false);
         List<VerifiableCredential> credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(typesOfVcs.size(), Objects.requireNonNull(credentialList).size());
 
-        response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}"
-                , HttpMethod.GET, entity, String.class, credentialList.get(0).getId());
+        response = restTemplate.exchange(RestURI.CREDENTIALS + "?credentialId={id}&asJwt={asJwt}"
+                , HttpMethod.GET, entity, String.class, credentialList.get(0).getId(), false);
         credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
 
-        response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
-                , HttpMethod.GET, entity, String.class, String.join(",", typesOfVcs));
+        response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}&asJwt={asJwt}"
+                , HttpMethod.GET, entity, String.class, String.join(",", typesOfVcs), false);
         credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(typesOfVcs.size(), Objects.requireNonNull(credentialList).size());
@@ -191,8 +191,8 @@ class HoldersCredentialTest {
 
         //test get by type
         String type = typesOfVcs.get(0);
-        response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}"
-                , HttpMethod.GET, entity, String.class, type);
+        response = restTemplate.exchange(RestURI.CREDENTIALS + "?type={list}&asJwt={asJwt}"
+                , HttpMethod.GET, entity, String.class, type, false);
         credentialList = TestUtils.getVerifiableCredentials(response, objectMapper);
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
         Assertions.assertEquals(1, Objects.requireNonNull(credentialList).size());
@@ -379,7 +379,7 @@ class HoldersCredentialTest {
 
         Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(RestURI.CREDENTIALS+ "?asJwt={asJwt}", HttpMethod.POST, entity, String.class, false);
         return response;
     }
 }
