@@ -93,7 +93,7 @@ public class HoldersCredentialController {
                                                                          @Parameter(name = "sortTpe", description = "Sort order", examples = {@ExampleObject(value = "desc", name = "Descending order"), @ExampleObject(value = "asc", name = "Ascending order")}) @RequestParam(required = false, defaultValue = "desc") String sortTpe,
                                                                          @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Page number, Page number start with zero") @RequestParam(required = false, defaultValue = "0") int pageNumber,
                                                                          @Min(0) @Max(Integer.MAX_VALUE) @Parameter(description = "Number of records per page") @RequestParam(required = false, defaultValue = Integer.MAX_VALUE + "") int size,
-                                                                         @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "false") boolean asJwt,
+                                                                         @AsJwtParam @RequestParam(name = StringPool.AS_JWT, defaultValue = "true") boolean asJwt,
 
                                                                         Authentication authentication) {
         log.debug("Received request to get credentials. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
@@ -124,7 +124,7 @@ public class HoldersCredentialController {
     @IssueCredentialApiDoc
     @PostMapping(path = RestURI.CREDENTIALS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CredentialsResponse> issueCredential(@RequestBody Map<String, Object> data, Authentication authentication,
-                                                                @AsJwtParam @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt
+                                                                @AsJwtParam @RequestParam(name = "asJwt", defaultValue = "true") boolean asJwt
     ) {
         log.debug("Received request to issue credential. BPN: {}", TokenParsingUtils.getBPNFromToken(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(holdersCredentialService.issueCredential(data, TokenParsingUtils.getBPNFromToken(authentication), asJwt));

@@ -34,25 +34,27 @@ import java.util.List;
  * As `presentationSubmission` a not well-defined, we will just skip the property for HTTP responses. Defining all types as 'Json' make the whole idea of using Json-Linked-Data a waste of time, but ok.
  * <p>
  * The `presentation` property is only specified as 'Json'. For this implementation we will assume these are Presentations from ether the <a href="https://www.w3.org/2018/credentials/v1">Verifiable Credential Data Model v1.1</a> or <a href="https://www.w3.org/ns/credentials/v2">Verifiable Credential Data Model v2.0</a>.
+ * <br/>
+ * At the same time other applications require the Verifiable Presentation to be a Json Web Token. As this protocol is not able to define a good data type, and implementations of this protocol even require different types, object is the correct data type here...
  */
 @Getter
 public class PresentationResponseMessage {
 
 
-    public PresentationResponseMessage(VerifiablePresentation verifiablePresentation) {
+    public PresentationResponseMessage(Object verifiablePresentation) {
         this(List.of(verifiablePresentation));
     }
 
-    public PresentationResponseMessage(List<VerifiablePresentation> verifiablePresentations) {
+    public PresentationResponseMessage(List<Object> verifiablePresentations) {
         this.verifiablePresentations = verifiablePresentations;
     }
 
     @JsonProperty("@context")
-    private List<String> contexts = List.of("https://w3id.org/tractusx-trust/v0.8");
+    private List<Object> contexts = List.of("https://w3id.org/tractusx-trust/v0.8");
 
     @JsonProperty("@type")
-    private List<String> types = List.of("PresentationResponseMessage");
+    private List<Object> types = List.of("PresentationResponseMessage");
 
     @JsonProperty("presentation")
-    private List<VerifiablePresentation> verifiablePresentations;
+    private List<Object> verifiablePresentations;
 }

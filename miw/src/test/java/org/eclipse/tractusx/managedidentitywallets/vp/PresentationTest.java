@@ -114,7 +114,7 @@ class PresentationTest {
         HttpHeaders headers = AuthenticationUtils.getValidUserHttpHeaders(bpn);
         HttpEntity<Map> entity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> validationResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS_VALIDATION, HttpMethod.POST, entity, Map.class);
+        ResponseEntity<Map> validationResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS_VALIDATION + "?asJwt={asJwt}", HttpMethod.POST, entity, Map.class, false);
         Assertions.assertEquals(validationResponse.getStatusCode().value(), HttpStatus.BAD_REQUEST.value());
     }
 
@@ -243,7 +243,7 @@ class PresentationTest {
 
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(request), headers);
 
-        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS, HttpMethod.POST, entity, Map.class);
+        ResponseEntity<Map> vpResponse = restTemplate.exchange(RestURI.API_PRESENTATIONS  + "?asJwt={asJwt}", HttpMethod.POST, entity, Map.class, false);
         Assertions.assertEquals(vpResponse.getStatusCode().value(), HttpStatus.CREATED.value());
 
     }
@@ -347,6 +347,6 @@ class PresentationTest {
 
         Map<String, Objects> map = objectMapper.readValue(credentialWithoutProof.toJson(), Map.class);
         HttpEntity<Map> entity = new HttpEntity<>(map, headers);
-        return restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}", HttpMethod.POST, entity, String.class, holderDid);
+        return restTemplate.exchange(RestURI.ISSUERS_CREDENTIALS + "?holderDid={did}&asJwt={asJwt}", HttpMethod.POST, entity, String.class, holderDid, false);
     }
 }
