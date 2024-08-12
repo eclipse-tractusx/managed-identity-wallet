@@ -27,9 +27,9 @@ import lombok.Getter;
 @Getter
 @Builder()
 public class StatusListCredentialSubject {
-    public static final String TYPE_ENTRY = "BitstringStatusListEntry";
-    public static final String TYPE_CREDENTIAL = "BitstringStatusListCredential";
-    public static final String TYPE_LIST = "BitstringStatusList";
+    public static final String TYPE_ENTRY = "StatusList2021Entry";
+    public static final String TYPE_CREDENTIAL = "StatusList2021";
+    public static final String TYPE_LIST = "StatusList2021Credential";
 
     public static final String SUBJECT_ID = "id";
     public static final String SUBJECT_TYPE = "type";

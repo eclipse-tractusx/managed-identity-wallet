@@ -303,7 +303,7 @@ public class RevocationService {
         VerifiableCredential statusListVC;
         StatusListCredentialSubject subject;
         types.add(VerifiableCredentialType.VERIFIABLE_CREDENTIAL);
-        types.add(StatusListCredentialSubject.TYPE_CREDENTIAL);
+        types.add(StatusListCredentialSubject.TYPE_LIST);
 
         bpn = extractBpnFromDid(dto.issuerId());
         id =
@@ -317,7 +317,7 @@ public class RevocationService {
                 StatusListCredentialSubject.builder()
                         .id(id)
                         .statusPurpose(dto.purpose().toLowerCase())
-                        .type(StatusListCredentialSubject.TYPE_LIST)
+                        .type(StatusListCredentialSubject.TYPE_CREDENTIAL)
                         .encodedList(BitSetManager.initializeEncodedListString())
                         .build();
 

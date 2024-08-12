@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.managedidentitywallets.revocation.services;
 
 import lombok.RequiredArgsConstructor;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.revocation.config.security.SecurityConfigProperties;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.TokenResponse;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -72,7 +73,7 @@ public class HttpClientService {
         String uri =
                 UriComponentsBuilder.fromHttpUrl(miwUrl)
                         .path("/api/credentials")
-                        .queryParam("isRevocable", "false")
+                        .queryParam(StringPool.REVOCABLE, "false")
                         .build()
                         .toUriString();
 
