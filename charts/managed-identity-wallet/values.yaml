@@ -1,30 +1,30 @@
-# /********************************************************************************
-# * Copyright (c) 2021,2024 Contributors to the Eclipse Foundation
-# *
-# * See the NOTICE file(s) distributed with this work for additional
-# * information regarding copyright ownership.
-# *
-# * This program and the accompanying materials are made available under the
-# * terms of the Apache License, Version 2.0 which is available at
-# * https://www.apache.org/licenses/LICENSE-2.0.
-# *
-# * Unless required by applicable law or agreed to in writing, software
-# * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# * License for the specific language governing permissions and limitations
-# * under the License.
-# *
-# * SPDX-License-Identifier: Apache-2.0
-# ********************************************************************************/
-
+###############################################################
+# Copyright (c) 2024 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+###############################################################
+#
+# ----------------------------------------------- Values for Managed Identity Wallet ----------------------------------------------- #
+#
 # -- The amount of replicas to run
 replicaCount: 1
-
 # -- String to partially override common.names.fullname template (will maintain the release name)
 nameOverride: ""
 # -- String to fully override common.names.fullname template
 fullnameOverride: ""
-
 image:
   # -- Image repository
   repository: tractusx/managed-identity-wallet
@@ -32,14 +32,11 @@ image:
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
   tag: ""
-
-
+imagePullSecrets: []
 # --  Parameters for the application (will be stored as secrets - so, for passwords, ...)
 secrets: {}
-
 # -- envs Parameters for the application (will be provided as environment variables)
 envs: {}
-
 serviceAccount:
   # -- Enable creation of ServiceAccount
   create: true
@@ -47,13 +44,12 @@ serviceAccount:
   annotations: {}
   # -- The name of the ServiceAccount to use.
   name: ""
-
 service:
   # -- Kubernetes Service type
   type: ClusterIP
   # -- Kubernetes Service port
   port: 8080
-
+# -- Ingress Configuration
 ingress:
   # -- Enable ingress controller resource
   enabled: false
@@ -70,10 +66,10 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
-
-# -- PodSecurityContext
+  className: nginx
+# -- Pod security configurations
 podSecurityContext: {}
-
+# -- Pod security parameters
 securityContext:
   # -- Enable privileged container
   privileged: false
@@ -85,35 +81,8 @@ securityContext:
   runAsGroup: 11111
   # -- Enable to run the container as a non-root user
   runAsNonRoot: true
-
-# -- Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
-livenessProbe:
-  # -- Enables/Disables the livenessProbe at all
-  enabled: true
-  # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container.
-  failureThreshold: 3
-  # -- Number of seconds after the container has started before readiness probe are initiated.
-  initialDelaySeconds: 20
-  # -- Number of seconds after which the probe times out.
-  timeoutSeconds: 15
-  # -- How often (in seconds) to perform the probe
-  periodSeconds: 5
-
-# -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
-readinessProbe:
-  # -- Enables/Disables the readinessProbe at all
-  enabled: true
-  # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready.
-  failureThreshold: 3
-  # -- Number of seconds after the container has started before readiness probe are initiated.
-  initialDelaySeconds: 30
-  # -- How often (in seconds) to perform the probe
-  periodSeconds: 5
-  # -- Minimum consecutive successes for the probe to be considered successful after having failed.
-  successThreshold: 1
-  # -- Number of seconds after which the probe times out.
-  timeoutSeconds: 5
-
+  # # -- Filesystem group ID
+  # fsGroup: 1001
 resources:
   requests:
     # -- CPU resource requests
@@ -125,38 +94,29 @@ resources:
     cpu: 2
     # -- Memory resource limits
     memory: 1Gi
-
 # -- NodeSelector configuration
 nodeSelector:
   "kubernetes.io/os": linux
-
 # -- Tolerations configuration
 tolerations: []
-
 # -- Affinity configuration
 affinity: {}
-
 # -- PodAnnotation configuration
 podAnnotations: {}
-
 # -- add initContainers to the miw deployment
 initContainers: []
-
 networkPolicy:
   # -- If `true` network policy will be created to restrict access to managed-identity-wallet
   enabled: false
   # -- Specify from rule network policy for miw (defaults to all namespaces)
   from:
-  - namespaceSelector: {}
-
+    - namespaceSelector: {}
 # -- add volumes to the miw deployment
 extraVolumes: []
-
-# -- add volume mounts to the miw deployment
 extraVolumeMounts: []
-
-## @section Managed Identity Wallet Primary Parameters
-##
+#
+# -----------------------------------------------MIW----------------------------------------------- #
+#
 miw:
   ## @param miw.host Host name
   ## @param miw.logging.level Log level. Should be ether ERROR, WARN, INFO, DEBUG, or TRACE.
@@ -184,15 +144,16 @@ miw:
     # -- Database port
     port: 5432
     # -- Database host
-    host: "{{ .Release.Name }}-postgresql"
+    host: "managed-identity-wallet-postgresql"
     # -- Database user
     user: "miw"
     # -- Database name
     name: "miw_app"
     # -- Existing secret name for the database password
-    secret: "{{ .Release.Name }}-postgresql"
+    secret: "managed-identity-wallet-postgresql"
     # -- Existing secret key for the database password
     secretPasswordKey: "password"
+    # -- Password encryption configuratons
     encryptionKey:
       # -- Database encryption key for confidential data.  Ignored if `secret` is set. If empty a secret with 32 random alphanumeric chars is generated.
       value: ""
@@ -207,32 +168,71 @@ miw:
     clientId: "miw_private_client"
     # -- Keycloak URL
     url: "http://{{ .Release.Name }}-keycloak"
-
-# For more information on how to configure the Keycloak chart see https://github.com/bitnami/charts/tree/main/bitnami/keycloak.
+  # -- Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  livenessProbe:
+    # -- Enables/Disables the livenessProbe at all
+    enabled: true
+    # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container.
+    failureThreshold: 3
+    # -- Number of seconds after the container has started before readiness probe are initiated.
+    initialDelaySeconds: 20
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 15
+    # -- How often (in seconds) to perform the probe
+    periodSeconds: 5
+  # -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  readinessProbe:
+    # -- Enables/Disables the readinessProbe at all
+    enabled: true
+    # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready.
+    failureThreshold: 3
+    # -- Number of seconds after the container has started before readiness probe are initiated.
+    initialDelaySeconds: 30
+    # -- How often (in seconds) to perform the probe
+    periodSeconds: 5
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 1
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 5
+    # For more information on how to configure the Keycloak chart see https://github.com/bitnami/charts/tree/main/bitnami/keycloak.
+# ----------------------------------------------- KEYCLOAK ----------------------------------------------- #
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
   # -- Extra environment variables
   extraEnvVars: []
-  #    - name: KEYCLOAK_HOSTNAME
-  #      value: "{{ .Release.Name }}-keycloak"
+  #  - name: KEYCLOAK_HOSTNAME
+  #    value: "keycloak"
   postgresql:
     # -- Name of the PostgreSQL chart to deploy. Mandatory when the MIW deploys a PostgreSQL chart, too.
     nameOverride: "keycloak-postgresql"
     # -- Enable to deploy PostgreSQL
     enabled: true
     auth:
-      # -- Keycloak PostgreSQL user
+      # -- Postgresql admin user password
       username: "miw_keycloak"
       # -- KeycloakPostgresql password to set (if empty one is generated)
-      password: ""
+      password: "adminpass"
       # -- Database name
       database: "miw_keycloak"
+    volumePermissions:
+      enabled: true
   ingress:
+    # -- Enable ingress controller resource
     enabled: false
+    # -- Ingress annotations
     annotations: {}
+    # -- Ingress accepted hostnames
     hosts: []
+    #   - host: chart-example.local
+    #     paths:
+    #       - path: /
+    #         pathType: Prefix
+    # -- Ingress TLS configuration
     tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
   auth:
     # -- Keycloak admin user
     adminUser: "admin"
@@ -245,28 +245,53 @@ keycloak:
     existingConfigmap: keycloak-realm-config
     # -- Number of retries before considering a Job as failed
     backoffLimit: 2
-
+# ----------------------------------------------- POSTGRESQL ----------------------------------------------- #
 # For more information on how to configure the PostgreSQL chart see https://github.com/bitnami/charts/tree/main/bitnami/postgresql.
 postgresql:
   # -- Enable to deploy Postgresql
   enabled: true
+  image:
+    tag: "16-debian-12"
+    # -- Debug logs
+    debug: true
   auth:
     # -- Enable postgresql admin user
-    enablePostgresUser: false
+    enablePostgresUser: true
     # -- Postgresql admin user password
-    postgresPassword: ""
+    postgresPassword: "adminpass"
     # -- Postgresql user to create
     username: "miw"
     # -- Postgresql password to set (if empty one is generated)
-    password: ""
+    password: "adminpass"
     # -- Postgresql database to create
     database: "miw_app"
+    # -- Creating a new database for VCRS application (Edit the DB configurations as required in configmap)
+  primary:
+    extraVolumes:
+      - name: postgres-seed
+        persistentVolumeClaim:
+          claimName: postgres-seed-pvc
+    extraVolumeMounts:
+      - mountPath: /docker-entrypoint-initdb.d/seed
+        name: postgres-seed
+    initdb:
+      user: "postgres"
+      password: "adminpass"
+      scripts:
+        init.sql: |
+          CREATE DATABASE vcrs_app;
+          CREATE USER vcrs WITH ENCRYPTED PASSWORD 'adminpass';
+          GRANT ALL PRIVILEGES ON DATABASE vcrs_app TO vcrs;
+          \c vcrs_app
+          GRANT ALL ON SCHEMA public TO vcrs;
   backup:
     # -- Enable to create a backup cronjob
     enabled: false
+    #Cronjob Configuration
     cronjob:
       # -- Backup schedule
       schedule: "* */6 * * *"
+      # Backup Storage configuration
       storage:
         # -- Name of an existing PVC to use
         existingClaim: ""
@@ -274,7 +299,9 @@ postgresql:
         resourcePolicy: "keep"
         # -- PVC Storage Request for the backup data volume
         size: "8Gi"
-
+  volumePermissions:
+    enabled: true
+# ----------------------------------------------- PGADMIN ----------------------------------------------- #
 # For more information on how to configure the pgadmin chart see https://artifacthub.io/packages/helm/runix/pgadmin4.
 # (Here we're using a stripped-down version of the pgadmin chart, to just )
 pgadmin4:
@@ -318,3 +345,138 @@ pgadmin4:
       subPath: servers.json
       mountPath: "/pgadmin4/servers.json"
       readOnly: true
+#
+# ----------------------------------------------- Values for Verifiable Credential Revocation Service application ----------------------------------------------- #
+#
+vcrs:
+  replicaCount: 1
+  # -- Revocation application configuration
+  host: localhost
+  # -- The configmap name
+  nameOverride: "verifiable-credential-revocation-service"
+  # -- String to partially override common.names.fullname template (will maintain the release name)
+  fullnameOverride: "verifiable-credential-revocation-service"
+  # -- ConfigMap Name 
+  configName: "verifiable-credential-revocation-service-config"
+  # -- The Service name
+  serviceName: "verifiable-credential-revocation-service"
+  # -- The Secret name
+  secretName: "verifiable-credential-revocation-service-secret"
+  image:
+    # -- Image repository
+    repository: public.ecr.aws/w6s7t8e0/tractusx/verifiable-credential-revocation-service
+    # -- PullPolicy
+    pullPolicy: IfNotPresent
+    # -- Image tag (empty one will use "appVersion" value from chart definition)
+    tag: "latest"
+  env:
+    # -- The application name
+    APPLICATION_NAME: verifiable-credential-revocation-service
+    # -- The application port
+    APPLICATION_PORT: 8081
+    # -- The application profile
+    APPLICATION_PROFILE: local
+    # -- The Database Host
+    DATABASE_HOST: managed-identity-wallet-postgresql
+    # -- The Database Port
+    DATABASE_PORT: 5432
+    # -- The Database Name
+    DATABASE_NAME: vcrs_app
+    # -- The Database SSL 
+    DATABASE_USE_SSL_COMMUNICATION: false
+    # -- The Database Name
+    DATABASE_USERNAME: vcrs
+    # -- The Database connection pool size
+    DATABASE_CONNECTION_POOL_SIZE: 10
+    # -- Swagger UI config
+    ENABLE_SWAGGER_UI: true
+    # -- Swagger Api Doc
+    ENABLE_API_DOC: true
+    # -- The application log level
+    APPLICATION_LOG_LEVEL: DEBUG
+    # Enable application security
+    SERVICE_SECURITY_ENABLED: true
+    # -- KeyClocak Configurations
+    KEYCLOAK_REALM: miw_test
+    # -- ClientID Config 
+    KEYCLOAK_CLIENT_ID: miw_private_client
+    # -- ClientID Config
+    KEYCLOAK_PUBLIC_CLIENT_ID: miw_public_client
+    # -- Auth URL for Keycloak
+    AUTH_SERVER_URL: "http://{{ .Release.Name }}-keycloak"
+    # -- Revocation application configuration
+    MIW_URL: https://a888-203-129-213-107.ngrok-free.app
+    VC_SCHEMA_LINK: https://www.w3.org/2018/credentials/v1, https://cofinity-x.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json
+    DOMAIN_URL: https://977d-203-129-213-107.ngrok-free.app
+    # Application logging configurations
+    APP_LOG_LEVEL: INFO
+  secrets:
+    # -- The Database Password
+    DATABASE_PASSWORD: "adminpass"
+  resources:
+    requests:
+      # -- CPU resource requests
+      cpu: 250m
+      # -- Memory resource requests
+      memory: 512Mi
+    limits:
+      # -- CPU resource limits
+      cpu: 500m
+      # -- Memory resource limits
+      memory: 1Gi
+  # -- Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  livenessProbe:
+    # -- Enables/Disables the livenessProbe at all
+    enabled: true
+    # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container.
+    failureThreshold: 5
+    # -- Number of seconds after the container has started before readiness probes are initiated.
+    initialDelaySeconds: 60
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 30
+    # -- How often (in seconds) to perform the probe
+    periodSeconds: 15
+    # -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  readinessProbe:
+    # -- Enables/Disables the readinessProbe at all
+    enabled: true
+    # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready.
+    failureThreshold: 5
+    # -- Number of seconds after the container has started before readiness probe are initiated.
+    initialDelaySeconds: 60
+    # -- How often (in seconds) to perform the probe
+    periodSeconds: 15
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 1
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 15
+    # -- ingress configuration
+  ingressName: "verifiable-credential-revocation-service-ingress"
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+    service:
+      # -- Kubernetes Service type
+      type: ClusterIP
+      # -- Kubernetes Service port
+      port: 8081
+  database:
+    encryptionKey:
+      # -- Database encryption key for confidential data.  Ignored if `secret` is set. If empty a secret with 32 random alphanumeric chars is generated.
+      value: ""
+      # -- Existing secret for database encryption key
+      secret: ""
+      # -- Existing secret key for database encryption key
+      secretKey: ""

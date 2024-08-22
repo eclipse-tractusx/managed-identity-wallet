@@ -1,4 +1,4 @@
-# /********************************************************************************
+# ********************************************************************************
 # * Copyright (c) 2024 Contributors to the Eclipse Foundation
 # *
 # * See the NOTICE file(s) distributed with this work for additional
@@ -15,7 +15,7 @@
 # * under the License.
 # *
 # * SPDX-License-Identifier: Apache-2.0
-# ********************************************************************************/
+# ********************************************************************************
 {{- if .Values.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

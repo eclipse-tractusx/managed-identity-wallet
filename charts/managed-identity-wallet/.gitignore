@@ -1,1 +1,2 @@
-charts/
+charts/pgadmin4
+**/charts/*.tgz
