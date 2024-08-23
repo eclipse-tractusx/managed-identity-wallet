@@ -1,15 +1,15 @@
 dependencies:
-  - name: keycloak
-    repository: https://charts.bitnami.com/bitnami
-    version: 22.1.0
-  - name: common
-    repository: https://charts.bitnami.com/bitnami
-    version: 2.13.3
-  - name: postgresql
-    repository: https://charts.bitnami.com/bitnami
-    version: 11.9.13
-  - name: pgadmin4
-    repository: file://charts/pgadmin4
-    version: 1.19.0
-digest: sha256:fb94864221b4fed31894b48ac56b72a2324da0dc1cb1d6888cc52c3490685df7
-generated: "2023-12-15T10:30:41.880265+01:00"
+- name: keycloak
+  repository: https://charts.bitnami.com/bitnami
+  version: 15.1.6
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.22.0
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.9.13
+- name: pgadmin4
+  repository: file://charts/pgadmin4
+  version: 1.19.0
+digest: sha256:886b90f763f2320a1601e15b06264065a764f51fc34d592c0f0a08bd76f01635
+generated: "2024-08-22T18:04:25.649769241+05:30"

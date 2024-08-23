@@ -21,7 +21,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: pgadmin4-server-definitions
+  name: {{ .Release.Name }}-pgadmin4-server-definitions
   labels:
     {{- include "pgadmin.labels" . | nindent 4 }}
 data:

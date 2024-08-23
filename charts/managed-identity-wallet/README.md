@@ -43,6 +43,8 @@ And at the same it shall support an uninterrupted tracking and tracing and docum
 
     helm install [RELEASE_NAME] charts/managed-identity-wallet
 
+    #This will spin up the container for MIW application, VSRS application, KeyCloak and Postgresql
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 The command deploys miw on the Kubernetes cluster in the default configuration.

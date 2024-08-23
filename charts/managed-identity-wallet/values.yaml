@@ -51,22 +51,20 @@ service:
   port: 8080
 # -- Ingress Configuration
 ingress:
-  # -- Enable ingress controller resource
-  enabled: false
-  # -- Ingress annotations
-  annotations: {}
-  # -- Ingress accepted hostnames
-  hosts: []
-  #   - host: chart-example.local
-  #     paths:
-  #       - path: /
-  #         pathType: Prefix
-  # -- Ingress TLS configuration
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-  className: nginx
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: miw.example.org
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: chart-example-tls
+      hosts:
+        - miw.example.org
 # -- Pod security configurations
 podSecurityContext: {}
 # -- Pod security parameters
@@ -451,22 +449,21 @@ vcrs:
     # -- Number of seconds after which the probe times out.
     timeoutSeconds: 15
     # -- ingress configuration
-  ingressName: "verifiable-credential-revocation-service-ingress"
   ingress:
-    enabled: false
-    className: ""
-    annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+    enabled: true
+    className: "nginx"
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+      kubernetes.io/tls-acme: "true"
     hosts:
-      - host: chart-example.local
+      - host: vcrs.example.org
         paths:
           - path: /
-            pathType: ImplementationSpecific
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
+            pathType: Prefix
+    tls:
+      - secretName: chart-example-tls
+        hosts:
+          - vcrs.example.org
     service:
       # -- Kubernetes Service type
       type: ClusterIP

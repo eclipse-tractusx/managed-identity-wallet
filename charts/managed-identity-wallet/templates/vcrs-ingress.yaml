@@ -17,12 +17,13 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-{{- if .Values.vcrs.ingress.enabled -}}
+
+{{ if .Values.vcrs.ingress.enabled -}}
 {{- $fullName := include "verifiable-credential-revocation-service.fullname" . -}}
-{{- $svcPort := .Values.vcrs.ingress.service.port -}}
-{{- if and .Values.ingress.vcrs.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+{{- $svcPort := .Values.service.port -}}
+{{- if and .Values.vcrs.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.vcrs.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.vcrs.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.vcrs.className}}
+  {{- $_ := set .Values.vcrs.ingress.annotations "kubernetes.io/ingress.class" .Values.vcrs.ingress.className }}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -37,27 +38,27 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "verifiable-credential-revocation-service.labels" . | nindent 4 }}
-  {{- with .Values.ingress.vcrs.annotations }}
+  {{- with .Values.vcrs.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ingress.vcrs.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.ingress.vcrs.className }}
+  {{- if and .Values.vcrs.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.vcrs.ingress.className }}
   {{- end }}
-  {{- if .Values.ingress.vcrs.tls }}
+  {{- if .Values.vcrs.ingress.tls }}
   tls:
-    {{- range .Values.ingress.vcrs.tls }}
+    {{- range .Values.vcrs.ingress.tls }}
     - hosts:
         {{- range .hosts }}
-        - {{ . | quote }}
+        - {{ tpl . $ | quote }}
         {{- end }}
-      secretName: {{ .secretName }}
+      secretName: "{{ $fullName }}-{{ .secretName }}"
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.vcrs.hosts }}
-    - host: {{ .host | quote }}
+    {{- range .Values.vcrs.ingress.hosts }}
+    - host: {{ tpl .host $  | quote }}
       http:
         paths:
           {{- range .paths }}

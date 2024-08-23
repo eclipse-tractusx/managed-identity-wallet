@@ -27,7 +27,6 @@ type: application
 version: 1.0.0-develop.4
 appVersion: 1.0.0-develop.4
 
-home: https://github.com/eclipse-tractusx/managed-identity-wallet
 keywords:
   - Managed Identity Wallet
   - eclipse-tractusx
@@ -39,7 +38,7 @@ maintainers:
     url: https://github.com/DominikPinsel
 dependencies:
   - name: keycloak
-    version: 22.1.0
+    version: 15.1.6
     repository: https://charts.bitnami.com/bitnami
     condition: keycloak.enabled
   - name: common
@@ -48,10 +47,11 @@ dependencies:
       - bitnami-common
     version: 2.x.x
   - name: postgresql
-    version: "16.x.x"
+    version: 11.9.13
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
   - name: pgadmin4
-    repository: file://charts/pgadmin4
+    repository: file://charts/pgadmin4 # https://helm.runix.net
+    # License: https://github.com/rowanruseler/helm-charts/blob/main/LICENSE
     version: 1.19.0
     condition: pgadmin4.enabled
