@@ -22,7 +22,7 @@ chart:
   version: 9.9.9+test
   appVersion: 9.9.9
 templates:
-  - templates/ingress.yaml
+  - templates/miw-ingress.yaml
 values:
   - values.yml
 tests:
@@ -42,7 +42,6 @@ tests:
             app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/version: "9.9.9"
             app.kubernetes.io/managed-by: Helm
-
   - it: must have rules set
     asserts:
       - isNotEmpty:
@@ -57,7 +56,6 @@ tests:
           count: 1
       - isNotEmpty:
           path: spec.rules[0].http.paths[0].path
-
   - it: must have tls set
     asserts:
       - isNotEmpty:

@@ -22,7 +22,7 @@ chart:
   version: 9.9.9+test
   appVersion: 9.9.9
 templates:
-  - templates/ingress.yaml
+  - templates/miw-ingress.yaml
 tests:
   - it: should not be available
     asserts:

@@ -22,7 +22,7 @@ chart:
   version: 9.9.9+test
   appVersion: 9.9.9
 templates:
-  - templates/deployment.yaml
+  - templates/miw-deployment.yaml
 tests:
   - it: should have latest image tag
     values:
@@ -31,7 +31,6 @@ tests:
       - matchRegex:
           path: spec.template.spec.containers[0].image
           pattern: .:latest
-
   - it: should have environment variables set (envs and secrets set)
     values:
       - values.yml
@@ -93,4 +92,3 @@ tests:
                 secretKeyRef:
                   key: encryption-key
                   name: RELEASE-NAME-managed-identity-wallet
-

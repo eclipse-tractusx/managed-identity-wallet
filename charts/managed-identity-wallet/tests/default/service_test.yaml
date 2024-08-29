@@ -22,7 +22,7 @@ chart:
   version: 9.9.9+test
   appVersion: 9.9.9
 templates:
-  - templates/service.yaml
+  - templates/miw-service.yaml
 tests:
   - it: should have correct metadata
     asserts:
@@ -40,13 +40,11 @@ tests:
             app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/version: "9.9.9"
             app.kubernetes.io/managed-by: Helm
-
   - it: should have type set to ClusterIP
     asserts:
       - equal:
           path: spec.type
           value: ClusterIP
-
   - it: should have ports set
     asserts:
       - contains:

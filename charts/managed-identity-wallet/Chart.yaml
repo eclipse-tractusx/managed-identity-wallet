@@ -22,20 +22,28 @@ name: managed-identity-wallet
 description: |
   Managed Identity Wallet is supposed to supply a secure data source and data sink for Digital Identity Documents (DID), in order to enable Self-Sovereign Identity founding on those DIDs.
   And at the same it shall support an uninterrupted tracking and tracing and documenting the usage of those DIDs, e.g. within logistical supply chains.
+
 type: application
 
 version: 1.0.0-develop.4
 appVersion: 1.0.0-develop.4
 
+home: https://github.com/eclipse-tractusx/managed-identity-wallet
 keywords:
   - Managed Identity Wallet
   - eclipse-tractusx
+
 sources:
   - https://github.com/eclipse-tractusx/managed-identity-wallet
+
 maintainers:
   - name: Dominik Pinsel
     email: dominik.pinsel@mercedes-benz.com
     url: https://github.com/DominikPinsel
+  - name: Rohit Solanki
+    email: rohit.solanki@smartsensesolutions.com
+    url: https://github.com/rohit-smartsensesolutions
+
 dependencies:
   - name: keycloak
     version: 15.1.6
@@ -51,7 +59,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
   - name: pgadmin4
-    repository: file://charts/pgadmin4 # https://helm.runix.net
+    repository: file://charts/pgadmin4  # https://helm.runix.net
     # License: https://github.com/rowanruseler/helm-charts/blob/main/LICENSE
     version: 1.19.0
     condition: pgadmin4.enabled

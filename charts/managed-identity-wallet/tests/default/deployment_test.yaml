@@ -22,7 +22,7 @@ chart:
   version: 9.9.9+test
   appVersion: 9.9.9
 templates:
-  - templates/deployment.yaml
+  - templates/miw-deployment.yaml
 tests:
   - it: should have correct metadata
     asserts:
@@ -40,7 +40,6 @@ tests:
             app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/version: "9.9.9"
             app.kubernetes.io/managed-by: Helm
-
   - it: should have important values set
     asserts:
       - equal:
@@ -57,14 +56,12 @@ tests:
             name: http
             containerPort: 8080
             protocol: TCP
-
   - it: should have probes set
     asserts:
       - isNotEmpty:
           path: spec.template.spec.containers[0].livenessProbe
       - isNotEmpty:
           path: spec.template.spec.containers[0].readinessProbe
-
   - it: should have resource limits set
     asserts:
       - isNotEmpty:
@@ -81,7 +78,6 @@ tests:
           path: spec.template.spec.containers[0].resources.requests.cpu
       - isNotEmpty:
           path: spec.template.spec.containers[0].resources.requests.memory
-
   - it: should have a security context
     asserts:
       - isSubset:
@@ -92,7 +88,6 @@ tests:
             runAsGroup: 11111
             runAsNonRoot: true
             runAsUser: 11111
-
   - it: should have environment variables set
     asserts:
       - isNotEmpty:
@@ -147,14 +142,12 @@ tests:
               value: "8080"
             - name: VC_EXPIRY_DATE
               value: 31-12-2024
-
   - it: should have empty values
     asserts:
       - notExists:
           path: spec.template.spec.affinity
       - notExists:
           path: spec.template.spec.tolerations
-
   - it: should have nodeSelector value set
     asserts:
       - exists:
@@ -163,7 +156,6 @@ tests:
           path: spec.template.spec.nodeSelector
           content:
             "kubernetes.io/os": linux
-
   - it: should not have "imagePullSecrets" set
     asserts:
       - notExists:

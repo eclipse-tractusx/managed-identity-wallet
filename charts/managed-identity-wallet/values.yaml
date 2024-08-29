@@ -32,7 +32,6 @@ image:
   pullPolicy: Always
   # -- Image tag (empty one will use "appVersion" value from chart definition)
   tag: ""
-imagePullSecrets: []
 # --  Parameters for the application (will be stored as secrets - so, for passwords, ...)
 secrets: {}
 # -- envs Parameters for the application (will be provided as environment variables)
@@ -50,21 +49,23 @@ service:
   # -- Kubernetes Service port
   port: 8080
 # -- Ingress Configuration
+
 ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: miw.example.org
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: chart-example-tls
-      hosts:
-        - miw.example.org
+  # -- Enable ingress controller resource
+  enabled: false
+  # -- Ingress annotations
+  annotations: {}
+  # -- Ingress accepted hostnames
+  hosts: []
+  #   - host: chart-example.local
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+  # -- Ingress TLS configuration
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 # -- Pod security configurations
 podSecurityContext: {}
 # -- Pod security parameters
@@ -142,13 +143,13 @@ miw:
     # -- Database port
     port: 5432
     # -- Database host
-    host: "managed-identity-wallet-postgresql"
+    host: "{{ .Release.Name }}-postgresql"
     # -- Database user
     user: "miw"
     # -- Database name
     name: "miw_app"
     # -- Existing secret name for the database password
-    secret: "managed-identity-wallet-postgresql"
+    secret: "{{ .Release.Name }}-postgresql"
     # -- Existing secret key for the database password
     secretPasswordKey: "password"
     # -- Password encryption configuratons
@@ -192,45 +193,32 @@ miw:
     successThreshold: 1
     # -- Number of seconds after which the probe times out.
     timeoutSeconds: 5
-    # For more information on how to configure the Keycloak chart see https://github.com/bitnami/charts/tree/main/bitnami/keycloak.
 # ----------------------------------------------- KEYCLOAK ----------------------------------------------- #
+# For more information on how to configure the Keycloak chart see https://github.com/bitnami/charts/tree/main/bitnami/keycloak.
 keycloak:
   # -- Enable to deploy Keycloak
   enabled: true
   # -- Extra environment variables
   extraEnvVars: []
-  #  - name: KEYCLOAK_HOSTNAME
-  #    value: "keycloak"
+  #    - name: KEYCLOAK_HOSTNAME
+  #      value: "{{ .Release.Name }}-keycloak"
   postgresql:
     # -- Name of the PostgreSQL chart to deploy. Mandatory when the MIW deploys a PostgreSQL chart, too.
     nameOverride: "keycloak-postgresql"
     # -- Enable to deploy PostgreSQL
     enabled: true
     auth:
-      # -- Postgresql admin user password
+      # -- Keycloak PostgreSQL user
       username: "miw_keycloak"
       # -- KeycloakPostgresql password to set (if empty one is generated)
-      password: "adminpass"
+      password: ""
       # -- Database name
       database: "miw_keycloak"
-    volumePermissions:
-      enabled: true
   ingress:
-    # -- Enable ingress controller resource
     enabled: false
-    # -- Ingress annotations
     annotations: {}
-    # -- Ingress accepted hostnames
     hosts: []
-    #   - host: chart-example.local
-    #     paths:
-    #       - path: /
-    #         pathType: Prefix
-    # -- Ingress TLS configuration
     tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
   auth:
     # -- Keycloak admin user
     adminUser: "admin"
@@ -248,10 +236,6 @@ keycloak:
 postgresql:
   # -- Enable to deploy Postgresql
   enabled: true
-  image:
-    tag: "16-debian-12"
-    # -- Debug logs
-    debug: true
   auth:
     # -- Enable postgresql admin user
     enablePostgresUser: true
@@ -375,7 +359,7 @@ vcrs:
     # -- The application profile
     APPLICATION_PROFILE: local
     # -- The Database Host
-    DATABASE_HOST: managed-identity-wallet-postgresql
+    DATABASE_HOST: "{{ .Release.Name }}-postgresql"
     # -- The Database Port
     DATABASE_PORT: 5432
     # -- The Database Name
@@ -450,7 +434,7 @@ vcrs:
     timeoutSeconds: 15
     # -- ingress configuration
   ingress:
-    enabled: true
+    enabled: false
     className: "nginx"
     annotations:
       kubernetes.io/ingress.class: "nginx"
