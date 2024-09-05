@@ -50,7 +50,7 @@ class CredentialStatusDtoTest {
                         "revocation",
                         validIndex, // this value is within the range [0, BitSetManager.BITSET_SIZE - 1]
                         "statusListCredential",
-                        "BitstringStatusListEntry");
+                        StatusListCredentialSubject.TYPE_ENTRY);
 
         // Assert
         assertNotNull(dto);
@@ -58,7 +58,7 @@ class CredentialStatusDtoTest {
         assertEquals("revocation", dto.statusPurpose());
         assertEquals(validIndex, dto.statusListIndex());
         assertEquals("statusListCredential", dto.statusListCredential());
-        assertEquals("BitstringStatusListEntry", dto.type());
+        assertEquals(StatusListCredentialSubject.TYPE_ENTRY, dto.type());
     }
 
     @ParameterizedTest
@@ -89,7 +89,7 @@ class CredentialStatusDtoTest {
                                         "revocation",
                                         "0",
                                         "statusListCredential",
-                                        "BitstringStatusListEntry"))
+                                        StatusListCredentialSubject.TYPE_ENTRY))
                         .isEmpty());
 
         assertFalse(
@@ -100,7 +100,7 @@ class CredentialStatusDtoTest {
                                         "revocation",
                                         "0",
                                         "", // statusListCredential is blank
-                                        "BitstringStatusListEntry"))
+                                        StatusListCredentialSubject.TYPE_ENTRY))
                         .isEmpty());
     }
 
@@ -113,7 +113,7 @@ class CredentialStatusDtoTest {
                 IllegalArgumentException.class,
                 () -> {
                     new CredentialStatusDto(
-                            "id", invalidPurpose, "0", "statusListCredential", "BitstringStatusListEntry");
+                            "id", invalidPurpose, "0", "statusListCredential", StatusListCredentialSubject.TYPE_ENTRY);
                 });
     }
 
@@ -137,14 +137,14 @@ class CredentialStatusDtoTest {
         assertDoesNotThrow(
                 () -> {
                     new CredentialStatusDto(
-                            "id", validPurpose, "0", "statusListCredential", "BitstringStatusListEntry");
+                            "id", validPurpose, "0", "statusListCredential", StatusListCredentialSubject.TYPE_ENTRY);
                 });
     }
 
     @Test
     @DisplayName("type is valid")
     void validType_DoesNotThrowException() {
-        String validType = "BitstringStatusListEntry";
+        String validType = StatusListCredentialSubject.TYPE_ENTRY;
 
         assertDoesNotThrow(
                 () -> {

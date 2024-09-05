@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.managedidentitywallets.revocation.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
 import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
@@ -40,7 +39,6 @@ import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialSubject;
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,7 +74,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -142,7 +139,7 @@ class RevocationServiceTest {
                             "http://this-is-my-domain/api/v1/revocations/credentials/"
                                     + TestUtil.extractBpnFromDid(issuer)
                                     + "/revocation/1");
-            when(credentialStatusDto.type()).thenReturn("BitstringStatusListEntry");
+            when(credentialStatusDto.type()).thenReturn("StatusList2021Entry");
 
 
             try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
@@ -152,7 +149,7 @@ class RevocationServiceTest {
                 }).thenReturn(mock);
                 Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
                 Map<String, String> status = revocationService.verifyStatus(credentialStatusDto);
-                Assertions.assertTrue(status.get(StringPool.STATUS).equals(CredentialStatus.ACTIVE.getName()));
+                assertEquals(status.get(StringPool.STATUS), CredentialStatus.ACTIVE.getName());
             }
         }
 
@@ -188,7 +185,7 @@ class RevocationServiceTest {
                             "http://this-is-my-domain/api/v1/revocations/credentials/"
                                     + TestUtil.extractBpnFromDid(issuer)
                                     + "/revocation/1");
-            when(credentialStatusDto.type()).thenReturn("BitstringStatusListEntry");
+            when(credentialStatusDto.type()).thenReturn("StatusList2021Entry");
             try (MockedStatic<LinkedDataProofValidation> utils = Mockito.mockStatic(LinkedDataProofValidation.class)) {
                 LinkedDataProofValidation mock = Mockito.mock(LinkedDataProofValidation.class);
                 utils.when(() -> {
@@ -197,7 +194,7 @@ class RevocationServiceTest {
                 Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
                 Map<String, String> status = revocationService.verifyStatus(credentialStatusDto);
 
-                Assertions.assertTrue(status.get(StringPool.STATUS).equals(CredentialStatus.REVOKED.getName()));
+                assertEquals(status.get(StringPool.STATUS), CredentialStatus.REVOKED.getName());
             }
         }
     }
@@ -230,10 +227,10 @@ class RevocationServiceTest {
                             "http://this-is-my-domain/api/v1/revocations/credentials/"
                                     + TestUtil.extractBpnFromDid(issuer)
                                     + "/revocation/1");
-            when(credentialStatusDto.type()).thenReturn("BitstringStatusListEntry");
+            when(credentialStatusDto.type()).thenReturn("StatusList2021Entry");
             assertDoesNotThrow(() -> revocationService.revoke(credentialStatusDto, "token"));
             Mockito.verify(statusListCredentialRepository, Mockito.times(1))
-                    .saveAndFlush(eq(statusListCredential));
+                    .saveAndFlush(statusListCredential);
             ArgumentCaptor<VerifiableCredential> captor =
                     ArgumentCaptor.forClass(VerifiableCredential.class);
             Mockito.verify(httpClientService)
@@ -274,7 +271,7 @@ class RevocationServiceTest {
                             "http://this-is-my-domain/api/v1/revocations/credentials/"
                                     + TestUtil.extractBpnFromDid(issuer)
                                     + "/revocation/1");
-            when(credentialStatusDto.type()).thenReturn("BitstringStatusListEntry");
+            when(credentialStatusDto.type()).thenReturn("StatusList2021Entry");
             try (MockedStatic<BitSetManager> utilities = Mockito.mockStatic(BitSetManager.class)) {
                 utilities
                         .when(() -> BitSetManager.revokeCredential(any(String.class), any(Integer.class)))
@@ -370,7 +367,7 @@ class RevocationServiceTest {
     class GetStatusListCredential {
 
         @Test
-        void shouldGetList() throws JsonProcessingException {
+        void shouldGetList() {
             final var issuer = DID;
             var fragment = UUID.randomUUID().toString();
             var encodedList = mockEmptyEncodedList();
@@ -403,39 +400,39 @@ class RevocationServiceTest {
     class CheckSubStringExtraction {
         @Test
         void shouldExtractBpnFromDid() {
-            assertEquals(revocationService.extractBpnFromDid(DID), BPN);
+            assertEquals(BPN, revocationService.extractBpnFromDid(DID));
         }
 
         @Test
         void shouldExtractIdFromURL() {
             assertEquals(
+                    "BPNL123456789000-revocation#1",
                     revocationService.extractIdFromURL(
-                            "http://this-is-my-domain/api/v1/revocations/credentials/BPNL123456789000/revocation/1"),
-                    "BPNL123456789000-revocation#1");
+                            "http://this-is-my-domain/api/v1/revocations/credentials/BPNL123456789000/revocation/1"));
         }
 
         @Test
         void shouldExtractIdFromURLCaseSensitive() {
             assertEquals(
+                    "BPNL123456789000-revocation#1",
                     revocationService.extractIdFromURL(
-                            "http://this-is-my-domain/api/v1/revocations/credentials/bpnl123456789000/revocation/1"),
-                    "BPNL123456789000-revocation#1");
+                            "http://this-is-my-domain/api/v1/revocations/credentials/bpnl123456789000/revocation/1"));
         }
 
         @Test
         void shouldExtractBpnFromURL() {
             assertEquals(
+                    BPN,
                     revocationService.extractBpnFromURL(
-                            "http://this-is-my-domain/api/v1/revocations/credentials/BPNL123456789000/revocation/1"),
-                    BPN);
+                            "http://this-is-my-domain/api/v1/revocations/credentials/BPNL123456789000/revocation/1"));
         }
 
         @Test
         void shouldExtractBpnFromURLCaseSensitive() {
             assertEquals(
+                    BPN,
                     revocationService.extractBpnFromURL(
-                            "http://this-is-my-domain/api/v1/revocations/creDENTials/bpNl123456789000/revocation/1"),
-                    BPN);
+                            "http://this-is-my-domain/api/v1/revocations/creDENTials/bpNl123456789000/revocation/1"));
         }
     }
 
@@ -452,7 +449,7 @@ class RevocationServiceTest {
 
             CredentialStatusDto dto =
                     new CredentialStatusDto(
-                            id, "revocation", statusIndex, statusListCredential, "BitstringStatusListEntry");
+                            id, "revocation", statusIndex, statusListCredential, "StatusList2021Entry");
 
             assertDoesNotThrow(() -> revocationService.validateCredentialStatus(dto));
         }
@@ -468,7 +465,7 @@ class RevocationServiceTest {
 
             CredentialStatusDto dto =
                     new CredentialStatusDto(
-                            id, "revocation", statusIndex, statusListCredential, "BitstringStatusListEntry");
+                            id, "revocation", statusIndex, statusListCredential, "StatusList2021Entry");
             assertThrows(
                     IllegalArgumentException.class, () -> revocationService.validateCredentialStatus(dto));
         }
@@ -483,7 +480,7 @@ class RevocationServiceTest {
 
             CredentialStatusDto dto =
                     new CredentialStatusDto(
-                            id, "revocation", statusIndex, statusListCredential, "BitstringStatusListEntry");
+                            id, "revocation", statusIndex, statusListCredential, "StatusList2021Entry");
             assertThrows(
                     IllegalArgumentException.class, () -> revocationService.validateCredentialStatus(dto));
         }
@@ -498,7 +495,7 @@ class RevocationServiceTest {
 
             CredentialStatusDto dto =
                     new CredentialStatusDto(
-                            id, "revocation", statusIndex, statusListCredential, "BitstringStatusListEntry");
+                            id, "revocation", statusIndex, statusListCredential, "StatusList2021Entry");
             assertThrows(
                     IllegalArgumentException.class, () -> revocationService.validateCredentialStatus(dto));
         }

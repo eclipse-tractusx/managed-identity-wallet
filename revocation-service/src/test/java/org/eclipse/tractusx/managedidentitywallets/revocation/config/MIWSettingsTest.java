@@ -50,6 +50,7 @@ class MIWSettingsTest {
 
     @Test
     void testMIWSettingsWithEmptyVCContexts() {
-        assertThrows(IllegalArgumentException.class, () -> new MIWSettings(List.of()));
+        List<URI> list = List.of();
+        assertThrows(IllegalArgumentException.class, () -> new MIWSettings(list));
     }
 }

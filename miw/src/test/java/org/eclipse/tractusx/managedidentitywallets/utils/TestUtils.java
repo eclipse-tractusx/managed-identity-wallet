@@ -98,8 +98,7 @@ public class TestUtils {
 
         HttpEntity<CreateWalletRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<String> exchange = testTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, String.class);
-        return exchange;
+        return testTemplate.exchange(RestURI.WALLETS, HttpMethod.POST, entity, String.class);
 
     }
 

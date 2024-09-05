@@ -27,6 +27,7 @@ import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.revocation.constant.RevocationApiEndpoints;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.CredentialStatusDto;
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.StatusEntryDto;
+import org.eclipse.tractusx.managedidentitywallets.revocation.dto.StatusListCredentialSubject;
 import org.eclipse.tractusx.managedidentitywallets.revocation.services.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.revocation.utils.BitSetManager;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
@@ -99,13 +100,12 @@ class RevocationApiControllerTest {
                         RevocationPurpose.REVOCATION.name(),
                         validIndex, // this value is within the range [0, BitSetManager.BITSET_SIZE - 1]
                         "https://example.com/revocations/credentials/" + BPN + "/revocation/1",
-                        "BitstringStatusListEntry");
+                        StatusListCredentialSubject.TYPE_ENTRY);
         given(revocationService.createStatusList(statusEntryDto, "token"))
                 .willReturn(credentialStatusDto);
         when(revocationService.extractBpnFromDid(DID)).thenReturn(BPN);
 
         Principal mockPrincipal = mockPrincipal(BPN);
-        var name = mockPrincipal.getName();
         // When & Then
         mockMvc
                 .perform(
@@ -142,7 +142,7 @@ class RevocationApiControllerTest {
                         "revocation",
                         validIndex, // this value is within the range [0, BitSetManager.BITSET_SIZE - 1]
                         "http://example.com/credentials/" + BPN + "/revocation/1",
-                        "BitstringStatusListEntry");
+                        StatusListCredentialSubject.TYPE_ENTRY);
         doNothing().when(revocationService).revoke(credentialStatusDto, "token");
         when(revocationService.extractBpnFromURL(any())).thenReturn(BPN);
 
@@ -186,25 +186,6 @@ class RevocationApiControllerTest {
         Map<String, Object> credentialData = new HashMap<>();
         credentialData.put(
                 "id", "http://example/api/v1/revocations/credentials/" + BPN + "/revocation/1");
-        credentialData.put("issuer", "https://issuer.example.com");
-        credentialData.put("issuanceDate", Instant.now().toString());
-        // Include 'type' field as a list because VerifiableCredential expects it to be non-null and a
-        // list
-        credentialData.put("type", List.of("VerifiableCredential", "StatusListCredential"));
-        Map<String, Object> subjectData = new HashMap<>();
-        subjectData.put("id", "subjectId");
-        subjectData.put("type", "StatusList2021Credential");
-        // 'credentialSubject' can be either a List or a single Map according to the code, so I'm
-        // keeping it as a single Map
-        credentialData.put("credentialSubject", subjectData);
-        credentialData.put("@context", VerifiableCredential.DEFAULT_CONTEXT.toString());
-        VerifiableCredential credential = new VerifiableCredential(credentialData);
-        return credential;
-    }
-
-    private VerifiableCredential createVerifiableCredentialTestDataInvalidDID() {
-        Map<String, Object> credentialData = new HashMap<>();
-        credentialData.put("id", UUID.randomUUID().toString());
         credentialData.put("issuer", "https://issuer.example.com");
         credentialData.put("issuanceDate", Instant.now().toString());
         // Include 'type' field as a list because VerifiableCredential expects it to be non-null and a

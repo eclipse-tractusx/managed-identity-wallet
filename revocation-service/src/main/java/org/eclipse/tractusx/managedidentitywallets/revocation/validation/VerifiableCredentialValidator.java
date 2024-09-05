@@ -59,7 +59,7 @@ public class VerifiableCredentialValidator
         for (Map<String, Object> subject : credentialSubjects) {
             // Extract the 'id' of the credential subject if it exists
             Object subjectId = subject.get("id");
-            if (subjectId == null || !(subjectId instanceof String)) {
+            if (!(subjectId instanceof String)) {
                 addConstraintViolation(context, "credentialSubject.id must be a valid String");
                 return false;
             }

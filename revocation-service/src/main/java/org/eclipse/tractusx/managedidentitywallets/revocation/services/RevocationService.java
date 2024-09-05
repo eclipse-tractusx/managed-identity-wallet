@@ -363,7 +363,7 @@ public class RevocationService {
         if (matcher.find()) {
             return matcher.group(1).toUpperCase();
         } else {
-            throw new Exception("No match found");
+            throw new IllegalArgumentException("No match found");
         }
     }
 

@@ -55,7 +55,7 @@ import java.util.Map;
 @DirtiesContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
-public class TokenRequestTest {
+class TokenRequestTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -125,7 +125,7 @@ public class TokenRequestTest {
 
     @Test
     @SneakyThrows
-    public void testPresentationQueryWithToken() {
+    void testPresentationQueryWithToken() {
         // when
         String body = "audience=%s&client_id=%s&client_secret=%s&grant_type=client_credentials&bearer_access_scope=org.eclipse.tractusx.vc.type:MembershipCredential:read";
         String requestBody = String.format(body, bpn, clientId, clientSecret);

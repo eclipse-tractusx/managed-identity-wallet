@@ -26,7 +26,6 @@ import org.eclipse.tractusx.managedidentitywallets.revocation.config.security.Se
 import org.eclipse.tractusx.managedidentitywallets.revocation.dto.TokenResponse;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredential;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -91,10 +90,6 @@ class HttpClientServiceTest {
         ReflectionTestUtils.setField(httpClientService, "miwUrl", wm1.baseUrl());
     }
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @Test
     void testGetBearerToken_Success() {
         String expectedToken = "mockToken";
@@ -131,7 +126,7 @@ class HttpClientServiceTest {
         tokenResponse.setAccessToken("123456");
         wm1.stubFor(post("/token").willReturn(jsonResponse(tokenResponse, 200)));
         wm1.stubFor(
-                post("/api/credentials?isRevocable=false")
+                post("/api/credentials?revocable=false")
                         .willReturn(jsonResponse(statusListCredential.getCredential(), 200)));
         VerifiableCredential signedCredential =
                 assertDoesNotThrow(

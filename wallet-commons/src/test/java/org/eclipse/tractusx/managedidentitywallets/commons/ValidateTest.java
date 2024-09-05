@@ -30,25 +30,26 @@ class ValidateTest {
 
     @Test
     void validateTest() {
-        Assertions.assertThrows(RuntimeException.class, () -> Validate.isFalse(false).launch(new RuntimeException()));
+        RuntimeException runtimeException = new RuntimeException();
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isFalse(false).launch(runtimeException));
 
-        Assertions.assertThrows(RuntimeException.class, () -> Validate.isTrue(true).launch(new RuntimeException()));
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isTrue(true).launch(runtimeException));
 
-        Assertions.assertThrows(RuntimeException.class, () -> Validate.isNull(null).launch(new RuntimeException()));
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isNull(null).launch(runtimeException));
 
-        Assertions.assertThrows(RuntimeException.class, () -> Validate.isNotNull("Test").launch(new RuntimeException()));
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.isNotNull("Test").launch(runtimeException));
 
-        Assertions.assertThrows(RuntimeException.class, () -> Validate.value("").isNotEmpty().launch(new RuntimeException()));
+        Assertions.assertThrows(RuntimeException.class, () -> Validate.value("").isNotEmpty().launch(runtimeException));
 
-        Assertions.assertDoesNotThrow(() -> Validate.isFalse(true).launch(new RuntimeException()));
+        Assertions.assertDoesNotThrow(() -> Validate.isFalse(true).launch(runtimeException));
 
-        Assertions.assertDoesNotThrow(() -> Validate.isTrue(false).launch(new RuntimeException()));
+        Assertions.assertDoesNotThrow(() -> Validate.isTrue(false).launch(runtimeException));
 
-        Assertions.assertDoesNotThrow(() -> Validate.isNull("").launch(new RuntimeException()));
+        Assertions.assertDoesNotThrow(() -> Validate.isNull("").launch(runtimeException));
 
-        Assertions.assertDoesNotThrow(() -> Validate.isNotNull(null).launch(new RuntimeException()));
+        Assertions.assertDoesNotThrow(() -> Validate.isNotNull(null).launch(runtimeException));
 
-        Assertions.assertDoesNotThrow(() -> Validate.value("Test").isNotEmpty().launch(new RuntimeException()));
+        Assertions.assertDoesNotThrow(() -> Validate.value("Test").isNotEmpty().launch(runtimeException));
 
     }
 }

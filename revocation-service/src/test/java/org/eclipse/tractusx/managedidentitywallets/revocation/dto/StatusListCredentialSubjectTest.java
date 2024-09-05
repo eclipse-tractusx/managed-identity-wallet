@@ -55,8 +55,8 @@ class StatusListCredentialSubjectTest {
     @Test
     void defaultConstantsAreCorrect() {
         // Assert
-        assertEquals("BitstringStatusListEntry", StatusListCredentialSubject.TYPE_ENTRY);
-        assertEquals("BitstringStatusList", StatusListCredentialSubject.TYPE_LIST);
+        assertEquals("StatusList2021Entry", StatusListCredentialSubject.TYPE_ENTRY);
+        assertEquals("StatusList2021Credential", StatusListCredentialSubject.TYPE_LIST);
         assertEquals("id", StatusListCredentialSubject.SUBJECT_ID);
         assertEquals("type", StatusListCredentialSubject.SUBJECT_TYPE);
         assertEquals("statusPurpose", StatusListCredentialSubject.SUBJECT_STATUS_PURPOSE);

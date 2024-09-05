@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class TokenResponeTest {
+class TokenResponseTest {
     @Test
     void getAndSetAccessToken() {
         // Arrange
@@ -38,7 +38,7 @@ public class TokenResponeTest {
 
         // Assert
         String actualToken = tokenResponse.getAccessToken();
-        assertEquals(expectedToken, actualToken, "someAccessToken123");
+        assertEquals(expectedToken, "someAccessToken123", actualToken);
     }
 
     @Test
@@ -65,6 +65,6 @@ public class TokenResponeTest {
 
         // Assert
         String actualToken = tokenResponse.getAccessToken();
-        assertEquals(expectedToken, actualToken, "");
+        assertEquals(expectedToken, "", actualToken);
     }
 }
