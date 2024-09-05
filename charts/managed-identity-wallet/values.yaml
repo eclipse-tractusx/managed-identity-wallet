@@ -48,8 +48,9 @@ service:
   type: ClusterIP
   # -- Kubernetes Service port
   port: 8080
+# -- Image pull secrets
+imagePullSecrets: []
 # -- Ingress Configuration
-
 ingress:
   # -- Enable ingress controller resource
   enabled: false
