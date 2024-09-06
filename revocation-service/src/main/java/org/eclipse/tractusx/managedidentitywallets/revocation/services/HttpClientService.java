@@ -74,6 +74,7 @@ public class HttpClientService {
                 UriComponentsBuilder.fromHttpUrl(miwUrl)
                         .path("/api/credentials")
                         .queryParam(StringPool.REVOCABLE, "false")
+                        .queryParam(StringPool.AS_JWT, "false")
                         .build()
                         .toUriString();
 

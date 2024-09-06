@@ -222,7 +222,6 @@ public class IssuersCredentialControllerApiDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Tag(name = API_TAG_VERIFIABLE_CREDENTIAL_VALIDATION)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "401", description = "The request could not be completed due to a failed authorization.", content = {
                     @Content(examples = {}) }),

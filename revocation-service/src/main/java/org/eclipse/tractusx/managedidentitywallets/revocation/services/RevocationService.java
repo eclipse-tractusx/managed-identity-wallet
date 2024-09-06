@@ -182,7 +182,7 @@ public class RevocationService {
         newSubject =
                 StatusListCredentialSubject.builder()
                         .id((String) subjectCredential.get(StatusListCredentialSubject.SUBJECT_ID))
-                        .type(StatusListCredentialSubject.TYPE_LIST)
+                        .type(StatusListCredentialSubject.TYPE_CREDENTIAL)
                         .statusPurpose(
                                 (String) subjectCredential.get(StatusListCredentialSubject.SUBJECT_STATUS_PURPOSE))
                         .encodedList(newEncodedList)
