@@ -280,7 +280,7 @@ public class TestUtils {
     public static VerifiableCredentialStatusList2021Entry getStatusListEntry(int index) {
         return new VerifiableCredentialStatusList2021Entry(Map.of(
                 "id", "https://example.com/credentials/bpn123456789000/revocation/3#" + index,
-                "type", "BitstringStatusListEntry",
+                "type", "StatusList2021Entry",
                 "statusPurpose", "revocation",
                 "statusListIndex", String.valueOf(index),
                 "statusListCredential", "https://example.com/credentials/bpn123456789000/revocation/3"
@@ -291,7 +291,7 @@ public class TestUtils {
         int index = RandomUtils.nextInt(1, 100);
         return new VerifiableCredentialStatusList2021Entry(Map.of(
                 "id", "https://example.com/credentials/bpn123456789000/revocation/3#" + index,
-                "type", "BitstringStatusListEntry",
+                "type", "StatusList2021Entry",
                 "statusPurpose", "revocation",
                 "statusListIndex", String.valueOf(index),
                 "statusListCredential", "https://example.com/credentials/bpn123456789000/revocation/3"
@@ -318,7 +318,7 @@ public class TestUtils {
         String vcString = """
                 {
                   "type": [
-                    "VerifiableCredential"
+                    "VerifiableCredential","StatusList2021Credential"
                   ],
                   "@context": [
                     "https://www.w3.org/2018/credentials/v1",
@@ -338,7 +338,7 @@ public class TestUtils {
                   },
                   "credentialSubject": {
                     "id": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
-                    "type": "BitstringStatusList",
+                    "type": "StatusList2021",
                     "statusPurpose": "revocation",
                     "encodedList": "##encodedList"
                   }
@@ -377,7 +377,7 @@ public class TestUtils {
                   },
                   "credentialSubject": {
                     "id": "did:key:z6MkhGTzcvb8BXh5aeoaFvb3XJ3MBmfLRamdYdXyV1pxJBce",
-                    "type": "StatusList2021Credential",
+                    "type": "StatusList2021",
                     "statusPurpose": "revocation",
                     "encodedList": "H4sIAAAAAAAA/+3BMQEAAAjAoEqzfzk/SwjUmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIDXFiqoX4AAAAIA"
                   }

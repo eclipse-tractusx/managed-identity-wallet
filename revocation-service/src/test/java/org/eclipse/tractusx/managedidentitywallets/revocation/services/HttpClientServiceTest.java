@@ -126,7 +126,7 @@ class HttpClientServiceTest {
         tokenResponse.setAccessToken("123456");
         wm1.stubFor(post("/token").willReturn(jsonResponse(tokenResponse, 200)));
         wm1.stubFor(
-                post("/api/credentials?revocable=false")
+                post("/api/credentials?revocable=false&asJwt=false")
                         .willReturn(jsonResponse(statusListCredential.getCredential(), 200)));
         VerifiableCredential signedCredential =
                 assertDoesNotThrow(
