@@ -110,7 +110,7 @@ miw:
     refresh-token-url: ${miw.security.token-url}
   revocation:
     url: ${REVOCATION_SERVICE_URL:http://localhost:8081}
-    bitStringStatusListContext: ${BITSTRING_STATUS_LIST_CONTEXT_URL:https://w3c.github.io/vc-bitstring-status-list/contexts/v1.jsonld}
+    statusList2021Context: ${STATUS_LIST_2021_CONTEXT_URL:https://w3id.org/vc/status-list/2021/v1}
 
 
 sts:

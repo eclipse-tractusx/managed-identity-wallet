@@ -233,8 +233,8 @@ public class IssuersCredentialService extends BaseService<IssuersCredential, Lon
 
             //add revocation context if missing
             List<URI> uris = miwSettings.vcContexts();
-            if (!uris.contains(revocationSettings.bitStringStatusListContext())) {
-                uris.add(revocationSettings.bitStringStatusListContext());
+            if (!uris.contains(revocationSettings.statusList2021Context())) {
+                uris.add(revocationSettings.statusList2021Context());
                 builder.contexts(uris);
             }
 

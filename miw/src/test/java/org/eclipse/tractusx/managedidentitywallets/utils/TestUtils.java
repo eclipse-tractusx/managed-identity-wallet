@@ -135,7 +135,7 @@ public class TestUtils {
         }
 
         if (verifiableCredential.getVerifiableCredentialStatus() != null) {
-            Assertions.assertTrue(verifiableCredential.getContext().contains(revocationSettings.bitStringStatusListContext()));
+            Assertions.assertTrue(verifiableCredential.getContext().contains(revocationSettings.statusList2021Context()));
         }
         //check expiry date
         Assertions.assertEquals(0, verifiableCredential.getExpirationDate().compareTo(miwSettings.vcExpiryDate().toInstant()));
