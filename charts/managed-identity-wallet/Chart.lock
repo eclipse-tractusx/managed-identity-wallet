@@ -12,4 +12,4 @@ dependencies:
   repository: file://charts/pgadmin4
   version: 1.19.0
 digest: sha256:886b90f763f2320a1601e15b06264065a764f51fc34d592c0f0a08bd76f01635
-generated: "2024-08-22T18:04:25.649769241+05:30"
+generated: "2024-09-11T11:53:55.835418982+05:30"

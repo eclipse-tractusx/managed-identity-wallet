@@ -156,6 +156,7 @@ jobs:
           context: .
           push: true
           tags: kind-registry:5000/miw:testing
+          file: ./miw/Dockerfile
 
       - uses: actions/setup-python@v4
         with:
@@ -230,6 +231,7 @@ jobs:
             charts/managed-identity-wallet \
             -n apps \
             --wait \
+            --timeout 10m \
             --set image.tag=testing \
             --set image.repository=kind-registry:5000/miw
         # only run if this is not a PR -OR- if there are new versions available
