@@ -356,7 +356,7 @@ vcrs:
   secretName: "verifiable-credential-revocation-service"
   image:
     # -- Image repository
-    repository: public.ecr.aws/w6s7t8e0/tractusx/verifiable-credential-revocation-service
+    repository: tractusx/verifiable-credential-revocation-service
     # -- PullPolicy
     pullPolicy: IfNotPresent
     # -- Image tag (empty one will use "appVersion" value from chart definition)
@@ -409,44 +409,53 @@ vcrs:
     password: "defaultpassword"
     # -- Postgresql password for postgres root-user
     postgres-password: "defaultpassword"
-  resources:
-    requests:
-      # -- CPU resource requests
-      cpu: 250m
-      # -- Memory resource requests
-      memory: 512Mi
-    limits:
-      # -- CPU resource limits
-      cpu: 500m
-      # -- Memory resource limits
-      memory: 1Gi
+  podAnnotations: {}
+  podLabels: {}
+  imagePullSecrets: []
+  rollingUpdate:
+    enabled: true
+    # Minimum number of pods that should be running during the update process.
+    rollingUpdateMaxSurge: 1
+    # Maximum number of pods that can be unavailable during the update process.
+    rollingUpdateMaxUnavailable: 0
+  resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
   # -- Kubernetes [liveness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
   livenessProbe:
     # -- Enables/Disables the livenessProbe at all
     enabled: true
     # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. Giving up in case of liveness probe means restarting the container.
-    failureThreshold: 5
-    # -- Number of seconds after the container has started before readiness probes are initiated.
+    failureThreshold: 3
+    # -- Number of seconds after the container has started before readiness probe are initiated.
     initialDelaySeconds: 60
     # -- Number of seconds after which the probe times out.
     timeoutSeconds: 30
     # -- How often (in seconds) to perform the probe
-    periodSeconds: 15
-    # -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+    periodSeconds: 5
+  # -- Kubernetes [readiness-probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
   readinessProbe:
     # -- Enables/Disables the readinessProbe at all
     enabled: true
     # -- When a probe fails, Kubernetes will try failureThreshold times before giving up. In case of readiness probe the Pod will be marked Unready.
-    failureThreshold: 5
+    failureThreshold: 3
     # -- Number of seconds after the container has started before readiness probe are initiated.
     initialDelaySeconds: 60
     # -- How often (in seconds) to perform the probe
-    periodSeconds: 15
-    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
-    successThreshold: 1
+    periodSeconds: 30
     # -- Number of seconds after which the probe times out.
-    timeoutSeconds: 15
+    timeoutSeconds: 30
     # -- ingress configuration
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
   ingressName: "verifiable-credential-revocation-service-ingress"
   ingress:
     enabled: false
@@ -476,3 +485,12 @@ vcrs:
       secret: ""
       # -- Existing secret key for database encryption key
       secretKey: ""
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+  volumes: []
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
