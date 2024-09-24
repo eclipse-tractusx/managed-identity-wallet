@@ -356,7 +356,7 @@ vcrs:
   secretName: "verifiable-credential-revocation-service"
   image:
     # -- Image repository
-    repository: public.ecr.aws/w6s7t8e0/tractusx/verifiable-credential-revocation-service
+    repository: tractusx/verifiable-credential-revocation-service
     # -- PullPolicy
     pullPolicy: IfNotPresent
     # -- Image tag (empty one will use "appVersion" value from chart definition)
