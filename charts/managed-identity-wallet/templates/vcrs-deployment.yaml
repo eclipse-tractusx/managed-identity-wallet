@@ -24,38 +24,49 @@ metadata:
   labels:
     {{- include "verifiable-credential-revocation-service.labels" . | nindent 4 }}
 spec:
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+  {{- if not .Values.vcrs.autoscaling.enabled }}
+  replicas: {{ .Values.vcrs.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "verifiable-credential-revocation-service.selectorLabels" . | nindent 6 }}
-  replicas: {{ .Values.vcrs.replicaCount }}
-  revisionHistoryLimit: 2
+  strategy:
+    {{- if .Values.vcrs.rollingUpdate.enabled }}
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.vcrs.rollingUpdate.rollingUpdateMaxSurge }}
+      maxUnavailable: {{ .Values.vcrs.rollingUpdate.rollingUpdateMaxUnavailable }}
+    {{- end }}
   template:
     metadata:
+      {{- with .Values.vcrs.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        {{- include "verifiable-credential-revocation-service.selectorLabels" . | nindent 8 }}
+        {{- include "verifiable-credential-revocation-service.labels" . | nindent 8 }}
+        {{- with .Values.vcrs.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
+      {{- with .Values.vcrs.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.vcrs.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ include "verifiable-credential-revocation-service.fullname" . }}
-          image: {{ .Values.vcrs.image.repository }}:{{ default .Chart.AppVersion .Values.vcrs.image.tag }}
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.vcrs.securityContext | nindent 12 }}
+          image: "{{ .Values.vcrs.image.repository }}:{{ .Values.vcrs.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.vcrs.image.pullPolicy }}
-          resources:
-            {{- toYaml .Values.vcrs.resources | nindent 12 }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.vcrs.secretName }}
-            - configMapRef:
-                name: {{ .Values.vcrs.configName }}
-          {{- with .Values.vcrs.livenessProbe }}
-          {{- if .enabled }}
           ports:
             - name: http
-              containerPort: 8081
+              containerPort: {{ .Values.vcrs.ingress.service.port }}
               protocol: TCP
+          {{- with .Values.vcrs.livenessProbe }}
+          {{- if .enabled }}
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -77,7 +88,33 @@ spec:
             failureThreshold: {{ .failureThreshold }}
             initialDelaySeconds: {{ .initialDelaySeconds }}
             periodSeconds: {{ .periodSeconds }}
-            successThreshold: {{ .successThreshold }}
             timeoutSeconds: {{ .timeoutSeconds }}
           {{- end }}
           {{- end }}
+          resources:
+            {{- toYaml .Values.vcrs.resources | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.vcrs.secretName }}
+            - configMapRef:
+                name: {{ .Values.vcrs.configName }}
+          {{- with .Values.vcrs.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.vcrs.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.vcrs.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.vcrs.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.vcrs.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
