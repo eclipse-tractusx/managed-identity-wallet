@@ -1,6 +1,7 @@
-# Bitstring Statuslist Service
+# Statuslist2021 revocation service Service
 
-This service is responsible for managing the status of credentials using a Bitstring status list. It supports operations such as creating, revoking, and retrieving credential statuses.
+This service is responsible for managing the status of credentials using a status list 2021.
+It supports operations such as creating, revoking, and retrieving credential statuses.
 
 ## Prerequisites
 
@@ -11,7 +12,7 @@ Before you begin, ensure you have met the following requirements:
 - Keycloak service is operational and accessible.
 - Postgres database service is running and accessible.
 - Environment variables are configured according to the application's requirements.
-- MIW is deployed and accessable
+- MIW is deployed and accessible
 - Be sure the right ssi-lib version is installed
 
 ## Environment Configuration
@@ -47,7 +48,7 @@ The application can be configured using environment variables. Below are the ava
 
 The application integrates with Keycloak for OAuth2 authentication and authorization:
 
-- **SERVICE_SECURITY_ENABLED**: Flag to enable or disable Servive Security integration for Disabling Swagger and other Endpoints. Defaults to true, false only for test purposes recommended.
+- **SERVICE_SECURITY_ENABLED**: Flag to enable or disable service Security integration for Disabling Swagger and other Endpoints. Defaults to true, false only for test purposes recommended.
 
 The application integrates with Keycloak for OAuth2 authentication and authorization:
 
@@ -80,15 +81,15 @@ Be sure to replace placeholder values in the environment variables with actual d
 
 Ensure that the middleware (MIW) is running, as it is used to sign the status list credentials.
 
-An Overview how to start the middleware can be found under the Readme.md in here:[README.md](..%2Fmiw%2FREADME.md)
+An Overview of how to start the middleware can be found under the Readme.md in here:[README.md](..%2Fmiw%2FREADME.md)
 
 ## Starting Services
 
-To start the Bitstring Statuslist Service, follow these steps:
+To start the Statuslist2021 Service, follow these steps:
 
 1. **Start Keycloak and Postgres:**
 
-   Ensure that both Keycloak and Postgres services are running. For development purposes the Keycloak and
+   Ensure that both Keycloak and Postgres services are running. For development purposes, the Keycloak and
    Postgres from the MIW Dev Setup can be used if not
    already running with the MIW Task deployment.
 

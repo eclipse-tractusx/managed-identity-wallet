@@ -13,7 +13,7 @@ not work.
 Simply deleting credentials will not work as there might be possible that holder save credentials in other location and
 present it to verifier.
 
-When any business partner deboarded from Cofinity-X
+When any business partner deboarded from Catena-X
 
 When there a any changes in credentials or updates needed in credentials. In this case, we need to revoke the older VC
 and need to reissue it.
@@ -26,17 +26,17 @@ The core functionalities are:
 
 ## Cross-cutting Concepts
 
-Please refer to this for more information: [Bitstring Status List v1.0](https://www.w3.org/TR/vc-bitstring-status-list/)
+Please refer to this for more information: [Status List 2021](https://www.w3.org/TR/2023/WD-vc-status-list-20230427)
 
 ## Requirements Overview
 
 The basic requirements for the Managed Identity Wallet are as follows:
 
-- issue status list to all issuer using REST API
+- issue status list to all issuers using REST API
 
 - Manage status list index for each issuer
 
-- Allow issuer to revoke credential using REST API
+- Allow issuers to revoke credentials using REST API
 
 - Allow verifier to verify status of credential using REST API
 
@@ -48,7 +48,7 @@ The basic requirements for the Managed Identity Wallet are as follows:
 2. The current index should be created for each issued revocable VC
 3. while revocation, the correct index should be revoked
 4. The application should work in case of horizontal scanning
-5. Only Authorizae user/client can access the revocation API
+5. Only Authorize user/client can access the revocation API
 6. One status list index should be created for one VC
 7. Sonar quality gate should be passed
 8. No issues in veracode scanning
@@ -58,7 +58,7 @@ The basic requirements for the Managed Identity Wallet are as follows:
 
 The key stakeholders of the component are:
 
-- Issuer: Issuer should able to issue revocable credentials and able to revoke issued credentials when there a need
+- Issuer: Issuer should be able to issue revocable credentials and able to revoke issued credentials when there a need
 
 - Verifier: Verify status of credential(active/revoked) along with signature and expiry date verification
 
@@ -139,7 +139,7 @@ Response Body:
     "statusPurpose": "revocation",
     "statusListIndex": "12",
     "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-    "type": "BitstringStatusListEntry"
+    "type": "StatusList2021"
 }
 
 ```
@@ -159,13 +159,13 @@ Response:
 {
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
-        "https://eclipse-tractusx.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json",
+        "https://w3id.org/vc/status-list/2021/v1",
         "https://w3id.org/security/suites/jws-2020/v1"
     ],
     "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
     "type": [
         "VerifiableCredential",
-        "BitstringStatusListCredential"
+        "StatusList2021Credential"
     ],
     "issuer": "did:web:localhost:BPNL000000000000",
     "issuanceDate": "2024-02-05T09:39:58Z",
@@ -173,7 +173,7 @@ Response:
         {
             "statusPurpose": "revocation",
             "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-            "type": "BitstringStatusList",
+            "type": "StatusList2021",
             "encodedList": "H4sIAAAAAAAA/wMAAAAAAAAAAAA="
         }
     ],
@@ -203,7 +203,7 @@ Request:
     "statusPurpose": "revocation",
     "statusListIndex": "12",
     "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-    "type": "BitstringStatusListEntry"
+    "type": "StatusList2021"
 }
 ```
 
@@ -227,7 +227,7 @@ Request:
     "statusPurpose": "revocation",
     "statusListIndex": "12",
     "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-    "type": "BitstringStatusListEntry"
+    "type": "StatusList2021"
 }
 ```
 
@@ -333,11 +333,11 @@ For local setup, instruction will be added in README.md file
 
 # Guiding Concepts
 
-Please refer: https://www.w3.org/TR/vc-bitstring-status-list/
+Please refer: https://www.w3.org/TR/2023/WD-vc-status-list-20230427
 
 # Design Decisions
 
-Revocation service is developed at Cofinity-X and as per discussion with product owner of MIW cofinity-x has decided to
+Revocation service is developed at Cofinity-X and as per discussion with a product owner of MIW cofinity-x has decided to
 contribute to the eclipse tractus-x
 
 # Quality Requirements
@@ -389,7 +389,7 @@ requirements where relevant and applicable:
 | VC                      | Verifiable Credential                                                                                                            |
 | VP                      | Verifiable Presentation                                                                                                          |
 | Wallet                  | Virtual placeholder for business partner which holds VCs                                                                         |
-| Base wallet             | Wallet for Cofinity-X. CX type of VC will be issued using this wallet                                                            |
+| Base wallet             | Wallet for Operating company . CX type of VC will be issued using this wallet                                                    |
 | Status list credential  | [https://www.w3.org/TR/vc-status-list/#statuslist2021credential](https://www.w3.org/TR/vc-status-list/#statuslist2021credential) |
 | Status list entry       | [https://www.w3.org/TR/vc-status-list/#statuslist2021credential](https://www.w3.org/TR/vc-status-list/#statuslist2021credential) |
 | Status list index       | [https://www.w3.org/TR/vc-status-list/#statuslist2021entry](https://www.w3.org/TR/vc-status-list/#statuslist2021entry)           |

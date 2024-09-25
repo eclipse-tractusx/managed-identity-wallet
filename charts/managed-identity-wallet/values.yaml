@@ -398,7 +398,7 @@ vcrs:
     AUTH_SERVER_URL: "http://{{ .Release.Name }}-keycloak"
     # -- Revocation application configuration
     MIW_URL: https://a888-203-129-213-107.ngrok-free.app
-    VC_SCHEMA_LINK: https://www.w3.org/2018/credentials/v1, https://cofinity-x.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json
+    VC_SCHEMA_LINK: https://www.w3.org/2018/credentials/v1, https://w3id.org/vc/status-list/2021/v1
     DOMAIN_URL: https://977d-203-129-213-107.ngrok-free.app
     # Application logging configurations
     APP_LOG_LEVEL: INFO

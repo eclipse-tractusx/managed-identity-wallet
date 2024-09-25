@@ -134,7 +134,6 @@ public class RevocationAPIDoc {
                                     "@context":
                                     [
                                         "https://www.w3.org/2018/credentials/v1",
-                                        "https://cofinity-x.github.io/schema-registry/v1.1/SummaryVC.json",
                                         "https://w3id.org/security/suites/jws-2020/v1",
                                         "https://w3id.org/vc/status-list/2021/v1"
                                     ],
@@ -146,7 +145,7 @@ public class RevocationAPIDoc {
                                         "statusPurpose": "revocation",
                                         "statusListIndex": "1",
                                         "statusListCredential": "https://7337-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials?issuerId=did:web:localhost:BPNL000000000000",
-                                        "type": "BitstringStatusListEntry"
+                                        "type": "StatusList2021"
                                     }
                                 }
                     """))

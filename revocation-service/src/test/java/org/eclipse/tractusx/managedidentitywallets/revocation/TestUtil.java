@@ -93,7 +93,7 @@ public class TestUtil {
                 new VerifiableCredentialBuilder()
                         .context(VC_CONTEXTS)
                         .id(URI.create(issuer + "#" + index))
-                        .type(List.of("VerifiableCredential", "BitstringStatusListCredential"))
+                        .type(List.of("VerifiableCredential", "StatusList2021Credential"))
                         .issuer(URI.create(issuer))
                         .expirationDate(Instant.now().plusSeconds(200000000L))
                         .issuanceDate(Instant.now())
@@ -149,7 +149,7 @@ public class TestUtil {
         Map<String, Object> credentialSubjectMap = new HashMap<String, Object>();
         credentialSubjectMap.put(
                 StatusListCredentialSubject.SUBJECT_ID, STATUS_LIST_CREDENTIAL_SUBJECT_ID);
-        credentialSubjectMap.put(StatusListCredentialSubject.SUBJECT_TYPE, "BitstringStatusList");
+        credentialSubjectMap.put(StatusListCredentialSubject.SUBJECT_TYPE, "StatusList2021");
         credentialSubjectMap.put(StatusListCredentialSubject.SUBJECT_STATUS_PURPOSE, "revocation");
         credentialSubjectMap.put(StatusListCredentialSubject.SUBJECT_ENCODED_LIST, encodedList);
         return credentialSubjectMap;

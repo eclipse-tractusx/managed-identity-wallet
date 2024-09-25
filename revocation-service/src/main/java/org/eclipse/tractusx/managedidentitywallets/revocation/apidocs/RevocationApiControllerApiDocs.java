@@ -81,7 +81,7 @@ public class RevocationApiControllerApiDocs {
                                                 "statusPurpose": "revocation",
                                                 "statusListIndex": "12",
                                                 "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                                                "type": "BitstringStatusListEntry"
+                                                "type": "StatusList2021"
                                             }
                                             """),
                             mediaType = "application/json")
@@ -117,7 +117,7 @@ public class RevocationApiControllerApiDocs {
                                     @ExampleObject(
                                             value = """
                                                     {
-                                                        "type": "BitstringStatusListEntry",
+                                                        "type": "StatusList2021",
                                                         "title": "Revocation service error",
                                                         "status": "409",
                                                         "detail": "Credential already revoked",
@@ -142,7 +142,7 @@ public class RevocationApiControllerApiDocs {
                                                 "statusPurpose": "revocation",
                                                 "statusListIndex": "12",
                                                 "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                                                "type": "BitstringStatusListEntry"
+                                                "type": "StatusList2021"
                                             }
                                             """),
                             mediaType = "application/json")
@@ -170,7 +170,7 @@ public class RevocationApiControllerApiDocs {
                                                                 "statusPurpose": "revocation",
                                                                 "statusListIndex": "17",
                                                                 "statusListCredential": "https://977d-203-129-213-107.ngrok-free.app/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                                                                "type": "BitstringStatusListEntry"
+                                                                "type": "StatusList2021"
                                                             }
                                                             """),
                                             mediaType = "application/json")
@@ -223,14 +223,14 @@ public class RevocationApiControllerApiDocs {
                                                                 "@context":
                                                                 [
                                                                     "https://www.w3.org/2018/credentials/v1",
-                                                                    "https://eclipse-tractusx.github.io/schema-registry/w3c/v1.0/BitstringStatusList.json",
+                                                                    "https://w3id.org/vc/status-list/2021/v1",
                                                                     "https://w3id.org/security/suites/jws-2020/v1"
                                                                 ],
                                                                 "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
                                                                 "type":
                                                                 [
                                                                     "VerifiableCredential",
-                                                                    "BitstringStatusListCredential"
+                                                                    "StatusList2021Credential"
                                                                 ],
                                                                 "issuer": "did:web:localhost:BPNL000000000000",
                                                                 "issuanceDate": "2024-02-05T09:39:58Z",
@@ -239,7 +239,7 @@ public class RevocationApiControllerApiDocs {
                                                                     {
                                                                         "statusPurpose": "revocation",
                                                                         "id": "http://localhost/api/v1/revocations/credentials/BPNL000000000000/revocation/1",
-                                                                        "type": "BitstringStatusList",
+                                                                        "type": "StatusList2021",
                                                                         "encodedList": "H4sIAAAAAAAA/wMAAAAAAAAAAAA="
                                                                     }
                                                                 ],
