@@ -23,8 +23,8 @@ package org.eclipse.tractusx.managedidentitywallets.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.security.CustomAuthenticationEntryPoint;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,8 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.server.resource.BearerTokenError;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
 
 class CustomAuthenticationEntryPointTest {
 

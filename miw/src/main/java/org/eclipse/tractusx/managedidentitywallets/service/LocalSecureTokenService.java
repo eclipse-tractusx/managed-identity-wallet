@@ -43,7 +43,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getJtiAccessToken;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getJtiAccessToken;
 
 @Slf4j
 @RequiredArgsConstructor

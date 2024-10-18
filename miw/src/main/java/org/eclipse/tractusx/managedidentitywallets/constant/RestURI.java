@@ -62,6 +62,8 @@ public class RestURI {
      */
     public static final String CREDENTIALS_VALIDATION = "/api/credentials/validation";
 
+    public static final String CREDENTIALS_REVOKE = "/api/credentials/revoke";
+
     /**
      * The constant ISSUERS_CREDENTIALS.
      */

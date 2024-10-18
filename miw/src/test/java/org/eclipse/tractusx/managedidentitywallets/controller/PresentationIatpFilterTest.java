@@ -22,9 +22,9 @@
 package org.eclipse.tractusx.managedidentitywallets.controller;
 
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dto.ValidationResult;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
 import org.junit.jupiter.api.Assertions;
@@ -47,8 +47,8 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors.NONCE_MISSING;
-import static org.eclipse.tractusx.managedidentitywallets.constant.TokenValidationErrors.TOKEN_ALREADY_EXPIRED;
+import static org.eclipse.tractusx.managedidentitywallets.commons.constant.TokenValidationErrors.NONCE_MISSING;
+import static org.eclipse.tractusx.managedidentitywallets.commons.constant.TokenValidationErrors.TOKEN_ALREADY_EXPIRED;
 
 @DirtiesContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })

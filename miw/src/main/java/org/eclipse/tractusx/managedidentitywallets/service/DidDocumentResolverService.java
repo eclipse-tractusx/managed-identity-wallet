@@ -33,7 +33,7 @@ import java.net.http.HttpClient;
 @Service
 public class DidDocumentResolverService {
 
-    final static HttpClient httpClient = HttpClient.newHttpClient();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
     @Getter
     private final DidWebResolver didDocumentResolverRegistry;
@@ -47,10 +47,10 @@ public class DidDocumentResolverService {
         final DidWebParser didParser = new DidWebParser();
 
         didDocumentResolverRegistry =
-                new DidWebResolver(httpClient, didParser, enforceHttps);
+                new DidWebResolver(HTTP_CLIENT, didParser, enforceHttps);
 
         compositeDidResolver = new CompositeDidResolver(
-                new DidWebResolver(httpClient, didParser, enforceHttps)
+                new DidWebResolver(HTTP_CLIENT, didParser, enforceHttps)
         );
     }
 }

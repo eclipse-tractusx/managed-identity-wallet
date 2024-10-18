@@ -1,0 +1,165 @@
+###############################################################
+# Copyright (c) 2024 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+###############################################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "managed-identity-wallet.fullname" . }}
+  labels:
+    {{- include "managed-identity-wallet.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "managed-identity-wallet.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "managed-identity-wallet.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "managed-identity-wallet.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- tpl (.Values.initContainers | toYaml) $ | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            # TODO Move ENVS into configmap
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.miw.logging.level }}
+            - name: MIW_HOST_NAME
+              value: {{ tpl .Values.miw.host . }}
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default .Values.miw.database.encryptionKey.secret (printf "%s-encryption-key" ( include "managed-identity-wallet.fullname" . )) }}
+                  key: {{ default .Values.miw.database.encryptionKey.secretKey "encryption-key" }}
+            - name: AUTHORITY_WALLET_BPN
+              value: {{ tpl  .Values.miw.authorityWallet.bpn . }}
+            - name: AUTHORITY_WALLET_NAME
+              value: {{ default (tpl  .Values.miw.authorityWallet.name . ) "" }}
+            - name: AUTHORITY_WALLET_DID
+              value: {{ printf "did:web:%s:%s" ( tpl .Values.miw.host . | replace ":" "%3A" | replace "/" ":") .Values.miw.authorityWallet.bpn }}
+            - name: ENFORCE_HTTPS_IN_DID_RESOLUTION
+              value: {{ quote .Values.miw.ssi.enforceHttpsInDidWebResolution }}
+            - name: APPLICATION_ENVIRONMENT
+              value: {{ .Values.miw.environment }}
+            - name: KEYCLOAK_REALM
+              value: {{ tpl .Values.miw.keycloak.realm . }}
+            - name: KEYCLOAK_CLIENT_ID
+              value: {{ .Values.miw.keycloak.clientId }}
+            - name: AUTH_SERVER_URL
+              value: {{ tpl .Values.miw.keycloak.url . }}
+            - name: USE_SSL
+              value: {{ quote .Values.miw.database.useSSL }}
+            - name: DB_HOST
+              value: {{  tpl .Values.miw.database.host . }}
+            - name: DB_PORT
+              value: {{ quote .Values.miw.database.port }}
+            - name: DB_NAME
+              value: {{ tpl .Values.miw.database.name . }}
+            - name: DB_USER_NAME
+              value: {{ .Values.miw.database.user }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.miw.database.secret . }}
+                  key: {{  tpl .Values.miw.database.secretPasswordKey . }}
+            - name: APPLICATION_PORT
+              value: "8080"
+            - name: VC_EXPIRY_DATE
+              value: {{ .Values.miw.ssi.vcExpiryDate | default (printf "31-12-%s" (now | date "2006")) | quote }}
+          {{- if or .Values.envs .Values.secrets }}
+          {{- range $key, $val := .Values.envs }}
+            - name: {{ $key }}
+              value: {{ tpl ($val | quote) $ }}
+          {{- end}}
+          {{- range $key, $val := .Values.secrets }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "managed-identity-wallet.fullname" $ }}
+                  key: {{ $key }}
+          {{- end}}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          {{- with .Values.miw.livenessProbe }}
+          {{- if .enabled }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8090
+              scheme: HTTP
+            failureThreshold: {{ .failureThreshold }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.miw.readinessProbe }}
+          {{- if .enabled }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8090
+              scheme: HTTP
+            failureThreshold: {{ .failureThreshold }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            successThreshold: {{ .successThreshold }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+          {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- toYaml .Values.extraVolumes | nindent 8 }}

@@ -30,12 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.GetVerifiablePresentationIATPApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.PostVerifiablePresentationApiDocs;
 import org.eclipse.tractusx.managedidentitywallets.apidocs.PresentationControllerApiDocs.PostVerifiablePresentationValidationApiDocs;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.dto.PresentationResponseMessage;
 import org.eclipse.tractusx.managedidentitywallets.reader.TractusXPresentationRequestReader;
 import org.eclipse.tractusx.managedidentitywallets.service.PresentationService;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
-import org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.presentation.VerifiablePresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -51,7 +51,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.tractusx.managedidentitywallets.utils.TokenParsingUtils.getAccessToken;
+import static org.eclipse.tractusx.managedidentitywallets.commons.utils.TokenParsingUtils.getAccessToken;
 
 /**
  * The type Presentation controller.
@@ -70,10 +70,10 @@ public class PresentationController {
     /**
      * Create presentation response entity.
      *
-     * @param data              the data
-     * @param audience          the audience
-     * @param asJwt             the as jwt
-     * @param authentication    the authentication
+     * @param data           the data
+     * @param audience       the audience
+     * @param asJwt          the as jwt
+     * @param authentication the authentication
      * @return the response entity
      */
     @PostVerifiablePresentationApiDocs
@@ -125,7 +125,7 @@ public class PresentationController {
             InputStream is) {
         try {
 
-            if(stsToken == null){
+            if (stsToken == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 

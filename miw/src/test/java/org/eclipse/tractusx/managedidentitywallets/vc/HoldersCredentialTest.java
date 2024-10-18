@@ -23,12 +23,15 @@ package org.eclipse.tractusx.managedidentitywallets.vc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teketik.test.mockinbean.MockInBean;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.CredentialStatus;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
+import org.eclipse.tractusx.managedidentitywallets.config.RevocationSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.controller.IssuersCredentialController;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
@@ -36,6 +39,8 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.HoldersCredent
 import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletRepository;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialVerificationRequest;
+import org.eclipse.tractusx.managedidentitywallets.revocation.RevocationClient;
+import org.eclipse.tractusx.managedidentitywallets.service.revocation.RevocationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.AuthenticationUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.TestUtils;
 import org.eclipse.tractusx.ssi.lib.did.resolver.DidResolver;
@@ -54,7 +59,9 @@ import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCreden
 import org.eclipse.tractusx.ssi.lib.proof.LinkedDataProofValidation;
 import org.eclipse.tractusx.ssi.lib.serialization.SerializeUtil;
 import org.json.JSONException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,8 +86,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
 @ExtendWith(MockitoExtension.class)
@@ -98,8 +103,26 @@ class HoldersCredentialTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
+    private RevocationSettings revocationSettings;
+
+    @MockInBean(RevocationService.class)
+    private RevocationClient revocationClient;
+
+    @Autowired
     private IssuersCredentialController credentialController;
 
+    @SneakyThrows
+    @BeforeEach
+    void beforeEach() {
+        TestUtils.mockGetStatusListEntry(revocationClient);
+        TestUtils.mockGetStatusListVC(revocationClient, objectMapper, TestUtils.createEncodedList());
+        TestUtils.mockRevocationVerification(revocationClient, CredentialStatus.ACTIVE);
+    }
+
+    @AfterEach
+    void afterEach() {
+        Mockito.reset(revocationClient);
+    }
 
     @Test
     void issueCredentialTestWithInvalidBPNAccess403() throws JsonProcessingException {
@@ -124,14 +147,15 @@ class HoldersCredentialTest {
 
         ResponseEntity<String> response = issueVC(bpn, did, type, headers);
 
-
         Assertions.assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         VerifiableCredential verifiableCredential = new VerifiableCredential(new ObjectMapper().readValue(response.getBody(), Map.class));
         Assertions.assertNotNull(verifiableCredential.getProof());
+        Assertions.assertNotNull(verifiableCredential.getVerifiableCredentialStatus());
+
 
         List<HoldersCredential> credentials = holdersCredentialRepository.getByHolderDidAndType(did, type);
         Assertions.assertFalse(credentials.isEmpty());
-        TestUtils.checkVC(credentials.get(0).getData(), miwSettings);
+        TestUtils.checkVC(credentials.get(0).getData(), miwSettings, revocationSettings);
         Assertions.assertTrue(credentials.get(0).isSelfIssued());
         Assertions.assertFalse(credentials.get(0).isStored());
     }
@@ -252,7 +276,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(false);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false, "dummy token").getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
@@ -275,7 +299,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true, "dummy token").getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
         }
@@ -302,7 +326,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, false, "dummt token").getBody();
             Assertions.assertTrue(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
         }
     }
@@ -330,7 +354,7 @@ class HoldersCredentialTest {
             }).thenReturn(mock);
             Mockito.when(mock.verify(Mockito.any(VerifiableCredential.class))).thenReturn(true);
 
-            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true).getBody();
+            Map<String, Object> stringObjectMap = credentialController.credentialsValidation(request, true, "dummy token").getBody();
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALID).toString()));
             Assertions.assertFalse(Boolean.parseBoolean(stringObjectMap.get(StringPool.VALIDATE_EXPIRY_DATE).toString()));
 
@@ -341,7 +365,7 @@ class HoldersCredentialTest {
     private Map<String, Object> issueVC() throws JsonProcessingException {
         String bpn = TestUtils.getRandomBpmNumber();
         String baseBpn = miwSettings.authorityWalletBpn();
-        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        String defaultLocation = miwSettings.host() + StringPool.COLON_SEPARATOR + bpn;
         ResponseEntity<String> response = TestUtils.createWallet(bpn, "Test Wallet", restTemplate, baseBpn, defaultLocation);
         Wallet wallet = TestUtils.getWalletFromString(response.getBody());
         VerifiableCredential verifiableCredential = TestUtils.issueCustomVCUsingBaseWallet(bpn, wallet.getDid(), miwSettings.authorityWalletDid(), "Type1", AuthenticationUtils.getValidUserHttpHeaders(miwSettings.authorityWalletBpn()), miwSettings, objectMapper, restTemplate);
@@ -353,7 +377,7 @@ class HoldersCredentialTest {
     private ResponseEntity<String> issueVC(String bpn, String did, String type, HttpHeaders headers) throws JsonProcessingException {
         String baseBpn = miwSettings.authorityWalletBpn();
         //save wallet
-        String defaultLocation = miwSettings.host() + COLON_SEPARATOR + bpn;
+        String defaultLocation = miwSettings.host() + StringPool.COLON_SEPARATOR + bpn;
         TestUtils.createWallet(bpn, did, restTemplate, baseBpn, defaultLocation);
 
         // Create VC without proof

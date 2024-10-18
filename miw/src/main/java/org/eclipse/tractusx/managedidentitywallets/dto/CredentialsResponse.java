@@ -21,7 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.dto;
 
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

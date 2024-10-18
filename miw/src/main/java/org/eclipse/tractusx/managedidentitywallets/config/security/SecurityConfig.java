@@ -23,7 +23,7 @@ package org.eclipse.tractusx.managedidentitywallets.config.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
 import org.eclipse.tractusx.managedidentitywallets.utils.BpnValidator;
@@ -56,6 +56,7 @@ import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 
 /**
  * The type Security config.
@@ -114,6 +115,9 @@ public class SecurityConfig {
 
                         //VP - Validation
                         .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_VALIDATION, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLETS, ApplicationRole.ROLE_VIEW_WALLET) //validate VP
+
+                        //VC - revoke
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_REVOKE, PUT.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_UPDATE_WALLETS) //revoke credentials
 
                         //VC - Holder
                         .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //get credentials

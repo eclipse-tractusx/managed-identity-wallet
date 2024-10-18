@@ -21,7 +21,7 @@
 
 package org.eclipse.tractusx.managedidentitywallets.domain;
 
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.ssi.lib.model.did.Did;
 import org.eclipse.tractusx.ssi.lib.model.did.DidDocument;
 import org.eclipse.tractusx.ssi.lib.model.verifiable.credential.VerifiableCredentialStatus;
@@ -115,7 +115,7 @@ class CredentialCreationConfigTest {
     }
 
     @Test
-    void shouldNotThrowWhenVcIdValid(){
+    void shouldNotThrowWhenVcIdValid() {
         CredentialCreationConfig.CredentialCreationConfigBuilder builder = CredentialCreationConfig.builder();
         assertDoesNotThrow(() -> builder.vcId("https://test.com"));
         assertDoesNotThrow(() -> builder.vcId(URI.create("https://test.com")));
