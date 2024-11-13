@@ -62,6 +62,8 @@ public class RestURI {
      */
     public static final String CREDENTIALS_VALIDATION = "/api/credentials/validation";
 
+    public static final String CREDENTIALS_REVOKE = "/api/credentials/revoke";
+
     /**
      * The constant ISSUERS_CREDENTIALS.
      */
@@ -79,5 +81,11 @@ public class RestURI {
      * The constant API_PRESENTATIONS_IATP.
      */
     public static final String API_PRESENTATIONS_IATP = "/api/presentations/iatp";
+
+    /**
+     * The constant API_PRESENTATIONS_IATP_WORKAROUND. THe EDC assumes (hard coded) that the presentation query endpoint is at /presentations/query.
+     * To mitigate this issue the MIW has to provide the same endpoint (without documentation), besides the correct one.
+     */
+    public static final String API_PRESENTATIONS_IATP_WORKAROUND = "/presentations/query";
 
 }

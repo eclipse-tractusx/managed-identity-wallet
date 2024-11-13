@@ -21,11 +21,13 @@
 
 package org.eclipse.tractusx.managedidentitywallets.config.security;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.tractusx.managedidentitywallets.constant.ApplicationRole;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.ApplicationRole;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
 import org.eclipse.tractusx.managedidentitywallets.service.STSTokenValidationService;
+import org.eclipse.tractusx.managedidentitywallets.utils.BpnValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -39,12 +41,22 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+
+import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 
 /**
  * The type Security config.
@@ -53,12 +65,15 @@ import static org.springframework.http.HttpMethod.POST;
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final STSTokenValidationService validationService;
 
     private final SecurityConfigProperties securityConfigProperties;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private String issuerUri;
 
     /**
      * Filter chain security filter chain.
@@ -81,7 +96,8 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/ui/swagger-ui/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/health/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/token", POST.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/presentations/iatp", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP, POST.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP_WORKAROUND, POST.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/actuator/loggers/**")).hasRole(ApplicationRole.ROLE_MANAGE_APP)
 
                         //did document resolve APIs
@@ -100,6 +116,9 @@ public class SecurityConfig {
                         //VP - Validation
                         .requestMatchers(new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_VALIDATION, POST.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLETS, ApplicationRole.ROLE_VIEW_WALLET) //validate VP
 
+                        //VC - revoke
+                        .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS_REVOKE, PUT.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_UPDATE_WALLETS) //revoke credentials
+
                         //VC - Holder
                         .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, GET.name())).hasAnyRole(ApplicationRole.ROLE_VIEW_WALLET, ApplicationRole.ROLE_VIEW_WALLETS) //get credentials
                         .requestMatchers(new AntPathRequestMatcher(RestURI.CREDENTIALS, POST.name())).hasAnyRole(ApplicationRole.ROLE_UPDATE_WALLET, ApplicationRole.ROLE_UPDATE_WALLETS) //issue credential
@@ -114,8 +133,12 @@ public class SecurityConfig {
                         //error
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 ).oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->
-                        jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId()))))
-                .addFilterAfter(new PresentationIatpFilter(validationService), BasicAuthenticationFilter.class);
+                                jwt.jwtAuthenticationConverter(new CustomAuthenticationConverter(securityConfigProperties.clientId())))
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
+                .securityMatcher(new NegatedRequestMatcher(new OrRequestMatcher(
+                        List.of(
+                                new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP),
+                                new AntPathRequestMatcher(RestURI.API_PRESENTATIONS_IATP_WORKAROUND)))));
 
         return http.build();
     }
@@ -137,7 +160,20 @@ public class SecurityConfig {
      */
     @Bean
     public AuthenticationEventPublisher authenticationEventPublisher
-            (ApplicationEventPublisher applicationEventPublisher) {
+    (ApplicationEventPublisher applicationEventPublisher) {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromIssuerLocation(issuerUri);
+        OAuth2TokenValidator<Jwt> bpnValidator = bpnValidator();
+        OAuth2TokenValidator<Jwt> withBpn = new DelegatingOAuth2TokenValidator<>(bpnValidator);
+        jwtDecoder.setJwtValidator(withBpn);
+        return jwtDecoder;
+    }
+
+    OAuth2TokenValidator<Jwt> bpnValidator() {
+        return new BpnValidator();
     }
 }

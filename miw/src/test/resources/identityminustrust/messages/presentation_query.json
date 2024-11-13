@@ -1,0 +1,10 @@
+{
+  "scope" : [
+    "org.eclipse.tractusx.vc.type:MembershipCredential:read"
+  ],
+  "@context" : [
+    "https://identity.foundation/presentation-exchange/submission/v1",
+    "https://w3id.org/tractusx-trust/v0.8"
+  ],
+  "@type" : "PresentationQueryMessage"
+}

@@ -1,3 +1,94 @@
+# [1.0.0-develop.5](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.4...v1.0.0-develop.5) (2024-10-18)
+
+
+### Bug Fixes
+
+* chart workflows ([3d0fbf9](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/3d0fbf9d18be9f3078e9c427a8f3239ae5a67b53))
+* compilation error ([90ef524](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/90ef5241d38e678eff5064c2cd5edb0e6fdc1541))
+* copy path in docker file ([ad65e01](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/ad65e0196d40bea81d600c50170bbf31f988eaf9))
+* dependencies addded at individual project level ([60e3a5c](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/60e3a5ccf7a77a6efc6428650d9f3091e6002707))
+* docker context path ([ce29cb8](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/ce29cb8287293a88745ec2c9bbb5d938564c568a))
+* dockerfile ([234a7a0](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/234a7a05d6839409b1a62a1d15ac3a424cfad20c))
+* dockerfile and dockerfile location ([042292f](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/042292f1d4ebf6018721af1f748f3598ee619aa9))
+* failing test ([a99ca32](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a99ca32e870a328858913f60c3bae28ca1f315dd))
+* failing test cases ([e91b6a0](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e91b6a0330b65d09bc24b6c38086d17ee16a761c))
+* file copy path in Dockerfile ([7d76b00](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/7d76b0002615720ed2c0a1f0d45e2ca5bef642be))
+* modefied the value for the replicas ([14a67e1](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/14a67e1b982569ddf6e3becd8176fc346b5ef731))
+* more test added ([e739cdc](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e739cdc6be1cc8c0c9d3cf2dde8b1b2ef0055b22))
+* random port added for management url ([6b118b2](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6b118b270ff77f93ee26be8de53706ddba9de277))
+* revocation service dockerfile ([28796db](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/28796dbe1642d1255f4cfd309ce3332055abf39a))
+* sonar issues ([643493d](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/643493df5b862bbc1a86b30360706180d78aa19e))
+* sonar issues ([b1c5417](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/b1c54176cfba899fbcfed32dc1d028cc028e0a68))
+* status list changed to 2021 from bitstring ([546908b](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/546908b5e13ce4a0695fa5ade42a14a1abb88a2b))
+* status list VS as JSON-LD ([65dd812](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/65dd8124787e7897260e720d42b17e61cdb8955c))
+* test cases due to revocation client ([02ccd31](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/02ccd3112bbed9ff14f8f487a5df40eaced79eba))
+* tests ([df62fcc](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/df62fcc2e5c841a4cfd893d99fad22d90d34e792))
+* user added in dockerfile ([44b46ff](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/44b46ff81ae0730946a198fd26de199755f1df77))
+* zap scan errors ([074ab2d](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/074ab2df61f94776d23b45eebc87220fbd61a0ef))
+* zap scan errors ([c162cad](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c162cada45cd0a885d0546214a18a32a7ac41f02))
+
+
+### Features
+
+* Helm charts for revocation service ([badb46d](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/badb46d7d90232d661665a33410c3f11d210a401))
+* intial revocation service added ([c173bd4](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/c173bd4d9902d798d75683247d13c89dda6861d2))
+* release workflow added for revocation-service ([f70b345](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/f70b3451c357dacd9b63e324efd23018723547f5))
+* revoke API, revocation support in issue VC API, wallet-commons module for common classes ([ec8bb00](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/ec8bb008746ee901acccc8eaccda3e5793aea775))
+* status list VC type set to StatusList2021 ([4429211](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/4429211d8b3bcb999b35a268f4fe588b9b28ef20))
+* test coverage verification added at root gradle level and javadoc for miw-commons ([6a7cff2](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/6a7cff2acb846fa9b664b359ec8fc179673df459))
+
+# [1.0.0-develop.4](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.3...v1.0.0-develop.4) (2024-08-09)
+
+
+* feat(API)!: change API VC/VP default data format from Json to JWT ([233ab68](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/233ab6883012a5523ecaa4e0ad234e775c3e4577))
+
+
+### BREAKING CHANGES
+
+* All API endpoints that used Verifiable Credentials and -Presentations in JSON format per default are now working with the JWT format by default instead.
+
+Signed-off-by: Dominik Pinsel <dominik.pinsel@mercedes-benz.com>
+
+# [1.0.0-develop.3](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.2...v1.0.0-develop.3) (2024-07-29)
+
+
+### Features
+
+* remove BaseController, change Principal to Authenticationand unit test cases added ([15425be](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/15425beccd8bbb3560328d7d845766f422e6e4d8))
+* test cases added, file header updated and detail log added for security events ([a4fa6cc](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/a4fa6cc37d72e57796616fd87716fef059770e76))
+
+# [1.0.0-develop.2](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v1.0.0-develop.1...v1.0.0-develop.2) (2024-07-22)
+
+
+### Bug Fixes
+
+* updated spring boot and cloud version ([010ecab](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/010ecab904a0ba4e85c3e4b885fbefb2ed6057e6))
+
+# [1.0.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.6.0-develop.1...v1.0.0-develop.1) (2024-07-18)
+
+
+* feat(identity-trust)!: update IATP protocol ([e3c5450](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/e3c5450fe2e0084f9deee16dff59e228afa40966))
+
+
+### BREAKING CHANGES
+
+* `/api/presentations/iatp` endpoint now accepts PresentationQueryMessage and returns PresentationResponseMessage objects.
+
+Signed-off-by: Dominik Pinsel <dominik.pinsel@mercedes-benz.com>
+
+# [0.6.0-develop.1](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.5.0...v0.6.0-develop.1) (2024-07-18)
+
+
+### Bug Fixes
+
+* updated code as per review ([5961854](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/5961854ad811615453ea2afff15c1e4955ca450d))
+* updated var name ([44af067](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/44af0670f1e87b5ebedf88f66adcde89157d08fa))
+
+
+### Features
+
+* added new fields in did document ([8a17aec](https://github.com/eclipse-tractusx/managed-identity-wallet/commit/8a17aec6ddf330d730df0e9262c88abc2e297e0b))
+
 # [0.5.0](https://github.com/eclipse-tractusx/managed-identity-wallet/compare/v0.4.0...v0.5.0) (2024-07-05)
 
 

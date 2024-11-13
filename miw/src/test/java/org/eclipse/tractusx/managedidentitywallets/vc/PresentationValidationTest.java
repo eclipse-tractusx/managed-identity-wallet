@@ -28,10 +28,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.eclipse.tractusx.managedidentitywallets.ManagedIdentityWalletsApplication;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
 import org.eclipse.tractusx.managedidentitywallets.config.TestContextInitializer;
 import org.eclipse.tractusx.managedidentitywallets.constant.RestURI;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
 import org.eclipse.tractusx.managedidentitywallets.dto.CredentialsResponse;
@@ -68,7 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
+import static org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool.COLON_SEPARATOR;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = { ManagedIdentityWalletsApplication.class })
 @ContextConfiguration(initializers = { TestContextInitializer.class })
@@ -120,13 +120,13 @@ class PresentationValidationTest {
 
         Map<String, Object> type1 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), "Type1", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
 
-        CredentialsResponse rs1 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type1, false, bpnOperator);
+        CredentialsResponse rs1 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type1, false, false, bpnOperator, "dummy token");
         vc_1 = new ObjectMapper().convertValue(rs1, VerifiableCredential.class);
 
 
         Map<String, Object> type2 = TestUtils.getCredentialAsMap(miwSettings.authorityWalletBpn(), miwSettings.authorityWalletDid(), miwSettings.authorityWalletDid(), "Type2", miwSettings, new com.fasterxml.jackson.databind.ObjectMapper());
 
-        CredentialsResponse rs2 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type2, false, bpnOperator);
+        CredentialsResponse rs2 = issuersCredentialService.issueCredentialUsingBaseWallet(tenantWallet.getDid(), type2, false, false, bpnOperator, "dummy token");
         vc_2 = new ObjectMapper().convertValue(rs2, VerifiableCredential.class);
     }
 
@@ -139,7 +139,7 @@ class PresentationValidationTest {
 
     @Test
     @SneakyThrows
-    public void testSuccessfulValidationForMultipleVC() {
+    void testSuccessfulValidationForMultipleVC() {
         Map<String, Object> creationResponse = createPresentationJwt(List.of(vc_1, vc_2), tenant_1);
         // get the payload of the json web token
         String encodedJwtPayload = ((String) creationResponse.get("vp")).split("\\.")[1];
@@ -153,7 +153,7 @@ class PresentationValidationTest {
     }
 
     @Test
-    public void testValidationFailureOfCredentialWitInvalidExpirationDate() {
+    void testValidationFailureOfCredentialWitInvalidExpirationDate() {
         // test is related to this old issue where the signature check still succeeded
         // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
         VerifiableCredential copyCredential = new VerifiableCredential(vc_1);
@@ -166,7 +166,7 @@ class PresentationValidationTest {
 
 
     @Test
-    public void testValidationFailureOfCredentialWitInvalidExpirationDateInSecondCredential() {
+    void testValidationFailureOfCredentialWitInvalidExpirationDateInSecondCredential() {
         // test is related to this old issue where the signature check still succeeded
         // https://github.com/eclipse-tractusx/SSI-agent-lib/issues/4
         VerifiableCredential copyCredential = new VerifiableCredential(vc_1);

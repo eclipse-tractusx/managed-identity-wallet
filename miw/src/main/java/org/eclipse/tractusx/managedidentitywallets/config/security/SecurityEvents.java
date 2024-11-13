@@ -38,7 +38,11 @@ public class SecurityEvents {
 
     @EventListener
     public void onFailure(AuthorizationDeniedEvent failure) {
-        log.warn("Failed Authorization: Missing 'Authorization' header.");
+        if (failure.getAuthorizationDecision() != null) {
+            log.warn("Failed Authorization: {}",failure.getAuthorizationDecision().toString());
+        } else {
+            log.warn("Failed Authorization: Missing 'Authorization' header.");
+        }
     }
 }
 

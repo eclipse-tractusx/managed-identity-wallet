@@ -25,21 +25,23 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.KeyUse;
-import com.smartsensesolutions.java.commons.FilterRequest;
-import com.smartsensesolutions.java.commons.base.repository.BaseRepository;
-import com.smartsensesolutions.java.commons.base.service.BaseService;
-import com.smartsensesolutions.java.commons.sort.Sort;
-import com.smartsensesolutions.java.commons.sort.SortType;
-import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
+import com.smartsensesolutions.commons.dao.base.BaseRepository;
+import com.smartsensesolutions.commons.dao.base.BaseService;
+import com.smartsensesolutions.commons.dao.filter.FilterRequest;
+import com.smartsensesolutions.commons.dao.filter.sort.Sort;
+import com.smartsensesolutions.commons.dao.filter.sort.SortType;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.StringPool;
+import org.eclipse.tractusx.managedidentitywallets.commons.constant.SupportedAlgorithms;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.BadDataException;
+import org.eclipse.tractusx.managedidentitywallets.commons.exception.ForbiddenException;
+import org.eclipse.tractusx.managedidentitywallets.commons.utils.Validate;
 import org.eclipse.tractusx.managedidentitywallets.config.MIWSettings;
-import org.eclipse.tractusx.managedidentitywallets.constant.StringPool;
-import org.eclipse.tractusx.managedidentitywallets.constant.SupportedAlgorithms;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.HoldersCredential;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.Wallet;
 import org.eclipse.tractusx.managedidentitywallets.dao.entity.WalletKey;
@@ -48,13 +50,10 @@ import org.eclipse.tractusx.managedidentitywallets.dao.repository.WalletReposito
 import org.eclipse.tractusx.managedidentitywallets.domain.KeyCreationConfig;
 import org.eclipse.tractusx.managedidentitywallets.domain.SigningServiceType;
 import org.eclipse.tractusx.managedidentitywallets.dto.CreateWalletRequest;
-import org.eclipse.tractusx.managedidentitywallets.exception.BadDataException;
 import org.eclipse.tractusx.managedidentitywallets.exception.DuplicateWalletProblem;
-import org.eclipse.tractusx.managedidentitywallets.exception.ForbiddenException;
 import org.eclipse.tractusx.managedidentitywallets.signing.SigningService;
 import org.eclipse.tractusx.managedidentitywallets.utils.CommonUtils;
 import org.eclipse.tractusx.managedidentitywallets.utils.EncryptionUtils;
-import org.eclipse.tractusx.managedidentitywallets.utils.Validate;
 import org.eclipse.tractusx.ssi.lib.crypt.KeyPair;
 import org.eclipse.tractusx.ssi.lib.crypt.jwk.JsonWebKey;
 import org.eclipse.tractusx.ssi.lib.did.web.DidWebFactory;
@@ -78,10 +77,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.COLON_SEPARATOR;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.REFERENCE_KEY;
-import static org.eclipse.tractusx.managedidentitywallets.constant.StringPool.VAULT_ACCESS_TOKEN;
-
 /**
  * The type Wallet service.
  */
@@ -103,10 +98,6 @@ public class WalletService extends BaseService<Wallet, Long> {
 
     private final HoldersCredentialRepository holdersCredentialRepository;
 
-    private final SpecificationUtil<Wallet> walletSpecificationUtil;
-
-    private final IssuersCredentialService issuersCredentialService;
-
     private final CommonService commonService;
 
     private final Map<SigningServiceType, SigningService> availableSigningServices;
@@ -122,10 +113,6 @@ public class WalletService extends BaseService<Wallet, Long> {
         return walletRepository;
     }
 
-    @Override
-    protected SpecificationUtil<Wallet> getSpecificationUtil() {
-        return walletSpecificationUtil;
-    }
 
     /**
      * Store credential map.
@@ -207,7 +194,7 @@ public class WalletService extends BaseService<Wallet, Long> {
         Sort sort = new Sort();
         sort.setColumn(sortColumn);
         sort.setSortType(SortType.valueOf(sortType.toUpperCase()));
-        filterRequest.setSort(sort);
+        filterRequest.setSort(List.of(sort));
         return filter(filterRequest);
     }
 
@@ -302,8 +289,8 @@ public class WalletService extends BaseService<Wallet, Long> {
                 WalletKey.builder()
                         .wallet(wallet)
                         .keyId(e.keyId)
-                        .referenceKey(REFERENCE_KEY)
-                        .vaultAccessToken(VAULT_ACCESS_TOKEN)
+                        .referenceKey(StringPool.REFERENCE_KEY)
+                        .vaultAccessToken(StringPool.VAULT_ACCESS_TOKEN)
                         .privateKey(encryptionUtils.encrypt(CommonUtils.getKeyString(e.keyPair.getPrivateKey().asByte(), StringPool.PRIVATE_KEY)))
                         .publicKey(encryptionUtils.encrypt(CommonUtils.getKeyString(e.keyPair.getPublicKey().asByte(), StringPool.PUBLIC_KEY)))
                         .algorithm(e.algorithm.name())
@@ -319,13 +306,13 @@ public class WalletService extends BaseService<Wallet, Long> {
     }
 
     private Did createDidJson(String didUrl) {
-        String[] split = didUrl.split(COLON_SEPARATOR);
+        String[] split = didUrl.split(StringPool.COLON_SEPARATOR);
         if (split.length == 1) {
             return DidWebFactory.fromHostname(didUrl);
         } else if (split.length == 2) {
             return DidWebFactory.fromHostnameAndPath(split[0], split[1]);
         } else {
-            int i = didUrl.lastIndexOf(COLON_SEPARATOR);
+            int i = didUrl.lastIndexOf(StringPool.COLON_SEPARATOR);
             String[] splitByLast = { didUrl.substring(0, i), didUrl.substring(i + 1) };
             return DidWebFactory.fromHostnameAndPath(splitByLast[0], splitByLast[1]);
         }
@@ -345,7 +332,7 @@ public class WalletService extends BaseService<Wallet, Long> {
                     CreateWalletRequest request = CreateWalletRequest.builder()
                             .companyName(miwSettings.authorityWalletName())
                             .businessPartnerNumber(miwSettings.authorityWalletBpn())
-                            .didUrl(miwSettings.host() + COLON_SEPARATOR + miwSettings.authorityWalletBpn())
+                            .didUrl(miwSettings.host() + StringPool.COLON_SEPARATOR + miwSettings.authorityWalletBpn())
                             .build();
                     wallets[0] = createWallet(request, true, miwSettings.authorityWalletBpn());
                     log.info("Authority wallet created with bpn {}", StringEscapeUtils.escapeJava(miwSettings.authorityWalletBpn()));
@@ -369,11 +356,7 @@ public class WalletService extends BaseService<Wallet, Long> {
     }
 
 
-    @RequiredArgsConstructor
-    private class WalletKeyInfo {
-        private final String keyId;
-        private final KeyPair keyPair;
-        private final SupportedAlgorithms algorithm;
-        private final VerificationMethod verificationMethod;
+    private record WalletKeyInfo(String keyId, KeyPair keyPair, SupportedAlgorithms algorithm,
+                                 VerificationMethod verificationMethod) {
     }
 }
