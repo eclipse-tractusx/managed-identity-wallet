@@ -43,7 +43,7 @@ jobs:
           version: v3.12.3
 
       - name: Set up Taskfile
-        uses: arduino/setup-task@v1
+        uses: arduino/setup-task@v2
 
       - uses: actions/setup-java@v4
         with:
